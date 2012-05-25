@@ -213,7 +213,6 @@ class AutoScalingController {
         ]
     }
 
-    // TODO this is a hotfix - move this to a common utility place or upgrade Guava so we can use Ints.tryParse()
     private Integer tryParse(String s) {
         s?.isInteger() ? s.toInteger() : null
     }

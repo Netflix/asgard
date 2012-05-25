@@ -81,7 +81,7 @@ grails.project.dependency.resolution = {
                 'commons-lang:commons-lang:2.4',
 
                 // Easier Java from Joshua Bloch and Google
-                'com.google.guava:guava:10.0.1',
+                'com.google.guava:guava:12.0',
 
                 // SSH calls to retrieve secret keys from remote servers
                 'com.jcraft:jsch:0.1.45',

@@ -16,9 +16,9 @@
 package com.netflix.asgard.model
 
 import com.amazonaws.services.cloudwatch.model.Metric
-import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
+import com.google.common.cache.LoadingCache
 import grails.converters.JSON
 import java.util.concurrent.TimeUnit
 import org.codehaus.groovy.grails.web.json.JSONElement
@@ -31,7 +31,7 @@ import org.codehaus.groovy.grails.web.json.JSONWriter
      * application name and the same MetricId can be referenced by many application names. In practice there are
      * actually relatively few unique MetricIds.
      */
-    static Cache<MetricId, MetricId> internIds = CacheBuilder.newBuilder().
+    static LoadingCache<MetricId, MetricId> internIds = CacheBuilder.newBuilder().
             expireAfterWrite(20, TimeUnit.MINUTES).
             build(new CacheLoader<MetricId, MetricId>() {
                 MetricId load(MetricId k) { k }
