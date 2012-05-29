@@ -1,0 +1,304 @@
+[
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-10-11T16:14:32Z",
+    "imageId": "ami-e9ea2680",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:488db6d8-2b4d-4bc8-a468-48e445c18937:launchConfigurationName/akms-v002-20111011091431",
+    "launchConfigurationName": "akms-v002-20111011091431",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "akms",
+      "nf-datacenter",
+      "nf-infrastructure"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"akms\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"\"\ncluster=\"akms\"\nautogrp=\"akms-v002\"\nlaunchconfig=\"akms-v002-20111011091431\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\nappdynappname=\"$region $appenv\"\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\n[[ $region == us-east-1 ]] && appdynappname=\"Cloud Milestones - test AWS\"\n \n\n\n# udf-test end\n# udf1 begin\nhostnamestring=${clusterorapp}-${instanceid}\nhostname $hostnamestring\nprintf \"/^HOSTNAME/ d\\n $\\na\\nHOSTNAME=${hostnamestring}\\n.\\nw\\nq\\n\" | ed -s /etc/sysconfig/network\necho \"127.0.0.1 localhost\" > /etc/hosts\nprintf \"%s\\t%s %s.netflix.com %s\\n\" `local-ipv4` `hostname` `hostname` `public-hostname` >> /etc/hosts\ntest -n \"$reg_hosts\" && echo $reg_hosts >> /etc/hosts\n\neval `gawk -F: '/60004/ {print \"amirole=\" $1}' /etc/passwd`\ntest -n \"$amirole\" && userdel -f $amirole\ngroupadd -f -g 60243 nac\nuseradd -u 60004 -g nac -c \"$app $appenv role\" $appuser\nif ! newbase; then\nmkdir -p /home/${appuser}/.ssh\n\n \n\n\n \n\n\ntest -f $cf4 && perl -pne '{ s/^(.*= cloud).*$/$1,%OS_USER2%/; }' -i $cf4 && cfud $cf4\n\n\n\ncurl=\"curl --retry 3 --silent --show-error --fail\"\nmetadatavars() {\nlocal url=$1\nfor uri in `$curl $url`\ndo\necho $uri | grep -q -E '=' && continue\necho $uri | grep -q -E 'public' && continue\nif echo $uri | grep -q -E '/$'\nthen\nmetadatavars \"${url}${uri}\"\nelse\nprintf \"export EC2_%s=\\\"%s\\\"\\n\"  `echo $uri | tr '/-' '_' | tr 'a-z' 'A-Z'` \"`$curl ${url}${uri}| tr '\\n' ' '`\"\nfi\ndone\n}\n\n\n\nmetadatavars http://169.254.169.254/latest/meta-data/ >> /etc/profile.d/netflix_environment.sh\n. /etc/profile.d/netflix_environment.sh\n\n \nln -s $jmxf $jmxl\n\nif newbase\nthen\n/usr/local/bin/installcrontab $appuser\nelse\n\nfi\n\n\n \n\nif ! grep -q '/etc/alternatives/java_sdk/lib/tools.jar' /apps/tomcat/bin/setclasspath.sh\nthen\n\nfi\n\n \n# udf1 end\n\n# added for CRL support (will be activated only for builds >= 1470)\n\nserver_template_crl=/apps/tomcat/conf/server_template_2011.xml \n\n \n\n# end added for CRL support\n \ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  },
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-10-11T16:24:57Z",
+    "imageId": "ami-e9ea2680",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:f97645c6-2653-4b25-825c-e0d78b991b28:launchConfigurationName/akms-v002-20111011092456",
+    "launchConfigurationName": "akms-v002-20111011092456",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "akms",
+      "nf-datacenter",
+      "nf-infrastructure"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"akms\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"\"\ncluster=\"akms\"\nautogrp=\"akms-v002\"\nlaunchconfig=\"akms-v002-20111011092456\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\nappdynappname=\"$region $appenv\"\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\n[[ $region == us-east-1 ]] && appdynappname=\"Cloud Milestones - test AWS\"\n \n\n\n# udf-test end\n# udf1 begin\nhostnamestring=${clusterorapp}-${instanceid}\nhostname $hostnamestring\nprintf \"/^HOSTNAME/ d\\n $\\na\\nHOSTNAME=${hostnamestring}\\n.\\nw\\nq\\n\" | ed -s /etc/sysconfig/network\necho \"127.0.0.1 localhost\" > /etc/hosts\nprintf \"%s\\t%s %s.netflix.com %s\\n\" `local-ipv4` `hostname` `hostname` `public-hostname` >> /etc/hosts\ntest -n \"$reg_hosts\" && echo $reg_hosts >> /etc/hosts\n\neval `gawk -F: '/60004/ {print \"amirole=\" $1}' /etc/passwd`\ntest -n \"$amirole\" && userdel -f $amirole\ngroupadd -f -g 60243 nac\nuseradd -u 60004 -g nac -c \"$app $appenv role\" $appuser\nif ! newbase; then\nmkdir -p /home/${appuser}/.ssh\n\n \n\n\n \n\n\ntest -f $cf4 && perl -pne '{ s/^(.*= cloud).*$/$1,%OS_USER2%/; }' -i $cf4 && cfud $cf4\n\n\n\ncurl=\"curl --retry 3 --silent --show-error --fail\"\nmetadatavars() {\nlocal url=$1\nfor uri in `$curl $url`\ndo\necho $uri | grep -q -E '=' && continue\necho $uri | grep -q -E 'public' && continue\nif echo $uri | grep -q -E '/$'\nthen\nmetadatavars \"${url}${uri}\"\nelse\nprintf \"export EC2_%s=\\\"%s\\\"\\n\"  `echo $uri | tr '/-' '_' | tr 'a-z' 'A-Z'` \"`$curl ${url}${uri}| tr '\\n' ' '`\"\nfi\ndone\n}\n\n\n\nmetadatavars http://169.254.169.254/latest/meta-data/ >> /etc/profile.d/netflix_environment.sh\n. /etc/profile.d/netflix_environment.sh\n\n \nln -s $jmxf $jmxl\n\nif newbase\nthen\n/usr/local/bin/installcrontab $appuser\nelse\n\nfi\n\n\n \n\nif ! grep -q '/etc/alternatives/java_sdk/lib/tools.jar' /apps/tomcat/bin/setclasspath.sh\nthen\n\nfi\n\n \n# udf1 end\n\n\n\n\n# added for CRL support (will be activated only for builds >= 1470)\n\nserver_template_crl=/apps/tomcat/conf/server_template_2011.xml \n\n \n\n# end added for CRL support\n \ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  },
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-10-11T23:24:15Z",
+    "imageId": "ami-0df33f64",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:bbfbd31b-d830-43f3-9f02-80f78b9f1b35:launchConfigurationName/akms-v002-20111011162414",
+    "launchConfigurationName": "akms-v002-20111011162414",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "akms",
+      "nf-datacenter",
+      "nf-infrastructure"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"akms\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"\"\ncluster=\"akms\"\nautogrp=\"akms-v002\"\nlaunchconfig=\"akms-v002-20111011162414\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\nappdynappname=\"$region $appenv\"\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\n[[ $region == us-east-1 ]] && appdynappname=\"Cloud Milestones - test AWS\"\n \n\n\n# udf-test end\n# udf1 begin\nhostnamestring=${clusterorapp}-${instanceid}\nhostname $hostnamestring\nprintf \"/^HOSTNAME/ d\\n $\\na\\nHOSTNAME=${hostnamestring}\\n.\\nw\\nq\\n\" | ed -s /etc/sysconfig/network\necho \"127.0.0.1 localhost\" > /etc/hosts\nprintf \"%s\\t%s %s.netflix.com %s\\n\" `local-ipv4` `hostname` `hostname` `public-hostname` >> /etc/hosts\ntest -n \"$reg_hosts\" && echo $reg_hosts >> /etc/hosts\n\neval `gawk -F: '/60004/ {print \"amirole=\" $1}' /etc/passwd`\ntest -n \"$amirole\" && userdel -f $amirole\ngroupadd -f -g 60243 nac\nuseradd -u 60004 -g nac -c \"$app $appenv role\" $appuser\nif ! newbase; then\nmkdir -p /home/${appuser}/.ssh\n\n \n\n\n \n\n\ntest -f $cf4 && perl -pne '{ s/^(.*= cloud).*$/$1,%OS_USER2%/; }' -i $cf4 && cfud $cf4\n\n\n\ncurl=\"curl --retry 3 --silent --show-error --fail\"\nmetadatavars() {\nlocal url=$1\nfor uri in `$curl $url`\ndo\necho $uri | grep -q -E '=' && continue\necho $uri | grep -q -E 'public' && continue\nif echo $uri | grep -q -E '/$'\nthen\nmetadatavars \"${url}${uri}\"\nelse\nprintf \"export EC2_%s=\\\"%s\\\"\\n\"  `echo $uri | tr '/-' '_' | tr 'a-z' 'A-Z'` \"`$curl ${url}${uri}| tr '\\n' ' '`\"\nfi\ndone\n}\n\n\n\nmetadatavars http://169.254.169.254/latest/meta-data/ >> /etc/profile.d/netflix_environment.sh\n. /etc/profile.d/netflix_environment.sh\n\n \nln -s $jmxf $jmxl\n\nif newbase\nthen\n/usr/local/bin/installcrontab $appuser\nelse\n\nfi\n\n\n \n\nif ! grep -q '/etc/alternatives/java_sdk/lib/tools.jar' /apps/tomcat/bin/setclasspath.sh\nthen\n\nfi\n\n \n# udf1 end\n\n\n\n\n# added for CRL support (will be activated only for builds >= 1470)\n\nserver_template_crl=/apps/tomcat/conf/server_template_2011.xml \n\n \n\n# end added for CRL support\n \ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  },
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-10-14T20:48:49Z",
+    "imageId": "ami-c13cf0a8",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:e9b014f9-2201-41a5-964c-f707f0dc22a7:launchConfigurationName/akms-v002-20111014134848",
+    "launchConfigurationName": "akms-v002-20111014134848",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "akms",
+      "nf-datacenter",
+      "nf-infrastructure"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"akms\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"\"\ncluster=\"akms\"\nautogrp=\"akms-v002\"\nlaunchconfig=\"akms-v002-20111014134848\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\nappdynappname=\"$region $appenv\"\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\n[[ $region == us-east-1 ]] && appdynappname=\"Cloud Milestones - test AWS\"\n \n\n\n# udf-test end\n# udf1 begin\nhostnamestring=${clusterorapp}-${instanceid}\nhostname $hostnamestring\nprintf \"/^HOSTNAME/ d\\n $\\na\\nHOSTNAME=${hostnamestring}\\n.\\nw\\nq\\n\" | ed -s /etc/sysconfig/network\necho \"127.0.0.1 localhost\" > /etc/hosts\nprintf \"%s\\t%s %s.netflix.com %s\\n\" `local-ipv4` `hostname` `hostname` `public-hostname` >> /etc/hosts\ntest -n \"$reg_hosts\" && echo $reg_hosts >> /etc/hosts\n\neval `gawk -F: '/60004/ {print \"amirole=\" $1}' /etc/passwd`\ntest -n \"$amirole\" && userdel -f $amirole\ngroupadd -f -g 60243 nac\nuseradd -u 60004 -g nac -c \"$app $appenv role\" $appuser\nif ! newbase; then\nmkdir -p /home/${appuser}/.ssh\n\n \n\n\n \n\n\ntest -f $cf4 && perl -pne '{ s/^(.*= cloud).*$/$1,%OS_USER2%/; }' -i $cf4 && cfud $cf4\n\n\n\ncurl=\"curl --retry 3 --silent --show-error --fail\"\nmetadatavars() {\nlocal url=$1\nfor uri in `$curl $url`\ndo\necho $uri | grep -q -E '=' && continue\necho $uri | grep -q -E 'public' && continue\nif echo $uri | grep -q -E '/$'\nthen\nmetadatavars \"${url}${uri}\"\nelse\nprintf \"export EC2_%s=\\\"%s\\\"\\n\"  `echo $uri | tr '/-' '_' | tr 'a-z' 'A-Z'` \"`$curl ${url}${uri}| tr '\\n' ' '`\"\nfi\ndone\n}\n\n\n\nmetadatavars http://169.254.169.254/latest/meta-data/ >> /etc/profile.d/netflix_environment.sh\n. /etc/profile.d/netflix_environment.sh\n\n \nln -s $jmxf $jmxl\n\nif newbase\nthen\n/usr/local/bin/installcrontab $appuser\nelse\n\nfi\n\n\n \n\nif ! grep -q '/etc/alternatives/java_sdk/lib/tools.jar' /apps/tomcat/bin/setclasspath.sh\nthen\n\nfi\n\n \n# udf1 end\n\n\n\n\n# added for CRL support (will be activated only for builds >= 1470)\n\nserver_template_crl=/apps/tomcat/conf/server_template_2011.xml \n\n \n\n# end added for CRL support\n \ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  },
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-10-14T21:16:58Z",
+    "imageId": "ami-c13cf0a8",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:2b2f257c-51f5-4b56-a032-c042edcd52ec:launchConfigurationName/akms-v002-20111014141657",
+    "launchConfigurationName": "akms-v002-20111014141657",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "akms",
+      "nf-datacenter",
+      "nf-infrastructure"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"akms\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"\"\ncluster=\"akms\"\nautogrp=\"akms-v002\"\nlaunchconfig=\"akms-v002-20111014141657\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\nappdynappname=\"$region $appenv\"\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\n[[ $region == us-east-1 ]] && appdynappname=\"Cloud Milestones - test AWS\"\n \n\n\n# udf-test end\n# udf1 begin\nhostnamestring=${clusterorapp}-${instanceid}\nhostname $hostnamestring\nprintf \"/^HOSTNAME/ d\\n $\\na\\nHOSTNAME=${hostnamestring}\\n.\\nw\\nq\\n\" | ed -s /etc/sysconfig/network\necho \"127.0.0.1 localhost\" > /etc/hosts\nprintf \"%s\\t%s %s.netflix.com %s\\n\" `local-ipv4` `hostname` `hostname` `public-hostname` >> /etc/hosts\ntest -n \"$reg_hosts\" && echo $reg_hosts >> /etc/hosts\n\neval `gawk -F: '/60004/ {print \"amirole=\" $1}' /etc/passwd`\ntest -n \"$amirole\" && userdel -f $amirole\ngroupadd -f -g 60243 nac\nuseradd -u 60004 -g nac -c \"$app $appenv role\" $appuser\nif ! newbase; then\nmkdir -p /home/${appuser}/.ssh\n\n \n\n\n \n\n\ntest -f $cf4 && perl -pne '{ s/^(.*= cloud).*$/$1,%OS_USER2%/; }' -i $cf4 && cfud $cf4\n\n\n\ncurl=\"curl --retry 3 --silent --show-error --fail\"\nmetadatavars() {\nlocal url=$1\nfor uri in `$curl $url`\ndo\necho $uri | grep -q -E '=' && continue\necho $uri | grep -q -E 'public' && continue\nif echo $uri | grep -q -E '/$'\nthen\nmetadatavars \"${url}${uri}\"\nelse\nprintf \"export EC2_%s=\\\"%s\\\"\\n\"  `echo $uri | tr '/-' '_' | tr 'a-z' 'A-Z'` \"`$curl ${url}${uri}| tr '\\n' ' '`\"\nfi\ndone\n}\n\n\n\nmetadatavars http://169.254.169.254/latest/meta-data/ >> /etc/profile.d/netflix_environment.sh\n. /etc/profile.d/netflix_environment.sh\n\n \nln -s $jmxf $jmxl\n\nif newbase\nthen\n/usr/local/bin/installcrontab $appuser\nelse\n\nfi\n\n\n \n\nif ! grep -q '/etc/alternatives/java_sdk/lib/tools.jar' /apps/tomcat/bin/setclasspath.sh\nthen\n\nfi\n\n \n# udf1 end\n\n\n\n\n# added for CRL support (will be activated only for builds >= 1470)\n\nserver_template_crl=/apps/tomcat/conf/server_template_2011.xml \n\n \n\n# end added for CRL support\n \ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  },
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-10-14T21:34:48Z",
+    "imageId": "ami-c13cf0a8",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:cbd20835-1882-4ebb-8265-8ca861a524ed:launchConfigurationName/akms-v002-20111014143448",
+    "launchConfigurationName": "akms-v002-20111014143448",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "akms",
+      "nf-datacenter",
+      "nf-infrastructure"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"akms\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"\"\ncluster=\"akms\"\nautogrp=\"akms-v002\"\nlaunchconfig=\"akms-v002-20111014143448\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\nappdynappname=\"$region $appenv\"\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\n[[ $region == us-east-1 ]] && appdynappname=\"Cloud Milestones - test AWS\"\n \n\n\n# udf-test end\n# udf1 begin\nhostnamestring=${clusterorapp}-${instanceid}\nhostname $hostnamestring\nprintf \"/^HOSTNAME/ d\\n $\\na\\nHOSTNAME=${hostnamestring}\\n.\\nw\\nq\\n\" | ed -s /etc/sysconfig/network\necho \"127.0.0.1 localhost\" > /etc/hosts\nprintf \"%s\\t%s %s.netflix.com %s\\n\" `local-ipv4` `hostname` `hostname` `public-hostname` >> /etc/hosts\ntest -n \"$reg_hosts\" && echo $reg_hosts >> /etc/hosts\n\neval `gawk -F: '/60004/ {print \"amirole=\" $1}' /etc/passwd`\ntest -n \"$amirole\" && userdel -f $amirole\ngroupadd -f -g 60243 nac\nuseradd -u 60004 -g nac -c \"$app $appenv role\" $appuser\nif ! newbase; then\nmkdir -p /home/${appuser}/.ssh\n\n \n\n\n \n\n\ntest -f $cf4 && perl -pne '{ s/^(.*= cloud).*$/$1,%OS_USER2%/; }' -i $cf4 && cfud $cf4\n\n\n\ncurl=\"curl --retry 3 --silent --show-error --fail\"\nmetadatavars() {\nlocal url=$1\nfor uri in `$curl $url`\ndo\necho $uri | grep -q -E '=' && continue\necho $uri | grep -q -E 'public' && continue\nif echo $uri | grep -q -E '/$'\nthen\nmetadatavars \"${url}${uri}\"\nelse\nprintf \"export EC2_%s=\\\"%s\\\"\\n\"  `echo $uri | tr '/-' '_' | tr 'a-z' 'A-Z'` \"`$curl ${url}${uri}| tr '\\n' ' '`\"\nfi\ndone\n}\n\n\n\nmetadatavars http://169.254.169.254/latest/meta-data/ >> /etc/profile.d/netflix_environment.sh\n. /etc/profile.d/netflix_environment.sh\n\n \nln -s $jmxf $jmxl\n\nif newbase\nthen\n/usr/local/bin/installcrontab $appuser\nelse\n\nfi\n\n\n \n\nif ! grep -q '/etc/alternatives/java_sdk/lib/tools.jar' /apps/tomcat/bin/setclasspath.sh\nthen\n\nfi\n\n \n# udf1 end\n\n\n\n\n# added for CRL support (will be activated only for builds >= 1470)\n\nserver_template_crl=/apps/tomcat/conf/server_template_2011.xml \n\n \n\n# end added for CRL support\n \ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  },
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-10-15T00:47:25Z",
+    "imageId": "ami-fd5f9394",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:9ae2c31f-c8cd-4ced-b5d9-f3d9e0355f6b:launchConfigurationName/akms-v002-20111014174724",
+    "launchConfigurationName": "akms-v002-20111014174724",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "akms",
+      "nf-datacenter",
+      "nf-infrastructure"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"akms\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"\"\ncluster=\"akms\"\nautogrp=\"akms-v002\"\nlaunchconfig=\"akms-v002-20111014174724\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\nappdynappname=\"$region $appenv\"\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\n[[ $region == us-east-1 ]] && appdynappname=\"Cloud Milestones - test AWS\"\n \n\n\n# udf-test end\n# udf1 begin\nhostnamestring=${clusterorapp}-${instanceid}\nhostname $hostnamestring\nprintf \"/^HOSTNAME/ d\\n $\\na\\nHOSTNAME=${hostnamestring}\\n.\\nw\\nq\\n\" | ed -s /etc/sysconfig/network\necho \"127.0.0.1 localhost\" > /etc/hosts\nprintf \"%s\\t%s %s.netflix.com %s\\n\" `local-ipv4` `hostname` `hostname` `public-hostname` >> /etc/hosts\ntest -n \"$reg_hosts\" && echo $reg_hosts >> /etc/hosts\n\neval `gawk -F: '/60004/ {print \"amirole=\" $1}' /etc/passwd`\ntest -n \"$amirole\" && userdel -f $amirole\ngroupadd -f -g 60243 nac\nuseradd -u 60004 -g nac -c \"$app $appenv role\" $appuser\nif ! newbase; then\nmkdir -p /home/${appuser}/.ssh\n\n \n\n\n \n\n\ntest -f $cf4 && perl -pne '{ s/^(.*= cloud).*$/$1,%OS_USER2%/; }' -i $cf4 && cfud $cf4\n\n\n\ncurl=\"curl --retry 3 --silent --show-error --fail\"\nmetadatavars() {\nlocal url=$1\nfor uri in `$curl $url`\ndo\necho $uri | grep -q -E '=' && continue\necho $uri | grep -q -E 'public' && continue\nif echo $uri | grep -q -E '/$'\nthen\nmetadatavars \"${url}${uri}\"\nelse\nprintf \"export EC2_%s=\\\"%s\\\"\\n\"  `echo $uri | tr '/-' '_' | tr 'a-z' 'A-Z'` \"`$curl ${url}${uri}| tr '\\n' ' '`\"\nfi\ndone\n}\n\n\n\nmetadatavars http://169.254.169.254/latest/meta-data/ >> /etc/profile.d/netflix_environment.sh\n. /etc/profile.d/netflix_environment.sh\n\n \nln -s $jmxf $jmxl\n\nif newbase\nthen\n/usr/local/bin/installcrontab $appuser\nelse\n\nfi\n\n\n \n\nif ! grep -q '/etc/alternatives/java_sdk/lib/tools.jar' /apps/tomcat/bin/setclasspath.sh\nthen\n\nfi\n\n \n# udf1 end\n\n\n\n\n# added for CRL support (will be activated only for builds >= 1470)\n\nserver_template_crl=/apps/tomcat/conf/server_template_2011.xml \n\n \n\n# end added for CRL support\n \ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  },
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-10-18T18:24:15Z",
+    "imageId": "ami-e3ab648a",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:bb6dba0c-e56f-4084-9953-006b46c7cf71:launchConfigurationName/akms-v002-20111018112415",
+    "launchConfigurationName": "akms-v002-20111018112415",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "akms",
+      "nf-datacenter",
+      "nf-infrastructure"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"akms\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"\"\ncluster=\"akms\"\nautogrp=\"akms-v002\"\nlaunchconfig=\"akms-v002-20111018112415\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\nappdynappname=\"$region $appenv\"\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\n[[ $region == us-east-1 ]] && appdynappname=\"Cloud Milestones - test AWS\"\n \n\n\n# udf-test end\n# udf1 begin\nhostnamestring=${clusterorapp}-${instanceid}\nhostname $hostnamestring\nprintf \"/^HOSTNAME/ d\\n $\\na\\nHOSTNAME=${hostnamestring}\\n.\\nw\\nq\\n\" | ed -s /etc/sysconfig/network\necho \"127.0.0.1 localhost\" > /etc/hosts\nprintf \"%s\\t%s %s.netflix.com %s\\n\" `local-ipv4` `hostname` `hostname` `public-hostname` >> /etc/hosts\ntest -n \"$reg_hosts\" && echo $reg_hosts >> /etc/hosts\n\neval `gawk -F: '/60004/ {print \"amirole=\" $1}' /etc/passwd`\ntest -n \"$amirole\" && userdel -f $amirole\ngroupadd -f -g 60243 nac\nuseradd -u 60004 -g nac -c \"$app $appenv role\" $appuser\nif ! newbase; then\nmkdir -p /home/${appuser}/.ssh\n\n \n\n\n \n\n\ntest -f $cf4 && perl -pne '{ s/^(.*= cloud).*$/$1,%OS_USER2%/; }' -i $cf4 && cfud $cf4\n\n\n\ncurl=\"curl --retry 3 --silent --show-error --fail\"\nmetadatavars() {\nlocal url=$1\nfor uri in `$curl $url`\ndo\necho $uri | grep -q -E '=' && continue\necho $uri | grep -q -E 'public' && continue\nif echo $uri | grep -q -E '/$'\nthen\nmetadatavars \"${url}${uri}\"\nelse\nprintf \"export EC2_%s=\\\"%s\\\"\\n\"  `echo $uri | tr '/-' '_' | tr 'a-z' 'A-Z'` \"`$curl ${url}${uri}| tr '\\n' ' '`\"\nfi\ndone\n}\n\n\n\nmetadatavars http://169.254.169.254/latest/meta-data/ >> /etc/profile.d/netflix_environment.sh\n. /etc/profile.d/netflix_environment.sh\n\n \nln -s $jmxf $jmxl\n\nif newbase\nthen\n/usr/local/bin/installcrontab $appuser\nelse\n\nfi\n\n\n \n\nif ! grep -q '/etc/alternatives/java_sdk/lib/tools.jar' /apps/tomcat/bin/setclasspath.sh\nthen\n\nfi\n\n \n# udf1 end\n\n\n\n\n# added for CRL support (will be activated only for builds >= 1470)\n\nserver_template_crl=/apps/tomcat/conf/server_template_2011.xml \n\n \n\n# end added for CRL support\n \ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  },
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-10-18T21:10:10Z",
+    "imageId": "ami-fd5f9394",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:53be19fa-d544-40d1-a00d-cacb6ce29fa3:launchConfigurationName/akms-v002-20111018141009",
+    "launchConfigurationName": "akms-v002-20111018141009",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "akms",
+      "nf-datacenter",
+      "nf-infrastructure"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"akms\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"\"\ncluster=\"akms\"\nautogrp=\"akms-v002\"\nlaunchconfig=\"akms-v002-20111018141009\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\nappdynappname=\"$region $appenv\"\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\n[[ $region == us-east-1 ]] && appdynappname=\"Cloud Milestones - test AWS\"\n \n\n\n# udf-test end\n# udf1 begin\nhostnamestring=${clusterorapp}-${instanceid}\nhostname $hostnamestring\nprintf \"/^HOSTNAME/ d\\n $\\na\\nHOSTNAME=${hostnamestring}\\n.\\nw\\nq\\n\" | ed -s /etc/sysconfig/network\necho \"127.0.0.1 localhost\" > /etc/hosts\nprintf \"%s\\t%s %s.netflix.com %s\\n\" `local-ipv4` `hostname` `hostname` `public-hostname` >> /etc/hosts\ntest -n \"$reg_hosts\" && echo $reg_hosts >> /etc/hosts\n\neval `gawk -F: '/60004/ {print \"amirole=\" $1}' /etc/passwd`\ntest -n \"$amirole\" && userdel -f $amirole\ngroupadd -f -g 60243 nac\nuseradd -u 60004 -g nac -c \"$app $appenv role\" $appuser\nif ! newbase; then\nmkdir -p /home/${appuser}/.ssh\n\n \n\n\n \n\n\ntest -f $cf4 && perl -pne '{ s/^(.*= cloud).*$/$1,%OS_USER2%/; }' -i $cf4 && cfud $cf4\n\n\n\ncurl=\"curl --retry 3 --silent --show-error --fail\"\nmetadatavars() {\nlocal url=$1\nfor uri in `$curl $url`\ndo\necho $uri | grep -q -E '=' && continue\necho $uri | grep -q -E 'public' && continue\nif echo $uri | grep -q -E '/$'\nthen\nmetadatavars \"${url}${uri}\"\nelse\nprintf \"export EC2_%s=\\\"%s\\\"\\n\"  `echo $uri | tr '/-' '_' | tr 'a-z' 'A-Z'` \"`$curl ${url}${uri}| tr '\\n' ' '`\"\nfi\ndone\n}\n\n\n\nmetadatavars http://169.254.169.254/latest/meta-data/ >> /etc/profile.d/netflix_environment.sh\n. /etc/profile.d/netflix_environment.sh\n\n \nln -s $jmxf $jmxl\n\nif newbase\nthen\n/usr/local/bin/installcrontab $appuser\nelse\n\nfi\n\n\n \n\nif ! grep -q '/etc/alternatives/java_sdk/lib/tools.jar' /apps/tomcat/bin/setclasspath.sh\nthen\n\nfi\n\n \n# udf1 end\n\n\n\n\n# added for CRL support (will be activated only for builds >= 1470)\n\nserver_template_crl=/apps/tomcat/conf/server_template_2011.xml \n\n \n\n# end added for CRL support\n \ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  },
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-10-14T23:52:41Z",
+    "imageId": "ami-4775b32e",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:c774340b-32c0-49b3-b37e-c551c296a2c2:launchConfigurationName/helloworld-example-v015-20111014165240",
+    "launchConfigurationName": "helloworld-example-v015-20111014165240",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "helloworld",
+      "helloworld-frontend",
+      "helloworld-nactest",
+      "nf-datacenter",
+      "nf-infrastructure"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"helloworld\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"example\"\ncluster=\"helloworld-example\"\nautogrp=\"helloworld-example-v015\"\nlaunchconfig=\"helloworld-example-v015-20111014165240\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\nappdynappname=\"$region $appenv\"\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\n[[ $region == us-east-1 ]] && appdynappname=\"Cloud Milestones - test AWS\"\n \n\n\n# udf-test end\n# udf1 begin\nhostnamestring=${clusterorapp}-${instanceid}\nhostname $hostnamestring\nprintf \"/^HOSTNAME/ d\\n $\\na\\nHOSTNAME=${hostnamestring}\\n.\\nw\\nq\\n\" | ed -s /etc/sysconfig/network\necho \"127.0.0.1 localhost\" > /etc/hosts\nprintf \"%s\\t%s %s.netflix.com %s\\n\" `local-ipv4` `hostname` `hostname` `public-hostname` >> /etc/hosts\ntest -n \"$reg_hosts\" && echo $reg_hosts >> /etc/hosts\n\neval `gawk -F: '/60004/ {print \"amirole=\" $1}' /etc/passwd`\ntest -n \"$amirole\" && userdel -f $amirole\ngroupadd -f -g 60243 nac\nuseradd -u 60004 -g nac -c \"$app $appenv role\" $appuser\nif ! newbase; then\nmkdir -p /home/${appuser}/.ssh\n\n \n\n\n \n\n\ntest -f $cf4 && perl -pne '{ s/^(.*= cloud).*$/$1,%OS_USER2%/; }' -i $cf4 && cfud $cf4\n\n\n\ncurl=\"curl --retry 3 --silent --show-error --fail\"\nmetadatavars() {\nlocal url=$1\nfor uri in `$curl $url`\ndo\necho $uri | grep -q -E '=' && continue\necho $uri | grep -q -E 'public' && continue\nif echo $uri | grep -q -E '/$'\nthen\nmetadatavars \"${url}${uri}\"\nelse\nprintf \"export EC2_%s=\\\"%s\\\"\\n\"  `echo $uri | tr '/-' '_' | tr 'a-z' 'A-Z'` \"`$curl ${url}${uri}| tr '\\n' ' '`\"\nfi\ndone\n}\n\n\n\nmetadatavars http://169.254.169.254/latest/meta-data/ >> /etc/profile.d/netflix_environment.sh\n. /etc/profile.d/netflix_environment.sh\n\n \nln -s $jmxf $jmxl\n\nif newbase\nthen\n/usr/local/bin/installcrontab $appuser\nelse\n\nfi\n\n\n \n\nif ! grep -q '/etc/alternatives/java_sdk/lib/tools.jar' /apps/tomcat/bin/setclasspath.sh\nthen\n\nfi\n\n \n# udf1 end\n# helloworld-example-test\n# nactest push adds this text to user data in all ASGs that are part of the helloworld-example cluster,\n#   including ASGs helloworld-example and helloworld-example-v001 and helloworld-example-v002\n# Combined custom UDFs for an instance must stay below 9000 characters.\n\n# Environment variable can be read in Java code on the instance like this:\n# String flavor = System.getenv(\"FAVORITE_GELATO_FLAVOR\")\ncat <<EndOfInput>> /etc/profile.d/netflix_environment.sh\nexport FAVORITE_GELATO_FLAVOR=\"Coconut Pistachio\"\nexport FAVORITE_MUSICAL_INSTRUMENT=\"Acoustic Guitar\"\nEndOfInput\n\n# helloworld-test for us-east-1\n# nactest push adds this text to user data for all helloworld instances in us-east-1.\n# Combined custom UDFs for an instance must stay below 9000 characters.\n\n# Use Java to read environment variables set here.\n# String pizzaToppings = System.getenv(\"FAVORITE_PIZZA_TOPPINGS\")\ncat <<EndOfInput>> /etc/profile.d/netflix_environment.sh\nexport FAVORITE_PIZZA_TOPPINGS=\"Artichokes and Olives\"\nexport FAVORITE_BEVERAGE=\"Sherry\"\nEndOfInput\n\n# helloworld-example-test for us-east-1\n# nactest push adds this text to user data in all ASGs that are part of the helloworld-example cluster in us-east-1,\n#   including ASGs helloworld-example and helloworld-example-v001 and helloworld-example-v002\n# Combined custom UDFs for an instance must stay below 9000 characters.\n\n# Environment variable can be read in Java code on the instance like this:\n# String flavor = System.getenv(\"FAVORITE_GELATO_FLAVOR\")\ncat <<EndOfInput>> /etc/profile.d/netflix_environment.sh\nexport FAVORITE_GELATO_FLAVOR=\"Campfire Banana\"\nexport FAVORITE_MUSICAL_INSTRUMENT=\"Irish Flute\"\nEndOfInput\n\n# udf2 begin\nchown -R ${appuser}:nac /apps\ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  },
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-07-21T17:10:40Z",
+    "imageId": "ami-dfdd1ab6",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:b647eb22-906f-4b91-833a-c7c714cf6f3b:launchConfigurationName/ntsuiboot-v000-20110721101039",
+    "launchConfigurationName": "ntsuiboot-v000-20110721101039",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "nf-datacenter",
+      "nf-infrastructure",
+      "ntsuiboot"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"ntsuiboot\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"\"\ncluster=\"ntsuiboot\"\nautogrp=\"ntsuiboot-v000\"\nlaunchconfig=\"ntsuiboot-v000-20110721101039\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\nappdynappname=\"Cloud Milestones - test AWS\"\n \n \ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  },
+  {
+    "blockDeviceMappings":
+    [
+    ],
+    "class": "com.amazonaws.services.autoscaling.model.LaunchConfiguration",
+    "createdTime": "2011-10-18T19:45:26Z",
+    "imageId": "ami-fba96692",
+    "instanceMonitoring": {
+      "class": "com.amazonaws.services.autoscaling.model.InstanceMonitoring",
+      "enabled": true
+    },
+    "instanceType": "m1.large",
+    "kernelId": "",
+    "keyName": "nf-test-keypair-a",
+    "launchConfigurationARN": "arn:aws:autoscaling:us-east-1:179000000000:launchConfiguration:e5e439c9-627e-45db-ba8d-ad920fc84823:launchConfigurationName/ntsuiboot-v001-20111018124526",
+    "launchConfigurationName": "ntsuiboot-v001-20111018124526",
+    "ramdiskId": "",
+    "securityGroups":
+    [
+      "nf-datacenter",
+      "nf-infrastructure",
+      "ntsuiboot"
+    ],
+    "userData": "#!/bin/bash\n# udf0 begin\nexec 1>/var/ec2/userdata.log\nexec 2>&1\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin\n\napp=\"ntsuiboot\"\nappenv=\"test\"\nregion=\"us-east-1\"\nappuser=\"${app}${appenv}\"\nstack=\"\"\ncluster=\"ntsuiboot\"\nautogrp=\"ntsuiboot-v001\"\nlaunchconfig=\"ntsuiboot-v001-20111018124526\"\nclusterorapp=${cluster:-$app}\nnflxbase=`rpm -q nflx-base | sed 's:nflx-base-1..-\\(.*\\)$:\\1:'`\nappdynappname=\"$region $appenv\"\n\nnewbase() {\n    test $nflxbase > 552092\n}\n\nsetenv_sh=\"/apps/tomcat/bin/setenv.sh\"\nNFenv=\"/apps/tomcat/bin/netflix.env\"\nserver_template_xml=\"/apps/tomcat/conf/server_template.xml\"\nserver_xml=\"/apps/tomcat/conf/server.xml\"\ninstanceid=`/usr/bin/instance-id`\n\n\n# udf0 end\n# udf-test begin\n[[ $region == us-east-1 ]] && appdynappname=\"Cloud Milestones - test AWS\"\n \n\n\n# udf-test end\n# udf1 begin\nhostnamestring=${clusterorapp}-${instanceid}\nhostname $hostnamestring\nprintf \"/^HOSTNAME/ d\\n $\\na\\nHOSTNAME=${hostnamestring}\\n.\\nw\\nq\\n\" | ed -s /etc/sysconfig/network\necho \"127.0.0.1 localhost\" > /etc/hosts\nprintf \"%s\\t%s %s.netflix.com %s\\n\" `local-ipv4` `hostname` `hostname` `public-hostname` >> /etc/hosts\ntest -n \"$reg_hosts\" && echo $reg_hosts >> /etc/hosts\n\neval `gawk -F: '/60004/ {print \"amirole=\" $1}' /etc/passwd`\ntest -n \"$amirole\" && userdel -f $amirole\ngroupadd -f -g 60243 nac\nuseradd -u 60004 -g nac -c \"$app $appenv role\" $appuser\nif ! newbase; then\nmkdir -p /home/${appuser}/.ssh\n\n \n\n\n \n\n\ntest -f $cf4 && perl -pne '{ s/^(.*= cloud).*$/$1,%OS_USER2%/; }' -i $cf4 && cfud $cf4\n\n\n\ncurl=\"curl --retry 3 --silent --show-error --fail\"\nmetadatavars() {\nlocal url=$1\nfor uri in `$curl $url`\ndo\necho $uri | grep -q -E '=' && continue\necho $uri | grep -q -E 'public' && continue\nif echo $uri | grep -q -E '/$'\nthen\nmetadatavars \"${url}${uri}\"\nelse\nprintf \"export EC2_%s=\\\"%s\\\"\\n\"  `echo $uri | tr '/-' '_' | tr 'a-z' 'A-Z'` \"`$curl ${url}${uri}| tr '\\n' ' '`\"\nfi\ndone\n}\n\n\n\nmetadatavars http://169.254.169.254/latest/meta-data/ >> /etc/profile.d/netflix_environment.sh\n. /etc/profile.d/netflix_environment.sh\n\n \nln -s $jmxf $jmxl\n\nif newbase\nthen\n/usr/local/bin/installcrontab $appuser\nelse\n\nfi\n\n\n \n\nif ! grep -q '/etc/alternatives/java_sdk/lib/tools.jar' /apps/tomcat/bin/setclasspath.sh\nthen\n\nfi\n\n \n# udf1 end\n# udf2 begin\nchown -R ${appuser}:nac /apps\ntouch /tmp/udf-complete\n# udf2 end\n\n"
+  }
+]

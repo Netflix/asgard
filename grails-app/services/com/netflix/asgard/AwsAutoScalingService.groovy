@@ -1,0 +1,859 @@
+/*
+ * Copyright 2012 Netflix, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.netflix.asgard
+
+import com.amazonaws.AmazonServiceException
+import com.amazonaws.services.autoscaling.AmazonAutoScaling
+import com.amazonaws.services.autoscaling.model.Activity
+import com.amazonaws.services.autoscaling.model.Alarm
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.autoscaling.model.BlockDeviceMapping
+import com.amazonaws.services.autoscaling.model.CreateAutoScalingGroupRequest
+import com.amazonaws.services.autoscaling.model.CreateLaunchConfigurationRequest
+import com.amazonaws.services.autoscaling.model.DeleteAutoScalingGroupRequest
+import com.amazonaws.services.autoscaling.model.DeleteLaunchConfigurationRequest
+import com.amazonaws.services.autoscaling.model.DeletePolicyRequest
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult
+import com.amazonaws.services.autoscaling.model.DescribeLaunchConfigurationsRequest
+import com.amazonaws.services.autoscaling.model.DescribeLaunchConfigurationsResult
+import com.amazonaws.services.autoscaling.model.DescribePoliciesRequest
+import com.amazonaws.services.autoscaling.model.DescribePoliciesResult
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult
+import com.amazonaws.services.autoscaling.model.Instance
+import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.autoscaling.model.PutScalingPolicyRequest
+import com.amazonaws.services.autoscaling.model.PutScalingPolicyResult
+import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest
+import com.amazonaws.services.autoscaling.model.ScalingPolicy
+import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest
+import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGroupRequest
+import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
+import com.amazonaws.services.cloudwatch.model.MetricAlarm
+import com.amazonaws.services.ec2.model.Image
+import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.netflix.asgard.cache.CacheInitializer
+import com.netflix.asgard.model.AlarmData
+import com.netflix.asgard.model.AutoScalingGroupData
+import com.netflix.asgard.model.AutoScalingProcessType
+import com.netflix.asgard.model.ScalingPolicyData
+import com.netflix.asgard.model.SimpleDbSequenceLocator
+import com.netflix.asgard.push.AsgDeletionMode
+import com.netflix.asgard.push.Cluster
+import com.netflix.asgard.retriever.AwsResultsRetriever
+import org.joda.time.DateTime
+import org.joda.time.Duration
+import org.springframework.beans.factory.InitializingBean
+
+class AwsAutoScalingService implements CacheInitializer, InitializingBean {
+
+    static transactional = false
+
+    def grailsApplication  // injected after construction
+    def applicationService
+    def awsClientService
+    def awsCloudWatchService
+    def awsEc2Service
+    def awsLoadBalancerService
+    def awsSimpleDbService
+    Caches caches
+    def discoveryService
+    def emailerService
+    def launchTemplateService
+    def mergedInstanceService
+    def pushService
+    def taskService
+
+    /** The location of the sequence number in SimpleDB */
+    final SimpleDbSequenceLocator sequenceLocator = new SimpleDbSequenceLocator(region: Region.defaultRegion(),
+            domainName: 'CLOUD_POLICY_SEQUENCE', itemName: 'policy_id', attributeName: 'value')
+
+    final AwsResultsRetriever scalingPolicyRetriever = new AwsResultsRetriever<ScalingPolicy, DescribePoliciesRequest,
+            DescribePoliciesResult>() {
+        protected DescribePoliciesResult makeRequest(Region region, DescribePoliciesRequest request) {
+            awsClient.by(region).describePolicies(request)
+        }
+        protected List<ScalingPolicy> accessResult(DescribePoliciesResult result) {
+            result.scalingPolicies
+        }
+    }
+
+    MultiRegionAwsClient<AmazonAutoScaling> awsClient
+
+    void afterPropertiesSet() {
+        awsClient = new MultiRegionAwsClient<AmazonAutoScaling>({ Region region ->
+            AmazonAutoScaling client = awsClientService.create(AmazonAutoScaling)
+            client.setEndpoint("autoscaling.${region}.amazonaws.com")
+            client
+        })
+    }
+
+    void initializeCaches() {
+        // Cluster cache has no timer. It gets triggered by the Auto Scaling Group cache callback closure.
+        caches.allClusters.ensureSetUp(
+                { Region region -> buildClusters(region, caches.allAutoScalingGroups.by(region).list()) }, {},
+                { Region region ->
+                    boolean awaitingLoadBalancers = caches.allLoadBalancers.by(region).isDoingFirstFill()
+                    boolean awaitingAppInstances = caches.allApplicationInstances.by(region).isDoingFirstFill()
+                    boolean awaitingImages = caches.allImages.by(region).isDoingFirstFill()
+                    boolean awaitingEc2Instances = caches.allInstances.by(region).isDoingFirstFill()
+                    !awaitingLoadBalancers && !awaitingAppInstances && !awaitingImages && !awaitingEc2Instances
+                }
+        )
+        caches.allAutoScalingGroups.ensureSetUp({ Region region -> retrieveAutoScalingGroups(region) },
+                { Region region -> caches.allClusters.by(region).fill() })
+        caches.allLaunchConfigurations.ensureSetUp({ Region region -> retrieveLaunchConfigurations(region) })
+        caches.allScalingPolicies.ensureSetUp({ Region region -> retrieveScalingPolicies(region) })
+    }
+
+    // Clusters
+
+    private Collection<Cluster> buildClusters(Region region, Collection<AutoScalingGroup> allGroups) {
+
+        UserContext userContext = UserContext.auto(region)
+        Map<String, Cluster> clusterNamesToClusters = [:]
+        allGroups.each { AutoScalingGroup group ->
+            // If the name contains a version number then remove the version number to get the cluster name
+            String clusterName = Relationships.clusterFromGroupName(group.autoScalingGroupName)
+
+            // Make a cluster object only if we haven't made one yet that matches this ASG.
+            if (!clusterNamesToClusters[clusterName]) {
+                Cluster cluster = buildCluster(userContext, allGroups, clusterName)
+                if (cluster) {
+                    clusterNamesToClusters[clusterName] = cluster
+                }
+            }
+        }
+
+        clusterNamesToClusters.values() as List
+    }
+
+    Collection<Cluster> getClusters(UserContext userContext) {
+        caches.allClusters.by(userContext.region).list()
+    }
+
+    /**
+     * Finds all the auto scaling groups that are part of a named cluster.
+     *
+     * Example:
+     *
+     * Cluster name: helloworld-example
+     * Members: helloworld-example, helloworld-example-v000, helloworld-example-v001
+     *
+     * @param name the name of the cluster or the name of one of the auto scaling groups in the cluster
+     * @return Cluster of ordered auto scaling groups
+     */
+    Cluster getCluster(UserContext userContext, String name, From from = From.AWS) {
+        if (!name) { return null }
+        if (from == From.CACHE) {
+            return caches.allClusters.by(userContext.region).get(name)
+        }
+        // If the name contains a version number then remove the version number to get the cluster name
+        String clusterName = Relationships.clusterFromGroupName(name)
+        if (!clusterName) { return null }
+        Collection<AutoScalingGroup> allGroupsSharedCache = getAutoScalingGroups(userContext)
+        Cluster cluster = buildCluster(userContext, allGroupsSharedCache, clusterName)
+        caches.allClusters.by(userContext.region).put(clusterName, cluster)
+        cluster
+    }
+
+    AutoScalingGroupData buildAutoScalingGroupData(UserContext userContext, AutoScalingGroup group) {
+        List<String> instanceIds = group.instances.collect { it.instanceId }
+        List<MergedInstance> mergedInstances = mergedInstanceService.getMergedInstancesByIds(userContext, instanceIds)
+        Map<String, Collection<LoadBalancerDescription>> instanceIdsToLoadBalancerLists =
+                awsLoadBalancerService.mapInstanceIdsToLoadBalancers(userContext, instanceIds)
+        Map<String, Image> imageIdsToImages = awsEc2Service.mapImageIdsToImagesForMergedInstances(userContext,
+                mergedInstances)
+        Collection<ScalingPolicyData> scalingPolicies = getScalingPolicyDatas(userContext, group.autoScalingGroupName)
+        AutoScalingGroupData.from(group, instanceIdsToLoadBalancerLists, mergedInstances, imageIdsToImages, scalingPolicies)
+    }
+
+    Cluster buildCluster(UserContext userContext, Collection<AutoScalingGroup> allGroups, String clusterName) {
+
+        // Optimization: find the candidate ASGs that start with the cluster name to avoid dissecting every group name.
+        List<AutoScalingGroup> candidates = allGroups.findAll { it.autoScalingGroupName.startsWith(clusterName) }
+
+        // Later the ASG CachedMap should contain AutoScalingGroupData objects instead of AutoScalingGroup objects.
+
+        // Find ASGs whose names equal the cluster name or the cluster name followed by a push number.
+        List<AutoScalingGroup> groups = candidates.findAll {
+            Relationships.clusterFromGroupName(it.autoScalingGroupName) == clusterName }
+
+        // Reduce the ASG list to the ASGs that still exist in Amazon. As a happy side effect, update the ASG cache.
+        groups = getAutoScalingGroups(userContext, groups*.autoScalingGroupName)
+
+        if (groups.size()) {
+            // This looks similar to buildAutoScalingGroupData() but it's faster to prepare the instance, ELB and AMI
+            // lists once for the entire cluster than multiple times.
+            List<String> instanceIds = groups.collect { it.instances }.collect { it.instanceId }.flatten()
+            Map<String, Collection<LoadBalancerDescription>> instanceIdsToLoadBalancerLists =
+                        awsLoadBalancerService.mapInstanceIdsToLoadBalancers(userContext, instanceIds)
+            List<MergedInstance> mergedInstances = mergedInstanceService.getMergedInstancesByIds(userContext,
+                        instanceIds)
+            Map<String, Image> imageIdsToImages = awsEc2Service.mapImageIdsToImagesForMergedInstances(userContext,
+                    mergedInstances)
+            List<AutoScalingGroupData> clusterGroups = groups.collect { AutoScalingGroup asg ->
+                AutoScalingGroupData.from(asg, instanceIdsToLoadBalancerLists, mergedInstances, imageIdsToImages, [])
+            }
+
+            return new Cluster(clusterGroups)
+        }
+        null
+    }
+
+    // Auto Scaling Groups
+
+    private List<AutoScalingGroup> retrieveAutoScalingGroups(Region region) {
+        List<AutoScalingGroup> groups = []
+        DescribeAutoScalingGroupsResult result = retrieveAutoScalingGroups(region, null)
+        while (true) {
+            groups.addAll(result.getAutoScalingGroups())
+            if (result.getNextToken() == null) {
+                break
+            }
+            result = retrieveAutoScalingGroups(region, result.getNextToken())
+        }
+        groups
+    }
+
+    private DescribeAutoScalingGroupsResult retrieveAutoScalingGroups(Region region, String nextToken) {
+        awsClient.by(region).describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withNextToken(nextToken))
+    }
+
+    Collection<AutoScalingGroup> getAutoScalingGroups(UserContext userContext) {
+        caches.allAutoScalingGroups.by(userContext.region).list()
+    }
+
+    List<AutoScalingGroup> getAutoScalingGroupsForApp(UserContext userContext, String appName) {
+        def pat = ~/^${appName.toLowerCase()}(?:_\d+)?(?:-.+)?$/
+        getAutoScalingGroups(userContext).findAll { it.autoScalingGroupName ==~ pat }
+    }
+
+    AutoScalingGroup getAutoScalingGroup(UserContext userContext, String name, From from = From.AWS) {
+        if (!name) { return null }
+        List<AutoScalingGroup> groups = getAutoScalingGroups(userContext, [name], from)
+        Check.loneOrNone(groups, AutoScalingGroup)
+    }
+
+    List<AutoScalingGroup> getAutoScalingGroups(UserContext userContext, Collection<String> names,
+                                                From from = From.AWS) {
+        if (names) {
+            if (from == From.CACHE) {
+                return names.collect { caches.allAutoScalingGroups.by(userContext.region).get(it) }.findAll { it != null }
+            }
+            DescribeAutoScalingGroupsResult result = awsClient.by(userContext.region).describeAutoScalingGroups(
+                    new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(names))
+            List<AutoScalingGroup> groups = result.getAutoScalingGroups()
+            if (from == From.AWS) {
+                // Update the ASG cache for all the requested ASG names including the ASGs that no longer exist.
+                for (String name in names) {
+                    if (name) {
+                        // To remove non-existent ASGs from the cache, put the null group reference.
+                        AutoScalingGroup group = groups.find { it.autoScalingGroupName == name }
+                        caches.allAutoScalingGroups.by(userContext.region).put(name, group)
+                    }
+                }
+                return groups.collect { it.copy() }
+            } else if (from == From.AWS_NOCACHE) {
+                return groups
+            }
+        }
+        []
+    }
+
+    AutoScalingGroup getAutoScalingGroupFor(UserContext userContext, String instanceId) {
+        if (!instanceId) { return null }
+        def groups = getAutoScalingGroups(userContext)
+        //println "Looking for group for instance " + instanceId
+        groups.find { it.instances.any { it.instanceId == instanceId }}
+    }
+
+    List<AutoScalingGroup> getAutoScalingGroupsForLB(UserContext userContext, String lbName) {
+        def groups = getAutoScalingGroups(userContext)
+        //println "Looking for group for LB " + lbName
+        groups.findAll { it.loadBalancerNames.any { it == lbName }}
+    }
+
+    AutoScalingGroup getAutoScalingGroupForLaunchConfig(UserContext userContext, String lcName) {
+        def groups = getAutoScalingGroups(userContext)
+        //println "Looking for group for " + lcName
+        groups.find { it.launchConfigurationName == lcName }
+    }
+
+    private static final Integer MAX_RECORDS_PER_REQUEST = 50
+    static final Integer UNLIMITED = Integer.MAX_VALUE
+
+    List<Activity> getAutoScalingGroupActivities(UserContext userContext, String name, Integer maxTotalActivities) {
+
+        List<Activity> activities = []
+        Integer remainingActivitiesToFetch = maxTotalActivities
+        String nextToken = null
+
+        while (remainingActivitiesToFetch > 0) {
+            Integer maxRecordsForNextRequest = Math.min(MAX_RECORDS_PER_REQUEST, remainingActivitiesToFetch)
+            DescribeScalingActivitiesRequest request = new DescribeScalingActivitiesRequest()
+            request.withAutoScalingGroupName(name).withMaxRecords(maxRecordsForNextRequest).withNextToken(nextToken)
+            try {
+                AmazonAutoScaling client = awsClient.by(userContext.region)
+                DescribeScalingActivitiesResult result = client.describeScalingActivities(request)
+                activities.addAll(result.activities)
+                nextToken = result.nextToken
+            } catch (AmazonServiceException ase) {
+                // The ASG stopped existing. This race condition happens during automated polling in a unit test.
+                break
+            }
+            if (nextToken == null) {
+                // We're done collecting activities
+                break
+            }
+            sleep 20 // Avoid rate limiting before using next token
+            remainingActivitiesToFetch = maxTotalActivities - activities.size()
+        }
+        activities
+    }
+
+    ScalingPolicy getScalingPolicy(UserContext userContext, String policyName) {
+        if (!policyName) { return null }
+        Check.loneOrNone(getScalingPolicies(userContext, [policyName]), ScalingPolicy)
+    }
+
+    List<ScalingPolicy> getScalingPolicies(UserContext userContext, Collection<String> policyNames) {
+        if (!policyNames) { return [] }
+        final DescribePoliciesRequest request = new DescribePoliciesRequest(policyNames: policyNames)
+        awsClient.by(userContext.region).describePolicies(request).scalingPolicies
+    }
+
+    List<ScalingPolicy> retrieveScalingPolicies(Region region) {
+        scalingPolicyRetriever.retrieve(region, new DescribePoliciesRequest())
+    }
+
+    Collection<ScalingPolicy> getAllScalingPolicies(UserContext userContext) {
+        caches.allScalingPolicies.by(userContext.region).list()
+    }
+
+    List<ScalingPolicy> getScalingPoliciesForGroup(UserContext userContext, String autoScalingGroupName) {
+        if (!autoScalingGroupName) { return [] }
+        final DescribePoliciesRequest request = new DescribePoliciesRequest(autoScalingGroupName: autoScalingGroupName)
+        awsClient.by(userContext.region).describePolicies(request).scalingPolicies
+    }
+
+    List<ScalingPolicyData> getScalingPolicyDatas(UserContext userContext, String autoScalingGroupName) {
+        if (!autoScalingGroupName) { return [] }
+        final List<ScalingPolicy> scalingPolicies = getScalingPoliciesForGroup(userContext, autoScalingGroupName)
+        Map<ScalingPolicy, Collection<MetricAlarm>> scalingPolicyToAlarms = [:]
+        final Collection<Alarm> alarmReferences = scalingPolicies*.alarms.flatten()
+        final Collection<MetricAlarm> alarms = awsCloudWatchService.getAlarms(userContext, alarmReferences*.alarmName)
+        final Map<String, ScalingPolicy> alarmNameToScalingPolicy = [:]
+        scalingPolicies.each { ScalingPolicy scalingPolicy ->
+            scalingPolicy.alarms.each { Alarm alarm ->
+                alarmNameToScalingPolicy[alarm.alarmName] = scalingPolicy
+            }
+        }
+        scalingPolicyToAlarms = alarms.groupBy {
+            alarmNameToScalingPolicy[it.alarmName]
+        } as Map
+        final List<ScalingPolicyData> scalingPolicyDatas = []
+        scalingPolicies.each { ScalingPolicy scalingPolicy ->
+            final Collection<MetricAlarm> alarmsPerPolicy = scalingPolicyToAlarms[scalingPolicy]
+            scalingPolicyDatas << ScalingPolicyData.fromPolicyAndAlarms(scalingPolicy, alarmsPerPolicy)
+        }
+        scalingPolicyDatas
+    }
+
+    List<String> createScalingPolicies(UserContext userContext, Collection<ScalingPolicyData> scalingPolicies,
+                               Task existingTask = null) {
+        List<String> scalingPolicyNames = []
+        if (!scalingPolicies) {
+            return scalingPolicyNames
+        }
+        Integer policyCount = scalingPolicies.size()
+        String msg = "Create ${policyCount} Scaling Polic${policyCount == 1 ? 'y' : 'ies'}"
+        taskService.runTask(userContext, msg, { Task task ->
+            scalingPolicies.eachWithIndex { ScalingPolicyData scalingPolicyData, int policyIndex ->
+                PutScalingPolicyRequest request = scalingPolicyData.toPutScalingPolicyRequest(nextPolicyId(userContext))
+                scalingPolicyNames << request.policyName
+                if (policyIndex >= 1) { Time.sleepCancellably(250) } // Avoid rate limits when there are many policies
+                task.log("Create Scaling Policy '${request.policyName}'")
+                final PutScalingPolicyResult result = awsClient.by(userContext.region).putScalingPolicy(request)
+                scalingPolicyData.alarms.eachWithIndex { AlarmData alarm, int alarmIndex ->
+                    if (alarmIndex >= 1) { Time.sleepCancellably(250) } // Avoid rate limits when there are many alarms
+                    awsCloudWatchService.createAlarm(userContext, alarm, result.policyARN, existingTask)
+                }
+            }
+        }, null, existingTask)
+        scalingPolicyNames
+    }
+
+    void updateScalingPolicy(UserContext userContext, ScalingPolicyData policy, Task existingTask = null) {
+        taskService.runTask(userContext, "Update Scaling Policy '${policy.policyName}'", { Task task ->
+                awsClient.by(userContext.region).putScalingPolicy(policy.toPutScalingPolicyRequest())
+        }, Link.to(EntityType.scalingPolicy, policy.policyName), existingTask)
+    }
+
+    void deleteScalingPolicy(UserContext userContext, ScalingPolicy scalingPolicy, Task existingTask = null) {
+        // TODO - this method needs to calculate only alarms that will be orphaned, and delete them in a single call
+        taskService.runTask(userContext, "Delete Scaling Policy '${scalingPolicy.policyName}'", { Task task ->
+            final deletePolicyRequest = new DeletePolicyRequest(policyName: scalingPolicy.policyName,
+                    autoScalingGroupName: scalingPolicy.autoScalingGroupName)
+            awsClient.by(userContext.region).deletePolicy(deletePolicyRequest)
+            awsCloudWatchService.deleteAlarms(userContext, scalingPolicy.alarms*.alarmName, task)
+        }, Link.to(EntityType.autoScaling, scalingPolicy.autoScalingGroupName), existingTask)
+        getScalingPolicy(userContext, scalingPolicy.policyName)
+    }
+
+    String nextPolicyId(UserContext userContext) {
+        try {
+            return awsSimpleDbService.incrementAndGetSequenceNumber(userContext, sequenceLocator)
+        } catch (Exception e) {
+            emailerService.sendExceptionEmail(e.toString(), e)
+            return UUID.randomUUID().toString()
+        }
+    }
+
+    private AutoScalingGroup createAutoScalingGroup(UserContext userContext, String name,
+            launchConfigurationName, minSize, desiredCapacity, maxSize, defaultCooldown, String healthCheckType,
+            Integer healthCheckGracePeriod, List<String> availabilityZones,
+            Collection<AutoScalingProcessType> suspendedProcesses,
+            List<String> loadBalancerNames, Task existingTask = null) {
+        taskService.runTask(userContext, "Create Autoscaling Group '${name}'", { Task task ->
+            def request = new CreateAutoScalingGroupRequest()
+                    .withAutoScalingGroupName(name)
+                    .withLaunchConfigurationName(launchConfigurationName)
+                    .withMinSize(minSize).withDesiredCapacity(desiredCapacity).withMaxSize(maxSize)
+                    .withDefaultCooldown(defaultCooldown)
+                    .withHealthCheckType(healthCheckType).withHealthCheckGracePeriod(healthCheckGracePeriod)
+                    .withAvailabilityZones(availabilityZones).withLoadBalancerNames(loadBalancerNames)
+            awsClient.by(userContext.region).createAutoScalingGroup(request)
+            suspendedProcesses.each {
+                suspendProcess(userContext, it, name, task)
+            }
+        }, Link.to(EntityType.autoScaling, name), existingTask)
+        getAutoScalingGroup(userContext, name)
+    }
+
+    AutoScalingGroup updateAutoScalingGroup(UserContext userContext, AutoScalingGroupData autoScalingGroupData,
+                Collection<AutoScalingProcessType> suspendProcessTypes = [],
+                Collection<AutoScalingProcessType> resumeProcessTypes = [], existingTask = null) {
+        [
+            'autoScalingGroupName',
+            'launchConfigurationName',
+            'minSize',
+            'desiredCapacity',
+            'maxSize',
+            'defaultCooldown',
+            'healthCheckType',
+            'healthCheckGracePeriod',
+            'availabilityZones',
+        ].each {
+            Check.notNull(autoScalingGroupData."${it}", AutoScalingGroup, it)
+        }
+        AutoScalingGroup group = getAutoScalingGroup(userContext, autoScalingGroupData.autoScalingGroupName)
+
+        Set<AutoScalingProcessType> processTypesToSuspend = suspendProcessTypes -
+                group.suspendedProcessTypes
+        processTypesToSuspend.retainAll(AutoScalingProcessType.getUpdatableProcesses())
+
+        Set<AutoScalingProcessType> enabledProcessTypes = AutoScalingProcessType.getUpdatableProcesses() -
+                group.suspendedProcessTypes
+        final Set<AutoScalingProcessType> processTypesToResume = resumeProcessTypes -
+                enabledProcessTypes
+        processTypesToResume.retainAll(AutoScalingProcessType.getUpdatableProcesses())
+
+        UpdateAutoScalingGroupRequest request = BeanState.ofSourceBean(autoScalingGroupData).injectState(
+                new UpdateAutoScalingGroupRequest()).withHealthCheckType(autoScalingGroupData.healthCheckType.name())
+
+        taskService.runTask(userContext, "Update Autoscaling Group '${autoScalingGroupData.autoScalingGroupName}'", { Task task ->
+            processTypesToSuspend.each {
+                suspendProcess(userContext, it, autoScalingGroupData.autoScalingGroupName, task)
+            }
+            processTypesToResume.each {
+                resumeProcess(userContext, it, autoScalingGroupData.autoScalingGroupName, task)
+            }
+            awsClient.by(userContext.region).updateAutoScalingGroup(request)
+
+        }, Link.to(EntityType.autoScaling, autoScalingGroupData.autoScalingGroupName), existingTask)
+
+        // Refresh auto scaling group and cluster cache
+        group = getAutoScalingGroup(userContext, autoScalingGroupData.autoScalingGroupName)
+        getCluster(userContext, autoScalingGroupData.autoScalingGroupName)
+        group
+    }
+
+    AutoScalingGroup suspendProcess(UserContext userContext, AutoScalingProcessType autoScalingProcessType,
+                                    String autoScalingGroupName, Task existingTask) {
+        SuspendProcessesRequest suspendProcessesRequest = new SuspendProcessesRequest().withAutoScalingGroupName(autoScalingGroupName).
+                withScalingProcesses([autoScalingProcessType.name()])
+        taskService.runTask(userContext,
+                "${autoScalingProcessType.suspendMessage} for auto scaling group '${autoScalingGroupName}'", { task ->
+            awsClient.by(userContext.region).suspendProcesses(suspendProcessesRequest)
+        }, Link.to(EntityType.autoScaling, autoScalingGroupName), existingTask)
+        getAutoScalingGroup(userContext, autoScalingGroupName) // refreshing cache
+    }
+
+    AutoScalingGroup resumeProcess(UserContext userContext, AutoScalingProcessType autoScalingProcessType,
+                                   String autoScalingGroupName, Task existingTask) {
+        ResumeProcessesRequest resumeProcessesRequest = new ResumeProcessesRequest().withAutoScalingGroupName(autoScalingGroupName).
+                withScalingProcesses([autoScalingProcessType.name()])
+        taskService.runTask(userContext,
+                "${autoScalingProcessType.resumeMessage} for auto scaling group '${autoScalingGroupName}'", { task ->
+            awsClient.by(userContext.region).resumeProcesses(resumeProcessesRequest)
+        }, Link.to(EntityType.autoScaling, autoScalingGroupName), existingTask)
+        getAutoScalingGroup(userContext, autoScalingGroupName) // refreshing cache
+    }
+
+    void setExpirationTime(UserContext userContext, String autoScalingGroupName, DateTime expirationTime,
+                           Task existingTask = null) {
+        Map<String, String> tagNameValuePairs = [(TagNames.EXPIRATION_TIME): Time.format(expirationTime)]
+        createOrUpdateAutoScalingGroupTags(userContext, autoScalingGroupName, tagNameValuePairs, existingTask)
+    }
+
+    void postponeExpirationTime(UserContext userContext, String autoScalingGroupName, Duration extraTime,
+                           Task existingTask = null) {
+        AutoScalingGroup group = getAutoScalingGroup(userContext, autoScalingGroupName)
+        AutoScalingGroupData autoScalingGroupData = buildAutoScalingGroupData(userContext, group)
+        DateTime expirationTime = autoScalingGroupData.expirationTimeAsDateTime()
+        if (expirationTime) {
+            DateTime now = Time.now()
+            DateTime timeToStartFrom = now.isAfter(expirationTime) ? now : expirationTime
+            DateTime newExpirationTime = timeToStartFrom.withDurationAdded(extraTime, 1)
+            Duration newDuration = new Duration(Time.now(), newExpirationTime)
+            if (newDuration < AutoScalingGroupData.MAX_EXPIRATION_DURATION) {
+                setExpirationTime(userContext, autoScalingGroupName, newExpirationTime, existingTask)
+            }
+        }
+    }
+
+    void removeExpirationTime(UserContext userContext, String autoScalingGroupName, Task existingTask = null) {
+        deleteAutoScalingGroupTags(userContext, autoScalingGroupName, [TagNames.EXPIRATION_TIME], existingTask)
+    }
+
+    void createOrUpdateAutoScalingGroupTags(UserContext userContext, String autoScalingGroupName, Map<String,
+                                    String> tagNameValuePairs, Task existingTask = null) {
+
+        // TODO: Re-enable this call after Amazon fixes bugs on their side and tell us it's safe again
+
+        /*
+
+        // Hopefully Amazon will eventually change CreateOrUpdateTagsRequest to take List<Tag> instead of List<String>
+        List<String> tagStringsEqualDelimited = tagNameValuePairs.collect { "${it.key}=${it.value}".toString() }
+
+        String suffix = tagNameValuePairs.size() == 1 ? '' : 's'
+        String msg = "Create tag${suffix} ${tagNameValuePairs} on Auto Scaling Group on '${autoScalingGroupName}'"
+        taskService.runTask(userContext, msg, { Task task ->
+            CreateOrUpdateTagsRequest request = new CreateOrUpdateTagsRequest(autoScalingGroupName: autoScalingGroupName,
+                    forceOverwriteTags: true, propagate: true, tags: tagStringsEqualDelimited)
+            awsClient.by(userContext.region).createOrUpdateTags(request)
+        }, Link.to(EntityType.autoScaling, autoScalingGroupName), existingTask)
+
+        */
+    }
+
+    void deleteAutoScalingGroupTags(UserContext userContext, String autoScalingGroupName, List<String> tagNames,
+                                   Task existingTask = null) {
+
+        // TODO: Re-enable this call after Amazon fixes bugs on their side and tell us it's safe again
+
+        /*
+
+        String suffix = tagNames.size() == 1 ? '' : 's'
+        String msg = "Delete tag${suffix} ${tagNames} on Auto Scaling Group on '${autoScalingGroupName}'"
+        taskService.runTask(userContext, msg, { Task task ->
+            DeleteTagsRequest request = new DeleteTagsRequest(autoScalingGroupName: autoScalingGroupName,
+                    tagsToDelete: tagNames)
+            awsClient.by(userContext.region).deleteTags(request)
+        }, Link.to(EntityType.autoScaling, autoScalingGroupName), existingTask)
+
+        */
+    }
+
+    void deleteAutoScalingGroup(UserContext userContext, String name, AsgDeletionMode mode = AsgDeletionMode.ATTEMPT,
+                                Task existingTask = null) {
+        Check.notNull(name, AutoScalingGroup, "name")
+        taskService.runTask(userContext, "Delete Auto Scaling Group '${name}'", { task ->
+            AutoScalingGroup group = getAutoScalingGroup(userContext, name)
+            if (group) {
+                def request = new DeleteAutoScalingGroupRequest().withAutoScalingGroupName(name)
+                if (mode == AsgDeletionMode.FORCE) { request.withForceDelete(true) }
+                awsClient.by(userContext.region).deleteAutoScalingGroup(request)
+                getAutoScalingGroup(userContext, name) // Update cache with current ASG state. Force delete is slow.
+            }
+            // Also refresh the cluster which may or may not still exist with other auto scaling groups.
+            getCluster(userContext, name)
+        }, Link.to(EntityType.autoScaling, name), existingTask)
+    }
+
+    void deregisterAllInstancesInAutoScalingGroupFromLoadBalancers(UserContext userContext, String name,
+                                                                   Task existingTask = null) {
+        Check.notNull(name, AutoScalingGroup, "name")
+        taskService.runTask(userContext, "Deregister all instances in Auto Scaling Group '${name}' from ELBs", { Task task ->
+            AutoScalingGroup group = getAutoScalingGroup(userContext, name)
+            if (group) {
+                List<String> loadBalancerNames = group.loadBalancerNames
+                List<String> instanceIds = group.instances*.instanceId
+                for (String loadBalancerName in loadBalancerNames) {
+                    awsLoadBalancerService.removeInstances(userContext, loadBalancerName, instanceIds, task)
+                }
+            }
+        }, Link.to(EntityType.autoScaling, name), existingTask)
+    }
+
+    void deregisterInstancesInAutoScalingGroupFromLoadBalancers(UserContext userContext, String groupName,
+            Collection<String> instanceIds, Task existingTask = null) {
+        Check.notNull(groupName, AutoScalingGroup, 'groupName')
+        AutoScalingGroup group = getAutoScalingGroup(userContext, groupName)
+        Closure work = { Task task ->
+            List<Instance> instances = instanceIds.collect { new Instance().withInstanceId(it) } // elasticloadbalancing.model.Instance type
+            if (instances) {
+                for (String loadBalancerName in group.loadBalancerNames) {
+                    awsLoadBalancerService.removeInstances(userContext, loadBalancerName, instanceIds, task)
+                }
+            }
+        }
+        String msg = "Remove instances ${instanceIds} from load balancers '${group.loadBalancerNames}'"
+        taskService.runTask(userContext, msg, work, Link.to(EntityType.autoScaling, groupName), existingTask)
+        getAutoScalingGroup(userContext, groupName)
+    }
+
+    /**
+     * Terminates the specified instance if an auto scaling group can be found that contains that instance.
+     *
+     * @param userContext who made the call, why, and in what region
+     * @param instanceId the id of the instance to terminate
+     * @return AutoScalingGroup the group in its state prior to shrinkage, or null if not found
+     */
+    AutoScalingGroup terminateInstanceAndDecrementAutoScalingGroup(UserContext userContext, String instanceId) {
+        Check.notNull(instanceId, Instance, 'instanceId')
+        AutoScalingGroup group = getAutoScalingGroupFor(userContext, instanceId)
+        if (group) {
+            if (group.desiredCapacity <= group.minSize) {
+                final AutoScalingGroupData autoScalingGroupData = AutoScalingGroupData.forUpdate(
+                        group.autoScalingGroupName, group.launchConfigurationName,
+                        group.minSize - 1, group.desiredCapacity, group.maxSize, group.defaultCooldown,
+                        group.healthCheckType, group.healthCheckGracePeriod, group.availabilityZones)
+                updateAutoScalingGroup(userContext, autoScalingGroupData)
+            }
+            String msg = "Terminate instance '${instanceId}' and shrink auto scaling group '${group.autoScalingGroupName}'"
+            taskService.runTask(userContext, msg, { Task task ->
+                deregisterInstancesInAutoScalingGroupFromLoadBalancers(userContext, group.autoScalingGroupName,
+                    [instanceId], task)
+                awsClient.by(userContext.region).terminateInstanceInAutoScalingGroup(
+                        new TerminateInstanceInAutoScalingGroupRequest().withInstanceId(instanceId).
+                                withShouldDecrementDesiredCapacity(true))
+            }, Link.to(EntityType.autoScaling, group.autoScalingGroupName))
+
+            return group
+        }
+        null
+    }
+
+    // public TerminateInstanceInAutoScalingGroupResponse terminateInstanceInAutoScalingGroup(TerminateInstanceInAutoScalingGroupRequest request) throws AmazonAutoScalingException;
+
+    // Launch Configurations
+
+    List<LaunchConfiguration> retrieveLaunchConfigurations(Region region) {
+        List<LaunchConfiguration> configs = []
+        DescribeLaunchConfigurationsResult result = retrieveLaunchConfigurations(region, null)
+        while (true) {
+            configs.addAll(result.getLaunchConfigurations())
+            if (result.getNextToken() == null) {
+                break
+            }
+            result = retrieveLaunchConfigurations(region, result.getNextToken())
+        }
+        configs.each { ensureUserDataIsDecoded(it) }
+        configs
+    }
+
+    private DescribeLaunchConfigurationsResult retrieveLaunchConfigurations(Region region, String nextToken) {
+        awsClient.by(region).describeLaunchConfigurations(new DescribeLaunchConfigurationsRequest().withNextToken(nextToken))
+    }
+
+    private void ensureUserDataIsDecoded(LaunchConfiguration launchConfiguration) {
+        launchConfiguration.userData = Ensure.decoded(launchConfiguration.userData)
+    }
+
+    Collection<LaunchConfiguration> getLaunchConfigurations(UserContext userContext) {
+        caches.allLaunchConfigurations.by(userContext.region).list()
+    }
+
+    LaunchConfiguration getLaunchConfiguration(UserContext userContext, String name, From from = From.AWS) {
+        if (!name) { return null }
+        if (from == From.CACHE) {
+            return caches.allLaunchConfigurations.by(userContext.region).get(name)
+        }
+        def result = awsClient.by(userContext.region).describeLaunchConfigurations(
+                new DescribeLaunchConfigurationsRequest().withLaunchConfigurationNames([name]))
+        List<LaunchConfiguration> launchConfigs = result.getLaunchConfigurations()
+        if (launchConfigs.size() > 0) {
+            LaunchConfiguration launchConfig = Check.lone(launchConfigs, LaunchConfiguration)
+            ensureUserDataIsDecoded(launchConfig)
+            return caches.allLaunchConfigurations.by(userContext.region).put(name, launchConfig)
+        }
+        null
+    }
+
+    Collection<String> getLaunchConfigurationNamesForAutoScalingGroup(UserContext userContext,
+                                                                      String autoScalingGroupName) {
+        Set<String> launchConfigNamesForGroup = new HashSet<String>()
+        String currentLaunchConfigName = getAutoScalingGroup(userContext, autoScalingGroupName).launchConfigurationName
+        if (currentLaunchConfigName) {
+            launchConfigNamesForGroup.add(currentLaunchConfigName)
+        }
+        def pat = ~/^${autoScalingGroupName}-\d{12,}$/
+        launchConfigNamesForGroup.addAll(getLaunchConfigurations(userContext).findAll {
+                    it.launchConfigurationName ==~ pat }.collect { it.launchConfigurationName })
+        new ArrayList<String>(launchConfigNamesForGroup)
+    }
+
+    List<LaunchConfiguration> getLaunchConfigurationsForApp(UserContext userContext, String appName) {
+        def pat = ~/^(launch-)?${appName.toLowerCase()}(_\d+)?-\d+$/
+        getLaunchConfigurations(userContext).findAll { it.launchConfigurationName ==~ pat }
+    }
+
+    Collection<LaunchConfiguration> getLaunchConfigurationsUsingImageId(UserContext userContext, String imageId) {
+        Check.notEmpty(imageId)
+        getLaunchConfigurations(userContext).findAll { LaunchConfiguration launchConfiguration ->
+            launchConfiguration.imageId == imageId
+        }
+    }
+
+    // mutators
+
+    CreateAutoScalingGroupResult createLaunchConfigAndAutoScalingGroup(UserContext userContext,
+            AutoScalingGroup groupTemplate, LaunchConfiguration launchConfigTemplate,
+            Collection<AutoScalingProcessType> suspendedProcesses, Task existingTask = null) {
+
+        CreateAutoScalingGroupResult result = new CreateAutoScalingGroupResult()
+        String groupName = groupTemplate.autoScalingGroupName
+        String launchConfigName = Relationships.buildLaunchConfigurationName(groupName)
+        String msg = "Create Auto Scaling Group '${groupName}'"
+
+        taskService.runTask(userContext, msg, { Task task ->
+
+            AutoScalingGroup groupForUserData = new AutoScalingGroup().
+                    withAutoScalingGroupName(groupTemplate.autoScalingGroupName).
+                    withLaunchConfigurationName(launchConfigName)
+            String userData = launchTemplateService.buildUserData(userContext, groupForUserData)
+            result.launchConfigName = launchConfigName
+            result.autoScalingGroupName = groupName
+
+            try {
+                createLaunchConfiguration(userContext, launchConfigName, launchConfigTemplate.imageId,
+                        launchConfigTemplate.keyName, launchConfigTemplate.securityGroups, userData,
+                        launchConfigTemplate.instanceType, launchConfigTemplate.kernelId,
+                        launchConfigTemplate.ramdiskId, null, task)
+                result.launchConfigCreated = true
+            } catch (AmazonServiceException launchConfigCreateException) {
+                result.launchConfigCreateException = launchConfigCreateException
+            }
+
+            try {
+                createAutoScalingGroup(userContext, groupName, launchConfigName, groupTemplate.minSize,
+                        groupTemplate.desiredCapacity, groupTemplate.maxSize, groupTemplate.defaultCooldown,
+                        groupTemplate.healthCheckType, groupTemplate.healthCheckGracePeriod,
+                        groupTemplate.availabilityZones, suspendedProcesses, groupTemplate.loadBalancerNames,
+                        task)
+                result.autoScalingGroupCreated = true
+            } catch (AmazonServiceException autoScalingCreateException) {
+                result.autoScalingCreateException = autoScalingCreateException
+                try {
+                    deleteLaunchConfiguration(userContext, launchConfigName, task)
+                    result.launchConfigDeleted = true
+                }
+                catch (AmazonServiceException launchConfigDeleteException) {
+                    result.launchConfigDeleteException = launchConfigDeleteException
+                }
+            }
+        }, Link.to(EntityType.autoScaling, groupName), existingTask)
+
+        result
+    }
+
+    void createLaunchConfiguration(UserContext userContext, String name, String imageId, String keyName,
+                                   List<String> securityGroups, String userData, String instanceType, String kernelId,
+                                   String ramdiskId, Collection<BlockDeviceMapping> blockDeviceMappings,
+                                   Task existingTask = null) {
+        taskService.runTask(userContext, "Create Launch Configuration '${name}' with image '${imageId}'", { Task task ->
+            Check.notNull(name, LaunchConfiguration, "name")
+            Check.notNull(imageId, LaunchConfiguration, "imageId")
+            Check.notNull(keyName, LaunchConfiguration, "keyName")
+            Check.notNull(instanceType, LaunchConfiguration, "instanceType")
+            List<String> securityGroupsWithDefaults = launchTemplateService.includeDefaultSecurityGroups(securityGroups)
+            String encodedUserData = Ensure.encoded(userData)
+            def request = new CreateLaunchConfigurationRequest()
+                    .withLaunchConfigurationName(name)
+                    .withImageId(imageId).withKeyName(keyName).withSecurityGroups(securityGroupsWithDefaults)
+                    .withUserData(encodedUserData).withInstanceType(instanceType)
+                    .withBlockDeviceMappings(blockDeviceMappings)
+            // Be careful not to set empties back into these fields--null is OK
+            if (kernelId != '') { request.setKernelId(kernelId) }
+            if (ramdiskId != '') { request.setRamdiskId(ramdiskId) }
+            awsClient.by(userContext.region).createLaunchConfiguration(request)
+            pushService.addAccountsForImage(userContext, imageId, task)
+
+        }, Link.to(EntityType.launchConfiguration, name), existingTask)
+        getLaunchConfiguration(userContext, name)
+    }
+
+    def deleteLaunchConfiguration(UserContext userContext, String name, Task existingTask = null) {
+        Check.notNull(name, LaunchConfiguration, "name")
+        taskService.runTask(userContext, "Delete Launch Configuration '${name}'", { task ->
+            def request = new DeleteLaunchConfigurationRequest().withLaunchConfigurationName(name)
+            awsClient.by(userContext.region).deleteLaunchConfiguration(request)
+        }, Link.to(EntityType.launchConfiguration, name), existingTask)
+        caches.allLaunchConfigurations.by(userContext.region).remove(name)
+    }
+}
+
+class CreateAutoScalingGroupResult {
+    String launchConfigName
+    String autoScalingGroupName
+    Boolean launchConfigCreated
+    AmazonServiceException launchConfigCreateException
+    Boolean autoScalingGroupCreated
+    AmazonServiceException autoScalingCreateException
+    Boolean launchConfigDeleted
+    AmazonServiceException launchConfigDeleteException
+
+    String toString() {
+        StringBuilder output = new StringBuilder()
+        if (launchConfigCreated) {
+            output.append("Launch Config '${launchConfigName}' has been created. ")
+        }
+        if (launchConfigCreateException) {
+            output.append('Could not create Launch Config for new Auto Scaling Group: ' +
+                    launchConfigCreateException.message)
+        }
+        if (autoScalingGroupCreated) {
+            output.append("Auto Scaling Group '${autoScalingGroupName}' has been created. ")
+        }
+        if (autoScalingCreateException) {
+            output.append("Could not create AutoScaling Group: ${autoScalingCreateException}. ")
+        }
+        if (launchConfigDeleted) { output.append("Launch Config '$launchConfigName' has been deleted. ") }
+        if (launchConfigDeleteException) {
+            output.append("Failed to delete Launch Config '${launchConfigName}' because: " +
+                    launchConfigDeleteException.message)
+        }
+        output.toString()
+    }
+
+    Boolean succeeded() {
+        launchConfigCreated && autoScalingGroupCreated &&
+                !launchConfigDeleted && !launchConfigCreateException && !autoScalingCreateException
+    }
+}

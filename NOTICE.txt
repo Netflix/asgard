@@ -1,0 +1,205 @@
+Asgard
+Copyright 2012 Netflix, Inc.
+
+-------------------------
+Attribution for Java Code
+-------------------------
+
+Easter date calculation method provided by Sven Diedrichsen
+https://jollyday.svn.sourceforge.net/svnroot/jollyday/tags/v_0_4_6/src/main/java/de/jollyday/util/CalendarUtil.java
+License: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+Copyright 2010 Sven Diedrichsen
+
+------------------------------------------------
+Attribution for JavaScript Libraries and Plugins
+------------------------------------------------
+
+jQuery JavaScript Library provided by John Resig and the jQuery Foundation
+http://jquery.com/
+License: MIT License (http://jquery.org/license)
+Copyright 2011 John Resig
+
+Sizzle.js provided by The Dojo Foundation
+http://sizzlejs.com/
+License: MIT License (http://jquery.org/license)
+Copyright 2011 The Dojo Foundation
+
+jQuery validation plug-in provided by Jorn Zaefferer
+http://bassistance.de/jquery-plugins/jquery-plugin-validation/
+License: MIT License
+Copyright 2006-2008 Jorn Zaefferer
+
+jQuery UI Effects and jQuery UI Effects Highlight provided by jQuery UI authors (https://github.com/jquery/jquery-ui/blob/master/AUTHORS.txt)
+http://jqueryui.com/about
+License: MIT License (https://github.com/jquery/jquery-ui/blob/master/MIT-LICENSE.txt)
+Copyright 2012 Paul Bakaus
+
+jQuery Cookie Plugin provided by Klaus Hartl
+https://github.com/carhartl/jquery-cookie
+License: MIT License
+Copyright 2011 Klaus Hartl
+
+jQuery Poll Plugin provided by Ethan Fremen <mindlace@canhas.biz>
+http://launchpad.net/jquery.poll
+License: MIT License (http://www.opensource.org/licenses/mit-license.php)
+Copyright 2009 Ethan Fremen
+
+jQuery TextAreaResizer Plugin provided by Ryan O'Dell
+http://plugins.jquery.com/project/TextAreaResizer
+
+lscache Library provided by Pamela Fox
+https://github.com/pamelafox/lscache
+License: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+Copyright 2011 Pamela Fox
+
+sorttable.js provided by Stuart Langridge
+http://www.kryogenix.org/code/browser/sorttable/
+License: X11 (http://www.kryogenix.org/code/browser/licence.html)
+Copyright 1997 Stuart Langridge
+
+shortcuts.js provided by Binny V A
+http://www.openjs.com/scripts/events/keyboard_shortcuts/
+License: BSD License
+
+Shadowbox.js provided by Michael J. I. Jackson
+http://shadowbox-js.com/
+License: Shadowbox.js Non-Commercial License version 1.0 (http://shadowbox-js.com/LICENSE)
+Copyright 2007-2010 Michael J. I. Jackson
+
+--------------------------------
+Attribution for Icons and Photos
+--------------------------------
+
+Tango Icons provided by the Tango Desktop Project
+http://tango.freedesktop.org/Tango_Desktop_Project
+License: Public domain
+
+Halloween Icons, Jack o' Lantern Icon (halloween.png), and Skull Icon (day-of-the-dead.png) provided by Aha-Soft
+http://www.aha-soft.com/
+http://www.desktop-icon.com/stock-icons/desktop-halloween-icons.htm
+License: Creative Commons Attribution-Share Alike 3.0
+http://creativecommons.org/licenses/by-sa/3.0/
+Copyright 2009-2012 Aha-Soft
+
+New Year Party Icon (new-year.png) provided by Aha-Soft
+http://www.aha-soft.com/
+http://www.iconarchive.com/show/standard-christmas-icons-by-aha-soft/New-Year-Party-icon.html
+License: Freeware
+
+Christmas Tree Icon (christmas.png) provided by Kidaubis Design
+http://www.kidcomic.net
+http://www.iconarchive.com/show/merry-christmas-icons-by-kidaubis-design/christmas-tree-icon.html
+License: CC Attribution-Noncommercial-No Derivate 2.5 (http://creativecommons.org/licenses/by-nc-nd/2.5/)
+
+Easter Basket Icon (easter-basket.png) provided by Yellow Icon Design
+http://www.yellowicon.com/
+http://www.iconarchive.com/show/easter-icons-by-yellowicon/basket-icon.html
+License: Free for non-commercial use
+
+"We Can Do It!" image (labor-day.png) provided by J. Howard Miller, artist employed by Westinghouse, poster used by the War Production Co-ordinating Committee
+http://commons.wikimedia.org/wiki/File:We_Can_Do_It!.jpg
+License: Public domain
+
+Dragon Mask Icon (chinese-new-year.png) provided by Pack Yuuyake
+http://www.iconfinder.com/icondetails/17572/128/dragon_mask_icon
+http://dunedhel.deviantart.com/art/Pack-Yuuyake-96029071
+License: Creative Commons (Attribution-Noncommercial-No Derivative Works 2.5 Generic) (http://creativecommons.org/licenses/by-nc-nd/2.5/)
+
+Secret Mask Icon (mardi-gras.png) provided by ArtDesigner.lv
+http://artdesigner.lv/
+http://www.iconarchive.com/show/my-secret-icons-by-artdesigner/secret-mask-icon.html
+License: Free for non-commercial use
+
+Clover Icon (st-patricks-day.png) provided by DesignContest
+http://www.designcontest.com/
+http://www.iconarchive.com/show/casino-icons-by-designcontest/Clover-icon.html
+License: Creative Commons Attribution 3.0 (http://creativecommons.org/licenses/by/3.0/)
+
+Firecracker Icon (independence-day.png) provided by YouTheDesigner.com
+http://www.youthedesigner.com/
+http://www.iconarchive.com/show/new-year-icons-by-youthedesigner/firecracker-icon.html
+License: Free for non-commercial use
+
+Favorites Heart Icon (valentines-day.png) provided by Harwen
+http://harwen.net/
+http://findicons.com/icon/51315/favorites
+License: Freeware Non-commercial
+
+Rattles from Mexico photo (cinco-de-mayo.png) provided by Hannes Grobe
+http://commons.wikimedia.org/wiki/File:Rattle-mexico_hg.jpg
+http://commons.wikimedia.org/wiki/User:Hgrobe
+License: Creative Commons Attribution 3.0 Unported (http://creativecommons.org/licenses/by/3.0/deed.en)
+
+Pie Icon (thanksgiving.png) provided by Martin Berube
+http://www.how-to-draw-funny-cartoons.com/
+http://www.iconarchive.com/show/food-icons-by-martin-berube/pie-icon.html
+License: Freeware
+
+Terminator Endoskull Profile 2 image (terminator.png) provided by jkno4u
+http://jkno4u.deviantart.com/art/Terminator-Endoskull-profile-2-116946036?q=gallery%3Ajkno4u%2F9513177&qo=11
+http://jkno4u.deviantart.com/
+License: Creative Commons Attribution-Noncommercial-No Derivative Works 3.0 License (http://creativecommons.org/licenses/by-nc-nd/3.0/)
+
+Weeping Angel photo (angel-exhausted-front.jpg) provided by D. Scott Lipsey
+http://www.flickr.com/photos/scottlipsey/409297705
+License: Creative Commons Attribution-NonCommercial-NoDerivs 2.0 Generic (CC BY-NC-ND 2.0) (http://creativecommons.org/licenses/by-nc-nd/2.0/)
+
+*facepalm* photo (baby-bed-facepalm.jpg) provided by Renee Ya
+http://www.flickr.com/photos/moon_child/3965679774
+License: Creative Commons Attribution-NonCommercial 2.0 Generic (CC BY-NC 2.0) (http://creativecommons.org/licenses/by-nc/2.0/deed.en)
+
+Sophie facepalm! photo (cat-facepalm.jpg) provided by Alexandra Ellwood
+http://www.flickr.com/photos/arkonan/5965890216
+License: Creative Commons Attribution-NonCommercial 2.0 Generic (CC BY-NC 2.0) (http://creativecommons.org/licenses/by-nc/2.0/deed.en)
+
+Chipmunk Facepalm photo (chipmunk-facepalm.jpg) provided by Tatiana Bulyonkova
+http://www.flickr.com/photos/ressaure/4546418448
+License: Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic (CC BY-NC-SA 2.0) (http://creativecommons.org/licenses/by-nc-sa/2.0/deed.en)
+
+2011-04-22-07 photo (kitten-rug-facepalm.jpg) provided by Robyn Anderson
+http://www.flickr.com/photos/robynanderson/5641365177
+License: Creative Commons Attribution-NonCommercial-NoDerivs 2.0 Generic (CC BY-NC-ND 2.0) (http://creativecommons.org/licenses/by-nc-nd/2.0/deed.en)
+
+otter-facepalm photo (otter-facepalm.jpg) provided by tgreyfox
+http://www.flickr.com/photos/9027208@N03/2737019233
+License: Creative Commons Attribution-ShareAlike 2.0 Generic (CC BY-SA 2.0) (http://creativecommons.org/licenses/by-sa/2.0/deed.en)
+
+Blue and yellow macaw photo (parrot-facepalm.jpg) provided by Zicon
+http://www.flickr.com/photos/zicon/4074526569
+License: Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic (CC BY-NC-SA 2.0) (http://creativecommons.org/licenses/by-nc-sa/2.0/deed.en)
+
+See no evil... photo (polar-bear-facepalm.jpg) provided by Valerie (ucumari)
+http://www.flickr.com/photos/ucumari/580865728
+License: Creative Commons Attribution-NonCommercial-NoDerivs 2.0 Generic (CC BY-NC-ND 2.0) (http://creativecommons.org/licenses/by-nc-nd/2.0/deed.en)
+
+Denial photo (statue-closeup-facepalm.jpg) provided by César Astudillo
+http://www.flickr.com/photos/cesarastudillo/3981364314
+License: Creative Commons Attribution-NonCommercial 2.0 Generic (CC BY-NC 2.0) (http://creativecommons.org/licenses/by-nc/2.0/deed.en)
+
+Untitled photo (statue-pigeon-facepalm.jpg) provided by Julia
+http://www.flickr.com/photos/julia_at_flickr/4849719179
+License: Creative Commons Attribution-ShareAlike 2.0 Generic (CC BY-SA 2.0) (http://creativecommons.org/licenses/by-sa/2.0/deed.en)
+
+Head in Hands photo (statue-side-facepalm.jpg) provided by Alex Proimos
+http://www.flickr.com/photos/proimos/4199675334
+License: Creative Commons Attribution 2.0 Generic (CC BY 2.0) (http://creativecommons.org/licenses/by/2.0/deed.en)
+
+Oh no! These photographers again! photo (tiger-facepalm.jpg) provided by Tambako The Jaguar
+http://www.flickr.com/photos/tambako/5734930758
+License: Creative Commons Attribution-NoDerivs 2.0 Generic (CC BY-ND 2.0) (http://creativecommons.org/licenses/by-nd/2.0/deed.en)
+
+Facepalm photo (toddler-outside-facepalm.jpg) provided by Bradley's Almanac
+http://www.flickr.com/photos/bsearles/2803659527
+License: Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic (CC BY-NC-SA 2.0) (http://creativecommons.org/licenses/by-nc-sa/2.0/deed.en)
+
+100_3766.JPG photo (toddler-carseat-facepalm.jpg) provided by Chris Wiegand
+http://www.flickr.com/photos/chriswiegand/583245840
+License: Creative Commons Attribution-ShareAlike 2.0 Generic (CC BY-SA 2.0) (http://creativecommons.org/licenses/by-sa/2.0/deed.en)
+
+191/365 Face Palm photo (toddler-blond-facepalm.jpg) provided by Will Hastings
+http://www.flickr.com/photos/willsan/5929371664
+License: Creative Commons Attribution-NonCommercial 2.0 Generic (CC BY-NC 2.0) (http://creativecommons.org/licenses/by-nc/2.0/deed.en)
+
+Weeping Angel photo (weeping-angel.jpg) provided by OnceAndFutureLaura
+http://www.flickr.com/photos/laura-kali/7034202967
+License: Creative Commons Attribution-NonCommercial-ShareAlike 2.0 Generic (CC BY-NC-SA 2.0) (http://creativecommons.org/licenses/by-nc-sa/2.0/deed.en)
