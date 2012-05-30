@@ -119,8 +119,8 @@ grails.project.dependency.resolution = {
         // Delete when upgrade to Grails 2.0 includes Spock out of the box. Unit testing framework, included
         // here for use in general unit tests rather than just through the Grails specific functionality
         // provided by the plugin
-        test 'org.spockframework:spock-core:0.6-groovy-1.7'
-        test 'org.spockframework:spock-grails-support:0.6-groovy-1.7'
+        test 'org.spockframework:spock-core:0.6-groovy-1.8'
+        test 'org.spockframework:spock-grails-support:0.6-groovy-1.8'
     }
 
     plugins {
