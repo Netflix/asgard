@@ -80,9 +80,7 @@
         </tbody>
       </table>
     </div>
-    <div class="paginateButtons">
-      <g:paginate total="${loadbalancers.count()}"/>
-    </div>
+    <div class="paginateButtons"></div>
   </g:form>
 </div>
 </body>

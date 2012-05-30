@@ -58,9 +58,7 @@
         </tbody>
       </table>
     </div>
-    <div class="paginateButtons">
-      <g:paginate total="${securityGroups.count()}"/>
-    </div>
+    <div class="paginateButtons"></div>
   </g:form>
 </div>
 </body>

@@ -35,9 +35,7 @@
         <g:link class="clean" action="audit">Audit Ungrouped Instances</g:link>
       </div>
       <g:render template="instances"/>
-      <div class="paginateButtons">
-        <g:paginate total="${instanceList.count()}"/>
-      </div>
+      <div class="paginateButtons"></div>
     </g:form>
   </div>
 </body>

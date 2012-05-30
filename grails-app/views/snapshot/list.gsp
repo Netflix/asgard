@@ -71,9 +71,7 @@
             </tbody>
           </table>
       </div>
-      <div class="paginateButtons">
-        <g:paginate total="${snapshots.count()}"/>
-      </div>
+      <div class="paginateButtons"></div>
     </g:form>
   </div>
 </body>
