@@ -20,6 +20,7 @@ import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.netflix.asgard.Check
 import com.netflix.asgard.Relationships
+import groovy.transform.Immutable
 
 @Immutable
 final class ScalingPolicyData {

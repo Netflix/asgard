@@ -18,6 +18,7 @@ package com.netflix.asgard.model
 import com.amazonaws.services.cloudwatch.model.Dimension
 import com.amazonaws.services.cloudwatch.model.Metric
 import com.netflix.asgard.Relationships
+import groovy.transform.Immutable
 
 @Immutable final class ApplicationMetrics {
 

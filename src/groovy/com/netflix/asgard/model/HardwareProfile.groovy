@@ -16,6 +16,7 @@
 package com.netflix.asgard.model
 
 import com.amazonaws.services.ec2.model.InstanceType
+import groovy.transform.Immutable
 
 @Immutable final class HardwareProfile {
     InstanceType instanceType

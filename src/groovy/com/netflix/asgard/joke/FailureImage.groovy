@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard.joke
 
+import groovy.transform.Immutable
+
 @Immutable class FailureImage {
     String path
     String url

@@ -16,6 +16,7 @@
 package com.netflix.asgard.push
 
 import com.netflix.asgard.model.ScalingPolicyData
+import groovy.transform.Immutable
 
 @Immutable final class GroupCreateOptions {
     CommonPushOptions common

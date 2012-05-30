@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard.server
 
+import groovy.transform.Immutable
+
 @Immutable final class SwitchAttemptResult {
     Boolean succeeded
     List<String> messages
