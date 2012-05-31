@@ -33,7 +33,9 @@ beans = {
 
     caches(Caches, ref('cachedMapBuilder'), ref('configService'))
 
-    defaultUserDataProvider(DefaultUserDataProvider)
+    defaultUserDataProvider(DefaultUserDataProvider) { bean ->
+        bean.lazyInit = true
+    }
 
     //**** Plugin behavior
 
