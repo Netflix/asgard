@@ -115,21 +115,13 @@ grails.project.dependency.resolution = {
         buildOptions?.extraDependencies?.each { compile it }
 
         test 'org.objenesis:objenesis:1.2'
-
-        // Delete when upgrade to Grails 2.0 includes Spock out of the box. Unit testing framework, included
-        // here for use in general unit tests rather than just through the Grails specific functionality
-        // provided by the plugin
-        test 'org.spockframework:spock-core:0.6-groovy-1.8'
-        test 'org.spockframework:spock-grails-support:0.6-groovy-1.8'
     }
 
     plugins {
         compile ":hibernate:$grailsVersion"
         compile ":compress:0.4"
 
-        test(':spock:0.6') {
-            exclude 'spock-grails-support'
-        }
+        test ':spock:0.6'
 
         test ':code-coverage:1.2.5'
 
