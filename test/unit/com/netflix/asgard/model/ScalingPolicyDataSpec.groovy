@@ -57,6 +57,7 @@ class ScalingPolicyDataSpec extends Specification {
             autoScalingGroupName: 'fantasticService-v003',
             adjustmentType: AdjustmentType.ChangeInCapacity,
             adjustment: 22,
+            minAdjustmentStep: 3,
             cooldown: 555,
             alarms: [alarmData1, alarmData2]
      )
@@ -158,6 +159,7 @@ class ScalingPolicyDataSpec extends Specification {
             autoScalingGroupName: 'fantasticService-v004',
             adjustmentType: AdjustmentType.ChangeInCapacity,
             adjustment: 22,
+            minAdjustmentStep: 3,
             cooldown: 555,
             alarms: [
                 new AlarmData(
