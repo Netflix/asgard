@@ -49,7 +49,7 @@ class AutoScalingController {
 
     def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', postpone: 'POST', pushStart: 'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -220,7 +220,7 @@ class AutoScalingController {
     def save = { GroupCreateCommand cmd ->
 
         if (cmd.hasErrors()) {
-            chain(action:create, model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
         } else {
 
             // Auto Scaling Group name
@@ -262,10 +262,10 @@ class AutoScalingController {
                     userContext, groupTemplate, launchConfigTemplate, suspendedProcesses)
             flash.message = result.toString()
             if (result.succeeded()) {
-                redirect(action: show, params: [id: groupName])
+                redirect(action: 'show', params: [id: groupName])
             }
             else {
-                chain(action: create, model: [cmd: cmd], params: params)
+                chain(action: 'create', model: [cmd: cmd], params: params)
             }
         }
     }
@@ -310,14 +310,14 @@ class AutoScalingController {
         Integer minSize = (params.min ?: 0) as Integer
         Integer desiredCapacity = (params.desiredCapacity ?: 0) as Integer
         Integer maxSize = (params.max ?: 0) as Integer
-        def nextAction = show
+        def nextAction = 'show'
 
         if (minSize > desiredCapacity) {
             flash.message = "Error: Minimum size ${minSize} is lower than desired capacity ${desiredCapacity}"
-            nextAction = edit
+            nextAction = 'edit'
         } else if (desiredCapacity > maxSize) {
             flash.message = "Error: Desired capacity ${desiredCapacity} is lower than max size ${maxSize}"
-            nextAction = edit
+            nextAction = 'edit'
         } else {
             String lcName = params.launchConfiguration
             Integer defaultCooldown = (params.defaultCooldown ?: 10) as Integer
@@ -344,7 +344,7 @@ class AutoScalingController {
                 flash.message = "AutoScaling Group '${name}' has been updated."
             } catch (Exception e) {
                 flash.message = "Could not update AutoScaling Group: ${e}"
-                nextAction = edit
+                nextAction = 'edit'
             }
         }
         redirect(action: nextAction, params: [name:name])
@@ -372,14 +372,14 @@ class AutoScalingController {
                 showGroupNext = true
             }
         }
-        showGroupNext ? redirect(action: show, params: [name: name]) : redirect(action: list)
+        showGroupNext ? redirect(action: 'show', params: [name: name]) : redirect(action: 'list')
     }
 
     def postpone = {
         UserContext userContext = UserContext.of(request)
         String name = params.name
         awsAutoScalingService.postponeExpirationTime(userContext, name, Duration.standardDays(1))
-        redirect(action: show, id: name)
+        redirect(action: 'show', id: name)
     }
 
     def generateName = {
@@ -438,7 +438,7 @@ class AutoScalingController {
         String name = params.id ?: params.name
         awsAutoScalingService.removeExpirationTime(userContext, name)
         flash.message = "Removed expiration time from auto scaling group '${name}'"
-        redirect(action: show, id: name)
+        redirect(action: 'show', id: name)
     }
 
     def imageless = {

@@ -23,7 +23,7 @@ import grails.converters.XML
     def configService
 
     def index = {
-        chain(action: list, params: [format: request.format])
+        chain(action: 'list', params: [format: request.format])
     }
 
     def list = {

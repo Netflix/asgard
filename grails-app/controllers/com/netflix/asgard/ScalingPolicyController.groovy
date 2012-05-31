@@ -37,7 +37,7 @@ class ScalingPolicyController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -68,7 +68,7 @@ class ScalingPolicyController {
             ] << awsCloudWatchService.prepareForAlarmCreation(UserContext.of(request), groupName, params)
         } else {
             flash.message = "Group '${groupName}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
         }
     }
 
@@ -103,7 +103,7 @@ class ScalingPolicyController {
             ]
         } else {
             flash.message = "Policy '${policyName}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
         }
     }
 

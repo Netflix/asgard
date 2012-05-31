@@ -62,7 +62,7 @@ class PushController {
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, groupName)
         if (!group) {
             flash.message = "Auto scaling group '${groupName}' not found"
-            redirect(action: result)
+            redirect(action: 'result')
             return
         }
         Integer relaunchCount = params.relaunchCount?.toInteger() ?: 0

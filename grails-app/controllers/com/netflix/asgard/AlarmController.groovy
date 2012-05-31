@@ -33,7 +33,7 @@ class AlarmController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -53,7 +53,7 @@ class AlarmController {
         ScalingPolicy policy = awsAutoScalingService.getScalingPolicy(userContext, policyName)
         if (!policy) {
             flash.message = "Policy '${policyName}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
             return
         }
         awsCloudWatchService.prepareForAlarmCreation(userContext, policy.autoScalingGroupName, params) <<
@@ -86,7 +86,7 @@ class AlarmController {
         MetricAlarm alarm = awsCloudWatchService.getAlarm(userContext, alarmName)
         if (!alarm) {
             flash.message = "Alarm '${alarmName}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
             return
         }
         AlarmData alarmData = AlarmData.fromMetricAlarm(alarm)
@@ -109,7 +109,7 @@ class AlarmController {
     }
 
     private void chooseRedirect(List<String> policies) {
-        Map destination = [action: result]
+        Map destination = [action: 'result']
         if (policies?.size() == 1) {
             destination = [controller: 'scalingPolicy', action: 'show', id: policies[0]]
         }

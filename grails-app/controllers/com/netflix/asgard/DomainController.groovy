@@ -25,7 +25,7 @@ class DomainController {
 
     def allowedMethods = [save: 'POST', delete: 'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -53,10 +53,10 @@ class DomainController {
                 msg += " ${grailsApplication.config.cloud.simpleDbDomainCreatedMessage}"
             }
             flash.message = msg
-            redirect(action:show, params:[id:domainName])
+            redirect(action: 'show', params:[id:domainName])
         } catch (Exception e) {
             flash.message = "Could not create SimpleDB domain: ${e}"
-            redirect(action:list)
+            redirect(action: 'list')
         }
     }
 
@@ -68,7 +68,7 @@ class DomainController {
         } catch (Exception e) {
             flash.message = "Could not delete SimpleDB Domain '${domainName}': ${e}"
         }
-        redirect(action:list)
+        redirect(action: 'list')
     }
 
     def show = {

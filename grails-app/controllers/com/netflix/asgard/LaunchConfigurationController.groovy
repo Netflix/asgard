@@ -33,7 +33,7 @@ class LaunchConfigurationController {
 
     def static allowedMethods = [delete:'POST', save:'POST', update:'POST', cleanup: 'POST', massDelete: 'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -119,7 +119,7 @@ class LaunchConfigurationController {
                 flash.message = "Could not delete Launch Configuration: ${e}"
             }
         }
-        redirect(action:list)
+        redirect(action: 'list')
     }
 
     def massDelete = {

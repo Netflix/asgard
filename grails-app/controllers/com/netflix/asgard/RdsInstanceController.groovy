@@ -26,7 +26,7 @@ class RdsInstanceController {
     // the delete actions only accept POST requests
     def static allowedMethods = [delete:'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def awsRdsService
     def awsEc2Service
@@ -69,7 +69,7 @@ class RdsInstanceController {
         log.info "trying to save new db, groups $params.selectedDBSecurityGroups"
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
-            chain(action:create, model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
         } else {
             try {
                 boolean multiAZ = "on".equals(params.multiAZ)
@@ -94,10 +94,10 @@ class RdsInstanceController {
 
                 awsRdsService.createDBInstance(userContext, dbInstance, params.masterUserPassword, params.port as Integer)
                 flash.message = "DB Instance '${params.dBInstanceIdentifier}' has been created."
-                redirect(action: show, params: [id: params.dBInstanceIdentifier])
+                redirect(action: 'show', params: [id: params.dBInstanceIdentifier])
             } catch (Exception e) {
                 flash.message = "Could not create DB Instance: ${e}"
-                chain(action: create, params: params) // Use chain instead of redirect, so params are not lost
+                chain(action: 'create', params: params) // Use chain instead of redirect, so params are not lost
             }
         }
     }
@@ -105,7 +105,7 @@ class RdsInstanceController {
     def update = {DbUpdateCommand cmd ->
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
-            chain(action:edit, model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
+            chain(action: 'edit', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
         } else {
             try {
                 boolean multiAZ = ("on" == params.multiAZ)
@@ -124,10 +124,10 @@ class RdsInstanceController {
                     params.preferredMaintenanceWindow
                 )
                 flash.message = "DB Instance '${params.dBInstanceIdentifier}' has been updated."
-                redirect(action:show, params:['dBInstanceIdentifier':params.dBInstanceIdentifier])
+                redirect(action: 'show', params:['dBInstanceIdentifier':params.dBInstanceIdentifier])
             } catch (Exception e) {
                 flash.message = "Could not update DB Instance: ${e}"
-                chain(action:edit, params:params)
+                chain(action: 'edit', params:params)
             }
         }
     }
@@ -164,10 +164,10 @@ class RdsInstanceController {
             id = params.dBInstanceIdentifier // instanceId comes from details page
             awsRdsService.deleteDBInstance(userContext, id)
             flash.message = "Deleting DB instance: '${id}'..."
-            redirect(action: list)
+            redirect(action: 'list')
         } catch (Exception e) {
             flash.message = "Could not delete DB instance ${id}: ${e}"
-            redirect(action: list)
+            redirect(action: 'list')
         }
 
     }

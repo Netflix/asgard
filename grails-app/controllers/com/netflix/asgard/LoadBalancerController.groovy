@@ -36,7 +36,7 @@ class LoadBalancerController {
             delete: 'POST', save: 'POST', update: 'POST', addListener: 'POST', removeListener: 'POST'
     ]
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -94,7 +94,7 @@ class LoadBalancerController {
 
     def save = { LoadBalancerCreateCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action:create, model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
         } else {
 
             // Load Balancer name
@@ -120,10 +120,10 @@ class LoadBalancerController {
                 flash.message = "Load Balancer '${lbName}' has been created. You should now file two tickets: " +
                         "one Eng Tools Jira ticket for Security Group ingress access, " +
                         "and one Service Now ticket for a new public CNAME."
-                redirect(action:show, params:[name:lbName])
+                redirect(action: 'show', params:[name:lbName])
             } catch (Exception e) {
                 flash.message = "Could not create Load Balancer: ${e}"
-                chain(action: create, model: [cmd: cmd], params: params)
+                chain(action: 'create', model: [cmd: cmd], params: params)
             }
         }
     }
@@ -137,7 +137,7 @@ class LoadBalancerController {
             redirect(action: 'result')
         } catch (Exception e) {
             flash.message = "Could not delete Load Balancer: ${e}"
-            redirect(action: show, params:[id: name])
+            redirect(action: 'show', params:[id: name])
         }
     }
 
@@ -188,7 +188,7 @@ class LoadBalancerController {
             def msg  = "Load Balancer '${name}' health check has been updated. "
             flash.message = flash.message ? flash.message + msg : msg
         }
-        redirect(action:show, params:[name:name])
+        redirect(action: 'show', params:[name:name])
     }
 
     // Used by both create and update to set the health check from page params

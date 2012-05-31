@@ -45,7 +45,7 @@ class ClusterController {
     def pushService
     def taskService
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -124,7 +124,7 @@ class ClusterController {
             }
         } else {
             params['id'] = cluster.name
-            redirect(action: show, params: params)
+            redirect(action: 'show', params: params)
         }
     }
 
@@ -148,7 +148,7 @@ class ClusterController {
 
         if (!cluster) {
             flash.message = "No auto scaling groups exist with cluster name ${name}"
-            redirect(action: result)
+            redirect(action: 'result')
             return
         }
 
@@ -176,7 +176,7 @@ class ClusterController {
             boolean discoveryExists = configService.doesRegionalDiscoveryExist(userContext.region)
             if (discoveryExists && initialTraffic == InitialTraffic.PREVENTED && !checkHealth) {
                 flash.message = "Due to a Discovery limitation, you must enable traffic and/or wait for health checks"
-                redirect(action: show, params: [id: name])
+                redirect(action: 'show', params: [id: name])
                 return
             }
 
@@ -278,6 +278,6 @@ class ClusterController {
     }
 
     private void redirectToTask(String taskId) {
-        redirect(controller: 'task', action:show, params: [id: taskId])
+        redirect(controller: 'task', action: 'show', params: [id: taskId])
     }
 }

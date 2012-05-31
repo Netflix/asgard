@@ -43,7 +43,7 @@ class ImageController {
             addTags: 'POST', removeTag: ['POST', 'DELETE'], removeTags: ['POST', 'DELETE'], removeAllTags: 'DELETE',
             massDelete: ['POST', 'DELETE']]
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -101,7 +101,7 @@ class ImageController {
         }
         catch (Exception e) {
             flash.message = "Unable to modify ${imageId} on this account because ${e}"
-            redirect(action:show, params: params)
+            redirect(action: 'show', params: params)
         }
         ['image' : awsEc2Service.getImage(userContext, imageId),
          'launchPermissions' : launchUsers,
@@ -120,12 +120,12 @@ class ImageController {
         } catch (Exception e) {
             flash.message = "Could not update Image: ${e}"
         }
-        redirect(action: show, params: [id: imageId])
+        redirect(action: 'show', params: [id: imageId])
     }
 
     def delete = { ImageDeleteCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action: show, model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
+            chain(action: 'show', model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
         } else {
             UserContext userContext = UserContext.of(request)
             String imageId = params.id
@@ -134,10 +134,10 @@ class ImageController {
                 String packageName = image.getPackageName()
                 imageService.deleteImage(userContext, imageId)
                 flash.message = "Image '${imageId}' has been deleted."
-                redirect(action: list, params: [id: packageName])
+                redirect(action: 'list', params: [id: packageName])
             } catch (Exception e) {
                 flash.message = "Could not delete image: ${e}"
-                redirect(action: show, params: [id: imageId])
+                redirect(action: 'show', params: [id: imageId])
             }
         }
     }
@@ -198,7 +198,7 @@ class ImageController {
         withFormat {
             form {
                 flash.message = message
-                Map redirectParams = [action: result]
+                Map redirectParams = [action: 'result']
                 if (instanceIds) {
                     redirectParams = [controller: 'instance', action: 'show', id: instanceIds[0]]
                 } else if (spotInstanceRequestIds) {

@@ -36,7 +36,7 @@ import org.apache.commons.collections.HashBag
 
     def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', securityUpdate:'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -154,7 +154,7 @@ import org.apache.commons.collections.HashBag
 
     def save = { ApplicationCreateCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action:create, model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
         } else {
             String name = params.name
             UserContext userContext = UserContext.of(request)
@@ -168,10 +168,10 @@ import org.apache.commons.collections.HashBag
                 applicationService.createRegisteredApplication(userContext, name, type, desc, owner, email,
                         bucketType)
                 flash.message = "Application '${name}' has been created."
-                redirect(action: show, params: [name: name])
+                redirect(action: 'show', params: [name: name])
             } catch (Exception e) {
                 flash.message = "Could not create Application: ${e}"
-                chain(action: create, model: [cmd: cmd], params: params) // Use chain to pass errors and params
+                chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass errors and params
             }
         }
     }
@@ -200,7 +200,7 @@ import org.apache.commons.collections.HashBag
         } catch (Exception e) {
             flash.message = "Could not update Application: ${e}"
         }
-        redirect(action:show, params:[name:name])
+        redirect(action: 'show', params:[name:name])
     }
 
     def delete = {
@@ -213,7 +213,7 @@ import org.apache.commons.collections.HashBag
         } catch (Exception e) {
             flash.message = "Could not delete Application: ${e}"
         }
-        redirect(action:list)
+        redirect(action: 'list')
     }
 
     def security = {
@@ -222,7 +222,7 @@ import org.apache.commons.collections.HashBag
         def app = applicationService.getRegisteredApplication(userContext, name)
         if (!app) {
             flash.message = "Application '${name}' not found."
-            redirect(action: list)
+            redirect(action: 'list')
             return
         } else {
             def group = awsEc2Service.getSecurityGroup(userContext, name)
@@ -233,7 +233,7 @@ import org.apache.commons.collections.HashBag
                 group = awsEc2Service.getSecurityGroup(userContext, name)
                 if (!group) {
                     flash.message = "Could not retrieve or create Security Group '${grpName}'"
-                    redirect(action:list)
+                    redirect(action: 'list')
                     return
                 }
             }
@@ -271,7 +271,7 @@ import org.apache.commons.collections.HashBag
         updateSecurityEgress(userContext, name, selectedGroups, params)
         flash.message = "Successfully updated access for Application '${name}'"
 
-        redirect(action:list)
+        redirect(action: 'list')
     }
 
     // Security Group permission updating logic

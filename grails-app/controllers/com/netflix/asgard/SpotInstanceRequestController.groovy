@@ -28,7 +28,7 @@ class SpotInstanceRequestController {
 
     final static allowedMethods = [cancel: 'POST']
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -60,7 +60,7 @@ class SpotInstanceRequestController {
         List<CancelledSpotInstanceRequest> cancelledSirs = spotInstanceRequestService.cancelSpotInstanceRequests(
                 userContext, sirIds)
         flash.message = "Cancelled Spot Instance Requests: ${cancelledSirs*.spotInstanceRequestId}"
-        redirect(action: result)
+        redirect(action: 'result')
     }
 
     def result = { render view: '/common/result' }

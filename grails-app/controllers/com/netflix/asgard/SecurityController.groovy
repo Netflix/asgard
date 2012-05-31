@@ -28,7 +28,7 @@ class SecurityController {
 
     def static allowedMethods = [save:'POST', update:'POST', delete:'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -84,7 +84,7 @@ class SecurityController {
     def save = { SecurityCreateCommand cmd ->
 
         if (cmd.hasErrors()) {
-            chain(action: create, model: [cmd:cmd], params: params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model: [cmd:cmd], params: params) // Use chain to pass both the errors and the params
         } else {
             UserContext userContext = UserContext.of(request)
             String name = Relationships.buildAppDetailName(params.appName, params.detail)
@@ -95,10 +95,10 @@ class SecurityController {
                 } else {
                     flash.message = "Security Group '${name}' already exists."
                 }
-                redirect(action: show, params: [id: name])
+                redirect(action: 'show', params: [id: name])
             } catch (Exception e) {
                 flash.message = "Could not create Security Group: ${e}"
-                chain(action: create, model: [cmd:cmd], params: params)
+                chain(action: 'create', model: [cmd:cmd], params: params)
             }
         }
     }
@@ -142,10 +142,10 @@ class SecurityController {
             } catch (Exception e) {
                 flash.message = "Could not update Security Group: ${e}"
             }
-            redirect(action:show, params:[id: name])
+            redirect(action: 'show', params:[id: name])
         } else {
             flash.message = "Security group ${name} should not be modified with this tool."
-            redirect(action:list)
+            redirect(action: 'list')
         }
     }
 
@@ -172,7 +172,7 @@ class SecurityController {
             msg = "Could not delete Security Group: ${e}"
         }
         flash.message = msg
-        redirect(action: result)
+        redirect(action: 'result')
     }
 
     def result = { render view: '/common/result' }
