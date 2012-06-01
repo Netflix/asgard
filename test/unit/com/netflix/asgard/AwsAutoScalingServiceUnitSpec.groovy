@@ -28,6 +28,7 @@ import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest
 import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
+import com.amazonaws.services.cloudwatch.model.Dimension
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AlarmData
@@ -38,9 +39,14 @@ import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.AwsRequestEqualityMixin
 import com.netflix.asgard.model.ScalingPolicyData
 import spock.lang.Specification
-import com.amazonaws.services.cloudwatch.model.Dimension
 
-class AwsAutoScalingServiceSpec extends Specification {
+class AwsAutoScalingServiceUnitSpec extends Specification {
+
+    final awsAutoScalingService = Mocks.newAwsAutoScalingService()
+
+    def setup() {
+        Mocks.monkeyPatcherService().createDynamicMethods()
+    }
 
     def 'should update ASG with proper AWS requests'() {
 
@@ -58,7 +64,6 @@ class AwsAutoScalingServiceSpec extends Specification {
         }
         mockAmazonAutoScalingClient.describePolicies(_) >> {[]}
 
-        final AwsAutoScalingService awsAutoScalingService = Mocks.newAwsAutoScalingService()
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
 
         when:
@@ -103,7 +108,6 @@ class AwsAutoScalingServiceSpec extends Specification {
     }
 
     def 'should create launch config and ASG'() {
-        final AwsAutoScalingService awsAutoScalingService = Mocks.newAwsAutoScalingService()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         mockAmazonAutoScalingClient.describeLaunchConfigurations(_) >> {
             new DescribeLaunchConfigurationsResult()
@@ -143,7 +147,6 @@ class AwsAutoScalingServiceSpec extends Specification {
     }
 
     def 'should get scaling policies'() {
-        final AwsAutoScalingService awsAutoScalingService = Mocks.newAwsAutoScalingService()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
         final AwsCloudWatchService mockAwsCloudWatchService = Mock(AwsCloudWatchService)
