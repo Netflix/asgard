@@ -57,7 +57,6 @@ class FastPropertyControllerSpec extends ControllerSpec {
 
     def 'show should return data'() {
         given:
-        FastProperty.mixin HasEqualsHashCodeToString
         Map expected = [
                 fastProperty: FastProperty.fromXml(mockXmlSingle('1'))
         ]

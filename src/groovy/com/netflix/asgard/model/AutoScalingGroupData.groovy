@@ -23,11 +23,12 @@ import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.AppVersion
-import com.netflix.asgard.HasEqualsHashCodeToString
 import com.netflix.asgard.MergedInstance
 import com.netflix.asgard.Relationships
 import com.netflix.asgard.TagNames
 import com.netflix.asgard.Time
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import org.apache.commons.collections.Bag
 import org.apache.commons.collections.bag.HashBag
 import org.apache.commons.lang.builder.ToStringBuilder
@@ -37,7 +38,8 @@ import org.joda.time.Duration
 /**
  * Immutable custom representation of an auto scaling group.
  */
-@Mixin(HasEqualsHashCodeToString)
+@EqualsAndHashCode
+@ToString
 class AutoScalingGroupData {
 
     static final Duration MAX_EXPIRATION_DURATION = Duration.standardDays(7)
