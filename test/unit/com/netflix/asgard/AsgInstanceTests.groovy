@@ -24,12 +24,14 @@ class AsgInstanceTests extends GroovyTestCase {
 
     void testCopy() {
 
+        Mocks.monkeyPatcherService().createDynamicMethods()
+
         Mocks.awsAutoScalingService()
 
         // Amazon didn't write an equals method but we need one for this test.
         if (!(Instance.class.methods as List).contains("equals")) {
             Instance.metaClass.equals = {that->
-                EqualsBuilder.reflectionEquals(delegate, that);
+                EqualsBuilder.reflectionEquals(delegate, that)
             }
         }
 

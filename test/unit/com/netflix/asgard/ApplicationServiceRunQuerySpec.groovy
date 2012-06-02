@@ -35,7 +35,7 @@ class ApplicationServiceRunQuerySpec extends Specification {
         domainName: DOMAIN_NAME)
 
     def setup() {
-        Mocks.monkeyPatcherService()
+        Mocks.monkeyPatcherService().createDynamicMethods()
     }
 
     def 'should retrieve applications'() {

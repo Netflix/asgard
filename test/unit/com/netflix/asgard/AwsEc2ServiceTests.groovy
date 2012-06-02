@@ -32,6 +32,10 @@ class AwsEc2ServiceTests extends GrailsUnitTestCase {
 
     String TEST_UDF_DIR = './test/unit/com/netflix/asgard'
 
+    void setUp() {
+        Mocks.monkeyPatcherService().createDynamicMethods()
+    }
+
     void testGetSpotInstanceRequests() {
         AwsEc2Service awsEc2Service = Mocks.awsEc2Service()
         Region region = Region.defaultRegion()

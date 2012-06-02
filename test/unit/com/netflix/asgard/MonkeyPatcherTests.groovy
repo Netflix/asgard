@@ -16,24 +16,32 @@
 package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
+import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.Tag
 import com.netflix.asgard.mock.Mocks
-import com.amazonaws.services.ec2.model.Image
+import org.junit.Before
+import org.junit.Test
 
-class MonkeyPatcherTests extends GroovyTestCase {
+class MonkeyPatcherTests {
 
+    @Before
+    void setUp() {
+        Mocks.monkeyPatcherService().createDynamicMethods()
+    }
+
+    @Test
     void testAddClassNameToStringOutputForAmazonServiceException() {
+        Mocks.monkeyPatcherService().addClassNameToStringOutputForAmazonServiceException()
         AmazonServiceException ase = new AmazonServiceException('Bad things happened')
         ase.errorCode = 'Throttling'
         ase.requestId = '45678'
         ase.statusCode = 400
         ase.serviceName = 'AutoScaling'
-        Mocks.monkeyPatcherService()
         assert 'AmazonServiceException: Status Code: 400, AWS Service: AutoScaling, AWS Request ID: 45678, AWS Error Code: Throttling, AWS Error Message: Bad things happened' == ase.toString()
     }
 
+    @Test
     void testAsgInstanceCopy() {
-        Mocks.monkeyPatcherService()
         com.amazonaws.services.autoscaling.model.Instance asgInstance =
             new com.amazonaws.services.autoscaling.model.Instance(
                     availabilityZone: 'us-east-1a',
@@ -53,8 +61,8 @@ class MonkeyPatcherTests extends GroovyTestCase {
         assert 'superterrifichappyhour' == asgInstanceCopy.launchConfigurationName
     }
 
+    @Test
     void testEc2InstanceTagGetters() {
-        Mocks.monkeyPatcherService()
         com.amazonaws.services.ec2.model.Instance ec2Instance =
             new com.amazonaws.services.ec2.model.Instance(
                     instanceId: 'i-deadbeef',
@@ -64,8 +72,8 @@ class MonkeyPatcherTests extends GroovyTestCase {
         assert 'helloworld' == ec2Instance.app
     }
 
+    @Test
     void testImageKeepForever() {
-        Mocks.monkeyPatcherService()
         Image image = new Image()
         assertFalse image.keepForever
         image.tags = [new Tag('expiration_time', 'the future')]

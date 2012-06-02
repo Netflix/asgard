@@ -23,6 +23,8 @@ class AutoScalingGroupTests extends GroovyTestCase {
 
     void testCopy() {
 
+        Mocks.monkeyPatcherService().createDynamicMethods()
+
         Mocks.awsAutoScalingService()
 
         Date start = new Date()
