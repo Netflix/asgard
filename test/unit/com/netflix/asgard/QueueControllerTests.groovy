@@ -17,12 +17,12 @@ package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.SimpleQueue
-import grails.test.ControllerUnitTestCase
+import org.junit.Before
 
-class QueueControllerTests extends ControllerUnitTestCase {
+class QueueControllerTests {
 
+    @Before
     void setUp() {
-        super.setUp()
         TestUtils.setUpMockRequest()
         controller.awsSqsService = Mocks.awsSqsService()
     }
@@ -60,7 +60,7 @@ class QueueControllerTests extends ControllerUnitTestCase {
         def p = controller.params
         p.id = 'doesntexist'
         controller.show()
-        assert '/error/missing' == controller.renderArgs.view
+        assert '/error/missing' == view
         assert "Queue 'doesntexist' not found in us-east-1 test" == controller.flash.message
     }
 }

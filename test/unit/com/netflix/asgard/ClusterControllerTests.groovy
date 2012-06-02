@@ -17,12 +17,13 @@ package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.push.Cluster
-import grails.test.ControllerUnitTestCase
+import org.junit.Before
 
-class ClusterControllerTests extends ControllerUnitTestCase {
+class ClusterControllerTests {
 
+    @Before
     void setUp() {
-        super.setUp()
+        Mocks.monkeyPatcherService().createDynamicMethods()
         TestUtils.setUpMockRequest()
         controller.grailsApplication = Mocks.grailsApplication()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
@@ -49,7 +50,7 @@ class ClusterControllerTests extends ControllerUnitTestCase {
         def p = controller.params
         p.name ='doesntexist'
         controller.show()
-        assert '/error/missing' == controller.renderArgs.view
+        assert '/error/missing' == view
         assert "Cluster 'doesntexist' not found in us-east-1 test" == controller.flash.message
     }
 }

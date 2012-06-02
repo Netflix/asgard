@@ -15,14 +15,15 @@
  */
 package com.netflix.asgard
 
-import grails.test.ControllerUnitTestCase
-import grails.test.MockUtils
 import com.netflix.asgard.mock.Mocks
+import grails.test.MockUtils
+import org.junit.Assert
+import org.junit.Before
 
-class SecurityControllerTests extends ControllerUnitTestCase {
+class SecurityControllerTests {
 
+    @Before
     void setUp() {
-        super.setUp()
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(SecurityCreateCommand)
         controller.awsEc2Service = Mocks.awsEc2Service()
@@ -36,19 +37,19 @@ class SecurityControllerTests extends ControllerUnitTestCase {
         assert 'helloworld' == attrs['app'].name
         assert 'helloworld' == attrs['group'].groupName
         assert 'test' == attrs['accountNames']['179000000000']
-        assertNotNull attrs['editable']
+        Assert.assertNotNull attrs['editable']
     }
 
     void testShowNonExistent() {
         def p = controller.params
         p.name ='doesntexist'
         controller.show()
-        assert '/error/missing' == controller.renderArgs.view
+        assert '/error/missing' == view
         assert "Security Group 'doesntexist' not found in us-east-1 test" == controller.flash.message
     }
 
     void testSaveWithoutApp() {
-        mockRequest.method = 'POST'
+        request.method = 'POST'
         def p = controller.params
         p.wrongParam = 'helloworld'
         def cmd = new SecurityCreateCommand()
@@ -56,14 +57,12 @@ class SecurityControllerTests extends ControllerUnitTestCase {
         cmd.validate()
         assert cmd.hasErrors()
         controller.save(cmd)
-        assert controller.create == controller.chainArgs.action
-        assert p == controller.chainArgs.params
-        assert cmd == controller.chainArgs.model['cmd']
+        assert '/security/create?wrongParam=helloworld' == response.redirectUrl
     }
 
     void testSaveSuccessfully() {
-        mockRequest.method = 'POST'
-        def p = mockParams
+        request.method = 'POST'
+        def p = controller.params
         p.appName = 'helloworld'
         p.detail ='indiana'
         p.description = 'Only accessible by Indiana Jones'
@@ -72,8 +71,7 @@ class SecurityControllerTests extends ControllerUnitTestCase {
         cmd.validate()
         assert !cmd.hasErrors()
         controller.save(cmd)
-        assert controller.show == controller.redirectArgs.action
-        assert 'helloworld-indiana' == controller.redirectArgs.params.id
+        assert '/security/show/helloworld-indiana' == response.redirectUrl
         assert controller.flash.message == "Security Group 'helloworld-indiana' has been created."
     }
 

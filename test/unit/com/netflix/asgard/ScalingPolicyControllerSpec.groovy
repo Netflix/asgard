@@ -33,10 +33,10 @@ import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AlarmData
 import com.netflix.asgard.model.AwsRequestEqualityMixin
 import com.netflix.asgard.model.TopicData
-import grails.plugin.spock.ControllerSpec
 import grails.test.MockUtils
+import spock.lang.Specification
 
-class ScalingPolicyControllerSpec extends ControllerSpec {
+class ScalingPolicyControllerSpec extends Specification {
 
     void setup() {
         TestUtils.setUpMockRequest()
@@ -45,7 +45,6 @@ class ScalingPolicyControllerSpec extends ControllerSpec {
     }
 
     def 'save should create scaling policy and associated alarm'() {
-        Dimension.mixin HasEqualsHashCodeToString
         [PutScalingPolicyRequest, PutMetricAlarmRequest].each {
             it.mixin AwsRequestEqualityMixin
         }
@@ -91,8 +90,7 @@ class ScalingPolicyControllerSpec extends ControllerSpec {
         controller.save(createCommand)
 
         then:
-        'show' == redirectArgs.action
-        'nflx_newton_client-v003-1' == redirectArgs.params.id
+        '/scalingPolicy/show/nflx_newton_client-v003-1' == response.redirectUrl
 
         1 * awsSnsService.getTopic(_, 'api-prodConformity-Report') >> {
             new TopicData('arn:aws:sns:blah')
@@ -154,7 +152,8 @@ class ScalingPolicyControllerSpec extends ControllerSpec {
         controller.save(createCommand)
 
         then:
-        'create' == chainArgs.action
+        createCommand.hasErrors()
+        '/scalingPolicy/create' == response.redirectUrl
     }
 
     def 'delete should remove policy'() {
@@ -172,9 +171,7 @@ class ScalingPolicyControllerSpec extends ControllerSpec {
         awsCloudWatchService.awsClient = new MultiRegionAwsClient({ mockAmazonCloudWatchClient })
         awsAutoScalingService.awsCloudWatchService = awsCloudWatchService
 
-        mockParams.with {
-            id = 'scale-up-helloworld--scalingtest-v000-32-301'
-        }
+        controller.params.id = 'scale-up-helloworld--scalingtest-v000-32-301'
 
         when:
         controller.delete()
@@ -215,9 +212,7 @@ class ScalingPolicyControllerSpec extends ControllerSpec {
         awsCloudWatchService.awsClient = new MultiRegionAwsClient({ mockAmazonCloudWatchClient })
         awsAutoScalingService.awsCloudWatchService = awsCloudWatchService
 
-        mockParams.with {
-            id = 'scale-up-helloworld--scalingtest-v000-32-301'
-        }
+        controller.params.id = 'scale-up-helloworld--scalingtest-v000-32-301'
 
         when:
         controller.delete()

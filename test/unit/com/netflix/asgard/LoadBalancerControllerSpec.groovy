@@ -20,16 +20,16 @@ import com.amazonaws.services.elasticloadbalancing.model.CreateLoadBalancerListe
 import com.amazonaws.services.elasticloadbalancing.model.DeleteLoadBalancerListenersRequest
 import com.amazonaws.services.elasticloadbalancing.model.Listener
 import com.netflix.asgard.mock.Mocks
-import grails.plugin.spock.ControllerSpec
 import grails.test.MockUtils
+import spock.lang.Specification
 
-class LoadBalancerControllerSpec extends ControllerSpec {
+class LoadBalancerControllerSpec extends Specification {
 
     AmazonElasticLoadBalancing mockElb = Mock(AmazonElasticLoadBalancing)
 
     void setup() {
         TestUtils.setUpMockRequest()
-        mockRequest.region = Region.defaultRegion()
+        request.region = Region.defaultRegion()
         [AddListenerCommand, RemoveListenerCommand].each {
             MockUtils.prepareForConstraintsTests(it)
         }
@@ -45,8 +45,8 @@ class LoadBalancerControllerSpec extends ControllerSpec {
         controller.addListener(cmd)
 
         then:
-        chainArgs.action == 'prepareListener'
-        chainArgs.model.cmd.name == 'app--test'
+        response.redirectUrl == '/loadBalancer/prepareListener'
+        flash.chainModel.cmd.name == 'app--test'
     }
 
     def 'addListener should fail with error'() {
@@ -61,7 +61,7 @@ class LoadBalancerControllerSpec extends ControllerSpec {
 
         then:
         controller.flash.message == "Could not add listener: java.lang.IllegalArgumentException: ELB service problems!"
-        chainArgs.action == 'prepareListener'
+        response.redirectUrl == '/loadBalancer/prepareListener'
     }
 
     def 'addListener should create listener'() {
@@ -72,8 +72,7 @@ class LoadBalancerControllerSpec extends ControllerSpec {
         controller.addListener(cmd)
 
         then:
-        redirectArgs.action == 'show'
-        redirectArgs.params == [id: "app--test"]
+        response.redirectUrl == '/loadBalancer/show/app--test'
         controller.flash.message == "Listener has been added to port 80."
         1 * mockElb.createLoadBalancerListeners(new CreateLoadBalancerListenersRequest(loadBalancerName: 'app--test',
                 listeners: [new Listener(protocol: 'http', loadBalancerPort: 80, instancePort: 7001)]))
@@ -88,7 +87,7 @@ class LoadBalancerControllerSpec extends ControllerSpec {
         controller.removeListener(cmd)
 
         then:
-        redirectArgs.action == 'show'
+        response.redirectUrl == '/loadBalancer/show/app--test'
         controller.flash.message == "Listener on port 80 has been removed."
         1 * mockElb.deleteLoadBalancerListeners(new DeleteLoadBalancerListenersRequest(loadBalancerName: 'app--test',
                 loadBalancerPorts: [80]))

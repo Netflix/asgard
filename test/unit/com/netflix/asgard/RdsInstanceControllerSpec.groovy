@@ -15,11 +15,11 @@
  */
 package com.netflix.asgard
 
-import grails.plugin.spock.ControllerSpec
-import grails.test.MockUtils
 import com.netflix.asgard.mock.Mocks
+import grails.test.MockUtils
+import spock.lang.Specification
 
-class RdsInstanceControllerSpec extends ControllerSpec {
+class RdsInstanceControllerSpec extends Specification {
 
     final showParams = [
         allocatedStorage: 1,
@@ -39,23 +39,22 @@ class RdsInstanceControllerSpec extends ControllerSpec {
         MockUtils.prepareForConstraintsTests(DbUpdateCommand)
         controller.awsRdsService = Mocks.awsRdsService()
         controller.awsEc2Service = Mocks.awsEc2Service()
-        mockRequest.region = Region.defaultRegion()
+        request.region = Region.defaultRegion()
     }
 
     def 'save should show RDS instance after creation'() {
-        mockParams.putAll(showParams)
+        controller.params.putAll(showParams)
         final cmd = new DbCreateCommand(showParams)
 
         when:
         controller.save(cmd)
 
         then:
-        redirectArgs.action == controller.show
-        redirectArgs.params == [id: "testDB"]
+        response.redirectUrl == '/rdsInstance/show/testDB'
      }
 
     def 'save should return exception message when necessary'() {
-        mockParams.putAll(showParams)
+        controller.params.putAll(showParams)
         final cmd = new DbCreateCommand(showParams)
         controller.awsRdsService = { throw new IllegalStateException("Exception Thrown for test.")} as AwsRdsService
 
@@ -63,12 +62,12 @@ class RdsInstanceControllerSpec extends ControllerSpec {
         controller.save(cmd)
 
         then:
-        chainArgs.action == controller.create
-        controller.flash.message == "Could not create DB Instance: java.lang.IllegalStateException: Exception Thrown for test."
+        response.redirectUrl == '/rdsInstance/create?' + showParams.collect { k,v -> "$k=$v" }.join('&')
+        flash.message == "Could not create DB Instance: java.lang.IllegalStateException: Exception Thrown for test."
      }
 
     def 'save should return error with invalid input'() {
-        mockParams.putAll(showParams)
+        controller.params.putAll(showParams)
         final cmd = new DbCreateCommand(showParams)
         cmd.validate()
 
@@ -76,14 +75,12 @@ class RdsInstanceControllerSpec extends ControllerSpec {
         controller.save(cmd)
 
         then:
-        chainArgs.action == controller.create
-        chainArgs.model.cmd.errors.allocatedStorage == "range"
+        response.redirectUrl == '/rdsInstance/create?' + showParams.collect { k,v -> "$k=$v" }.join('&')
+        flash.chainModel.cmd.errors.allocatedStorage == 'range'
      }
 
     def 'create should return possible RDS engines and license model selections'() {
-        mockParams.with {
-            dBInstanceIdentifier = "0"
-        }
+        controller.params.dBInstanceIdentifier = '0'
 
         when:
         final model = controller.create()
