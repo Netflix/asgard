@@ -294,7 +294,7 @@ class LoadBalancerCreateCommand {
             }
         })
 
-        newStack(validator: { value, command->
+        newStack(nullable: true, validator: { value, command->
             if (value && !Relationships.checkName(value)) {
                 return "stack.illegalChar"
             }
@@ -319,13 +319,13 @@ class LoadBalancerCreateCommand {
         lbPort1(nullable: false, range: 0..65535)
         instancePort1(nullable: false, range: 0..65535)
 
-        protocol2(validator: { value, command->
+        protocol2(nullable: true, validator: { value, command->
             if (value && (!command.lbPort2 || !command.instancePort2) ) {
                 return "Please enter port numbers for the second protocol"
             }
         })
-        lbPort2(range: 0..65535)
-        instancePort2(range: 0..65535)
+        lbPort2(nullable: true, range: 0..65535)
+        instancePort2(nullable: true, range: 0..65535)
 
         target(nullable: false, blank: false)
         interval(nullable: false, range: 0..1000)
