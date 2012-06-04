@@ -20,14 +20,20 @@ import spock.lang.Specification
 
 class ApplicationServiceUnitSpec extends Specification {
 
-    def applicationService = Mocks.applicationService()
+    final Collection<String> APP_NAMES = ['aws_stats', 'api', 'cryptex','helloworld','abcache']
+
+    def allApplications = Mock(CachedMap)
+    def caches = Mock(Caches)
+    ApplicationService applicationService = new ApplicationService(caches: caches)
 
     def 'should return correct apps for load balancer'() {
+        mockApplications()
+
         when:
         def appsForLoadBalancer = applicationService.getRegisteredApplicationsForLoadBalancer(Mocks.userContext())
 
         then:
-        6 == appsForLoadBalancer.size()
+        4 == appsForLoadBalancer.size()
         'abcache' == appsForLoadBalancer[0].name
         'api' == appsForLoadBalancer[1].name
         'cryptex' == appsForLoadBalancer[2].name
@@ -35,12 +41,18 @@ class ApplicationServiceUnitSpec extends Specification {
     }
 
     def 'should return correct registered applications'() {
+        mockApplications()
+
         when:
         def allApps = applicationService.getRegisteredApplications(Mocks.userContext())
 
         then:
-        7 == allApps.size()
+        5 == allApps.size()
         'aws_stats' == allApps[2].name
     }
 
+    void mockApplications() {
+        caches.allApplications >> allApplications
+        allApplications.list() >> APP_NAMES.collect { new AppRegistration(name: it)}
+    }
 }
