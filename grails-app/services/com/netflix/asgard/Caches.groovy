@@ -48,39 +48,39 @@ import com.netflix.asgard.push.Cluster
  */
 class Caches {
 
-    final CachedMap<AppRegistration> allApplications
-    final CachedMap<ApplicationMetrics> allApplicationMetrics
-    final CachedMap<HardwareProfile> allHardwareProfiles
+    CachedMap<AppRegistration> allApplications
+    CachedMap<ApplicationMetrics> allApplicationMetrics
+    CachedMap<HardwareProfile> allHardwareProfiles
 
-    final MultiRegionCachedMap<MetricAlarm> allAlarms
-    final MultiRegionCachedMap<ApplicationInstance> allApplicationInstances
-    final MultiRegionCachedMap<AutoScalingGroup> allAutoScalingGroups
-    final MultiRegionCachedMap<AvailabilityZone> allAvailabilityZones
-    final MultiRegionCachedMap<Cluster> allClusters
-    final MultiRegionCachedMap<DBInstance> allDBInstances
-    final MultiRegionCachedMap<DBSecurityGroup> allDBSecurityGroups
-    final MultiRegionCachedMap<DBSnapshot> allDBSnapshots
-    final MultiRegionCachedMap<String> allDomains
-    final MultiRegionCachedMap<FastProperty> allFastProperties
-    final MultiRegionCachedMap<Image> allImages
-    final MultiRegionCachedMap<Instance> allInstances
-    final MultiRegionCachedMap<InstanceTypeData> allInstanceTypes
-    final MultiRegionCachedMap<KeyPairInfo> allKeyPairs
-    final MultiRegionCachedMap<LaunchConfiguration> allLaunchConfigurations
-    final MultiRegionCachedMap<LoadBalancerDescription> allLoadBalancers
-    final MultiRegionCachedMap<SimpleQueue> allQueues
-    final MultiRegionCachedMap<ReservedInstances> allReservedInstancesGroups
-    final MultiRegionCachedMap<ScalingPolicy> allScalingPolicies
-    final MultiRegionCachedMap<SecurityGroup> allSecurityGroups
-    final MultiRegionCachedMap<Snapshot> allSnapshots
-    final MultiRegionCachedMap<SourceSecurityGroup> allSourceSecurityGroups
-    final MultiRegionCachedMap<SpotInstanceRequest> allSpotInstanceRequests
-    final MultiRegionCachedMap<TopicData> allTopics
-    final MultiRegionCachedMap<Volume> allVolumes
+    MultiRegionCachedMap<MetricAlarm> allAlarms
+    MultiRegionCachedMap<ApplicationInstance> allApplicationInstances
+    MultiRegionCachedMap<AutoScalingGroup> allAutoScalingGroups
+    MultiRegionCachedMap<AvailabilityZone> allAvailabilityZones
+    MultiRegionCachedMap<Cluster> allClusters
+    MultiRegionCachedMap<DBInstance> allDBInstances
+    MultiRegionCachedMap<DBSecurityGroup> allDBSecurityGroups
+    MultiRegionCachedMap<DBSnapshot> allDBSnapshots
+    MultiRegionCachedMap<String> allDomains
+    MultiRegionCachedMap<FastProperty> allFastProperties
+    MultiRegionCachedMap<Image> allImages
+    MultiRegionCachedMap<Instance> allInstances
+    MultiRegionCachedMap<InstanceTypeData> allInstanceTypes
+    MultiRegionCachedMap<KeyPairInfo> allKeyPairs
+    MultiRegionCachedMap<LaunchConfiguration> allLaunchConfigurations
+    MultiRegionCachedMap<LoadBalancerDescription> allLoadBalancers
+    MultiRegionCachedMap<SimpleQueue> allQueues
+    MultiRegionCachedMap<ReservedInstances> allReservedInstancesGroups
+    MultiRegionCachedMap<ScalingPolicy> allScalingPolicies
+    MultiRegionCachedMap<SecurityGroup> allSecurityGroups
+    MultiRegionCachedMap<Snapshot> allSnapshots
+    MultiRegionCachedMap<SourceSecurityGroup> allSourceSecurityGroups
+    MultiRegionCachedMap<SpotInstanceRequest> allSpotInstanceRequests
+    MultiRegionCachedMap<TopicData> allTopics
+    MultiRegionCachedMap<Volume> allVolumes
 
-    final MultiRegionInstancePrices allOnDemandPrices
-    final MultiRegionInstancePrices allReservedPrices
-    final MultiRegionInstancePrices allSpotPrices
+    MultiRegionInstancePrices allOnDemandPrices
+    MultiRegionInstancePrices allReservedPrices
+    MultiRegionInstancePrices allSpotPrices
 
     Caches(CachedMapBuilder cachedMapBuilder, ConfigService configService) {
 
