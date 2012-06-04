@@ -32,7 +32,7 @@ img          { border: none; }
                               background: url(../images/asgard-title-red.png) transparent no-repeat 7px 15px; }
 .prod .titlebar .mainHeader { background-image: url(../images/asgard-title-black.png); }
 .titlebar img.logo          { float: left; margin-right: 14px; margin-top: 8px; height: 58px; width: 58px; }
-.titlebar .header           { float: left; height: 75px; }
+.titlebar .header           { float: left; height: 75px; width: 400px; }
 .titlebar .header a         { float: left; }
 .titlebar .region           { float: left; margin: 0 10px 0 0; }
 .titlebar .region form      { float: left; display: inline-block; vertical-align: top; }
