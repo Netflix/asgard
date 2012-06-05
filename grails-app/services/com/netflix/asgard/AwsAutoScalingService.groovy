@@ -132,7 +132,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
             // Make a cluster object only if we haven't made one yet that matches this ASG.
             if (!clusterNamesToClusters[clusterName]) {
-                Cluster cluster = buildCluster(userContext, allGroups, clusterName)
+                Cluster cluster = buildCluster(userContext, allGroups, clusterName, From.CACHE)
                 if (cluster) {
                     clusterNamesToClusters[clusterName] = cluster
                 }
@@ -182,7 +182,8 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         AutoScalingGroupData.from(group, instanceIdsToLoadBalancerLists, mergedInstances, imageIdsToImages, scalingPolicies)
     }
 
-    Cluster buildCluster(UserContext userContext, Collection<AutoScalingGroup> allGroups, String clusterName) {
+    Cluster buildCluster(UserContext userContext, Collection<AutoScalingGroup> allGroups, String clusterName,
+            From loadAutoScalingGroupsFrom = From.AWS) {
 
         // Optimization: find the candidate ASGs that start with the cluster name to avoid dissecting every group name.
         List<AutoScalingGroup> candidates = allGroups.findAll { it.autoScalingGroupName.startsWith(clusterName) }
@@ -194,7 +195,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             Relationships.clusterFromGroupName(it.autoScalingGroupName) == clusterName }
 
         // Reduce the ASG list to the ASGs that still exist in Amazon. As a happy side effect, update the ASG cache.
-        groups = getAutoScalingGroups(userContext, groups*.autoScalingGroupName)
+        groups = getAutoScalingGroups(userContext, groups*.autoScalingGroupName, loadAutoScalingGroupsFrom)
 
         if (groups.size()) {
             // This looks similar to buildAutoScalingGroupData() but it's faster to prepare the instance, ELB and AMI
