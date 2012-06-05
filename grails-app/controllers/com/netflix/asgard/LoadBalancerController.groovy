@@ -285,7 +285,7 @@ class LoadBalancerCreateCommand {
             }
         })
 
-        stack(validator: { value, command->
+        stack(nullable: true, validator: { value, command->
             if (value && !Relationships.checkName(value)) {
                 return "The stack must be empty or consist of alphanumeric characters"
             }
@@ -306,7 +306,7 @@ class LoadBalancerCreateCommand {
             }
         })
 
-        detail(validator: { value, command->
+        detail(nullable: true, validator: { value, command->
             if (value && !Relationships.checkDetail(value)) {
                 return "The detail must be empty or consist of alphanumeric characters and hyphens"
             }

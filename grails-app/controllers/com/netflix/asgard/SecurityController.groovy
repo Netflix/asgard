@@ -203,7 +203,7 @@ class SecurityCreateCommand {
             }
         })
 
-        detail(validator: { value, command->
+        detail(nullable: true, validator: { value, command->
             if (value && !Relationships.checkDetail(value)) {
                 return "The detail must be empty or consist of alphanumeric characters and hyphens"
             }
