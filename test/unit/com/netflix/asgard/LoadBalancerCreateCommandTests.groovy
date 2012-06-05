@@ -15,19 +15,27 @@
  */
 package com.netflix.asgard
 
-import grails.test.GrailsUnitTestCase
 import grails.test.MockUtils
-import com.netflix.asgard.mock.Mocks
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.Before
+import org.junit.Test
 
 // http://stackoverflow.com/questions/1703952/grails-how-do-you-unit-test-a-command-object-with-a-service-injected-into-it
-class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
+@TestMixin(GrailsUnitTestMixin)
+class LoadBalancerCreateCommandTests {
 
     def appService
 
+    @Before
     void setUp() {
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(LoadBalancerCreateCommand)
-        appService = Mocks.applicationService()
+        def appServiceMock = mockFor(ApplicationService)
+        appServiceMock.demand.getRegisteredApplicationForLoadBalancer { UserContext uc, String name ->
+         name == 'abcache' ? new AppRegistration(name: name) : null
+        }
+        appService = appServiceMock.createMock()
     }
 
     private LoadBalancerCreateCommand validateParams(Map params) {
@@ -45,6 +53,7 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         cmd
     }
 
+    @Test
     void testEmptyAppNameIsNotValid() {
         LoadBalancerCreateCommand cmd = validateParams(appName: "")
         assert cmd.hasErrors()
@@ -52,6 +61,7 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "blank" == cmd.errors.appName
     }
 
+    @Test
     void testBlankAppNameIsNotValid() {
         LoadBalancerCreateCommand cmd = validateParams(appName: "   ")
         assert cmd.hasErrors()
@@ -59,6 +69,7 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "blank" == cmd.errors.appName
     }
 
+    @Test
     void testNullAppNameIsNotValid() {
         LoadBalancerCreateCommand cmd = validateParams(appName: null)
         assert cmd.hasErrors()
@@ -66,6 +77,7 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "nullable" == cmd.errors.appName
     }
 
+    @Test
     void testAppNameWithBadCharacterIsNotValid() {
         LoadBalancerCreateCommand cmd = validateParams(appName: "uses-hyphen")
         assert cmd.hasErrors()
@@ -73,6 +85,7 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "application.name.illegalChar" == cmd.errors.appName
     }
 
+    @Test
     void testUnknownAppNameIsValid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "neverheardofthisapp")
         assert cmd.hasErrors()
@@ -80,30 +93,35 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "application.name.nonexistent" == cmd.errors.appName
     }
 
+    @Test
     void testKnownAppNameIsValid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache")
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
+    @Test
     void testEmptyStackIsValid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", stack:"")
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
+    @Test
     void testNullStackIsValid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", stack:null)
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
+    @Test
     void testStackIsValid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", stack:"iphone")
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
+    @Test
     void testStackIsInvalid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", stack:"iphone-and-ipad")
         assert cmd.hasErrors()
@@ -111,24 +129,28 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "The stack must be empty or consist of alphanumeric characters" == cmd.errors.stack
     }
 
+    @Test
     void testEmptyNewStackIsValid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", newStack:"")
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
+    @Test
     void testNullNewStackIsValid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", newStack:null)
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
+    @Test
     void testNewStackIsValid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", newStack:"iphone")
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
+    @Test
     void testStackWithReservedFormatIsNotValid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", stack:"v293")
         assert cmd.hasErrors()
@@ -136,6 +158,7 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "name.usesReservedFormat" == cmd.errors.stack
     }
 
+    @Test
     void testNewStackWithReservedFormatIsNotValid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", newStack:"v293")
         assert cmd.hasErrors()
@@ -143,6 +166,7 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "name.usesReservedFormat" == cmd.errors.newStack
     }
 
+    @Test
     void testNewStackIsInvalid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", newStack:"iphone-and-ipad")
         assert cmd.hasErrors()
@@ -150,6 +174,7 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "stack.illegalChar" == cmd.errors.newStack
     }
 
+    @Test
     void testStackAndNewStackIsInvalid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", stack:"iphone", newStack:"iphone")
         assert cmd.hasErrors()
@@ -157,6 +182,7 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "stack.matchesNewStack" == cmd.errors.newStack
     }
 
+    @Test
     void testDetailWithReservedFormatIsInvalid() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", detail: "v021")
         assert cmd.hasErrors()
@@ -164,12 +190,14 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "name.usesReservedFormat" == cmd.errors.detail
     }
 
+    @Test
     void testPortNumbers() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", newStack:"iphone", lbPort1: 99999999, instancePort1: 99999999)
         assert cmd.hasErrors()
         assert 2 == cmd.errors.errorCount
     }
 
+    @Test
     void testIncompleteListener2() {
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", newStack:"iphone", protocol2: "HTTP")
         assert cmd.hasErrors()
@@ -177,8 +205,9 @@ class LoadBalancerCreateCommandTests extends GrailsUnitTestCase {
         assert "Please enter port numbers for the second protocol" == cmd.errors.protocol2
     }
 
+    @Test
     void testTotalNameIsTooLong() {
-        LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "videometadata",
+        LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache",
                 stack: "navigator", detail: "integration-240-usa-iphone-ipad-ios5-even-numbered-days-except-weekends-and-excluding-when-the-moon-is-full")
         assert cmd.hasErrors()
         assert 1 == cmd.errors.errorCount
