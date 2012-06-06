@@ -26,7 +26,7 @@ import com.amazonaws.services.ec2.model.RunInstancesResult
 import com.amazonaws.services.ec2.model.SpotInstanceRequest
 import com.amazonaws.services.ec2.model.SpotPlacement
 import com.amazonaws.services.ec2.model.Tag
-import com.google.common.collect.HashMultimap
+import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import com.google.common.collect.Sets
 import com.google.common.util.concurrent.ThreadFactoryBuilder
@@ -273,8 +273,8 @@ class ImageService implements BackgroundProcessInitializer {
 
         Collection<Image> prodImages = parseImagesXml(prodImagesXml)
 
-        Multimap<String, String> deletableTagNamesToImageIds = HashMultimap.create()
-        Multimap<Tag, String> addableTagsToImageIds = HashMultimap.create()
+        Multimap<String, String> deletableTagNamesToImageIds = ArrayListMultimap.create()
+        Multimap<Tag, String> addableTagsToImageIds = ArrayListMultimap.create()
 
         // Look through all the prod images. For each one, find its counterpart in the test images.
         // Correct any mismatches.

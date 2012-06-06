@@ -33,7 +33,7 @@ import com.amazonaws.services.elasticloadbalancing.model.Listener
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.elasticloadbalancing.model.RegisterInstancesWithLoadBalancerRequest
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
-import com.google.common.collect.HashMultimap
+import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import com.netflix.asgard.cache.CacheInitializer
 import org.springframework.beans.factory.InitializingBean
@@ -122,7 +122,7 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
     Map<String, Collection<LoadBalancerDescription>> mapInstanceIdsToLoadBalancers(UserContext userContext,
                                                                                    List<String> instanceIds) {
         Collection<LoadBalancerDescription> loadBalancers = getLoadBalancers(userContext)
-        Multimap<String, LoadBalancerDescription> instanceIdsToLoadBalancers = HashMultimap.create()
+        Multimap<String, LoadBalancerDescription> instanceIdsToLoadBalancers = ArrayListMultimap.create()
         for (LoadBalancerDescription loadBalancer : loadBalancers) {
             for (Instance instance : loadBalancer.instances) {
                 instanceIdsToLoadBalancers.put(instance.instanceId, loadBalancer)

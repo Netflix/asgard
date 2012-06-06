@@ -92,6 +92,6 @@ class Meta {
      * @return String the phrase with the words separated by the delimiter
      */
     static String splitCamelCase(String input, String delimiter = ' ') {
-        Joiner.on(delimiter).join(StringUtils.splitByCharacterTypeCamelCase(input))
+        Joiner.on(delimiter).join(StringUtils.splitByCharacterTypeCamelCase(input) as List)
     }
 }

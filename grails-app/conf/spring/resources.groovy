@@ -33,7 +33,9 @@ beans = {
 
     caches(Caches, ref('cachedMapBuilder'), ref('configService'))
 
-    defaultUserDataProvider(DefaultUserDataProvider)
+    defaultUserDataProvider(DefaultUserDataProvider) { bean ->
+        bean.lazyInit = true
+    }
 
     //**** Plugin behavior
 
@@ -44,6 +46,6 @@ beans = {
     pluginDir.eachFileMatch(FileType.FILES, ~/.*\.groovy/) { File plugin ->
         String beanName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, plugin.name.replace('.groovy', ''))
         lang.groovy(id: beanName, 'script-source': "file:${application.config.asgardHome}/plugins/${plugin.name}",
-            'refresh-check-delay': 5000)
+            'refresh-check-delay': application.config.plugin.refreshDelay?: -1)
     }
 }

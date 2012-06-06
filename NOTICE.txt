@@ -66,6 +66,11 @@ http://shadowbox-js.com/
 License: Shadowbox.js Non-Commercial License version 1.0 (http://shadowbox-js.com/LICENSE)
 Copyright 2007-2010 Michael J. I. Jackson
 
+Chrome Frame CFInstall script provided by The Chromium Authors
+http://www.chromium.org/developers/how-tos/chrome-frame-cfinstall
+License: BSD
+Copyright 2009 The Chromium Authors
+
 --------------------------------
 Attribution for Icons and Photos
 --------------------------------
@@ -73,6 +78,16 @@ Attribution for Icons and Photos
 Tango Icons provided by the Tango Desktop Project
 http://tango.freedesktop.org/Tango_Desktop_Project
 License: Public domain
+
+Blue Rocket Icon (launch.png) provided by DarKobra
+http://darkobra.deviantart.com/art/Tango-Rocket-Dock-Icon-83118394
+https://commons.wikimedia.org/wiki/File:Blue-rocket.svg
+License: Creative Commons Attribution-Share Alike 3.0 Unported (https://creativecommons.org/licenses/by-sa/3.0/deed.en)
+
+Database Icon (database.png) provided by dracos
+http://dracos.deviantart.com/art/Tango-Database-178291490
+https://commons.wikimedia.org/wiki/File:Applications-database.svg
+License: Creative Commons Attribution-Share Alike 3.0 Unported (https://creativecommons.org/licenses/by-sa/3.0/deed.en)
 
 Halloween Icons, Jack o' Lantern Icon (halloween.png), and Skull Icon (day-of-the-dead.png) provided by Aha-Soft
 http://www.aha-soft.com/

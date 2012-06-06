@@ -395,6 +395,7 @@ class Relationships {
     @LabeledEnvVar String zone
 
     List<String> labeledEnvironmentVariables(String prefix) {
+        Check.notNull(prefix, String, 'prefix')
         List<String> envVars = []
 
         this.class.declaredFields.findAll { it.declaredAnnotations.any { it instanceof LabeledEnvVar } }.
