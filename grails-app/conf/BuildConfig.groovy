@@ -33,42 +33,24 @@ codenarc {
     maxPriority1Violations = 0
 }
 
-Closure lookForExternalBuildOptions = {
-    // TODO: do not duplicate the asgard home logic in Config.groovy
-    String asgardHome = System.getenv('ASGARD_HOME') ?: System.getProperty('ASGARD_HOME') ?: "${userHome}/.asgard"
-    File optionsFile = new File(asgardHome, 'BuildOptions.groovy')
-    if (optionsFile.exists()) {
-        logger.println("Build options selected from ${optionsFile.absolutePath}")
-        try {
-            return new GroovyClassLoader().parseClass(optionsFile)?.newInstance()
-        } catch (Exception e) {
-            logger.println("Failed to load build options: ${e.message}")
-        }
-    }
-}
-def buildOptions = lookForExternalBuildOptions()
-
 grails.project.dependency.resolution = {
     // Inherit Grails' default dependencies
     inherits('global') {}
 
     log 'warn'
 
-    // Default to public repos for open source build
-    Closure defaultRepositories = {
+    repositories {
         grailsPlugins()
         grailsHome()
         grailsCentral()
         mavenCentral()
     }
 
-    repositories buildOptions?.repositories ?: defaultRepositories
-
     dependencies {
 
         compile(
                 // Amazon Web Services programmatic interface
-                buildOptions?.dependencyOverride?.awsSdk ?: 'com.amazonaws:aws-java-sdk:1.3.10',
+                'com.amazonaws:aws-java-sdk:1.3.10',
 
                 // Transitive dependencies of aws-java-sdk, but also used directly
                 'org.apache.httpcomponents:httpcore:4.1',
@@ -100,6 +82,9 @@ grails.project.dependency.resolution = {
 
                 // This fixes ivy resolution issues we had with our transitive dependency on 1.4.
                 'commons-codec:commons-codec:1.5',
+
+                // Call Perforce in process. Delete when user data no longer come from Perforce at deployment time.
+                'com.perforce:p4java:2010.1.269249',
         ) { // Exclude superfluous and dangerous transitive dependencies
             excludes(
                     // Some libraries bring older versions of JUnit as a transitive dependency and that can interfere
@@ -111,8 +96,6 @@ grails.project.dependency.resolution = {
                     'stax-api',
             )
         }
-
-        buildOptions?.extraDependencies?.each { compile it }
 
         test 'org.objenesis:objenesis:1.2'
 
