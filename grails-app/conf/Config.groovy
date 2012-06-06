@@ -157,6 +157,9 @@ environments {
     development {
         server.online = !System.getProperty('offline')
         if (!server.online) { println 'Config: working offline' }
+        plugin {
+            refreshDelay = 5000
+        }
     }
     test {
         server.online = false
