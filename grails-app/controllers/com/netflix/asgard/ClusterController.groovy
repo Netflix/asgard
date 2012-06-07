@@ -104,7 +104,7 @@ class ClusterController {
                         cluster.size() <= 1 ? 'Create a new group and switch traffic to it' :
                         'Switch traffic to the preferred group, then delete legacy group'
                     Collection<Task> runningTasks = taskService.getRunningTasksByObject(Link.to(EntityType.cluster,
-                        cluster.name), userContext.region)
+                            cluster.name), userContext.region)
 
                     boolean showAllImages = params.allImages ? true : false
                     Map attributes = pushService.prepareEdit(userContext, lastGroup.autoScalingGroupName, showAllImages,
