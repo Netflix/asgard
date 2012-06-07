@@ -278,10 +278,10 @@ class GroupResizeOperation {
         ensureTrafficIsSuppressedIfAppropriate(group)
         Collection<String> idsOfInstancesThatAreNotYetHealthy = findInstancesNotYetHealthy(group.instances*.instanceId)
         if (idsOfInstancesThatAreNotYetHealthy.empty) {
-            //everything is healthy, our work is done here
+            // Everything is healthy, our work is done here
             return group
         }
-        // loop until everything not yet healthy is healthy
+        // Loop until everything not yet healthy is healthy
         while (!idsOfInstancesThatAreNotYetHealthy.empty) {
             if (hasTooMuchTimePassedSinceBatchStart()) {
                 Integer unhealthyCount = idsOfInstancesThatAreNotYetHealthy.size()
@@ -297,7 +297,7 @@ class GroupResizeOperation {
             ensureTrafficIsSuppressedIfAppropriate(group)
             idsOfInstancesThatAreNotYetHealthy = findInstancesNotYetHealthy(idsOfInstancesThatAreNotYetHealthy)
         }
-        // check the health of all instances in the ASG, now that the unhealthy instances have become healthy
+        // Check the health of all instances in the ASG, now that the unhealthy instances have become healthy
         checkHealthOfInstances()
     }
 
