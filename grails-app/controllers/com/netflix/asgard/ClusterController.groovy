@@ -94,31 +94,32 @@ class ClusterController {
         if (!cluster) {
             Requests.renderNotFound('Cluster', name, this)
         } else if (name == cluster.name) {
-            AutoScalingGroupData lastGroup = cluster.last()
-            String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
-            Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
-            String recommendedNextStep = cluster.size() >= Relationships.CLUSTER_MAX_GROUPS ?
-                'Delete an old group before pushing to a new group.' :
-                cluster.size() <= 1 ? 'Create a new group and switch traffic to it' :
-                'Switch traffic to the preferred group, then delete legacy group'
-            Collection<Task> runningTasks = taskService.getRunningTasksByObject(Link.to(EntityType.cluster, cluster.name),
-                    userContext.region)
-
-            boolean showAllImages = params.allImages ? true : false
-            Map attributes = pushService.prepareEdit(userContext, lastGroup.autoScalingGroupName, showAllImages,
-                    actionName)
-            attributes.putAll([
-                    'cluster': cluster,
-                    'runningTasks': runningTasks,
-                    'group': lastGroup,
-                    'nextGroupName': nextGroupName,
-                    'okayToCreateGroup': okayToCreateGroup,
-                    'recommendedNextStep': recommendedNextStep,
-                    buildServer: grailsApplication.config.cloud.buildServer
-            ])
-
             withFormat {
-                html { return attributes }
+                html {
+                    AutoScalingGroupData lastGroup = cluster.last()
+                    String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
+                    Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
+                    String recommendedNextStep = cluster.size() >= Relationships.CLUSTER_MAX_GROUPS ?
+                        'Delete an old group before pushing to a new group.' :
+                        cluster.size() <= 1 ? 'Create a new group and switch traffic to it' :
+                        'Switch traffic to the preferred group, then delete legacy group'
+                    Collection<Task> runningTasks = taskService.getRunningTasksByObject(Link.to(EntityType.cluster, cluster.name),
+                            userContext.region)
+
+                    boolean showAllImages = params.allImages ? true : false
+                    Map attributes = pushService.prepareEdit(userContext, lastGroup.autoScalingGroupName, showAllImages,
+                            actionName)
+                    attributes.putAll([
+                            'cluster': cluster,
+                            'runningTasks': runningTasks,
+                            'group': lastGroup,
+                            'nextGroupName': nextGroupName,
+                            'okayToCreateGroup': okayToCreateGroup,
+                            'recommendedNextStep': recommendedNextStep,
+                            buildServer: grailsApplication.config.cloud.buildServer
+                    ])
+                    return attributes
+                }
                 xml { new XML(cluster).render(response) }
                 json { new JSON(cluster).render(response) }
             }
