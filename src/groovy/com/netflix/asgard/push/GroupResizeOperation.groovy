@@ -278,7 +278,7 @@ class GroupResizeOperation {
         ensureTrafficIsSuppressedIfAppropriate(group)
         Collection<String> idsOfInstancesThatAreNotYetHealthy = findInstancesNotYetHealthy(group.instances*.instanceId)
         if (idsOfInstancesThatAreNotYetHealthy.empty) {
-            // Everything is healthy, our work is done here
+            // Everything is healthy. Our work is done here.
             return group
         }
         // Loop until everything not yet healthy is healthy
