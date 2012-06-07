@@ -224,11 +224,7 @@ class GroupResizeOperation {
         Boolean moreInstancesAreExpected = true
         while (moreInstancesAreExpected) {
             Time.sleepCancellably(ITERATION_WAIT_MILLIS)
-            group = awsAutoScalingService.getAutoScalingGroup(userContext, autoScalingGroupName,
-                    From.AWS_NOCACHE)
-            if (!group) {
-                abortBecauseGroupDisappeared()
-            }
+            group = checkGroupStillExists()
             Integer currentCount = group.instances.size()
             ensureTrafficIsSuppressedIfAppropriate(group)
 
@@ -245,10 +241,7 @@ class GroupResizeOperation {
         Boolean waitingForInstancesToGoInService = true
         while (waitingForInstancesToGoInService) {
             Time.sleepCancellably(ITERATION_WAIT_MILLIS)
-            group = awsAutoScalingService.getAutoScalingGroup(userContext, autoScalingGroupName, From.AWS_NOCACHE)
-            if (!group) {
-                abortBecauseGroupDisappeared()
-            }
+            group = checkGroupStillExists()
             Integer currentCount = group.findInServiceInstanceIds().size()
             ensureTrafficIsSuppressedIfAppropriate(group)
 
@@ -262,42 +255,7 @@ class GroupResizeOperation {
         }
 
         if (checkHealth) {
-            task.log("Waiting for ${newMin} healthy instance${newMin == 1 ? '' : 's'} in group '${autoScalingGroupName}'")
-            Boolean waitingForAllInstancesToBeHealthy = true
-            while (waitingForAllInstancesToBeHealthy) {
-                Time.sleepCancellably(ITERATION_WAIT_MILLIS)
-                Collection<String> idsOfInstancesThatAreNotYetHealthy = []
-                group = awsAutoScalingService.getAutoScalingGroup(userContext, autoScalingGroupName,
-                        From.AWS_NOCACHE)
-                if (!group) {
-                    abortBecauseGroupDisappeared()
-                }
-                ensureTrafficIsSuppressedIfAppropriate(group)
-                group.instances.collect { it.instanceId }.each { String id ->
-                    String healthCheckUrl = getHealthCheckUrl(id)
-                    if (healthCheckUrl) {
-                        Integer responseCode = awsEc2Service.getRepeatedResponseCode(healthCheckUrl)
-                        if (responseCode != 200) {
-                            idsOfInstancesThatAreNotYetHealthy.add(id)
-                        }
-                    // Still waiting for Discovery?
-                    } else if (!discoveryService.getAppInstance(userContext, appName, id)) {
-                        Time.sleepCancellably(discoveryService.MILLIS_DELAY_BETWEEN_DISCOVERY_CALLS)
-                        idsOfInstancesThatAreNotYetHealthy.add(id)
-                    }
-                }
-                Integer unhealthyCount = idsOfInstancesThatAreNotYetHealthy.size()
-                waitingForAllInstancesToBeHealthy = unhealthyCount > 0
-
-                if (waitingForAllInstancesToBeHealthy && hasTooMuchTimePassedSinceBatchStart()) {
-                    throw new PushException("Timeout waiting ${Time.format(calculateMaxTimePerBatch())} " +
-                            "for instances to register with Discovery and pass a health check. " +
-                            "Expected ${newMin} discoverable, healthy instance${newMin == 1 ? '' : 's'}, but " +
-                            "auto scaling group '${autoScalingGroupName}' still has ${unhealthyCount} " +
-                            "undiscoverable or unhealthy instance${unhealthyCount == 1 ? '': 's'} " +
-                            "including ${idsOfInstancesThatAreNotYetHealthy}. Are the new instances having errors?")
-                }
-            }
+            group = checkHealthOfInstances()
         } else if (afterBootWait) {
             task.log("Waiting ${afterBootWait} second${afterBootWait == 1 ? '' : 's'} for new instances to be " +
                     "ready in group '${autoScalingGroupName}'")
@@ -312,6 +270,58 @@ class GroupResizeOperation {
         }
         // Update the caches for ASG and cluster
         awsAutoScalingService.getAutoScalingGroup(userContext, autoScalingGroupName)
+    }
+
+    private AutoScalingGroup checkHealthOfInstances() {
+        task.log("Waiting for ${newMin} healthy instance${newMin == 1 ? '' : 's'} in group '${autoScalingGroupName}'")
+        AutoScalingGroup group = checkGroupStillExists()
+        ensureTrafficIsSuppressedIfAppropriate(group)
+        Collection<String> idsOfInstancesThatAreNotYetHealthy = findInstancesNotYetHealthy(group.instances*.instanceId)
+        if (idsOfInstancesThatAreNotYetHealthy.empty) {
+            // Everything is healthy. Our work is done here.
+            return group
+        }
+        // Loop until everything not yet healthy is healthy
+        while (!idsOfInstancesThatAreNotYetHealthy.empty) {
+            if (hasTooMuchTimePassedSinceBatchStart()) {
+                Integer unhealthyCount = idsOfInstancesThatAreNotYetHealthy.size()
+                throw new PushException("Timeout waiting ${Time.format(calculateMaxTimePerBatch())} " +
+                        "for instances to register with Discovery and pass a health check. " +
+                        "Expected ${newMin} discoverable, healthy instance${newMin == 1 ? '' : 's'}, but " +
+                        "auto scaling group '${autoScalingGroupName}' still has ${unhealthyCount} " +
+                        "undiscoverable or unhealthy instance${unhealthyCount == 1 ? '': 's'} " +
+                        "including ${idsOfInstancesThatAreNotYetHealthy}. Are the new instances having errors?")
+            }
+            Time.sleepCancellably(ITERATION_WAIT_MILLIS)
+            group = checkGroupStillExists()
+            ensureTrafficIsSuppressedIfAppropriate(group)
+            idsOfInstancesThatAreNotYetHealthy = findInstancesNotYetHealthy(idsOfInstancesThatAreNotYetHealthy)
+        }
+        // Check the health of all instances in the ASG, now that the unhealthy instances have become healthy
+        checkHealthOfInstances()
+    }
+
+    private Collection<String> findInstancesNotYetHealthy(Collection<String> instanceIds) {
+        instanceIds.findAll { String id ->
+            String healthCheckUrl = getHealthCheckUrl(id)
+            if (healthCheckUrl) {
+                Integer responseCode = awsEc2Service.getRepeatedResponseCode(healthCheckUrl)
+                return responseCode != 200
+            }
+            // Still waiting for Discovery?
+            boolean missingInDiscovery = !discoveryService.getAppInstance(userContext, appName, id)
+            Time.sleepCancellably(discoveryService.MILLIS_DELAY_BETWEEN_DISCOVERY_CALLS)
+            missingInDiscovery
+        }
+    }
+
+    private AutoScalingGroup checkGroupStillExists() {
+        AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, autoScalingGroupName,
+                From.AWS_NOCACHE)
+        if (!group) {
+            abortBecauseGroupDisappeared()
+        }
+        group
     }
 
     private void ensureTrafficIsSuppressedIfAppropriate(AutoScalingGroup group) {
@@ -350,7 +360,7 @@ class GroupResizeOperation {
                 instanceIdsToHealthCheckUrls.put(id, healthCheckUrl)
             }
         }
-        return healthCheckUrl
+        healthCheckUrl
     }
 
     private void waitForInstancesToTerminate() {
