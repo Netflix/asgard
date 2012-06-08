@@ -141,9 +141,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     // Images
 
-    /** A cache of image collections for a given package name within a certain AWS region. */
-    Map<Region, Map<String, Collection<Image>>> regionalPackagesToImageLists = [:]
-
     private List<Image> retrieveImages(Region region) {
         DescribeImagesRequest request = new DescribeImagesRequest().withOwners(accounts)
         AmazonEC2 awsClientForRegion = awsClient.by(region)
@@ -162,32 +159,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             images = images.collect { imageIdToImageWithTags[it.imageId] ?: it }
         }
 
-        regionalPackagesToImageLists[region] = getPackagesToImageLists(images)
         images
-    }
-
-    private void refreshImageCacheForPackageName(UserContext userContext, String packageName) {
-        if (packageName) {
-            Map<String, Collection<Image>> packagesToImageLists = regionalPackagesToImageLists[userContext.region]
-            if (packagesToImageLists) {
-                Collection<Image> imagesForPackage = getAccountImages(userContext).
-                        findAll { packageName == it.packageName }
-                packagesToImageLists[packageName] = imagesForPackage
-            }
-        }
-    }
-
-    private Map<String, Collection<Image>> getPackagesToImageLists(Collection<Image> images) {
-        Map<String, Collection<Image>> namesToLists = new HashMap<String, Collection<Image>>()
-        images.each { Image image ->
-            String packageName = image.packageName
-            if (packageName) {
-                Collection<Image> imagesForPackage = namesToLists[packageName] ?: []
-                imagesForPackage << image
-                namesToLists[packageName] = imagesForPackage
-            }
-        }
-        namesToLists
     }
 
     Collection<Image> getAccountImages(UserContext userContext) {
@@ -211,20 +183,14 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     /**
-     * Gets the images that have the specified package name (usually app name) if any. If there are no images for the
-     * specified package name, or if the specified package name is null or empty, then this method returns all the
-     * images.
+     * Gets the images that have the specified package name (usually app name) if any. If the specified package name is
+     * null or empty, then this method returns all the images.
      *
      * @param name the package name (usually app name) to look for
-     * @return Collection< Image > the images with the specified package name, or all images if none matched
+     * @return Collection< Image > the images with the specified package name, or all images if name is null or empty
      */
     Collection<Image> getImagesForPackage(UserContext userContext, String name) {
-        Map<String, Collection<Image>> packagesToImageLists = regionalPackagesToImageLists[userContext.region]
-        if (name && packagesToImageLists) {
-            Collection<Image> images = packagesToImageLists[name]
-            return images ?: []
-        }
-        getAccountImages(userContext)
+        name ? getAccountImages(userContext).findAll { name == it.packageName } : getAccountImages(userContext)
     }
 
     Image getImage(UserContext userContext, String imageId, From preferredDataSource = From.AWS) {
@@ -243,7 +209,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
                 // If Amazon doesn't know this image id then return null and put null in the allImages CachedMap
             }
             caches.allImages.by(userContext.region).put(imageId, image)
-            refreshImageCacheForPackageName(userContext, image?.packageName)
         }
         image
     }
@@ -279,7 +244,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
                 String packageName = image.packageName
                 DeregisterImageRequest request = new DeregisterImageRequest().withImageId(image.imageId)
                 awsClient.by(userContext.region).deregisterImage(request)
-                refreshImageCacheForPackageName(userContext, packageName)
             }
             getImage(userContext, imageId)
         }
