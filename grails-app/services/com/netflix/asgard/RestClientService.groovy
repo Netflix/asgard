@@ -37,14 +37,24 @@ import org.apache.http.message.BasicNameValuePair
 import org.apache.http.params.HttpConnectionParams
 import org.apache.http.util.EntityUtils
 import org.codehaus.groovy.grails.web.json.JSONElement
+import org.springframework.beans.factory.InitializingBean
 
-class RestClientService {
+class RestClientService implements InitializingBean {
 
     static transactional = false
+
+    def configService
 
     // Change to PoolingClientConnectionManager after upgrade to http-client 4.2.
     final ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager()
     final HttpClient httpClient = new DefaultHttpClient(connectionManager)
+
+    public void afterPropertiesSet() throws Exception {
+        // Switch to ClientPNames.CONN_MANAGER_TIMEOUT when upgrading http-client 4.2
+        httpClient.params.setLongParameter(ConnManagerPNames.TIMEOUT, configService.httpConnPoolTimeout)
+        connectionManager.maxTotal = configService.httpConnPoolMaxSize
+        connectionManager.defaultMaxPerRoute = configService.httpConnPoolMaxForRoute
+    }
 
     GPathResult getAsXml(String uri, Integer timeoutMillis = 10000) {
         try {

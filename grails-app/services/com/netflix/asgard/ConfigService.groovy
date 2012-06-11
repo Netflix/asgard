@@ -182,4 +182,25 @@ class ConfigService {
     Map<String, String> getPluginNamesToBeanNames() {
         grailsApplication.config.plugin ?: [:]
     }
+
+    /**
+     * @return Maximum time in miliseconds for threads to wait for a connection from the http connection pool
+     */
+    long getHttpConnPoolTimeout() {
+        grailsApplication.config.httpConnPool?.timeout ?: 50 * 1000
+    }
+
+    /**
+     * @return Maximum size of the http connection pool
+     */
+    int getHttpConnPoolMaxSize() {
+        grailsApplication.config.httpConnPool?.maxSize ?: 50
+    }
+
+    /**
+     * @return Maximum number of connections in the connection pool per host.
+     */
+    int getHttpConnPoolMaxForRoute() {
+        grailsApplication.config.httpConnPool?.maxSize ?: 5
+    }
 }
