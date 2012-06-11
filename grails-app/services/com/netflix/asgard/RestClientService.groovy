@@ -19,23 +19,32 @@ import com.netflix.asgard.format.JsonpStripper
 import grails.converters.JSON
 import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
+import java.util.concurrent.TimeUnit
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
 import org.apache.http.client.entity.UrlEncodedFormEntity
+import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.methods.HttpPut
+import org.apache.http.client.methods.HttpUriRequest
+import org.apache.http.conn.params.ConnManagerPNames
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.DefaultHttpClient
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.params.HttpConnectionParams
-import org.apache.http.params.HttpParams
 import org.apache.http.util.EntityUtils
 import org.codehaus.groovy.grails.web.json.JSONElement
 
 class RestClientService {
 
     static transactional = false
+
+    // Change to PoolingClientConnectionManager after upgrade to http-client 4.2.
+    final ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager()
+    final HttpClient httpClient = new DefaultHttpClient(connectionManager)
 
     GPathResult getAsXml(String uri, Integer timeoutMillis = 10000) {
         try {
@@ -69,21 +78,41 @@ class RestClientService {
     }
 
     private String get(String uri, String contentType, Integer timeoutMillis) {
-        HttpClient httpClient = new DefaultHttpClient()
-        HttpParams httpParams = httpClient.getParams()
-        HttpConnectionParams.setConnectionTimeout(httpParams, timeoutMillis)
-        HttpConnectionParams.setSoTimeout(httpParams, timeoutMillis)
-        HttpGet httpGet = new HttpGet(uri)
+        HttpGet httpGet = getWithTimeout(uri, timeoutMillis)
         httpGet.setHeader('Content-Type', contentType)
         httpGet.setHeader('Accept', contentType)
-        HttpResponse httpResponse = httpClient.execute(httpGet)
-        httpResponse.statusLine.statusCode
-        if (httpResponse.statusLine.statusCode == HttpURLConnection.HTTP_OK) {
-            HttpEntity httpEntity = httpResponse.getEntity()
-            String output = EntityUtils.toString(httpEntity)
-            return output
+        executeAndProcessResponse(httpGet) { HttpResponse httpResponse ->
+            if (readStatusCode(httpResponse) == HttpURLConnection.HTTP_OK) {
+                HttpEntity httpEntity = httpResponse.getEntity()
+                return EntityUtils.toString(httpEntity)
+            }
+            return null
         }
-        return null
+    }
+
+    private HttpGet getWithTimeout(String uri, int timeoutMillis) {
+        HttpGet httpGet = new HttpGet(uri)
+        HttpConnectionParams.setConnectionTimeout(httpGet.params, timeoutMillis)
+        HttpConnectionParams.setSoTimeout(httpGet.params, timeoutMillis)
+        httpGet.params.setLongParameter(ConnManagerPNames.TIMEOUT, timeoutMillis)
+        httpGet
+    }
+
+    def executeAndProcessResponse(HttpUriRequest request, Closure responseHandler) {
+        def retVal = null
+        try {
+            HttpResponse httpResponse = httpClient.execute(request)
+            retVal = responseHandler(httpResponse)
+            // ensure the connection gets released to the manager
+            EntityUtils.consume(httpResponse.entity)
+            return retVal
+        } catch (Exception e) {
+            request.abort()
+            throw e
+        } finally {
+            // Save memory per http://stackoverflow.com/questions/4999708/httpclient-memory-management
+            connectionManager.closeIdleConnections(30, TimeUnit.SECONDS)
+        }
     }
 
     /**
@@ -115,60 +144,35 @@ class RestClientService {
     }
 
     private int executePost(HttpPost httpPost) {
-        HttpClient httpClient = new DefaultHttpClient()
-        HttpResponse httpResponse = httpClient.execute(httpPost)
-
-        final int statusCode = httpResponse.statusLine.statusCode
-        if (statusCode >= 300) {
-            log.error("POST to ${httpPost.URI.path} failed: ${statusCode} ${httpResponse.statusLine.reasonPhrase}. " +
-                    "Content: ${httpPost.entity}")
+        executeAndProcessResponse(httpPost) { HttpResponse httpResponse ->
+            int statusCode = readStatusCode(httpResponse)
+            if (statusCode >= 300) {
+                log.error("POST to ${httpPost.URI.path} failed: ${statusCode} " +
+                        "${httpResponse.statusLine.reasonPhrase}. Content: ${httpPost.entity}")
+            }
+            statusCode
         }
-
-        statusCode
     }
 
     int put(String uri) {
-        //println "PUT to $uri"
-        URLConnection conn = new URI(uri).toURL().openConnection()
-        conn.requestMethod = "PUT"
-        conn.connect()
-        //if (conn.responseCode != conn.HTTP_OK) {
-            //if (conn.responseCode >= 300)
-            //    println "PUT to ${uri} failed: ${conn.responseCode}: ${conn.responseMessage}"
-        //}
-        conn.disconnect()
-        conn.responseCode
+        executeAndProcessResponse(new HttpPut(uri), this.&readStatusCode)
     }
 
     int delete(String uri) {
-        //println "DELETE of $uri"
-        URLConnection conn = new URI(uri).toURL().openConnection()
-        conn.requestMethod = "DELETE"
-        conn.connect()
-        //if (conn.responseCode != conn.HTTP_OK) {
-            //if (conn.responseCode >= 300)
-            //    println "DELETE of ${uri} failed: ${conn.responseCode}: ${conn.responseMessage}"
-        //}
-        conn.disconnect()
-        conn.responseCode
+        executeAndProcessResponse(new HttpDelete(uri), this.&readStatusCode)
     }
 
     Integer getResponseCode(String url) {
+        Integer statusCode = null
         try {
-            URLConnection conn = new URL(url).openConnection()
-            conn.requestMethod = "GET" // or HEAD, but some apps don't implement it!
-            conn.connectTimeout = 2000 // 2 second connect timeout
-            conn.readTimeout = 2000 // 2 second read timeout
-            //println "checking health @ ${url} => ${conn.responseCode}"
-            //if (conn.responseCode == conn.HTTP_OK) {
-            //    conn.headerFields.each {println it}
-            //    conn.inputStream.withStream {println it.text}
-            //}
-            //conn.disconnect()
-            return conn.responseCode
+            statusCode = executeAndProcessResponse(getWithTimeout(url, 2000), this.&readStatusCode)
         } catch (Exception e) {
-            //println "checking health @ ${url} failed: ${e}"
-            return null
+            // Ignore and return null
         }
+        statusCode
+    }
+
+    private int readStatusCode(HttpResponse httpResponse) {
+        httpResponse.statusLine.statusCode
     }
 }
