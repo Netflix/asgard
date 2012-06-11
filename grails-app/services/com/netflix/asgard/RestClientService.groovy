@@ -178,17 +178,17 @@ class RestClientService implements InitializingBean {
     }
 
     int put(String uri) {
-        executeAndProcessResponse(new HttpPut(uri), this.&readStatusCode)
+        executeAndProcessResponse(new HttpPut(uri), readStatusCode)
     }
 
     int delete(String uri) {
-        executeAndProcessResponse(new HttpDelete(uri), this.&readStatusCode)
+        executeAndProcessResponse(new HttpDelete(uri), readStatusCode)
     }
 
     Integer getResponseCode(String url) {
         Integer statusCode = null
         try {
-            statusCode = executeAndProcessResponse(getWithTimeout(url, 2000), this.&readStatusCode)
+            statusCode = executeAndProcessResponse(getWithTimeout(url, 2000), readStatusCode)
         } catch (Exception e) {
             // Ignore and return null
         }
