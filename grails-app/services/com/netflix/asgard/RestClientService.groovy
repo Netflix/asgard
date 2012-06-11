@@ -100,28 +100,41 @@ class RestClientService implements InitializingBean {
         }
     }
 
+    /**
+     * Convenience method to create a http-client HttpGet with the timeout parameters set
+     *
+     * @param uri The uri to connect to.
+     * @param timeoutMillis The value to use as socket and connection timeout when making the request
+     * @return HttpGet object with parameters set
+     */
     private HttpGet getWithTimeout(String uri, int timeoutMillis) {
         HttpGet httpGet = new HttpGet(uri)
         HttpConnectionParams.setConnectionTimeout(httpGet.params, timeoutMillis)
         HttpConnectionParams.setSoTimeout(httpGet.params, timeoutMillis)
-        httpGet.params.setLongParameter(ConnManagerPNames.TIMEOUT, timeoutMillis)
         httpGet
     }
 
-    def executeAndProcessResponse(HttpUriRequest request, Closure responseHandler) {
-        def retVal = null
+    /**
+     * Template method to execute a HttpUriRequest object (HttpGet, HttpPost, etc.), process the response with a
+     * closure, and perform the cleanup necessary to return the connection to the pool.
+     *
+     * @param request An http action to execute with httpClient
+     * @param responseHandler Handles the response from the request and provides the return value for this method
+     * @return The return value of executing responseHandler
+     */
+    private Object executeAndProcessResponse(HttpUriRequest request, Closure responseHandler) {
         try {
             HttpResponse httpResponse = httpClient.execute(request)
-            retVal = responseHandler(httpResponse)
-            // ensure the connection gets released to the manager
+            Object retVal = responseHandler(httpResponse)
+            // Ensure the connection gets released to the manager.
             EntityUtils.consume(httpResponse.entity)
             return retVal
-        } catch (Exception e) {
+        } catch (Throwable e) {
             request.abort()
             throw e
         } finally {
             // Save memory per http://stackoverflow.com/questions/4999708/httpclient-memory-management
-            connectionManager.closeIdleConnections(30, TimeUnit.SECONDS)
+            connectionManager.closeIdleConnections(60, TimeUnit.SECONDS)
         }
     }
 
@@ -182,7 +195,7 @@ class RestClientService implements InitializingBean {
         statusCode
     }
 
-    private int readStatusCode(HttpResponse httpResponse) {
+    Closure readStatusCode = { HttpResponse httpResponse ->
         httpResponse.statusLine.statusCode
     }
 }
