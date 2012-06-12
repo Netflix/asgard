@@ -16,8 +16,6 @@
 package com.netflix.asgard.text
 
 import com.netflix.asgard.Check
-import groovy.text.SimpleTemplateEngine
-import groovy.text.Template
 
 /**
  * Used to specify a customized formula for building a link based on a variable server name and a known URL pattern.
@@ -27,7 +25,7 @@ class TextLinkTemplate {
     /**
      * The required variable name to replace in the link template
      */
-    private static final VARIABLE = 'server'
+    private static final VARIABLE = '${server}'
 
     /**
      * The formula for creating the URL of the link
@@ -47,8 +45,8 @@ class TextLinkTemplate {
      * @param text the display text of the link
      */
     TextLinkTemplate(String urlTemplate, String text) {
-        String msg = "Cannot create link template for ${urlTemplate} because it lacks a \${${VARIABLE}} variable"
-        Check.condition(msg, { urlTemplate.contains("\${${VARIABLE}}") })
+        String msg = "Cannot create link template for ${urlTemplate} because it lacks a ${VARIABLE} variable"
+        Check.condition(msg, { urlTemplate.contains(VARIABLE) })
         this.urlTemplate = urlTemplate
         this.text = text
     }
@@ -60,8 +58,6 @@ class TextLinkTemplate {
      * @return TextLink the resulting URL and display text for the given server name
      */
     TextLink makeLinkForServer(String server) {
-        Template template = new SimpleTemplateEngine().createTemplate(urlTemplate)
-        String url = template.make([(VARIABLE): server]).toString()
-        new TextLink(url, text)
+        new TextLink(urlTemplate.replace(VARIABLE, server), text)
     }
 }
