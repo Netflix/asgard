@@ -35,6 +35,10 @@ class StackService {
 }
 
 @Canonical
-class StackInfo extends HasCompareTo {
+class StackInfo implements Comparable<StackInfo> {
     String name
+
+    public int compareTo(StackInfo that) {
+        this.name <=> that.name
+    }
 }

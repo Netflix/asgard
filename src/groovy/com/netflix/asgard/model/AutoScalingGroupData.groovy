@@ -31,7 +31,6 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import org.apache.commons.collections.Bag
 import org.apache.commons.collections.bag.HashBag
-import org.apache.commons.lang.builder.ToStringBuilder
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
@@ -225,10 +224,6 @@ class AutoScalingGroupData {
 
     DateTime expirationTimeAsDateTime() {
         expirationTime ? new DateTime(expirationTime) : null
-    }
-
-    String toString() {
-        ToStringBuilder.reflectionToString(this).toString()
     }
 
     Collection<AutoScalingProcessType> getSuspendedPrimaryProcessTypes() {

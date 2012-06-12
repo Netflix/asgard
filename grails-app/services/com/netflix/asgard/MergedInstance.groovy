@@ -18,7 +18,8 @@ package com.netflix.asgard
 import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.Tag
 import com.netflix.asgard.model.ApplicationInstance
-import org.apache.commons.lang.builder.ToStringBuilder
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 /**
  * Generic Instance encapsulation for use in instance list. May be created from:
@@ -26,6 +27,8 @@ import org.apache.commons.lang.builder.ToStringBuilder
  * and/or
  *   - EC2's RegisteredInstance
  */
+@EqualsAndHashCode
+@ToString
 class MergedInstance {
 
     // General fields
@@ -87,10 +90,6 @@ class MergedInstance {
 
     List<Tag> listTags() {
         ec2Instance?.tags?.sort { it.key }
-    }
-
-    public String toString() {
-        ToStringBuilder.reflectionToString(this)
     }
 
     List listFieldContainers() {

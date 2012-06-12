@@ -25,7 +25,6 @@ import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AlarmData
-import com.netflix.asgard.model.AwsRequestEqualityMixin
 import com.netflix.asgard.model.TopicData
 import grails.test.MockUtils
 import spock.lang.Specification
@@ -66,10 +65,6 @@ class AlarmControllerSpec extends Specification {
     }
 
     def 'save should create alarm'() {
-        [PutMetricAlarmRequest].each {
-            it.mixin AwsRequestEqualityMixin
-        }
-
         final awsCloudWatchService = Mocks.newAwsCloudWatchService()
         final mockAmazonCloudWatchClient = Mock(AmazonCloudWatch)
         mockAmazonCloudWatchClient.describeAlarms(_) >> { new DescribeAlarmsResult() }
@@ -155,10 +150,6 @@ class AlarmControllerSpec extends Specification {
     }
 
     def 'delete should remove alarm'() {
-        [DeleteAlarmsRequest, DescribeAlarmsRequest].each {
-            it.mixin AwsRequestEqualityMixin
-        }
-
         final awsCloudWatchService = Mocks.newAwsCloudWatchService()
         final mockAmazonCloudWatchClient = Mock(AmazonCloudWatch)
         mockAmazonCloudWatchClient.describeAlarms(_) >> { new DescribeAlarmsResult() }

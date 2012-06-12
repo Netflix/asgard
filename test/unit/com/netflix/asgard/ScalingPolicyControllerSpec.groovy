@@ -25,13 +25,11 @@ import com.amazonaws.services.autoscaling.model.PutScalingPolicyResult
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model.DeleteAlarmsRequest
-import com.amazonaws.services.cloudwatch.model.DescribeAlarmsRequest
 import com.amazonaws.services.cloudwatch.model.DescribeAlarmsResult
 import com.amazonaws.services.cloudwatch.model.Dimension
 import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AlarmData
-import com.netflix.asgard.model.AwsRequestEqualityMixin
 import com.netflix.asgard.model.TopicData
 import grails.test.MockUtils
 import spock.lang.Specification
@@ -45,9 +43,6 @@ class ScalingPolicyControllerSpec extends Specification {
     }
 
     def 'save should create scaling policy and associated alarm'() {
-        [PutScalingPolicyRequest, PutMetricAlarmRequest].each {
-            it.mixin AwsRequestEqualityMixin
-        }
         final awsAutoScalingService = Mocks.newAwsAutoScalingService()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         mockAmazonAutoScalingClient.describePolicies(_) >> { new DescribePoliciesResult() }
@@ -157,10 +152,6 @@ class ScalingPolicyControllerSpec extends Specification {
     }
 
     def 'delete should remove policy'() {
-        [DeletePolicyRequest, DescribePoliciesRequest, DeleteAlarmsRequest, DescribeAlarmsRequest].each {
-            it.mixin AwsRequestEqualityMixin
-        }
-
         final awsAutoScalingService = Mocks.newAwsAutoScalingService()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({ mockAmazonAutoScalingClient })
@@ -198,10 +189,6 @@ class ScalingPolicyControllerSpec extends Specification {
     }
 
     def 'delete should remove policy and alarm'() {
-        [DeletePolicyRequest, DescribePoliciesRequest, DeleteAlarmsRequest, DescribeAlarmsRequest].each {
-            it.mixin AwsRequestEqualityMixin
-        }
-
         final awsAutoScalingService = Mocks.newAwsAutoScalingService()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({ mockAmazonAutoScalingClient })

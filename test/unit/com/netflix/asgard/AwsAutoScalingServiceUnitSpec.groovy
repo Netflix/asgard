@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard
 
+import grails.test.mixin.*
+
 import com.amazonaws.services.autoscaling.AmazonAutoScaling
 import com.amazonaws.services.autoscaling.model.Alarm
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
@@ -36,7 +38,6 @@ import com.netflix.asgard.model.AlarmData.ComparisonOperator
 import com.netflix.asgard.model.AlarmData.Statistic
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
-import com.netflix.asgard.model.AwsRequestEqualityMixin
 import com.netflix.asgard.model.ScalingPolicyData
 import spock.lang.Specification
 
@@ -49,11 +50,6 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
     }
 
     def 'should update ASG with proper AWS requests'() {
-
-        [UpdateAutoScalingGroupRequest, SuspendProcessesRequest, ResumeProcessesRequest].each {
-            it.mixin AwsRequestEqualityMixin
-        }
-
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         mockAmazonAutoScalingClient.describeAutoScalingGroups(_ as DescribeAutoScalingGroupsRequest) >> {
             List<SuspendedProcess> suspendedProcesses = AutoScalingProcessType.with { [AZRebalance, AddToLoadBalancer] }

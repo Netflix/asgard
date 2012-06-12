@@ -15,12 +15,15 @@
  */
 package com.netflix.asgard.model
 
-import org.apache.commons.lang.builder.ToStringBuilder
 import org.joda.time.DateTime
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 /**
  * Discovery API ApplicationInstance encapsulation contained within an Application.
  */
+@EqualsAndHashCode
+@ToString
 class ApplicationInstance {
     String appName
     String hostName  // Always accessible hostname: ec2 public, or dc/intra private
@@ -80,9 +83,5 @@ class ApplicationInstance {
             }
         }
         map
-    }
-
-    String toString() {
-        ToStringBuilder.reflectionToString(this)
     }
 }
