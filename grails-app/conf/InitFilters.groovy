@@ -15,6 +15,8 @@
  */
 class InitFilters {
 
+    def dependsOn = [RegionFilters, SettingsFilters]
+
     def configService
 
     def filters = {
