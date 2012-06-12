@@ -17,12 +17,11 @@ package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
 import grails.test.MockUtils
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
+import grails.test.mixin.TestFor
 import org.junit.Before
 import org.junit.Test
 
-@TestMixin(GrailsUnitTestMixin)
+@TestFor(SecurityController)
 class SecurityCreateCommandTests {
 
     def appService

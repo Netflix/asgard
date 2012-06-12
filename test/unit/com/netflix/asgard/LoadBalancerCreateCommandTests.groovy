@@ -22,7 +22,7 @@ import org.junit.Before
 import org.junit.Test
 
 // http://stackoverflow.com/questions/1703952/grails-how-do-you-unit-test-a-command-object-with-a-service-injected-into-it
-@TestMixin(GrailsUnitTestMixin)
+@TestFor(LoadBalancerController)
 class LoadBalancerCreateCommandTests {
 
     def appService
