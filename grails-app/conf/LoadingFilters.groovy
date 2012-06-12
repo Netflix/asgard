@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse
 
 class LoadingFilters {
 
-    def dependsOn = [SettingsFilters, InitFilters]
+    def dependsOn = [InitFilters]
 
     def initService
 
