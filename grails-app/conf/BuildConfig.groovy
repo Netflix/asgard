@@ -50,7 +50,7 @@ grails.project.dependency.resolution = {
 
         compile(
                 // Amazon Web Services programmatic interface
-                'com.amazonaws:aws-java-sdk:1.3.10',
+                'com.amazonaws:aws-java-sdk:1.3.11',
 
                 // Transitive dependencies of aws-java-sdk, but also used directly
                 'org.apache.httpcomponents:httpcore:4.1',

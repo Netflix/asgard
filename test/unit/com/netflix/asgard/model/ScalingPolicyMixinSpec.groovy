@@ -32,10 +32,11 @@ class ScalingPolicyMixinSpec extends Specification {
     }
 
     def 'should display percentage change in capacity with minimum adjustment'() {
-        ScalingPolicy policy = new ScalingPolicy(adjustmentType: 'PercentChangeInCapacity', scalingAdjustment: 10)
+        ScalingPolicy policy = new ScalingPolicy(adjustmentType: 'PercentChangeInCapacity', scalingAdjustment: 10,
+                minAdjustmentStep: 3)
 
         expect:
-        policy.toDisplayValue() == '10%'
+        policy.toDisplayValue() == '10% (3)'
     }
 
     def 'should display exact capacity'() {

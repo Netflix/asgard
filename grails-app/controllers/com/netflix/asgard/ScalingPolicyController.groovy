@@ -60,11 +60,12 @@ class ScalingPolicyController {
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(UserContext.of(request), groupName)
         String adjustmentType = params.adjustmentType ?: ScalingPolicyData.AdjustmentType.default.name()
         String adjustment = params.adjustment
+        String minAdjustmentStep = params.minAdjustmentStep
         String cooldown = params.cooldown ?: '600'
         if (group) {
             [
                     adjustmentTypes: AdjustmentType.values(), group: groupName, adjustmentType: adjustmentType,
-                    adjustment: adjustment, cooldown: cooldown
+                    adjustment: adjustment, minAdjustmentStep: minAdjustmentStep, cooldown: cooldown
             ] << awsCloudWatchService.prepareForAlarmCreation(UserContext.of(request), groupName, params)
         } else {
             flash.message = "Group '${groupName}' does not exist."
@@ -95,11 +96,13 @@ class ScalingPolicyController {
         ScalingPolicy policy = awsAutoScalingService.getScalingPolicy(userContext, policyName)
         String adjustmentType = params.adjustmentType ?: policy?.adjustmentType
         String adjustment = params.adjustment ?: policy?.scalingAdjustment
+        String minAdjustmentStep = params.minAdjustmentStep ?: policy?.minAdjustmentStep
         String cooldown = params.cooldown ?: policy?.cooldown
         if (policy) {
             [
                     scalingPolicy: policy, adjustmentTypes: AdjustmentType.values(), group: policy.autoScalingGroupName,
-                    adjustmentType: adjustmentType, adjustment: adjustment, cooldown: cooldown
+                    adjustmentType: adjustmentType, adjustment: adjustment,
+                    minAdjustmentStep: minAdjustmentStep, cooldown: cooldown
             ]
         } else {
             flash.message = "Policy '${policyName}' does not exist."
@@ -157,6 +160,7 @@ class ScalingPolicyController {
                 adjustmentType: adjustmentType,
                 adjustment: cmd.adjustment,
                 cooldown: cmd.cooldown,
+                minAdjustmentStep: cmd.minAdjustmentStep,
                 alarms: alarms,
             )
             try {
@@ -183,6 +187,7 @@ class ScalingPolicyController {
                 adjustmentType = inputAdjustmentType
                 scalingAdjustment = cmd.adjustment
                 cooldown = cmd.cooldown
+                minAdjustmentStep = cmd.minAdjustmentStep
             }
             try {
                 awsAutoScalingService.updateScalingPolicy(userContext, ScalingPolicyData.fromPolicyAndAlarms(policy))
@@ -206,6 +211,7 @@ class ScalingPolicyCreateCommand {
     String adjustmentType
     Integer adjustment
     Integer cooldown
+    Integer minAdjustmentStep
 
     String comparisonOperator
     String metric
@@ -240,6 +246,7 @@ class ScalingPolicyUpdateCommand {
     String adjustmentType
     Integer adjustment
     Integer cooldown
+    Integer minAdjustmentStep
 
     static constraints = {
         policyName(nullable:false, blank:false)

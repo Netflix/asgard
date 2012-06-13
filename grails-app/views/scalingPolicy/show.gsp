@@ -63,6 +63,10 @@
           <td class="value">${scalingPolicy.scalingAdjustment}</td>
         </tr>
         <tr class="prop">
+          <td class="name">Minimum Adjustment:</td>
+          <td class="value">${scalingPolicy.minAdjustmentStep}</td>
+        </tr>
+        <tr class="prop">
           <td class="name">Cooldown:</td>
           <td class="value">${scalingPolicy.cooldown} seconds</td>
         </tr>
