@@ -24,20 +24,42 @@
 </head>
 <body>
   <div class="body cluster">
-    <h1>Manage Cluster of Sequential Auto Scaling Groups</h1>
-    <g:if test="${flash.message}">
-      <div class="message">${flash.message}</div>
-    </g:if>
-    <p>
-      Recommended next step: <em>${recommendedNextStep}</em>
-    </p>
-    <g:if test="${runningTasks}">
-      <h3>Running tasks:</h3>
-      <ul class="tasks">
-        <g:each var="task" in="${runningTasks}">
-          <li><g:link class="task" controller="task" action="show" params="[id:task.id]">${task.name}</g:link></li>
+    <div class="intro">
+      <h1>Manage Cluster of Sequential Auto Scaling Groups</h1>
+      <g:if test="${flash.message}">
+        <div class="message">${flash.message}</div>
+      </g:if>
+      <p>
+        Recommended next step: <br/>
+        <em>${recommendedNextStep}</em>
+      </p>
+      <g:if test="${runningTasks}">
+        <h3>Running tasks:</h3>
+        <ul class="tasks">
+          <g:each var="task" in="${runningTasks}">
+            <li><g:link class="task" controller="task" action="show" params="[id:task.id]">${task.name}</g:link></li>
+          </g:each>
+        </ul>
+      </g:if>
+    </div>
+    <g:if test="${instanceType && zoneAvailabilities}">
+      <table class="reservations" title="Reserved instances are cheaper and more likely to be available than on demand instances">
+        <caption>Reservations for ${instanceType}</caption>
+        <thead>
+        <tr>
+          <th>Zone</th>
+          <th title="Reservations that are currently unused and available for use">Available</th>
+        </tr>
+        </thead>
+        <tbody>
+        <g:each var="za" in="${zoneAvailabilities}">
+          <tr>
+            <td><g:availabilityZone value="${za.zoneName}"/></td>
+            <td title="${za.low ? 'Only ' : ''}${za.percentAvailable}% of ${za.totalReservations} reservations" ${za.low ? 'class="danger"' : ''}>${za.availableReservations}</td>
+          </tr>
         </g:each>
-      </ul>
+        </tbody>
+      </table>
     </g:if>
     <ul class="groupReplacingPush">
       <g:each var="autoScalingGroup" in="${cluster}">

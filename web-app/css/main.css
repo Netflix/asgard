@@ -402,20 +402,22 @@ label.choice      { padding-right: 15px; }
 /* GROUP REPLACING PUSH */
 .cluster h3            {                  margin-bottom: 8px; }
 .cluster ul.tasks      { padding-left: 0; margin-bottom: 10px; list-style-type: none; }
-.groupReplacingPush    { padding: 0;      margin: 0; }
+.groupReplacingPush    { padding: 0;      margin: 0; clear: both; }
 .groupReplacingPush li { padding: 10px;   margin-right: 14px; margin-bottom: 14px; display: inline-block; float: left; max-width: 340px; border-style: solid; border-color: #CCC #999 #999 #CCC; border-width: 1px 2px 2px 1px; }
+.cluster div.intro          { float: left; margin-right: 40px;}
+.cluster table.reservations { float: left; margin-bottom: 14px; width: auto; }
 .groupReplacingPush .batchResizeContainer { display: none; padding: 0 8px; }
 .groupReplacingPush li.disabledGroup,
 .groupReplacingPush li.disabledGroup th,
 .groupReplacingPush li.disabledGroup div.buttons { background-color: #EBEBEB; background-image: none; }
-.groupReplacingPush li.create                  { max-width: 380px; }
-.groupReplacingPush li.create table            { width: auto;      }
-.groupReplacingPush li h2                      { margin-top: 0;    }
-.groupReplacingPush li.create h2:first-of-type { float: left;      }
-.groupReplacingPush li.create span.toggle      { float: right;     }
-.groupReplacingPush select                     { max-width: 240px; }
-.groupReplacingPush .filter                    { width: 60px;      }
-.groupReplacingPush .name                      { white-space: normal; min-width: 86px; }
+.groupReplacingPush li.create                    { max-width: 380px; }
+.groupReplacingPush li.create table              { width: auto;      }
+.groupReplacingPush li h2                        { margin-top: 0;    }
+.groupReplacingPush li.create h2:first-of-type   { float: left;      }
+.groupReplacingPush li.create span.toggle        { float: right;     }
+.groupReplacingPush select                       { max-width: 240px; }
+.groupReplacingPush .filter                      { width: 60px;      }
+.groupReplacingPush .name                        { white-space: normal; min-width: 86px; }
 
                    span.toggle       { background: url(../images/tango/16/actions/list-remove.png) transparent no-repeat 0 50%; padding: 0 2px 0 17px; line-height: 16px; }
 .hideAdvancedItems span.toggle       { background-image: url(../images/tango/16/actions/list-add.png); }
