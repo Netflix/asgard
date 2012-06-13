@@ -43,6 +43,13 @@
         <tr class="prop">
           <td class="name">Name:</td>
           <td class="value">${group.groupName}</td>
+        </tr><tr class="prop">
+            <td class="name">Group ID:</td>
+            <td class="value">${group.groupId}</td>
+        </tr>
+        <tr class="prop">
+            <td class="name">VPC ID:</td>
+            <td class="value">${group.vpcId}</td>
         </tr>
         <tr class="prop">
           <td class="name">Owner ID:</td>
@@ -61,7 +68,7 @@
                 <tr class="prop">
                   <td class="value">
                     ${perm.ipProtocol} ${perm.fromPort}-${perm.toPort}
-                    [<g:each var="pair" in="${perm.userIdGroupPairs}" status="j"><g:if test="${j>0}">, </g:if><g:linkObject type="security" name="${pair.groupName}"/></g:each>]
+                    [<g:each var="pair" in="${perm.userIdGroupPairs}" status="j"><g:if test="${j>0}">, </g:if><g:linkObject type="security" name="${pair.groupId}">${pair.groupName}</g:linkObject></g:each>]
                     ${perm.ipRanges}
                   </td>
                 </tr>

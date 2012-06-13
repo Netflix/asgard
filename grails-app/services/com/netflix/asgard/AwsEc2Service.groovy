@@ -89,6 +89,7 @@ import com.netflix.asgard.model.ZoneAvailability
 import org.apache.commons.codec.binary.Base64
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.beans.factory.InitializingBean
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 
 class AwsEc2Service implements CacheInitializer, InitializingBean {
 
@@ -106,7 +107,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     private static final List<String> ACTIVE_INSTANCE_STATES = ['pending', 'running'].asImmutable()
 
     void afterPropertiesSet() {
-        awsClient = new MultiRegionAwsClient<AmazonEC2>({ Region region ->
+        awsClient = awsClient ?: new MultiRegionAwsClient<AmazonEC2>({ Region region ->
             AmazonEC2 client = awsClientService.create(AmazonEC2)
             client.setEndpoint("ec2.${region}.amazonaws.com")
             client
@@ -405,16 +406,22 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     SecurityGroup getSecurityGroup(UserContext userContext, String name, From from = From.AWS) {
         Check.notNull(name, SecurityGroup, "name")
-        SecurityGroup group
         if (from == From.CACHE) {
             return caches.allSecurityGroups.by(userContext.region).get(name)
         }
-        try {
-            def result = awsClient.by(userContext.region).describeSecurityGroups(
-                    new DescribeSecurityGroupsRequest().withGroupNames([name]))
-            group = Check.lone(result.getSecurityGroups(), SecurityGroup)
-        } catch (com.amazonaws.AmazonServiceException e) {
-            group = null
+        Closure findGroupForRequest = { DescribeSecurityGroupsRequest request ->
+            try {
+                DescribeSecurityGroupsResult result = awsClient.by(userContext.region).describeSecurityGroups(request)
+                return Check.lone(result?.getSecurityGroups(), SecurityGroup)
+            } catch (com.amazonaws.AmazonServiceException ignore) {
+                // Can't find a security group with that request.
+                return null
+            }
+        }
+        SecurityGroup group = findGroupForRequest(new DescribeSecurityGroupsRequest().withGroupIds(name))
+        if (!group) {
+            // Maybe they provided a name rather than an ID.
+            group = findGroupForRequest(new DescribeSecurityGroupsRequest().withGroupNames(name))
         }
         caches.allSecurityGroups.by(userContext.region).put(name, group)
     }
