@@ -21,15 +21,24 @@ class ZoneAvailabilitySpec extends Specification {
 
     def 'zone availability should be low if and only if available is less than 25% of total'() {
         when:
-        ZoneAvailability fiftyPercentAvailable = new ZoneAvailability(totalReservations: 10, usedReservations: 3)
-        ZoneAvailability tenPercentAvailable = new ZoneAvailability(totalReservations: 10, usedReservations: 8)
+        ZoneAvailability manyAvailable = new ZoneAvailability(totalReservations: 10, usedReservations: 3)
+        ZoneAvailability fewAvailable = new ZoneAvailability(totalReservations: 10, usedReservations: 8)
 
         then:
-        !fiftyPercentAvailable.low
-        fiftyPercentAvailable.availableReservations == 7
-        fiftyPercentAvailable.percentAvailable == 70
-        tenPercentAvailable.low
-        tenPercentAvailable.availableReservations == 2
-        tenPercentAvailable.percentAvailable == 20
+        !manyAvailable.low
+        manyAvailable.availableReservations == 7
+        manyAvailable.percentAvailable == 70
+        fewAvailable.low
+        fewAvailable.availableReservations == 2
+        fewAvailable.percentAvailable == 20
+    }
+
+    def 'zone availability should have a minimum of zero'() {
+        when:
+        ZoneAvailability zoneAvailability = new ZoneAvailability(totalReservations: 1, usedReservations: 3)
+
+        then:
+        zoneAvailability.percentAvailable == 0
+        zoneAvailability.availableReservations == 0
     }
 }
