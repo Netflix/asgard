@@ -19,6 +19,7 @@ import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.netflix.asgard.model.ZoneAvailability
 import com.netflix.asgard.push.GroupActivateOperation
 import com.netflix.asgard.push.GroupCreateOperation
 import com.netflix.asgard.push.GroupCreateOptions
@@ -133,6 +134,8 @@ class PushService {
         Integer relaunchCount = group.instances.size()
         LaunchConfiguration lc = awsAutoScalingService.getLaunchConfiguration(userContext,
                 group.launchConfigurationName)
+        String instanceType = lc.instanceType
+        List<ZoneAvailability> zoneAvailabilities = awsEc2Service.getZoneAvailabilities(userContext, instanceType)
         Collection<Image> images = awsEc2Service.getAccountImages(userContext)
         Integer fullCount = images.size()
         Image currentImage = awsEc2Service.getImage(userContext, lc.imageId)
@@ -154,7 +157,8 @@ class PushService {
                 image: lc.imageId,
                 imageListIsShort: imageListIsShort,
                 instanceTypes: instanceTypeService.getInstanceTypes(userContext),
-                instanceType: lc.instanceType,
+                instanceType: instanceType,
+                zoneAvailabilities: zoneAvailabilities,
                 securityGroups: awsEc2Service.getEffectiveSecurityGroups(userContext),
                 loadBalancers: loadBalancers,
                 selectedLoadBalancers: group.loadBalancerNames,
