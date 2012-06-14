@@ -46,7 +46,6 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest
 import com.amazonaws.services.ec2.model.DescribeReservedInstancesOfferingsRequest
 import com.amazonaws.services.ec2.model.DescribeReservedInstancesOfferingsResult
-import com.amazonaws.services.ec2.model.DescribeReservedInstancesRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
 import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsRequest
@@ -82,9 +81,11 @@ import com.amazonaws.services.ec2.model.TerminateInstancesResult
 import com.amazonaws.services.ec2.model.UserIdGroupPair
 import com.amazonaws.services.ec2.model.Volume
 import com.amazonaws.services.ec2.model.VolumeAttachment
+import com.google.common.collect.HashMultiset
 import com.google.common.collect.Multiset
 import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.cache.CacheInitializer
+import com.netflix.asgard.model.ZoneAvailability
 import org.apache.commons.codec.binary.Base64
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.beans.factory.InitializingBean
@@ -100,6 +101,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     def restClientService
     def taskService
     List<String> accounts  // main account is accounts[0]
+
+    /** The state names for instances that count against reservation usage. */
+    private static final List<String> ACTIVE_INSTANCE_STATES = ['pending', 'running'].asImmutable()
 
     void afterPropertiesSet() {
         awsClient = new MultiRegionAwsClient<AmazonEC2>({ Region region ->
@@ -597,6 +601,16 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         caches.allInstances.by(userContext.region)?.list() ?: []
     }
 
+    /**
+     * Gets all instances that are currently active and counted against reservation usage.
+     *
+     * @param userContext who, where, why
+     * @return Collection < Instance > active instances
+     */
+    Collection<Instance> getActiveInstances(UserContext userContext) {
+        getInstances(userContext).findAll { it.state.name in ACTIVE_INSTANCE_STATES }
+    }
+
     List<Instance> getInstancesByIds(UserContext userContext, List<String> instanceIds, From from = From.CACHE) {
         List<Instance> instances = []
         if (from == From.AWS) {
@@ -780,16 +794,45 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         awsClient.by(region).describeReservedInstances().reservedInstances
     }
 
-    Collection<ReservedInstances> getReservedInstances(UserContext userContext) {
-        caches.allReservedInstancesGroups.by(userContext.region).list()
+    /**
+     * For a given instance type such as m1.large, this method calculates how many active instance reservations are
+     * currently available for use in each availability zone.
+     *
+     * @param userContext who, where, why
+     * @param instanceType the choice of instance type to get reservation counts for, such as m1.large
+     * @return List < ZoneAvailability > availability zones with available reservation counts, or empty list if there
+     *          are no reservations in any zones for the specified instance type
+     */
+    List<ZoneAvailability> getZoneAvailabilities(UserContext userContext, String instanceType) {
+        Collection<ReservedInstances> reservedInstanceGroups = getReservedInstances(userContext)
+        Map<String, Integer> zonesToActiveReservationCounts = [:]
+        for (ReservedInstances reservedInstanceGroup in reservedInstanceGroups) {
+            if (reservedInstanceGroup.state == 'active' && reservedInstanceGroup.instanceType == instanceType) {
+                String zone = reservedInstanceGroup.availabilityZone
+                int runningCount = zonesToActiveReservationCounts[zone] ?: 0
+                zonesToActiveReservationCounts[zone] = runningCount + reservedInstanceGroup.instanceCount
+            }
+        }
+        Collection<Instance> activeInstances = getActiveInstances(userContext)
+        Multiset<String> zoneInstanceCounts = HashMultiset.create()
+        for (Instance instance in activeInstances) {
+            if (instance.instanceType == instanceType) {
+                zoneInstanceCounts.add(instance.placement.availabilityZone)
+            }
+        }
+        Set<String> zonesWithInstances = zoneInstanceCounts.elementSet()
+        Set<String> zonesWithReservations = zonesToActiveReservationCounts.keySet()
+        List<String> zoneNames = (zonesWithInstances + zonesWithReservations).sort()
+        List<ZoneAvailability> zoneAvailabilities = zoneNames.collect { String zone ->
+            int instanceCount = zoneInstanceCounts.count(zone)
+            Integer reservationCount = zonesToActiveReservationCounts[zone] ?: 0
+            new ZoneAvailability(zoneName: zone, totalReservations: reservationCount, usedReservations: instanceCount)
+        }
+        zoneAvailabilities.any { it.totalReservations } ? zoneAvailabilities : []
     }
 
-    ReservedInstances getReservedInstances(UserContext userContext, String reservationId) {
-        Check.notNull(reservationId, ReservedInstances, "reservationId")
-        def result = awsClient.by(userContext.region).describeReservedInstances(
-                new DescribeReservedInstancesRequest().withReservedInstancesIds(reservationId))
-        ReservedInstances lone = Check.lone(result.getReservedInstances(), ReservedInstances)
-        caches.allReservedInstancesGroups.by(userContext.region).put(reservationId, lone)
+    Collection<ReservedInstances> getReservedInstances(UserContext userContext) {
+        caches.allReservedInstancesGroups.by(userContext.region).list()
     }
 
     //Volumes
