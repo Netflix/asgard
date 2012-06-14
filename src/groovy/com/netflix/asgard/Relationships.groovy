@@ -364,8 +364,13 @@ class Relationships {
         String dateString = null
         if (matcher.matches()) { dateString = matcher[0][1] }
 
-        // Example: 20100823
-        dateString ? DateTimeFormat.forPattern("yyyyMMdd").parseDateTime(dateString) : null
+        try {
+            // Example: 20100823
+            return dateString ? DateTimeFormat.forPattern("yyyyMMdd").parseDateTime(dateString) : null
+        } catch (Exception e) {
+            // ignore failure
+            return null
+        }
     }
 }
 
