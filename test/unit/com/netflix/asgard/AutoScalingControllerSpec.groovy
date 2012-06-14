@@ -25,6 +25,7 @@ import com.amazonaws.services.autoscaling.model.Alarm
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 
+@SuppressWarnings("GroovyPointlessArithmetic")
 class AutoScalingControllerSpec extends ControllerSpec {
 
     void setup() {

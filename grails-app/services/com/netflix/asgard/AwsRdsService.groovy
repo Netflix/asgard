@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.rds.AmazonRDS
 import com.amazonaws.services.rds.model.AuthorizeDBSecurityGroupIngressRequest
 import com.amazonaws.services.rds.model.CreateDBInstanceRequest
@@ -44,7 +45,6 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
     static final String QUADRUPLE_EXTRA_LARGE = 'db.m2.4xlarge'
 
     static final Integer DEFAULT_PORT = 3306
-    static final String DEFAULT_ENGINE = 'MySQL5.1'
 
     final enum Engine {
         MySQL("MySQL"),
@@ -66,7 +66,7 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
     def awsClientService
     Caches caches
     def taskService
-    List<String> accounts  // main account is accounts[0]
+    List<String> accounts // Main account is accounts[0]
 
     void afterPropertiesSet() {
         awsClient = new MultiRegionAwsClient<AmazonRDS>( { Region region ->
@@ -177,7 +177,7 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
             def result = awsClient.by(userContext.region).describeDBSecurityGroups(
                     new DescribeDBSecurityGroupsRequest().withDBSecurityGroupName(name))
             group = Check.lone(result.getDBSecurityGroups(), DBSecurityGroup)
-        } catch (com.amazonaws.AmazonServiceException e) {
+        } catch (AmazonServiceException ignored) {
             group = null
         }
         caches.allDBSecurityGroups.by(userContext.region).put(name, group)

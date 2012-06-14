@@ -24,6 +24,7 @@ import com.amazonaws.services.simpledb.model.SelectResult
 import com.netflix.asgard.mock.Mocks
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAccessibility")
 class ApplicationServiceRunQuerySpec extends Specification {
 
     static final DOMAIN_NAME = 'CLOUD_APPLICATIONS'
@@ -59,6 +60,7 @@ class ApplicationServiceRunQuerySpec extends Specification {
         when:
         Collection<AppRegistration> applications = applicationService.retrieveApplications()
 
+        //noinspection GroovyPointlessArithmetic
         then:
         1 * simpleDbClient.createDomain(new CreateDomainRequest(DOMAIN_NAME))
         applications == []

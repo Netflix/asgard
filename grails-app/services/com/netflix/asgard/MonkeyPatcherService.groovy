@@ -23,7 +23,6 @@ import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.Instance
-import com.amazonaws.services.ec2.model.SpotInstanceRequest
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.simpledb.model.Attribute
 import com.amazonaws.services.simpledb.model.DomainMetadataResult
@@ -210,12 +209,6 @@ class MonkeyPatcherService implements InitializingBean {
     private void addInstanceTagGetterMethod(String getter, String key) {
         if (!(Instance.class.methods as List).contains(getter)) {
             Instance.metaClass[getter] = { -> delegate.getTag(key) }
-        }
-    }
-
-    private void addSpotInstanceRequestTagGetterMethod(String getter, String key) {
-        if (!(SpotInstanceRequest.class.methods as List).contains(getter)) {
-            SpotInstanceRequest.metaClass[getter] = { -> delegate.getTag(key) }
         }
     }
 

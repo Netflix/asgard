@@ -78,7 +78,7 @@ class TaskService {
     def doWork(Closure work, Task task) {
         try {
             return work(task)
-        } catch (CancelledException ie) {
+        } catch (CancelledException ignored) {
             // Thrown if task is cancelled while sleeping. Not an error.
         } catch (Exception e) {
             exception(task, e)
@@ -195,7 +195,7 @@ class TaskService {
             task.thread.interrupt()
             task.log("Cancelled by ${userContext.clientHostName}")
             fail(task)
-        } catch (CancelledException ie) {
+        } catch (CancelledException ignored) {
             // Thrown if task is cancelled while sleeping. Not an error.
         } catch (Exception e) {
             exception(task, e)

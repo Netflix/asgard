@@ -73,7 +73,7 @@ class AwsSimpleDbService implements InitializingBean {
     DomainMetadataResult getDomainMetadata(UserContext userContext, String domainName) {
         try {
             return awsClient.by(userContext.region).domainMetadata(new DomainMetadataRequest(domainName))
-        } catch (AmazonServiceException ase) {
+        } catch (AmazonServiceException ignored) {
             return null
         }
     }
@@ -97,7 +97,7 @@ class AwsSimpleDbService implements InitializingBean {
         for (int i = 0; i < maxAttempts; i++) {
             try {
                 return nextTaskIdAttempt(locator)
-            } catch (AttributeDoesNotExistException adnee) {
+            } catch (AttributeDoesNotExistException ignored) {
                 triedToResetAttribute = true
                 resetSequence(locator)
             } catch (AmazonServiceException ase) {

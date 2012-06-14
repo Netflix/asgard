@@ -22,7 +22,6 @@ import com.netflix.asgard.ServiceInitLoggingBeanPostProcessor
 import com.netflix.asgard.ThreadScheduler
 import groovy.io.FileType
 
-
 beans = {
     serviceInitLoggingBeanPostProcessor(ServiceInitLoggingBeanPostProcessor)
 

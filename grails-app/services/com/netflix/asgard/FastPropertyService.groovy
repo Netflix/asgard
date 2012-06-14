@@ -136,7 +136,6 @@ class FastPropertyService implements CacheInitializer {
         }, Link.to(EntityType.fastProperty, id), existingTask)
     }
 
-
     void updateFastProperty(UserContext userContext, String id, String value, String updatedBy,
                             Task existingTask = null) {
         FastProperty fastProperty = get(userContext, id)
@@ -213,7 +212,6 @@ class FastPropertyService implements CacheInitializer {
             }, Link.to(EntityType.fastProperty, id), existingTask)
         }
     }
-
 
     /**
      * Returns a list of all registered application names. For app names that do not have any Fast Properties,

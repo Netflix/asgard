@@ -102,8 +102,3 @@ class Task {
     }
 
 }
-
-class TypeAndId {
-    Class type
-    String id
-}

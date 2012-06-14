@@ -144,7 +144,7 @@ class AwsS3Service implements InitializingBean {
             Time.sleepCancellably(50) // Avoid rate limiting
             awsClient.by(userContext.region).getObjectMetadata(bucket, key)
             return true
-        } catch (AmazonServiceException ase) {
+        } catch (AmazonServiceException ignored) {
             return false
         }
     }

@@ -59,8 +59,8 @@ class HealthcheckService implements BackgroundProcessInitializer {
             minimumCounts.each { cacheName, threshold ->
                 MultiRegionCachedMap multiRegionCachedMap
                 try {
-                    multiRegionCachedMap = caches[cacheName]
-                } catch (MissingPropertyException e) {
+                    multiRegionCachedMap = caches[cacheName] as MultiRegionCachedMap
+                } catch (MissingPropertyException ignored) {
                     log.error("Invalid cache name ${cacheName} specified for healthCheck in config")
                     cachesHealthy = false
                     cacheNamesToProblems[cacheName] = 'Invalid cache name'

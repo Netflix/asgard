@@ -44,8 +44,6 @@ import com.amazonaws.services.ec2.model.DescribeInstanceAttributeResult
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest
 import com.amazonaws.services.ec2.model.DescribeInstancesResult
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest
-import com.amazonaws.services.ec2.model.DescribeReservedInstancesOfferingsRequest
-import com.amazonaws.services.ec2.model.DescribeReservedInstancesOfferingsResult
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
 import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsRequest
@@ -210,7 +208,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
                 List<Image> images = awsClient.by(userContext.region).describeImages(request).getImages()
                 image = Check.loneOrNone(images, Image)
             }
-            catch (AmazonServiceException ase) {
+            catch (AmazonServiceException ignored) {
                 // If Amazon doesn't know this image id then return null and put null in the allImages CachedMap
             }
             caches.allImages.by(userContext.region).put(imageId, image)
@@ -246,7 +244,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             // Verify that the image exists
             Image image = getImage(userContext, imageId)
             if (image) {
-                String packageName = image.packageName
                 DeregisterImageRequest request = new DeregisterImageRequest().withImageId(image.imageId)
                 awsClient.by(userContext.region).deregisterImage(request)
             }
@@ -359,7 +356,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
                 addImageLaunchers(userContext, imageId, addAccounts, existingTask)
             }
             return addAccounts
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             return []  // permission problem
         }
     }
@@ -414,7 +411,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             def result = awsClient.by(userContext.region).describeSecurityGroups(
                     new DescribeSecurityGroupsRequest().withGroupNames([name]))
             group = Check.lone(result.getSecurityGroups(), SecurityGroup)
-        } catch (com.amazonaws.AmazonServiceException e) {
+        } catch (AmazonServiceException ignored) {
             group = null
         }
         caches.allSecurityGroups.by(userContext.region).put(name, group)
@@ -549,10 +546,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             awsClient.by(userContext.region).revokeSecurityGroupIngress(
                     new RevokeSecurityGroupIngressRequest().withGroupName(groupName).withIpPermissions(perms))
         }, Link.to(EntityType.security, groupName))
-    }
-
-    DescribeReservedInstancesOfferingsResult describeReservedInstancesOfferings(Region region) {
-        awsClient.by(region).describeReservedInstancesOfferings(new DescribeReservedInstancesOfferingsRequest())
     }
 
     DescribeSpotPriceHistoryResult describeSpotPriceHistory(Region region,

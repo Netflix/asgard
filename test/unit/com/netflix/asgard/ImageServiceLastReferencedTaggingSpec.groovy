@@ -20,6 +20,7 @@ import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.Instance
 import grails.converters.JSON
 
+@SuppressWarnings("GroovyPointlessArithmetic")
 class ImageServiceLastReferencedTaggingSpec extends ImageServiceSpec {
 
     def 'should tag if image is referenced in test instance'() {
@@ -50,6 +51,7 @@ class ImageServiceLastReferencedTaggingSpec extends ImageServiceSpec {
 
     def 'should tag if image is used in production'() {
         UserContext usEastUserContext = userContext.withRegion(Region.US_EAST_1)
+        //noinspection GroovyAssignabilityCheck
         restClientService.getAsJson({ it =~ /\/us-east-1\/image\/used.json/ }) >> JSON.parse("[${IMAGE_ID}]")
         awsEc2Service.getAccountImages(usEastUserContext) >> [new Image(imageId: IMAGE_ID, name: 'image-name')]
         setupLastReferencedDefaults()

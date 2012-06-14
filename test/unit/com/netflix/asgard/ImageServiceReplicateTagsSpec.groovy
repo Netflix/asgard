@@ -21,6 +21,7 @@ import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
 import groovy.xml.MarkupBuilder
 
+@SuppressWarnings(["GroovyPointlessArithmetic", "GroovyAssignabilityCheck"])
 class ImageServiceReplicateTagsSpec extends ImageServiceSpec {
 
     def 'should add tags if missing from production'() {
