@@ -22,20 +22,18 @@ import grails.converters.XML
 
 class VolumeController {
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: list, params: params) }
 
     def awsEc2Service
 
     def list = {
         UserContext userContext = UserContext.of(request)
         def volumes = (awsEc2Service.getVolumes(userContext) as List).sort { it.volumeId.toLowerCase() }
-        def details = ['volumes':volumes, 'zoneList':awsEc2Service.getAvailabilityZones(userContext)]
+        def details = ['volumes': volumes, 'zoneList': awsEc2Service.getAvailabilityZones(userContext)]
         withFormat {
             html { details }
             xml { new XML(details).render(response) }
             json { new JSON(details).render(response) }
-            // TODO: use this one when we can solve CSRF susceptibility
-            //json { new CallbackJSON(instances, params.callback).render(response) }
         }
     }
 
@@ -45,10 +43,10 @@ class VolumeController {
             Volume volume = awsEc2Service.createVolume(userContext, params.volumeSize as Integer,
                     params.availabilityZone)
             flash.message = "EBS Volume '${volume.volumeId}' has been created."
-            redirect(action:show, params:[id:volume.volumeId])
+            redirect(action: show, params: [id: volume.volumeId])
         } catch (AmazonServiceException ase) {
             flash.message = "Could not create EBS Volume: ${ase}"
-            redirect(action:list)
+            redirect(action: list)
         }
     }
 
@@ -87,7 +85,6 @@ class VolumeController {
                 html { return ['volume':volume] }
                 xml { new XML(volume).render(response) }
                 json { new JSON(volume).render(response) }
-                //json { new CallbackJSON(details, params.callback).render(response) }
             }
         }
     }
@@ -101,6 +98,6 @@ class VolumeController {
         } catch (Exception e) {
             flash.message = "Could not detach EBS Volume ${volumeId}: ${e}"
         }
-        redirect(action:show, params:[id:volumeId])
+        redirect(action: show, params: [id: volumeId])
     }
 }

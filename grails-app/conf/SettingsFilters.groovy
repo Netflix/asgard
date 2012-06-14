@@ -17,7 +17,6 @@
 class SettingsFilters {
 
     def configService
-    def flagService
     def grailsApplication
 
     def filters = {

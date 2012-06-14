@@ -40,7 +40,6 @@ class GroupCreateOperation {
     def awsEc2Service
     def awsLoadBalancerService
     def discoveryService
-    def pushService
     def taskService
     private final GroupCreateOptions options
     Task task

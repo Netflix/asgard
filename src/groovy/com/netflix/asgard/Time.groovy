@@ -65,7 +65,7 @@ class Time {
             String[] formats = [READABLE_ISO_FORMAT_STRING, ZULU_ISO_FORMAT_STRING]
             Date parsedDate = DateUtils.parseDate(input, formats)
             return new DateTime(parsedDate.time)
-        } catch (Exception parseException) {
+        } catch (Exception ignored) {
             // Can't parse, so return null
         }
         null

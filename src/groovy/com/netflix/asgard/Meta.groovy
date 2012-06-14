@@ -62,7 +62,7 @@ class Meta {
     private static Boolean hasStaticField(Class clazz, String name) {
         try {
             return Modifier.isStatic(clazz.getDeclaredField(name).modifiers)
-        } catch (NoSuchFieldException nsfe) {
+        } catch (NoSuchFieldException ignored) {
             return false
         }
     }

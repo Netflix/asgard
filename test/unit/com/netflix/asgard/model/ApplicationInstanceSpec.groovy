@@ -61,7 +61,6 @@ class ApplicationInstanceSpec extends Specification {
           <actionType>ADDED</actionType>
         </instance>'''
 
-
     def 'should parse xml and read instance id'() {
         when:
         ApplicationInstance instance = new ApplicationInstance(XML.parse(instanceXml))

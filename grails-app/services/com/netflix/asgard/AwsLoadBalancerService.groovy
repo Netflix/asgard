@@ -105,7 +105,7 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
             def loadBalancers = awsClient.by(userContext.region).describeLoadBalancers(
                     new DescribeLoadBalancersRequest().withLoadBalancerNames([name])).getLoadBalancerDescriptions()
             loadBalancer = Check.lone(loadBalancers, LoadBalancerDescription)
-        } catch (AmazonServiceException ase) {
+        } catch (AmazonServiceException ignored) {
             loadBalancer = null
         }
         if (from != From.AWS_NOCACHE) {

@@ -21,6 +21,7 @@ import com.netflix.asgard.TagNames
 import com.netflix.asgard.Time
 import org.joda.time.DateTime
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 @Category(AutoScalingGroup)
 class AutoScalingGroupMixin {
 

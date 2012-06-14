@@ -23,6 +23,7 @@ import com.netflix.asgard.mock.Mocks
 import grails.plugin.spock.ControllerSpec
 import grails.test.MockUtils
 
+@SuppressWarnings("GroovyPointlessArithmetic")
 class LoadBalancerControllerSpec extends ControllerSpec {
 
     AmazonElasticLoadBalancing mockElb = Mock(AmazonElasticLoadBalancing)

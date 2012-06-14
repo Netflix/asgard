@@ -159,7 +159,7 @@ class SecurityController {
 
     def delete = {
         UserContext userContext = UserContext.of(request)
-        String msg = ''
+        String msg
         try {
             String name = params.name
             if (awsEc2Service.getSecurityGroup(userContext, name)) {
