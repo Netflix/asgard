@@ -84,11 +84,11 @@ class InitControllerSpec extends ControllerSpec {
 
         where:
 
-        accessId                | valid
-        'accessId'              | false
-        ''                      | false
-        null                    | false
-        SAMPLE_ACCESS_ID        | true
+        accessId         | valid
+        'accessId'       | false
+        ''               | false
+        null             | false
+        SAMPLE_ACCESS_ID | true
     }
 
     @Unroll("hasErrors should return #valid when secrectKey is #secretKey")
@@ -103,11 +103,11 @@ class InitControllerSpec extends ControllerSpec {
 
         where:
 
-        secretKey               | valid
-        'secretKeyId'           | false
-        ''                      | false
-        null                    | false
-        SAMPLE_SECRET_KEY       | true
+        secretKey         | valid
+        'secretKeyId'     | false
+        ''                | false
+        null              | false
+        SAMPLE_SECRET_KEY | true
     }
 
     @Unroll("hasErrors should return #valid when accountNumber is #accountNumber")
@@ -122,12 +122,12 @@ class InitControllerSpec extends ControllerSpec {
 
         where:
 
-        accountNumber           | valid
-        '1111-2222-3333'        | true
-        '111122223333'          | true
-        ''                      | false
-        null                    | false
-        'aaaa'                  | false
-        '1111222233334'         | false
+        accountNumber    | valid
+        '1111-2222-3333' | true
+        '111122223333'   | true
+        ''               | false
+        null             | false
+        'aaaa'           | false
+        '1111222233334'  | false
     }
 }

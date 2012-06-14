@@ -47,7 +47,7 @@ abstract class ImageServiceSpec extends Specification {
 
     void setupLastReferencedDefaults() {
         awsEc2Service.getInstances(_) >> []
-        awsAutoScalingService.getLaunchConfigurations(_)  >> []
+        awsAutoScalingService.getLaunchConfigurations(_) >> []
         restClientService.getAsJson({ it =~ /\/image\/used.json/ }) >> JSON.parse('[]')
     }
 
