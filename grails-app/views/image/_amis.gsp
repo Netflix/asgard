@@ -36,7 +36,7 @@
   <tbody>
   <g:each var="image" in="${images}" status="i">
     <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-      <td><g:linkObject name="${image.imageId}" /></td>
+      <td><g:linkObject type="image" name="${image.imageId}"/></td>
       <td>
         <g:each var="mergedInstance" in="${imageIdsToInstanceLists[image.imageId]}">
           <g:linkObject name="${mergedInstance.instanceId}"/>
@@ -45,7 +45,7 @@
         </g:each>
       </td>
       <td><g:formatDate date="${image.baseAmiDate?.toDate()}"/></td>
-      <td><g:linkObject name="${image.baseAmiId}" /></td>
+      <td><g:linkObject type="image" name="${image.baseAmiId}"/></td>
       <td>${image.baseAmiName}</td>
       <td class="ami">${image.name}</td>
       <td class="ami">${image.imageLocation}</td>

@@ -28,7 +28,7 @@
     <h1>For more advanced configuration, please consult the the documentation.</h1>
     <g:if test="${flash.message}">
       <div class="message">${flash.message}</div>
-    </g:if>    
+    </g:if>
     <g:hasErrors bean="${cmd}">
       <div class="errors">
         <g:renderErrors bean="${cmd}" as="list"/>
@@ -40,21 +40,30 @@
           <tbody>
             <tr class="prop">
               <td class="name">
-                <label>Access Key ID:</label>
+                <label for="accessId">Access Key ID:</label>
               </td>
               <td class="value"><input type="text" size='25' maxlength='20' id="accessId" name="accessId" value="${params.accessId}" class="required"/></td>
             </tr>
             <tr class="prop">
               <td class="name">
-                <label>Secret Access Key:</label>
+                <label for="secretKey">Secret Access Key:</label>
               </td>
-              <td class="value"><input type="text" size='50' maxlength='40' id="secretKey" name="secretKey" value="${params.secretKey}" class="required"/></td>
+              <td class="value"><input type="password" size='50' maxlength='40' id="secretKey" name="secretKey" value="${params.secretKey}" class="required"/></td>
             </tr>
             <tr class="prop">
               <td class="name">
-                <label>AWS Account Number:</label>
+                <label for="accountNumber">AWS Account Number:</label>
               </td>
               <td class="value"><input type="text" size='15' maxlength='14' id="accountNumber" name="accountNumber" value="${params.accountNumber}" class="required"/></td>
+            </tr>
+            <tr class="prop" title="Keep this flag checked to allow display and use of public Amazon images">
+              <td class="name">
+                <label for="showPublicAmazonImages">Use public Amazon images:</label>
+              </td>
+              <td class="value">
+                %{--Pre-check initially (no cmd). On validation failure retain user choice.--}%
+                <input type="checkbox" ${params.showPublicAmazonImages || !cmd ? 'checked="checked"' : ''} id="showPublicAmazonImages" name="showPublicAmazonImages"/>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -62,7 +71,7 @@
       <div class="buttons">
         <g:buttonSubmit class="save" value="save">Save</g:buttonSubmit>
       </div>
-    </g:form>     
+    </g:form>
   </div>
 </body>
 </html>

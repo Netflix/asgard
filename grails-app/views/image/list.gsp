@@ -51,7 +51,7 @@
         <tbody>
         <g:each var="image" in="${images}" status="i">
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-            <td><g:linkObject name="${image.imageId}"/></td>
+            <td><g:linkObject type="image" name="${image.imageId}"/></td>
             <td class="ami">${image.name}</td>
             <td class="ami">${image.imageLocation}</td>
             <td>${image.architecture}</td>
@@ -61,7 +61,7 @@
             <td>${image.creationTime}</td>
             <td>${image.lastReferencedTime}</td>
             <td class="ami">${image.appVersion}</td>
-            <td><g:linkObject name="${image.baseAmiId}"/></td>
+            <td><g:linkObject type="image" name="${image.baseAmiId}"/></td>
             <td><g:formatDate date="${image.baseAmiDate?.toDate()}" format="yyyy-MM-dd"/></td>
           </tr>
         </g:each>
