@@ -47,9 +47,6 @@ class SecurityControllerSpec extends ControllerSpec {
         'helloworld' == attrs['group'].groupName
         'test' == attrs['accountNames']['179000000000']
         null != attrs['editable']
-        1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['helloworld'])) >> {
-            throw new AmazonServiceException('Missing Security Group')
-        }
         1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['helloworld'])) >>
                 new DescribeSecurityGroupsResult(securityGroups: [new SecurityGroup(groupName: 'helloworld')])
         0 * _._
@@ -73,16 +70,13 @@ class SecurityControllerSpec extends ControllerSpec {
 
     def 'show should not find missing security group'() {
         def p = controller.params
-        p.name ='doesntexist'
+        p.name = 'doesntexist'
 
         when: controller.show()
 
         then:
         '/error/missing' == controller.renderArgs.view
         "Security Group 'doesntexist' not found in us-east-1 test" == controller.flash.message
-        1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['doesntexist'])) >> {
-            throw new AmazonServiceException('Missing Security Group')
-        }
         1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['doesntexist'])) >> {
             throw new AmazonServiceException('Missing Security Group')
         }
@@ -107,11 +101,11 @@ class SecurityControllerSpec extends ControllerSpec {
         cmd == controller.chainArgs.model['cmd']
     }
 
-    void 'save should create security group'() {
+    def 'save should create security group'() {
         mockRequest.method = 'POST'
         def p = mockParams
         p.appName = 'helloworld'
-        p.detail ='indiana'
+        p.detail = 'indiana'
         p.description = 'Only accessible by Indiana Jones'
         SecurityCreateCommand cmd = new SecurityCreateCommand(appName: p.appName, detail: p.detail)
         cmd.applicationService = Mocks.applicationService()

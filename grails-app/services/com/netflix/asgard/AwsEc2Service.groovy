@@ -47,6 +47,7 @@ import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest
 import com.amazonaws.services.ec2.model.DescribeReservedInstancesOfferingsRequest
 import com.amazonaws.services.ec2.model.DescribeReservedInstancesOfferingsResult
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsRequest
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsResult
@@ -89,7 +90,6 @@ import com.netflix.asgard.model.ZoneAvailability
 import org.apache.commons.codec.binary.Base64
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.beans.factory.InitializingBean
-import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 
 class AwsEc2Service implements CacheInitializer, InitializingBean {
 
@@ -409,19 +409,18 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         if (from == From.CACHE) {
             return caches.allSecurityGroups.by(userContext.region).get(name)
         }
-        Closure findGroupForRequest = { DescribeSecurityGroupsRequest request ->
-            try {
-                DescribeSecurityGroupsResult result = awsClient.by(userContext.region).describeSecurityGroups(request)
-                return Check.lone(result?.getSecurityGroups(), SecurityGroup)
-            } catch (com.amazonaws.AmazonServiceException ignore) {
-                // Can't find a security group with that request.
-                return null
-            }
+        DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest()
+        if (name ==~ /sg-[a-f0-9]+/) {
+            request.withGroupIds(name)
+        } else {
+            request.withGroupNames(name)
         }
-        SecurityGroup group = findGroupForRequest(new DescribeSecurityGroupsRequest().withGroupIds(name))
-        if (!group) {
-            // Maybe they provided a name rather than an ID.
-            group = findGroupForRequest(new DescribeSecurityGroupsRequest().withGroupNames(name))
+        SecurityGroup group = null
+        try {
+            DescribeSecurityGroupsResult result = awsClient.by(userContext.region).describeSecurityGroups(request)
+            group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
+        } catch (AmazonServiceException ignore) {
+            // Can't find a security group with that request.
         }
         caches.allSecurityGroups.by(userContext.region).put(name, group)
     }
