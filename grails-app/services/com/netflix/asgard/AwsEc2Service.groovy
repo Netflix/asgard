@@ -82,6 +82,7 @@ import com.amazonaws.services.ec2.model.UserIdGroupPair
 import com.amazonaws.services.ec2.model.Volume
 import com.amazonaws.services.ec2.model.VolumeAttachment
 import com.google.common.collect.HashMultiset
+import com.google.common.collect.Lists
 import com.google.common.collect.Multiset
 import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.cache.CacheInitializer
@@ -104,6 +105,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     /** The state names for instances that count against reservation usage. */
     private static final List<String> ACTIVE_INSTANCE_STATES = ['pending', 'running'].asImmutable()
+
+    /** Maximum number of image ids to send in a single create tags request. */
+    private static final int TAG_IMAGE_CHUNK_SIZE = 500
 
     void afterPropertiesSet() {
         awsClient = new MultiRegionAwsClient<AmazonEC2>({ Region region ->
@@ -333,8 +337,11 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         Check.notEmpty(imageIds, "imageIds")
         Check.notEmpty(name, "name")
         Check.notEmpty(value, "value")
-        awsClient.by(userContext.region).createTags(
-                new CreateTagsRequest().withResources(imageIds).withTags(new Tag(name, value)))
+        List<List<String>> partitionedImageIds = Lists.partition(imageIds, TAG_IMAGE_CHUNK_SIZE)
+        for (List<String> imageIdsChunk in partitionedImageIds) {
+            CreateTagsRequest request = new CreateTagsRequest(resources: imageIdsChunk, tags: [new Tag(name, value)])
+            awsClient.by(userContext.region).createTags(request)
+        }
     }
 
     void deleteImageTags(UserContext userContext, Collection<String> imageIds, String name) {
