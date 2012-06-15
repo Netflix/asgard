@@ -360,7 +360,7 @@ class Relationships {
 
     static DateTime baseAmiDateFromDescription(String imageDescription) {
         String name = baseAmiNameFromDescription(imageDescription)
-        Matcher matcher = name =~ /.*?(20[0-9]{6}).*?/
+        Matcher matcher = name =~ /.*\-(20[0-9]{6})(\-.*)?/
         String dateString = null
         if (matcher.matches()) { dateString = matcher[0][1] }
 
@@ -368,7 +368,7 @@ class Relationships {
             // Example: 20100823
             return dateString ? DateTimeFormat.forPattern("yyyyMMdd").parseDateTime(dateString) : null
         } catch (Exception e) {
-            // ignore failure
+            // Ignore failure.
             return null
         }
     }

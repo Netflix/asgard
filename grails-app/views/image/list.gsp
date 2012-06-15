@@ -62,7 +62,7 @@
             <td>${image.lastReferencedTime}</td>
             <td class="ami">${image.appVersion}</td>
             <td><g:linkObject name="${image.baseAmiId}"/></td>
-            <td><g:formatDate date="${image.baseAmiDate?.toDate()}" /></td>
+            <td><g:formatDate date="${image.baseAmiDate?.toDate()}" format="yyyy-MM-dd"/></td>
           </tr>
         </g:each>
         </tbody>
