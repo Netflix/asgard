@@ -97,6 +97,15 @@ class ConfigService {
         grailsApplication.config?.grails?.awsAccounts ?: []
     }
 
+    /**
+     * Gets the optional list of accounts whose public resources such as AMIs should be used.
+     *
+     * @return List < String > account numbers/names, or empty list if not configured
+     */
+    List<String> getPublicResourceAccounts() {
+        grailsApplication.config?.cloud?.publicResourceAccounts ?: []
+    }
+
     List<String> getDiscouragedAvailabilityZones() {
         grailsApplication.config?.cloud?.discouragedAvailabilityZones ?: []
     }
