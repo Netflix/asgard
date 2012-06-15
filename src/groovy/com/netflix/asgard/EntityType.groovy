@@ -66,8 +66,7 @@ import java.lang.reflect.Modifier
     static final EntityType<FastProperty> fastProperty = create('Fast Property', { it.id })
     static final EntityType<HardwareProfile> hardwareProfile = create('Hardware Profile',
             { it.instanceType.toString() })
-    static final EntityType<Image> image = create('Image', { it.imageId }, 'ami-',
-            'Show details of this Amazon machine image')
+    static final EntityType<Image> image = create('Image', { it.imageId })
     static final EntityType<Instance> instance = create('Instance', { it.instanceId }, 'i-')
     static final EntityType<InstanceTypeData> instanceType = create('Instance Type', { it.name })
     static final EntityType<KeyPairInfo> keyPair = create('Key Pair', { it.keyName })

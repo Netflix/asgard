@@ -146,7 +146,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     // Images
 
     private List<Image> retrieveImages(Region region) {
-        DescribeImagesRequest request = new DescribeImagesRequest().withOwners(accounts)
+        List<String> publicAccounts = configService.publicResourceAccounts
+        DescribeImagesRequest request = new DescribeImagesRequest().withOwners(accounts + publicAccounts)
         AmazonEC2 awsClientForRegion = awsClient.by(region)
         List<Image> images = awsClientForRegion.describeImages(request).getImages()
         // Temporary workaround because Amazon can send us the list of images without the tags occasionally.
