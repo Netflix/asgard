@@ -66,7 +66,7 @@
           <td>${appVersionToImageList.value.size()}</td>
           <td>
             <g:each in="${appVersionToImageList.value}" var="image">
-              <g:linkObject name="${image.imageId}" />
+              <g:linkObject type="image" name="${image.imageId}"/>
             </g:each>
           </td>
         </tr>
