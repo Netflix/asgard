@@ -27,6 +27,7 @@ import com.amazonaws.services.ec2.model.Tag
 import com.google.common.collect.Multiset
 import com.netflix.asgard.mock.Mocks
 import grails.test.GrailsUnitTestCase
+import grails.test.MockUtils
 
 class AwsEc2ServiceTests extends GrailsUnitTestCase {
 
@@ -128,6 +129,7 @@ class AwsEc2ServiceTests extends GrailsUnitTestCase {
         Image image1 = new Image(imageId: 'imageId1', tags: [new Tag()])
         Image image2 = new Image(imageId: 'imageId2', tags: [new Tag()])
         AwsEc2Service awsEc2Service = new AwsEc2Service()
+        awsEc2Service.configService = Mocks.configService()
         def mockAmazonEC2 = mockFor(AmazonEC2)
         awsEc2Service.awsClient = new MultiRegionAwsClient({ mockAmazonEC2.createMock() })
         DescribeImagesResult describeImagesResult = new DescribeImagesResult(images: [image1, image2])
@@ -142,6 +144,8 @@ class AwsEc2ServiceTests extends GrailsUnitTestCase {
         Image image1 = new Image(imageId: 'imageId1')
         Image image2 = new Image(imageId: 'imageId2')
         AwsEc2Service awsEc2Service = new AwsEc2Service()
+        MockUtils.mockLogging(AwsEc2Service)
+        awsEc2Service.configService = Mocks.configService()
         def mockAmazonEC2 = mockFor(AmazonEC2)
         awsEc2Service.awsClient = new MultiRegionAwsClient({ mockAmazonEC2.createMock() })
         DescribeImagesResult describeImagesResultMissingTags = new DescribeImagesResult(images: [image1, image2])

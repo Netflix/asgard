@@ -23,9 +23,9 @@ class EntityTypeSpec extends Specification {
         expect:
         EntityType.instance == EntityType.fromId('i-1bd7b278')
         EntityType.spotInstanceRequest == EntityType.fromId('sir-cd1a3e14')
-        EntityType.image == EntityType.fromId('ami-8ceb1be5')
         EntityType.volume == EntityType.fromId('vol-06892b6c')
         EntityType.snapshot == EntityType.fromId('snap-00b46468')
+        null == EntityType.fromId('ami-8ceb1be5')
         null == EntityType.fromId('  i-1bd7b278  ')
         null == EntityType.fromId('nflx-1234')
         null == EntityType.fromId('blah')
