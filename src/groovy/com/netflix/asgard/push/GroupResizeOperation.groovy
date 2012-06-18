@@ -255,6 +255,8 @@ class GroupResizeOperation {
         }
 
         if (checkHealth) {
+            task.log("Waiting for ${newMin} healthy instance${newMin == 1 ? '' : 's'} in group " +
+                    "'${autoScalingGroupName}'")
             group = checkHealthOfInstances()
         } else if (afterBootWait) {
             task.log("Waiting ${afterBootWait} second${afterBootWait == 1 ? '' : 's'} for new instances to be " +
@@ -273,7 +275,6 @@ class GroupResizeOperation {
     }
 
     private AutoScalingGroup checkHealthOfInstances() {
-        task.log("Waiting for ${newMin} healthy instance${newMin == 1 ? '' : 's'} in group '${autoScalingGroupName}'")
         AutoScalingGroup group = checkGroupStillExists()
         ensureTrafficIsSuppressedIfAppropriate(group)
         Collection<String> idsOfInstancesThatAreNotYetHealthy = findInstancesNotYetHealthy(group.instances*.instanceId)
