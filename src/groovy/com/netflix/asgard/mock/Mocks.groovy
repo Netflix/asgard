@@ -16,6 +16,7 @@
 package com.netflix.asgard.mock
 
 import com.amazonaws.AmazonServiceException
+import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing
 import com.amazonaws.services.simpledb.model.Attribute
 import com.amazonaws.services.simpledb.model.Item
@@ -486,14 +487,24 @@ class Mocks {
     private static AwsEc2Service awsEc2Service
     static AwsEc2Service awsEc2Service() {
         if (awsEc2Service == null) {
-            MockUtils.mockLogging(AwsEc2Service, false)
-            awsEc2Service = new AwsEc2Service()
-            awsEc2Service.configService = configService()
-            awsEc2Service.awsClientService = awsClientService()
-            awsEc2Service.caches = caches()
-            awsEc2Service.taskService = taskService()
-            awsEc2Service.afterPropertiesSet()
-            awsEc2Service.initializeCaches()
+            awsEc2Service = newAwsEc2Service()
+        }
+        awsEc2Service
+    }
+
+    static AwsEc2Service newAwsEc2Service(AmazonEC2 amazonEC2 = null) {
+        MockUtils.mockLogging(AwsEc2Service, false)
+        AwsEc2Service awsEc2Service = new AwsEc2Service()
+        awsEc2Service.with() {
+            configService = configService()
+            awsClientService = awsClientService()
+            caches = caches()
+            taskService = taskService()
+            if (amazonEC2) {
+                awsClient = new MultiRegionAwsClient({ amazonEC2 })
+            }
+            afterPropertiesSet()
+            initializeCaches()
         }
         awsEc2Service
     }
