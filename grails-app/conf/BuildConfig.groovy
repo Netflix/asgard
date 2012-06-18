@@ -51,10 +51,20 @@ grails.project.dependency.resolution = {
         compile(
                 // Amazon Web Services programmatic interface
                 'com.amazonaws:aws-java-sdk:1.3.11',
+        ) {
+            // AWS defines their dependencies as open-ended, which causes problems when resolving.
+            // See http://stackoverflow.com/a/7990573/869
+            transitive = false
+        }
 
+        compile(
                 // Transitive dependencies of aws-java-sdk, but also used directly
                 'org.apache.httpcomponents:httpcore:4.1',
                 'org.apache.httpcomponents:httpclient:4.1.1',
+
+                // Explicitly including aws-java-sdk transitive dependencies
+                'org.codehaus.jackson:jackson-core-asl:1.8.9',
+                'org.codehaus.jackson:jackson-mapper-asl:1.8.9',
 
                 // Extra collection types and utilities
                 'commons-collections:commons-collections:3.2.1',
@@ -92,8 +102,6 @@ grails.project.dependency.resolution = {
                     'junit',
 
                     'mockito-core',
-
-                    'stax-api',
             )
         }
 
