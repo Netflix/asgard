@@ -228,7 +228,7 @@ class AlarmValidationCommand {
     static constraints = {
         comparisonOperator(nullable:false, blank:false)
         threshold(nullable:false)
-        metric(validator: { Object value, AlarmValidationCommand cmd ->
+        metric(nullable: true, validator: { Object value, AlarmValidationCommand cmd ->
             (value && cmd.namespace) || cmd.existingMetric
         })
     }
