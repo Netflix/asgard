@@ -35,6 +35,7 @@ final class ScalingPolicyData {
     AdjustmentType adjustmentType = AdjustmentType.PercentChangeInCapacity
     Integer adjustment
     Integer cooldown
+    Integer minAdjustmentStep
     Collection<AlarmData> alarms
 
     static ScalingPolicyData fromPolicyAndAlarms(ScalingPolicy scalingPolicy, Collection<MetricAlarm> alarms = []) {
@@ -48,6 +49,7 @@ final class ScalingPolicyData {
                 adjustment: scalingPolicy.scalingAdjustment,
                 cooldown: scalingPolicy.cooldown,
                 adjustmentType: adjustmentType,
+                minAdjustmentStep: scalingPolicy.minAdjustmentStep,
                 alarms: alarmDatas
          )
     }
@@ -57,6 +59,7 @@ final class ScalingPolicyData {
         new ScalingPolicyData(
                 autoScalingGroupName: newAutoScalingGroupName,
                 adjustment: adjustment,
+                minAdjustmentStep: minAdjustmentStep,
                 adjustmentType: adjustmentType,
                 cooldown: cooldown,
                 alarms: alarmCopies
@@ -69,6 +72,7 @@ final class ScalingPolicyData {
                 policyName: policyName,
                 autoScalingGroupName: autoScalingGroupName,
                 scalingAdjustment: adjustment,
+                minAdjustmentStep: minAdjustmentStep,
                 adjustmentType: adjustmentType.name(),
                 cooldown: cooldown
         )

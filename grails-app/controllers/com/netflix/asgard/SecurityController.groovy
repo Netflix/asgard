@@ -62,7 +62,7 @@ class SecurityController {
         } else {
             def details = [
                     'group' : group,
-                    'app' : applicationService.getRegisteredApplication(userContext, name),
+                    'app' : applicationService.getRegisteredApplication(userContext, group.groupName),
                     'accountNames' : grailsApplication.config.grails.awsAccountNames,
                     'editable' : awsEc2Service.isSecurityGroupEditable(group.groupName) ]
             // TODO referenced-from lists would be nice too

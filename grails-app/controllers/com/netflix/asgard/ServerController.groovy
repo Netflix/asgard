@@ -43,7 +43,7 @@ import grails.converters.XML
 
     def build = { render "${grailsApplication.config.build.number}" }
 
-    def change = { render "${grailsApplication.config.sync.change}" }
+    def change = { render "${grailsApplication.config.scm.commit}" }
 
     def waitingToMoveTraffic = { render "${serverService.isThisServerWaitingToMoveTraffic()}" }
 

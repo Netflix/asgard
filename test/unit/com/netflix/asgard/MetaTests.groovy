@@ -32,12 +32,13 @@ class MetaTests extends GroovyTestCase {
         assert expected == Meta.toMap(metricId)
 
         ScalingPolicyData scalingPolicyData = new ScalingPolicyData(
-                adjustmentType: AdjustmentType.PercentChangeInCapacity, cooldown: 60,
+                adjustmentType: AdjustmentType.PercentChangeInCapacity, cooldown: 60, minAdjustmentStep: 3,
                 autoScalingGroupName: 'helloworld-example-v122'
         )
         Map<String, ?> expectedScalingPolicyMap = [
                 adjustment: null, adjustmentType: AdjustmentType.PercentChangeInCapacity, alarms: null, arn: null,
-                autoScalingGroupName: 'helloworld-example-v122', cooldown: 60, policyName: null
+                autoScalingGroupName: 'helloworld-example-v122', cooldown: 60, minAdjustmentStep: 3,
+                policyName: null
         ]
         assert expectedScalingPolicyMap == Meta.toMap(scalingPolicyData)
     }

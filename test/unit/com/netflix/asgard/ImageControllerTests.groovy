@@ -39,7 +39,7 @@ class ImageControllerTests {
     }
 
     void testShowNonExistent() {
-        controller.params.imageId ='doesntexist'
+        controller.params.imageId ='ami-doesntexist'
         controller.show()
         assert '/error/missing' == view
         assert "Image 'ami-doesntexist' not found in us-east-1 test" == controller.flash.message

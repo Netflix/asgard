@@ -36,6 +36,14 @@
     <g:textField name="adjustment" value="${adjustment}"/>
   </td>
 </tr>
+<tr class="prop" title="A change in capacity of at least this amount will occur.">
+  <td class="name">
+    <label for="minAdjustmentStep">Minimum Adjustment:</label>
+  </td>
+  <td class="value">
+    <g:textField name="minAdjustmentStep" value="${minAdjustmentStep}"/>
+  </td>
+</tr>
 <tr class="prop">
   <td class="name">
     <label for="cooldown">Cooldown:</label>

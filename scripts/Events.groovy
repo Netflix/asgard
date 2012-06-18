@@ -21,7 +21,7 @@
 eventCompileEnd = { kind ->
     String sourceVersionFile = "${classesDirPath}/sourceVersion.properties"
     ant.propertyfile(file: sourceVersionFile) {
-        entry(key: 'sync.change', value: System.getenv('P4_CHANGELIST') ?: '')
+        entry(key: 'scm.commit', value: System.getenv('GIT_COMMIT') ?: '')
         entry(key: 'build.id', value: System.getenv('BUILD_ID') ?: '')
         entry(key: 'build.number', value: System.getenv('BUILD_NUMBER') ?: '')
     }

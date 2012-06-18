@@ -42,10 +42,11 @@ beans = {
     xmlns lang:'http://www.springframework.org/schema/lang'
 
     File pluginDir = new File("${application.config.asgardHome}/plugins/")
-
-    pluginDir.eachFileMatch(FileType.FILES, ~/.*\.groovy/) { File plugin ->
-        String beanName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, plugin.name.replace('.groovy', ''))
-        lang.groovy(id: beanName, 'script-source': "file:${application.config.asgardHome}/plugins/${plugin.name}",
-            'refresh-check-delay': application.config.plugin.refreshDelay?: -1)
+    if (pluginDir.exists()) {
+        pluginDir.eachFileMatch(FileType.FILES, ~/.*\.groovy/) { File plugin ->
+            String beanName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, plugin.name.replace('.groovy', ''))
+            lang.groovy(id: beanName, 'script-source': "file:${application.config.asgardHome}/plugins/${plugin.name}",
+                    'refresh-check-delay': application.config.plugin.refreshDelay?: -1)
+        }
     }
 }

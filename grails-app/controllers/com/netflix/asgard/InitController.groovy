@@ -61,6 +61,7 @@ class InitializeCommand {
     String accessId
     String secretKey
     String accountNumber
+    boolean showPublicAmazonImages
     static constraints = {
         accessId(nullable: false, blank: false, matches: /[A-Z0-9]{20}/)
         secretKey(nullable: false, blank: false, matches: /[A-Za-z0-9\+\/]{40}/)
@@ -83,6 +84,7 @@ class InitializeCommand {
         ConfigObject cloudConfig = new ConfigObject()
         rootConfig['cloud'] = cloudConfig
         cloudConfig['accountName'] = 'prod'
+        cloudConfig['publicResourceAccounts'] = showPublicAmazonImages ? ['amazon'] : []
 
         rootConfig
     }
