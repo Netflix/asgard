@@ -24,6 +24,7 @@ import com.netflix.asgard.Region
 import com.netflix.asgard.model.AwsRequestEqualityMixin
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyPointlessArithmetic")
 class AwsResultsRetrieverSpec extends Specification {
 
     def setup() {

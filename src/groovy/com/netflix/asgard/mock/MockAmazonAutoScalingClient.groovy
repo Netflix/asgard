@@ -82,7 +82,7 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
                     withInstances(it.instances.collect { def inst ->
                         new Instance().withAvailabilityZone(inst.availabilityZone).withHealthStatus(inst.healthStatus).
                         withInstanceId(inst.instanceId).withLaunchConfigurationName(inst.launchConfigurationName).
-                        withLifecycleState(inst.lifecycleState)
+                        withLifecycleState(inst.lifecycleState as String)
                     }).
                     withSuspendedProcesses(it.suspendedProcesses.collect { def suspendedProcess ->
                         new SuspendedProcess().withProcessName(suspendedProcess.processName).

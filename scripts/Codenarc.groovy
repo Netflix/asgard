@@ -64,7 +64,7 @@ private void runCodenarc() {
             fileset(dir: '.', includes: includes.join(','))
         }
     }
-    catch(BuildException e) {
+    catch (BuildException e) {
         if (systemExitOnBuildException) {
             println "FAILED -- ${e.message}"
             System.exit(1)
@@ -85,7 +85,7 @@ private ConfigObject loadConfig(String className) {
     try {
         return new ConfigSlurper(GrailsUtil.environment).parse(classLoader.loadClass(className)).codenarc
     }
-    catch(ClassNotFoundException e) {
+    catch (ClassNotFoundException ignored) {
         return new ConfigObject()
     }
 }
@@ -194,7 +194,7 @@ try {
     // Required for Grails 1.3 and later
     setDefaultTarget('codenarc')
 }
-catch(MissingMethodException e) {
+catch (MissingMethodException ignored) {
     // Ignore. Older versions of Groovy/Grails do not implement this method
 }
 

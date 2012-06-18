@@ -19,6 +19,7 @@ import grails.test.MockUtils
 import org.joda.time.DateTime
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAccessibility")
 class HealthCheckServiceSpec extends Specification {
 
     HealthcheckService healthcheckService

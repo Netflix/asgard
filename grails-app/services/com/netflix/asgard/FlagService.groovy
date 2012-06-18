@@ -15,7 +15,6 @@
  */
 package com.netflix.asgard
 
-
 class FlagService {
 
     static transactional = false

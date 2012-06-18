@@ -104,7 +104,7 @@ class AwsSnsService implements CacheInitializer, InitializingBean {
             GetTopicAttributesRequest attributesRequest = new GetTopicAttributesRequest(arn)
             topic.attributes = awsClient.by(region).getTopicAttributes(attributesRequest).attributes
             return caches.allTopics.by(region).put(topicName, topic)
-        } catch (AmazonServiceException ase) {
+        } catch (AmazonServiceException ignored) {
             return null
         }
     }

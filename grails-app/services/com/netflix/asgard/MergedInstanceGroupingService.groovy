@@ -71,7 +71,7 @@ class MergedInstanceGroupingService {
         Collection<ApplicationInstance> discList = discoveryService.getAppInstances(userContext, appName, From.CACHE)
 
         List<MergedInstance> instances = discList.collect { appInst ->
-            Instance ec2Inst
+            Instance ec2Inst = null
             if (appInst.instanceId) {
                 ec2Inst = awsEc2Service.getInstance(userContext, appInst.instanceId, From.CACHE)
             }

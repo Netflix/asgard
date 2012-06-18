@@ -82,7 +82,6 @@ public class IndentWriter extends PrintWriter {
     void print(String s) { checkIndent(); super.print(s) }
 }
 
-
 class PrettyWriter extends IndentWriter {
     PrettyWriter(Writer w) {
         super(w, ' ', 0, true)

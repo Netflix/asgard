@@ -83,7 +83,6 @@ class GroupResizeOperation {
     private DateTime lastBatchStartTime = Time.now()
     private static Duration MAX_TIME_PER_BATCH = Duration.standardMinutes(25)
 
-
     private Duration calculateMaxTimePerBatch() {
         if (flagService.isOn(Flag.SHORT_MAX_TIME_PER_BATCH)) {
             return Duration.standardSeconds(5)
@@ -110,15 +109,10 @@ class GroupResizeOperation {
         task.email = applicationService.getEmailFromApp(userContext, appName)
 
         if (eventualMin == 0) {
-            AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, autoScalingGroupName)
-
             // Disable traffic on ELB first because an ELB can send traffic to incorrect instances if you terminate
             // instances that are receiving ELB traffic.
             awsAutoScalingService.deregisterAllInstancesInAutoScalingGroupFromLoadBalancers(userContext,
                     autoScalingGroupName, task)
-
-            String comment = "NAC user at ${userContext.clientHostName} shrinking auto scaling " +
-                    "group ${autoScalingGroupName} to zero"
         }
 
         while (true) {
