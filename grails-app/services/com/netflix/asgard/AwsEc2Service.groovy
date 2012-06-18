@@ -95,6 +95,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     static transactional = false
 
+    private static SECURITY_GROUP_ID_PATTERN = ~/sg-[a-f0-9]+/
+
     def configService
     MultiRegionAwsClient<AmazonEC2> awsClient
     def awsClientService
@@ -411,7 +413,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             return caches.allSecurityGroups.by(userContext.region).get(name)
         }
         DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest()
-        if (name ==~ /sg-[a-f0-9]+/) {
+        if (name ==~ SECURITY_GROUP_ID_PATTERN) {
             request.withGroupIds(name)
         } else {
             request.withGroupNames(name)
