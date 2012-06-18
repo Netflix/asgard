@@ -25,7 +25,7 @@ td.full { font-weight: 600; }
 <table>
   <g:each var="trial" in="${trials}" status="i">
     <tr class="style${i % 3}">
-      <td class="${trial.value ? "full" : ""}">${trial.key}</td>
+      <td class="${trial.value ? 'full' : ''}">${trial.key}</td>
       <td>${trial.value}</td>
     </tr>
   </g:each>

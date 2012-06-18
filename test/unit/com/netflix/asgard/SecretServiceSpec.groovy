@@ -18,6 +18,7 @@ package com.netflix.asgard
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAccessibility")
 class SecretServiceSpec extends Specification {
 
     static final String ACCESS_ID = 'accessId'

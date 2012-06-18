@@ -42,7 +42,7 @@ class AutoScalingGroupTests extends GroovyTestCase {
         copy.metaClass.appNameIsValid = true
 
         boolean missingPropExceptionThrown = false
-        try { original.appNameIsValue } catch (MissingPropertyException e) { missingPropExceptionThrown = true }
+        try { original.appNameIsValue } catch (MissingPropertyException ignored) { missingPropExceptionThrown = true }
         assert missingPropExceptionThrown
 
         assert copy.appNameIsValid

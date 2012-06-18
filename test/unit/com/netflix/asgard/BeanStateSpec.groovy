@@ -85,7 +85,6 @@ class BeanStateSpec extends Specification {
             'Ricky Gervais' == targetBean.string2
     }
 
-
     def "should copy state to wider type" () {
         when:
             final BeanWithWiderType targetBean = originalState.injectState(new BeanWithWiderType())

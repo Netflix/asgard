@@ -313,7 +313,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 DescribeScalingActivitiesResult result = client.describeScalingActivities(request)
                 activities.addAll(result.activities)
                 nextToken = result.nextToken
-            } catch (AmazonServiceException ase) {
+            } catch (AmazonServiceException ignored) {
                 // The ASG stopped existing. This race condition happens during automated polling in a unit test.
                 break
             }

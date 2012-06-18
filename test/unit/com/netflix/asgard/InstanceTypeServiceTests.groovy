@@ -20,6 +20,7 @@ import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.InstanceProductType
 import com.netflix.asgard.model.InstanceTypeData
 
+@SuppressWarnings("GroovyAccessibility")
 class InstanceTypeServiceTests extends GroovyTestCase {
 
     void testGetInstanceTypeData() {

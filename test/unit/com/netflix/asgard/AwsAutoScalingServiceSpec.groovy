@@ -40,6 +40,7 @@ import com.netflix.asgard.model.ScalingPolicyData
 import spock.lang.Specification
 import com.amazonaws.services.cloudwatch.model.Dimension
 
+@SuppressWarnings(["GroovyPointlessArithmetic", "GroovyAssignabilityCheck"])
 class AwsAutoScalingServiceSpec extends Specification {
 
     def 'should update ASG with proper AWS requests'() {
@@ -61,6 +62,7 @@ class AwsAutoScalingServiceSpec extends Specification {
         final AwsAutoScalingService awsAutoScalingService = Mocks.newAwsAutoScalingService()
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
 
+        //noinspection GroovyAccessibility
         when:
         awsAutoScalingService.updateAutoScalingGroup(Mocks.userContext(),
                 new AutoScalingGroupData('hiyaworld-example-v042', null, 31, 153, [], 'EC2', 17, [],
