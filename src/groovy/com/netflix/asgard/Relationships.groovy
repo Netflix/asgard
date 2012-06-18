@@ -367,7 +367,7 @@ class Relationships {
         try {
             // Example: 20100823
             return dateString ? DateTimeFormat.forPattern("yyyyMMdd").parseDateTime(dateString) : null
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             // Ignore failure.
             return null
         }

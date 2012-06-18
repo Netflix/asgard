@@ -14,7 +14,7 @@ class PluginService implements ApplicationContextAware {
 
     UserDataProvider getUserDataProvider() {
         String beanName = configService.pluginNamesToBeanNames[USER_DATA_PROVIDER] ?: 'defaultUserDataProvider'
-        applicationContext.getBean(beanName)
+        applicationContext.getBean(beanName) as UserDataProvider
     }
 
 }

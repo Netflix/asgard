@@ -64,6 +64,7 @@ class MonkeyPatcherTests extends GroovyTestCase {
         assert 'helloworld' == ec2Instance.app
     }
 
+    @SuppressWarnings("GroovyAssignabilityCheck")
     void testImageKeepForever() {
         Mocks.monkeyPatcherService()
         Image image = new Image()

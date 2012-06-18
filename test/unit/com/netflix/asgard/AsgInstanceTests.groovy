@@ -46,7 +46,7 @@ class AsgInstanceTests extends GroovyTestCase {
         copy.metaClass.loadBalancers = [new LoadBalancerDescription()]
 
         boolean missingPropExceptionThrown = false
-        try { original.loadBalancers } catch (MissingPropertyException e) { missingPropExceptionThrown = true }
+        try { original.loadBalancers } catch (MissingPropertyException ignored) { missingPropExceptionThrown = true }
         assert missingPropExceptionThrown
 
         assert 1 == copy.loadBalancers.size()

@@ -78,7 +78,7 @@ class RegionService implements InitializingBean {
     }
 
     Boolean isControllerRegional(def controller) {
-        String controllerName = 'invalid'
+        String controllerName
         if (controller instanceof String) {
             controllerName = controller
         } else {

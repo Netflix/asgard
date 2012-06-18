@@ -38,7 +38,7 @@ class TaskTests extends GroovyTestCase {
 
         task = new Task(startTime: new Date(1290239315666), updateTime: new Date(1290242925333), status: "completed")
         assert "1h 9s" == task.durationString
-        
+
         task = new Task(startTime: new Date(1290239315666), updateTime: new Date(1290329325555), status: "completed")
         assert "1d 1h 9s" == task.durationString
     }

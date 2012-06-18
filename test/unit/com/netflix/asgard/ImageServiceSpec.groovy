@@ -20,7 +20,7 @@ import grails.converters.JSON
 import grails.test.MockUtils
 import spock.lang.Specification
 
-
+@SuppressWarnings("GroovyAssignabilityCheck")
 abstract class ImageServiceSpec extends Specification {
 
     static final String IMAGE_ID = 'imageId'
@@ -47,7 +47,7 @@ abstract class ImageServiceSpec extends Specification {
 
     void setupLastReferencedDefaults() {
         awsEc2Service.getInstances(_) >> []
-        awsAutoScalingService.getLaunchConfigurations(_)  >> []
+        awsAutoScalingService.getLaunchConfigurations(_) >> []
         restClientService.getAsJson({ it =~ /\/image\/used.json/ }) >> JSON.parse('[]')
     }
 

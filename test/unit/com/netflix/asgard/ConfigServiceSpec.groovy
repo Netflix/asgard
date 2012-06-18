@@ -26,5 +26,4 @@ class ConfigServiceSpec extends Specification {
         expect:
         configService.getExcludedLaunchPermissionsForMassDelete() == [Mocks.SEG_AWS_ACCOUNT_ID] as Set
     }
-    
 }

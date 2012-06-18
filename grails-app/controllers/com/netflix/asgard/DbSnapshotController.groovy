@@ -42,7 +42,7 @@ class DbSnapshotController {
             flash.message = "DB Snapshot name may not be blank."
             redirect(controller:"rdsInstance", action:'show', params:[name:params.dBInstanceIdentifier])
         } else {
-            def snapshot = awsRdsService.createDBSnapshot(userContext, params.dBInstanceIdentifier, params.snapshotName)
+            awsRdsService.createDBSnapshot(userContext, params.dBInstanceIdentifier, params.snapshotName)
             redirect(action: show, params: [name: params.snapshotName])
         }
     }

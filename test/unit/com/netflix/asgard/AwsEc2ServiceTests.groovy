@@ -32,8 +32,6 @@ import grails.test.MockUtils
 
 class AwsEc2ServiceTests extends GrailsUnitTestCase {
 
-    String TEST_UDF_DIR = './test/unit/com/netflix/asgard'
-
     void testGetSpotInstanceRequests() {
         AwsEc2Service awsEc2Service = Mocks.awsEc2Service()
         Region region = Region.defaultRegion()
@@ -78,6 +76,7 @@ class AwsEc2ServiceTests extends GrailsUnitTestCase {
         assertNull awsEc2Service.getImage(Mocks.userContext(), "doesn't exist")
     }
 
+    @SuppressWarnings("GroovyAccessibility")
     void testGetCountedAppVersions() {
 
         AwsEc2Service service = new AwsEc2Service()
@@ -135,6 +134,7 @@ class AwsEc2ServiceTests extends GrailsUnitTestCase {
         awsEc2Service.awsClient = new MultiRegionAwsClient({ mockAmazonEC2.createMock() })
         DescribeImagesResult describeImagesResult = new DescribeImagesResult(images: [image1, image2])
         mockAmazonEC2.demand.describeImages { DescribeImagesRequest request -> describeImagesResult }
+        //noinspection GroovyAccessibility
         Collection<Image> images = awsEc2Service.retrieveImages(Region.US_EAST_1)
 
         assert images == [image1, image2]
@@ -161,6 +161,7 @@ class AwsEc2ServiceTests extends GrailsUnitTestCase {
             }
         }
 
+        //noinspection GroovyAccessibility
         Collection<Image> images = awsEc2Service.retrieveImages(Region.US_EAST_1)
 
         assert images == [image1WithTags, image2]

@@ -75,7 +75,4 @@ abstract class AwsResultsRetriever<T, Q, S> {
     protected String getNextToken(S result) {
         result.nextToken
     }
-
 }
-
-
