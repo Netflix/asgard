@@ -15,8 +15,6 @@
  */
 package com.netflix.asgard
 
-import grails.test.mixin.*
-
 import com.amazonaws.services.autoscaling.AmazonAutoScaling
 import com.amazonaws.services.autoscaling.model.Alarm
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
