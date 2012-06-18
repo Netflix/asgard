@@ -101,7 +101,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     Caches caches
     def restClientService
     def taskService
-    List<String> accounts  // main account is accounts[0]
+    List<String> accounts = [] // main account is accounts[0]
 
     /** The state names for instances that count against reservation usage. */
     private static final List<String> ACTIVE_INSTANCE_STATES = ['pending', 'running'].asImmutable()
@@ -147,7 +147,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     // Images
 
     private List<Image> retrieveImages(Region region) {
-        DescribeImagesRequest request = new DescribeImagesRequest().withOwners(accounts)
+        List<String> owners = configService.publicResourceAccounts + accounts
+        DescribeImagesRequest request = new DescribeImagesRequest().withOwners(owners)
         AmazonEC2 awsClientForRegion = awsClient.by(region)
         List<Image> images = awsClientForRegion.describeImages(request).getImages()
         // Temporary workaround because Amazon can send us the list of images without the tags occasionally.

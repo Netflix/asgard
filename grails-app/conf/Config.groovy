@@ -164,7 +164,7 @@ environments {
     test {
         server.online = false
     }
-    prod {
+    production {
         cloud {
             envStyle = 'prod'
         }
