@@ -106,7 +106,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     /** The state names for instances that count against reservation usage. */
     private static final List<String> ACTIVE_INSTANCE_STATES = ['pending', 'running'].asImmutable()
 
-    /** Maximum number of image ids to send in a single create tags request. */
+    /** Maximum number of image ids to send in a single create tags request. See ASGARD-895. */
     private static final int TAG_IMAGE_CHUNK_SIZE = 500
 
     void afterPropertiesSet() {
