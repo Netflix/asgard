@@ -43,14 +43,14 @@
         <tbody>
         <g:each var="grp" in="${securityGroups}" status="i">
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-            <td><g:linkObject type="security" name="${grp.groupName}"/></td>
+            <td><g:linkObject type="security" name="${grp.groupId}">${grp.groupName}</g:linkObject></td>
             <td>${grp.description}</td>
             <td><g:each var="perm" in="${grp.ipPermissions}">
               ${perm.ipProtocol} ${perm.fromPort}-${perm.toPort} [
               <g:each var="pair" in="${perm.userIdGroupPairs}" status="j"><g:if test="${j>0}">, </g:if>
-                <g:linkObject type="security" name="${pair.groupName}"/>
-              </g:each>]
-              ] ${perm.ipRanges}
+                <g:linkObject type="security" name="${pair.groupId}">${pair.groupName}</g:linkObject>
+              </g:each>
+              ] ${perm.ipRanges ?: ''}
               <br>
             </g:each></td>
           </tr>

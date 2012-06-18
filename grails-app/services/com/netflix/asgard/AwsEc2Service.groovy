@@ -47,6 +47,7 @@ import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest
 import com.amazonaws.services.ec2.model.DescribeReservedInstancesOfferingsRequest
 import com.amazonaws.services.ec2.model.DescribeReservedInstancesOfferingsResult
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsRequest
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsResult
@@ -95,6 +96,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     static transactional = false
 
+    private static SECURITY_GROUP_ID_PATTERN = ~/sg-[a-f0-9]+/
+
     def configService
     MultiRegionAwsClient<AmazonEC2> awsClient
     def awsClientService
@@ -110,7 +113,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     private static final int TAG_IMAGE_CHUNK_SIZE = 500
 
     void afterPropertiesSet() {
-        awsClient = new MultiRegionAwsClient<AmazonEC2>({ Region region ->
+        awsClient = awsClient ?: new MultiRegionAwsClient<AmazonEC2>({ Region region ->
             AmazonEC2 client = awsClientService.create(AmazonEC2)
             client.setEndpoint("ec2.${region}.amazonaws.com")
             client
@@ -413,16 +416,21 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     SecurityGroup getSecurityGroup(UserContext userContext, String name, From from = From.AWS) {
         Check.notNull(name, SecurityGroup, "name")
-        SecurityGroup group
         if (from == From.CACHE) {
             return caches.allSecurityGroups.by(userContext.region).get(name)
         }
+        DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest()
+        if (name ==~ SECURITY_GROUP_ID_PATTERN) {
+            request.withGroupIds(name)
+        } else {
+            request.withGroupNames(name)
+        }
+        SecurityGroup group = null
         try {
-            def result = awsClient.by(userContext.region).describeSecurityGroups(
-                    new DescribeSecurityGroupsRequest().withGroupNames([name]))
-            group = Check.lone(result.getSecurityGroups(), SecurityGroup)
-        } catch (com.amazonaws.AmazonServiceException e) {
-            group = null
+            DescribeSecurityGroupsResult result = awsClient.by(userContext.region).describeSecurityGroups(request)
+            group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
+        } catch (AmazonServiceException ignore) {
+            // Can't find a security group with that request.
         }
         caches.allSecurityGroups.by(userContext.region).put(name, group)
     }
