@@ -32,7 +32,7 @@ class TopicController {
 
     def list = {
         UserContext userContext = UserContext.of(request)
-        List<Topic> topics = (awsSnsService.getTopics(userContext) as List).sort { it.name?.toLowerCase() }
+        List<TopicData> topics = (awsSnsService.getTopics(userContext) as List).sort { it.name?.toLowerCase() }
         Map details = ['topics': topics]
         withFormat {
             html { details }
