@@ -156,6 +156,7 @@ class AutoScalingController {
                     app: applicationService.getRegisteredApplication(userContext, appName),
                     buildServer: grailsApplication.config.cloud.buildServer,
                     alarmsByName: alarmsByName,
+                    vpcZoneIdentifier: group.VPCZoneIdentifier
             ]
             withFormat {
                 html { return details }
