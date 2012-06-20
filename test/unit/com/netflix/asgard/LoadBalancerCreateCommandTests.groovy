@@ -16,8 +16,7 @@
 package com.netflix.asgard
 
 import grails.test.MockUtils
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
+import grails.test.mixin.TestFor
 import org.junit.Before
 import org.junit.Test
 
