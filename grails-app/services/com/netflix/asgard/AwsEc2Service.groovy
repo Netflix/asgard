@@ -87,6 +87,7 @@ import com.google.common.collect.Lists
 import com.google.common.collect.Multiset
 import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.cache.CacheInitializer
+import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.ZoneAvailability
 import org.apache.commons.codec.binary.Base64
 import org.codehaus.groovy.runtime.StackTraceUtils
@@ -131,6 +132,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         caches.allSecurityGroups.ensureSetUp({ Region region -> retrieveSecurityGroups(region) })
         caches.allSnapshots.ensureSetUp({ Region region -> retrieveSnapshots(region) })
         caches.allVolumes.ensureSetUp({ Region region -> retrieveVolumes(region) })
+        caches.allSubnets.ensureSetUp({ Region region -> retrieveSubnets(region) })
     }
 
     // Availability Zones
@@ -143,11 +145,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     Collection<AvailabilityZone> getAvailabilityZones(UserContext userContext) {
         caches.allAvailabilityZones.by(userContext.region).list().sort { it.zoneName }
-    }
-
-    Collection<Subnet> getSubnets(UserContext userContext) {
-        DescribeSubnetsResult result = awsClient.by(userContext.region).describeSubnets()
-        result.getSubnets()
     }
 
     Collection<AvailabilityZone> getRecommendedAvailabilityZones(UserContext userContext) {
@@ -181,6 +178,15 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     Collection<Image> getAccountImages(UserContext userContext) {
         caches.allImages.by(userContext.region).list()
+    }
+
+    private Collection<Subnet> retrieveSubnets(Region region) {
+        DescribeSubnetsResult result = awsClient.by(region).describeSubnets()
+        result.getSubnets()
+    }
+
+    Subnets getSubnets(UserContext userContext) {
+        Subnets.from(caches.allSubnets.by(userContext.region).list())
     }
 
     /**

@@ -14,7 +14,9 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.ec2.model.Subnet
+import com.google.common.collect.Lists
+import com.netflix.asgard.model.SubnetData
+import com.netflix.asgard.model.Subnets
 import grails.converters.JSON
 import grails.converters.XML
 
@@ -26,11 +28,13 @@ class SubnetController {
 
     def list = {
         UserContext userContext = UserContext.of(request)
-        Collection<Subnet> subnets = awsEc2Service.getSubnets(userContext)
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        OrderBy<SubnetData> orderBy = new OrderBy<SubnetData>([{ it.availabilityZone }, { it.purpose }, { it.target }])
+        Collection<SubnetData> allSubnets = Lists.newArrayList(subnets.allSubnets).sort(orderBy)
         withFormat {
-            html { ['subnets': subnets] }
-            xml { new XML(subnets).render(response) }
-            json { new JSON(subnets).render(response) }
+            html { ['subnets': allSubnets] }
+            xml { new XML(allSubnets).render(response) }
+            json { new JSON(allSubnets).render(response) }
         }
     }
 }
