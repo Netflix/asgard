@@ -178,7 +178,6 @@ import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.Snapshot
 import com.amazonaws.services.ec2.model.SpotInstanceRequest
 import com.amazonaws.services.ec2.model.SpotPlacement
-import com.amazonaws.services.ec2.model.SpotPrice
 import com.amazonaws.services.ec2.model.StartInstancesRequest
 import com.amazonaws.services.ec2.model.StartInstancesResult
 import com.amazonaws.services.ec2.model.StopInstancesRequest
@@ -196,7 +195,6 @@ import org.joda.time.format.ISODateTimeFormat
 class MockAmazonEC2Client extends AmazonEC2Client {
 
     private Collection<Image> mockImages
-    private Collection<SpotPrice> mockSpotPrices
     private Collection<Instance> mockInstances
     private Collection<SpotInstanceRequest> mockSpotInstanceRequests
     private Collection<SecurityGroup> mockSecurityGroups
@@ -244,10 +242,10 @@ class MockAmazonEC2Client extends AmazonEC2Client {
                     withRootDeviceName(Mocks.jsonNullable(it.rootDeviceName)).
                     withRootDeviceType(it.rootDeviceType).
                     withSpotInstanceRequestId(Mocks.jsonNullable(it.spotInstanceRequestId)).
-                    withState(new InstanceState().withCode(it.state.code).withName(it.state.name)).
+                    withState(new InstanceState().withCode(it.state.code).withName(it.state.name as String)).
                     withStateTransitionReason(it.stateTransitionReason).
                     withSubnetId(Mocks.jsonNullable(it.subnetId)).
-                    withVirtualizationType(it.virtualizationType).
+                    withVirtualizationType(it.virtualizationType as String).
                     withVpcId(Mocks.jsonNullable(it.vpcId))
         }
     }
@@ -307,7 +305,7 @@ class MockAmazonEC2Client extends AmazonEC2Client {
                     withOwnerAlias(Mocks.jsonNullable(it.ownerAlias)).withOwnerId(it.ownerId).
                     withProgress(it.progress).withSnapshotId(it.snapshotId).
                     withStartTime(ISODateTimeFormat.dateTimeParser().parseDateTime(it.startTime).toDate()).
-                    withState(it.state).withTags(it.tags.collect {
+                    withState(it.state as String).withTags(it.tags.collect {
                         new Tag().withKey(it.key).withValue(it.value)
                     }).withVolumeId(it.volumeId).withVolumeSize(it.volumeSize)
         }
@@ -405,7 +403,6 @@ class MockAmazonEC2Client extends AmazonEC2Client {
     CreateImageResult createImage(CreateImageRequest createImageRequest) { null }
 
     void authorizeSecurityGroupIngress(AuthorizeSecurityGroupIngressRequest authorizeSecurityGroupIngressRequest) {}
-
 
     CreateSecurityGroupResult createSecurityGroup(CreateSecurityGroupRequest createSecurityGroupRequest) {
         String name = createSecurityGroupRequest.getGroupName()

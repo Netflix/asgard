@@ -90,7 +90,7 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
         try {
             GetQueueAttributesRequest attrRequest = new GetQueueAttributesRequest(url).withAttributeNames('All')
             return awsClient.by(userContext.region).getQueueAttributes(attrRequest).attributes.sort()
-        } catch (AmazonServiceException ase) {
+        } catch (AmazonServiceException ignored) {
             return null
         }
     }

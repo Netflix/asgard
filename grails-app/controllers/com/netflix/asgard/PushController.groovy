@@ -42,7 +42,7 @@ class PushController {
         Map attrs = [:]
         try {
             attrs = pushService.prepareEdit(userContext, name, showAllImages, actionName)
-        } catch (NoSuchObjectException nsoe) {
+        } catch (NoSuchObjectException ignored) {
             Requests.renderNotFound('Auto Scaling Group', name, this)
             return
         } catch (PushException pe) {

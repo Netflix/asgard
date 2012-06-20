@@ -39,8 +39,6 @@ class SnapshotController {
             html { [ 'snapshots' : snapshots] }
             xml { new XML(snapshots).render(response) }
             json { new JSON(snapshots).render(response) }
-            // TODO: use this one when we can solve CSRF susceptibility
-            //json { new CallbackJSON(instances, params.callback).render(response) }
         }
     }
 
@@ -62,7 +60,6 @@ class SnapshotController {
                 html { return details }
                 xml { new XML(details).render(response) }
                 json { new JSON(details).render(response) }
-                //json { new CallbackJSON(details, params.callback).render(response) }
             }
         }
     }
@@ -130,6 +127,6 @@ class SnapshotController {
 class SnapshotCommand {
     String zone
     static constraints = {
-        zone(blank:false, nullable:false)
+        zone(blank: false, nullable: false)
     }
 }

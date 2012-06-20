@@ -29,13 +29,11 @@ class VolumeController {
     def list = {
         UserContext userContext = UserContext.of(request)
         def volumes = (awsEc2Service.getVolumes(userContext) as List).sort { it.volumeId.toLowerCase() }
-        def details = ['volumes':volumes, 'zoneList':awsEc2Service.getAvailabilityZones(userContext)]
+        def details = ['volumes': volumes, 'zoneList': awsEc2Service.getAvailabilityZones(userContext)]
         withFormat {
             html { details }
             xml { new XML(details).render(response) }
             json { new JSON(details).render(response) }
-            // TODO: use this one when we can solve CSRF susceptibility
-            //json { new CallbackJSON(instances, params.callback).render(response) }
         }
     }
 
@@ -87,7 +85,6 @@ class VolumeController {
                 html { return ['volume':volume] }
                 xml { new XML(volume).render(response) }
                 json { new JSON(volume).render(response) }
-                //json { new CallbackJSON(details, params.callback).render(response) }
             }
         }
     }

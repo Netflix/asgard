@@ -73,6 +73,7 @@ class MonkeyPatcherTests {
     }
 
     @Test
+    @SuppressWarnings("GroovyAssignabilityCheck")
     void testImageKeepForever() {
         Image image = new Image()
         assertFalse image.keepForever

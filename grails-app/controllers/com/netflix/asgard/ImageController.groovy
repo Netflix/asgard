@@ -73,7 +73,7 @@ class ImageController {
         } else {
             List<String> launchUsers = []
             try { launchUsers = awsEc2Service.getImageLaunchers(userContext, image.imageId) }
-            catch (AmazonServiceException ase) { /* we may not own the image, so ignore failures here */ }
+            catch (AmazonServiceException ignored) { /* We may not own the image, so ignore failures here */ }
             String snapshotId = image.blockDeviceMappings.findResult { it.ebs?.snapshotId }
             String ownerId = image.ownerId
             Map<String, String> accounts = grailsApplication.config.grails.awsAccountNames

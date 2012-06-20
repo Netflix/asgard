@@ -225,15 +225,15 @@ class ScalingPolicyCreateCommand {
     String topic
 
     static constraints = {
-            group(nullable:false, blank:false)
-            adjustmentType(nullable:false, blank:false)
-            adjustment(nullable:false)
-            cooldown(nullable:false)
-            threshold(nullable:false)
-            comparisonOperator(nullable:false, blank:false)
-            metric(validator: { Object value, ScalingPolicyCreateCommand cmd ->
-                (value && cmd.namespace) || cmd.existingMetric
-            })
+        group(nullable: false, blank: false)
+        adjustmentType(nullable: false, blank: false)
+        adjustment(nullable: false)
+        cooldown(nullable: false)
+        threshold(nullable: false)
+        comparisonOperator(nullable: false, blank: false)
+        metric(validator: { Object value, ScalingPolicyCreateCommand cmd ->
+            (value && cmd.namespace) || cmd.existingMetric
+        })
     }
 
     MetricId assembleMetric() {
@@ -249,10 +249,10 @@ class ScalingPolicyUpdateCommand {
     Integer minAdjustmentStep
 
     static constraints = {
-        policyName(nullable:false, blank:false)
-        adjustmentType(nullable:false, blank:false)
-        adjustment(nullable:false)
-        cooldown(nullable:false)
+        policyName(nullable: false, blank: false)
+        adjustmentType(nullable: false, blank: false)
+        adjustment(nullable: false)
+        cooldown(nullable: false)
     }
 
 }

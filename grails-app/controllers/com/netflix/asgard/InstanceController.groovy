@@ -56,8 +56,6 @@ class InstanceController {
             html { ['instanceList' : instances, 'appNames': appNames] }
             xml { new XML(instances).render(response) }
             json { new JSON(instances).render(response) }
-            // TODO: use this one when we can solve CSRF susceptibility
-            //json { new CallbackJSON(instances, params.callback).render(response) }
         }
     }
 
@@ -138,7 +136,6 @@ class InstanceController {
             html { return details }
             xml { new XML(details).render(response) }
             json { new JSON(details).render(response) }
-            //json { new CallbackJSON(details, params.callback).render(response) }
         }
     }
 
@@ -198,7 +195,6 @@ class InstanceController {
                 html { return details }
                 xml { new XML(details).render(response) }
                 json { new JSON(details).render(response) }
-                //json { new CallbackJSON(details, params.callback).render(response) }
             }
         }
     }

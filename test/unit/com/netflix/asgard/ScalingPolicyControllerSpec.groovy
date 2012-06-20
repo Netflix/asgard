@@ -34,6 +34,7 @@ import com.netflix.asgard.model.TopicData
 import grails.test.MockUtils
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyPointlessArithmetic")
 class ScalingPolicyControllerSpec extends Specification {
 
     void setup() {

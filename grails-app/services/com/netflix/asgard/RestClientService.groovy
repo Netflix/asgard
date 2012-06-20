@@ -189,7 +189,7 @@ class RestClientService implements InitializingBean {
         Integer statusCode = null
         try {
             statusCode = executeAndProcessResponse(getWithTimeout(url, 2000), readStatusCode)
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             // Ignore and return null
         }
         statusCode

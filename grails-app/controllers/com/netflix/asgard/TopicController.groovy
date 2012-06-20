@@ -15,7 +15,6 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.sns.model.Topic
 import com.netflix.asgard.model.SubscriptionData
 import com.netflix.asgard.model.TopicData
 import grails.converters.JSON
@@ -33,7 +32,7 @@ class TopicController {
 
     def list = {
         UserContext userContext = UserContext.of(request)
-        List<Topic> topics = (awsSnsService.getTopics(userContext) as List).sort { it.name?.toLowerCase() }
+        List<TopicData> topics = (awsSnsService.getTopics(userContext) as List).sort { it.name?.toLowerCase() }
         Map details = ['topics': topics]
         withFormat {
             html { details }
@@ -167,7 +166,7 @@ class SaveTopicCommand {
     String appName
     String detail
     static constraints = {
-        appName(nullable:false, blank:false)
+        appName(nullable: false, blank: false)
     }
 }
 

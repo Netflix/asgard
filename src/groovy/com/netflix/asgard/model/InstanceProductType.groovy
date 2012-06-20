@@ -43,10 +43,10 @@ enum InstanceProductType {
         try {
             return (InstanceProductType) Enum.valueOf(InstanceProductType, name.toUpperCase())
         }
-        catch (IllegalArgumentException iae) {
+        catch (IllegalArgumentException ignored) {
             return null
         }
-        catch (NullPointerException npe) {
+        catch (NullPointerException ignored) {
             return null
         }
     }

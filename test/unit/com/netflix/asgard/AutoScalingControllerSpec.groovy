@@ -26,6 +26,7 @@ import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import java.util.List
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyPointlessArithmetic")
 class AutoScalingControllerSpec extends Specification {
 
     void setup() {

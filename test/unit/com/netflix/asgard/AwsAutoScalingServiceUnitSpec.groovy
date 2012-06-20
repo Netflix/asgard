@@ -39,6 +39,7 @@ import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.ScalingPolicyData
 import spock.lang.Specification
 
+@SuppressWarnings(["GroovyPointlessArithmetic", "GroovyAssignabilityCheck"])
 class AwsAutoScalingServiceUnitSpec extends Specification {
 
     final awsAutoScalingService = Mocks.newAwsAutoScalingService()
@@ -60,6 +61,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
 
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
 
+        //noinspection GroovyAccessibility
         when:
         awsAutoScalingService.updateAutoScalingGroup(Mocks.userContext(),
                 new AutoScalingGroupData('hiyaworld-example-v042', null, 31, 153, [], 'EC2', 17, [],

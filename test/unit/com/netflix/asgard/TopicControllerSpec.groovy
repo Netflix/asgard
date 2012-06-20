@@ -30,6 +30,7 @@ import com.netflix.asgard.mock.Mocks
 import grails.test.MockUtils
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyPointlessArithmetic")
 class TopicControllerSpec extends Specification {
     AmazonSNS mockAmazonSNS = Mock(AmazonSNS)
 

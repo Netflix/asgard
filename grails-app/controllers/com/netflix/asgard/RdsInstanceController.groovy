@@ -38,8 +38,6 @@ class RdsInstanceController {
             html { [ 'dbInstanceList' : dbInstances] }
             xml { new XML(dbInstances).render(response) }
             json { new JSON(dbInstances).render(response) }
-            // TODO: use this one when we can solve CSRF susceptibility
-            //json { new CallbackJSON(instances, params.callback).render(response) }
         }
     }
 
@@ -139,7 +137,7 @@ class RdsInstanceController {
         def dbInstance = null
         try {
             dbInstance = awsRdsService.getDBInstance(userContext, dbInstanceId)
-        } catch(Exception e) {
+        } catch (Exception ignored) {
             // AWS will throw exception if RDS instance not found. Ignore it.
             // Request will redirect after null check on dbInstance.
         }
@@ -152,7 +150,6 @@ class RdsInstanceController {
                 html { return details }
                 xml { new XML(details).render(response) }
                 json { new JSON(details).render(response) }
-                //json { new CallbackJSON(details, params.callback).render(response) }
             }
         }
     }
@@ -175,70 +172,70 @@ class RdsInstanceController {
 
 class DbCreateCommand {
 
-    Integer allocatedStorage //Must be an integer between 5 and 1024.
-    String availabilityZone //The availabilityZone parameter cannot be set if the --multi-az parameter is set to true.
-    Integer backupRetentionPeriod //Must be a value from 0 to 8.
-    String dBInstanceClass //Valid values: db.m1.small | db.m1.large | db.m1.xlarge | db.m2.2xlarge | db.m2.4xlarge
-    String dBInstanceIdentifier //Constraints: Must contain from 1 to 63 alphanumeric characters or hyphens. First character must be a letter. Cannot end with a hyphen or contain two consecutive hyphens.
+    Integer allocatedStorage // Must be an integer between 5 and 1024.
+    String availabilityZone // The availabilityZone parameter cannot be set if the --multi-az parameter is set to true.
+    Integer backupRetentionPeriod // Must be a value from 0 to 8.
+    String dBInstanceClass // Valid values: db.m1.small | db.m1.large | db.m1.xlarge | db.m2.2xlarge | db.m2.4xlarge
+    String dBInstanceIdentifier // Constraints: Must contain from 1 to 63 alphanumeric characters or hyphens. First character must be a letter. Cannot end with a hyphen or contain two consecutive hyphens.
     String dBName // Cannot be empty. Must contain 1 to 64 alphanumeric characters. Cannot be a word reserved by the specified database engine.
-    Collection<String> selectedDBSecurityGroups //at least one
-    String masterUsername //Must be an alphanumeric string containing from 1 to 16 characters.
-    String masterUserPassword //Must contain 4 to 16 alphanumeric characters.
+    Collection<String> selectedDBSecurityGroups // At least one
+    String masterUsername // Must be an alphanumeric string containing from 1 to 16 characters.
+    String masterUserPassword // Must contain 4 to 16 alphanumeric characters.
     Integer port
-    String preferredBackupWindow //Constraints: Must be in the format hh24:mi-hh24:mi.
-    //Times should be 24-hour Universal Time Coordinated (UTC).
-    //Must not conflict with the --preferred-maintenance-window.
-    //Must be at least 2 hours.
-    //Cannot be set if the --backup-retention-period has not been specified.
+    String preferredBackupWindow // Constraints: Must be in the format hh24:mi-hh24:mi.
+    // Times should be 24-hour Universal Time Coordinated (UTC).
+    // Must not conflict with the --preferred-maintenance-window.
+    // Must be at least 2 hours.
+    // Cannot be set if the --backup-retention-period has not been specified.
 
-    String preferredMaintenanceWindow//Must be in the format ddd:hh24:mi-ddd:hh24:mi.
-    //Times should be Universal Time Coordinated (UTC). See example below.
-    //Example: --preferred-maintenance-window Tue:00:30-Tue:04:30
+    String preferredMaintenanceWindow // Must be in the format ddd:hh24:mi-ddd:hh24:mi.
+    // Times should be Universal Time Coordinated (UTC). See example below.
+    // Example: --preferred-maintenance-window Tue:00:30-Tue:04:30
 
     static constraints = {
-        allocatedStorage(nullable:false, range:5..1024)
-        availabilityZone(nullable:false, blank:false) //need more -- custom validator?
-        backupRetentionPeriod(blank:false, nullable:false, range:0..8)
-        dBInstanceClass(nullable:false, blank:false)
-        dBInstanceIdentifier(nullable:false, blank:false, size:1..63, matches:'[a-zA-Z]{1}[a-zA-Z0-9-]*[^-]$') //this match does not check the double-hyphen
-        dBName(nullable:false, blank:false, size:1..64,matches:'[a-zA-Z0-9]{1,64}')
-        selectedDBSecurityGroups(nullable:false, minSize:1)
-        masterUsername(nullable:false, blank:false, size:1..16,matches:'[a-zA-Z0-9]{1,16}')
-        masterUserPassword(nullable:false, blank:false, size:4..16,matches:'[a-zA-Z0-9]{4,16}')
-        port(nullable:false)
-        preferredBackupWindow(blank:true, matches:'(20|21|22|23|[01]\\d|\\d)(([:][0-5]\\d){1,2})-(20|21|22|23|[01]\\d|\\d)(([:][0-5]\\d){1,2})')
-        //did not check for 2 hour min, clash with maintenance, or that backup period specified
+        allocatedStorage(nullable: false, range: 5..1024)
+        availabilityZone(nullable: false, blank: false) // Need more -- custom validator?
+        backupRetentionPeriod(blank: false, nullable: false, range: 0..8)
+        dBInstanceClass(nullable: false, blank: false)
+        dBInstanceIdentifier(nullable: false, blank: false, size: 1..63, matches: '[a-zA-Z]{1}[a-zA-Z0-9-]*[^-]$') // This match does not check the double-hyphen
+        dBName(nullable: false, blank: false, size: 1..64, matches: '[a-zA-Z0-9]{1,64}')
+        selectedDBSecurityGroups(nullable: false, minSize: 1)
+        masterUsername(nullable: false, blank: false, size: 1..16, matches: '[a-zA-Z0-9]{1,16}')
+        masterUserPassword(nullable: false, blank: false, size: 4..16, matches: '[a-zA-Z0-9]{4,16}')
+        port(nullable: false)
+        preferredBackupWindow(blank: true, matches: '(20|21|22|23|[01]\\d|\\d)(([:][0-5]\\d){1,2})-(20|21|22|23|[01]\\d|\\d)(([:][0-5]\\d){1,2})')
+        // Did not check for 2 hour min, clash with maintenance, or that backup period specified
 
-        //should, but did not, validate preferredMaintenanceWindow
+        // Should, but did not, validate preferredMaintenanceWindow
     }
 }
 
 class DbUpdateCommand {
 
-    Integer allocatedStorage //Must be an integer between 5 and 1024.
-    Integer backupRetentionPeriod //Must be a value from 0 to 8.
-    String dBInstanceClass //Valid values: db.m1.small | db.m1.large | db.m1.xlarge | db.m2.2xlarge | db.m2.4xlarge
-    Collection<String> selectedDBSecurityGroups //at least one
-    String masterUserPassword //Must contain 4 to 16 alphanumeric characters.
-    String preferredBackupWindow //Constraints: Must be in the format hh24:mi-hh24:mi.
-    //Times should be 24-hour Universal Time Coordinated (UTC).
-    //Must not conflict with the --preferred-maintenance-window.
-    //Must be at least 2 hours.
-    //Cannot be set if the --backup-retention-period has not been specified.
+    Integer allocatedStorage // Must be an integer between 5 and 1024.
+    Integer backupRetentionPeriod // Must be a value from 0 to 8.
+    String dBInstanceClass // Valid values: db.m1.small | db.m1.large | db.m1.xlarge | db.m2.2xlarge | db.m2.4xlarge
+    Collection<String> selectedDBSecurityGroups // At least one
+    String masterUserPassword // Must contain 4 to 16 alphanumeric characters.
+    String preferredBackupWindow // Constraints: Must be in the format hh24:mi-hh24:mi.
+    // Times should be 24-hour Universal Time Coordinated (UTC).
+    // Must not conflict with the --preferred-maintenance-window.
+    // Must be at least 2 hours.
+    // Cannot be set if the --backup-retention-period has not been specified.
 
-    String preferredMaintenanceWindow//Must be in the format ddd:hh24:mi-ddd:hh24:mi.
-    //Times should be Universal Time Coordinated (UTC). See example below.
-    //Example: --preferred-maintenance-window Tue:00:30-Tue:04:30
+    String preferredMaintenanceWindow // Must be in the format ddd:hh24:mi-ddd:hh24:mi.
+    // Times should be Universal Time Coordinated (UTC). See example below.
+    // Example: --preferred-maintenance-window Tue:00:30-Tue:04:30
 
     static constraints = {
-        allocatedStorage(nullable:false, range:5..1024)
-        backupRetentionPeriod(blank:false, nullable:false, range:0..8)
-        dBInstanceClass(nullable:false, blank:false)
-        selectedDBSecurityGroups(nullable:false, minSize:1)
-        masterUserPassword(blank:true, size:4..16, matches:'[a-zA-Z0-9]{4,16}')
-        preferredBackupWindow(blank:true, matches:'(20|21|22|23|[01]\\d|\\d)(([:][0-5]\\d){1,2})-(20|21|22|23|[01]\\d|\\d)(([:][0-5]\\d){1,2})')
-        //did not check for 2 hour min, clash with maintenance, or that backup period specified
+        allocatedStorage(nullable: false, range: 5..1024)
+        backupRetentionPeriod(blank: false, nullable: false, range: 0..8)
+        dBInstanceClass(nullable: false, blank: false)
+        selectedDBSecurityGroups(nullable: false, minSize: 1)
+        masterUserPassword(blank: true, size: 4..16, matches: '[a-zA-Z0-9]{4,16}')
+        preferredBackupWindow(blank: true, matches: '(20|21|22|23|[01]\\d|\\d)(([:][0-5]\\d){1,2})-(20|21|22|23|[01]\\d|\\d)(([:][0-5]\\d){1,2})')
+        // Did not check for 2 hour min, clash with maintenance, or that backup period specified
 
-        //should, but did not, validate preferredMaintenanceWindow
+        // Should, but did not, validate preferredMaintenanceWindow
     }
 }

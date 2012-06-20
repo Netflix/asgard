@@ -90,6 +90,6 @@ import grails.converters.XML
     }
 
     def runningCount = {
-        render "" + taskService.getRunning().size()
+        render '' + taskService.getRunning().size()
     }
 }

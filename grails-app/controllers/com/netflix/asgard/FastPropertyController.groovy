@@ -24,8 +24,6 @@ class FastPropertyController {
 
     def fastPropertyService
 
-    String unavailableMessage = 'The new platformservice editor is not yet operational. It will be online shortly.'
-
     def index = { redirect(action: 'list', params: params) }
 
     def list = {

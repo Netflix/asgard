@@ -112,7 +112,7 @@ class AutoScalingController {
             try {
                 activities = awsAutoScalingService.getAutoScalingGroupActivities(userContext, name, DEFAULT_ACTIVITIES)
                 scalingPolicies = awsAutoScalingService.getScalingPoliciesForGroup(userContext, name)
-            } catch (AmazonServiceException ase) {
+            } catch (AmazonServiceException ignored) {
                 // The ASG stopped existing. This race condition happens during automated polling in a unit test.
             }
             Integer instanceCount = group.instances.size()

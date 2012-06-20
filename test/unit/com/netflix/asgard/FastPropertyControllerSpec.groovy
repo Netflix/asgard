@@ -66,6 +66,7 @@ class FastPropertyControllerSpec extends Specification {
         when:
         Map actual = controller.show()
 
+        //noinspection GroovyPointlessArithmetic
         then:
         1 * controller.fastPropertyService.get(!null, !null) >> FastProperty.fromXml(mockXmlSingle('1'))
         actual.fastProperty.id == expected.fastProperty.id

@@ -121,7 +121,7 @@ class MergedInstance {
     }
 
     def attributes() {
-        [ami:amiId, app:appName, id:instanceId, launch:launchTime, status:status, version:version, zone:zone]
+        [ami: amiId, app: appName, id: instanceId, launch: launchTime, status: status, version: version, zone: zone]
     }
 
 }

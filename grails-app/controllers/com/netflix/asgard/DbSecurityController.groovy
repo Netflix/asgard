@@ -30,7 +30,8 @@ class DbSecurityController {
 
     def list = {
         UserContext userContext = UserContext.of(request)
-        def dbSecurityGroups = awsRdsService.getDBSecurityGroups(userContext).sort{ it.dBSecurityGroupName.toLowerCase() }
+        def dbSecurityGroups = awsRdsService.getDBSecurityGroups(userContext).sort{
+                it.getDBSecurityGroupName().toLowerCase() }
         withFormat {
             html {
                 [ 'dbSecurityGroups' : dbSecurityGroups,

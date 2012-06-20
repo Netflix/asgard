@@ -52,6 +52,7 @@ class InstanceTypeService implements CacheInitializer {
     def grailsApplication
     def awsEc2Service
     Caches caches
+    def configService
     def emailerService
     def restClientService
 
@@ -96,8 +97,11 @@ class InstanceTypeService implements CacheInitializer {
     }
 
     private Document fetchInstanceTypesDocument() {
-        grailsApplication.config.server.online ? Jsoup.connect(instanceTypesUrl).get() :
+        if (configService.online) {
+            Jsoup.parse(restClientService.getAsText(instanceTypesUrl))
+        } else {
             fetchLocalInstanceTypesDocument()
+        }
     }
 
     private JSONElement fetchPricingJsonData(InstancePriceType instancePriceType) {
