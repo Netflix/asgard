@@ -23,7 +23,7 @@ import com.netflix.asgard.model.ZoneAvailability
 import com.amazonaws.services.ec2.model.Placement
 
 @SuppressWarnings("GroovyPointlessArithmetic")
-class AwsEc2ServiceSpec extends Specification {
+class AwsEc2ServiceUnitSpec extends Specification {
 
     def 'active instances should only include pending and running states'() {
         given:
