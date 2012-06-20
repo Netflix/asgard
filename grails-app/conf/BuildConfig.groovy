@@ -113,6 +113,7 @@ grails.project.dependency.resolution = {
     plugins {
         compile ":hibernate:$grailsVersion"
         compile ":compress:0.4"
+        compile ":context-param:1.0"
 
         test ':spock:0.6'
 

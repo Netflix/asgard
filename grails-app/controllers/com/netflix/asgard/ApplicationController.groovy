@@ -26,7 +26,7 @@ import grails.converters.XML
 import org.apache.commons.collections.Bag
 import org.apache.commons.collections.HashBag
 
-@RegionAgnostic class ApplicationController {
+class ApplicationController {
 
     def applicationService
     def awsEc2Service

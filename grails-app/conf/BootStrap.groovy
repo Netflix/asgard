@@ -19,7 +19,6 @@ class BootStrap {
     def configService
     def initService
     def monkeyPatcherService
-    def regionService // Good to load this early, since it modifies some core Grails behavior
 
     def init = { servletContext ->
         if (configService.appConfigured) { // Only start warming the caches if Asgard has been configured

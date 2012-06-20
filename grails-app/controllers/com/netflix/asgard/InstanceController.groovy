@@ -26,9 +26,11 @@ import com.google.common.collect.Multiset
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.text.TextLink
 import com.netflix.asgard.text.TextLinkTemplate
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class InstanceController {
 
     final static allowedMethods = [terminate: 'POST', terminateAndShrinkGroup: 'POST']

@@ -17,9 +17,11 @@ package com.netflix.asgard
 
 import com.amazonaws.services.ec2.model.Snapshot
 import com.amazonaws.services.ec2.model.Volume
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class SnapshotController {
 
     def awsEc2Service

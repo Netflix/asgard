@@ -18,7 +18,7 @@ package com.netflix.asgard
 import grails.converters.JSON
 import grails.converters.XML
 
-@RegionAgnostic class RegionController {
+class RegionController {
 
     def configService
 

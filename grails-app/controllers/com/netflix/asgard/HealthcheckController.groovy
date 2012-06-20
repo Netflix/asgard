@@ -15,7 +15,7 @@
  */
 package com.netflix.asgard
 
-@RegionAgnostic class HealthcheckController {
+class HealthcheckController {
 
     def healthcheckService
 

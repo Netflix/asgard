@@ -16,9 +16,11 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.model.SimpleQueue
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class QueueController {
 
     def awsSqsService

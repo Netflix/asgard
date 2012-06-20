@@ -17,11 +17,13 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.netflix.asgard.push.CommonPushOptions
+import com.netflix.asgard.push.PushException
 import com.netflix.asgard.push.RollingPushOperation
 import com.netflix.asgard.push.RollingPushOptions
+import com.netflix.grails.contextParam.ContextParam
 import java.rmi.NoSuchObjectException
-import com.netflix.asgard.push.PushException
 
+@ContextParam('region')
 class PushController {
 
     def static allowedMethods = [startRolling:'POST']

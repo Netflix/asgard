@@ -23,11 +23,13 @@ import com.amazonaws.services.ec2.model.SpotInstanceRequest
 import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.model.JanitorMode
 import com.netflix.asgard.model.MassDeleteRequest
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 import org.codehaus.groovy.grails.web.binding.DataBindingUtils
 import org.codehaus.groovy.grails.web.json.JSONElement
 
+@ContextParam('region')
 class ImageController {
 
     def awsEc2Service

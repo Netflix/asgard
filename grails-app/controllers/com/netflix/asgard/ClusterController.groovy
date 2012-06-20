@@ -20,6 +20,7 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.GroupedInstance
+import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.push.CommonPushOptions
 import com.netflix.asgard.push.GroupActivateOperation
@@ -28,11 +29,11 @@ import com.netflix.asgard.push.GroupDeactivateOperation
 import com.netflix.asgard.push.GroupDeleteOperation
 import com.netflix.asgard.push.GroupResizeOperation
 import com.netflix.asgard.push.InitialTraffic
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
-import com.netflix.asgard.model.ScalingPolicyData
-
+@ContextParam('region')
 class ClusterController {
 
     def static allowedMethods = [createNextGroup: 'POST', resize: 'POST', delete: 'POST', activate: 'POST',

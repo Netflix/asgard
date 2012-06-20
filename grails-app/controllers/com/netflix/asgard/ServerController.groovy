@@ -21,7 +21,7 @@ import grails.converters.JSON
 import grails.converters.XML
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
-@RegionAgnostic class ServerController {
+class ServerController {
 
     def serverService
     def taskService

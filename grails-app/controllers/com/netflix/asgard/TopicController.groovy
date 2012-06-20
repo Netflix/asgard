@@ -17,9 +17,11 @@ package com.netflix.asgard
 
 import com.netflix.asgard.model.SubscriptionData
 import com.netflix.asgard.model.TopicData
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class TopicController {
 
     def awsSnsService

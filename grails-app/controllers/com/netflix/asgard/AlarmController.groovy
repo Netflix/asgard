@@ -18,13 +18,15 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.netflix.asgard.model.AlarmData
-import com.netflix.asgard.model.AlarmData.ComparisonOperator
-import com.netflix.asgard.model.AlarmData.Statistic
 import com.netflix.asgard.model.MetricId
 import com.netflix.asgard.model.TopicData
+import com.netflix.asgard.model.AlarmData.ComparisonOperator
+import com.netflix.asgard.model.AlarmData.Statistic
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class AlarmController {
 
     def awsCloudWatchService

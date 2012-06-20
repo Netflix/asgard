@@ -16,11 +16,13 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.rds.model.DBInstance
-import grails.converters.JSON
-import grails.converters.XML
 import com.amazonaws.services.rds.model.DBSnapshot
 import com.netflix.asgard.AwsRdsService.Engine
+import com.netflix.grails.contextParam.ContextParam
+import grails.converters.JSON
+import grails.converters.XML
 
+@ContextParam('region')
 class RdsInstanceController {
 
     // the delete actions only accept POST requests

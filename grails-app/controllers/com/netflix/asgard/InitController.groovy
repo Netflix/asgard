@@ -18,7 +18,7 @@ package com.netflix.asgard
 /**
  * Controller that handles all user requests if there is no Config.groovy in ASGARD_HOME
  */
-@RegionAgnostic class InitController {
+class InitController {
 
     def initService
     def configService

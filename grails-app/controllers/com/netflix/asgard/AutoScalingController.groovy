@@ -31,11 +31,13 @@ import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.GroupedInstance
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
+@ContextParam('region')
 class AutoScalingController {
 
     def grailsApplication

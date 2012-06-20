@@ -17,7 +17,7 @@ package com.netflix.asgard
 
 import grails.converters.JSON
 
-@RegionAgnostic class FlagController {
+class FlagController {
 
     def flagService
 

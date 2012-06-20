@@ -20,7 +20,7 @@ class RegionFilters {
     private static MONTH_IN_SECONDS = 60 * 60 * 24 * 30
 
     def configService
-    def regionService
+    def grailsApplication
 
     def filters = {
         all(controller: '*', action: '*') {
@@ -41,7 +41,7 @@ class RegionFilters {
                         request.format == 'html' &&
                         request.method == 'GET' &&
                         actionName && /* Avoid redirecting twice when both action and region are missing */
-                        regionService.isControllerRegional(controllerName)) {
+                        grailsApplication.controllerNamesToContextParams[(controllerName)].contains('region')) {
                     params.region = region.code
                     redirect(controller: controllerName, params: params)
 
