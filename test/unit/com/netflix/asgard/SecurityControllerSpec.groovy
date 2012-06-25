@@ -25,6 +25,7 @@ import com.netflix.asgard.mock.Mocks
 import grails.plugin.spock.ControllerSpec
 import grails.test.MockUtils
 
+@SuppressWarnings("GroovyPointlessArithmetic")
 class SecurityControllerSpec extends ControllerSpec {
     AmazonEC2 amazonEC2 = Mock(AmazonEC2)
 
