@@ -19,6 +19,7 @@ import com.netflix.asgard.server.ServerState
 import com.netflix.asgard.server.SwitchAttemptResult
 import grails.converters.JSON
 import grails.converters.XML
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 @RegionAgnostic class ServerController {
 
@@ -40,6 +41,8 @@ import grails.converters.XML
     }
 
     def ip = { render InetAddress.localHost.hostAddress }
+
+    def version = { render "${ApplicationHolder.application.metadata['app.version']}" }
 
     def build = { render "${grailsApplication.config.build.number}" }
 

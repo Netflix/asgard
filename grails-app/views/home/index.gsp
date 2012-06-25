@@ -123,6 +123,7 @@
         Discovery: There is no Discovery URL for <strong>${grailsApplication.config.cloud.accountName}</strong> in <strong>${region}</strong>
       </g:else>
       <p>Hostname: ${InetAddress.localHost.hostName}, IP: ${InetAddress.localHost.hostAddress}</p>
+      <p>Version: <g:meta name="app.version"/></p>
       <p>Build: id=${grailsApplication.config.build.id} build#${grailsApplication.config.build.number} @${grailsApplication.config.scm.commit}</p>
     </div>
   </div>
