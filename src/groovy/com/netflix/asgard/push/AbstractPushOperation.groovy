@@ -22,7 +22,7 @@ abstract class AbstractPushOperation {
         group
     }
 
-    private void abortBecauseGroupDisappeared() {
+    private void abortBecauseGroupDisappeared(String autoScalingGroupName) {
         throw new PushException("Group '${autoScalingGroupName}' can no longer be found.")
     }
 
