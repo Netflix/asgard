@@ -27,6 +27,8 @@ class InitServiceSpec extends Specification {
     static final String ASGARD_HOME = 'asgardtmp'
 
     @AutoCleanup('delete')
+    File configFile = new File(ASGARD_HOME, 'Config.groovy') // Only used for cleanup
+    @AutoCleanup('delete')
     File asgardHome = new File(ASGARD_HOME)
 
     def applicationContext = Mock(ApplicationContext)

@@ -17,6 +17,7 @@ package com.netflix.asgard.push
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.netflix.asgard.EntityType
+import com.netflix.asgard.From
 import com.netflix.asgard.Link
 import com.netflix.asgard.Relationships
 import com.netflix.asgard.Spring
@@ -30,17 +31,12 @@ import org.joda.time.Duration
 /**
  * A long running process that stops traffic to all instances of an auto scaling group.
  */
-class GroupDeactivateOperation {
+class GroupDeactivateOperation extends AbstractPushOperation {
 
     private static final log = LogFactory.getLog(this)
 
-    def applicationService
-    def awsAutoScalingService
-    def awsLoadBalancerService
     def configService
     def discoveryService
-    def taskService
-    Task task
     UserContext userContext
     String autoScalingGroupName
 
@@ -64,7 +60,7 @@ class GroupDeactivateOperation {
             String appName = Relationships.appNameFromGroupName(autoScalingGroupName)
             task.email = applicationService.getEmailFromApp(userContext, appName)
 
-            AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, autoScalingGroupName)
+            AutoScalingGroup group = checkGroupStillExists(userContext, autoScalingGroupName)
 
             // Ensure processes are disabled to avoid accidental launches and terminations while traffic should be off.
             final Set<AutoScalingProcessType> suspendProcessTypes = AutoScalingProcessType.getDisableProcesses() -

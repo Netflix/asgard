@@ -37,7 +37,7 @@ import org.joda.time.Duration
  * meet the new requirements. If new instances were needed, this operation waits for the instances to be ready for
  * traffic.
  */
-class GroupResizeOperation {
+class GroupResizeOperation extends AbstractPushOperation {
     private static final log = LogFactory.getLog(this)
 
     /**
@@ -47,15 +47,10 @@ class GroupResizeOperation {
 
     static final Integer MINUTES_BETWEEN_BATCHES = 5
 
-    def applicationService
-    def awsAutoScalingService
-    def awsLoadBalancerService
     def awsEc2Service
     def discoveryService
     def flagService
-    def taskService
 
-    Task task
     UserContext userContext
     String autoScalingGroupName
     InitialTraffic initialTraffic
@@ -142,7 +137,7 @@ class GroupResizeOperation {
                 waitForInstancesToTerminate()
             }
 
-            group = awsAutoScalingService.getAutoScalingGroup(userContext, autoScalingGroupName)
+            group = checkGroupStillExists(userContext, autoScalingGroupName)
             currentCount = group.instances.size()
             if (currentCount >= eventualMin && currentCount <= newMax) {
                 break
@@ -195,10 +190,6 @@ class GroupResizeOperation {
 
     private static final Integer ITERATION_WAIT_MILLIS = 300
 
-    private void abortBecauseGroupDisappeared() {
-        throw new PushException("Group '${autoScalingGroupName}' can no longer be found.")
-    }
-
     private void abortBecauseInstancesHaveNotAppeared(int currentCount, String instanceChangeDescription) {
         throw new PushException("Timeout waiting ${Time.format(calculateMaxTimePerBatch())} for" +
                 " instances ${instanceChangeDescription}. Expected ${newMin} instance${newMin == 1 ? '' : 's'}" +
@@ -218,7 +209,7 @@ class GroupResizeOperation {
         Boolean moreInstancesAreExpected = true
         while (moreInstancesAreExpected) {
             Time.sleepCancellably(ITERATION_WAIT_MILLIS)
-            group = checkGroupStillExists()
+            group = checkGroupStillExists(userContext, autoScalingGroupName, From.AWS_NOCACHE)
             Integer currentCount = group.instances.size()
             ensureTrafficIsSuppressedIfAppropriate(group)
 
@@ -235,7 +226,7 @@ class GroupResizeOperation {
         Boolean waitingForInstancesToGoInService = true
         while (waitingForInstancesToGoInService) {
             Time.sleepCancellably(ITERATION_WAIT_MILLIS)
-            group = checkGroupStillExists()
+            group = checkGroupStillExists(userContext, autoScalingGroupName, From.AWS_NOCACHE)
             Integer currentCount = group.findInServiceInstanceIds().size()
             ensureTrafficIsSuppressedIfAppropriate(group)
 
@@ -269,7 +260,7 @@ class GroupResizeOperation {
     }
 
     private AutoScalingGroup checkHealthOfInstances() {
-        AutoScalingGroup group = checkGroupStillExists()
+        AutoScalingGroup group = checkGroupStillExists(userContext, autoScalingGroupName, From.AWS_NOCACHE)
         ensureTrafficIsSuppressedIfAppropriate(group)
         Collection<String> idsOfInstancesThatAreNotYetHealthy = findInstancesNotYetHealthy(group.instances*.instanceId)
         if (idsOfInstancesThatAreNotYetHealthy.empty) {
@@ -288,7 +279,7 @@ class GroupResizeOperation {
                         "including ${idsOfInstancesThatAreNotYetHealthy}. Are the new instances having errors?")
             }
             Time.sleepCancellably(ITERATION_WAIT_MILLIS)
-            group = checkGroupStillExists()
+            group = checkGroupStillExists(userContext, autoScalingGroupName, From.AWS_NOCACHE)
             ensureTrafficIsSuppressedIfAppropriate(group)
             idsOfInstancesThatAreNotYetHealthy = findInstancesNotYetHealthy(idsOfInstancesThatAreNotYetHealthy)
         }
@@ -308,15 +299,6 @@ class GroupResizeOperation {
             Time.sleepCancellably(discoveryService.MILLIS_DELAY_BETWEEN_DISCOVERY_CALLS)
             missingInDiscovery
         }
-    }
-
-    private AutoScalingGroup checkGroupStillExists() {
-        AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, autoScalingGroupName,
-                From.AWS_NOCACHE)
-        if (!group) {
-            abortBecauseGroupDisappeared()
-        }
-        group
     }
 
     private void ensureTrafficIsSuppressedIfAppropriate(AutoScalingGroup group) {
