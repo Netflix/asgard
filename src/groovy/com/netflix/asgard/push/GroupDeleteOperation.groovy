@@ -16,8 +16,9 @@
 package com.netflix.asgard.push
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
-import com.netflix.asgard.Link
 import com.netflix.asgard.EntityType
+import com.netflix.asgard.From
+import com.netflix.asgard.Link
 import com.netflix.asgard.Names
 import com.netflix.asgard.Relationships
 import com.netflix.asgard.Spring
@@ -29,14 +30,9 @@ import org.apache.commons.logging.LogFactory
  * A long running process that sets an auto scaling group to size 0, waits for all the instances to terminate, then
  * deletes the auto scaling group and all its launch configurations.
  */
-class GroupDeleteOperation {
+class GroupDeleteOperation extends AbstractPushOperation {
     private static final log = LogFactory.getLog(this)
 
-    def applicationService
-    def awsAutoScalingService
-    def awsLoadBalancerService
-    def taskService
-    Task task
     UserContext userContext
     AutoScalingGroup autoScalingGroup
 
@@ -60,7 +56,7 @@ class GroupDeleteOperation {
             String appName = names.app
             task.email = applicationService.getEmailFromApp(userContext, appName)
 
-            AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, groupName)
+            AutoScalingGroup group = checkGroupStillExists(userContext, groupName)
             List<String> oldLaunchConfigNames = awsAutoScalingService.getLaunchConfigurationNamesForAutoScalingGroup(
                 userContext, groupName).findAll { it != group.launchConfigurationName }
 

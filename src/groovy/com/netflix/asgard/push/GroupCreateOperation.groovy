@@ -32,15 +32,11 @@ import org.apache.commons.logging.LogFactory
  * Optionally this operation can try to prevent traffic from reaching the instances as they come up.
  * This operation finishes after all instances are in their expected stable state (either with or without traffic).
  */
-class GroupCreateOperation {
+class GroupCreateOperation extends AbstractPushOperation {
     private static final log = LogFactory.getLog(this)
 
-    def applicationService
-    def awsAutoScalingService
     def awsEc2Service
-    def awsLoadBalancerService
     def discoveryService
-    def taskService
     private final GroupCreateOptions options
     Task task
 
