@@ -33,7 +33,7 @@ class SecurityControllerSpec extends ControllerSpec {
         MockUtils.prepareForConstraintsTests(SecurityCreateCommand)
         controller.awsEc2Service = Mocks.newAwsEc2Service(amazonEC2)
         controller.applicationService = Mocks.applicationService()
-        controller.metaClass.grailsApplication = Mocks.grailsApplication()
+        controller.configService = Mocks.configService()
     }
 
     def 'show should display details for name'() {
