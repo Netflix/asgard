@@ -34,6 +34,15 @@ class ConfigService {
         grailsApplication.config?.grails?.awsAccounts[0]
     }
 
+    /**
+     * Gets the mapping of all relevant account numbers to account names.
+     *
+     * @return Map <String, String> account numbers to account names
+     */
+    Map<String, String> getAwsAccountNames() {
+        grailsApplication.config?.grails?.awsAccountNames ?: [:]
+    }
+
     String getRegionalDiscoveryServer(Region region) {
         Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.cloud?.discoveryServers
         regionsToDiscoveryServers ? regionsToDiscoveryServers[region] : null

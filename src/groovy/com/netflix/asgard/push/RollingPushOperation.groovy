@@ -25,7 +25,6 @@ import com.netflix.asgard.Link
 import com.netflix.asgard.Region
 import com.netflix.asgard.Relationships
 import com.netflix.asgard.Spring
-import com.netflix.asgard.Task
 import com.netflix.asgard.Time
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.ApplicationInstance
@@ -37,21 +36,16 @@ import org.joda.time.Duration
  * A complex operation that involves pushing an AMI image to many new instances within an auto scaling group, and
  * monitoring the status of the instances for real time user feedback.
  */
-class RollingPushOperation {
+class RollingPushOperation extends AbstractPushOperation {
     private static final log = LogFactory.getLog(this)
 
-    def applicationService
-    def awsAutoScalingService
     def awsEc2Service
-    def awsLoadBalancerService
     def configService
     def discoveryService
     def launchTemplateService
-    def taskService
     private List<Slot> relaunchSlots = []
     List<String> loadBalancerNames = []
     private final RollingPushOptions options
-    Task task
     PushStatus pushStatus
 
     /**
@@ -184,8 +178,7 @@ class RollingPushOperation {
                 break
 
             case InstanceState.terminated:
-                AutoScalingGroup freshGroup = awsAutoScalingService.getAutoScalingGroup(userContext,
-                        options.groupName, From.AWS_NOCACHE)
+                AutoScalingGroup freshGroup = checkGroupStillExists(userContext, options.groupName, From.AWS_NOCACHE)
                 // See if new ASG instance can be found yet
                 def newInst = freshGroup.instances.find {
                     def instanceFromGroup = it
@@ -211,8 +204,7 @@ class RollingPushOperation {
             // After here instanceInfo holds the state of the fresh instance, not the old instance
             case InstanceState.pending:
                 //if (state == InstanceState.pending) {
-                def freshGroup = awsAutoScalingService.getAutoScalingGroup(userContext, options.groupName,
-                        From.AWS_NOCACHE)
+                def freshGroup = checkGroupStillExists(userContext, options.groupName, From.AWS_NOCACHE)
                 def newInst = freshGroup.instances.find { it.instanceId == instanceInfo.id }
                 String lifecycleState = newInst?.lifecycleState
                 Boolean freshInstanceFailed = !newInst || "Terminated" == lifecycleState

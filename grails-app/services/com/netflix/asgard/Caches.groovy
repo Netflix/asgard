@@ -95,7 +95,7 @@ class Caches {
         allInstances = cachedMapBuilder.of(EntityType.instance, 120).buildMultiRegionCachedMap()
         allSpotInstanceRequests = cachedMapBuilder.of(EntityType.spotInstanceRequest, 120).buildMultiRegionCachedMap()
         allApplicationInstances = cachedMapBuilder.of(EntityType.applicationInstance, 60).buildMultiRegionCachedMap()
-        allReservedInstancesGroups = cachedMapBuilder.of(EntityType.reservation, 300).buildMultiRegionCachedMap()
+        allReservedInstancesGroups = cachedMapBuilder.of(EntityType.reservation, 3600).buildMultiRegionCachedMap()
         allSecurityGroups = cachedMapBuilder.of(EntityType.security, 120).buildMultiRegionCachedMap()
         allSnapshots = cachedMapBuilder.of(EntityType.snapshot, 300).buildMultiRegionCachedMap()
         allVolumes = cachedMapBuilder.of(EntityType.volume, 300).buildMultiRegionCachedMap()

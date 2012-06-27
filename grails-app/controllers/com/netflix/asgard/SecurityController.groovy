@@ -25,10 +25,11 @@ class SecurityController {
     def applicationService
     def awsEc2Service
     def awsLoadBalancerService
+    def configService
 
-    def static allowedMethods = [save:'POST', update:'POST', delete:'POST']
+    def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -61,10 +62,11 @@ class SecurityController {
             return
         } else {
             def details = [
-                    'group' : group,
-                    'app' : applicationService.getRegisteredApplication(userContext, group.groupName),
-                    'accountNames' : grailsApplication.config.grails.awsAccountNames,
-                    'editable' : awsEc2Service.isSecurityGroupEditable(group.groupName) ]
+                    group: group,
+                    app: applicationService.getRegisteredApplication(userContext, group.groupName),
+                    accountNames: configService.awsAccountNames,
+                    editable: awsEc2Service.isSecurityGroupEditable(group.groupName)
+            ]
             // TODO referenced-from lists would be nice too
             withFormat {
                 html { return details }
@@ -77,7 +79,7 @@ class SecurityController {
     def create = {
         UserContext userContext = UserContext.of(request)
         [
-            'applications' : applicationService.getRegisteredApplications(userContext)
+            applications: applicationService.getRegisteredApplications(userContext)
         ]
     }
 
@@ -112,9 +114,9 @@ class SecurityController {
             return
         } else {
             return [
-                'group' : group,
-                'groups' : getSecurityAccessibility(userContext, group),
-                'editable' : awsEc2Service.isSecurityGroupEditable(group.groupName)
+                group: group,
+                groups: getSecurityAccessibility(userContext, group),
+                editable: awsEc2Service.isSecurityGroupEditable(group.groupName)
             ]
         }
     }
@@ -142,9 +144,9 @@ class SecurityController {
             } catch (Exception e) {
                 flash.message = "Could not update Security Group: ${e}"
             }
-            redirect(action: 'show', params:[id: name])
+            redirect(action: 'show', params: [id: name])
         } else {
-            flash.message = "Security group ${name} should not be modified with this tool."
+            flash.message = "Security group '${name}' should not be modified with this tool."
             redirect(action: 'list')
         }
     }
@@ -190,13 +192,13 @@ class SecurityCreateCommand {
         appName(nullable: false, blank: false, validator: { value, command->
             UserContext userContext = UserContext.of(Requests.request)
             if (!Relationships.checkName(value)) {
-                return "application.name.illegalChar"
+                return 'application.name.illegalChar'
             }
             if (Relationships.usesReservedFormat(value)) {
-                return "name.usesReservedFormat"
+                return 'name.usesReservedFormat'
             }
             if (!command.applicationService.getRegisteredApplication(userContext, value)) {
-                return "application.name.nonexistent"
+                return 'application.name.nonexistent'
             }
             if ("${value}-${command.detail}".length() > Relationships.GROUP_NAME_MAX_LENGTH) {
                 return "The complete name cannot exceed ${Relationships.GROUP_NAME_MAX_LENGTH} characters"
@@ -205,10 +207,10 @@ class SecurityCreateCommand {
 
         detail(nullable: true, validator: { value, command->
             if (value && !Relationships.checkDetail(value)) {
-                return "The detail must be empty or consist of alphanumeric characters and hyphens"
+                return 'The detail must be empty or consist of alphanumeric characters and hyphens'
             }
             if (Relationships.usesReservedFormat(value)) {
-                return "name.usesReservedFormat"
+                return 'name.usesReservedFormat'
             }
         })
 

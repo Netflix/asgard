@@ -25,6 +25,7 @@ import com.netflix.asgard.mock.Mocks
 import grails.test.MockUtils
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyPointlessArithmetic")
 class SecurityControllerSpec extends Specification {
     AmazonEC2 amazonEC2 = Mock(AmazonEC2)
 
@@ -34,7 +35,7 @@ class SecurityControllerSpec extends Specification {
         MockUtils.prepareForConstraintsTests(SecurityCreateCommand)
         controller.awsEc2Service = Mocks.newAwsEc2Service(amazonEC2)
         controller.applicationService = Mocks.applicationService()
-        controller.metaClass.grailsApplication = Mocks.grailsApplication()
+        controller.configService = Mocks.configService()
     }
 
     def 'show should display details for name'() {

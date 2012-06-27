@@ -428,8 +428,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
         } catch (AmazonServiceException ignore) {
             // Can't find a security group with that request.
+            return null
         }
-        caches.allSecurityGroups.by(userContext.region).put(name, group)
+        caches.allSecurityGroups.by(userContext.region).put(group.groupName, group)
     }
 
     // mutators
@@ -969,7 +970,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
                         DeleteSnapshotRequest request = new DeleteSnapshotRequest().withSnapshotId(snapshotId)
                         awsClient.by(userContext.region).deleteSnapshot(request)
                     },
-                    { Exception e -> e instanceof AmazonServiceException && e.errorCode == 'InvalidSnapshot.InUse' }
+                    { Exception e -> e instanceof AmazonServiceException && e.errorCode == 'InvalidSnapshot.InUse' },
+                    250
             )
             caches.allSnapshots.by(userContext.region).remove(snapshotId)
         }
