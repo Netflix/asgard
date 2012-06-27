@@ -428,8 +428,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
         } catch (AmazonServiceException ignore) {
             // Can't find a security group with that request.
+            return null
         }
-        caches.allSecurityGroups.by(userContext.region).put(name, group)
+        caches.allSecurityGroups.by(userContext.region).put(group.groupName, group)
     }
 
     // mutators
