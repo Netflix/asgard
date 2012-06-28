@@ -15,15 +15,33 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.AmazonServiceException
+import com.amazonaws.services.ec2.AmazonEC2
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.InstanceState
-import spock.lang.Specification
-import com.amazonaws.services.ec2.model.ReservedInstances
-import com.netflix.asgard.model.ZoneAvailability
 import com.amazonaws.services.ec2.model.Placement
+import com.amazonaws.services.ec2.model.ReservedInstances
+import com.amazonaws.services.ec2.model.SecurityGroup
+import com.netflix.asgard.model.ZoneAvailability
+import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
 class AwsEc2ServiceSpec extends Specification {
+
+    UserContext userContext
+    AmazonEC2 mockAmazonEC2
+    CachedMap mockSecurityGroupCache
+    MultiRegionCachedMap mockAllSecurityGroups
+    
+    def setup() {
+        userContext = new UserContext(region: Region.US_EAST_1)
+        mockAmazonEC2 = Mock(AmazonEC2)
+        mockSecurityGroupCache = Mock(CachedMap)
+        mockAllSecurityGroups = Mock(MultiRegionCachedMap)
+        mockAllSecurityGroups.by(_) >> mockSecurityGroupCache
+    }
 
     def 'active instances should only include pending and running states'() {
         given:
@@ -100,5 +118,64 @@ class AwsEc2ServiceSpec extends Specification {
 
         then:
         zoneAvailabilities == []
+    }
+
+    def 'should put security group in cache by name'() {
+        AwsEc2Service awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }),
+                allSecurityGroups: mockAllSecurityGroups)
+        SecurityGroup expectedSecurityGroup = new SecurityGroup(groupId: 'sg-123', groupName: 'super_secure')
+        when: SecurityGroup actualSecurityGroup = awsEc2Service.getSecurityGroup(userContext, 'super_secure')
+        then:
+        actualSecurityGroup == expectedSecurityGroup
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['super_secure'])) >>
+                new DescribeSecurityGroupsResult(securityGroups: [expectedSecurityGroup])
+        1 * mockSecurityGroupCache.put('super_secure', expectedSecurityGroup) >> expectedSecurityGroup
+    }
+
+    def 'should put security group in cache by name even when asked for by ID'() {
+        AwsEc2Service awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }),
+                allSecurityGroups: mockAllSecurityGroups)
+        SecurityGroup expectedSecurityGroup = new SecurityGroup(groupId: 'sg-123', groupName: 'super_secure')
+        when: SecurityGroup actualSecurityGroup = awsEc2Service.getSecurityGroup(userContext, 'sg-123')
+        then:
+        actualSecurityGroup == expectedSecurityGroup
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >>
+                new DescribeSecurityGroupsResult(securityGroups: [expectedSecurityGroup])
+        1 * mockSecurityGroupCache.put('super_secure', expectedSecurityGroup) >> expectedSecurityGroup
+    }
+
+    def 'should put null in cache by name when security group is not found by name'() {
+        AwsEc2Service awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }),
+                allSecurityGroups: mockAllSecurityGroups)
+        when: null == awsEc2Service.getSecurityGroup(userContext, 'super_secure')
+        then:
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['super_secure'])) >> {
+            throw new AmazonServiceException('there is no security group like that')
+        }
+        1 * mockSecurityGroupCache.put('super_secure', null)
+    }
+
+    def 'should put null in cache by name when security group is not found by id'() {
+        AwsEc2Service awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }),
+                allSecurityGroups: mockAllSecurityGroups)
+        when: null == awsEc2Service.getSecurityGroup(userContext, 'sg-123')
+        then:
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >> {
+            throw new AmazonServiceException('there is no security group like that')
+        }
+        1 * mockSecurityGroupCache.list() >> [new SecurityGroup(groupId: 'sg-123', groupName: 'super_secure')]
+        1 * mockSecurityGroupCache.put('super_secure', null)
+    }
+
+    def 'should put nothing in cache when security group is not found by id or in cache'() {
+        AwsEc2Service awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }),
+                allSecurityGroups: mockAllSecurityGroups)
+        when: null == awsEc2Service.getSecurityGroup(userContext, 'sg-123')
+        then:
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >> {
+            throw new AmazonServiceException('there is no security group like that')
+        }
+        1 * mockSecurityGroupCache.list() >> [new SecurityGroup(groupId: 'sg-000', groupName: 'super_secure')]
+        0 * mockSecurityGroupCache.put(_, _)
     }
 }
