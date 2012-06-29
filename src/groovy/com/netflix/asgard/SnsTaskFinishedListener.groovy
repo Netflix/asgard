@@ -7,6 +7,9 @@ import grails.web.JSONBuilder
 import org.apache.commons.lang.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 
+/**
+ * (@link TaskFinishedListener) implementation for publishing to an SNS topic.
+ */
 class SnsTaskFinishedListener implements TaskFinishedListener {
 
     static final List<String> EXCLUDED_PROPS = ['log', 'logAsString', 'thread']
@@ -17,6 +20,12 @@ class SnsTaskFinishedListener implements TaskFinishedListener {
     @Autowired
     ConfigService configService
 
+    /**
+     * Publishes to the SNS topic specified in Config.groovy under sns/taskFinished. If the topic is not specified,
+     * this method does nothing.
+     *
+     * @param task The finished task (can be completed or failed)
+     */
     void taskFinished(Task task) {
         Region region = configService.taskFinishedSnsTopicRegion
         String topicName = configService.taskFinishedSnsTopicName
