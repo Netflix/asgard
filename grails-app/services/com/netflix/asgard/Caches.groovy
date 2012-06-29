@@ -82,8 +82,8 @@ class Caches {
     final MultiRegionInstancePrices allReservedPrices
     final MultiRegionInstancePrices allSpotPrices
 
-    Caches(CachedMapBuilder cachedMapBuilder, ConfigService configService) {
-
+    Caches(CachedMapBuilder cachedMapBuilder, ConfigService configService = null) {
+        
         allClusters = cachedMapBuilder.of(EntityType.cluster).buildMultiRegionCachedMap()
         allAutoScalingGroups = cachedMapBuilder.of(EntityType.autoScaling, 120).buildMultiRegionCachedMap()
         allLaunchConfigurations = cachedMapBuilder.of(EntityType.launchConfiguration, 180).buildMultiRegionCachedMap()
@@ -106,7 +106,7 @@ class Caches {
         allDBInstances = cachedMapBuilder.of(EntityType.rdsInstance, 120).buildMultiRegionCachedMap()
         allDBSecurityGroups = cachedMapBuilder.of(EntityType.dbSecurity, 120).buildMultiRegionCachedMap()
         allDBSnapshots = cachedMapBuilder.of(EntityType.dbSnapshot, 120).buildMultiRegionCachedMap()
-        allFastProperties = cachedMapBuilder.of(EntityType.fastProperty, 180).buildMultiRegionCachedMap(configService.
+        allFastProperties = cachedMapBuilder.of(EntityType.fastProperty, 180).buildMultiRegionCachedMap(configService?.
                 platformServiceRegions)
         allScalingPolicies = cachedMapBuilder.of(EntityType.scalingPolicy, 120).buildMultiRegionCachedMap()
         allApplications = cachedMapBuilder.of(EntityType.application, 120).buildCachedMap()

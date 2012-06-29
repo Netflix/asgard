@@ -104,8 +104,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     def taskService
     List<String> accounts = [] // main account is accounts[0]
 
-    MultiRegionCachedMap<SecurityGroup> allSecurityGroups
-
     /** The state names for instances that count against reservation usage. */
     private static final List<String> ACTIVE_INSTANCE_STATES = ['pending', 'running'].asImmutable()
 
@@ -119,7 +117,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             client
         })
         accounts = configService.awsAccounts
-        allSecurityGroups = allSecurityGroups ?: caches.allSecurityGroups
     }
 
     void initializeCaches() {
@@ -129,7 +126,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         caches.allImages.ensureSetUp({ Region region -> retrieveImages(region) })
         caches.allInstances.ensureSetUp({ Region region -> retrieveInstances(region) })
         caches.allReservedInstancesGroups.ensureSetUp({ Region region -> retrieveReservations(region) })
-        allSecurityGroups.ensureSetUp({ Region region -> retrieveSecurityGroups(region) })
+        caches.allSecurityGroups.ensureSetUp({ Region region -> retrieveSecurityGroups(region) })
         caches.allSnapshots.ensureSetUp({ Region region -> retrieveSnapshots(region) })
         caches.allVolumes.ensureSetUp({ Region region -> retrieveVolumes(region) })
     }
@@ -393,7 +390,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     Collection<SecurityGroup> getSecurityGroups(UserContext userContext) {
-        allSecurityGroups.by(userContext.region).list()
+        caches.allSecurityGroups.by(userContext.region).list()
     }
 
     /** Returns a filtered and sorted list of security groups to show in UI lists. Special groups are suppressed. */
@@ -417,13 +414,13 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     SecurityGroup getSecurityGroup(UserContext userContext, String name, From from = From.AWS) {
         Check.notNull(name, SecurityGroup, "name")
         if (from == From.CACHE) {
-            return allSecurityGroups.by(userContext.region).get(name)
+            return caches.allSecurityGroups.by(userContext.region).get(name)
         }
         String groupName = null
         DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest()
         if (name ==~ SECURITY_GROUP_ID_PATTERN) {
             request.withGroupIds(name)
-            SecurityGroup cachedGroup = allSecurityGroups.by(userContext.region).list().find { it.groupId == name }
+            SecurityGroup cachedGroup = caches.allSecurityGroups.by(userContext.region).list().find { it.groupId == name }
             groupName = cachedGroup?.groupName
         } else {
             request.withGroupNames(name)
@@ -438,7 +435,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             // Can't find a security group with that request.
         }
         if (groupName) {
-            allSecurityGroups.by(userContext.region).put(groupName, group)
+            caches.allSecurityGroups.by(userContext.region).put(groupName, group)
         }
     }
 
@@ -459,7 +456,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             def request = new DeleteSecurityGroupRequest().withGroupName(name)
             awsClient.by(userContext.region).deleteSecurityGroup(request)  // no result
         }, Link.to(EntityType.security, name))
-        allSecurityGroups.by(userContext.region).remove(name)
+        caches.allSecurityGroups.by(userContext.region).remove(name)
     }
 
     /** High-level permission update for a group pair: given the desired state, make it so. */
