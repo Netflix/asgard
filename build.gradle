@@ -24,6 +24,7 @@ task(licensesAll, type: License) {
     include 'web-app/js/*'
     exclude 'web-app/js/chromeframeinstall.js'
     exclude 'web-app/js/jquery.js'
+    exclude '**/*.json'
 }
 
 license {
