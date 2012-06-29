@@ -193,6 +193,21 @@ class ConfigService {
     }
 
     /**
+     * @return Region indicating where the SNS topic for task finished notifications resides
+     */
+    Region getTaskFinishedSnsTopicRegion() {
+        String region = grailsApplication.config.sns.taskFinished.region
+        region ? Region.withCode(region) : null
+    }
+
+    /**
+     * @return SNS Topic name of where to send task finished notifications
+     */
+    String getTaskFinishedSnsTopicName() {
+        grailsApplication.config.sns.taskFinished.topicName ?: null
+    }
+
+    /**
      * @return Maximum time in miliseconds for threads to wait for a connection from the http connection pool
      */
     long getHttpConnPoolTimeout() {

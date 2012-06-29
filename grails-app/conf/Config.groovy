@@ -141,6 +141,10 @@ healthCheck {
     }
 }
 
+plugin {
+    taskFinishedListeners = ['snsTaskFinishedListener']
+}
+
 promote {
     imageTags = false
 }
