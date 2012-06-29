@@ -24,7 +24,7 @@ class SnsTaskFinishedListener implements TaskFinishedListener {
             return // Sns notifications are not configured
         }
         UserContext userContext = UserContext.auto(region)
-        TopicData topicData = awsSnsService.getTopic(userContext, topicName)
+        TopicData topicData = awsSnsService.getTopic(userContext, topicName, From.CACHE)
         String subject = StringUtils.substring(task.name, 0, 100).trim()
         // Idea from http://stackoverflow.com/questions/5936300/grails-converters-json-except-few-properties
         // Also this can be changed to the Groovy version of JSONBuilder when Grails 2.x upgrade is complete
