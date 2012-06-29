@@ -12,23 +12,23 @@ class MockCachedMapBuilder<T>  extends CachedMapBuilder<T> {
         this.entityType = entityType
     }
 
-    def <S> CachedMapBuilder<S> of(EntityType<S> entityType, Integer interval) {
+    protected <S> CachedMapBuilder<S> of(EntityType<S> entityType, Integer interval) {
         of(entityType)
     }
 
-    def <S> CachedMapBuilder<S> of(EntityType<S> entityType) {
+    protected <S> CachedMapBuilder<S> of(EntityType<S> entityType) {
         new MockCachedMapBuilder(entityTypeToCacheMap, entityType)
     }
 
-    CachedMap<T> buildCachedMap(Region region = null) {
+    protected CachedMap<T> buildCachedMap(Region region = null) {
         entityTypeToCacheMap.get(entityType)
     }
 
-    MultiRegionCachedMap<T> buildMultiRegionCachedMap(Collection<Region> regions = null) {
+    protected MultiRegionCachedMap<T> buildMultiRegionCachedMap(Collection<Region> regions = null) {
         new MockMultiRegionCachedMap(buildCachedMap())
     }
 
-    static class MockMultiRegionCachedMap extends MultiRegionCachedMap {
+    private static class MockMultiRegionCachedMap extends MultiRegionCachedMap {
         final CachedMap cachedMap
 
         MockMultiRegionCachedMap(CachedMap cachedMap) {
