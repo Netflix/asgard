@@ -33,70 +33,68 @@ class AwsEc2ServiceSpec extends Specification {
     UserContext userContext
     AmazonEC2 mockAmazonEC2
     CachedMap mockSecurityGroupCache
-    MultiRegionCachedMap mockAllSecurityGroups
+    CachedMap mockInstanceCache
+    CachedMap mockReservationCache
     AwsEc2Service awsEc2Service
 
     def setup() {
-        userContext = new UserContext(region: Region.US_EAST_1)
+        userContext = UserContext.auto(Region.US_EAST_1)
         mockAmazonEC2 = Mock(AmazonEC2)
         mockSecurityGroupCache = Mock(CachedMap)
+        mockInstanceCache = Mock(CachedMap)
+        mockReservationCache = Mock(CachedMap)
         Caches caches = new Caches(new MockCachedMapBuilder([
-                (EntityType.security): mockSecurityGroupCache
+                (EntityType.security): mockSecurityGroupCache,
+                (EntityType.instance): mockInstanceCache,
+                (EntityType.reservation): mockReservationCache,
         ]))
         awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }), caches: caches)
     }
 
     def 'active instances should only include pending and running states'() {
-        given:
-        AwsEc2Service awsEc2Service = new AwsEc2Service()
-        awsEc2Service.metaClass.getInstances = { UserContext context ->
-            [
-                    new Instance(instanceId: 'i-papa', state: new InstanceState(name: 'pending')),
-                    new Instance(instanceId: 'i-smurfette', state: new InstanceState(name: 'running')),
-                    new Instance(instanceId: 'i-brainy', state: new InstanceState(name: 'shutting-down')),
-                    new Instance(instanceId: 'i-jokey', state: new InstanceState(name: 'terminated')),
-                    new Instance(instanceId: 'i-hefty', state: new InstanceState(name: 'stopping')),
-                    new Instance(instanceId: 'i-barber', state: new InstanceState(name: 'stopped')),
-                    new Instance(instanceId: 'i-grouchy', state: new InstanceState(name: 'running'))
-            ]
-        }
+        mockInstanceCache.list() >> [
+                new Instance(instanceId: 'i-papa', state: new InstanceState(name: 'pending')),
+                new Instance(instanceId: 'i-smurfette', state: new InstanceState(name: 'running')),
+                new Instance(instanceId: 'i-brainy', state: new InstanceState(name: 'shutting-down')),
+                new Instance(instanceId: 'i-jokey', state: new InstanceState(name: 'terminated')),
+                new Instance(instanceId: 'i-hefty', state: new InstanceState(name: 'stopping')),
+                new Instance(instanceId: 'i-barber', state: new InstanceState(name: 'stopped')),
+                new Instance(instanceId: 'i-grouchy', state: new InstanceState(name: 'running'))
+        ]
 
         when:
-        Collection<Instance> instances = awsEc2Service.getActiveInstances(null)
+        Collection<Instance> instances = awsEc2Service.getActiveInstances(userContext)
 
         then:
         instances*.instanceId.sort() == ['i-grouchy', 'i-papa', 'i-smurfette']
     }
 
     def 'zone availabilities should sum, group, and filter reservation counts and instance counts'() {
-        given:
-        AwsEc2Service awsEc2Service = new AwsEc2Service()
-        awsEc2Service.metaClass.getReservedInstances = { UserContext userContext ->
-            [
-                    [instanceCount: 1, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active'],
-                    [instanceCount: 10, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active'],
-                    [instanceCount: 100, availabilityZone: 'us-east-1a', instanceType: 'm1.small', state: 'active'],
-                    [instanceCount: 1000, availabilityZone: 'us-east-1b', instanceType: 'm2.xlarge', state: 'active'],
-                    [instanceCount: 10000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'retired'],
-                    [instanceCount: 100000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active']
-            ].collect { new ReservedInstances(it) }
-        }
-        awsEc2Service.metaClass.getActiveInstances = {  UserContext userContext ->
-            [
-                    [instanceType: 'm2.xlarge', placement: new Placement(availabilityZone: 'us-east-1a')],
-                    [instanceType: 'm2.xlarge', placement: new Placement(availabilityZone: 'us-east-1a')],
-                    [instanceType: 'm2.xlarge', placement: new Placement(availabilityZone: 'us-east-1a')],
-                    [instanceType: 'm1.small', placement: new Placement(availabilityZone: 'us-east-1a')],
-                    [instanceType: 'm2.xlarge', placement: new Placement(availabilityZone: 'us-east-1b')],
-                    [instanceType: 'm2.xlarge', placement: new Placement(availabilityZone: 'us-east-1b')],
-                    [instanceType: 'm2.xlarge', placement: new Placement(availabilityZone: 'us-east-1b')],
-                    [instanceType: 'm2.xlarge', placement: new Placement(availabilityZone: 'us-east-1b')],
-                    [instanceType: 'm2.xlarge', placement: new Placement(availabilityZone: 'us-east-1c')]
-            ].collect { new Instance(it) }
-        }
+        mockReservationCache.list() >> [
+                [instanceCount: 1, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active'],
+                [instanceCount: 10, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active'],
+                [instanceCount: 100, availabilityZone: 'us-east-1a', instanceType: 'm1.small', state: 'active'],
+                [instanceCount: 1000, availabilityZone: 'us-east-1b', instanceType: 'm2.xlarge', state: 'active'],
+                [instanceCount: 10000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'retired'],
+                [instanceCount: 100000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active']
+        ].collect { new ReservedInstances(it) }
+        Placement zoneA = new Placement(availabilityZone: 'us-east-1a')
+        Placement zoneB = new Placement(availabilityZone: 'us-east-1b')
+        Placement zoneC = new Placement(availabilityZone: 'us-east-1c')
+        InstanceState running = new InstanceState(name: 'running')
+        mockInstanceCache.list() >> [
+                new Instance(instanceType: 'm2.xlarge', placement: zoneA, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneA, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneA, state: running),
+                new Instance(instanceType: 'm1.small', placement: zoneA, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneC, state: running),
+        ]
 
         when:
-        UserContext userContext = UserContext.auto(Region.US_EAST_1)
         List<ZoneAvailability> zoneAvailabilities = awsEc2Service.getZoneAvailabilities(userContext, 'm2.xlarge')
 
         then:
@@ -108,15 +106,12 @@ class AwsEc2ServiceSpec extends Specification {
     }
 
     def 'zone availability should be empty if there are no reservations'() {
-        given:
-        AwsEc2Service awsEc2Service = new AwsEc2Service()
-        awsEc2Service.metaClass.getReservedInstances = { UserContext userContext -> [] }
-        awsEc2Service.metaClass.getActiveInstances = {  UserContext userContext ->
-            [new Instance(instanceType: 'm2.xlarge', placement: new Placement(availabilityZone: 'us-east-1a'))]
-        }
+        mockReservationCache.list() >> []
+        Placement zoneA = new Placement(availabilityZone: 'us-east-1a')
+        InstanceState running = new InstanceState(name: 'running')
+        mockInstanceCache.list() >> [new Instance(instanceType: 'm2.xlarge', placement: zoneA, state: running)]
 
         when:
-        UserContext userContext = UserContext.auto(Region.US_EAST_1)
         List<ZoneAvailability> zoneAvailabilities = awsEc2Service.getZoneAvailabilities(userContext, 'm2.xlarge')
 
         then:
