@@ -71,7 +71,7 @@
                       <th>Protocol</th>
                       <th>Load Balancer Port</th>
                       <th>Instance Port</th>
-                      <th></th>
+                      <th class="sorttable_nosort"></th>
                     </tr>
                   </thead>
                   <g:each var="listenerDescription" in="${loadBalancer.listenerDescriptions.sort { it.listener.loadBalancerPort }}" status="i">
