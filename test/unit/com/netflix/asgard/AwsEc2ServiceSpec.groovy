@@ -118,7 +118,7 @@ class AwsEc2ServiceSpec extends Specification {
         zoneAvailabilities == []
     }
 
-    def 'should put security group in cache by name'() {
+    def 'should get security group by name'() {
         SecurityGroup expectedSecurityGroup = new SecurityGroup(groupId: 'sg-123', groupName: 'super_secure')
 
         when:
@@ -131,7 +131,7 @@ class AwsEc2ServiceSpec extends Specification {
         1 * mockSecurityGroupCache.put('super_secure', expectedSecurityGroup) >> expectedSecurityGroup
     }
 
-    def 'should put security group in cache by name even when asked for by ID'() {
+    def 'should get security group by ID'() {
         SecurityGroup expectedSecurityGroup = new SecurityGroup(groupId: 'sg-123', groupName: 'super_secure')
 
         when:
@@ -142,6 +142,42 @@ class AwsEc2ServiceSpec extends Specification {
         1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >>
                 new DescribeSecurityGroupsResult(securityGroups: [expectedSecurityGroup])
         1 * mockSecurityGroupCache.put('super_secure', expectedSecurityGroup) >> expectedSecurityGroup
+    }
+
+    def 'should get security group by name from cache'() {
+        SecurityGroup expectedSecurityGroup = new SecurityGroup(groupId: 'sg-123', groupName: 'super_secure')
+
+        when:
+        SecurityGroup actualSecurityGroup = awsEc2Service.getSecurityGroup(userContext, 'super_secure', From.CACHE)
+
+        then:
+        actualSecurityGroup == expectedSecurityGroup
+        1 * mockSecurityGroupCache.get('super_secure') >> expectedSecurityGroup
+        0 * _
+    }
+
+    def 'should get security group by ID from cache'() {
+        SecurityGroup expectedSecurityGroup = new SecurityGroup(groupId: 'sg-123', groupName: 'super_secure')
+
+        when:
+        SecurityGroup actualSecurityGroup = awsEc2Service.getSecurityGroup(userContext, 'sg-123', From.CACHE)
+
+        then:
+        actualSecurityGroup == expectedSecurityGroup
+        1 * mockSecurityGroupCache.list() >> [expectedSecurityGroup]
+        1 * mockSecurityGroupCache.get('super_secure') >> expectedSecurityGroup
+        0 * _
+    }
+
+    def 'should return null when getting security group by ID from empty cache'() {
+        when:
+        SecurityGroup actualSecurityGroup = awsEc2Service.getSecurityGroup(userContext, 'sg-123', From.CACHE)
+
+        then:
+        actualSecurityGroup == null
+        1 * mockSecurityGroupCache.list() >> []
+        1 * mockSecurityGroupCache.get(null)
+        0 * _
     }
 
     def 'should put null in cache by name when security group is not found by name'() {

@@ -414,16 +414,18 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     SecurityGroup getSecurityGroup(UserContext userContext, String name, From from = From.AWS) {
         Region region = userContext.region
         Check.notNull(name, SecurityGroup, "name")
-        if (from == From.CACHE) {
-            return caches.allSecurityGroups.by(region).get(name)
-        }
-        String groupName = null
+        String groupName
         DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest()
         if (name ==~ SECURITY_GROUP_ID_PATTERN) {
             request.withGroupIds(name)
+            SecurityGroup cachedSecurityGroup = caches.allSecurityGroups.by(region).list().find { it.groupId == name }
+            groupName = cachedSecurityGroup?.groupName
         } else {
             request.withGroupNames(name)
             groupName = name
+        }
+        if (from == From.CACHE) {
+            return caches.allSecurityGroups.by(region).get(groupName)
         }
         SecurityGroup group = null
         try {
@@ -432,15 +434,11 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             groupName = group?.groupName
         } catch (AmazonServiceException ignore) {
             // Can't find a security group with that request.
-            if (!groupName) {
-                // We need a group name to clear the cache with. We may be able to find the security group by ID.
-                SecurityGroup cachedGroup = caches.allSecurityGroups.by(region).list().find { it.groupId == name }
-                groupName = cachedGroup?.groupName
-            }
         }
         if (groupName) {
-            caches.allSecurityGroups.by(region).put(groupName, group)
+            return caches.allSecurityGroups.by(region).put(groupName, group)
         }
+        return null
     }
 
     // mutators
