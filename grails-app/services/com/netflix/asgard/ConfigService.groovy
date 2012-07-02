@@ -197,8 +197,22 @@ class ConfigService {
     /**
      * @return Name of the plugins to the implementing beans, ex. [userDataProvider: 'perforceUserDataProvider']
      */
-    Map<String, String> getPluginNamesToBeanNames() {
+    Map<String, Object> getPluginNamesToBeanNames() {
         grailsApplication.config.plugin ?: [:]
+    }
+
+    /**
+     * @return Region indicating where the SNS topic for task finished notifications resides
+     */
+    Region getTaskFinishedSnsTopicRegion() {
+        grailsApplication.config.sns?.taskFinished?.region
+    }
+
+    /**
+     * @return SNS Topic name of where to send task finished notifications
+     */
+    String getTaskFinishedSnsTopicName() {
+        grailsApplication.config.sns?.taskFinished?.topicName ?: null
     }
 
     /**
