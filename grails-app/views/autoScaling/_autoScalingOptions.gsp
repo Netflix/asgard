@@ -59,7 +59,7 @@
     <label for="selectedZones">Availablity Zones:</label>
   </td>
   <td>
-    <select multiple="true" id="selectedZones" name="selectedZones">
+    <select multiple="true" id="selectedZones" name="selectedZones" size="5">
       <g:each var="z" in="${zoneList}">
         <option value="${z.zoneName}" ${z.shouldBePreselected(params.selectedZones, group) ? 'selected' : ''}>${z.zoneName}</option>
       </g:each>
