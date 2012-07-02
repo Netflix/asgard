@@ -21,7 +21,7 @@ package com.netflix.asgard
  *
  * Usage:
  * CachedMapBuilder builder = new CachedMapBuilder(threadScheduler, regions)
- * CachedMap cachedMap = builder.of('Lemons').buildCachedMap()
+ * CachedMap cachedMap = builder.of(EntityType.autoScaling).buildCachedMap()
  *
  * CachedMapBuilder is immutable and it is common to reuse the same base CachedMapBuilder.
  *

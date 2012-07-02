@@ -438,7 +438,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         if (groupName) {
             return caches.allSecurityGroups.by(region).put(groupName, group)
         }
-        return null
+        null
     }
 
     // mutators
