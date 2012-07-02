@@ -77,8 +77,8 @@ class ScalingPolicyController {
         UserContext userContext = UserContext.of(request)
         String scalingPolicyName = params.id
         ScalingPolicy scalingPolicy = awsAutoScalingService.getScalingPolicy(userContext, scalingPolicyName)
-        List<MetricAlarm> alarms = awsCloudWatchService.getAlarms(userContext, scalingPolicy.alarms*.alarmName)
         if (scalingPolicy) {
+            List<MetricAlarm> alarms = awsCloudWatchService.getAlarms(userContext, scalingPolicy.alarms*.alarmName)
             Map result = [scalingPolicy: scalingPolicy, alarms: alarms]
             withFormat {
                 html { result }
