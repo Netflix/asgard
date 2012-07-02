@@ -196,15 +196,14 @@ class ConfigService {
      * @return Region indicating where the SNS topic for task finished notifications resides
      */
     Region getTaskFinishedSnsTopicRegion() {
-        String region = grailsApplication.config.sns.taskFinished.region
-        region ? Region.withCode(region) : null
+        grailsApplication.config.sns?.taskFinished?.region
     }
 
     /**
      * @return SNS Topic name of where to send task finished notifications
      */
     String getTaskFinishedSnsTopicName() {
-        grailsApplication.config.sns.taskFinished.topicName ?: null
+        grailsApplication.config.sns?.taskFinished?.topicName ?: null
     }
 
     /**
