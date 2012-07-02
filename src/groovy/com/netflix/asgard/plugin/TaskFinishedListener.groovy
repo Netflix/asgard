@@ -15,10 +15,19 @@
  */
 package com.netflix.asgard.plugin
 
-import com.netflix.asgard.UserContext
+import com.netflix.asgard.Task
 
-interface UserDataProvider {
+/**
+ * Observer interface to execute code when a task is finished. Listeners are registered under
+ * plugins/taskFinishedListeners in Config.groovy.
+ */
+interface TaskFinishedListener {
 
-    String buildUserDataForVariables(UserContext userContext, String appName, String autoScalingGroupName,
-            String launchConfigName)
+    /**
+     * Method to call when a task is finished.
+     *
+     * @param task The finished task (can be completed or failed)
+     */
+    void taskFinished(Task task)
+
 }
