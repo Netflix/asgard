@@ -412,25 +412,33 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     SecurityGroup getSecurityGroup(UserContext userContext, String name, From from = From.AWS) {
+        Region region = userContext.region
         Check.notNull(name, SecurityGroup, "name")
-        if (from == From.CACHE) {
-            return caches.allSecurityGroups.by(userContext.region).get(name)
-        }
+        String groupName
         DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest()
         if (name ==~ SECURITY_GROUP_ID_PATTERN) {
             request.withGroupIds(name)
+            SecurityGroup cachedSecurityGroup = caches.allSecurityGroups.by(region).list().find { it.groupId == name }
+            groupName = cachedSecurityGroup?.groupName
         } else {
             request.withGroupNames(name)
+            groupName = name
+        }
+        if (from == From.CACHE) {
+            return caches.allSecurityGroups.by(region).get(groupName)
         }
         SecurityGroup group = null
         try {
-            DescribeSecurityGroupsResult result = awsClient.by(userContext.region).describeSecurityGroups(request)
+            DescribeSecurityGroupsResult result = awsClient.by(region).describeSecurityGroups(request)
             group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
+            groupName = group?.groupName
         } catch (AmazonServiceException ignore) {
             // Can't find a security group with that request.
-            return null
         }
-        caches.allSecurityGroups.by(userContext.region).put(group.groupName, group)
+        if (groupName) {
+            return caches.allSecurityGroups.by(region).put(groupName, group)
+        }
+        null
     }
 
     // mutators
