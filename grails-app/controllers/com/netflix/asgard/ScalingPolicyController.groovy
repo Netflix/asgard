@@ -41,17 +41,17 @@ class ScalingPolicyController {
 
     def list = {
         UserContext userContext = UserContext.of(request)
-        Collection<ScalingPolicy> scalingPolicies = awsAutoScalingService.getAllScalingPolicies(userContext)
+        List<ScalingPolicy> policies = awsAutoScalingService.getAllScalingPolicies(userContext).sort { it.policyName }
         Map<String, MetricAlarm> alarmsByName = caches.allAlarms.by(userContext.region).unmodifiable()
         withFormat {
             html {
                 [
-                        scalingPolicies: scalingPolicies,
+                        scalingPolicies: policies,
                         alarmsByName: alarmsByName,
                 ]
             }
-            xml { new XML(scalingPolicies).render(response) }
-            json { new JSON(scalingPolicies).render(response) }
+            xml { new XML(policies).render(response) }
+            json { new JSON(policies).render(response) }
         }
     }
 
