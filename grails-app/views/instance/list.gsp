@@ -29,12 +29,13 @@
     </g:if>
     <g:form method="post" class="validate">
       <input type="hidden" name="appNames" value="${params.id}"/>
-      <div class="buttons">
-        <g:buttonSubmit class="stop" value="Terminate Instance(s)" action="terminate"
-                onclick="return confirm('Really terminate instance(s)?');"/>
-        <g:link class="clean" action="audit">Audit Ungrouped Instances</g:link>
-      </div>
-      <g:render template="instances"/>
+      <g:render template="instances">
+        <div class="buttons">
+          <g:buttonSubmit class="stop" value="Terminate Instance(s)" action="terminate"
+                          onclick="return confirm('Really terminate instance(s)?');"/>
+          <g:link class="clean" action="audit">Audit Ungrouped Instances</g:link>
+        </div>
+      </g:render>
       <div class="paginateButtons">
         <g:paginate total="${instanceList.count()}"/>
       </div>

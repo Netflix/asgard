@@ -37,7 +37,7 @@
         <input type="hidden" name="name" value="${loadBalancer.loadBalancerName}"/>
         <g:link class="edit" action="edit" params="[id: loadBalancer.loadBalancerName]">Edit Load Balancer</g:link>
         <g:buttonSubmit class="delete" action="delete" value="Delete Load Balancer"
-                data-warning="Really delete Load Balancer '${loadBalancer.loadBalancerName}'?" />
+                        data-warning="Really delete Load Balancer '${loadBalancer.loadBalancerName}'?" />
         <g:link class="create" action="prepareListener" params="[id: loadBalancer.loadBalancerName]">Add Listener</g:link>
       </g:form>
     </div>
@@ -67,12 +67,12 @@
               <div class="list">
                 <table class="sortable subitems">
                   <thead>
-                    <tr>
-                      <th>Protocol</th>
-                      <th>Load Balancer Port</th>
-                      <th>Instance Port</th>
-                      <th class="sorttable_nosort"></th>
-                    </tr>
+                  <tr>
+                    <th>Protocol</th>
+                    <th>Load Balancer Port</th>
+                    <th>Instance Port</th>
+                    <th class="sorttable_nosort"></th>
+                  </tr>
                   </thead>
                   <g:each var="listenerDescription" in="${loadBalancer.listenerDescriptions.sort { it.listener.loadBalancerPort }}" status="i">
                     <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
