@@ -67,6 +67,7 @@ import groovy.util.slurpersupport.GPathResult
 import javax.servlet.http.HttpServletRequest
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONElement
+import org.joda.time.format.ISODateTimeFormat
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.springframework.mock.web.MockHttpServletRequest
@@ -119,6 +120,16 @@ class Mocks {
 
     static String jsonNullable(def jsonValue) {
         jsonValue?.toString() != 'null' ? jsonValue.toString() : null
+    }
+
+    /**
+     * Parses an ISO formatted date string
+     *
+     * @param jsonValue date from JSON in ISO date format
+     * @return Date the parsed date, or null if jsonValue was null
+     */
+    static Date parseJsonDate(String jsonValue) {
+        jsonNullable(jsonValue) ? ISODateTimeFormat.dateTimeParser().parseDateTime(jsonValue).toDate() : null
     }
 
     static {
