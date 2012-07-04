@@ -116,14 +116,33 @@
         <tr class="prop">
           <td class="name">Instances:</td>
           <td>
-            <table>
-              <g:each var="is" in="${instanceStates}">
-                <tr class="prop">
-                  <td class="value"><g:linkObject type="instance" name="${is.instanceId}"/> | ${is.state} | ${is.reasonCode} | ${is.description}
-                  </td>
-                </tr>
-              </g:each>
-            </table>
+            <div class="list">
+              <div class="buttons"></div>
+              <table class="sortable subitems">
+                <thead>
+                  <tr>
+                    <th>Instance</th>
+                    <th>Zone</th>
+                    <th>Auto Scaling Group</th>
+                    <th>ELB State</th>
+                    <th>Reason</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <g:each var="is" in="${instanceStates}">
+                    <tr>
+                      <td><g:linkObject type="instance" name="${is.instanceId}"/></td>
+                      <td><g:availabilityZone value="${is.availabilityZone}"/></td>
+                      <td><g:linkObject type="autoScaling" name="${is.autoScalingGroupName}"/></td>
+                      <td>${is.state}</td>
+                      <td>${is.reasonCode}</td>
+                      <td>${is.description}</td>
+                    </tr>
+                  </g:each>
+                </tbody>
+              </table>
+            </div>
           </td>
         </tr>
         <tr class="prop">
