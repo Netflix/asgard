@@ -34,12 +34,12 @@ class LoadBalancerController {
     def awsAutoScalingService
     def stackService
 
-    // the delete, save and update actions only accept POST requests
+    // The delete, save and update actions only accept POST requests
     def static allowedMethods = [
             delete: 'POST', save: 'POST', update: 'POST', addListener: 'POST', removeListener: 'POST'
     ]
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -65,8 +65,7 @@ class LoadBalancerController {
         if (!lb) {
             Requests.renderNotFound('Load Balancer', name, this)
         } else {
-            def appName = awsLoadBalancerService.getAppNameForLoadBalancer(name)
-            //println "Show LB: ${name} for app: ${appName}"
+            String appName = awsLoadBalancerService.getAppNameForLoadBalancer(name)
             List<AutoScalingGroup> groups =
                     awsAutoScalingService.getAutoScalingGroupsForLB(userContext, name).sort { it.autoScalingGroupName }
             List<String> clusterNames =
@@ -83,12 +82,12 @@ class LoadBalancerController {
             }
             // Initial sort by zone. Within zone, sort by ASG.
             instanceStateDatas.sort { it.autoScalingGroupName }.sort { it.availabilityZone }
-            def details = [
-                    'loadBalancer': lb,
-                    'app': applicationService.getRegisteredApplication(userContext, appName),
-                    'clusters': clusterNames,
-                    'groups': groups,
-                    'instanceStates': instanceStateDatas
+            Map details = [
+                    loadBalancer: lb,
+                    app: applicationService.getRegisteredApplication(userContext, appName),
+                    clusters: clusterNames,
+                    groups: groups,
+                    instanceStates: instanceStateDatas
             ]
             withFormat {
                 html { return details }
@@ -101,29 +100,29 @@ class LoadBalancerController {
     def create = {
         UserContext userContext = UserContext.of(request)
         [
-            'applications' : applicationService.getRegisteredApplicationsForLoadBalancer(userContext),
-            'stacks' : stackService.getStacks(userContext),
-            'zoneList' : awsEc2Service.getAvailabilityZones(userContext)
+            applications: applicationService.getRegisteredApplicationsForLoadBalancer(userContext),
+            stacks: stackService.getStacks(userContext),
+            zoneList: awsEc2Service.getAvailabilityZones(userContext)
         ]
     }
 
     def save = { LoadBalancerCreateCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action:create, model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
         } else {
 
             // Load Balancer name
-            def appName = params.appName
-            def stack = params.newStack ?: params.stack
-            def detail = params.detail
-            def lbName = Relationships.buildLoadBalancerName(appName, stack, detail)
+            String appName = params.appName
+            String stack = params.newStack ?: params.stack
+            String detail = params.detail
+            String lbName = Relationships.buildLoadBalancerName(appName, stack, detail)
 
             UserContext userContext = UserContext.of(request)
             List<String> zoneList = Requests.ensureList(params.selectedZones)
             try {
-                def listener1 = new Listener()
-                        .withProtocol(params.protocol1)
-                        .withLoadBalancerPort(params.lbPort1.toInteger()).withInstancePort(params.instancePort1.toInteger())
+                Listener listener1 = new Listener().withProtocol(params.protocol1).
+                        withLoadBalancerPort(params.lbPort1.toInteger()).
+                        withInstancePort(params.instancePort1.toInteger())
                 List<Listener> listeners = [listener1]
                 if (params.protocol2) {
                     listeners.add(new Listener()
@@ -138,7 +137,7 @@ class LoadBalancerController {
                 redirect(action:show, params:[name:lbName])
             } catch (Exception e) {
                 flash.message = "Could not create Load Balancer: ${e}"
-                chain(action: create, model: [cmd: cmd], params: params)
+                chain(action: 'create', model: [cmd: cmd], params: params)
             }
         }
     }
@@ -152,21 +151,23 @@ class LoadBalancerController {
             redirect(action: 'result')
         } catch (Exception e) {
             flash.message = "Could not delete Load Balancer: ${e}"
-            redirect(action: show, params:[id: name])
+            redirect(action: 'show', params: [id: name])
         }
     }
 
     def edit = {
         String name = params.name ?: params.id
         UserContext userContext = UserContext.of(request)
-        ['loadBalancer' : awsLoadBalancerService.getLoadBalancer(userContext, name),
-         'zoneList' : awsEc2Service.getAvailabilityZones(userContext) ]
+        [
+                loadBalancer: awsLoadBalancerService.getLoadBalancer(userContext, name),
+                zoneList: awsEc2Service.getAvailabilityZones(userContext)
+        ]
     }
 
     def update = {
         String name = params.name
         UserContext userContext = UserContext.of(request)
-        def lb = awsLoadBalancerService.getLoadBalancer(userContext, name)
+        LoadBalancerDescription lb = awsLoadBalancerService.getLoadBalancer(userContext, name)
 
         // Zones
 
@@ -179,12 +180,12 @@ class LoadBalancerController {
 
         if (addedZones.size() > 0) {
             awsLoadBalancerService.addZones(userContext, name, addedZones)
-            def msg = "Added zone${addedZones.size() == 1 ? "" : "s"} $addedZones to load balancer. "
+            def msg = "Added zone${addedZones.size() == 1 ? '' : 's'} $addedZones to load balancer. "
             flash.message = flash.message ? flash.message + msg : msg
         }
         if (removedZones.size() > 0) {
             awsLoadBalancerService.removeZones(userContext, name, removedZones)
-            def msg = "Removed zone${removedZones.size() == 1 ? "" : "s"} $removedZones from load balancer. "
+            def msg = "Removed zone${removedZones.size() == 1 ? '' : 's'} $removedZones from load balancer. "
             flash.message = flash.message ? flash.message + msg : msg
         }
 
@@ -195,23 +196,22 @@ class LoadBalancerController {
             healthCheckUpdated = true
         }
         catch (AmazonServiceException ase) {
-            def msg = "Failed to update health check: ${ase} "
+            String msg = "Failed to update health check: ${ase} "
             flash.message = flash.message ? flash.message + msg : msg
         }
 
         if (healthCheckUpdated) {
-            def msg  = "Load Balancer '${name}' health check has been updated. "
+            String msg  = "Load Balancer '${name}' health check has been updated. "
             flash.message = flash.message ? flash.message + msg : msg
         }
-        redirect(action:show, params:[name:name])
+        redirect(action: 'show', params: [name: name])
     }
 
     // Used by both create and update to set the health check from page params
     private void updateHealthCheck(userContext, name, params) {
-        awsLoadBalancerService.configureHealthCheck(userContext, name,
-            new HealthCheck().withTarget(params.target)
-                    .withInterval(params.interval.toInteger()).withTimeout(params.timeout.toInteger())
-                    .withUnhealthyThreshold(params.unhealthy.toInteger()).withHealthyThreshold(params.healthy.toInteger()))
+        awsLoadBalancerService.configureHealthCheck(userContext, name, new HealthCheck().withTarget(params.target).
+                withInterval(params.interval.toInteger()).withTimeout(params.timeout.toInteger()).
+                withUnhealthyThreshold(params.unhealthy.toInteger()).withHealthyThreshold(params.healthy.toInteger()))
     }
 
     def prepareListener = {
@@ -242,7 +242,7 @@ class LoadBalancerController {
 
     def removeListener = { RemoveListenerCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action: 'show', model: [cmd:cmd], params: params)
+            chain(action: 'show', model: [cmd: cmd], params: params)
         } else {
             UserContext userContext = UserContext.of(request)
             try {
