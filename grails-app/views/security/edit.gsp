@@ -28,7 +28,7 @@
       <div class="message">${flash.message}</div>
     </g:if>
     <g:form method="post">
-      <input type="hidden" id="name" name="name" value="${group.groupName}"/>
+      <input type="hidden" name="name" value="${group.groupName}"/>
       <div class="dialog">
         <table>
           <tbody>

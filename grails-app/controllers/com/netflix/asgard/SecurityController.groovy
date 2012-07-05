@@ -86,7 +86,7 @@ class SecurityController {
     def save = { SecurityCreateCommand cmd ->
 
         if (cmd.hasErrors()) {
-            chain(action: create, model: [cmd:cmd], params: params) // Use chain to pass both the errors and the params
+            chain(action: create, model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
         } else {
             UserContext userContext = UserContext.of(request)
             String name = Relationships.buildAppDetailName(params.appName, params.detail)
@@ -100,7 +100,7 @@ class SecurityController {
                 redirect(action: show, params: [id: name])
             } catch (Exception e) {
                 flash.message = "Could not create Security Group: ${e}"
-                chain(action: create, model: [cmd:cmd], params: params)
+                chain(action: create, model: [cmd: cmd], params: params)
             }
         }
     }

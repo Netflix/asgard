@@ -88,6 +88,8 @@ import com.google.common.collect.Multiset
 import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.ZoneAvailability
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 import org.apache.commons.codec.binary.Base64
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.beans.factory.InitializingBean
@@ -96,12 +98,12 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     static transactional = false
 
-    private static SECURITY_GROUP_ID_PATTERN = ~/sg-[a-f0-9]+/
+    private static Pattern SECURITY_GROUP_ID_PATTERN = ~/sg-[a-f0-9]+/
 
-    def configService
     MultiRegionAwsClient<AmazonEC2> awsClient
     def awsClientService
     Caches caches
+    def configService
     def restClientService
     def taskService
     List<String> accounts = [] // main account is accounts[0]
@@ -193,7 +195,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      * @return Collection< Image > The images which match the imageIds where any of the users in executableUsers have
      *         launch permissions
      */
-    Collection<Image> getImagesWithLaunchPermissions(UserContext userContext, Collection<String> executableUsers, Collection<String> imageIds) {
+    Collection<Image> getImagesWithLaunchPermissions(UserContext userContext, Collection<String> executableUsers,
+                                                     Collection<String> imageIds) {
         DescribeImagesRequest request = new DescribeImagesRequest(executableUsers: executableUsers, imageIds: imageIds)
         DescribeImagesResult result = awsClient.by(userContext.region).describeImages(request)
         result.images
@@ -299,7 +302,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         Check.notEmpty(imageIds, "imageIds")
         Check.notEmpty(name, "name")
         Check.notEmpty(value, "value")
-        List<List<String>> partitionedImageIds = Lists.partition(imageIds, TAG_IMAGE_CHUNK_SIZE)
+        List<List<String>> partitionedImageIds = Lists.partition(imageIds as List, TAG_IMAGE_CHUNK_SIZE)
         for (List<String> imageIdsChunk in partitionedImageIds) {
             CreateTagsRequest request = new CreateTagsRequest(resources: imageIdsChunk, tags: [new Tag(name, value)])
             awsClient.by(userContext.region).createTags(request)
@@ -356,7 +359,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     /** Returns a filtered and sorted list of security groups to show in UI lists. Special groups are suppressed. */
     Collection<SecurityGroup> getEffectiveSecurityGroups(UserContext userContext) {
-        getSecurityGroups(userContext).findAll{ isSecurityGroupEditable(it.groupName) }.sort{ it.groupName.toLowerCase() }
+        getSecurityGroups(userContext).findAll {
+            isSecurityGroupEditable(it.groupName)
+        }.sort { it.groupName.toLowerCase() }
     }
 
     Boolean isSecurityGroupEditable(String name) {
@@ -469,13 +474,13 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     static List<IpPermission> permissionsFromString(String portsStr) {
         List<IpPermission> perms = []
         if (portsStr) {
-            portsStr.split(',').each {rangeStr->
-                def m = rangeStr =~ /(-?\d+)(-(-?\d+))?/
+            portsStr.split(',').each { rangeStr ->
+                Matcher m = rangeStr =~ /(-?\d+)(-(-?\d+))?/
                 //println "permissionsFromString: ${portStr} => ${m[0]}"
                 if (m.matches()) {
                     def rangeParts = m[0]  // 0:all 1:from 2:dashAndTo 3:to
-                    def fromPort = rangeParts[1]
-                    def toPort = rangeParts[3] ?: fromPort
+                    String fromPort = rangeParts[1]
+                    String toPort = rangeParts[3] ?: fromPort
                     perms += new IpPermission().withFromPort(fromPort.toInteger()).withToPort(toPort.toInteger())
                 }
             }
@@ -483,7 +488,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         perms
     }
 
-    /** Returns the ingress permissions from one group to another as a strings. Assumes tcp and groups, not cidrs. */
+    /** Returns the ingress permissions from one group to another as a string. Assumes tcp and groups, not cidrs. */
     static String getIngressFrom(SecurityGroup targetGroup, String srcGroupName) {
         Collection<IpPermission> ipPermissions = targetGroup.ipPermissions.findAll {
             it.userIdGroupPairs.any { it.groupName == srcGroupName }
@@ -533,6 +538,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         }, Link.to(EntityType.security, groupName))
     }
 
+    // TODO: Delete this method after rewriting AwsResultsRetrieverSpec unit test to use some other use case
     DescribeSpotPriceHistoryResult describeSpotPriceHistory(Region region,
             DescribeSpotPriceHistoryRequest describeSpotPriceHistoryRequest) {
         awsClient.by(region).describeSpotPriceHistory(describeSpotPriceHistoryRequest)
