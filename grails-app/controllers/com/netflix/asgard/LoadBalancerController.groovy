@@ -17,9 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
-import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.elasticloadbalancing.model.HealthCheck
-import com.amazonaws.services.elasticloadbalancing.model.InstanceState
 import com.amazonaws.services.elasticloadbalancing.model.Listener
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.InstanceStateData
@@ -70,18 +68,8 @@ class LoadBalancerController {
                     awsAutoScalingService.getAutoScalingGroupsForLB(userContext, name).sort { it.autoScalingGroupName }
             List<String> clusterNames =
                     groups.collect { Relationships.clusterFromGroupName(it.autoScalingGroupName) }.unique()
-            List<InstanceState> instanceStates = awsLoadBalancerService.getInstanceHealth(userContext, name)
-            List<InstanceStateData> instanceStateDatas = instanceStates.collect { InstanceState instanceState ->
-                Instance instance = null
-                AutoScalingGroup group = groups.find { AutoScalingGroup group ->
-                    instance = group.instances.find { it.instanceId == instanceState.instanceId }
-                }
-                new InstanceStateData(instanceId: instanceState.instanceId, state: instanceState.state,
-                        reasonCode: instanceState.reasonCode, description: instanceState.description,
-                        autoScalingGroupName: group?.autoScalingGroupName, availabilityZone: instance?.availabilityZone)
-            }
-            // Initial sort by zone. Within zone, sort by ASG.
-            instanceStateDatas.sort { it.autoScalingGroupName }.sort { it.availabilityZone }
+            List<InstanceStateData> instanceStateDatas = awsLoadBalancerService.getInstanceStateDatas(
+                    userContext, name, groups)
             Map details = [
                     loadBalancer: lb,
                     app: applicationService.getRegisteredApplication(userContext, appName),
