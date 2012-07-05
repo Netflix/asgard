@@ -161,10 +161,10 @@
             <div class="clear"></div>
             <h2>${nextGroupName}</h2>
             <table>
-              <g:render template="/launchConfiguration/launchConfigOptions" />
               <tr class="advanced"><td colspan="2"><h2>Auto Scaling</h2></td></tr>
               <g:render template="/loadBalancer/selection"/>
               <g:render template="/autoScaling/autoScalingOptions" />
+              <g:render template="/launchConfiguration/launchConfigOptions" />
               <g:render template="/push/startupOptions" />
               <tr class="advanced">
                 <td>
