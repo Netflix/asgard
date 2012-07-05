@@ -74,7 +74,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-53649e30\",\"owner\":\"pvenkman@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-53649e30\\",\\"owner\\":\\"pvenkman@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-00189a6d"
@@ -94,7 +94,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-04-08T21:09:27\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-04-08T21:09:27\\"}"
         }
       ],
       "volumeId": "vol-00289a6f"
@@ -123,12 +123,12 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "immutable_metadata",
-          "value": "{\"ami\":\"ami-3af49e53\",\"ami-nam49e:\"centosbase-x86_64-20120625-ebs\",\"arch\":\"x86_64\",\"purpose\":\"prebake\",\"status\":\"free\"}"
-        }
+          "value": "{\\"ami\\":\\"ami-3af49e53\\",\\"ami-nam49e:\\"centosbase-x86_64-20120625-ebs\\",\\"arch\\":\\"x86_64\\",\\"purpose\\":\\"prebake\\",\\"status\\":\\"free\\"}"
+        },
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-89d49eef\",\"owner\":\"pvenkman@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-89d49eef\\",\\"owner\\":\\"pvenkman@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-00589a6e"
@@ -181,7 +181,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-7b449e03\",\"owner\":\"rstanz@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-7b449e03\\",\\"owner\\":\\"rstanz@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-00d89a6e"
@@ -210,7 +210,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-b3549ecb\",\"owner\":\"rstanz@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-b3549ecb\\",\\"owner\\":\\"rstanz@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-00f89a6e"
@@ -230,12 +230,12 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "immutable_metadata",
-          "value": "{\"ami\":\"ami-fd549e94\",\"ami-nam49e:\"centosbase-x86_64-20111206-ebs\",\"arch\":\"x86_64\",\"purpose\":\"prebake\",\"status\":\"free\"}"
-        }
+          "value": "{\\"ami\\":\\"ami-fd549e94\\",\\"ami-nam49e:\\"centosbase-x86_64-20111206-ebs\\",\\"arch\\":\\"x86_64\\",\\"purpose\\":\\"prebake\\",\\"status\\":\\"free\\"}"
+        },
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:47:03\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:47:03\\"}"
         }
       ],
       "volumeId": "vol-01289a6c"
@@ -255,7 +255,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-05-25T17:45:26\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-05-25T17:45:26\\"}"
         }
       ],
       "volumeId": "vol-01389a6f"
@@ -275,7 +275,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-06-20T17:58:01\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-06-20T17:58:01\\"}"
         }
       ],
       "volumeId": "vol-01389a6f"
@@ -328,12 +328,12 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "rating_metadata",
-          "value": "{\"desc\":\"1339483743620\",\"device\":\"/dev/sdh1\",\"index\":\"7\",\"mount point\":\"/DB/RATEPROD/data02\",\"name\":\"RATEPROD\",\"role\":\"MASTER\",\"zone\":\"us-east-1a\"}"
+          "value": "{\\"desc\\":\\"1339483743620\\",\\"device\\":\\"/dev/sdh1\\",\\"index\\":\\"7\\",\\"mount point\\":\\"/DB/RATEPROD/data02\\",\\"name\\":\\"RATEPROD\\",\\"role\\":\\"MASTER\\",\\"zone\\":\\"us-east-1a\\"}"
         },
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-0ce49e75\",\"owner\":\"rstanz@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-0ce49e75\\",\\"owner\\":\\"rstanz@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-01789a6f"
@@ -353,7 +353,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-06-25T20:14:19\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-06-25T20:14:19\\"}"
         }
       ],
       "volumeId": "vol-01989a6f"
@@ -373,7 +373,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:43:28\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:43:28\\"}"
         }
       ],
       "volumeId": "vol-01a89a6c"
@@ -393,7 +393,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-06-12T17:14:21\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-06-12T17:14:21\\"}"
         }
       ],
       "volumeId": "vol-01a89a6f"
@@ -413,7 +413,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:44:16\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:44:16\\"}"
         }
       ],
       "volumeId": "vol-01b89a6c"
@@ -442,7 +442,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-05849e60\",\"owner\":\"rstanz@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-05849e60\\",\\"owner\\":\\"rstanz@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-01c89a6d"
@@ -471,7 +471,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-b4549ecd\",\"owner\":\"espengler@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-b4549ecd\\",\\"owner\\":\\"espengler@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-01d89a6f"
@@ -491,7 +491,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:40:21\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:40:21\\"}"
         }
       ],
       "volumeId": "vol-01e89a6c"
@@ -511,7 +511,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:43:39\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:43:39\\"}"
         }
       ],
       "volumeId": "vol-01e89a6c"
@@ -540,7 +540,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-d4b49ead\",\"owner\":\"espengler@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-d4b49ead\\",\\"owner\\":\\"espengler@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-01f89a6f"
@@ -569,12 +569,12 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "immutable_metadata",
-          "value": "{\"desc\":\"1337451486800\",\"device\":\"/dev/sdh4\",\"index\":\"6\",\"mount point\":\"/DB/RATEPROD/data05\",\"name\":\"RATEPROD\",\"role\":\"MASTER\",\"\":\"\",\"zone\":\"us-east-1a\"}"
+          "value": "{\\"desc\\":\\"1337451486800\\",\\"device\\":\\"/dev/sdh4\\",\\"index\\":\\"6\\",\\"mount point\\":\\"/DB/RATEPROD/data05\\",\\"name\\":\\"RATEPROD\\",\\"role\\":\\"MASTER\\",\\"\\":\\"\\",\\"zone\\":\\"us-east-1a\\"}"
         },
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-74949e0d\",\"owner\":\"espengler@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-74949e0d\\",\\"owner\\":\\"espengler@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-01f89a6f"
@@ -618,7 +618,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-05-10T17:45:50\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-05-10T17:45:50\\"}"
         }
       ],
       "volumeId": "vol-02189a6d"
@@ -743,7 +743,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-25149e42\",\"owner\":\"wzeddemore@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-25149e42\\",\\"owner\\":\\"wzeddemore@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-02c89a6d"
@@ -763,7 +763,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:45:56\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:45:56\\"}"
         }
       ],
       "volumeId": "vol-03089a6e"
@@ -783,7 +783,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:40:23\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:40:23\\"}"
         }
       ],
       "volumeId": "vol-03389a6f"
@@ -803,7 +803,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-a9849ece\",\"owner\":\"pvenkman@whoyagonnacall.com\",\"detachTime\":\"2012-06-08T16:59:49\"}"
+          "value": "{\\"instance\\":\\"i-a9849ece\\",\\"owner\\":\\"pvenkman@whoyagonnacall.com\\",\\"detachTime\\":\\"2012-06-08T16:59:49\\"}"
         }
       ],
       "volumeId": "vol-03889a6d"
@@ -823,7 +823,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:39:45\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:39:45\\"}"
         }
       ],
       "volumeId": "vol-03a89a6e"
@@ -852,7 +852,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-8a549ef3\",\"owner\":\"rstanz@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-8a549ef3\\",\\"owner\\":\\"rstanz@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-03d89a6d"
@@ -881,12 +881,12 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "immutable_metadata",
-          "value": "{\"desc\":\"1337451521431\",\"device\":\"/dev/sdh2\",\"index\":\"8\",\"mount point\":\"/DB/RATEPROD/data03\",\"name\":\"RATEPROD\",\"role\":\"MASTER\",\"zone\":\"us-east-1a\"}"
+          "value": "{\\"desc\\":\\"1337451521431\\",\\"device\\":\\"/dev/sdh2\\",\\"index\\":\\"8\\",\\"mount point\\":\\"/DB/RATEPROD/data03\\",\\"name\\":\\"RATEPROD\\",\\"role\\":\\"MASTER\\",\\"zone\\":\\"us-east-1a\\"}"
         },
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-76949e0f\",\"owner\":\"rstanz@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-76949e0f\\",\\"owner\\":\\"rstanz@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-03f89a6d"
@@ -963,12 +963,12 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "immutable_metadata",
-          "value": "{\"desc\":\"1337451471203\",\"device\":\"/dev/sdh4\",\"index\":\"5\",\"mount point\":\"/DB/RATEPROD/data05\",\"name\":\"RATEPROD\",\"role\":\"MASTER\",\"zone\":\"us-east-1a\"}"
+          "value": "{\\"desc\\":\\"1337451471203\\",\\"device\\":\\"/dev/sdh4\\",\\"index\\":\\"5\\",\\"mount point\\":\\"/DB/RATEPROD/data05\\",\\"name\\":\\"RATEPROD\\",\\"role\\":\\"MASTER\\",\\"zone\\":\\"us-east-1a\\"}"
         },
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-68949e11\",\"owner\":\"espengler@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-68949e11\\",\\"owner\\":\\"espengler@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-03f89a6d"
@@ -988,7 +988,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-06-20T17:58:18\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-06-20T17:58:18\\"}"
         }
       ],
       "volumeId": "vol-03f89a6d"
@@ -1008,7 +1008,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:39:01\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:39:01\\"}"
         }
       ],
       "volumeId": "vol-03f89a6e"
@@ -1028,7 +1028,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-05-10T17:45:42\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-05-10T17:45:42\\"}"
         }
       ],
       "volumeId": "vol-04189a6b"
@@ -1057,7 +1057,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-48349e31\",\"owner\":\"espengler@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-48349e31\\",\\"owner\\":\\"espengler@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-04589a6a"
@@ -1134,7 +1134,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-fed49e87\",\"owner\":\"rstanz@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-fed49e87\\",\\"owner\\":\\"rstanz@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-04889a6a"
@@ -1163,7 +1163,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-24c49e5d\",\"owner\":\"rstanz@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-24c49e5d\\",\\"owner\\":\\"rstanz@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-04989a6a"
@@ -1192,7 +1192,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-28849e51\",\"owner\":\"rstanz@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-28849e51\\",\\"owner\\":\\"rstanz@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-05089a6b"
@@ -1221,7 +1221,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-84b49efd\",\"owner\":\"rstanz@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-84b49efd\\",\\"owner\\":\\"rstanz@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-05089a6b"
@@ -1241,12 +1241,12 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "immutable_metadata",
-          "value": "{\"ami-nam49e:\"centosbase-i386-20111206-ebs\",\"ami\":\"ami-f1549e98\",\"arch\":\"i386\",\"purpose\":\"prebake\",\"status\":\"free\"}"
-        }
+          "value": "{\\"ami-nam49e:\\"centosbase-i386-20111206-ebs\\",\\"ami\\":\\"ami-f1549e98\\",\\"arch\\":\\"i386\\",\\"purpose\\":\\"prebake\\",\\"status\\":\\"free\\"}"
+        },
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:46:05\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:46:05\\"}"
         }
       ],
       "volumeId": "vol-05189a68"
@@ -1275,7 +1275,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-e6949e9f\",\"owner\":\"rstanz@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-e6949e9f\\",\\"owner\\":\\"rstanz@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-05389a69"
@@ -1295,7 +1295,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:43:24\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:43:24\\"}"
         }
       ],
       "volumeId": "vol-05589a68"
@@ -1324,7 +1324,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-1e149e67\",\"owner\":\"espengler@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-1e149e67\\",\\"owner\\":\\"espengler@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-05689a6b"
@@ -1353,7 +1353,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-7c249e1e\",\"owner\":\"espengler@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-7c249e1e\\",\\"owner\\":\\"espengler@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-05789a68"
@@ -1397,7 +1397,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:45:27\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:45:27\\"}"
         }
       ],
       "volumeId": "vol-05789a68"
@@ -1489,7 +1489,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:44:27\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:44:27\\"}"
         }
       ],
       "volumeId": "vol-05889a68"
@@ -1509,7 +1509,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-06-21T17:36:15\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-06-21T17:36:15\\"}"
         }
       ],
       "volumeId": "vol-05889a6b"
@@ -1529,7 +1529,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-06-25T20:14:23\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-06-25T20:14:23\\"}"
         }
       ],
       "volumeId": "vol-05989a6b"
@@ -1549,7 +1549,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"\",\"owner\":\"\",\"detachTime\":\"2012-03-06T04:39:17\"}"
+          "value": "{\\"instance\\":\\"\\",\\"owner\\":\\"\\",\\"detachTime\\":\\"2012-03-06T04:39:17\\"}"
         }
       ],
       "volumeId": "vol-05b89a68"
@@ -1578,7 +1578,7 @@ class MockVolumes {
         {
           "class": "com.amazonaws.services.ec2.model.Tag",
           "key": "janitor_metadata",
-          "value": "{\"instance\":\"i-fc549e85\",\"owner\":\"espengler@whoyagonnacall.com\"}"
+          "value": "{\\"instance\\":\\"i-fc549e85\\",\\"owner\\":\\"espengler@whoyagonnacall.com\\"}"
         }
       ],
       "volumeId": "vol-05d89a6b"
