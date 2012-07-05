@@ -46,15 +46,21 @@
           </tr>
           <tr>
             <td class="name">Security Groups Accessible from this Application:</td>
-            <td class="value">
-              <table>
+            <td class="list">
+              <table class="securityGroups">
+                <thead>
+                <tr>
+                  <th>Open</th>
+                  <th>Security Group (traffic target)</th>
+                  <th>Port Ranges</th>
+                </tr>
+                </thead>
                 <tbody>
                 <g:each var="g" in="${groups}">
                   <tr>
-                    <td>
-                      <g:checkBox name="selectedGroups" value="${g.target}" checked="${g.allowed}"/> ${g.target}
-                      <input type="text" id="${g.target}" name="${g.target}" value="${g.ports}"/>
-                    </td>
+                    <td class="checkbox"><g:checkBox name="selectedGroups" value="${g.target}" checked="${g.allowed}"/></td>
+                    <td><label for="${g.target}">${g.target}</label></td>
+                    <td><input type="text" id="${g.target}" name="${g.target}" value="${g.ports}"/></td>
                   </tr>
                 </g:each>
                 </tbody>
