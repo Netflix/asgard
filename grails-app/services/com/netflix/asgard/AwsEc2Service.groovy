@@ -87,6 +87,7 @@ import com.google.common.collect.Lists
 import com.google.common.collect.Multiset
 import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.cache.CacheInitializer
+import com.netflix.asgard.model.SecurityGroupOption
 import com.netflix.asgard.model.ZoneAvailability
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -407,6 +408,49 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         null
     }
 
+    /**
+     * Calculates the relationships between most security groups (many potential sources of traffic) and one security
+     * group (single target of traffic).
+     *
+     * @param userContext who, where, why
+     * @param targetGroup the security group for the instances receiving traffic
+     * @return list of security group options for display
+     */
+    List<SecurityGroupOption> getSecurityGroupOptionsForTarget(UserContext userContext, SecurityGroup targetGroup) {
+        Collection<SecurityGroup> sourceGroups = getEffectiveSecurityGroups(userContext)
+        String guessedPorts = bestIngressPortsFor(targetGroup)
+        List<SecurityGroupOption> securityGroupOptions = sourceGroups.collect { SecurityGroup sourceGroup ->
+            buildSecurityGroupOption(sourceGroup.groupName, targetGroup, guessedPorts)
+        }
+        securityGroupOptions
+    }
+
+    /**
+     * Calculates the relationships between one security group (single source of traffic) and most security groups
+     * (many potential targets of traffic).
+     *
+     * @param userContext who, where, why
+     * @param sourceGroupName the name of the security group for the instances sending traffic
+     * @return list of security group options for display
+     */
+    List<SecurityGroupOption> getSecurityGroupOptionsForSource(UserContext userContext, String sourceGroupName) {
+        Collection<SecurityGroup> targetGroups = getEffectiveSecurityGroups(userContext)
+        List<SecurityGroupOption> securityGroupOptions = targetGroups.collect { SecurityGroup targetGroup ->
+            String guessedPorts = bestIngressPortsFor(targetGroup)
+            buildSecurityGroupOption(sourceGroupName, targetGroup, guessedPorts)
+        }
+        securityGroupOptions
+    }
+
+    private SecurityGroupOption buildSecurityGroupOption(String sourceGroupName, SecurityGroup targetGroup,
+                                                         String defaultPorts) {
+        String accessiblePorts = getIngressFrom(targetGroup, sourceGroupName)
+        boolean accessible = accessiblePorts ? true : false
+        String ports = accessiblePorts ?: defaultPorts
+        String groupName = targetGroup.groupName
+        new SecurityGroupOption(source: sourceGroupName, target: groupName, allowed: accessible, ports: ports)
+    }
+
     // mutators
 
     SecurityGroup createSecurityGroup(UserContext userContext, String name, String description) {
@@ -496,7 +540,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         permissionsToString(ipPermissions)
     }
 
-    String bestIngressPortsFor(SecurityGroup targetGroup) {
+    private String bestIngressPortsFor(SecurityGroup targetGroup) {
         Map guess = ['7001' : 1]
         targetGroup.ipPermissions.each {
             if (it.ipProtocol == 'tcp' &&  it.userIdGroupPairs.size() > 0) {
