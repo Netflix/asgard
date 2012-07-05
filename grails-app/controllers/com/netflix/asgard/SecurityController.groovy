@@ -114,20 +114,9 @@ class SecurityController {
         }
         [
                 group: group,
-                groups: getSecurityAccessibility(userContext, group),
+                groups: awsEc2Service.getSecurityGroupOptionsForTarget(userContext, group),
                 editable: awsEc2Service.isSecurityGroupEditable(group.groupName)
         ]
-    }
-
-    private Map<String, List> getSecurityAccessibility(UserContext userContext, SecurityGroup targetGroup) {
-        Collection<SecurityGroup> allGroups = awsEc2Service.getEffectiveSecurityGroups(userContext)
-        String defaultPorts = awsEc2Service.bestIngressPortsFor(targetGroup)
-        Map<String, List> groupNamesToAccessibilityData = [:]
-        allGroups.each { SecurityGroup srcGroup ->
-            String ports = awsEc2Service.getIngressFrom(targetGroup, srcGroup.groupName)
-            groupNamesToAccessibilityData[srcGroup.groupName] = ports ? [ true, ports ] : [ false, defaultPorts ]
-        }
-        groupNamesToAccessibilityData
     }
 
     def update = {

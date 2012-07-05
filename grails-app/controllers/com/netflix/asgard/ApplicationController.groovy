@@ -225,9 +225,7 @@ import org.apache.commons.collections.HashBag
             return
         }
         SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
-        def isNew = false
         if (!group) {
-            isNew = true
             awsEc2Service.createSecurityGroup(userContext, name, app.description) // TODO move creation to update?
             group = awsEc2Service.getSecurityGroup(userContext, name)
             if (!group) {
@@ -240,25 +238,8 @@ import org.apache.commons.collections.HashBag
                 app: app,
                 name: name,
                 group: group,
-                groups: getSecurityIngressibility(name, isNew)
+                groups: awsEc2Service.getSecurityGroupOptionsForSource(userContext, name)
         ]
-    }
-
-    private Map<String, List> getSecurityIngressibility(String srcGroupName, boolean isNew) {
-        UserContext userContext = UserContext.of(request)
-        List<SecurityGroup> allGroups = awsEc2Service.getEffectiveSecurityGroups(userContext)
-        Map grpMap = [:]
-        allGroups.each { targetGroup ->
-            String ports = awsEc2Service.getIngressFrom(targetGroup, srcGroupName)
-            if (ports) {
-                grpMap[targetGroup.groupName] = [ true, ports ]
-            } else {
-                ports = awsEc2Service.bestIngressPortsFor(targetGroup)
-                grpMap[targetGroup.groupName] = [ false, ports ]
-            }
-        }
-        //println grpMap
-        grpMap
     }
 
     def securityUpdate = {

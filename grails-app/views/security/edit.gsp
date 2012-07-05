@@ -55,8 +55,8 @@
                 <tbody>
                 <g:each var="g" in="${groups}">
                   <tr>
-                    <td><g:checkBox name="selectedGroups" value="${g.key}" checked="${g.value[0]}"
-                          /> ${g.key} <input type="text" id="${g.key}" name="${g.key}" value="${g.value[1]}"/></td>
+                    <td><g:checkBox name="selectedGroups" value="${g.source}" checked="${g.allowed}"
+                          /> ${g.source} <input type="text" id="${g.source}" name="${g.source}" value="${g.ports}"/></td>
                   </tr>
                 </g:each>
                 </tbody>
