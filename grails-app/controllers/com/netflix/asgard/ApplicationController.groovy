@@ -231,7 +231,7 @@ import org.apache.commons.collections.HashBag
                 awsEc2Service.createSecurityGroup(userContext, name, app.description) // TODO move creation to update?
                 group = awsEc2Service.getSecurityGroup(userContext, name)
                 if (!group) {
-                    flash.message = "Could not retrieve or create Security Group '${grpName}'"
+                    flash.message = "Could not retrieve or create Security Group '${name}'"
                     redirect(action: 'list')
                     return
                 }
