@@ -37,7 +37,9 @@ beans = {
         bean.lazyInit = true
     }
 
-    snsTaskFinishedListener(SnsTaskFinishedListener)
+    snsTaskFinishedListener(SnsTaskFinishedListener) { bean ->
+        bean.lazyInit = true
+    }
 
     //**** Plugin behavior
 
