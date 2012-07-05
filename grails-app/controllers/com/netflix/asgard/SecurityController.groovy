@@ -60,19 +60,18 @@ class SecurityController {
         if (!group) {
             Requests.renderNotFound('Security Group', name, this)
             return
-        } else {
-            def details = [
-                    group: group,
-                    app: applicationService.getRegisteredApplication(userContext, group.groupName),
-                    accountNames: configService.awsAccountNames,
-                    editable: awsEc2Service.isSecurityGroupEditable(group.groupName)
-            ]
-            // TODO referenced-from lists would be nice too
-            withFormat {
-                html { return details }
-                xml { new XML(details).render(response) }
-                json { new JSON(details).render(response) }
-            }
+        }
+        def details = [
+                group: group,
+                app: applicationService.getRegisteredApplication(userContext, group.groupName),
+                accountNames: configService.awsAccountNames,
+                editable: awsEc2Service.isSecurityGroupEditable(group.groupName)
+        ]
+        // TODO referenced-from lists would be nice too
+        withFormat {
+            html { return details }
+            xml { new XML(details).render(response) }
+            json { new JSON(details).render(response) }
         }
     }
 
@@ -112,13 +111,12 @@ class SecurityController {
         if (!group) {
             Requests.renderNotFound('Security Group', name, this)
             return
-        } else {
-            return [
+        }
+        [
                 group: group,
                 groups: getSecurityAccessibility(userContext, group),
                 editable: awsEc2Service.isSecurityGroupEditable(group.groupName)
-            ]
-        }
+        ]
     }
 
     private Map<String, List> getSecurityAccessibility(UserContext userContext, SecurityGroup targetGroup) {

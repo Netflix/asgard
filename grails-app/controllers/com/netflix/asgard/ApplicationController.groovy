@@ -223,26 +223,25 @@ import org.apache.commons.collections.HashBag
             flash.message = "Application '${name}' not found."
             redirect(action: 'list')
             return
-        } else {
-            SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
-            def isNew = false
-            if (!group) {
-                isNew = true
-                awsEc2Service.createSecurityGroup(userContext, name, app.description) // TODO move creation to update?
-                group = awsEc2Service.getSecurityGroup(userContext, name)
-                if (!group) {
-                    flash.message = "Could not retrieve or create Security Group '${name}'"
-                    redirect(action: 'list')
-                    return
-                }
-            }
-            [
-                    app: app,
-                    name: name,
-                    group: group,
-                    groups: getSecurityIngressibility(name, isNew)
-            ]
         }
+        SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
+        def isNew = false
+        if (!group) {
+            isNew = true
+            awsEc2Service.createSecurityGroup(userContext, name, app.description) // TODO move creation to update?
+            group = awsEc2Service.getSecurityGroup(userContext, name)
+            if (!group) {
+                flash.message = "Could not retrieve or create Security Group '${name}'"
+                redirect(action: 'list')
+                return
+            }
+        }
+        [
+                app: app,
+                name: name,
+                group: group,
+                groups: getSecurityIngressibility(name, isNew)
+        ]
     }
 
     private Map<String, List> getSecurityIngressibility(String srcGroupName, boolean isNew) {
