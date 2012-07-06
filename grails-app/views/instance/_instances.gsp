@@ -16,6 +16,7 @@
 
 --%>
 <div class="list">
+  ${body()}
   <table class="sortable">
     <thead>
     <tr>

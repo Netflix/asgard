@@ -56,7 +56,7 @@ class LoadBalancerControllerTests extends ControllerUnitTestCase {
         cmd.validate()
         assert cmd.hasErrors()
         controller.save(cmd)
-        assert controller.create == controller.chainArgs.action
+        assert 'create' == controller.chainArgs.action
         assert p == controller.chainArgs.params
         assert cmd == controller.chainArgs.model['cmd']
     }

@@ -28,8 +28,8 @@
     <div class="message">${flash.message}</div>
   </g:if>
   <g:form method="post">
-    <div class="buttons"></div>
     <div class="list">
+      <div class="buttons"></div>
       <table class="sortable">
         <thead>
         <tr>

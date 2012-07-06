@@ -29,6 +29,7 @@
   </g:if>
   <g:form method="post">
     <div class="list">
+      <div class="buttons"></div>
       <table class="sortable">
         <thead>
         <tr>

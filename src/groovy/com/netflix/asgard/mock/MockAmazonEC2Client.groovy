@@ -189,6 +189,7 @@ import com.amazonaws.services.ec2.model.UnmonitorInstancesRequest
 import com.amazonaws.services.ec2.model.UnmonitorInstancesResult
 import com.amazonaws.services.ec2.model.UserIdGroupPair
 import com.amazonaws.services.ec2.model.Volume
+import com.amazonaws.services.ec2.model.VolumeAttachment
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.joda.time.format.ISODateTimeFormat
 
@@ -295,7 +296,17 @@ class MockAmazonEC2Client extends AmazonEC2Client {
     }
 
     private List<Volume> loadMockVolumes() {
-        [new Volume().withVolumeId('vol-deadbeef')]
+        JSONArray jsonArray = Mocks.parseJsonString(MockVolumes.DATA)
+        jsonArray.collect {
+            List<VolumeAttachment> volumeAttachments = it.attachments.collect {
+                new VolumeAttachment().withAttachTime(Mocks.parseJsonDate(it.attachTime)).withInstanceId(it.instanceId).
+                        withState(it.state as String).withVolumeId(it.volumeId)
+            }
+            new Volume().withAttachments(volumeAttachments).withAvailabilityZone(it.availabilityZone).
+                    withCreateTime(Mocks.parseJsonDate(it.createTime)).withSize(it.size as Integer).
+                    withSnapshotId(it.snapshotId).withState(it.state as String).withVolumeId(it.volumeId).
+                    withTags(it.tags.collect { new Tag().withKey(it.key).withValue(it.value) })
+        }
     }
 
     private List<Snapshot> loadMockSnapshots() {

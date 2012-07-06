@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing
 import com.amazonaws.services.elasticloadbalancing.model.ConfigureHealthCheckRequest
 import com.amazonaws.services.elasticloadbalancing.model.CreateLoadBalancerListenersRequest
@@ -36,6 +37,7 @@ import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import com.netflix.asgard.cache.CacheInitializer
+import com.netflix.asgard.model.InstanceStateData
 import org.springframework.beans.factory.InitializingBean
 
 class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
@@ -137,9 +139,39 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
         }
     }
 
-    List<InstanceState> getInstanceHealth(UserContext userContext, String name) {
-        awsClient.by(userContext.region).describeInstanceHealth(
-                new DescribeInstanceHealthRequest().withLoadBalancerName(name)).getInstanceStates()
+    /**
+     * Gets the list of instances registered with the specified load balancer, along with the name of the auto scaling
+     * group and availability zone of each instance. Results are sorted by availability zone first, then by auto scaling
+     * group within a zone.
+     *
+     * @param userContext who, where, why
+     * @param name the name of the load balancer to inspect
+     * @param groups the auto scaling groups to check for ownership and zone info for the instances
+     * @return list of {@link InstanceStateData} objects associated with the load balancer
+     */
+    List<InstanceStateData> getInstanceStateDatas(UserContext userContext, String name,
+                                                            List<AutoScalingGroup> groups) {
+        DescribeInstanceHealthRequest request = new DescribeInstanceHealthRequest().withLoadBalancerName(name)
+        List<InstanceState> states = awsClient.by(userContext.region).describeInstanceHealth(request).instanceStates
+        Map<String, String> instanceIdsToGroupNames = [:]
+        Map<String, String> instanceIdsToZones = [:]
+        for (AutoScalingGroup group in groups) {
+            for (com.amazonaws.services.autoscaling.model.Instance asgInstance in group.instances) {
+                String instanceId = asgInstance.instanceId
+                instanceIdsToGroupNames.put(instanceId, group.autoScalingGroupName)
+                instanceIdsToZones.put(instanceId, asgInstance.availabilityZone)
+            }
+        }
+        List<InstanceStateData> instanceStateDatas = states.collect { InstanceState instanceState ->
+            String instanceId = instanceState.instanceId
+            String autoScalingGroupName = instanceIdsToGroupNames[instanceId]
+            String availabilityZone = instanceIdsToZones[instanceId]
+            new InstanceStateData(instanceId: instanceId, state: instanceState.state,
+                    reasonCode: instanceState.reasonCode, description: instanceState.description,
+                    autoScalingGroupName: autoScalingGroupName, availabilityZone: availabilityZone)
+        }
+        // Initial sort by zone. Within zone, sort by ASG.
+        instanceStateDatas.sort { it.autoScalingGroupName }.sort { it.availabilityZone }
     }
 
     // mutators
