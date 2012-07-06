@@ -27,11 +27,10 @@ class SubnetController {
     def list = {
         UserContext userContext = UserContext.of(request)
         Collection<Subnet> subnets = awsEc2Service.getSubnets(userContext)
-        Map details = ['subnets': subnets]
         withFormat {
-            html { details }
-            xml { new XML(details).render(response) }
-            json { new JSON(details).render(response) }
+            html { ['subnets': subnets] }
+            xml { new XML(subnets).render(response) }
+            json { new JSON(subnets).render(response) }
         }
     }
 }

@@ -17,50 +17,51 @@
 --%>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main"/>
-    <title>Subnets</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="layout" content="main"/>
+  <title>Subnets</title>
 </head>
+
 <body>
 <div class="body">
-    <h1>Subnets in ${region.description}${appNames ? ' for ' + appNames : ''}</h1>
-    <g:if test="${flash.message}">
-        <div class="message">${flash.message}</div>
-    </g:if>
-    <g:form method="post">
-        <div class="list">
-            <table class="sortable">
-                <thead>
-                <tr>
-                    <th>Subnet ID</th>
-                    <th>State</th>
-                    <th>Availability Zone</th>
-                    <th>Available</th>
-                    <th>CIDR</th>
-                    <th>Tags</th>
-                </tr>
-                </thead>
-                <tbody>
-                <g:each var="subnet" in="${subnets.sort { it.availabilityZone } }" status="i">
-                    <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-                        <td>${subnet.subnetId}</td>
-                        <td>${subnet.state}</td>
-                        <td>${subnet.availabilityZone}</td>
-                        <td>${subnet.availableIpAddressCount}</td>
-                        <td>${subnet.cidrBlock}</td>
-                        <td>
-                            <ul>
-                                <g:each var="tag" in="${subnet.tags}">
-                                    <li>${tag.key} - ${tag.value}</li>
-                                </g:each>
-                            </ul>
-                        </td>
-                    </tr>
+  <h1>Subnets in ${region.description}${appNames ? ' for ' + appNames : ''}</h1>
+  <g:if test="${flash.message}">
+    <div class="message">${flash.message}</div>
+  </g:if>
+  <g:form method="post">
+    <div class="list">
+      <table class="sortable">
+        <thead>
+        <tr>
+          <th>Subnet ID</th>
+          <th>State</th>
+          <th>Availability Zone</th>
+          <th>Available</th>
+          <th>CIDR</th>
+          <th>Tags</th>
+        </tr>
+        </thead>
+        <tbody>
+        <g:each var="subnet" in="${subnets.sort { it.availabilityZone }}" status="i">
+          <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+            <td>${subnet.subnetId}</td>
+            <td>${subnet.state}</td>
+            <td><g:availabilityZone value="${subnet.availabilityZone}"/></td>
+            <td>${subnet.availableIpAddressCount}</td>
+            <td>${subnet.cidrBlock}</td>
+            <td>
+              <ul>
+                <g:each var="tag" in="${subnet.tags}">
+                  <li>${tag.key} - ${tag.value}</li>
                 </g:each>
-                </tbody>
-            </table>
-        </div>
-    </g:form>
+              </ul>
+            </td>
+          </tr>
+        </g:each>
+        </tbody>
+      </table>
+    </div>
+  </g:form>
 </div>
 </body>
 </html>
