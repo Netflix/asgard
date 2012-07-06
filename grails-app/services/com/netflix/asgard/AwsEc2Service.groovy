@@ -161,7 +161,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     // Images
 
     private List<Image> retrieveImages(Region region) {
-        List<String> owners = configService.publicResourceAccounts + accounts
+        List<String> owners = configService.publicResourceAccounts + configService.awsAccounts
         DescribeImagesRequest request = new DescribeImagesRequest().withOwners(owners)
         AmazonEC2 awsClientForRegion = awsClient.by(region)
         List<Image> images = awsClientForRegion.describeImages(request).getImages()
@@ -325,8 +325,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     List<String> authorizeSecondaryImageLaunchers(UserContext userContext, String imageId, Task existingTask = null) {
         try {
             List<String> hasAccounts = getImageLaunchers(userContext, imageId)
-            hasAccounts += accounts[0]
-            List<String> addAccounts = accounts.findAll {account -> !hasAccounts.any {it == account}}
+            hasAccounts += configService.awsAccountNumber
+            List<String> addAccounts = configService.awsAccounts.findAll {account -> !hasAccounts.any {it == account}}
             if (addAccounts.size() > 0) {
                 addImageLaunchers(userContext, imageId, addAccounts, existingTask)
             }
