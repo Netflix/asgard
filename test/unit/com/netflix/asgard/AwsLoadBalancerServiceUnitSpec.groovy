@@ -24,7 +24,7 @@ import com.netflix.asgard.model.InstanceStateData
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
-class AwsLoadBalancerServiceSpec extends Specification {
+class AwsLoadBalancerServiceUnitSpec extends Specification {
 
     UserContext userContext
     AmazonElasticLoadBalancing mockAmazonElasticLoadBalancing
