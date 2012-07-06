@@ -268,30 +268,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     //mutators
 
-    void setImageName(UserContext userContext, String imageId, String name) {
-        taskService.runTask(userContext, "Set image ${imageId} name to ${name}", { task ->
-            ModifyImageAttributeRequest request = new ModifyImageAttributeRequest()
-                    .withImageId(imageId)
-                    .withAttribute("name")
-                    .withOperationType("add")
-                    .withValue(name)
-            awsClient.by(userContext.region).modifyImageAttribute(request)
-        }, Link.to(EntityType.image, imageId))
-        getImage(userContext, imageId)
-    }
-
-    void setImageDescription(UserContext userContext, String imageId, String description) {
-        taskService.runTask(userContext, "Set image ${imageId} description to ${description}", { task ->
-            ModifyImageAttributeRequest request = new ModifyImageAttributeRequest()
-                    .withImageId(imageId)
-                    .withAttribute("description")
-                    .withOperationType("add")
-                    .withValue(description)
-            awsClient.by(userContext.region).modifyImageAttribute(request)
-        }, Link.to(EntityType.image, imageId))
-        getImage(userContext, imageId)
-    }
-
     void addImageLaunchers(UserContext userContext, String imageId, List<String> userIds, Task existingTask = null) {
         taskService.runTask(userContext, "Add to image ${imageId}, launchers ${userIds}", { task ->
             ModifyImageAttributeRequest request = new ModifyImageAttributeRequest()
@@ -301,18 +277,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
                     .withUserIds(userIds)
             awsClient.by(userContext.region).modifyImageAttribute(request)
         }, Link.to(EntityType.image, imageId), existingTask)
-        getImage(userContext, imageId)
-    }
-
-    void removeImageLaunchers(UserContext userContext, String imageId, List<String> userIds) {
-        taskService.runTask(userContext, "Remove from image ${imageId}, launchers ${userIds}", { task ->
-            ModifyImageAttributeRequest request = new ModifyImageAttributeRequest()
-                    .withImageId(imageId)
-                    .withAttribute('launchPermission')
-                    .withOperationType('remove')
-                    .withUserIds(userIds)
-            awsClient.by(userContext.region).modifyImageAttribute(request)
-        }, Link.to(EntityType.image, imageId))
         getImage(userContext, imageId)
     }
 
@@ -329,16 +293,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             awsClient.by(userContext.region).modifyImageAttribute(request)
         }, Link.to(EntityType.image, imageId))
         getImage(userContext, imageId)
-    }
-
-    void createImageTag(UserContext userContext, String imageId, String name, String value) {
-        Check.notEmpty(imageId, "imageId")
-        createImageTags(userContext, [imageId], name, value)
-    }
-
-    void deleteImageTag(UserContext userContext, String imageId, String name) {
-        Check.notEmpty(imageId, "imageId")
-        deleteImageTags(userContext, [imageId], name)
     }
 
     void createImageTags(UserContext userContext, Collection<String> imageIds, String name, String value) {
