@@ -51,6 +51,7 @@ import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsRequest
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsResult
 import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryRequest
 import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryResult
+import com.amazonaws.services.ec2.model.DescribeSubnetsResult
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest
 import com.amazonaws.services.ec2.model.DetachVolumeRequest
 import com.amazonaws.services.ec2.model.Filter
@@ -74,6 +75,7 @@ import com.amazonaws.services.ec2.model.RunInstancesResult
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.Snapshot
 import com.amazonaws.services.ec2.model.SpotInstanceRequest
+import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Tag
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest
 import com.amazonaws.services.ec2.model.TerminateInstancesResult
@@ -141,6 +143,11 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     Collection<AvailabilityZone> getAvailabilityZones(UserContext userContext) {
         caches.allAvailabilityZones.by(userContext.region).list().sort { it.zoneName }
+    }
+
+    Collection<Subnet> getSubnets(UserContext userContext) {
+        DescribeSubnetsResult result = awsClient.by(userContext.region).describeSubnets()
+        result.getSubnets()
     }
 
     Collection<AvailabilityZone> getRecommendedAvailabilityZones(UserContext userContext) {
