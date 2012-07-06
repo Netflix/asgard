@@ -51,6 +51,7 @@ import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsRequest
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsResult
 import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryRequest
 import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryResult
+import com.amazonaws.services.ec2.model.DescribeSubnetsResult
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest
 import com.amazonaws.services.ec2.model.DetachVolumeRequest
 import com.amazonaws.services.ec2.model.Filter
@@ -74,6 +75,7 @@ import com.amazonaws.services.ec2.model.RunInstancesResult
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.Snapshot
 import com.amazonaws.services.ec2.model.SpotInstanceRequest
+import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Tag
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest
 import com.amazonaws.services.ec2.model.TerminateInstancesResult
@@ -141,6 +143,11 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     Collection<AvailabilityZone> getAvailabilityZones(UserContext userContext) {
         caches.allAvailabilityZones.by(userContext.region).list().sort { it.zoneName }
+    }
+
+    Collection<Subnet> getSubnets(UserContext userContext) {
+        DescribeSubnetsResult result = awsClient.by(userContext.region).describeSubnets()
+        result.getSubnets()
     }
 
     Collection<AvailabilityZone> getRecommendedAvailabilityZones(UserContext userContext) {
@@ -412,25 +419,33 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     SecurityGroup getSecurityGroup(UserContext userContext, String name, From from = From.AWS) {
+        Region region = userContext.region
         Check.notNull(name, SecurityGroup, "name")
-        if (from == From.CACHE) {
-            return caches.allSecurityGroups.by(userContext.region).get(name)
-        }
+        String groupName
         DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest()
         if (name ==~ SECURITY_GROUP_ID_PATTERN) {
             request.withGroupIds(name)
+            SecurityGroup cachedSecurityGroup = caches.allSecurityGroups.by(region).list().find { it.groupId == name }
+            groupName = cachedSecurityGroup?.groupName
         } else {
             request.withGroupNames(name)
+            groupName = name
+        }
+        if (from == From.CACHE) {
+            return caches.allSecurityGroups.by(region).get(groupName)
         }
         SecurityGroup group = null
         try {
-            DescribeSecurityGroupsResult result = awsClient.by(userContext.region).describeSecurityGroups(request)
+            DescribeSecurityGroupsResult result = awsClient.by(region).describeSecurityGroups(request)
             group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
+            groupName = group?.groupName
         } catch (AmazonServiceException ignore) {
             // Can't find a security group with that request.
-            return null
         }
-        caches.allSecurityGroups.by(userContext.region).put(group.groupName, group)
+        if (groupName) {
+            return caches.allSecurityGroups.by(region).put(groupName, group)
+        }
+        null
     }
 
     // mutators

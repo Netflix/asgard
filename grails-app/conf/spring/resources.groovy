@@ -19,6 +19,7 @@ import com.netflix.asgard.Caches
 import com.netflix.asgard.DefaultUserDataProvider
 import com.netflix.asgard.Region
 import com.netflix.asgard.ServiceInitLoggingBeanPostProcessor
+import com.netflix.asgard.SnsTaskFinishedListener
 import com.netflix.asgard.ThreadScheduler
 import groovy.io.FileType
 
@@ -33,6 +34,10 @@ beans = {
     caches(Caches, ref('cachedMapBuilder'), ref('configService'))
 
     defaultUserDataProvider(DefaultUserDataProvider) { bean ->
+        bean.lazyInit = true
+    }
+
+    snsTaskFinishedListener(SnsTaskFinishedListener) { bean ->
         bean.lazyInit = true
     }
 

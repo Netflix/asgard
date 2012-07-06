@@ -28,8 +28,9 @@
       <div class="message">${flash.message}</div>
     </g:if>
     <g:each in="${ownersToInstanceLists}" var="ownerToInstances">
-      <h2>Owner: <g:link class="user" action="audit" params="[id: ownerToInstances.key]" >${ownerToInstances.key}</g:link></h2>
-      <g:render template="instances" model="[instanceList: ownerToInstances.value]"/>
+        <g:render template="instances" model="[instanceList: ownerToInstances.value]">
+          <h2>Owner: <g:link class="user" action="audit" params="[id: ownerToInstances.key]" >${ownerToInstances.key}</g:link></h2>
+        </g:render>
     </g:each>
   </div>
 </body>

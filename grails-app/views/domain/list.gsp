@@ -28,10 +28,10 @@
     <div class="message">${flash.message}</div>
   </g:if>
   <g:form method="post">
-    <div class="buttons">
-      <g:link class="create" action="create">Create New SimpleDB Domain</g:link>
-    </div>
     <div class="list">
+      <div class="buttons">
+        <g:link class="create" action="create">Create New SimpleDB Domain</g:link>
+      </div>
       <table class="sortable">
         <thead>
         <tr>

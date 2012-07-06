@@ -126,7 +126,7 @@ input.number                     { width: 36px;  }
 .halloween .nav .tasks         { background-image: url(../images/occasion/halloween/24/Boiler.png);       }
 
 /* General page body */
-.body       { float: left; margin: 0 15px 10px; }
+.body       { clear: both; float: left; margin: 0 15px 10px; }
 .emphasized { font-weight: bold; }
 div.clear   { clear: both; }
 .initial    { color: #204a87; font-weight: bold; }
@@ -182,6 +182,7 @@ th a:link, th a:visited, th a:hover { color: #333; display: block; font-size: 10
 th.asc a, th.desc a         { background-position: right; background-repeat: no-repeat; }
 th.asc a                    { background-image: url(../images/skin/sorted_asc.gif);  }
 th.desc a                   { background-image: url(../images/skin/sorted_desc.gif); }
+.list                       { float: left; }
 .list tr.odd                { background: #F5F5F5; }
 .list tr.even               { background: white; }
 .list td                    { vertical-align: top; line-height: 19px; }
@@ -227,7 +228,7 @@ ul.links    { padding-left: 0; }
 ul.links li { list-style: none; }
 
 /* PAGINATION */
-.paginateButtons      { border: 1px solid #DDD; border-top: 0; color: #666; font-size: 10px; overflow: hidden; padding: 10px 3px; }
+.paginateButtons      { clear: both; border: 1px solid #DDD; border-top: 0; color: #666; font-size: 10px; overflow: hidden; padding: 10px 3px; }
 .paginateButtons      { background-image: -moz-linear-gradient(center bottom, #DDD 0%, white 80%); }
 .paginateButtons      { background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #DDD), color-stop(0.8, white)); }
 .paginateButtons a    { background: #FFF; border-width: 1px; border-style: solid; border-color: #DDD #AAA #AAA #CCC; color: #666; margin: 0 3px; padding: 2px 6px; }

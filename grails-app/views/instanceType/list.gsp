@@ -27,8 +27,8 @@
     <g:if test="${flash.message}">
       <div class="message">${flash.message}</div>
     </g:if>
-    <div class="buttons"></div>
     <div class="list">
+      <div class="buttons"></div>
       <table class="sortable instanceType">
         <tr>
           <th>Name</th>

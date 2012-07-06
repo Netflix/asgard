@@ -28,10 +28,10 @@
     </g:if>
     <h1>Running Tasks</h1>
     <g:form method="post">
-      <div class="buttons">
-        <g:buttonSubmit class="stop" onclick="return confirm('Really stop the selected task?');" action="cancel" value="Stop Selected Task"/>
-      </div>
       <div class="list">
+        <div class="buttons">
+          <g:buttonSubmit class="stop" onclick="return confirm('Really stop the selected task?');" action="cancel" value="Stop Selected Task"/>
+        </div>
         <table class="sortable">
           <thead>
           <tr>
@@ -68,9 +68,11 @@
       </div>
       <div class="paginateButtons"></div>
     </g:form>
+  </div>
+  <div class="body">
     <h1>Completed Tasks</h1>
-    <div class="buttons"></div>
     <div class="list">
+      <div class="buttons"></div>
       <table class="sortable">
         <thead>
         <tr>

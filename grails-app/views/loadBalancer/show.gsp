@@ -37,7 +37,7 @@
         <input type="hidden" name="name" value="${loadBalancer.loadBalancerName}"/>
         <g:link class="edit" action="edit" params="[id: loadBalancer.loadBalancerName]">Edit Load Balancer</g:link>
         <g:buttonSubmit class="delete" action="delete" value="Delete Load Balancer"
-                data-warning="Really delete Load Balancer '${loadBalancer.loadBalancerName}'?" />
+                        data-warning="Really delete Load Balancer '${loadBalancer.loadBalancerName}'?" />
         <g:link class="create" action="prepareListener" params="[id: loadBalancer.loadBalancerName]">Add Listener</g:link>
       </g:form>
     </div>
@@ -67,12 +67,12 @@
               <div class="list">
                 <table class="sortable subitems">
                   <thead>
-                    <tr>
-                      <th>Protocol</th>
-                      <th>Load Balancer Port</th>
-                      <th>Instance Port</th>
-                      <th></th>
-                    </tr>
+                  <tr>
+                    <th>Protocol</th>
+                    <th>Load Balancer Port</th>
+                    <th>Instance Port</th>
+                    <th class="sorttable_nosort"></th>
+                  </tr>
                   </thead>
                   <g:each var="listenerDescription" in="${loadBalancer.listenerDescriptions.sort { it.listener.loadBalancerPort }}" status="i">
                     <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
@@ -116,14 +116,33 @@
         <tr class="prop">
           <td class="name">Instances:</td>
           <td>
-            <table>
-              <g:each var="is" in="${instanceStates}">
-                <tr class="prop">
-                  <td class="value"><g:linkObject type="instance" name="${is.instanceId}"/> | ${is.state} | ${is.reasonCode} | ${is.description}
-                  </td>
-                </tr>
-              </g:each>
-            </table>
+            <div class="list">
+              <div class="buttons"></div>
+              <table class="sortable subitems">
+                <thead>
+                  <tr>
+                    <th>Instance</th>
+                    <th>Zone</th>
+                    <th>Auto Scaling Group</th>
+                    <th>ELB State</th>
+                    <th>Reason</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <g:each var="is" in="${instanceStates}">
+                    <tr>
+                      <td><g:linkObject type="instance" name="${is.instanceId}"/></td>
+                      <td><g:availabilityZone value="${is.availabilityZone}"/></td>
+                      <td><g:linkObject type="autoScaling" name="${is.autoScalingGroupName}"/></td>
+                      <td>${is.state}</td>
+                      <td>${is.reasonCode}</td>
+                      <td>${is.description}</td>
+                    </tr>
+                  </g:each>
+                </tbody>
+              </table>
+            </div>
           </td>
         </tr>
         <tr class="prop">

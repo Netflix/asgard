@@ -19,35 +19,47 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
-  <title>Source Security Groups</title>
+  <title>Subnets</title>
 </head>
+
 <body>
 <div class="body">
-  <h1>Source Security Groups in ${region.description}</h1>
+  <h1>Subnets in ${region.description}${appNames ? ' for ' + appNames : ''}</h1>
   <g:if test="${flash.message}">
     <div class="message">${flash.message}</div>
   </g:if>
   <g:form method="post">
     <div class="list">
-      <div class="buttons"></div>
       <table class="sortable">
         <thead>
         <tr>
-          <th>Name</th>
-          <th>Owner</th>
+          <th>Subnet ID</th>
+          <th>State</th>
+          <th>Availability Zone</th>
+          <th>Available</th>
+          <th>CIDR</th>
+          <th>Tags</th>
         </tr>
         </thead>
         <tbody>
-        <g:each var="grp" in="${sourceSecurityGroups}" status="i">
+        <g:each var="subnet" in="${subnets.sort { it.availabilityZone }}" status="i">
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-            <td>${grp.groupName}</td>
-            <td>${grp.ownerAlias}</td>
+            <td>${subnet.subnetId}</td>
+            <td>${subnet.state}</td>
+            <td><g:availabilityZone value="${subnet.availabilityZone}"/></td>
+            <td>${subnet.availableIpAddressCount}</td>
+            <td>${subnet.cidrBlock}</td>
+            <td>
+              <ul>
+                <g:each var="tag" in="${subnet.tags}">
+                  <li>${tag.key} - ${tag.value}</li>
+                </g:each>
+              </ul>
+            </td>
           </tr>
         </g:each>
         </tbody>
       </table>
-    </div>
-    <div class="paginateButtons">
     </div>
   </g:form>
 </div>

@@ -29,14 +29,12 @@
       <div class="message">${flash.message}</div>
     </g:if>
     <g:form method="post" class="validate">
-      <div class="buttons">
-        <g:buttonSubmit class="create" action="save" value="Create Volume"/><br/>
-        <label>Volume Size (in GB):</label><g:textField name="volumeSize" size="12" placeholder="--ENTER SIZE--" class="required"/>
-        <label>Availability Zone:</label><g:select name="availabilityZone" from="${zoneList.zoneName}"/>
-      </div>
-      <div class="buttons">
-      </div>
       <div class="list">
+        <div class="buttons">
+          <g:buttonSubmit class="create" action="save" value="Create Volume"/><br/>
+          <label>Volume Size (in GB):</label><g:textField name="volumeSize" size="12" placeholder="--ENTER SIZE--" class="required"/>
+          <label>Availability Zone:</label><g:select name="availabilityZone" from="${zoneList.zoneName}"/>
+        </div>
           <table class="sortable">
             <thead>
             <tr>

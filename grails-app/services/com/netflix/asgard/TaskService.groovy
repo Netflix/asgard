@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.AmazonServiceException
 import com.google.common.collect.Lists
 import com.netflix.asgard.model.SimpleDbSequenceLocator
+import com.netflix.asgard.plugin.TaskFinishedListener
 import java.util.concurrent.ConcurrentLinkedQueue
 import org.codehaus.groovy.runtime.StackTraceUtils
 
@@ -36,6 +37,8 @@ class TaskService {
     def awsSimpleDbService
     def emailerService
     def grailsApplication
+    def pluginService
+
     Integer numberOfCompletedTasksToRetain = 500
 
     /** The location of the sequence number in SimpleDB */
@@ -167,6 +170,13 @@ class TaskService {
         }
         if (task.email) {
             emailerService.sendUserEmail(task.email, task.summary, task.logAsString)
+        }
+        for(TaskFinishedListener taskFinishedListener in pluginService?.taskFinishedListeners) {
+            try {
+                taskFinishedListener.taskFinished(task)
+            } catch (Exception e) {
+                emailerService.sendExceptionEmail("Task finished plugin error: $e", e)
+            }
         }
     }
 
