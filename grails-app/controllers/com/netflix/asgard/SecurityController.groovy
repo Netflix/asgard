@@ -55,12 +55,12 @@ class SecurityController {
         UserContext userContext = UserContext.of(request)
         def name = params.name ?: params.id
         SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
-        group?.ipPermissions?.sort { it.userIdGroupPairs ? it.userIdGroupPairs[0].groupName : it.fromPort }
-        group?.ipPermissions?.each { it.userIdGroupPairs.sort { it.groupName } }
         if (!group) {
             Requests.renderNotFound('Security Group', name, this)
             return
         }
+        group.ipPermissions.sort { it.userIdGroupPairs ? it.userIdGroupPairs[0].groupName : it.fromPort }
+        group.ipPermissions.each { it.userIdGroupPairs.sort { it.groupName } }
         def details = [
                 group: group,
                 app: applicationService.getRegisteredApplication(userContext, group.groupName),
