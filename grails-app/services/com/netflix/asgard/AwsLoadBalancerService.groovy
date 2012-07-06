@@ -153,14 +153,22 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
                                                             List<AutoScalingGroup> groups) {
         DescribeInstanceHealthRequest request = new DescribeInstanceHealthRequest().withLoadBalancerName(name)
         List<InstanceState> states = awsClient.by(userContext.region).describeInstanceHealth(request).instanceStates
-        List<InstanceStateData> instanceStateDatas = states.collect { InstanceState instanceState ->
-            com.amazonaws.services.autoscaling.model.Instance asgInstance = null
-            AutoScalingGroup group = groups.find { AutoScalingGroup group ->
-                asgInstance = group.instances.find { it.instanceId == instanceState.instanceId }
+        Map<String, String> instanceIdsToGroupNames = [:]
+        Map<String, String> instanceIdsToZones = [:]
+        for (AutoScalingGroup group in groups) {
+            for (com.amazonaws.services.autoscaling.model.Instance asgInstance in group.instances) {
+                String instanceId = asgInstance.instanceId
+                instanceIdsToGroupNames.put(instanceId, group.autoScalingGroupName)
+                instanceIdsToZones.put(instanceId, asgInstance.availabilityZone)
             }
-            new InstanceStateData(instanceId: instanceState.instanceId, state: instanceState.state,
+        }
+        List<InstanceStateData> instanceStateDatas = states.collect { InstanceState instanceState ->
+            String instanceId = instanceState.instanceId
+            String autoScalingGroupName = instanceIdsToGroupNames[instanceId]
+            String availabilityZone = instanceIdsToZones[instanceId]
+            new InstanceStateData(instanceId: instanceId, state: instanceState.state,
                     reasonCode: instanceState.reasonCode, description: instanceState.description,
-                    autoScalingGroupName: group?.autoScalingGroupName, availabilityZone: asgInstance?.availabilityZone)
+                    autoScalingGroupName: autoScalingGroupName, availabilityZone: availabilityZone)
         }
         // Initial sort by zone. Within zone, sort by ASG.
         instanceStateDatas.sort { it.autoScalingGroupName }.sort { it.availabilityZone }
