@@ -1001,8 +1001,8 @@ jQuery(document).ready(function() {
 
     // Add filter to all long tables on list pages
     var setUpListFilters = function() {
-        var config, prepareTableRows, runTableFilter, identifyRows, resetAndRecordTableWidth, addTableFilter,
-                addInitializeButton, storedFilter, getStorageKey, setUpTableFilters;
+        var config, prepareTableRows, runTableFilter, identifyRows, resetAndRecordTableWidth, findControlBar,
+                addTableFilter, addInitializeButton, storedFilter, getStorageKey, setUpTableFilters;
         config = {
             minRowCount: 3,
             maxDataCellCount: 9000,
@@ -1085,6 +1085,10 @@ jQuery(document).ready(function() {
             jQuery(table).data('initWidth', jQuery(table).width() + 1);
         };
 
+        findControlBar = function(table) {
+            return jQuery(table).parent('div.list').children('div.buttons').first();
+        };
+
         addTableFilter = function(table) {
             var storedFilterValue, label, input, counter, filterContainer, timer;
 
@@ -1114,7 +1118,7 @@ jQuery(document).ready(function() {
             prepareTableRows(table);
             filterContainer = jQuery('<div class="filter" title="Separate word fragments by spaces for advanced filtering"/>');
             filterContainer.append(label).append(input).append(counter);
-            jQuery(table).parent('div.list').prev('div.buttons').append(filterContainer);
+            findControlBar(table).append(filterContainer);
 
             storedFilterValue = storedFilter.get();
 
@@ -1142,7 +1146,7 @@ jQuery(document).ready(function() {
                 jInitListFilterButton.remove();
             });
 
-            jQuery(table).parent('div.list').prev('div.buttons').append(jInitListFilterButton);
+            findControlBar(table).append(jInitListFilterButton);
         };
 
         storedFilter = {

@@ -29,11 +29,11 @@
     </g:if>
     <g:form method="post" class="validate">
       <input type="hidden" name="appNames" value="${params.id}"/>
-      <div class="buttons">
-        <g:buttonSubmit class="stop" value="Cancel Spot Instance Request(s)" action="cancel"
-                onclick="return confirm('Really cancel spot instance request(s)?');"/>
-      </div>
       <div class="list">
+        <div class="buttons">
+          <g:buttonSubmit class="stop" value="Cancel Spot Instance Request(s)" action="cancel"
+                  onclick="return confirm('Really cancel spot instance request(s)?');"/>
+        </div>
         <table class="sortable">
           <thead>
           <tr>

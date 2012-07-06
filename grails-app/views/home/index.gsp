@@ -37,7 +37,7 @@
         <tbody>
         <tr>
           <td>
-            Manage <g:link class="list" controller="application" action="list"
+            Manage <g:link controller="application" action="list"
                       title="An Application is an interrelated set of AWS components identified by standard naming patterns.">Applications</g:link>
             <ul>
               <li>Push images to one or more Application AutoScaling Groups</li>
@@ -46,21 +46,21 @@
           </td>
           <td>
             <ul>
-              <li>Manage <g:link class="list" controller="image" action="list"
+              <li>Manage <g:link controller="image" action="list"
                                  title="An 'Amazon Machine Image' is a snapshot if a running machine used to create new instances.">Images</g:link></li>
-              <li>Manage <g:link class="list" controller="autoScaling" action="list"
+              <li>Manage <g:link controller="autoScaling" action="list"
                                  title="An 'Auto Scaling Group' is where an Application defines its scaling parameters.">Auto Scaling</g:link> Groups</li>
-              <li>Manage <g:link class="list" controller="loadBalancer" action="list"
+              <li>Manage <g:link controller="loadBalancer" action="list"
                                  title="A 'Load Balancer' is where an Application defines its load balancing parameters for either frontend or middle tier.">Load Balancers</g:link></li>
-              <li>Manage <g:link class="list" controller="launchConfiguration" action="list"
+              <li>Manage <g:link controller="launchConfiguration" action="list"
                                  title="A 'Launch Configuration' is an Application's instance factory used by Auto Scaling to launch new instances.">Launch Configurations</g:link></li>
-              <li>Manage <g:link class="list" controller="security" action="list"
+              <li>Manage <g:link controller="security" action="list"
                                  title="A 'Security Group' is the collection of network ingress rules for an Application.">Security Groups</g:link></li>
-              <li>Manage Running <g:link class="list" controller="instance" action="list"
+              <li>Manage Running <g:link controller="instance" action="list"
                                          title="An 'Instance' is a single running machine instance of an Application.">Instances</g:link></li>
             </ul>
           </td>
-          <td>Monitor Background <g:link class="list" controller="task" action="list"
+          <td>Monitor Background <g:link controller="task" action="list"
                       title="Watch the progress of long-running workflow processes.">Tasks</g:link>
           </td>
           <g:if test="${externalLinks}">
