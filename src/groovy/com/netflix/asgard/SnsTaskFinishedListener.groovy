@@ -53,7 +53,7 @@ class SnsTaskFinishedListener implements TaskFinishedListener {
         // Idea from http://stackoverflow.com/questions/5936300/grails-converters-json-except-few-properties
         // Also this can be changed to the Groovy version of JSONBuilder when Grails 2.x upgrade is complete
         JSON builder = new JSONBuilder().build {
-            task.properties.each { propName, propValue ->
+            task.properties.each { String propName, propValue ->
                 if (!EXCLUDED_PROPS.contains(propName)) { // Keep under the 8k SNS limit
                     setProperty(propName, propValue)
                 }

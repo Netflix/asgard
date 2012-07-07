@@ -107,7 +107,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     def configService
     def restClientService
     def taskService
-    List<String> accounts = [] // main account is accounts[0]
 
     /** The state names for instances that count against reservation usage. */
     private static final List<String> ACTIVE_INSTANCE_STATES = ['pending', 'running'].asImmutable()
@@ -121,7 +120,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             client.setEndpoint("ec2.${region}.amazonaws.com")
             client
         })
-        accounts = configService.awsAccounts
     }
 
     void initializeCaches() {
@@ -470,10 +468,12 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     /** High-level permission update for a group pair: given the desired state, make it so. */
-    void updateSecurityGroupPermissions(UserContext userContext, SecurityGroup targetGroup, String sourceGroupName, String wantPorts) {
-        List<IpPermission> havePerms = targetGroup.ipPermissions.findAll { it.userIdGroupPairs.any { it.groupName == sourceGroupName }}
+    void updateSecurityGroupPermissions(UserContext userContext, SecurityGroup targetGroup, String sourceGroupName,
+                                        String wantPorts) {
+        List<IpPermission> havePerms = targetGroup.ipPermissions.findAll {
+            it.userIdGroupPairs.any { it.groupName == sourceGroupName}
+        }
         List<IpPermission> wantPerms = permissionsFromString(wantPorts)
-        //println " access from ${sourceGroup} to ${targetGroup.groupName}? have:${permissionsToString(havePerms)} want:${permissionsToString(wantPerms)}"
         String groupName = targetGroup.groupName
         String userId = configService.awsAccountNumber
         List<UserIdGroupPair> pairs = [new UserIdGroupPair().withUserId(userId).withGroupName(sourceGroupName)]
@@ -497,7 +497,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
                     request.withGroupName(groupName).withIpPermissions(permissionsToRevoke)
                     awsClient.by(userContext.region).revokeSecurityGroupIngress(request)
                 }
-                getSecurityGroup(userContext, targetGroup.groupName)
+                getSecurityGroup(userContext, groupName)
             }, Link.to(EntityType.security, groupName))
         }
     }
