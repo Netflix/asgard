@@ -142,8 +142,8 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <g:each var="is" in="${instanceStates}">
-                    <tr>
+                  <g:each var="is" in="${instanceStates}" status="i">
+                    <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
                       <td><g:linkObject type="instance" name="${is.instanceId}"/></td>
                       <td><g:availabilityZone value="${is.availabilityZone}"/></td>
                       <td><g:linkObject type="autoScaling" name="${is.autoScalingGroupName}"/></td>
