@@ -180,9 +180,9 @@ class TaskService {
         }
     }
 
-    def getRunning = { Lists.newArrayList(running) }
+    List<Task> getRunning() { Lists.newArrayList(running) }
 
-    def getCompleted = { Lists.newArrayList(completed) }
+    List<Task> getCompleted() { Lists.newArrayList(completed) }
 
     Task getTaskById(String id) {
         Task task = running.find { it.id == id }
