@@ -17,7 +17,17 @@ package com.netflix.asgard.model
 /** Partitions subnets by the type of AWS objects they can be applied to.*/
 enum SubnetTarget {
     /** The subnet can be applied only to AWS machine instances. */
-    ec2,
+    EC2('ec2'),
     /** The subnet can be applied only to AWS Elastic Load Balancers. */
-    elb
+    ELB('elb')
+
+    private final String text
+
+    SubnetTarget(String text) {
+        this.text = text
+    }
+
+    static SubnetTarget forText(String text) {
+        values().find() { it.text == text }
+    }
 }

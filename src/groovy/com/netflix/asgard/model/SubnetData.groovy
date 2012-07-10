@@ -72,7 +72,7 @@ import org.codehaus.groovy.grails.web.json.JSONElement
     private static SubnetTarget getTarget(JSONElement json) {
         String targetName = json?.target
         if (!targetName) { return null }
-        Enum.valueOf(SubnetTarget, targetName)
+        SubnetTarget.forText(targetName)
     }
 
     private static JSONElement getJsonMetaData(List<Tag> tags) {
