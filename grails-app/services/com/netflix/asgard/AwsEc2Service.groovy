@@ -447,7 +447,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         SecurityGroup group = null
         try {
             DescribeSecurityGroupsResult result = awsClient.by(region).describeSecurityGroups(request)
-            group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
+            group = Check.loneOrNone(result.getSecurityGroups(), SecurityGroup)
             groupName = group?.groupName
         } catch (AmazonServiceException e) {
             // Can't find a security group with that request.
