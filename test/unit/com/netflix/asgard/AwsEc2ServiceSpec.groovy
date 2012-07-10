@@ -28,12 +28,10 @@ import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Tag
 import com.google.common.collect.ImmutableList
+import com.netflix.asgard.model.SubnetData
+import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.ZoneAvailability
 import spock.lang.Specification
-
-import static com.netflix.asgard.model.SubnetData.Target.ec2
-import static com.netflix.asgard.model.SubnetData.Target.elb
-import static com.netflix.asgard.model.SubnetsSpec.subnet
 
 @SuppressWarnings("GroovyPointlessArithmetic")
 class AwsEc2ServiceSpec extends Specification {
@@ -233,8 +231,6 @@ class AwsEc2ServiceSpec extends Specification {
         }
         List<Subnet> subnets = ImmutableList.of(
                 awsSubnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', 'ec2'),
-                awsSubnet('subnet-e9b0a3a2', 'us-east-1a', 'external', 'ec2'),
-                awsSubnet('subnet-e9b0a3a3', 'us-east-1a', 'internal', 'elb'),
                 awsSubnet('subnet-e9b0a3a4', 'us-east-1a', 'external', 'elb'),
         )
         AmazonEC2 mockAmazonEC2 = Mock(AmazonEC2)
@@ -251,10 +247,10 @@ class AwsEc2ServiceSpec extends Specification {
         then:
         1 * mockAmazonEC2.describeSubnets() >> new DescribeSubnetsResult(subnets: subnets)
         ImmutableList.copyOf(awsEc2Service.getSubnets(userContext).allSubnets) == [
-                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', ec2),
-                subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', ec2),
-                subnet('subnet-e9b0a3a3', 'us-east-1a', 'internal', elb),
-                subnet('subnet-e9b0a3a4', 'us-east-1a', 'external', elb),
+                new SubnetData(subnetId: 'subnet-e9b0a3a1', availabilityZone: 'us-east-1a', purpose: 'internal',
+                        target: SubnetTarget.ec2),
+                new SubnetData(subnetId: 'subnet-e9b0a3a4', availabilityZone: 'us-east-1a', purpose: 'external',
+                        target: SubnetTarget.elb),
         ]
     }
 }

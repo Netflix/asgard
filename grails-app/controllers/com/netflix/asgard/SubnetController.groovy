@@ -24,7 +24,7 @@ class SubnetController {
 
     def awsEc2Service
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: list, params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -32,7 +32,7 @@ class SubnetController {
         OrderBy<SubnetData> orderBy = new OrderBy<SubnetData>([{ it.availabilityZone }, { it.purpose }, { it.target }])
         Collection<SubnetData> allSubnets = Lists.newArrayList(subnets.allSubnets).sort(orderBy)
         withFormat {
-            html { ['subnets': allSubnets] }
+            html { [subnets: allSubnets] }
             xml { new XML(allSubnets).render(response) }
             json { new JSON(allSubnets).render(response) }
         }

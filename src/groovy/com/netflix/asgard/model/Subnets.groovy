@@ -16,52 +16,62 @@ package com.netflix.asgard.model
 
 import com.amazonaws.services.ec2.model.Subnet
 import com.google.common.base.Function
-import com.google.common.base.Preconditions
-import com.google.common.collect.ImmutableMap
 import com.google.common.collect.Maps
+import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
+import com.netflix.asgard.Check
 
-/*
+/**
  * These are nontrivial queries we like to perform on subnets.
  */
 @Immutable class Subnets {
+    /** All of the subnets contained in this object. */
     Collection<SubnetData> allSubnets
 
+    /**
+     * Construct Subnets from AWS Subnets
+     *
+     * @param  subnets the actual AWS Subnets
+     * @return a new immutable Subnets based off the subnets
+     */
     public static Subnets from(Collection<Subnet> subnets) {
         new Subnets(allSubnets: subnets.collect() { SubnetData.from(it) })
     }
 
     /**
-     * Simply find a subnet based on it's ID.
+     * Simply find a subnet based on its ID.
      *
      * @param id of the subnet
      * @return the unique subnet with that ID or null
      */
     SubnetData findSubnetById(String id) {
-        Preconditions.checkNotNull(id)
+        Check.notNull(id, String)
         allSubnets.find { it.subnetId == id }
     }
 
     /**
-     * Find the subnet ID's that map to specific zones
+     * Find the subnet IDs that map to specific zones
      *
-     * @param  zones the zones in AWS that you want Subnet ID's for
+     * @param  zones the zones in AWS that you want Subnet IDs for
      * @param  purpose only subnets with the specified purpose will be returned
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
-     * @return the subnet ID's returned in the same order as the zones sent in
+     * @return the subnet IDs returned in the same order as the zones sent in
      */
-    List<String> getSubnetIdsForZones(List<String> zones, String purpose, SubnetData.Target target = null) {
-        Preconditions.checkNotNull(zones)
-        Preconditions.checkNotNull(purpose)
+    List<String> getSubnetIdsForZones(List<String> zones, String purpose, SubnetTarget target = null) {
+        if (!zones) {
+            return Collections.emptyList()
+        }
+        Check.notNull(purpose, String)
         Function<SubnetData, String> purposeOfSubnet = { it.purpose } as Function
-        Map<String, Collection<SubnetData>> zonesToSubnets = mapZonesToTargetSubnets(target)
-        zones.inject([]) { List<String> subnets, String zone ->
+        Map<String, Collection<SubnetData>> zonesToSubnets = mapZonesToTargetSubnets(target).asMap()
+        zones.inject([]) { List<String> subnetIds, String zone ->
             Collection<SubnetData> subnetsForZone = zonesToSubnets[zone]
-            if (subnetsForZone == null) { return subnets }
-            ImmutableMap<String, SubnetData> purposeToSubnets = Maps.uniqueIndex(subnetsForZone, purposeOfSubnet)
-            SubnetData subnet = purposeToSubnets[purpose]
-            if (subnet) { subnets << subnet.subnetId }
-            subnets
+            if (subnetsForZone == null) {
+                return subnetIds
+            }
+            // Find the unique subnet in this zone by purpose
+            SubnetData subnet = Maps.uniqueIndex(subnetsForZone, purposeOfSubnet)[purpose]
+            subnet ? subnetIds << subnet.subnetId : subnetIds
         } as List
     }
 
@@ -72,23 +82,20 @@ import com.google.common.collect.Multimaps
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
      * @return the set of distinct purposes
      */
-    Set<String> getPurposesForZones(Collection<String> zones, SubnetData.Target target = null) {
-        Preconditions.checkNotNull(zones)
-        Map<String, Collection<SubnetData>> zonesToSubnets = mapZonesToTargetSubnets(target)
-        zones.inject(null) { Set<String> purposeIntersection, String zone ->
+    Set<String> getPurposesForZones(Collection<String> zones, SubnetTarget target = null) {
+        if (!zones) {
+            return Collections.emptySet()
+        }
+        Map<String, Collection<SubnetData>> zonesToSubnets = mapZonesToTargetSubnets(target).asMap()
+        zones.inject(null) { Collection<String> purposeIntersection, String zone ->
             Collection<SubnetData> subnetsForZone = zonesToSubnets[zone]
             List<String> purposes = subnetsForZone.collect { it.purpose }
-            if (purposeIntersection == null) {
-                purposeIntersection = purposes
-            } else {
-                purposeIntersection.retainAll(purposes)
-            }
-            purposeIntersection
+            purposeIntersection == null ? purposes : purposeIntersection.intersect(purposes)
         } as Set
     }
 
-    private Map<String, Collection<SubnetData>> mapZonesToTargetSubnets(SubnetData.Target target) {
+    private Multimap<String, SubnetData> mapZonesToTargetSubnets(SubnetTarget target) {
         Collection<SubnetData> targetSubnetsWithPurpose = allSubnets.findAll() { it.target == target && it.purpose }
-        Multimaps.index(targetSubnetsWithPurpose, { it.availabilityZone } as Function).asMap()
+        Multimaps.index(targetSubnetsWithPurpose, { it.availabilityZone } as Function)
     }
 }

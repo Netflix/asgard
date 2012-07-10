@@ -51,7 +51,6 @@ import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsRequest
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsResult
 import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryRequest
 import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryResult
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest
 import com.amazonaws.services.ec2.model.DetachVolumeRequest
 import com.amazonaws.services.ec2.model.Filter
@@ -181,10 +180,15 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     private Collection<Subnet> retrieveSubnets(Region region) {
-        DescribeSubnetsResult result = awsClient.by(region).describeSubnets()
-        result.getSubnets()
+        awsClient.by(region).describeSubnets().subnets
     }
 
+    /**
+     * Gets information about all subnets in a region.
+     *
+     * @param userContext who, where, why
+     * @return a wrapper for querying subnets
+     */
     Subnets getSubnets(UserContext userContext) {
         Subnets.from(caches.allSubnets.by(userContext.region).list())
     }

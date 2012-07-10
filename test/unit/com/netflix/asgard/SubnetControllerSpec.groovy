@@ -18,13 +18,14 @@ package com.netflix.asgard
 import com.netflix.asgard.model.SubnetData
 import com.netflix.asgard.model.Subnets
 import grails.plugin.spock.ControllerSpec
-
-import static com.netflix.asgard.model.SubnetData.Target.ec2
-import static com.netflix.asgard.model.SubnetData.Target.elb
-import static com.netflix.asgard.model.SubnetsSpec.subnet
+import com.netflix.asgard.model.SubnetTarget
 
 @SuppressWarnings("GroovyPointlessArithmetic")
 class SubnetControllerSpec extends ControllerSpec {
+
+    static SubnetData subnet(String id, String zone, String purpose, SubnetTarget target) {
+        new SubnetData(subnetId: id, availabilityZone: zone, purpose: purpose, target: target)
+    }
 
     void setup() {
         TestUtils.setUpMockRequest()
@@ -33,18 +34,18 @@ class SubnetControllerSpec extends ControllerSpec {
 
     def 'list should display subnets'() {
         controller.awsEc2Service.getSubnets(_) >> new Subnets(allSubnets: [
-                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', ec2),
-                subnet('subnet-e9b0a3a1', 'us-east-1b', 'internal', ec2),
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.ec2),
+                subnet('subnet-e9b0a3a1', 'us-east-1b', 'internal', SubnetTarget.ec2),
                 subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', null),
-                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', elb),
-                subnet('subnet-e9b0a3a1', 'us-east-1a', 'external', ec2),
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.elb),
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'external', SubnetTarget.ec2),
         ])
         List<SubnetData> expectedSortedSubnets = [
-                subnet('subnet-e9b0a3a1', 'us-east-1a', 'external', ec2),
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'external', SubnetTarget.ec2),
                 subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', null),
-                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', ec2),
-                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', elb),
-                subnet('subnet-e9b0a3a1', 'us-east-1b', 'internal', ec2),
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.ec2),
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.elb),
+                subnet('subnet-e9b0a3a1', 'us-east-1b', 'internal', SubnetTarget.ec2),
         ]
 
         when:

@@ -19,13 +19,12 @@ import com.amazonaws.services.ec2.model.Tag
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONElement
 
-/*
+/**
  * Immutable Wrapper for an AWS Subnet.
  * Metadata in tags becomes proper attributes here.
  * {@link com.amazonaws.services.ec2.model.Subnet}
  */
 @Immutable class SubnetData {
-    enum Target {ec2, elb}
 
     private static final String METADATA_TAG_KEY = 'immutable_metadata'
 
@@ -50,8 +49,8 @@ import org.codehaus.groovy.grails.web.json.JSONElement
     /** A label that indicates the purpose of this Subnet's configuration. */
     String purpose
 
-    /** The type of AWS object the subnet applies to (null means any object type). */
-    Target target
+    /** The target the subnet applies to (null means any object type). */
+    SubnetTarget target
 
     /**
      * Construct SubnetData from the original AWS Subnet
@@ -70,10 +69,10 @@ import org.codehaus.groovy.grails.web.json.JSONElement
         json?.purpose
     }
 
-    private static Target getTarget(JSONElement json) {
+    private static SubnetTarget getTarget(JSONElement json) {
         String targetName = json?.target
         if (!targetName) { return null }
-        Enum.valueOf(SubnetData.Target, targetName)
+        Enum.valueOf(SubnetTarget, targetName)
     }
 
     private static JSONElement getJsonMetaData(List<Tag> tags) {
