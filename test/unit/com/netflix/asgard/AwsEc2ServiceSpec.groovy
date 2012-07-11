@@ -21,9 +21,12 @@ import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.InstanceState
+import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.Placement
 import com.amazonaws.services.ec2.model.ReservedInstances
 import com.amazonaws.services.ec2.model.SecurityGroup
+import com.amazonaws.services.ec2.model.UserIdGroupPair
+import com.netflix.asgard.model.SecurityGroupOption
 import com.netflix.asgard.model.ZoneAvailability
 import spock.lang.Specification
 
@@ -216,5 +219,64 @@ class AwsEc2ServiceSpec extends Specification {
         }
         1 * mockSecurityGroupCache.list() >> [new SecurityGroup(groupId: 'sg-000', groupName: 'super_secure')]
         0 * mockSecurityGroupCache.put(_, _)
+    }
+
+    private List<SecurityGroup> simulateWarGames() {
+        // wopr can call norad.
+        // joshua can call wopr, globalthermonuclearwar, tictactoe.
+        // modem and falken can call joshua.
+        Closure pairs = { String groupName -> [new UserIdGroupPair(groupName: groupName)] }
+        IpPermission woprPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('wopr'))
+        IpPermission joshuaPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('joshua'))
+        IpPermission falkenPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('falken'))
+        IpPermission modemPerm = new IpPermission(fromPort: 8080, toPort: 8080, userIdGroupPairs: pairs('modem'))
+        [
+                new SecurityGroup(groupName: 'norad', ipPermissions: [woprPerm]),
+                new SecurityGroup(groupName: 'wopr', ipPermissions: [joshuaPerm]),
+                new SecurityGroup(groupName: 'globalthermonuclearwar', ipPermissions: [joshuaPerm]),
+                new SecurityGroup(groupName: 'tictactoe', ipPermissions: [joshuaPerm]),
+                new SecurityGroup(groupName: 'joshua', ipPermissions: [modemPerm, falkenPerm]),
+                new SecurityGroup(groupName: 'modem'),
+                new SecurityGroup(groupName: 'falken'),
+        ]
+    }
+
+    def 'options for target security group should include all groups sorted, but only some allowed to call target'() {
+
+        List<SecurityGroup> warGamesSecurityGroups = simulateWarGames()
+        SecurityGroup joshua = warGamesSecurityGroups.find { it.groupName == 'joshua' }
+
+        when:
+        List<SecurityGroupOption> joshuaCallers = awsEc2Service.getSecurityGroupOptionsForTarget(userContext, joshua)
+
+        then:
+        joshuaCallers == [
+                new SecurityGroupOption('falken', 'joshua', true, '7101-7102'),
+                new SecurityGroupOption('globalthermonuclearwar', 'joshua', false, '7001'),
+                new SecurityGroupOption('joshua', 'joshua', false, '7001'),
+                new SecurityGroupOption('modem', 'joshua', true, '8080'),
+                new SecurityGroupOption('norad', 'joshua', false, '7001'),
+                new SecurityGroupOption('tictactoe', 'joshua', false, '7001'),
+                new SecurityGroupOption('wopr', 'joshua', false, '7001'),
+        ]
+        1 * mockSecurityGroupCache.list() >> { warGamesSecurityGroups }
+    }
+
+    def 'options for source group should include all groups sorted, but only some allowed to be called by source'() {
+
+        when:
+        List<SecurityGroupOption> gamesForJoshua = awsEc2Service.getSecurityGroupOptionsForSource(userContext, 'joshua')
+
+        then:
+        gamesForJoshua == [
+                new SecurityGroupOption('joshua', 'falken', false, '7001'),
+                new SecurityGroupOption('joshua', 'globalthermonuclearwar', true, '7101-7102'),
+                new SecurityGroupOption('joshua', 'joshua', false, '7001'),
+                new SecurityGroupOption('joshua', 'modem', false, '7001'),
+                new SecurityGroupOption('joshua', 'norad', false, '7001'),
+                new SecurityGroupOption('joshua', 'tictactoe', true, '7101-7102'),
+                new SecurityGroupOption('joshua', 'wopr', true, '7101-7102'),
+        ]
+        1 * mockSecurityGroupCache.list() >> { simulateWarGames() }
     }
 }
