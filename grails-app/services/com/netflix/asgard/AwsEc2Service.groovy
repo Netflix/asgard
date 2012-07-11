@@ -419,10 +419,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     List<SecurityGroupOption> getSecurityGroupOptionsForTarget(UserContext userContext, SecurityGroup targetGroup) {
         Collection<SecurityGroup> sourceGroups = getEffectiveSecurityGroups(userContext)
         String guessedPorts = bestIngressPortsFor(targetGroup)
-        List<SecurityGroupOption> securityGroupOptions = sourceGroups.collect { SecurityGroup sourceGroup ->
+        sourceGroups.collect { SecurityGroup sourceGroup ->
             buildSecurityGroupOption(sourceGroup.groupName, targetGroup, guessedPorts)
         }
-        securityGroupOptions
     }
 
     /**
@@ -435,11 +434,10 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      */
     List<SecurityGroupOption> getSecurityGroupOptionsForSource(UserContext userContext, String sourceGroupName) {
         Collection<SecurityGroup> targetGroups = getEffectiveSecurityGroups(userContext)
-        List<SecurityGroupOption> securityGroupOptions = targetGroups.collect { SecurityGroup targetGroup ->
+        targetGroups.collect { SecurityGroup targetGroup ->
             String guessedPorts = bestIngressPortsFor(targetGroup)
             buildSecurityGroupOption(sourceGroupName, targetGroup, guessedPorts)
         }
-        securityGroupOptions
     }
 
     private SecurityGroupOption buildSecurityGroupOption(String sourceGroupName, SecurityGroup targetGroup,
