@@ -56,6 +56,7 @@ import com.netflix.asgard.Check
      * @param  purpose only subnets with the specified purpose will be returned
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
      * @return the subnet IDs returned in the same order as the zones sent in
+     * @throws IllegalArgumentException if there are multiple subnets with the same purpose and zone
      */
     List<String> getSubnetIdsForZones(List<String> zones, String purpose, SubnetTarget target = null) {
         if (!zones) {

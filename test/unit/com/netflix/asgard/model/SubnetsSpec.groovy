@@ -128,7 +128,7 @@ class SubnetsSpec extends Specification {
         expect: ['subnet-e9b0a3a2'] == subnets.getSubnetIdsForZones(['us-east-1a'], 'internal')
     }
 
-    def 'should fail to return multiple subnets with same description and zone'() {
+    def 'should fail to return multiple subnets with same purpose and zone'() {
         subnets = new Subnets([
                 subnet('subnet-c1e8b2c1', 'us-east-1c', 'internal', SubnetTarget.EC2),
                 subnet('subnet-c1e8b2c3', 'us-east-1c', 'internal', SubnetTarget.EC2),
