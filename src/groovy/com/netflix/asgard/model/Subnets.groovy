@@ -65,15 +65,13 @@ import com.netflix.asgard.Check
         Check.notNull(purpose, String)
         Function<SubnetData, String> purposeOfSubnet = { it.purpose } as Function
         Map<String, Collection<SubnetData>> zonesToSubnets = mapZonesToTargetSubnets(target).asMap()
-        zones.inject([]) { List<String> subnetIds, String zone ->
-            Collection<SubnetData> subnetsForZone = zonesToSubnets[zone]
+        zonesToSubnets.subMap(zones).values().collect { Collection<SubnetData> subnetsForZone ->
             if (subnetsForZone == null) {
-                return subnetIds
+                return null
             }
-            // Find the unique subnet in this zone by purpose
-            SubnetData subnet = Maps.uniqueIndex(subnetsForZone, purposeOfSubnet)[purpose]
-            subnet ? subnetIds << subnet.subnetId : subnetIds
-        } as List
+            SubnetData subnetForPurpose = Maps.uniqueIndex(subnetsForZone, purposeOfSubnet)[purpose]
+            subnetForPurpose?.subnetId
+        }.findAll { it != null}
     }
 
     /**
