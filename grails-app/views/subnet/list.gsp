@@ -24,7 +24,7 @@
 
 <body>
 <div class="body">
-  <h1>Subnets in ${region.description}${appNames ? ' for ' + appNames : ''}</h1>
+  <h1>Subnets in ${region.description}</h1>
   <g:if test="${flash.message}">
     <div class="message">${flash.message}</div>
   </g:if>
@@ -38,24 +38,20 @@
           <th>Availability Zone</th>
           <th>Available</th>
           <th>CIDR</th>
-          <th>Tags</th>
+          <th>Purpose</th>
+          <th>Target</th>
         </tr>
         </thead>
         <tbody>
-        <g:each var="subnet" in="${subnets.sort { it.availabilityZone }}" status="i">
+        <g:each var="subnet" in="${subnets}" status="i">
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
             <td>${subnet.subnetId}</td>
             <td>${subnet.state}</td>
             <td><g:availabilityZone value="${subnet.availabilityZone}"/></td>
             <td>${subnet.availableIpAddressCount}</td>
             <td>${subnet.cidrBlock}</td>
-            <td>
-              <ul>
-                <g:each var="tag" in="${subnet.tags}">
-                  <li>${tag.key} - ${tag.value}</li>
-                </g:each>
-              </ul>
-            </td>
+            <td>${subnet.purpose}</td>
+            <td>${subnet.target}</td>
           </tr>
         </g:each>
         </tbody>

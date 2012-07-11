@@ -27,6 +27,7 @@ import com.amazonaws.services.ec2.model.ReservedInstances
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.Snapshot
 import com.amazonaws.services.ec2.model.SpotInstanceRequest
+import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Volume
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
@@ -82,6 +83,7 @@ import java.lang.reflect.Modifier
     static final EntityType<SourceSecurityGroup> sourceSecurityGroup = create('Source Security Group', { it.groupName })
     static final EntityType<SpotInstanceRequest> spotInstanceRequest = create('Spot Instance Request',
             { it.spotInstanceRequestId }, 'sir-')
+    static final EntityType<Subnet> subnet = create('Subnet', { it.subnetId }, 'subnet-')
     static final EntityType<Task> task = create('Task', { it.id })
     static final EntityType<TopicData> topic = create('Topic', { it.name })
     static final EntityType<Volume> volume = create('Volume', { it.volumeId }, 'vol-')

@@ -36,7 +36,11 @@ class MockCachedMapBuilder<T> extends CachedMapBuilder<T> {
     }
 
     protected CachedMap<T> buildCachedMap(Region region = null) {
-        entityTypeToCacheMap.get(entityType)
+        CachedMap cachedMap = entityTypeToCacheMap.get(entityType)
+        if (!cachedMap) {
+            cachedMap = new CachedMap(region, entityType, null, null)
+        }
+        cachedMap
     }
 
     protected MultiRegionCachedMap<T> buildMultiRegionCachedMap(Collection<Region> regions = null) {
@@ -53,11 +57,13 @@ class MockCachedMapBuilder<T> extends CachedMapBuilder<T> {
 
         void ensureSetUp(Closure multiRegionRetriever, Closure multiRegionCallback = {},
                          Closure multiRegionReadinessChecker = { true }) {
-            // noop
+            Region region = Region.US_EAST_1
+            cachedMap.ensureSetUp({ multiRegionRetriever(region) }, { multiRegionCallback(region) },
+                    { multiRegionReadinessChecker(region) })
         }
 
         void fill() {
-            // noop
+            cachedMap.fill()
         }
 
         boolean isFilled() {
