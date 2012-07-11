@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.ec2.AmazonEC2
+import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.Instance
@@ -24,8 +25,10 @@ import com.amazonaws.services.ec2.model.InstanceState
 import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.Placement
 import com.amazonaws.services.ec2.model.ReservedInstances
+import com.amazonaws.services.ec2.model.RevokeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.UserIdGroupPair
+import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.SecurityGroupOption
 import com.netflix.asgard.model.ZoneAvailability
 import spock.lang.Specification
@@ -39,6 +42,8 @@ class AwsEc2ServiceSpec extends Specification {
     CachedMap mockInstanceCache
     CachedMap mockReservationCache
     AwsEc2Service awsEc2Service
+    ConfigService configService
+    TaskService taskService
 
     def setup() {
         userContext = UserContext.auto(Region.US_EAST_1)
@@ -46,12 +51,15 @@ class AwsEc2ServiceSpec extends Specification {
         mockSecurityGroupCache = Mock(CachedMap)
         mockInstanceCache = Mock(CachedMap)
         mockReservationCache = Mock(CachedMap)
+        configService = Mock(ConfigService)
+        taskService = Mocks.taskService()
         Caches caches = new Caches(new MockCachedMapBuilder([
                 (EntityType.security): mockSecurityGroupCache,
                 (EntityType.instance): mockInstanceCache,
                 (EntityType.reservation): mockReservationCache,
         ]))
-        awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }), caches: caches)
+        awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }), caches: caches,
+                configService: configService, taskService: taskService)
     }
 
     def 'active instances should only include pending and running states'() {
@@ -278,5 +286,37 @@ class AwsEc2ServiceSpec extends Specification {
                 new SecurityGroupOption('joshua', 'wopr', true, '7101-7102'),
         ]
         1 * mockSecurityGroupCache.list() >> { simulateWarGames() }
+    }
+
+    def 'updating a security group relationship should result in one task, one auth, and one revoke'() {
+
+        List<UserIdGroupPair> pairs = [new UserIdGroupPair(groupName: 'modem')]
+        List<IpPermission> existingPerms = [
+                new IpPermission(ipProtocol: 'tcp', fromPort: 5000, toPort: 5001, userIdGroupPairs: pairs),
+                new IpPermission(ipProtocol: 'tcp', fromPort: 6000, toPort: 6001, userIdGroupPairs: pairs)
+        ]
+        SecurityGroup targetGroup = new SecurityGroup(groupName: 'joshua', ipPermissions: existingPerms)
+        int tasksDoneBefore = taskService.getCompleted().size()
+
+        when:
+        awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, 'modem', '7003,8080')
+
+        then:
+        taskService.getCompleted().size() == tasksDoneBefore + 1 // Cannot use a spock mock because closure needs to run
+        1 * mockAmazonEC2.authorizeSecurityGroupIngress(new AuthorizeSecurityGroupIngressRequest(
+                groupName: targetGroup.groupName, ipPermissions: [
+                        new IpPermission(ipProtocol: 'tcp', fromPort: 7003, toPort: 7003, userIdGroupPairs: pairs),
+                        new IpPermission(ipProtocol: 'tcp', fromPort: 8080, toPort: 8080, userIdGroupPairs: pairs),
+                ]
+        ))
+        1 * mockAmazonEC2.revokeSecurityGroupIngress(new RevokeSecurityGroupIngressRequest(
+                groupName: targetGroup.groupName, ipPermissions: existingPerms
+        ))
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['joshua'])) >> {
+            new DescribeSecurityGroupsResult(securityGroups: [targetGroup])
+        }
+        1 * configService.getAwsAccountNumber()
+        1 * mockSecurityGroupCache.put('joshua', targetGroup)
+        0 * _._
     }
 }
