@@ -51,7 +51,6 @@ import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsRequest
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsResult
 import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryRequest
 import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryResult
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest
 import com.amazonaws.services.ec2.model.DetachVolumeRequest
 import com.amazonaws.services.ec2.model.Filter
@@ -88,12 +87,14 @@ import com.google.common.collect.Multiset
 import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.SecurityGroupOption
+import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.ZoneAvailability
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 import org.apache.commons.codec.binary.Base64
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.beans.factory.InitializingBean
+
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 class AwsEc2Service implements CacheInitializer, InitializingBean {
 
@@ -134,6 +135,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         caches.allSecurityGroups.ensureSetUp({ Region region -> retrieveSecurityGroups(region) })
         caches.allSnapshots.ensureSetUp({ Region region -> retrieveSnapshots(region) })
         caches.allVolumes.ensureSetUp({ Region region -> retrieveVolumes(region) })
+        caches.allSubnets.ensureSetUp({ Region region -> retrieveSubnets(region) })
     }
 
     // Availability Zones
@@ -146,11 +148,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     Collection<AvailabilityZone> getAvailabilityZones(UserContext userContext) {
         caches.allAvailabilityZones.by(userContext.region).list().sort { it.zoneName }
-    }
-
-    Collection<Subnet> getSubnets(UserContext userContext) {
-        DescribeSubnetsResult result = awsClient.by(userContext.region).describeSubnets()
-        result.getSubnets()
     }
 
     Collection<AvailabilityZone> getRecommendedAvailabilityZones(UserContext userContext) {
@@ -184,6 +181,20 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     Collection<Image> getAccountImages(UserContext userContext) {
         caches.allImages.by(userContext.region).list()
+    }
+
+    private Collection<Subnet> retrieveSubnets(Region region) {
+        awsClient.by(region).describeSubnets().subnets
+    }
+
+    /**
+     * Gets information about all subnets in a region.
+     *
+     * @param userContext who, where, why
+     * @return a wrapper for querying subnets
+     */
+    Subnets getSubnets(UserContext userContext) {
+        Subnets.from(caches.allSubnets.by(userContext.region).list())
     }
 
     /**
