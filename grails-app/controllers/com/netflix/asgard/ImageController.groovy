@@ -113,8 +113,6 @@ class ImageController {
         UserContext userContext = UserContext.of(request)
         List<String> launchPermissions = (params.launchPermissions instanceof String) ? [ params.launchPermissions ] : params.launchPermissions?: []
         try {
-            //awsEc2Service.setImageName(imageId, params.name)
-            //awsEc2Service.setImageDescription(imageId, params.description)
             awsEc2Service.setImageLaunchers(userContext, imageId, launchPermissions)
             flash.message = "Image '${imageId}' has been updated."
         } catch (Exception e) {

@@ -55,24 +55,23 @@ class SecurityController {
         UserContext userContext = UserContext.of(request)
         def name = params.name ?: params.id
         SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
-        group?.ipPermissions?.sort { it.userIdGroupPairs ? it.userIdGroupPairs[0].groupName : it.fromPort }
-        group?.ipPermissions?.each { it.userIdGroupPairs.sort { it.groupName } }
         if (!group) {
             Requests.renderNotFound('Security Group', name, this)
             return
-        } else {
-            def details = [
-                    group: group,
-                    app: applicationService.getRegisteredApplication(userContext, group.groupName),
-                    accountNames: configService.awsAccountNames,
-                    editable: awsEc2Service.isSecurityGroupEditable(group.groupName)
-            ]
-            // TODO referenced-from lists would be nice too
-            withFormat {
-                html { return details }
-                xml { new XML(details).render(response) }
-                json { new JSON(details).render(response) }
-            }
+        }
+        group.ipPermissions.sort { it.userIdGroupPairs ? it.userIdGroupPairs[0].groupName : it.fromPort }
+        group.ipPermissions.each { it.userIdGroupPairs.sort { it.groupName } }
+        def details = [
+                group: group,
+                app: applicationService.getRegisteredApplication(userContext, group.groupName),
+                accountNames: configService.awsAccountNames,
+                editable: awsEc2Service.isSecurityGroupEditable(group.groupName)
+        ]
+        // TODO referenced-from lists would be nice too
+        withFormat {
+            html { return details }
+            xml { new XML(details).render(response) }
+            json { new JSON(details).render(response) }
         }
     }
 
@@ -86,7 +85,7 @@ class SecurityController {
     def save = { SecurityCreateCommand cmd ->
 
         if (cmd.hasErrors()) {
-            chain(action: create, model: [cmd:cmd], params: params) // Use chain to pass both the errors and the params
+            chain(action: create, model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
         } else {
             UserContext userContext = UserContext.of(request)
             String name = Relationships.buildAppDetailName(params.appName, params.detail)
@@ -100,7 +99,7 @@ class SecurityController {
                 redirect(action: show, params: [id: name])
             } catch (Exception e) {
                 flash.message = "Could not create Security Group: ${e}"
-                chain(action: create, model: [cmd:cmd], params: params)
+                chain(action: create, model: [cmd: cmd], params: params)
             }
         }
     }
@@ -112,24 +111,12 @@ class SecurityController {
         if (!group) {
             Requests.renderNotFound('Security Group', name, this)
             return
-        } else {
-            return [
+        }
+        [
                 group: group,
-                groups: getSecurityAccessibility(userContext, group),
+                groups: awsEc2Service.getSecurityGroupOptionsForTarget(userContext, group),
                 editable: awsEc2Service.isSecurityGroupEditable(group.groupName)
-            ]
-        }
-    }
-
-    private Map<String, List> getSecurityAccessibility(UserContext userContext, SecurityGroup targetGroup) {
-        Collection<SecurityGroup> allGroups = awsEc2Service.getEffectiveSecurityGroups(userContext)
-        String defaultPorts = awsEc2Service.bestIngressPortsFor(targetGroup)
-        Map<String, List> groupNamesToAccessibilityData = [:]
-        allGroups.each { SecurityGroup srcGroup ->
-            String ports = awsEc2Service.getIngressFrom(targetGroup, srcGroup.groupName)
-            groupNamesToAccessibilityData[srcGroup.groupName] = ports ? [ true, ports ] : [ false, defaultPorts ]
-        }
-        groupNamesToAccessibilityData
+        ]
     }
 
     def update = {
