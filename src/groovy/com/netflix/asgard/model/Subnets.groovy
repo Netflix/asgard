@@ -97,4 +97,19 @@ import com.netflix.asgard.Check
         Collection<SubnetData> targetSubnetsWithPurpose = allSubnets.findAll() { it.target == target && it.purpose }
         Multimaps.index(targetSubnetsWithPurpose, { it.availabilityZone } as Function)
     }
+
+    /**
+     * Find the purpose associated with a VPC Zone ID
+     *
+     * @param  vpcZoneId the VPC Zone ID for an ASG should contain Subnet IDs
+     * @return the associated purpose or an empty String if none exists
+     */
+    String getPurposeForVpcZoneId(String vpcZoneId) {
+        if (!vpcZoneId) {
+            return ''
+        }
+        List<String> subnetIds = vpcZoneId.tokenize(',')
+        String subnetId = subnetIds[0]?.trim()
+        allSubnets.find { it.subnetId == subnetId }?.purpose ?: ''
+    }
 }
