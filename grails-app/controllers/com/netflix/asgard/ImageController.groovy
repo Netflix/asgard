@@ -173,7 +173,7 @@ class ImageController {
             String zone = params.zone
             String instanceType = params.instanceType
             List<String> rawSecurityGroups = Requests.ensureList(params.selectedGroups)
-            List<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(rawSecurityGroups)
+            Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(rawSecurityGroups)
             Integer count = 1
             if (pricing == 'ondemand') {
                 List<Instance> launchedInstances = imageService.runOnDemandInstances(userContext, imageId, count,

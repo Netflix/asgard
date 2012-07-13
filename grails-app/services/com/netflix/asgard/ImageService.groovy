@@ -70,7 +70,7 @@ class ImageService implements BackgroundProcessInitializer {
     }
 
     List<SpotInstanceRequest> requestSpotInstances(UserContext userContext, String imageId, Integer count,
-                            List<String> securityGroups, String instanceType, String zone, String ownerName) {
+            Collection<String> securityGroups, String instanceType, String zone, String ownerName) {
         Check.notEmpty(ownerName, 'Owner')
         String keyName = awsEc2Service.getDefaultKeyName()
         Image image = awsEc2Service.getImage(userContext, imageId)
@@ -93,7 +93,7 @@ class ImageService implements BackgroundProcessInitializer {
     }
 
     List<Instance> runOnDemandInstances(UserContext userContext, String imageId, Integer count,
-                            List<String> securityGroups, String instanceType, String zone, String ownerName) {
+            Collection<String> securityGroups, String instanceType, String zone, String ownerName) {
         Check.notEmpty(ownerName, 'Owner')
         String keyName = awsEc2Service.getDefaultKeyName()
         Image image = awsEc2Service.getImage(userContext, imageId)
