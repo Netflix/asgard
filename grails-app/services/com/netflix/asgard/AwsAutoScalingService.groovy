@@ -742,6 +742,8 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         String groupName = groupTemplate.autoScalingGroupName
         String launchConfigName = Relationships.buildLaunchConfigurationName(groupName)
         String msg = "Create Auto Scaling Group '${groupName}'"
+        Collection<String> securityGroups = launchTemplateService.
+                includeDefaultSecurityGroups(launchConfigTemplate.securityGroups)
 
         taskService.runTask(userContext, msg, { Task task ->
 
@@ -754,7 +756,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
             try {
                 createLaunchConfiguration(userContext, launchConfigName, launchConfigTemplate.imageId,
-                        launchConfigTemplate.keyName, launchConfigTemplate.securityGroups, userData,
+                        launchConfigTemplate.keyName, securityGroups, userData,
                         launchConfigTemplate.instanceType, launchConfigTemplate.kernelId,
                         launchConfigTemplate.ramdiskId, null, task)
                 result.launchConfigCreated = true
@@ -785,19 +787,17 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
 
     void createLaunchConfiguration(UserContext userContext, String name, String imageId, String keyName,
-                                   List<String> securityGroups, String userData, String instanceType, String kernelId,
-                                   String ramdiskId, Collection<BlockDeviceMapping> blockDeviceMappings,
-                                   Task existingTask = null) {
+            Collection<String> securityGroups, String userData, String instanceType, String kernelId, String ramdiskId,
+            Collection<BlockDeviceMapping> blockDeviceMappings, Task existingTask = null) {
         taskService.runTask(userContext, "Create Launch Configuration '${name}' with image '${imageId}'", { Task task ->
             Check.notNull(name, LaunchConfiguration, "name")
             Check.notNull(imageId, LaunchConfiguration, "imageId")
             Check.notNull(keyName, LaunchConfiguration, "keyName")
             Check.notNull(instanceType, LaunchConfiguration, "instanceType")
-            List<String> securityGroupsWithDefaults = launchTemplateService.includeDefaultSecurityGroups(securityGroups)
             String encodedUserData = Ensure.encoded(userData)
             def request = new CreateLaunchConfigurationRequest()
                     .withLaunchConfigurationName(name)
-                    .withImageId(imageId).withKeyName(keyName).withSecurityGroups(securityGroupsWithDefaults)
+                    .withImageId(imageId).withKeyName(keyName).withSecurityGroups(securityGroups)
                     .withUserData(encodedUserData).withInstanceType(instanceType)
                     .withBlockDeviceMappings(blockDeviceMappings)
             // Be careful not to set empties back into these fields--null is OK

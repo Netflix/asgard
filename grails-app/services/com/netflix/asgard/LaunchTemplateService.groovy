@@ -26,11 +26,17 @@ class LaunchTemplateService {
     def configService
     def grailsApplication
     def pluginService
+    Caches caches
 
-    List<String> includeDefaultSecurityGroups(List<String> securityGroupNames) {
-        Set<String> uniqueSecurityGroupNames = securityGroupNames as Set
-        uniqueSecurityGroupNames.addAll(grailsApplication.config.cloud.defaultSecurityGroups ?: [])
-        uniqueSecurityGroupNames as List
+    Collection<String> includeDefaultSecurityGroups(List<String> securityGroupNames) {
+        (securityGroupNames + configService.defaultSecurityGroups) as Set
+    }
+
+    Collection<String> includeDefaultVpcSecurityGroups(List<String> securityGroupNames, Region region) {
+        List<String> vpcSecurityGroupIdsForRegion = configService.defaultVpcSecurityGroupNames.collect {
+            caches.allSecurityGroups.by(region).get(it)?.groupId
+        }.findAll { it }
+        (securityGroupNames + vpcSecurityGroupIdsForRegion) as Set
     }
 
     String buildUserDataForImage(UserContext userContext, Image image) {
