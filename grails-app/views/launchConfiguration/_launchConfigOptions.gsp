@@ -73,11 +73,18 @@
       <label for="selectedSecurityGroups">Security Groups:</label>
     </td>
     <td>
-      <select multiple="true" size="5" id="selectedSecurityGroups" name="selectedSecurityGroups" data-placeholder="Select security groups">
-        <g:each var="g" in="${securityGroups}">
-          <option value="${g.groupName}" ${Requests.ensureList(params.selectedSecurityGroups).contains(g.groupName) || selectedSecurityGroups?.contains(g.groupName) ? "selected" : ""}>${g.groupName}</option>
-        </g:each>
-      </select>
+      <div class="${vpc ? 'concealed' : ''}">
+        <g:select name="selectedSecurityGroups"  multiple="multiple" size="5"
+            optionKey="groupName" optionValue="groupName"
+            from="${securityGroups}"
+            value="${selectedSecurityGroups}" />
+      </div>
+      <div class="${!vpc ? 'concealed' : ''}">
+        <g:select name="selectedVpcSecurityGroups"  multiple="multiple" size="5"
+            optionKey="groupId" optionValue="groupName"
+            from="${vpcSecurityGroups}"
+            value="${selectedVpcSecurityGroups}" />
+      </div>
     </td>
   </tr>
   <tr class="prop advanced">

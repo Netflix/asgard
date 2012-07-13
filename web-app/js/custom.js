@@ -708,6 +708,23 @@ jQuery(document).ready(function() {
     };
     setJsonValue();
 
+    var setUpVpcLaunchConfiguration = function() {
+        var ec2, radioButtons, selectedSecurityGroups, selectedVpcSecurityGroups, isEc2, vpcToggle;
+        ec2 = jQuery('#ec2');
+        radioButtons = jQuery('input[name="vpc"]');
+        selectedSecurityGroups = jQuery('#selectedSecurityGroups').parent();
+        selectedVpcSecurityGroups = jQuery('#selectedVpcSecurityGroups').parent();
+        vpcToggle = function() {
+            isEc2 = ec2.is(':checked');
+            selectedSecurityGroups.toggleClass('concealed', !isEc2);
+            selectedVpcSecurityGroups.toggleClass('concealed', isEc2);
+        };
+        radioButtons.click(function() {
+            vpcToggle()
+        });
+    };
+    setUpVpcLaunchConfiguration();
+
     // Cluster page
     var setUpClusterPage = function() {
         var config, jCreateContainer, jCreateAdvancedTrs;
