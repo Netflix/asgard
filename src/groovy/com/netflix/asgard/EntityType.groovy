@@ -36,6 +36,10 @@ import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import com.amazonaws.services.rds.model.DBInstance
 import com.amazonaws.services.rds.model.DBSecurityGroup
 import com.amazonaws.services.rds.model.DBSnapshot
+import com.amazonaws.services.simpleworkflow.model.ActivityTypeInfo
+import com.amazonaws.services.simpleworkflow.model.DomainInfo
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
+import com.amazonaws.services.simpleworkflow.model.WorkflowTypeInfo
 import com.google.common.collect.ImmutableBiMap
 import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.model.ApplicationInstance
@@ -54,6 +58,8 @@ import java.lang.reflect.Modifier
 @Immutable class EntityType<T> {
 
     // By convention, entity names match corresponding controller names.
+    static final EntityType<ActivityTypeInfo> activityType = create('Activity Type',
+            { "${it.activityType.name}-${it.activityType.version}" })
     static final EntityType<MetricAlarm> alarm = create('Metric Alarm', { it.alarmName })
     static final EntityType<AppRegistration> application = create('Application', { it.name })
     static final EntityType<ApplicationInstance> applicationInstance = create('App Instance', { it.hostName })
@@ -100,6 +106,11 @@ import java.lang.reflect.Modifier
     static final EntityType<TopicData> topic = create('Topic', { it.name })
     static final EntityType<Volume> volume = create('Volume', { it.volumeId }, 'vol-')
     static final EntityType<Vpc> vpc = create('VPC', { it.vpcId }, 'vpc-')
+    static final EntityType<WorkflowExecutionInfo> workflowExecution = create('Workflow Execution',
+            { it.execution.runId })
+    static final EntityType<WorkflowTypeInfo> workflowType = create('Workflow Type',
+            { "${it.workflowType.name}-${it.workflowType.version}" })
+    static final EntityType<DomainInfo> workflowDomain = create('Workflow Domain', { it.name })
 
 
     /**

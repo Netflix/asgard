@@ -251,6 +251,20 @@ class ConfigService {
     }
 
     /**
+     * @return the name of the Amazon Simple Workflow domain that should be used for automation
+     */
+    String getSimpleWorkflowDomain() {
+        grailsApplication.config?.workflow?.domain ?: 'asgard'
+    }
+
+    /**
+     * @return the number of days to retain Amazon Simple Workflow closed executions
+     */
+    Integer getWorkflowExecutionRetentionPeriodInDays() {
+        grailsApplication.config?.workflow?.workflowExecutionRetentionPeriodInDays ?: 90
+    }
+
+    /**
      * @return Map of a property name in {@link Caches} to minimum size for that cache to be considered 'healthy'
      */
     Map<String, Integer> getHealthCheckMinimumCounts() {
