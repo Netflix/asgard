@@ -240,13 +240,13 @@ class ConfigService {
      * @return Default Security Groups.
      */
     List<String> getDefaultSecurityGroups() {
-        grailsApplication.config.cloud.defaultSecurityGroups ?: []
+        grailsApplication.config.cloud?.defaultSecurityGroups ?: []
     }
 
     /**
      * @return Default VPC Security Groups.
      */
     List<String> getDefaultVpcSecurityGroupNames() {
-        grailsApplication.config.cloud.defaultVpcSecurityGroupNames ?: []
+        grailsApplication.config.cloud?.defaultVpcSecurityGroupNames ?: []
     }
 }
