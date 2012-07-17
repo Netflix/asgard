@@ -24,7 +24,9 @@ import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.google.common.collect.Multiset
 import com.google.common.collect.Sets
+import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingProcessType
@@ -106,6 +108,10 @@ class AutoScalingController {
             return
         } else {
             AutoScalingGroupData groupData = awsAutoScalingService.buildAutoScalingGroupData(userContext, group)
+            Multiset<String> zonesWithInstanceCounts = TreeMultiset.create()
+            for (com.amazonaws.services.autoscaling.model.Instance instance in groupData?.instances) {
+                zonesWithInstanceCounts.add(instance.availabilityZone)
+            }
             String appName = Relationships.appNameFromGroupName(name)
             List<Activity> activities = []
             List<ScalingPolicy> scalingPolicies = []
@@ -143,6 +149,7 @@ class AutoScalingController {
                     showPostponeButton: showPostponeButton,
                     runHealthChecks: runHealthChecks,
                     group: groupData,
+                    zonesWithInstanceCounts: zonesWithInstanceCounts,
                     launchConfiguration: launchConfig,
                     image: image,
                     clusterName: Relationships.clusterFromGroupName(name),
