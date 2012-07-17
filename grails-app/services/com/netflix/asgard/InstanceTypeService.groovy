@@ -133,7 +133,7 @@ class InstanceTypeService implements CacheInitializer {
             RegionalInstancePrices spotPrices = getSpotPrices(region)
 
             List<InstanceTypeData> instanceTypes = InstanceType.values().collect { InstanceType instanceType ->
-                HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == instanceType }
+                HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == instanceType.toString() }
                 new InstanceTypeData(
                         hardwareProfile: hardwareProfile,
                         linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
@@ -145,7 +145,14 @@ class InstanceTypeService implements CacheInitializer {
                 )
             }
             // Only include types that have prices listed for this region
-            return instanceTypes.findAll { it.linuxOnDemandPrice }
+            Collection<InstanceTypeData> relevantInstanceTypes = instanceTypes.findAll { it.linuxOnDemandPrice }
+            Collection<String> foundInstanceTypeNames = relevantInstanceTypes*.name
+
+            // Add any custom instance types that are still missing from the InstanceType enum.
+            List<InstanceTypeData> customInstanceTypes = configService.customInstanceTypes.findAll {
+                !(it in foundInstanceTypeNames)
+            }
+            return relevantInstanceTypes + customInstanceTypes
         } catch (Exception e) {
             log.error(e)
             emailerService.sendExceptionEmail('Error parsing Amazon instance data', e)
@@ -209,7 +216,7 @@ class InstanceTypeService implements CacheInitializer {
                     String description = (descriptionRaw - ' Instance').trim()
 
                     HardwareProfile hardwareProfile = new HardwareProfile(
-                            instanceType: InstanceType.fromValue(name),
+                            instanceType: name,
                             description: description,
                             memory: memory,
                             cpu: cpu,
