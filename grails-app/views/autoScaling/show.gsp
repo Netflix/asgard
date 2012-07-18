@@ -102,6 +102,10 @@
             </g:each>
           </td>
         </tr>
+        <tr class="prop" title="Comma-separated list that identifies VPC subnets per zone, if applicable.">
+          <td class="name">VPC Zone Identifier:</td>
+          <td class="value">${vpcZoneIdentifier}</td>
+        </tr>
         <g:render template="/common/showTags" model="[entity: group]"/>
         <tr class="prop">
           <td class="name">AZ Rebalancing:</td>
