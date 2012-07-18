@@ -28,8 +28,8 @@ import com.amazonaws.services.ec2.model.ReservedInstances
 import com.amazonaws.services.ec2.model.RevokeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.UserIdGroupPair
-import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.SecurityGroupOption
+import com.netflix.asgard.model.SimpleDbSequenceLocator
 import com.netflix.asgard.model.ZoneAvailability
 import spock.lang.Specification
 
@@ -52,7 +52,10 @@ class AwsEc2ServiceSpec extends Specification {
         mockInstanceCache = Mock(CachedMap)
         mockReservationCache = Mock(CachedMap)
         configService = Mock(ConfigService)
-        taskService = Mocks.taskService()
+        taskService = new TaskService(awsSimpleDbService: new AwsSimpleDbService() {
+            String incrementAndGetSequenceNumber(UserContext userContext, SimpleDbSequenceLocator locator) { '1' }
+        }, grailsApplication: [config: [cloud: [:]]])
+
         Caches caches = new Caches(new MockCachedMapBuilder([
                 (EntityType.security): mockSecurityGroupCache,
                 (EntityType.instance): mockInstanceCache,
