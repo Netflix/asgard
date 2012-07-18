@@ -99,16 +99,15 @@ import com.netflix.asgard.Check
     }
 
     /**
-     * Find the purpose associated with a VPC Zone ID
+     * Find the purpose associated with subnetIds
      *
-     * @param  vpcZoneId the VPC Zone ID for an ASG should contain Subnet IDs
+     * @param  subnetIds the first one with a purpose is used
      * @return the associated purpose or an empty String if none exists
      */
-    String getPurposeForVpcZoneId(String vpcZoneId) {
-        if (!vpcZoneId) {
+    String getPurposeForSubnets(List<String> subnetIds) {
+        if (!subnetIds) {
             return ''
         }
-        List<String> subnetIds = vpcZoneId.tokenize(',')
         String subnetId = subnetIds[0]?.trim()
         allSubnets.find { it.subnetId == subnetId }?.purpose ?: ''
     }
