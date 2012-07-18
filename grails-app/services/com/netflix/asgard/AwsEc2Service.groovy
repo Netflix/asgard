@@ -506,23 +506,21 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     private void authorizePermissions(UserContext userContext, String sourceGroupName, String groupName,
-                                      List<IpPermission> permissionsToAuth, Task task) {
-        if (permissionsToAuth) {
-            String ports = permissionsToString(permissionsToAuth)
+                                      List<IpPermission> permsToAuth, Task task) {
+        if (permsToAuth) {
+            String ports = permissionsToString(permsToAuth)
             task.log("Authorize Security Group Ingress from '${sourceGroupName}' to '${groupName}' on ${ports}")
-            AuthorizeSecurityGroupIngressRequest request = new AuthorizeSecurityGroupIngressRequest()
-            request.withGroupName(groupName).withIpPermissions(permissionsToAuth)
+            def request = new AuthorizeSecurityGroupIngressRequest(groupName: groupName, ipPermissions: permsToAuth)
             awsClient.by(userContext.region).authorizeSecurityGroupIngress(request)
         }
     }
 
     private void revokePermissions(UserContext userContext, String sourceGroupName, String groupName,
-                                   List<IpPermission> permissionsToRevoke, Task task) {
-        if (permissionsToRevoke) {
-            String ports = permissionsToString(permissionsToRevoke)
+                                   List<IpPermission> permsToRevoke, Task task) {
+        if (permsToRevoke) {
+            String ports = permissionsToString(permsToRevoke)
             task.log("Revoke Security Group Ingress from '${sourceGroupName}' to '${groupName}' on ${ports}")
-            RevokeSecurityGroupIngressRequest request = new RevokeSecurityGroupIngressRequest()
-            request.withGroupName(groupName).withIpPermissions(permissionsToRevoke)
+            def request = new RevokeSecurityGroupIngressRequest(groupName: groupName, ipPermissions: permsToRevoke)
             awsClient.by(userContext.region).revokeSecurityGroupIngress(request)
         }
     }
