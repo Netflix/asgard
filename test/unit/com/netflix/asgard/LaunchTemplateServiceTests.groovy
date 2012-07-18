@@ -22,7 +22,7 @@ class LaunchTemplateServiceTests extends GroovyTestCase {
     void testIncludeDefaultSecurityGroups() {
         LaunchTemplateService launchTemplateService = Mocks.launchTemplateService()
         List<String> original = ["account_batch", "abcache"]
-        List<String> result = launchTemplateService.includeDefaultSecurityGroups(original)
+        Collection<String> result = launchTemplateService.includeDefaultSecurityGroups(original)
 
         assert !original.contains("nf-infrastructure")
         assert !original.contains("nf-datacenter")
@@ -37,7 +37,7 @@ class LaunchTemplateServiceTests extends GroovyTestCase {
     void testIncludeDefaultSecurityGroupsWithoutDuplication() {
         LaunchTemplateService launchTemplateService = Mocks.launchTemplateService()
         List<String> original = ["account_batch", "nf-infrastructure"]
-        List<String> result = launchTemplateService.includeDefaultSecurityGroups(original)
+        Collection<String> result = launchTemplateService.includeDefaultSecurityGroups(original)
 
         assert original.contains("nf-infrastructure")
         assert !original.contains("nf-datacenter")
