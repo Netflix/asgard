@@ -205,7 +205,7 @@ class ConfigService {
      * @return Region indicating where the SNS topic for task finished notifications resides
      */
     Region getTaskFinishedSnsTopicRegion() {
-        grailsApplication.config.sns?.taskFinished?.region
+        grailsApplication.config.sns?.taskFinished?.region ?: null
     }
 
     /**
@@ -234,5 +234,19 @@ class ConfigService {
      */
     int getHttpConnPoolMaxForRoute() {
         grailsApplication.config.httpConnPool?.maxSize ?: 5
+    }
+
+    /**
+     * @return Default Security Groups.
+     */
+    List<String> getDefaultSecurityGroups() {
+        grailsApplication.config.cloud?.defaultSecurityGroups ?: []
+    }
+
+    /**
+     * @return Default VPC Security Groups.
+     */
+    List<String> getDefaultVpcSecurityGroupNames() {
+        grailsApplication.config.cloud?.defaultVpcSecurityGroupNames ?: []
     }
 }
