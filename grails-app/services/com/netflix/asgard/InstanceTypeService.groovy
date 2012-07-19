@@ -150,7 +150,7 @@ class InstanceTypeService implements CacheInitializer {
 
             // Add any custom instance types that are still missing from the InstanceType enum.
             List<InstanceTypeData> customInstanceTypes = configService.customInstanceTypes.findAll {
-                !(it in foundInstanceTypeNames)
+                !(it.name in foundInstanceTypeNames)
             }
             return relevantInstanceTypes + customInstanceTypes
         } catch (Exception e) {
