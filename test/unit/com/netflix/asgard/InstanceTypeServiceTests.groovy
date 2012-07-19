@@ -27,6 +27,9 @@ class InstanceTypeServiceTests extends GroovyTestCase {
         InstanceTypeService instanceTypeService = Mocks.instanceTypeService()
         List<InstanceTypeData> instanceTypes = instanceTypeService.getInstanceTypes(Mocks.userContext())
         assert instanceTypes.any { it.name == 'm1.large' }
+
+        // Custom instance type from config is included
+        assert instanceTypes.any { it.name == 'huge.mainframe' }
     }
 
     void testRetrieveInstanceTypeOnDemandPricingData() {

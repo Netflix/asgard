@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.text.TextLinkTemplate
 
 /**
@@ -100,6 +101,15 @@ class ConfigService {
             return true
         }
         result
+    }
+
+    /**
+     * Gets the instance types that Asgard needs to use that are not included in the AWS Java SDK enum
+     *
+     * @return List <InstanceTypeData> the custom instance types, or an empty list
+     */
+    List<InstanceTypeData> getCustomInstanceTypes() {
+        grailsApplication.config?.cloud?.customIntanceTypes ?: []
     }
 
     List<String> getAwsAccounts() {
