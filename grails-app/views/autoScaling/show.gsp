@@ -98,7 +98,7 @@
           <td class="name">Availablility Zones:</td>
           <td class="value">
             <g:each var="zone" in="${group.availabilityZones}">
-              <div><g:availabilityZone value="${zone}"/></div>
+              <div><g:availabilityZone value="${zone}"/> (${zonesWithInstanceCounts.count(zone)})</div>
             </g:each>
           </td>
         </tr>
