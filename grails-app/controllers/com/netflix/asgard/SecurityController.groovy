@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import grails.converters.JSON
@@ -78,38 +79,42 @@ class SecurityController {
     def create = {
         UserContext userContext = UserContext.of(request)
         [
-            applications: applicationService.getRegisteredApplications(userContext)
+            applications: applicationService.getRegisteredApplications(userContext),
+            vpcIds: awsEc2Service.getVpcs(userContext)*.vpcId,
+            selectedVpcIds: params.selectedVpcIds,
+            enableVpc: params.enableVpc
         ]
     }
 
     def save = { SecurityCreateCommand cmd ->
-
         if (cmd.hasErrors()) {
             chain(action: create, model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
         } else {
             UserContext userContext = UserContext.of(request)
             String name = Relationships.buildAppDetailName(params.appName, params.detail)
             try {
-                if (!awsEc2Service.getSecurityGroup(userContext, name)) {
-                    awsEc2Service.createSecurityGroup(userContext, name, params.description)
+                SecurityGroup securityGroup = awsEc2Service.getSecurityGroup(userContext, name)
+                if (!securityGroup) {
+                    securityGroup = awsEc2Service.createSecurityGroup(userContext, name, params.description, params.vpcId)
                     flash.message = "Security Group '${name}' has been created."
                 } else {
                     flash.message = "Security Group '${name}' already exists."
                 }
-                redirect(action: show, params: [id: name])
+                redirect(action: show, params: [id: securityGroup.groupId])
             } catch (Exception e) {
                 flash.message = "Could not create Security Group: ${e}"
                 chain(action: create, model: [cmd: cmd], params: params)
+                throw e
             }
         }
     }
 
     def edit = {
         UserContext userContext = UserContext.of(request)
-        String name = params.id
-        SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
+        String id = params.id
+        SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, id)
         if (!group) {
-            Requests.renderNotFound('Security Group', name, this)
+            Requests.renderNotFound('Security Group', id, this)
             return
         }
         [
@@ -121,17 +126,19 @@ class SecurityController {
 
     def update = {
         String name = params.name
+        String id = params.id
         UserContext userContext = UserContext.of(request)
         if (awsEc2Service.isSecurityGroupEditable(name)) {
             List<String> selectedGroups = Requests.ensureList(params.selectedGroups)
-            SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
+            SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, id)
             try {
                 updateSecurityIngress(userContext, group, selectedGroups, params)
                 flash.message = "Security Group '${name}' has been updated."
+                redirect(action: show, params: [id: id])
             } catch (Exception e) {
                 flash.message = "Could not update Security Group: ${e}"
+                redirect(action: edit, params: [id: id])
             }
-            redirect(action: show, params: [id: name])
         } else {
             flash.message = "Security group '${name}' should not be modified with this tool."
             redirect(action: list)
@@ -142,26 +149,29 @@ class SecurityController {
         awsEc2Service.getSecurityGroups(userContext).each {srcGroup ->
             boolean wantAccess = selectedGroups.any {it == srcGroup.groupName} && portMap[srcGroup.groupName] != ''
             String wantPorts = wantAccess ? portMap[srcGroup.groupName] : null
-            awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, srcGroup.groupName, wantPorts)
+            List<IpPermission> wantPerms = awsEc2Service.permissionsFromString(wantPorts)
+            awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, srcGroup, wantPerms)
         }
     }
 
     def delete = {
         UserContext userContext = UserContext.of(request)
+        String name = params.name
+        String id = params.id
         String msg
         try {
-            String name = params.name
-            if (awsEc2Service.getSecurityGroup(userContext, name)) {
-                awsEc2Service.removeSecurityGroup(userContext, name)
+            if (awsEc2Service.getSecurityGroup(userContext, id)) {
+                awsEc2Service.removeSecurityGroup(userContext, name, id)
                 msg = "Security Group '${name}' has been deleted."
             } else {
                 msg = "Security Group '${name}' does not exist."
             }
+            flash.message = msg
+            redirect(action: result)
         } catch (Exception e) {
-            msg = "Could not delete Security Group: ${e}"
+            flash.message = "Could not delete Security Group: ${e}"
+            redirect(action: show, params: [id: id])
         }
-        flash.message = msg
-        redirect(action: result)
     }
 
     def result = { render view: '/common/result' }

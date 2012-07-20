@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.MonitorBucketType
@@ -238,7 +239,7 @@ import org.apache.commons.collections.HashBag
                 app: app,
                 name: name,
                 group: group,
-                groups: awsEc2Service.getSecurityGroupOptionsForSource(userContext, name)
+                groups: awsEc2Service.getSecurityGroupOptionsForSource(userContext, group)
         ]
     }
 
@@ -246,8 +247,8 @@ import org.apache.commons.collections.HashBag
         String name = params.name
         UserContext userContext = UserContext.of(request)
         List<String> selectedGroups = Requests.ensureList(params.selectedGroups)
-
-        updateSecurityEgress(userContext, name, selectedGroups, params)
+        SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
+        updateSecurityEgress(userContext, group, selectedGroups, params)
         flash.message = "Successfully updated access for Application '${name}'"
 
         redirect(action: 'list')
@@ -255,11 +256,12 @@ import org.apache.commons.collections.HashBag
 
     // Security Group permission updating logic
 
-    private void updateSecurityEgress(UserContext userContext, String srcGroup, List<String> selectedGroups, Map portMap) {
+    private void updateSecurityEgress(UserContext userContext, SecurityGroup srcGroup, List<String> selectedGroups, Map portMap) {
         awsEc2Service.getSecurityGroups(userContext).each {SecurityGroup targetGroup ->
             boolean wantAccess = selectedGroups.any {it == targetGroup.groupName} && portMap[targetGroup.groupName] != ''
             String  wantPorts = wantAccess ? portMap[targetGroup.groupName] : null
-            awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, srcGroup, wantPorts)
+            List<IpPermission> wantPerms = awsEc2Service.permissionsFromString(wantPorts)
+            awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, srcGroup, wantPerms)
         }
     }
 

@@ -81,6 +81,7 @@ import com.amazonaws.services.ec2.model.TerminateInstancesResult
 import com.amazonaws.services.ec2.model.UserIdGroupPair
 import com.amazonaws.services.ec2.model.Volume
 import com.amazonaws.services.ec2.model.VolumeAttachment
+import com.amazonaws.services.ec2.model.Vpc
 import com.google.common.collect.HashMultiset
 import com.google.common.collect.Lists
 import com.google.common.collect.Multiset
@@ -126,6 +127,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     void initializeCaches() {
+        caches.allVpcs.ensureSetUp({ Region region -> retrieveVpcs(region) })
         caches.allKeyPairs.ensureSetUp({ Region region -> retrieveKeys(region) })
         caches.allAvailabilityZones.ensureSetUp({ Region region -> retrieveAvailabilityZones(region) },
                 { Region region -> caches.allKeyPairs.by(region).fill() })
@@ -195,6 +197,20 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      */
     Subnets getSubnets(UserContext userContext) {
         Subnets.from(caches.allSubnets.by(userContext.region).list())
+    }
+
+    private Collection<Vpc> retrieveVpcs(Region region) {
+        awsClient.by(region).describeVpcs().vpcs
+    }
+
+    /**
+     * Gets information about all VPCs in a region.
+     *
+     * @param userContext who, where, why
+     * @return a list of VPCs
+     */
+    Collection<Vpc> getVpcs(UserContext userContext) {
+        caches.allVpcs.by(userContext.region).list()
     }
 
     /**
@@ -381,7 +397,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     private List<SecurityGroup> retrieveSecurityGroups(Region region) {
-        awsClient.by(region).describeSecurityGroups(new DescribeSecurityGroupsRequest()).securityGroups
+        awsClient.by(region).describeSecurityGroups().securityGroups
     }
 
     List<SecurityGroup> getSecurityGroupsForApp(UserContext userContext, String appName) {
@@ -429,9 +445,11 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      */
     List<SecurityGroupOption> getSecurityGroupOptionsForTarget(UserContext userContext, SecurityGroup targetGroup) {
         Collection<SecurityGroup> sourceGroups = getEffectiveSecurityGroups(userContext)
+        // Find Security Groups consistent with the target with respect to VPC/non-VPC
+        sourceGroups = sourceGroups.findAll { !(it.vpcId.asBoolean() ^ targetGroup.vpcId.asBoolean()) }
         String guessedPorts = bestIngressPortsFor(targetGroup)
         sourceGroups.collect { SecurityGroup sourceGroup ->
-            buildSecurityGroupOption(sourceGroup.groupName, targetGroup, guessedPorts)
+            buildSecurityGroupOption(sourceGroup, targetGroup, guessedPorts)
         }
     }
 
@@ -440,62 +458,70 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      * (many potential targets of traffic).
      *
      * @param userContext who, where, why
-     * @param sourceGroupName the name of the security group for the instances sending traffic
+     * @param sourceGroupName the security group for the instances sending traffic
      * @return list of security group options for display
      */
-    List<SecurityGroupOption> getSecurityGroupOptionsForSource(UserContext userContext, String sourceGroupName) {
+    List<SecurityGroupOption> getSecurityGroupOptionsForSource(UserContext userContext, SecurityGroup sourceGroup) {
         Collection<SecurityGroup> targetGroups = getEffectiveSecurityGroups(userContext)
         targetGroups.collect { SecurityGroup targetGroup ->
             String guessedPorts = bestIngressPortsFor(targetGroup)
-            buildSecurityGroupOption(sourceGroupName, targetGroup, guessedPorts)
+            buildSecurityGroupOption(sourceGroup, targetGroup, guessedPorts)
         }
     }
 
-    private SecurityGroupOption buildSecurityGroupOption(String sourceGroupName, SecurityGroup targetGroup,
+    private SecurityGroupOption buildSecurityGroupOption(SecurityGroup sourceGroup, SecurityGroup targetGroup,
                                                          String defaultPorts) {
-        String accessiblePorts = getIngressFrom(targetGroup, sourceGroupName)
+        Collection<IpPermission> ipPermissions = targetGroup.ipPermissions.findAll {
+            it.userIdGroupPairs.any { it.groupId == sourceGroup.groupId }
+        }
+        String accessiblePorts = permissionsToString(ipPermissions)
         boolean accessible = accessiblePorts ? true : false
         String ports = accessiblePorts ?: defaultPorts
         String groupName = targetGroup.groupName
-        new SecurityGroupOption(source: sourceGroupName, target: groupName, allowed: accessible, ports: ports)
+        new SecurityGroupOption(source: sourceGroup.groupName, target: groupName, allowed: accessible, ports: ports)
     }
 
     // mutators
 
-    SecurityGroup createSecurityGroup(UserContext userContext, String name, String description) {
+    SecurityGroup createSecurityGroup(UserContext userContext, String name, String description, String vpcId = null) {
         Check.notEmpty(name, 'name')
         Check.notEmpty(description, 'description')
+        String groupId = null
         taskService.runTask(userContext, "Create Security Group ${name}", { task ->
-            awsClient.by(userContext.region).createSecurityGroup(
-                    new CreateSecurityGroupRequest().withGroupName(name).withDescription(description))
+            def result = awsClient.by(userContext.region).createSecurityGroup(
+                    new CreateSecurityGroupRequest(groupName: name, description: description, vpcId: vpcId))
+            groupId = result.groupId
         }, Link.to(EntityType.security, name))
-        getSecurityGroup(userContext, name)
+        getSecurityGroup(userContext, groupId)
     }
 
-    void removeSecurityGroup(UserContext userContext, String name) {
+    void removeSecurityGroup(UserContext userContext, String name, String id) {
         taskService.runTask(userContext, "Remove Security Group ${name}", { task ->
-            def request = new DeleteSecurityGroupRequest().withGroupName(name)
-            awsClient.by(userContext.region).deleteSecurityGroup(request)  // no result
+            awsClient.by(userContext.region).deleteSecurityGroup(new DeleteSecurityGroupRequest(groupId: id))
         }, Link.to(EntityType.security, name))
         caches.allSecurityGroups.by(userContext.region).remove(name)
     }
 
     /** High-level permission update for a group pair: given the desired state, make it so. */
-    void updateSecurityGroupPermissions(UserContext userContext, SecurityGroup targetGroup, String sourceGroupName, String wantPorts) {
-        List<IpPermission> havePerms = targetGroup.ipPermissions.findAll { it.userIdGroupPairs.any { it.groupName == sourceGroupName }}
-        List<IpPermission> wantPerms = permissionsFromString(wantPorts)
-        //println " access from ${sourceGroup} to ${targetGroup.groupName}? have:${permissionsToString(havePerms)} want:${permissionsToString(wantPerms)}"
+    void updateSecurityGroupPermissions(UserContext userContext, SecurityGroup targetGroup, SecurityGroup sourceGroup,
+            List<IpPermission> wantPerms) {
+        String sourceGroupName = sourceGroup.groupName
+        List<IpPermission> havePerms = targetGroup.ipPermissions.findAll { it.userIdGroupPairs.any { it.groupId == sourceGroup.groupId }}
+        if (!havePerms && !wantPerms) {
+            return
+        }
+        // println "Access from ${sourceGroupName} to ${targetGroup.groupName}? have:${havePerms} want:${wantPerms}"
         Boolean somethingChanged = false
         havePerms.each { havePerm ->
             if (!wantPerms.any { wp -> wp.fromPort == havePerm.fromPort && wp.toPort == havePerm.toPort } ) {
-                revokeSecurityGroupIngress(userContext, targetGroup.groupName, sourceGroupName, 'tcp',
+                revokeSecurityGroupIngress(userContext, targetGroup, sourceGroup, 'tcp',
                         havePerm.fromPort, havePerm.toPort)
                 somethingChanged = true
             }
         }
         wantPerms.each { wantPerm ->
             if (!havePerms.any { hp -> hp.fromPort == wantPerm.fromPort && hp.toPort == wantPerm.toPort} ) {
-                authorizeSecurityGroupIngress(userContext, targetGroup.groupName, sourceGroupName, 'tcp',
+                authorizeSecurityGroupIngress(userContext, targetGroup, sourceGroup, 'tcp',
                         wantPerm.fromPort, wantPerm.toPort)
                 somethingChanged = true
             }
@@ -541,14 +567,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         perms
     }
 
-    /** Returns the ingress permissions from one group to another as a string. Assumes tcp and groups, not cidrs. */
-    static String getIngressFrom(SecurityGroup targetGroup, String srcGroupName) {
-        Collection<IpPermission> ipPermissions = targetGroup.ipPermissions.findAll {
-            it.userIdGroupPairs.any { it.groupName == srcGroupName }
-        }
-        permissionsToString(ipPermissions)
-    }
-
     private String bestIngressPortsFor(SecurityGroup targetGroup) {
         Map guess = ['7001' : 1]
         targetGroup.ipPermissions.each {
@@ -565,8 +583,10 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     // TODO refactor the following two methods to take IpPermissions List from callers now that AWS API takes those.
 
-    private void authorizeSecurityGroupIngress(UserContext userContext, String groupName, String sourceGroupName, String ipProtocol, int fromPort, int toPort) {
-        UserIdGroupPair sourcePair = new UserIdGroupPair().withUserId(accounts[0]).withGroupName(sourceGroupName)
+    private void authorizeSecurityGroupIngress(UserContext userContext, SecurityGroup targetgroup, SecurityGroup sourceGroup, String ipProtocol, int fromPort, int toPort) {
+        String groupName = targetgroup.groupName
+        String sourceGroupName = sourceGroup.groupName
+        UserIdGroupPair sourcePair = new UserIdGroupPair().withUserId(accounts[0]).withGroupId(sourceGroup.groupId)
         List<IpPermission> perms = [
                 new IpPermission()
                         .withUserIdGroupPairs(sourcePair)
@@ -574,12 +594,14 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         ]
         taskService.runTask(userContext, "Authorize Security Group Ingress to ${groupName} from ${sourceGroupName} on ${fromPort}-${toPort}", { task ->
             awsClient.by(userContext.region).authorizeSecurityGroupIngress(
-                    new AuthorizeSecurityGroupIngressRequest().withGroupName(groupName).withIpPermissions(perms))
+                    new AuthorizeSecurityGroupIngressRequest().withGroupId(targetgroup.groupId).withIpPermissions(perms))
         }, Link.to(EntityType.security, groupName))
     }
 
-    private void revokeSecurityGroupIngress(UserContext userContext, String groupName, String sourceGroupName, String ipProtocol, int fromPort, int toPort) {
-        UserIdGroupPair sourcePair = new UserIdGroupPair().withUserId(accounts[0]).withGroupName(sourceGroupName)
+    private void revokeSecurityGroupIngress(UserContext userContext, SecurityGroup targetgroup, SecurityGroup sourceGroup, String ipProtocol, int fromPort, int toPort) {
+        String groupName = targetgroup.groupName
+        String sourceGroupName = sourceGroup.groupName
+        UserIdGroupPair sourcePair = new UserIdGroupPair().withUserId(accounts[0]).withGroupId(sourceGroup.groupId)
         List<IpPermission> perms = [
                 new IpPermission()
                         .withUserIdGroupPairs(sourcePair)
@@ -587,7 +609,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         ]
         taskService.runTask(userContext, "Revoke Security Group Ingress to ${groupName} from ${sourceGroupName} on ${fromPort}-${toPort}", { task ->
             awsClient.by(userContext.region).revokeSecurityGroupIngress(
-                    new RevokeSecurityGroupIngressRequest().withGroupName(groupName).withIpPermissions(perms))
+                    new RevokeSecurityGroupIngressRequest().withGroupId(targetgroup.groupId).withIpPermissions(perms))
         }, Link.to(EntityType.security, groupName))
     }
 
