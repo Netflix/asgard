@@ -65,7 +65,6 @@
         </table>
       </div>
     <div class="paginateButtons">
-        <g:paginate total="${dbInstanceList.count()}"/>
     </div>
     </g:form>
   </div>

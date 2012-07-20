@@ -71,7 +71,6 @@
           </table>
       </div>
       <div class="paginateButtons">
-        <g:paginate total="${volumes.count()}"/>
       </div>
     </g:form>
   </div>
