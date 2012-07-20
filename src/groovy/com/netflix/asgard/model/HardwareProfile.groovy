@@ -15,10 +15,8 @@
  */
 package com.netflix.asgard.model
 
-import com.amazonaws.services.ec2.model.InstanceType
-
 @Immutable final class HardwareProfile {
-    InstanceType instanceType
+    String instanceType
     String description
     String memory
     String cpu
@@ -27,14 +25,14 @@ import com.amazonaws.services.ec2.model.InstanceType
     String ioPerformance
 
     String getCpuSummary() {
-        cpu.contains('(') ? cpu.substring(0, cpu.indexOf('(')).trim() : cpu
+        cpu?.contains('(') ? cpu.substring(0, cpu.indexOf('(')).trim() : cpu
     }
 
     String getCpuDetail() {
-        cpu.contains('(') ? cpu.substring(cpu.indexOf('(')).trim() : null
+        cpu?.contains('(') ? cpu.substring(cpu.indexOf('(')).trim() : null
     }
 
     String getName() {
-        instanceType.toString()
+        instanceType
     }
 }

@@ -30,7 +30,7 @@ class InstanceTypeControllerTests extends ControllerUnitTestCase {
     void testList() {
         def attrs = controller.list()
         List<InstanceTypeData> types = attrs.instanceTypes
-        assert 12 == types.size()
+        assert 13 == types.size()
         assert 't1.micro' == types[0].name
         assert 'Small' == types[1].hardwareProfile.description
         assert '1.7 GB' == types[2].hardwareProfile.memory

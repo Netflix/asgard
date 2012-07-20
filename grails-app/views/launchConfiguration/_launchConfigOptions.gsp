@@ -46,7 +46,7 @@
     <td>
       <select id="instanceType" name="instanceType">
         <g:each var="t" in="${instanceTypes}">
-          <option value="${t.name}" ${t.name == params.instanceType || t.name == instanceType ? 'selected' : ''}>${t.name} ${t.monthlyLinuxOnDemandPrice}/mo</option>
+          <option value="${t.name}" ${t.name == params.instanceType || t.name == instanceType ? 'selected' : ''}>${t.name} ${t.monthlyLinuxOnDemandPrice ? t.monthlyLinuxOnDemandPrice + '/mo' : ''}</option>
         </g:each>
       </select>
     </td>
