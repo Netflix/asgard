@@ -29,6 +29,7 @@ import com.amazonaws.services.ec2.model.Snapshot
 import com.amazonaws.services.ec2.model.SpotInstanceRequest
 import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Volume
+import com.amazonaws.services.ec2.model.Vpc
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import com.amazonaws.services.rds.model.DBInstance
@@ -43,6 +44,7 @@ import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.model.SimpleQueue
 import com.netflix.asgard.model.TopicData
 import com.netflix.asgard.push.Cluster
+
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 
@@ -87,6 +89,7 @@ import java.lang.reflect.Modifier
     static final EntityType<Task> task = create('Task', { it.id })
     static final EntityType<TopicData> topic = create('Topic', { it.name })
     static final EntityType<Volume> volume = create('Volume', { it.volumeId }, 'vol-')
+    static final EntityType<Vpc> vpc = create('VPC', { it.vpcId }, 'vpc-')
 
     /*
      * These two convenience constructors are explicit because of an IntelliJ bug that cannot handle the generics on a

@@ -31,7 +31,8 @@
       <div class="buttons">
         <g:form>
           <input type="hidden" name="name" value="${group.groupName}"/>
-          <g:link class="edit" action="edit" params="[id: group.groupName]">Edit Security Group</g:link>
+          <input type="hidden" name="id" value="${group.groupId}"/>
+          <g:link class="edit" action="edit" params="[id: group.groupId]">Edit Security Group</g:link>
           <g:buttonSubmit class="delete" action="delete" value="Delete Security Group"
                           data-warning="Really delete Security Group '${group.groupName}'?" />
         </g:form>

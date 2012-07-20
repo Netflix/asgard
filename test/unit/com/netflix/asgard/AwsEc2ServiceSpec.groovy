@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.ec2.AmazonEC2
+import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult
@@ -25,6 +26,7 @@ import com.amazonaws.services.ec2.model.InstanceState
 import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.Placement
 import com.amazonaws.services.ec2.model.ReservedInstances
+import com.amazonaws.services.ec2.model.RevokeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Tag
@@ -57,7 +59,13 @@ class AwsEc2ServiceSpec extends Specification {
                 (EntityType.instance): mockInstanceCache,
                 (EntityType.reservation): mockReservationCache,
         ]))
-        awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }), caches: caches)
+        TaskService taskService = new TaskService() {
+            def runTask(UserContext userContext, String name, Closure work, Link link = null) {
+                work(new Task())
+            }
+        }
+        awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }), caches: caches,
+                taskService: taskService)
     }
 
     def 'active instances should only include pending and running states'() {
@@ -261,19 +269,19 @@ class AwsEc2ServiceSpec extends Specification {
         // wopr can call norad.
         // joshua can call wopr, globalthermonuclearwar, tictactoe.
         // modem and falken can call joshua.
-        Closure pairs = { String groupName -> [new UserIdGroupPair(groupName: groupName)] }
-        IpPermission woprPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('wopr'))
-        IpPermission joshuaPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('joshua'))
-        IpPermission falkenPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('falken'))
-        IpPermission modemPerm = new IpPermission(fromPort: 8080, toPort: 8080, userIdGroupPairs: pairs('modem'))
+        Closure pairs = { String groupId -> [new UserIdGroupPair(groupId: groupId)] }
+        IpPermission woprPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('sg-2'))
+        IpPermission joshuaPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('sg-5'))
+        IpPermission falkenPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('sg-7'))
+        IpPermission modemPerm = new IpPermission(fromPort: 8080, toPort: 8080, userIdGroupPairs: pairs('sg-6'))
         [
-                new SecurityGroup(groupName: 'norad', ipPermissions: [woprPerm]),
-                new SecurityGroup(groupName: 'wopr', ipPermissions: [joshuaPerm]),
-                new SecurityGroup(groupName: 'globalthermonuclearwar', ipPermissions: [joshuaPerm]),
-                new SecurityGroup(groupName: 'tictactoe', ipPermissions: [joshuaPerm]),
-                new SecurityGroup(groupName: 'joshua', ipPermissions: [modemPerm, falkenPerm]),
-                new SecurityGroup(groupName: 'modem'),
-                new SecurityGroup(groupName: 'falken'),
+                new SecurityGroup(groupId: 'sg-1', groupName: 'norad', ipPermissions: [woprPerm]),
+                new SecurityGroup(groupId: 'sg-2', groupName: 'wopr', ipPermissions: [joshuaPerm]),
+                new SecurityGroup(groupId: 'sg-3', groupName: 'globalthermonuclearwar', ipPermissions: [joshuaPerm]),
+                new SecurityGroup(groupId: 'sg-4', groupName: 'tictactoe', ipPermissions: [joshuaPerm]),
+                new SecurityGroup(groupId: 'sg-5', groupName: 'joshua', ipPermissions: [modemPerm, falkenPerm]),
+                new SecurityGroup(groupId: 'sg-6', groupName: 'modem'),
+                new SecurityGroup(groupId: 'sg-7', groupName: 'falken'),
         ]
     }
 
@@ -300,8 +308,11 @@ class AwsEc2ServiceSpec extends Specification {
 
     def 'options for source group should include all groups sorted, but only some allowed to be called by source'() {
 
+        List<SecurityGroup> warGamesSecurityGroups = simulateWarGames()
+        SecurityGroup joshua = warGamesSecurityGroups.find { it.groupName == 'joshua' }
+
         when:
-        List<SecurityGroupOption> gamesForJoshua = awsEc2Service.getSecurityGroupOptionsForSource(userContext, 'joshua')
+        List<SecurityGroupOption> gamesForJoshua = awsEc2Service.getSecurityGroupOptionsForSource(userContext, joshua)
 
         then:
         gamesForJoshua == [
@@ -314,5 +325,33 @@ class AwsEc2ServiceSpec extends Specification {
                 new SecurityGroupOption('joshua', 'wopr', true, '7101-7102'),
         ]
         1 * mockSecurityGroupCache.list() >> { simulateWarGames() }
+    }
+
+    def 'should update security groups'() {
+        List<UserIdGroupPair> userIdGroupPairs = [new UserIdGroupPair(groupId: 'sg-s')]
+        SecurityGroup source = new SecurityGroup(groupName: 'source', groupId: 'sg-s')
+        SecurityGroup target = new SecurityGroup(groupName: 'target', groupId: 'sg-t', ipPermissions: [
+                new IpPermission(fromPort: 1, toPort: 1, userIdGroupPairs: userIdGroupPairs),
+                new IpPermission(fromPort: 2, toPort: 2, userIdGroupPairs: userIdGroupPairs),
+        ])
+
+        when:
+        awsEc2Service.updateSecurityGroupPermissions(userContext, target, source, [
+                new IpPermission(fromPort: 2, toPort: 2),
+                new IpPermission(fromPort: 3, toPort: 3),
+        ])
+
+        then:
+        1 * mockAmazonEC2.authorizeSecurityGroupIngress(new AuthorizeSecurityGroupIngressRequest(groupId: 'sg-t',
+                ipPermissions: [
+                        new IpPermission(fromPort: 3, toPort: 3, ipProtocol: 'tcp', userIdGroupPairs: userIdGroupPairs),
+                ]))
+        1 * mockAmazonEC2.revokeSecurityGroupIngress(new RevokeSecurityGroupIngressRequest(groupId: 'sg-t',
+                ipPermissions: [
+                        new IpPermission(fromPort: 1, toPort: 1, ipProtocol: 'tcp', userIdGroupPairs: userIdGroupPairs),
+                ]))
+        1 * mockAmazonEC2.describeSecurityGroups(_) >> new DescribeSecurityGroupsResult(
+                securityGroups: [new SecurityGroup()])
+        0 * _
     }
 }
