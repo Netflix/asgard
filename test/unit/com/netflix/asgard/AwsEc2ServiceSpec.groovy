@@ -265,29 +265,18 @@ class AwsEc2ServiceSpec extends Specification {
         ]
     }
 
-    private List<SecurityGroup> simulateWarGames() {
-        // wopr can call norad.
-        // joshua can call wopr, globalthermonuclearwar, tictactoe.
-        // modem and falken can call joshua.
-        Closure pairs = { String groupId -> [new UserIdGroupPair(groupId: groupId)] }
-        IpPermission woprPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('sg-2'))
-        IpPermission joshuaPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('sg-5'))
-        IpPermission falkenPerm = new IpPermission(fromPort: 7101, toPort: 7102, userIdGroupPairs: pairs('sg-7'))
-        IpPermission modemPerm = new IpPermission(fromPort: 8080, toPort: 8080, userIdGroupPairs: pairs('sg-6'))
-        [
-                new SecurityGroup(groupId: 'sg-1', groupName: 'norad', ipPermissions: [woprPerm]),
-                new SecurityGroup(groupId: 'sg-2', groupName: 'wopr', ipPermissions: [joshuaPerm]),
-                new SecurityGroup(groupId: 'sg-3', groupName: 'globalthermonuclearwar', ipPermissions: [joshuaPerm]),
-                new SecurityGroup(groupId: 'sg-4', groupName: 'tictactoe', ipPermissions: [joshuaPerm]),
-                new SecurityGroup(groupId: 'sg-5', groupName: 'joshua', ipPermissions: [modemPerm, falkenPerm]),
-                new SecurityGroup(groupId: 'sg-6', groupName: 'modem'),
-                new SecurityGroup(groupId: 'sg-7', groupName: 'falken'),
-        ]
+    private Collection<SecurityGroup> simulateWarGames() {
+        SecurityGroupDsl.config {
+            wopr(7101, 7102) >> norad
+            joshua(7101, 7102) >> [wopr, globalthermonuclearwar, tictactoe]
+            modem(8080, 8080) >> joshua
+            falken(7101, 7102) >> joshua
+        }
     }
 
     def 'options for target security group should include all groups sorted, but only some allowed to call target'() {
 
-        List<SecurityGroup> warGamesSecurityGroups = simulateWarGames()
+        Collection<SecurityGroup> warGamesSecurityGroups = simulateWarGames()
         SecurityGroup joshua = warGamesSecurityGroups.find { it.groupName == 'joshua' }
 
         when:
@@ -308,7 +297,7 @@ class AwsEc2ServiceSpec extends Specification {
 
     def 'options for source group should include all groups sorted, but only some allowed to be called by source'() {
 
-        List<SecurityGroup> warGamesSecurityGroups = simulateWarGames()
+        Collection<SecurityGroup> warGamesSecurityGroups = simulateWarGames()
         SecurityGroup joshua = warGamesSecurityGroups.find { it.groupName == 'joshua' }
 
         when:
