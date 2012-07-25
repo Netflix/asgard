@@ -186,7 +186,7 @@ class InstanceTypeService implements CacheInitializer {
         Elements dataParagraphs = paragraphsWithBreaks.select(':matches([a-z])') // Skip the empty paragraph
 
         // Send an alert email when Amazon edits the instance types page in a way that breaks this web scraper.
-        if (titleParagraphs.size() == dataParagraphs.size() && dataParagraphs.size() >= InstanceType.values().size()) {
+        if (titleParagraphs.size() <= dataParagraphs.size() && titleParagraphs.size() >= InstanceType.values().size()) {
             for (Integer i = 0; i < titleParagraphs.size(); i++) {
                 Element dataParagraph = dataParagraphs.get(i)
                 List<Node> dataChildNodes = dataParagraph.childNodes().findAll { it.nodeName() != 'br' }
