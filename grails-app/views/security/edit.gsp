@@ -29,6 +29,7 @@
     </g:if>
     <g:form method="post">
       <input type="hidden" name="name" value="${group.groupName}"/>
+      <input type="hidden" name="id" value="${group.groupId}"/>
       <div class="dialog">
         <table>
           <tbody>

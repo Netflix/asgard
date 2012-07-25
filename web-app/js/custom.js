@@ -666,6 +666,17 @@ jQuery(document).ready(function() {
     };
     setCustomOrExistingInput();
 
+    var setUpEnableVpc = function() {
+        var enableVpc, vpcId, isVpc;
+        enableVpc = jQuery('#enableVpc');
+        vpcId = jQuery('#vpcId');
+        enableVpc.click(function() {
+            isVpc = enableVpc.is(':checked');
+            vpcId.prop('disabled', !isVpc);
+        });
+    };
+    setUpEnableVpc();
+
     var setJsonValue = function() {
         jQuery('.jsonValue').each(function() {
             var jsonString, jsonValue, formattedJsonValue, originalJson, advancedJson, toggle, jsonContainer;
