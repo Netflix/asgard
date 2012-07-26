@@ -259,4 +259,47 @@ class ConfigService {
     List<String> getDefaultVpcSecurityGroupNames() {
         grailsApplication.config.cloud?.defaultVpcSecurityGroupNames ?: []
     }
+
+    /*
+     * @return true if api key based authentication is active, false otherwise
+     */
+    boolean isApiTokenEnabled() {
+        grailsApplication.config.security?.apiToken?.enabled ?: false
+    }
+
+    /**
+     * @return List of encryption keys for hashing api keys. The first item is used as the current key for new requests.
+     */
+    List<String> getApiEncryptionKeys() {
+        grailsApplication.config.security?.apiToken?.encryptionKeys ?: []
+    }
+
+    /**
+     * @return Filename containing a list of keys to use for hashing api keys.
+     */
+    String getApiEncryptionKeyFile() {
+        grailsApplication.config.secret?.apiEncryptionKeyFile ?: null
+    }
+
+    /**
+     * @return Number of days a newly generated api key will be active for
+     */
+    int getApiTokenExpirationDays() {
+        grailsApplication.config.security?.apiToken?.expirationDays ?: 90
+    }
+
+    /**
+     * @return Number days before API key expiration to send an email warning
+     */
+    int getApiTokenExpiryWarningThresholdDays() {
+        grailsApplication.config.security?.apiToken?.expiryWarningThresholdDays ?: 7
+    }
+
+    /**
+     * @return Minutes between sending warnings about a specific API key expiring.
+     */
+    int getApiTokenExpiryWarningIntervalMinutes() {
+        grailsApplication.config.security?.apiToken?.expiryWarningIntervalMinutes ?: 360
+    }
+
 }
