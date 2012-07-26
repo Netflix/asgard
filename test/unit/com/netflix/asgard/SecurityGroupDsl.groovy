@@ -46,7 +46,7 @@ class SecurityGroupDsl {
     def methodMissing(String name, args) {
         SecurityGroup securityGroupForName = propertyMissing(name)
         List<UserIdGroupPair> pairs = [new UserIdGroupPair(groupId: securityGroupForName.groupId)]
-        return new SecurityGroupWithPermission().with {
+        new SecurityGroupWithPermission().with {
             securityGroup = securityGroupForName
             ipPermission = new IpPermission(fromPort: args[0], toPort: args[1], userIdGroupPairs: pairs)
             it

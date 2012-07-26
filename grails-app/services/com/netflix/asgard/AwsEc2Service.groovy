@@ -446,7 +446,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     List<SecurityGroupOption> getSecurityGroupOptionsForTarget(UserContext userContext, SecurityGroup targetGroup) {
         Collection<SecurityGroup> sourceGroups = getEffectiveSecurityGroups(userContext)
         // Find Security Groups consistent with the target with respect to VPC/non-VPC
-        sourceGroups = sourceGroups.findAll { !(it.vpcId.asBoolean() ^ targetGroup.vpcId.asBoolean()) }
+        sourceGroups = sourceGroups.findAll { it.vpcId.asBoolean() == targetGroup.vpcId.asBoolean() }
         String guessedPorts = bestIngressPortsFor(targetGroup)
         sourceGroups.collect { SecurityGroup sourceGroup ->
             buildSecurityGroupOption(sourceGroup, targetGroup, guessedPorts)
@@ -471,9 +471,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     private SecurityGroupOption buildSecurityGroupOption(SecurityGroup sourceGroup, SecurityGroup targetGroup,
                                                          String defaultPorts) {
-        Collection<IpPermission> ipPermissions = targetGroup.ipPermissions.findAll {
-            it.userIdGroupPairs.any { it.groupId == sourceGroup.groupId }
-        }
+        Collection<IpPermission> ipPermissions = getIngressFrom(targetGroup, sourceGroup)
         String accessiblePorts = permissionsToString(ipPermissions)
         boolean accessible = accessiblePorts ? true : false
         String ports = accessiblePorts ?: defaultPorts
@@ -505,12 +503,10 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     /** High-level permission update for a group pair: given the desired state, make it so. */
     void updateSecurityGroupPermissions(UserContext userContext, SecurityGroup targetGroup, SecurityGroup sourceGroup,
             List<IpPermission> wantPerms) {
-        String sourceGroupName = sourceGroup.groupName
-        List<IpPermission> havePerms = targetGroup.ipPermissions.findAll { it.userIdGroupPairs.any { it.groupId == sourceGroup.groupId }}
+        List<IpPermission> havePerms = getIngressFrom(targetGroup, sourceGroup)
         if (!havePerms && !wantPerms) {
             return
         }
-        // println "Access from ${sourceGroupName} to ${targetGroup.groupName}? have:${havePerms} want:${wantPerms}"
         Boolean somethingChanged = false
         havePerms.each { havePerm ->
             if (!wantPerms.any { wp -> wp.fromPort == havePerm.fromPort && wp.toPort == havePerm.toPort } ) {
@@ -565,6 +561,13 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             }
         }
         perms
+    }
+
+    /** Returns the ingress permissions from one group to another. Assumes tcp and groups, not cidrs. */
+    static Collection<IpPermission> getIngressFrom(SecurityGroup targetGroup, SecurityGroup sourceGroup) {
+        targetGroup.ipPermissions.findAll {
+            it.userIdGroupPairs.any { it.groupId == sourceGroup.groupId }
+        }
     }
 
     private String bestIngressPortsFor(SecurityGroup targetGroup) {
