@@ -97,4 +97,19 @@ import com.netflix.asgard.Check
         Collection<SubnetData> targetSubnetsWithPurpose = allSubnets.findAll() { it.target == target && it.purpose }
         Multimaps.index(targetSubnetsWithPurpose, { it.availabilityZone } as Function)
     }
+
+    /**
+     * Find the zones with VPCs that have the specified purpose
+     *
+     * @param  purpose the VPC purpose want AWS zone names for
+     * @param  target is the type of AWS object the subnet applies to (null means any object type)
+     * @return the set of distinct zones that contain a VPC with the specified purpose
+     */
+    Set<String> getZonesForPurpose(String purpose, SubnetTarget target) {
+        if (!purpose) {
+            return Collections.emptySet()
+        }
+        Collection<SubnetData> subnetsForPurpose = allSubnets.findAll { it.purpose == purpose && it.target == target }
+        subnetsForPurpose*.availabilityZone as Set
+    }
 }

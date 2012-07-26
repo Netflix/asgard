@@ -189,4 +189,40 @@ class SubnetsSpec extends Specification {
     def 'should return no purposes when including zone without subnets'() {
         expect: subnets.getPurposesForZones(['us-east-1a', 'us-east-1b', 'us-east-1c'], SubnetTarget.EC2).isEmpty()
     }
+
+    def 'should return zones with specified purpose'() {
+        subnets = new Subnets([
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a3', 'us-east-1a', 'internal', SubnetTarget.ELB),
+                subnet('subnet-e9b0a3a4', 'us-east-1a', 'external', SubnetTarget.ELB),
+                subnet('subnet-e9b0a3a5', 'us-east-1b', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c6', 'us-east-1c', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c7', 'us-east-1c', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c8', 'us-east-1d', 'internal', SubnetTarget.ELB),
+        ])
+        Set<String> expectedZones = ['us-east-1a', 'us-east-1c'] as Set
+
+        expect:
+        expectedZones == subnets.getZonesForPurpose('internal', SubnetTarget.EC2)
+    }
+
+    def 'should return no zones when specified purpose is missing'() {
+        expect: subnets.getZonesForPurpose('vulnerable', SubnetTarget.EC2).isEmpty()
+    }
+
+    def 'should return no zones for null purpose'() {
+        expect: subnets.getZonesForPurpose(null, SubnetTarget.EC2).isEmpty()
+    }
+
+    def 'should return only zones without a target when not specified'() {
+        subnets = new Subnets([
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a2', 'us-east-1b', 'internal', null),
+        ])
+        Set<String> expectedZones = ['us-east-1b'] as Set
+
+        expect:
+        expectedZones == subnets.getZonesForPurpose('internal', null)
+    }
 }
