@@ -55,7 +55,7 @@ import com.netflix.asgard.Check
      * @param  zones the zones in AWS that you want Subnet IDs for
      * @param  purpose only subnets with the specified purpose will be returned
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
-     * @return the subnet IDs returned in the same order as the zones sent in
+     * @return the subnet IDs returned in the same order as the zones sent in or an empty List
      * @throws IllegalArgumentException if there are multiple subnets with the same purpose and zone
      */
     List<String> getSubnetIdsForZones(List<String> zones, String purpose, SubnetTarget target = null) {
@@ -79,7 +79,7 @@ import com.netflix.asgard.Check
      *
      * @param  zones the zones in AWS that you want purposes for
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
-     * @return the set of distinct purposes
+     * @return the set of distinct purposes or an empty Set
      */
     Set<String> getPurposesForZones(Collection<String> zones, SubnetTarget target = null) {
         if (!zones) {
@@ -95,6 +95,7 @@ import com.netflix.asgard.Check
 
     private Multimap<String, SubnetData> mapZonesToTargetSubnets(SubnetTarget target) {
         Collection<SubnetData> targetSubnetsWithPurpose = allSubnets.findAll() {
+            // Find ones with a purpose, and if they have a target then it should match
             (!it.target || it.target == target) && it.purpose
         }
         Multimaps.index(targetSubnetsWithPurpose, { it.availabilityZone } as Function)
@@ -105,13 +106,14 @@ import com.netflix.asgard.Check
      *
      * @param  purpose the VPC purpose want AWS zone names for
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
-     * @return the set of distinct zones that contain a VPC with the specified purpose
+     * @return the set of distinct zones that contain a VPC with the specified purpose or an empty Set
      */
     Set<String> getZonesForPurpose(String purpose, SubnetTarget target) {
         if (!purpose) {
             return Collections.emptySet()
         }
         Collection<SubnetData> subnetsForPurpose = allSubnets.findAll {
+            // Find ones with a matching purpose, and if they have a target then it should match
             it.purpose == purpose && (!it.target || it.target == target)
         }
         subnetsForPurpose*.availabilityZone as Set
