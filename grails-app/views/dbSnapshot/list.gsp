@@ -59,7 +59,6 @@
         </table>
       </div>
       <div class="paginateButtons">
-        <g:paginate total="${snapshots.count()}"/>
       </div>
     </g:form>
   </div>

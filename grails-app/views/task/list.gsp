@@ -67,7 +67,6 @@
         </table>
       </div>
       <div class="paginateButtons">
-        <g:paginate total="${runningTaskList.count()}"/>
       </div>
     </g:form>
   </div>
@@ -108,7 +107,6 @@
       </table>
     </div>
     <div class="paginateButtons">
-      <g:paginate total="${completedTaskList.count()}"/>
     </div>
   </div>
 </body>

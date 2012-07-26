@@ -68,7 +68,6 @@
       </table>
     </div>
     <div class="paginateButtons">
-      <g:paginate total="${images.count()}"/>
     </div>
   </g:form>
 </div>
