@@ -94,7 +94,9 @@ import com.netflix.asgard.Check
     }
 
     private Multimap<String, SubnetData> mapZonesToTargetSubnets(SubnetTarget target) {
-        Collection<SubnetData> targetSubnetsWithPurpose = allSubnets.findAll() { it.target == target && it.purpose }
+        Collection<SubnetData> targetSubnetsWithPurpose = allSubnets.findAll() {
+            (!it.target || it.target == target) && it.purpose
+        }
         Multimaps.index(targetSubnetsWithPurpose, { it.availabilityZone } as Function)
     }
 
@@ -109,7 +111,9 @@ import com.netflix.asgard.Check
         if (!purpose) {
             return Collections.emptySet()
         }
-        Collection<SubnetData> subnetsForPurpose = allSubnets.findAll { it.purpose == purpose && it.target == target }
+        Collection<SubnetData> subnetsForPurpose = allSubnets.findAll {
+            it.purpose == purpose && (!it.target || it.target == target)
+        }
         subnetsForPurpose*.availabilityZone as Set
     }
 }
