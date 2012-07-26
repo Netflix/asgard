@@ -34,6 +34,10 @@ class AuthControllerSpec extends ControllerSpec {
         controller.pluginService = pluginService
     }
 
+    def cleanup() {
+        ShiroTestUtil.tearDownShiro()
+    }
+
     def 'should throw 403 if authentication is not configured'() {
         when:
         controller.beforeInterceptor()

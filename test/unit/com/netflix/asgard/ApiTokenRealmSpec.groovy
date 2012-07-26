@@ -39,6 +39,10 @@ class ApiTokenRealmSpec extends Specification {
         apiToken = new ApiToken('ThisPurpose', 'testDL@netflix.com', 90, 'key')
     }
 
+    def cleanup() {
+        ShiroTestUtil.tearDownShiro()
+    }
+
     def 'should throw AuthenticationException when token is null'() {
         when:
         realm.authenticate(null)

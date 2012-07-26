@@ -27,6 +27,10 @@ class ApiTokenSpec extends Specification {
         ShiroTestUtil.setSubject(subject)
     }
 
+    def cleanup() {
+        ShiroTestUtil.tearDownShiro()
+    }
+
     def 'should generate and parse a key correctly'() {
         ApiToken apiToken = new ApiToken('TestScript', 'testDL@netflix.com', 30, 'key')
 

@@ -37,6 +37,10 @@ class ApiTokenControllerSpec extends ControllerSpec {
         ShiroTestUtil.setSubject(subject)
     }
 
+    def cleanup() {
+        ShiroTestUtil.tearDownShiro()
+    }
+
     def 'should return 401 if api tokens disabled'() {
         configService.apiTokenEnabled >> null
 
