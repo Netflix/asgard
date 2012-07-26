@@ -37,7 +37,6 @@
         </div>
       </g:render>
       <div class="paginateButtons">
-        <g:paginate total="${instanceList.count()}"/>
       </div>
     </g:form>
   </div>

@@ -60,7 +60,6 @@
       </table>
     </div>
     <div class="paginateButtons">
-      <g:paginate total="${dbSecurityGroups.count()}"/>
     </div>
   </g:form>
 </div>

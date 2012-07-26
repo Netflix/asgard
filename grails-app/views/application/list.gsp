@@ -64,7 +64,6 @@
       </table>
     </div>
     <div class="paginateButtons">
-      <g:paginate total="${applications.count()}"/>
     </div>
   </g:form>
 </div>
