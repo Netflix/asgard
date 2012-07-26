@@ -62,6 +62,15 @@
                 <input class="required" type="text" id="description" name="description" value="${params.description}"/>
               </td>
             </tr>
+            <tr class="prop">
+              <td class="name">
+                <label for="vpcId">VPC:</label>
+              </td>
+              <td>
+                <g:checkBox name="enableVpc" checked="${enableVpc ? 'checked' : ''}" />
+                <g:select name="vpcId" from="${vpcIds}" value="${selectedVpcIds}" disabled="true" />
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

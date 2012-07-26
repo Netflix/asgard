@@ -29,6 +29,7 @@ import com.amazonaws.services.ec2.model.Snapshot
 import com.amazonaws.services.ec2.model.SpotInstanceRequest
 import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Volume
+import com.amazonaws.services.ec2.model.Vpc
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import com.amazonaws.services.rds.model.DBInstance
@@ -79,13 +80,14 @@ class Caches {
     final MultiRegionCachedMap<Subnet> allSubnets
     final MultiRegionCachedMap<TopicData> allTopics
     final MultiRegionCachedMap<Volume> allVolumes
+    final MultiRegionCachedMap<Vpc> allVpcs
 
     final MultiRegionInstancePrices allOnDemandPrices
     final MultiRegionInstancePrices allReservedPrices
     final MultiRegionInstancePrices allSpotPrices
 
     Caches(CachedMapBuilder cachedMapBuilder, ConfigService configService = null) {
-        
+
         allClusters = cachedMapBuilder.of(EntityType.cluster).buildMultiRegionCachedMap()
         allAutoScalingGroups = cachedMapBuilder.of(EntityType.autoScaling, 120).buildMultiRegionCachedMap()
         allLaunchConfigurations = cachedMapBuilder.of(EntityType.launchConfiguration, 180).buildMultiRegionCachedMap()
@@ -93,6 +95,7 @@ class Caches {
         allSourceSecurityGroups = cachedMapBuilder.of(EntityType.sourceSecurityGroup).buildMultiRegionCachedMap()
         allAvailabilityZones = cachedMapBuilder.of(EntityType.availabilityZone, 3600).buildMultiRegionCachedMap()
         allSubnets = cachedMapBuilder.of(EntityType.subnet, 3600).buildMultiRegionCachedMap()
+        allVpcs = cachedMapBuilder.of(EntityType.vpc, 3600).buildMultiRegionCachedMap()
         allKeyPairs = cachedMapBuilder.of(EntityType.keyPair).buildMultiRegionCachedMap()
         allImages = cachedMapBuilder.of(EntityType.image, 120).buildMultiRegionCachedMap()
         allInstances = cachedMapBuilder.of(EntityType.instance, 120).buildMultiRegionCachedMap()
