@@ -54,6 +54,23 @@
     <input type="text" class="number" id="healthCheckGracePeriod" name="healthCheckGracePeriod" value="${group?.healthCheckGracePeriod == null ? '600' : group?.healthCheckGracePeriod}"/> seconds
   </td>
 </tr>
+<tr class="prop advanced ${showVpc ? '' : 'concealed'}">
+  <td class="name">
+    <label for="vpc">VPC:</label>
+  </td>
+  <td>
+    <div>
+      <g:radio id="ec2" name="vpc" value="" checked="${!vpc}"/>
+      <label for="vpc" class="choice">Launch EC2 instances</label>
+    </div>
+    <g:each var="purpose" in="${vpcPurposes}">
+      <div>
+        <g:radio id="${purpose}" name="vpc" value="${purpose}" checked="${vpc == purpose ? 'true' : ''}"/>
+        <label for="vpc" class="choice">Launch '${purpose}' VPC instances</label>
+      </div>
+    </g:each>
+  </td>
+</tr>
 <tr class="prop advanced">
   <td class="name">
     <label for="selectedZones">Availablity Zones:</label>
