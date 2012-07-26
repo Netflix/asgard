@@ -104,7 +104,6 @@ class SecurityController {
             } catch (Exception e) {
                 flash.message = "Could not create Security Group: ${e}"
                 chain(action: create, model: [cmd: cmd], params: params)
-                throw e
             }
         }
     }
@@ -134,14 +133,14 @@ class SecurityController {
             try {
                 updateSecurityIngress(userContext, group, selectedGroups, params)
                 flash.message = "Security Group '${name}' has been updated."
-                redirect(action: show, params: [id: id])
+                redirect(action: 'show', params: [id: id])
             } catch (Exception e) {
                 flash.message = "Could not update Security Group: ${e}"
-                redirect(action: edit, params: [id: id])
+                redirect(action: 'edit', params: [id: id])
             }
         } else {
             flash.message = "Security group '${name}' should not be modified with this tool."
-            redirect(action: list)
+            redirect(action: 'list')
         }
     }
 
