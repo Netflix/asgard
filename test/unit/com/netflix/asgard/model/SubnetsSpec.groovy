@@ -189,4 +189,20 @@ class SubnetsSpec extends Specification {
     def 'should return no purposes when including zone without subnets'() {
         expect: subnets.getPurposesForZones(['us-east-1a', 'us-east-1b', 'us-east-1c'], SubnetTarget.EC2).isEmpty()
     }
+
+    def 'should return purpose for subnet ID'() {
+        expect: 'external' == subnets.getPurposeForSubnets(['subnet-e9b0a3a2'])
+    }
+
+    def 'should return purpose for first subnet ID if there are multiple'() {
+        expect: 'external' == subnets.getPurposeForSubnets(['subnet-e9b0a3a2', 'subnet-e9b0a3a1'])
+    }
+
+    def 'should return empty String if there is no subnet ID'() {
+        expect: '' == subnets.getPurposeForSubnets(null)
+    }
+
+    def 'should return empty String if there is no subnet in cache with ID'() {
+        expect: '' == subnets.getPurposeForSubnets(['subnet-deadbeef'])
+    }
 }

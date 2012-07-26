@@ -97,4 +97,18 @@ import com.netflix.asgard.Check
         Collection<SubnetData> targetSubnetsWithPurpose = allSubnets.findAll() { it.target == target && it.purpose }
         Multimaps.index(targetSubnetsWithPurpose, { it.availabilityZone } as Function)
     }
+
+    /**
+     * Find the purpose associated with subnetIds
+     *
+     * @param  subnetIds the first one with a purpose is used
+     * @return the associated purpose or an empty String if none exists
+     */
+    String getPurposeForSubnets(List<String> subnetIds) {
+        if (!subnetIds) {
+            return ''
+        }
+        String subnetId = subnetIds[0]?.trim()
+        allSubnets.find { it.subnetId == subnetId }?.purpose ?: ''
+    }
 }

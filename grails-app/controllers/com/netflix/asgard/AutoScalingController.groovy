@@ -123,6 +123,8 @@ class AutoScalingController {
             }
             Integer instanceCount = group.instances.size()
             Boolean runHealthChecks = params.runHealthChecks || instanceCount < 20
+            List<String> subnetIds = group.VPCZoneIdentifier?.tokenize(',') ?: []
+            String vpcPurpose = awsEc2Service.getSubnets(userContext).getPurposeForSubnets(subnetIds)
 
             final Map<AutoScalingProcessType, String> processTypeToProcessStatusMessage = [:]
             AutoScalingProcessType.with { [Launch, AZRebalance, Terminate, AddToLoadBalancer] }.each {
@@ -163,6 +165,7 @@ class AutoScalingController {
                     app: applicationService.getRegisteredApplication(userContext, appName),
                     buildServer: grailsApplication.config.cloud.buildServer,
                     alarmsByName: alarmsByName,
+                    vpcPurpose: vpcPurpose,
                     vpcZoneIdentifier: group.VPCZoneIdentifier
             ]
             withFormat {
