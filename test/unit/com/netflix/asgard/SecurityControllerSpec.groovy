@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest
+import com.amazonaws.services.ec2.model.CreateSecurityGroupResult
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.SecurityGroup
@@ -110,9 +111,6 @@ class SecurityControllerSpec extends ControllerSpec {
         p.description = 'Only accessible by Indiana Jones'
         SecurityCreateCommand cmd = new SecurityCreateCommand(appName: p.appName, detail: p.detail)
         cmd.applicationService = Mocks.applicationService()
-        amazonEC2.describeSecurityGroups(_) >> {
-            throw new AmazonServiceException('Missing Security Group')
-        }
 
         when: cmd.validate()
         then: !cmd.hasErrors()
@@ -122,9 +120,17 @@ class SecurityControllerSpec extends ControllerSpec {
 
         then:
         controller.show == controller.redirectArgs.action
-        'helloworld-indiana' == controller.redirectArgs.params.id
+        'sg-123' == controller.redirectArgs.params.id
         controller.flash.message == "Security Group 'helloworld-indiana' has been created."
         1 * amazonEC2.createSecurityGroup(new CreateSecurityGroupRequest(groupName: 'helloworld-indiana',
-                description: 'Only accessible by Indiana Jones'))
+                description: 'Only accessible by Indiana Jones')) >> new CreateSecurityGroupResult(groupId: 'sg-123')
+        1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['helloworld-indiana'])) >> {
+            throw new AmazonServiceException('Missing Security Group')
+        }
+        1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >> {
+            new DescribeSecurityGroupsResult(
+                    securityGroups: [new SecurityGroup(groupName: 'helloworld-indiana', groupId: 'sg-123')])
+        }
+        0 * _
     }
 }
