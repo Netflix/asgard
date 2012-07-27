@@ -22,7 +22,7 @@ class AuthController {
 
     def login = {
         session[AUTH_TARGET_URL] = params.targetUri
-        redirect(url: pluginService.authenticationProvider.loginUrl())
+        redirect(url: pluginService.authenticationProvider.loginUrl(request))
     }
 
     def signIn = {

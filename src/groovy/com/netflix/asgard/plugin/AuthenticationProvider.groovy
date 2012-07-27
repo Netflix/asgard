@@ -30,7 +30,7 @@ interface AuthenticationProvider {
     /**
      * @return A url to send a redirect to when the login link is clicked.
      */
-    String loginUrl()
+    String loginUrl(HttpServletRequest request)
 
     /**
      * Build the Asgard login token based on a request sent to the auth/signIn endpoint.
