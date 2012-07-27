@@ -302,4 +302,24 @@ class ConfigService {
         grailsApplication.config.security?.apiToken?.expiryWarningIntervalMinutes ?: 360
     }
 
+    /**
+     * @return Application specific URL from OneLogin to redirect SSO requests to.
+     */
+    String getOneLoginUrl() {
+        grailsApplication.config.security?.onelogin?.url ?: null
+    }
+
+    /**
+     * @return Certificate provided by OneLogin used to validate SAML tokens.
+     */
+    String getOneLoginCertificate() {
+        grailsApplication.config.security?.onelogin?.certificate ?: null
+    }
+
+    /**
+     * @return Common suffix to truncate off usernames returned by OneLogin. For example '@netflix.com'.
+     */
+    String getOneLoginUsernameSuffix() {
+        grailsApplication.config.security?.onelogin?.usernameSuffix ?: null
+    }
 }
