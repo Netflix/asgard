@@ -41,9 +41,15 @@
                 <label for="appName">Application:</label>
               </td>
               <td>
-                <g:select class="required" title="The application that will run on the instances that use this security group" name="appName"
-                        noSelection="['':'-Choose application-']" value="${params.appName}" from="${applications}"
-                        optionKey="name" optionValue="name"/>
+                <g:if test="${name}">
+                  ${name}
+                  <input type="hidden" name="appName" value="${name}"/>
+                </g:if>
+                <g:else>
+                  <g:select class="required" title="The application that will run on the instances that use this security group" name="appName"
+                            noSelection="['':'-Choose application-']" value="${params.appName}" from="${applications}"
+                            optionKey="name" optionValue="name"/>
+                </g:else>
               </td>
             </tr>
             <tr class="prop">
@@ -59,7 +65,7 @@
                 <label for="description">Description:</label>
               </td>
               <td>
-                <input class="required" type="text" id="description" name="description" value="${params.description}"/>
+                <input class="required" type="text" id="description" name="description" value="${description}"/>
               </td>
             </tr>
             <tr class="prop">
