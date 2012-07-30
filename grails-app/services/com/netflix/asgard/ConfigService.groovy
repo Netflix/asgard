@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.model.InstanceTypeData
+import com.netflix.asgard.server.Environment
 import com.netflix.asgard.text.TextLinkTemplate
 
 /**
@@ -321,5 +322,20 @@ class ConfigService {
      */
     String getOneLoginUsernameSuffix() {
         grailsApplication.config.security?.onelogin?.usernameSuffix ?: null
+    }
+
+    /**
+     * @return Details of server configurations.
+     */
+    List<Environment> getServerEnvironments() {
+        grailsApplication.config.server?.environments ?: []
+    }
+
+    /**
+     * @return Identifying name for servers that service this AWS account.
+     */
+    String getCanonicalServerName() {
+        Environment currentEnvironment = serverEnvironments.find { it.name == accountName }
+        currentEnvironment?.canonicalDnsName ?: "asgard ${accountName}"
     }
 }
