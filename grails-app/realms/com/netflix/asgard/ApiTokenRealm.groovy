@@ -69,9 +69,9 @@ class ApiTokenRealm implements InitializingBean {
         DateTime expiryWarningThreshold = new DateTime().plusDays(configService.apiTokenExpiryWarningThresholdDays)
         if (apiToken.expires.isBefore(expiryWarningThreshold) &&
                 !tokensAlertsSent.getIfPresent(apiToken.credentials)) {
-            // TODO add server name to message
-            emailerService.sendUserEmail(apiToken.email, 'Asgard API key is about to expire',
-                    "The following Asgard API key is about to expire:\n\n" +
+            emailerService.sendUserEmail(apiToken.email,
+                    "${configService.canonicalServerName} API key is about to expire",
+                    "The following ${configService.canonicalServerName} API key is about to expire:\n\n" +
                     "Key: ${apiToken.credentials}\n" +
                     "Purpose: ${apiToken.purpose}\n" +
                     "Registered by: ${apiToken.username}\n" +

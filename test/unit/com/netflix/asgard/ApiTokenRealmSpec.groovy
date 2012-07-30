@@ -76,6 +76,7 @@ class ApiTokenRealmSpec extends Specification {
 
     def 'should send email when token is near expiration'() {
         configService.apiTokenExpiryWarningThresholdDays >> 100
+        configService.canonicalServerName >> 'asgardtest'
         secretService.apiEncryptionKeys >> ['key']
 
         // initialize cache
@@ -86,7 +87,8 @@ class ApiTokenRealmSpec extends Specification {
         2.times { realm.authenticate(apiToken) }
 
         then: 'only one email is sent'
-        1 * emailerService.sendUserEmail('testDL@netflix.com', 'Asgard API key is about to expire', _)
+        1 * emailerService.sendUserEmail('testDL@netflix.com', 'asgardtest API key is about to expire',
+                { it.startsWith('The following asgardtest API key is about to expire:') })
     }
 
 }
