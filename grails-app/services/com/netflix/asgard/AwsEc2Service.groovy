@@ -385,8 +385,14 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         caches.allSecurityGroups.by(userContext.region).list()
     }
 
-    /** Returns a filtered and sorted list of security groups to show in UI lists. Special groups are suppressed. */
-    Collection<SecurityGroup> getEffectiveSecurityGroups(UserContext userContext, String vpcId = null) {
+    /**
+     * Returns a filtered and sorted list of security groups to show in UI lists. Special groups are suppressed.
+     *
+     * @param userContext who, where, why
+     * @param vpcId only groups with a specified VPC id will be shown (no VPC id indicates non-VPC groups)
+     * @return list of security groups
+     */
+    List<SecurityGroup> getEffectiveSecurityGroups(UserContext userContext, String vpcId = null) {
         getSecurityGroups(userContext).findAll {
             isSecurityGroupEditable(it.groupName) && it.vpcId == vpcId
         }.sort { it.groupName.toLowerCase() }
