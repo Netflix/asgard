@@ -130,14 +130,17 @@ import org.apache.commons.collections.HashBag
             List<String> clusterNames =
                     groups.collect { Relationships.clusterFromGroupName(it.autoScalingGroupName) }.unique()
             request.alertingServiceConfigUrl = configService.alertingServiceConfigUrl
+            SecurityGroup appSecurityGroup = awsEc2Service.getSecurityGroup(userContext, name)
             def details = [
-                    'app': app,
-                    'strictName': Relationships.checkStrictName(app.name),
-                    'clusters': clusterNames,
-                    'groups': groups,
-                    'balancers': awsLoadBalancerService.getLoadBalancersForApp(userContext, name),
-                    'securities': awsEc2Service.getSecurityGroupsForApp(userContext, name),
-                    'launches': awsAutoScalingService.getLaunchConfigurationsForApp(userContext, name) ]
+                    app: app,
+                    strictName: Relationships.checkStrictName(app.name),
+                    clusters: clusterNames,
+                    groups: groups,
+                    balancers: awsLoadBalancerService.getLoadBalancersForApp(userContext, name),
+                    securities: awsEc2Service.getSecurityGroupsForApp(userContext, name),
+                    appSecurityGroup: appSecurityGroup,
+                    launches: awsAutoScalingService.getLaunchConfigurationsForApp(userContext, name)
+            ]
             withFormat {
                 html { return details }
                 xml { new XML(details).render(response) }
@@ -250,8 +253,7 @@ import org.apache.commons.collections.HashBag
         SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
         updateSecurityEgress(userContext, group, selectedGroups, params)
         flash.message = "Successfully updated access for Application '${name}'"
-
-        redirect(action: 'list')
+        redirect(action: 'show', params: [id: name])
     }
 
     // Security Group permission updating logic
