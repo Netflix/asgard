@@ -90,12 +90,11 @@ import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.SecurityGroupOption
 import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.ZoneAvailability
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 import org.apache.commons.codec.binary.Base64
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.beans.factory.InitializingBean
-
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 class AwsEc2Service implements CacheInitializer, InitializingBean {
 
@@ -115,7 +114,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     private static final List<String> ACTIVE_INSTANCE_STATES = ['pending', 'running'].asImmutable()
 
     /** Maximum number of image ids to send in a single create tags request. See ASGARD-895. */
-    private static final int TAG_IMAGE_CHUNK_SIZE = 500
+    private static final int TAG_IMAGE_CHUNK_SIZE = 250
 
     void afterPropertiesSet() {
         awsClient = awsClient ?: new MultiRegionAwsClient<AmazonEC2>({ Region region ->
