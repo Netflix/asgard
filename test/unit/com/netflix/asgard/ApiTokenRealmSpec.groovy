@@ -20,23 +20,23 @@ import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.authc.AuthenticationInfo
 import org.apache.shiro.authc.SimpleAuthenticationInfo
 import org.apache.shiro.subject.Subject
+import org.springframework.context.ApplicationContext
 import spock.lang.Specification
-
 
 class ApiTokenRealmSpec extends Specification {
 
     ApiToken apiToken
-    def configService = Mock(ConfigService)
-    def emailerService = Mock(EmailerService)
-    def secretService = Mock(SecretService)
-    ApiTokenRealm realm = new ApiTokenRealm(configService: configService, emailerService: emailerService,
-        secretService: secretService)
+    ApiTokenService apiTokenService = Mock(ApiTokenService)
+    ApplicationContext applicationContext = Mock(ApplicationContext)
+    ApiTokenRealm realm = new ApiTokenRealm(applicationContext: applicationContext)
 
     def setup() {
         Subject subject = Mock(Subject)
         subject.principal >> 'test@netflix.com'
         ShiroTestUtil.setSubject(subject)
         apiToken = new ApiToken('ThisPurpose', 'testDL@netflix.com', 90, 'key')
+
+        applicationContext.getBean(ApiTokenService) >> apiTokenService
     }
 
     def cleanup() {
@@ -53,18 +53,18 @@ class ApiTokenRealmSpec extends Specification {
     }
 
     def 'should authenticate valid token'() {
-        configService.apiTokenExpiryWarningThresholdDays >> 7
-        secretService.apiEncryptionKeys >> ['key']
+        apiTokenService.tokenValid(apiToken) >> true
 
         when:
         AuthenticationInfo info = realm.authenticate(apiToken)
 
         then:
+        1 * apiTokenService.checkExpiration(apiToken)
         info == new SimpleAuthenticationInfo('test@netflix.com', apiToken.credentials, 'ApiTokenRealm')
     }
 
     def 'should throw AuthenticationException when token is invalid'() {
-        secretService.apiEncryptionKeys >> ['different key']
+        apiTokenService.tokenValid(apiToken) >> false
 
         when:
         realm.authenticate(apiToken)
@@ -72,23 +72,7 @@ class ApiTokenRealmSpec extends Specification {
         then:
         AuthenticationException e = thrown()
         e.message == 'API Token is invalid'
-    }
-
-    def 'should send email when token is near expiration'() {
-        configService.apiTokenExpiryWarningThresholdDays >> 100
-        configService.canonicalServerName >> 'asgardtest'
-        secretService.apiEncryptionKeys >> ['key']
-
-        // initialize cache
-        configService.apiTokenExpiryWarningIntervalMinutes >> 360
-        realm.afterPropertiesSet()
-
-        when: 'multiple authentication calls'
-        2.times { realm.authenticate(apiToken) }
-
-        then: 'only one email is sent'
-        1 * emailerService.sendUserEmail('testDL@netflix.com', 'asgardtest API key is about to expire',
-                { it.startsWith('The following asgardtest API key is about to expire:') })
+        0 * apiTokenService.checkExpiration(apiToken)
     }
 
 }

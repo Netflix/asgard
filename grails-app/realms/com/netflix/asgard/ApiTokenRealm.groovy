@@ -15,40 +15,21 @@
  */
 package com.netflix.asgard
 
-import com.google.common.cache.Cache
-import com.google.common.cache.CacheBuilder
 import com.netflix.asgard.auth.ApiToken
-import java.util.concurrent.TimeUnit
 import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.authc.AuthenticationToken
 import org.apache.shiro.authc.SimpleAuthenticationInfo
-import org.joda.time.DateTime
-import org.springframework.beans.factory.InitializingBean
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
 
 /**
- * Security realm for validating Asgard api tokes. Takes care of sending out expiration warnings when a token is close
- * to expiration.
+ * Security realm for validating Asgard api tokens. Sends out expiration warnings when a token is near expiration.
  */
-class ApiTokenRealm implements InitializingBean {
+class ApiTokenRealm implements ApplicationContextAware {
 
     static authTokenClass = ApiToken
 
-    def configService
-    def emailerService
-    def secretService
-
-    /**
-     * Time based expiring cache of tokens that have triggered an email alert. This allows only one alert to be sent out
-     * per configured interval.
-     */
-    private Cache<String, String> tokensAlertsSent
-
-    void afterPropertiesSet() {
-        tokensAlertsSent =  new CacheBuilder()
-                .expireAfterWrite(configService.apiTokenExpiryWarningIntervalMinutes, TimeUnit.MINUTES)
-                .maximumSize(256)
-                .build()
-    }
+    ApplicationContext applicationContext
 
     def authenticate(AuthenticationToken authToken) {
         if (authToken == null) {
@@ -56,32 +37,14 @@ class ApiTokenRealm implements InitializingBean {
         }
 
         ApiToken apiToken = (ApiToken)authToken
-        checkKeyValid(apiToken)
-
-        new SimpleAuthenticationInfo(apiToken.username, apiToken.credentials, 'ApiTokenRealm')
-    }
-
-    private void checkKeyValid(ApiToken apiToken) {
-        if (!isKeyValid(apiToken)) {
+        // Realms are not lazy loaded so have to load this way to prevent eager loading of SecretService.
+        ApiTokenService apiTokenService = applicationContext.getBean(ApiTokenService)
+        if (!apiTokenService.tokenValid(apiToken)) {
             String message = apiToken.expired ? 'API Token has expired' : 'API Token is invalid'
             throw new AuthenticationException(message)
         }
-        DateTime expiryWarningThreshold = new DateTime().plusDays(configService.apiTokenExpiryWarningThresholdDays)
-        if (apiToken.expires.isBefore(expiryWarningThreshold) &&
-                !tokensAlertsSent.getIfPresent(apiToken.credentials)) {
-            emailerService.sendUserEmail(apiToken.email,
-                    "${configService.canonicalServerName} API key is about to expire",
-                    "The following ${configService.canonicalServerName} API key is about to expire:\n\n" +
-                    "Key: ${apiToken.credentials}\n" +
-                    "Purpose: ${apiToken.purpose}\n" +
-                    "Registered by: ${apiToken.username}\n" +
-                    "Expires: ${apiToken.expiresISOFormatted}\n\n" +
-                    "Please generate a new key.")
-            tokensAlertsSent.put(apiToken.credentials, apiToken.credentials)
-        }
-    }
+        apiTokenService.checkExpiration(apiToken)
 
-    private boolean isKeyValid(ApiToken apiToken) {
-        secretService.apiEncryptionKeys.find { String encryptionKey -> apiToken.isValid(encryptionKey) } != null
+        new SimpleAuthenticationInfo(apiToken.username, apiToken.credentials, 'ApiTokenRealm')
     }
 }
