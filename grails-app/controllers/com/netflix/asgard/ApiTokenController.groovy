@@ -44,7 +44,7 @@ class ApiTokenController {
 
     def generate = { GenerateApiTokenCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action: 'create', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model:[cmd: cmd], params: params)
         } else {
             flash.apiToken = new ApiToken(cmd.purpose, cmd.email, configService.apiTokenExpirationDays,
                     secretService.apiEncryptionKeys[0])
