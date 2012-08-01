@@ -28,7 +28,8 @@
       <div class="message">${flash.message}</div>
     </g:if>
     <g:form method="post">
-      <input type="hidden" id="name" name="name" value="${group.groupName}"/>
+      <input type="hidden" name="name" value="${group.groupName}"/>
+      <input type="hidden" name="id" value="${group.groupId}"/>
       <div class="dialog">
         <table>
           <tbody>
@@ -50,13 +51,21 @@
           </tr>
           <tr>
             <td class="name">Ingress Permissions:</td>
-            <td class="value">
-              <table>
+            <td class="list">
+              <table class="securityGroups">
+                <thead>
+                  <tr>
+                    <th>Open</th>
+                    <th>Security Group (traffic source)</th>
+                    <th>Port Ranges</th>
+                  </tr>
+                </thead>
                 <tbody>
                 <g:each var="g" in="${groups}">
                   <tr>
-                    <td><g:checkBox name="selectedGroups" value="${g.key}" checked="${g.value[0]}"
-                          /> ${g.key} <input type="text" id="${g.key}" name="${g.key}" value="${g.value[1]}"/></td>
+                    <td class="checkbox"><g:checkBox name="selectedGroups" value="${g.source}" checked="${g.allowed}"/></td>
+                    <td><label for="${g.source}">${g.source}</label></td>
+                    <td><input type="text" id="${g.source}" name="${g.source}" value="${g.ports}"/></td>
                   </tr>
                 </g:each>
                 </tbody>

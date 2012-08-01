@@ -36,7 +36,8 @@
           <g:link class="clean" action="audit">Audit Ungrouped Instances</g:link>
         </div>
       </g:render>
-      <div class="paginateButtons"></div>
+      <div class="paginateButtons">
+      </div>
     </g:form>
   </div>
 </body>

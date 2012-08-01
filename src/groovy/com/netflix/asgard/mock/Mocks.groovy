@@ -59,6 +59,8 @@ import com.netflix.asgard.ThreadScheduler
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.cache.Fillable
 import com.netflix.asgard.format.JsonpStripper
+import com.netflix.asgard.model.HardwareProfile
+import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.plugin.UserDataProvider
 import grails.converters.JSON
 import grails.converters.XML
@@ -145,6 +147,12 @@ class Mocks {
                             online: false,
                             cloud: [
                                     accountName: 'test',
+                                    customIntanceTypes: [
+                                            new InstanceTypeData(linuxOnDemandPrice: 145.86, hardwareProfile:
+                                                    new HardwareProfile(
+                                                            instanceType: 'huge.mainframe',
+                                                            architecture: '64-bit')
+                                            )],
                                     defaultKeyName: 'nf-test-keypair-a',
                                     defaultSecurityGroups: ['nf-datacenter', 'nf-infrastructure'],
                                     discouragedAvailabilityZones: ['us-east-1b', 'us-west-1b'],
@@ -283,6 +291,7 @@ class Mocks {
             instanceTypeService = new InstanceTypeService()
             instanceTypeService.grailsApplication = grailsApplication()
             instanceTypeService.awsEc2Service = awsEc2Service()
+            instanceTypeService.configService = configService()
             instanceTypeService.emailerService = emailerService()
             instanceTypeService.caches = caches()
             instanceTypeService.initializeCaches()

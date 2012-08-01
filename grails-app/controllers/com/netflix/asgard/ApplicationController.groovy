@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.MonitorBucketType
@@ -34,9 +35,9 @@ import org.apache.commons.collections.HashBag
     def configService
     def discoveryService
 
-    def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', securityUpdate:'POST']
+    def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', securityUpdate: 'POST']
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -117,7 +118,6 @@ import org.apache.commons.collections.HashBag
     def show = {
         String name = params.name ?: params.id
         UserContext userContext = UserContext.of(request)
-        //println "Show App: ${name}"
         AppRegistration app = applicationService.getRegisteredApplication(userContext, name)
         if (!app) {
             Requests.renderNotFound('Application', name, this)
@@ -146,7 +146,7 @@ import org.apache.commons.collections.HashBag
         }
     }
 
-    static String[] typeList = [ 'Standalone Application', 'Web Application', 'Web Service']
+    static String[] typeList = ['Standalone Application', 'Web Application', 'Web Service']
 
     def create = {
         ['typeList' : typeList]
@@ -154,7 +154,9 @@ import org.apache.commons.collections.HashBag
 
     def save = { ApplicationCreateCommand cmd ->
         if (cmd.hasErrors()) {
+            chain(action:create, model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
             chain(action: 'create', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
+            chain(action: create, model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
         } else {
             String name = params.name
             UserContext userContext = UserContext.of(request)
@@ -200,7 +202,9 @@ import org.apache.commons.collections.HashBag
         } catch (Exception e) {
             flash.message = "Could not update Application: ${e}"
         }
+        redirect(action:show, params:[name:name])
         redirect(action: 'show', params:[name:name])
+        redirect(action: 'show', params: [name: name])
     }
 
     def delete = {
@@ -219,15 +223,25 @@ import org.apache.commons.collections.HashBag
     def security = {
         String name = params.name
         UserContext userContext = UserContext.of(request)
-        def app = applicationService.getRegisteredApplication(userContext, name)
+        AppRegistration app = applicationService.getRegisteredApplication(userContext, name)
         if (!app) {
             flash.message = "Application '${name}' not found."
             redirect(action: 'list')
             return
-        } else {
-            def group = awsEc2Service.getSecurityGroup(userContext, name)
-            def isNew = false
+        }
+        SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
+        if (!group) {
+            awsEc2Service.createSecurityGroup(userContext, name, app.description) // TODO move creation to update?
+            group = awsEc2Service.getSecurityGroup(userContext, name)
             if (!group) {
+                isNew = true
+                awsEc2Service.createSecurityGroup(userContext, name, app.description) // TODO move creation to update?
+                group = awsEc2Service.getSecurityGroup(userContext, name)
+                if (!group) {
+                    flash.message = "Could not retrieve or create Security Group '${grpName}'"
+                    redirect(action:list)
+                    return
+                }
                 isNew = true
                 awsEc2Service.createSecurityGroup(userContext, name, app.description) // TODO move creation to update?
                 group = awsEc2Service.getSecurityGroup(userContext, name)
@@ -236,39 +250,25 @@ import org.apache.commons.collections.HashBag
                     redirect(action: 'list')
                     return
                 }
-            }
-            return [ 'app' : app,
-                     'name' : name,
-                     'group' : group,
-                     'groups' : getSecurityIngressibility(name, isNew)
-            ]
-        }
-    }
-
-    private Map<String, List> getSecurityIngressibility(String srcGroupName, boolean isNew) {
-        UserContext userContext = UserContext.of(request)
-        List<SecurityGroup> allGroups = awsEc2Service.getEffectiveSecurityGroups(userContext)
-        Map grpMap = [:]
-        allGroups.each { targetGroup ->
-            String ports = awsEc2Service.getIngressFrom(targetGroup, srcGroupName)
-            if (ports) {
-                grpMap[targetGroup.groupName] = [ true, ports ]
-            } else {
-                ports = awsEc2Service.bestIngressPortsFor(targetGroup)
-                grpMap[targetGroup.groupName] = [ false, ports ]
+                flash.message = "Could not retrieve or create Security Group '${name}'"
+                redirect(action: 'list')
+                return
             }
         }
-        //println grpMap
-        grpMap
+        [
+                app: app,
+                name: name,
+                group: group,
+                groups: awsEc2Service.getSecurityGroupOptionsForSource(userContext, group)
+        ]
     }
 
     def securityUpdate = {
-        //println "Security Update: ${params}"
-        def name = params.name
+        String name = params.name
         UserContext userContext = UserContext.of(request)
         List<String> selectedGroups = Requests.ensureList(params.selectedGroups)
-
-        updateSecurityEgress(userContext, name, selectedGroups, params)
+        SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
+        updateSecurityEgress(userContext, group, selectedGroups, params)
         flash.message = "Successfully updated access for Application '${name}'"
 
         redirect(action: 'list')
@@ -276,11 +276,12 @@ import org.apache.commons.collections.HashBag
 
     // Security Group permission updating logic
 
-    private void updateSecurityEgress(UserContext userContext, String srcGroup, List<String> selectedGroups, Map portMap) {
+    private void updateSecurityEgress(UserContext userContext, SecurityGroup srcGroup, List<String> selectedGroups, Map portMap) {
         awsEc2Service.getSecurityGroups(userContext).each {SecurityGroup targetGroup ->
             boolean wantAccess = selectedGroups.any {it == targetGroup.groupName} && portMap[targetGroup.groupName] != ''
             String  wantPorts = wantAccess ? portMap[targetGroup.groupName] : null
-            awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, srcGroup, wantPorts)
+            List<IpPermission> wantPerms = awsEc2Service.permissionsFromString(wantPorts)
+            awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, srcGroup, wantPerms)
         }
     }
 
@@ -293,7 +294,8 @@ class ApplicationCreateCommand {
     String description
     String owner
     static constraints = {
-        name(nullable:false, blank:false, size:1..Relationships.APPLICATION_MAX_LENGTH, validator: { value, command ->
+        name(nullable: false, blank: false, size: 1..Relationships.APPLICATION_MAX_LENGTH,
+                validator: { value, command ->
             if (!Relationships.checkName(value)) {
                 return "application.name.illegalChar"
             }
@@ -301,9 +303,9 @@ class ApplicationCreateCommand {
                 return "name.usesReservedFormat"
             }
         })
-        email(nullable:false, blank:false, email:true)
-        type(nullable:false, blank:false)
-        description(nullable:false, blank:false)
-        owner(nullable:false, blank:false)
+        email(nullable: false, blank: false, email: true)
+        type(nullable: false, blank: false)
+        description(nullable: false, blank: false)
+        owner(nullable: false, blank: false)
     }
 }

@@ -17,13 +17,24 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.ec2.AmazonEC2
+import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
+import com.amazonaws.services.ec2.model.DescribeSubnetsResult
 import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.InstanceState
+import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.Placement
 import com.amazonaws.services.ec2.model.ReservedInstances
+import com.amazonaws.services.ec2.model.RevokeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.SecurityGroup
+import com.amazonaws.services.ec2.model.Subnet
+import com.amazonaws.services.ec2.model.Tag
+import com.amazonaws.services.ec2.model.UserIdGroupPair
+import com.google.common.collect.ImmutableList
+import com.netflix.asgard.model.SecurityGroupOption
+import com.netflix.asgard.model.SubnetData
+import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.ZoneAvailability
 import spock.lang.Specification
 
@@ -48,7 +59,13 @@ class AwsEc2ServiceUnitSpec extends Specification {
                 (EntityType.instance): mockInstanceCache,
                 (EntityType.reservation): mockReservationCache,
         ]))
-        awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }), caches: caches)
+        TaskService taskService = new TaskService() {
+            def runTask(UserContext userContext, String name, Closure work, Link link = null) {
+                work(new Task())
+            }
+        }
+        awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }), caches: caches,
+                taskService: taskService)
     }
 
     def 'active instances should only include pending and running states'() {
@@ -216,5 +233,114 @@ class AwsEc2ServiceUnitSpec extends Specification {
         }
         1 * mockSecurityGroupCache.list() >> [new SecurityGroup(groupId: 'sg-000', groupName: 'super_secure')]
         0 * mockSecurityGroupCache.put(_, _)
+    }
+
+    def 'should retrieve subnets'() {
+        Closure awsSubnet = { String id, String zone, String purpose, String target ->
+            new Subnet(subnetId: id, availabilityZone: zone, tags: [new Tag(key: 'immutable_metadata',
+                    value: "{ \"purpose\": \"${purpose}\", \"target\": \"${target}\" }")])
+        }
+        List<Subnet> subnets = ImmutableList.of(
+                awsSubnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', 'ec2'),
+                awsSubnet('subnet-e9b0a3a4', 'us-east-1a', 'external', 'elb'),
+        )
+        AmazonEC2 mockAmazonEC2 = Mock(AmazonEC2)
+        Caches caches = new Caches(new MockCachedMapBuilder([
+                (EntityType.subnet): new CachedMapBuilder(null).of(EntityType.subnet).buildCachedMap(),
+        ]))
+        AwsEc2Service awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }),
+                caches: caches)
+        awsEc2Service.initializeCaches()
+
+        when:
+        caches.allSubnets.fill()
+
+        then:
+        1 * mockAmazonEC2.describeSubnets() >> new DescribeSubnetsResult(subnets: subnets)
+        ImmutableList.copyOf(awsEc2Service.getSubnets(userContext).allSubnets) == [
+                new SubnetData(subnetId: 'subnet-e9b0a3a1', availabilityZone: 'us-east-1a', purpose: 'internal',
+                        target: SubnetTarget.EC2),
+                new SubnetData(subnetId: 'subnet-e9b0a3a4', availabilityZone: 'us-east-1a', purpose: 'external',
+                        target: SubnetTarget.ELB),
+        ]
+    }
+
+    private Collection<SecurityGroup> simulateWarGames() {
+        SecurityGroupDsl.config {
+            wopr(7101, 7102) >> norad
+            joshua(7101, 7102) >> [wopr, globalthermonuclearwar, tictactoe]
+            modem(8080, 8080) >> joshua
+            falken(7101, 7102) >> joshua
+        }
+    }
+
+    def 'options for target security group should include all groups sorted, but only some allowed to call target'() {
+
+        Collection<SecurityGroup> warGamesSecurityGroups = simulateWarGames()
+        SecurityGroup joshua = warGamesSecurityGroups.find { it.groupName == 'joshua' }
+
+        when:
+        List<SecurityGroupOption> joshuaCallers = awsEc2Service.getSecurityGroupOptionsForTarget(userContext, joshua)
+
+        then:
+        joshuaCallers == [
+                new SecurityGroupOption('falken', 'joshua', true, '7101-7102'),
+                new SecurityGroupOption('globalthermonuclearwar', 'joshua', false, '7001'),
+                new SecurityGroupOption('joshua', 'joshua', false, '7001'),
+                new SecurityGroupOption('modem', 'joshua', true, '8080'),
+                new SecurityGroupOption('norad', 'joshua', false, '7001'),
+                new SecurityGroupOption('tictactoe', 'joshua', false, '7001'),
+                new SecurityGroupOption('wopr', 'joshua', false, '7001'),
+        ]
+        1 * mockSecurityGroupCache.list() >> { warGamesSecurityGroups }
+    }
+
+    def 'options for source group should include all groups sorted, but only some allowed to be called by source'() {
+
+        Collection<SecurityGroup> warGamesSecurityGroups = simulateWarGames()
+        SecurityGroup joshua = warGamesSecurityGroups.find { it.groupName == 'joshua' }
+
+        when:
+        List<SecurityGroupOption> gamesForJoshua = awsEc2Service.getSecurityGroupOptionsForSource(userContext, joshua)
+
+        then:
+        gamesForJoshua == [
+                new SecurityGroupOption('joshua', 'falken', false, '7001'),
+                new SecurityGroupOption('joshua', 'globalthermonuclearwar', true, '7101-7102'),
+                new SecurityGroupOption('joshua', 'joshua', false, '7001'),
+                new SecurityGroupOption('joshua', 'modem', false, '7001'),
+                new SecurityGroupOption('joshua', 'norad', false, '7001'),
+                new SecurityGroupOption('joshua', 'tictactoe', true, '7101-7102'),
+                new SecurityGroupOption('joshua', 'wopr', true, '7101-7102'),
+        ]
+        1 * mockSecurityGroupCache.list() >> { simulateWarGames() }
+    }
+
+    def 'should update security groups'() {
+        List<UserIdGroupPair> userIdGroupPairs = [new UserIdGroupPair(groupId: 'sg-s')]
+        SecurityGroup source = new SecurityGroup(groupName: 'source', groupId: 'sg-s')
+        SecurityGroup target = new SecurityGroup(groupName: 'target', groupId: 'sg-t', ipPermissions: [
+                new IpPermission(fromPort: 1, toPort: 1, userIdGroupPairs: userIdGroupPairs),
+                new IpPermission(fromPort: 2, toPort: 2, userIdGroupPairs: userIdGroupPairs),
+        ])
+
+        when:
+        awsEc2Service.updateSecurityGroupPermissions(userContext, target, source, [
+                new IpPermission(fromPort: 2, toPort: 2),
+                new IpPermission(fromPort: 3, toPort: 3),
+        ])
+
+        then:
+        1 * mockAmazonEC2.authorizeSecurityGroupIngress(new AuthorizeSecurityGroupIngressRequest(groupId: 'sg-t',
+                ipPermissions: [
+                        new IpPermission(fromPort: 3, toPort: 3, ipProtocol: 'tcp', userIdGroupPairs: userIdGroupPairs),
+                ]))
+        1 * mockAmazonEC2.revokeSecurityGroupIngress(new RevokeSecurityGroupIngressRequest(groupId: 'sg-t',
+                ipPermissions: [
+                        new IpPermission(fromPort: 1, toPort: 1, ipProtocol: 'tcp', userIdGroupPairs: userIdGroupPairs),
+                ]))
+        1 * mockAmazonEC2.describeSecurityGroups(_) >> new DescribeSecurityGroupsResult(
+                securityGroups: [new SecurityGroup()])
+        0 * _
     }
 }

@@ -98,9 +98,13 @@
           <td class="name">Availablility Zones:</td>
           <td class="value">
             <g:each var="zone" in="${group.availabilityZones}">
-              <div><g:availabilityZone value="${zone}"/></div>
+              <div><g:availabilityZone value="${zone}"/> (${zonesWithInstanceCounts.count(zone)})</div>
             </g:each>
           </td>
+        </tr>
+        <tr class="prop" title="Comma-separated list that identifies VPC subnets per zone, if applicable.">
+          <td class="name">VPC Zone Identifier:</td>
+          <td class="value">${vpcZoneIdentifier}</td>
         </tr>
         <g:render template="/common/showTags" model="[entity: group]"/>
         <tr class="prop">

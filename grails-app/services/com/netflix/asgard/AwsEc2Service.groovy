@@ -51,7 +51,6 @@ import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsRequest
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsResult
 import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryRequest
 import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryResult
-import com.amazonaws.services.ec2.model.DescribeSubnetsResult
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest
 import com.amazonaws.services.ec2.model.DetachVolumeRequest
 import com.amazonaws.services.ec2.model.Filter
@@ -82,12 +81,17 @@ import com.amazonaws.services.ec2.model.TerminateInstancesResult
 import com.amazonaws.services.ec2.model.UserIdGroupPair
 import com.amazonaws.services.ec2.model.Volume
 import com.amazonaws.services.ec2.model.VolumeAttachment
+import com.amazonaws.services.ec2.model.Vpc
 import com.google.common.collect.HashMultiset
 import com.google.common.collect.Lists
 import com.google.common.collect.Multiset
 import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.cache.CacheInitializer
+import com.netflix.asgard.model.SecurityGroupOption
+import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.ZoneAvailability
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 import org.apache.commons.codec.binary.Base64
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.beans.factory.InitializingBean
@@ -96,12 +100,12 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     static transactional = false
 
-    private static SECURITY_GROUP_ID_PATTERN = ~/sg-[a-f0-9]+/
+    private static Pattern SECURITY_GROUP_ID_PATTERN = ~/sg-[a-f0-9]+/
 
-    def configService
     MultiRegionAwsClient<AmazonEC2> awsClient
     def awsClientService
     Caches caches
+    def configService
     def restClientService
     def taskService
     List<String> accounts = [] // main account is accounts[0]
@@ -110,7 +114,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     private static final List<String> ACTIVE_INSTANCE_STATES = ['pending', 'running'].asImmutable()
 
     /** Maximum number of image ids to send in a single create tags request. See ASGARD-895. */
-    private static final int TAG_IMAGE_CHUNK_SIZE = 500
+    private static final int TAG_IMAGE_CHUNK_SIZE = 250
 
     void afterPropertiesSet() {
         awsClient = awsClient ?: new MultiRegionAwsClient<AmazonEC2>({ Region region ->
@@ -122,6 +126,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     void initializeCaches() {
+        caches.allVpcs.ensureSetUp({ Region region -> retrieveVpcs(region) })
         caches.allKeyPairs.ensureSetUp({ Region region -> retrieveKeys(region) })
         caches.allAvailabilityZones.ensureSetUp({ Region region -> retrieveAvailabilityZones(region) },
                 { Region region -> caches.allKeyPairs.by(region).fill() })
@@ -131,6 +136,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         caches.allSecurityGroups.ensureSetUp({ Region region -> retrieveSecurityGroups(region) })
         caches.allSnapshots.ensureSetUp({ Region region -> retrieveSnapshots(region) })
         caches.allVolumes.ensureSetUp({ Region region -> retrieveVolumes(region) })
+        caches.allSubnets.ensureSetUp({ Region region -> retrieveSubnets(region) })
     }
 
     // Availability Zones
@@ -145,11 +151,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         caches.allAvailabilityZones.by(userContext.region).list().sort { it.zoneName }
     }
 
-    Collection<Subnet> getSubnets(UserContext userContext) {
-        DescribeSubnetsResult result = awsClient.by(userContext.region).describeSubnets()
-        result.getSubnets()
-    }
-
     Collection<AvailabilityZone> getRecommendedAvailabilityZones(UserContext userContext) {
         List<String> discouragedAvailabilityZones = configService.discouragedAvailabilityZones
         getAvailabilityZones(userContext).findAll { !(it.zoneName in discouragedAvailabilityZones) }
@@ -158,7 +159,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     // Images
 
     private List<Image> retrieveImages(Region region) {
-        List<String> owners = configService.publicResourceAccounts + accounts
+        List<String> owners = configService.publicResourceAccounts + configService.awsAccounts
         DescribeImagesRequest request = new DescribeImagesRequest().withOwners(owners)
         AmazonEC2 awsClientForRegion = awsClient.by(region)
         List<Image> images = awsClientForRegion.describeImages(request).getImages()
@@ -183,6 +184,34 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         caches.allImages.by(userContext.region).list()
     }
 
+    private Collection<Subnet> retrieveSubnets(Region region) {
+        awsClient.by(region).describeSubnets().subnets
+    }
+
+    /**
+     * Gets information about all subnets in a region.
+     *
+     * @param userContext who, where, why
+     * @return a wrapper for querying subnets
+     */
+    Subnets getSubnets(UserContext userContext) {
+        Subnets.from(caches.allSubnets.by(userContext.region).list())
+    }
+
+    private Collection<Vpc> retrieveVpcs(Region region) {
+        awsClient.by(region).describeVpcs().vpcs
+    }
+
+    /**
+     * Gets information about all VPCs in a region.
+     *
+     * @param userContext who, where, why
+     * @return a list of VPCs
+     */
+    Collection<Vpc> getVpcs(UserContext userContext) {
+        caches.allVpcs.by(userContext.region).list()
+    }
+
     /**
      * Based on a list of users and image ids, gives back a list of image objects for those ids that would be executable
      * by any of those users.
@@ -193,7 +222,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      * @return Collection< Image > The images which match the imageIds where any of the users in executableUsers have
      *         launch permissions
      */
-    Collection<Image> getImagesWithLaunchPermissions(UserContext userContext, Collection<String> executableUsers, Collection<String> imageIds) {
+    Collection<Image> getImagesWithLaunchPermissions(UserContext userContext, Collection<String> executableUsers,
+                                                     Collection<String> imageIds) {
         DescribeImagesRequest request = new DescribeImagesRequest(executableUsers: executableUsers, imageIds: imageIds)
         DescribeImagesResult result = awsClient.by(userContext.region).describeImages(request)
         result.images
@@ -268,30 +298,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     //mutators
 
-    void setImageName(UserContext userContext, String imageId, String name) {
-        taskService.runTask(userContext, "Set image ${imageId} name to ${name}", { task ->
-            ModifyImageAttributeRequest request = new ModifyImageAttributeRequest()
-                    .withImageId(imageId)
-                    .withAttribute("name")
-                    .withOperationType("add")
-                    .withValue(name)
-            awsClient.by(userContext.region).modifyImageAttribute(request)
-        }, Link.to(EntityType.image, imageId))
-        getImage(userContext, imageId)
-    }
-
-    void setImageDescription(UserContext userContext, String imageId, String description) {
-        taskService.runTask(userContext, "Set image ${imageId} description to ${description}", { task ->
-            ModifyImageAttributeRequest request = new ModifyImageAttributeRequest()
-                    .withImageId(imageId)
-                    .withAttribute("description")
-                    .withOperationType("add")
-                    .withValue(description)
-            awsClient.by(userContext.region).modifyImageAttribute(request)
-        }, Link.to(EntityType.image, imageId))
-        getImage(userContext, imageId)
-    }
-
     void addImageLaunchers(UserContext userContext, String imageId, List<String> userIds, Task existingTask = null) {
         taskService.runTask(userContext, "Add to image ${imageId}, launchers ${userIds}", { task ->
             ModifyImageAttributeRequest request = new ModifyImageAttributeRequest()
@@ -301,18 +307,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
                     .withUserIds(userIds)
             awsClient.by(userContext.region).modifyImageAttribute(request)
         }, Link.to(EntityType.image, imageId), existingTask)
-        getImage(userContext, imageId)
-    }
-
-    void removeImageLaunchers(UserContext userContext, String imageId, List<String> userIds) {
-        taskService.runTask(userContext, "Remove from image ${imageId}, launchers ${userIds}", { task ->
-            ModifyImageAttributeRequest request = new ModifyImageAttributeRequest()
-                    .withImageId(imageId)
-                    .withAttribute('launchPermission')
-                    .withOperationType('remove')
-                    .withUserIds(userIds)
-            awsClient.by(userContext.region).modifyImageAttribute(request)
-        }, Link.to(EntityType.image, imageId))
         getImage(userContext, imageId)
     }
 
@@ -331,21 +325,11 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         getImage(userContext, imageId)
     }
 
-    void createImageTag(UserContext userContext, String imageId, String name, String value) {
-        Check.notEmpty(imageId, "imageId")
-        createImageTags(userContext, [imageId], name, value)
-    }
-
-    void deleteImageTag(UserContext userContext, String imageId, String name) {
-        Check.notEmpty(imageId, "imageId")
-        deleteImageTags(userContext, [imageId], name)
-    }
-
     void createImageTags(UserContext userContext, Collection<String> imageIds, String name, String value) {
         Check.notEmpty(imageIds, "imageIds")
         Check.notEmpty(name, "name")
         Check.notEmpty(value, "value")
-        List<List<String>> partitionedImageIds = Lists.partition(imageIds, TAG_IMAGE_CHUNK_SIZE)
+        List<List<String>> partitionedImageIds = Lists.partition(imageIds as List, TAG_IMAGE_CHUNK_SIZE)
         for (List<String> imageIdsChunk in partitionedImageIds) {
             CreateTagsRequest request = new CreateTagsRequest(resources: imageIdsChunk, tags: [new Tag(name, value)])
             awsClient.by(userContext.region).createTags(request)
@@ -367,8 +351,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     List<String> authorizeSecondaryImageLaunchers(UserContext userContext, String imageId, Task existingTask = null) {
         try {
             List<String> hasAccounts = getImageLaunchers(userContext, imageId)
-            hasAccounts += accounts[0]
-            List<String> addAccounts = accounts.findAll {account -> !hasAccounts.any {it == account}}
+            hasAccounts += configService.awsAccountNumber
+            List<String> addAccounts = configService.awsAccounts.findAll {account -> !hasAccounts.any {it == account}}
             if (addAccounts.size() > 0) {
                 addImageLaunchers(userContext, imageId, addAccounts, existingTask)
             }
@@ -402,7 +386,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     /** Returns a filtered and sorted list of security groups to show in UI lists. Special groups are suppressed. */
     Collection<SecurityGroup> getEffectiveSecurityGroups(UserContext userContext) {
-        getSecurityGroups(userContext).findAll{ isSecurityGroupEditable(it.groupName) }.sort{ it.groupName.toLowerCase() }
+        getSecurityGroups(userContext).findAll {
+            isSecurityGroupEditable(it.groupName)
+        }.sort { it.groupName.toLowerCase() }
     }
 
     Boolean isSecurityGroupEditable(String name) {
@@ -410,7 +396,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     private List<SecurityGroup> retrieveSecurityGroups(Region region) {
-        awsClient.by(region).describeSecurityGroups(new DescribeSecurityGroupsRequest()).securityGroups
+        awsClient.by(region).describeSecurityGroups().securityGroups
     }
 
     List<SecurityGroup> getSecurityGroupsForApp(UserContext userContext, String appName) {
@@ -448,42 +434,89 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         null
     }
 
-    // mutators
-
-    SecurityGroup createSecurityGroup(UserContext userContext, String name, String description) {
-        Check.notEmpty(name, 'name')
-        Check.notEmpty(description, 'description')
-        taskService.runTask(userContext, "Create Security Group ${name}", { task ->
-            awsClient.by(userContext.region).createSecurityGroup(
-                    new CreateSecurityGroupRequest().withGroupName(name).withDescription(description))
-        }, Link.to(EntityType.security, name))
-        getSecurityGroup(userContext, name)
+    /**
+     * Calculates the relationships between most security groups (many potential sources of traffic) and one security
+     * group (single target of traffic).
+     *
+     * @param userContext who, where, why
+     * @param targetGroup the security group for the instances receiving traffic
+     * @return list of security group options for display
+     */
+    List<SecurityGroupOption> getSecurityGroupOptionsForTarget(UserContext userContext, SecurityGroup targetGroup) {
+        Collection<SecurityGroup> sourceGroups = getEffectiveSecurityGroups(userContext)
+        // Find Security Groups consistent with the target with respect to VPC/non-VPC
+        sourceGroups = sourceGroups.findAll { it.vpcId.asBoolean() == targetGroup.vpcId.asBoolean() }
+        String guessedPorts = bestIngressPortsFor(targetGroup)
+        sourceGroups.collect { SecurityGroup sourceGroup ->
+            buildSecurityGroupOption(sourceGroup, targetGroup, guessedPorts)
+        }
     }
 
-    void removeSecurityGroup(UserContext userContext, String name) {
+    /**
+     * Calculates the relationships between one security group (single source of traffic) and most security groups
+     * (many potential targets of traffic).
+     *
+     * @param userContext who, where, why
+     * @param sourceGroupName the security group for the instances sending traffic
+     * @return list of security group options for display
+     */
+    List<SecurityGroupOption> getSecurityGroupOptionsForSource(UserContext userContext, SecurityGroup sourceGroup) {
+        Collection<SecurityGroup> targetGroups = getEffectiveSecurityGroups(userContext)
+        targetGroups.collect { SecurityGroup targetGroup ->
+            String guessedPorts = bestIngressPortsFor(targetGroup)
+            buildSecurityGroupOption(sourceGroup, targetGroup, guessedPorts)
+        }
+    }
+
+    private SecurityGroupOption buildSecurityGroupOption(SecurityGroup sourceGroup, SecurityGroup targetGroup,
+                                                         String defaultPorts) {
+        Collection<IpPermission> ipPermissions = getIngressFrom(targetGroup, sourceGroup)
+        String accessiblePorts = permissionsToString(ipPermissions)
+        boolean accessible = accessiblePorts ? true : false
+        String ports = accessiblePorts ?: defaultPorts
+        String groupName = targetGroup.groupName
+        new SecurityGroupOption(source: sourceGroup.groupName, target: groupName, allowed: accessible, ports: ports)
+    }
+
+    // mutators
+
+    SecurityGroup createSecurityGroup(UserContext userContext, String name, String description, String vpcId = null) {
+        Check.notEmpty(name, 'name')
+        Check.notEmpty(description, 'description')
+        String groupId = null
+        taskService.runTask(userContext, "Create Security Group ${name}", { task ->
+            def result = awsClient.by(userContext.region).createSecurityGroup(
+                    new CreateSecurityGroupRequest(groupName: name, description: description, vpcId: vpcId))
+            groupId = result.groupId
+        }, Link.to(EntityType.security, name))
+        getSecurityGroup(userContext, groupId)
+    }
+
+    void removeSecurityGroup(UserContext userContext, String name, String id) {
         taskService.runTask(userContext, "Remove Security Group ${name}", { task ->
-            def request = new DeleteSecurityGroupRequest().withGroupName(name)
-            awsClient.by(userContext.region).deleteSecurityGroup(request)  // no result
+            awsClient.by(userContext.region).deleteSecurityGroup(new DeleteSecurityGroupRequest(groupId: id))
         }, Link.to(EntityType.security, name))
         caches.allSecurityGroups.by(userContext.region).remove(name)
     }
 
     /** High-level permission update for a group pair: given the desired state, make it so. */
-    void updateSecurityGroupPermissions(UserContext userContext, SecurityGroup targetGroup, String sourceGroupName, String wantPorts) {
-        List<IpPermission> havePerms = targetGroup.ipPermissions.findAll { it.userIdGroupPairs.any { it.groupName == sourceGroupName }}
-        List<IpPermission> wantPerms = permissionsFromString(wantPorts)
-        //println " access from ${sourceGroup} to ${targetGroup.groupName}? have:${permissionsToString(havePerms)} want:${permissionsToString(wantPerms)}"
+    void updateSecurityGroupPermissions(UserContext userContext, SecurityGroup targetGroup, SecurityGroup sourceGroup,
+            List<IpPermission> wantPerms) {
+        List<IpPermission> havePerms = getIngressFrom(targetGroup, sourceGroup)
+        if (!havePerms && !wantPerms) {
+            return
+        }
         Boolean somethingChanged = false
         havePerms.each { havePerm ->
             if (!wantPerms.any { wp -> wp.fromPort == havePerm.fromPort && wp.toPort == havePerm.toPort } ) {
-                revokeSecurityGroupIngress(userContext, targetGroup.groupName, sourceGroupName, 'tcp',
+                revokeSecurityGroupIngress(userContext, targetGroup, sourceGroup, 'tcp',
                         havePerm.fromPort, havePerm.toPort)
                 somethingChanged = true
             }
         }
         wantPerms.each { wantPerm ->
             if (!havePerms.any { hp -> hp.fromPort == wantPerm.fromPort && hp.toPort == wantPerm.toPort} ) {
-                authorizeSecurityGroupIngress(userContext, targetGroup.groupName, sourceGroupName, 'tcp',
+                authorizeSecurityGroupIngress(userContext, targetGroup, sourceGroup, 'tcp',
                         wantPerm.fromPort, wantPerm.toPort)
                 somethingChanged = true
             }
@@ -515,13 +548,13 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     static List<IpPermission> permissionsFromString(String portsStr) {
         List<IpPermission> perms = []
         if (portsStr) {
-            portsStr.split(',').each {rangeStr->
-                def m = rangeStr =~ /(-?\d+)(-(-?\d+))?/
+            portsStr.split(',').each { rangeStr ->
+                Matcher m = rangeStr =~ /(-?\d+)(-(-?\d+))?/
                 //println "permissionsFromString: ${portStr} => ${m[0]}"
                 if (m.matches()) {
                     def rangeParts = m[0]  // 0:all 1:from 2:dashAndTo 3:to
-                    def fromPort = rangeParts[1]
-                    def toPort = rangeParts[3] ?: fromPort
+                    String fromPort = rangeParts[1]
+                    String toPort = rangeParts[3] ?: fromPort
                     perms += new IpPermission().withFromPort(fromPort.toInteger()).withToPort(toPort.toInteger())
                 }
             }
@@ -529,15 +562,14 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         perms
     }
 
-    /** Returns the ingress permissions from one group to another as a strings. Assumes tcp and groups, not cidrs. */
-    static String getIngressFrom(SecurityGroup targetGroup, String srcGroupName) {
-        Collection<IpPermission> ipPermissions = targetGroup.ipPermissions.findAll {
-            it.userIdGroupPairs.any { it.groupName == srcGroupName }
+    /** Returns the ingress permissions from one group to another. Assumes tcp and groups, not cidrs. */
+    static Collection<IpPermission> getIngressFrom(SecurityGroup targetGroup, SecurityGroup sourceGroup) {
+        targetGroup.ipPermissions.findAll {
+            it.userIdGroupPairs.any { it.groupId == sourceGroup.groupId }
         }
-        permissionsToString(ipPermissions)
     }
 
-    String bestIngressPortsFor(SecurityGroup targetGroup) {
+    private String bestIngressPortsFor(SecurityGroup targetGroup) {
         Map guess = ['7001' : 1]
         targetGroup.ipPermissions.each {
             if (it.ipProtocol == 'tcp' &&  it.userIdGroupPairs.size() > 0) {
@@ -553,8 +585,10 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     // TODO refactor the following two methods to take IpPermissions List from callers now that AWS API takes those.
 
-    private void authorizeSecurityGroupIngress(UserContext userContext, String groupName, String sourceGroupName, String ipProtocol, int fromPort, int toPort) {
-        UserIdGroupPair sourcePair = new UserIdGroupPair().withUserId(accounts[0]).withGroupName(sourceGroupName)
+    private void authorizeSecurityGroupIngress(UserContext userContext, SecurityGroup targetgroup, SecurityGroup sourceGroup, String ipProtocol, int fromPort, int toPort) {
+        String groupName = targetgroup.groupName
+        String sourceGroupName = sourceGroup.groupName
+        UserIdGroupPair sourcePair = new UserIdGroupPair().withUserId(accounts[0]).withGroupId(sourceGroup.groupId)
         List<IpPermission> perms = [
                 new IpPermission()
                         .withUserIdGroupPairs(sourcePair)
@@ -562,12 +596,14 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         ]
         taskService.runTask(userContext, "Authorize Security Group Ingress to ${groupName} from ${sourceGroupName} on ${fromPort}-${toPort}", { task ->
             awsClient.by(userContext.region).authorizeSecurityGroupIngress(
-                    new AuthorizeSecurityGroupIngressRequest().withGroupName(groupName).withIpPermissions(perms))
+                    new AuthorizeSecurityGroupIngressRequest().withGroupId(targetgroup.groupId).withIpPermissions(perms))
         }, Link.to(EntityType.security, groupName))
     }
 
-    private void revokeSecurityGroupIngress(UserContext userContext, String groupName, String sourceGroupName, String ipProtocol, int fromPort, int toPort) {
-        UserIdGroupPair sourcePair = new UserIdGroupPair().withUserId(accounts[0]).withGroupName(sourceGroupName)
+    private void revokeSecurityGroupIngress(UserContext userContext, SecurityGroup targetgroup, SecurityGroup sourceGroup, String ipProtocol, int fromPort, int toPort) {
+        String groupName = targetgroup.groupName
+        String sourceGroupName = sourceGroup.groupName
+        UserIdGroupPair sourcePair = new UserIdGroupPair().withUserId(accounts[0]).withGroupId(sourceGroup.groupId)
         List<IpPermission> perms = [
                 new IpPermission()
                         .withUserIdGroupPairs(sourcePair)
@@ -575,10 +611,11 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         ]
         taskService.runTask(userContext, "Revoke Security Group Ingress to ${groupName} from ${sourceGroupName} on ${fromPort}-${toPort}", { task ->
             awsClient.by(userContext.region).revokeSecurityGroupIngress(
-                    new RevokeSecurityGroupIngressRequest().withGroupName(groupName).withIpPermissions(perms))
+                    new RevokeSecurityGroupIngressRequest().withGroupId(targetgroup.groupId).withIpPermissions(perms))
         }, Link.to(EntityType.security, groupName))
     }
 
+    // TODO: Delete this method after rewriting AwsResultsRetrieverSpec unit test to use some other use case
     DescribeSpotPriceHistoryResult describeSpotPriceHistory(Region region,
             DescribeSpotPriceHistoryRequest describeSpotPriceHistoryRequest) {
         awsClient.by(region).describeSpotPriceHistory(describeSpotPriceHistoryRequest)

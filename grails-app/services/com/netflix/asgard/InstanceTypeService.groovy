@@ -134,7 +134,7 @@ class InstanceTypeService implements CacheInitializer {
             RegionalInstancePrices spotPrices = getSpotPrices(region)
 
             List<InstanceTypeData> instanceTypes = InstanceType.values().collect { InstanceType instanceType ->
-                HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == instanceType }
+                HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == instanceType.toString() }
                 new InstanceTypeData(
                         hardwareProfile: hardwareProfile,
                         linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
@@ -146,7 +146,14 @@ class InstanceTypeService implements CacheInitializer {
                 )
             }
             // Only include types that have prices listed for this region
-            return instanceTypes.findAll { it.linuxOnDemandPrice }
+            Collection<InstanceTypeData> relevantInstanceTypes = instanceTypes.findAll { it.linuxOnDemandPrice }
+            Collection<String> foundInstanceTypeNames = relevantInstanceTypes*.name
+
+            // Add any custom instance types that are still missing from the InstanceType enum.
+            List<InstanceTypeData> customInstanceTypes = configService.customInstanceTypes.findAll {
+                !(it.name in foundInstanceTypeNames)
+            }
+            return relevantInstanceTypes + customInstanceTypes
         } catch (Exception e) {
             log.error(e)
             emailerService.sendExceptionEmail('Error parsing Amazon instance data', e)
@@ -180,7 +187,7 @@ class InstanceTypeService implements CacheInitializer {
         Elements dataParagraphs = paragraphsWithBreaks.select(':matches([a-z])') // Skip the empty paragraph
 
         // Send an alert email when Amazon edits the instance types page in a way that breaks this web scraper.
-        if (titleParagraphs.size() == dataParagraphs.size() && dataParagraphs.size() >= InstanceType.values().size()) {
+        if (titleParagraphs.size() <= dataParagraphs.size() && titleParagraphs.size() >= InstanceType.values().size()) {
             for (Integer i = 0; i < titleParagraphs.size(); i++) {
                 Element dataParagraph = dataParagraphs.get(i)
                 List<Node> dataChildNodes = dataParagraph.childNodes().findAll { it.nodeName() != 'br' }
@@ -210,7 +217,7 @@ class InstanceTypeService implements CacheInitializer {
                     String description = (descriptionRaw - ' Instance').trim()
 
                     HardwareProfile hardwareProfile = new HardwareProfile(
-                            instanceType: InstanceType.fromValue(name),
+                            instanceType: name,
                             description: description,
                             memory: memory,
                             cpu: cpu,

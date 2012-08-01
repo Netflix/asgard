@@ -27,7 +27,9 @@ import com.amazonaws.services.ec2.model.ReservedInstances
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.Snapshot
 import com.amazonaws.services.ec2.model.SpotInstanceRequest
+import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Volume
+import com.amazonaws.services.ec2.model.Vpc
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import com.amazonaws.services.rds.model.DBInstance
@@ -52,44 +54,48 @@ class Caches {
     CachedMap<ApplicationMetrics> allApplicationMetrics
     CachedMap<HardwareProfile> allHardwareProfiles
 
-    MultiRegionCachedMap<MetricAlarm> allAlarms
-    MultiRegionCachedMap<ApplicationInstance> allApplicationInstances
-    MultiRegionCachedMap<AutoScalingGroup> allAutoScalingGroups
-    MultiRegionCachedMap<AvailabilityZone> allAvailabilityZones
-    MultiRegionCachedMap<Cluster> allClusters
-    MultiRegionCachedMap<DBInstance> allDBInstances
-    MultiRegionCachedMap<DBSecurityGroup> allDBSecurityGroups
-    MultiRegionCachedMap<DBSnapshot> allDBSnapshots
-    MultiRegionCachedMap<String> allDomains
-    MultiRegionCachedMap<FastProperty> allFastProperties
-    MultiRegionCachedMap<Image> allImages
-    MultiRegionCachedMap<Instance> allInstances
-    MultiRegionCachedMap<InstanceTypeData> allInstanceTypes
-    MultiRegionCachedMap<KeyPairInfo> allKeyPairs
-    MultiRegionCachedMap<LaunchConfiguration> allLaunchConfigurations
-    MultiRegionCachedMap<LoadBalancerDescription> allLoadBalancers
-    MultiRegionCachedMap<SimpleQueue> allQueues
-    MultiRegionCachedMap<ReservedInstances> allReservedInstancesGroups
-    MultiRegionCachedMap<ScalingPolicy> allScalingPolicies
-    MultiRegionCachedMap<SecurityGroup> allSecurityGroups
-    MultiRegionCachedMap<Snapshot> allSnapshots
-    MultiRegionCachedMap<SourceSecurityGroup> allSourceSecurityGroups
-    MultiRegionCachedMap<SpotInstanceRequest> allSpotInstanceRequests
-    MultiRegionCachedMap<TopicData> allTopics
-    MultiRegionCachedMap<Volume> allVolumes
+    final MultiRegionCachedMap<MetricAlarm> allAlarms
+    final MultiRegionCachedMap<ApplicationInstance> allApplicationInstances
+    final MultiRegionCachedMap<AutoScalingGroup> allAutoScalingGroups
+    final MultiRegionCachedMap<AvailabilityZone> allAvailabilityZones
+    final MultiRegionCachedMap<Cluster> allClusters
+    final MultiRegionCachedMap<DBInstance> allDBInstances
+    final MultiRegionCachedMap<DBSecurityGroup> allDBSecurityGroups
+    final MultiRegionCachedMap<DBSnapshot> allDBSnapshots
+    final MultiRegionCachedMap<String> allDomains
+    final MultiRegionCachedMap<FastProperty> allFastProperties
+    final MultiRegionCachedMap<Image> allImages
+    final MultiRegionCachedMap<Instance> allInstances
+    final MultiRegionCachedMap<InstanceTypeData> allInstanceTypes
+    final MultiRegionCachedMap<KeyPairInfo> allKeyPairs
+    final MultiRegionCachedMap<LaunchConfiguration> allLaunchConfigurations
+    final MultiRegionCachedMap<LoadBalancerDescription> allLoadBalancers
+    final MultiRegionCachedMap<SimpleQueue> allQueues
+    final MultiRegionCachedMap<ReservedInstances> allReservedInstancesGroups
+    final MultiRegionCachedMap<ScalingPolicy> allScalingPolicies
+    final MultiRegionCachedMap<SecurityGroup> allSecurityGroups
+    final MultiRegionCachedMap<Snapshot> allSnapshots
+    final MultiRegionCachedMap<SourceSecurityGroup> allSourceSecurityGroups
+    final MultiRegionCachedMap<SpotInstanceRequest> allSpotInstanceRequests
+    final MultiRegionCachedMap<Subnet> allSubnets
+    final MultiRegionCachedMap<TopicData> allTopics
+    final MultiRegionCachedMap<Volume> allVolumes
+    final MultiRegionCachedMap<Vpc> allVpcs
 
     MultiRegionInstancePrices allOnDemandPrices
     MultiRegionInstancePrices allReservedPrices
     MultiRegionInstancePrices allSpotPrices
 
     Caches(CachedMapBuilder cachedMapBuilder, ConfigService configService = null) {
-        
+
         allClusters = cachedMapBuilder.of(EntityType.cluster).buildMultiRegionCachedMap()
         allAutoScalingGroups = cachedMapBuilder.of(EntityType.autoScaling, 120).buildMultiRegionCachedMap()
         allLaunchConfigurations = cachedMapBuilder.of(EntityType.launchConfiguration, 180).buildMultiRegionCachedMap()
         allLoadBalancers = cachedMapBuilder.of(EntityType.loadBalancer, 120).buildMultiRegionCachedMap()
         allSourceSecurityGroups = cachedMapBuilder.of(EntityType.sourceSecurityGroup).buildMultiRegionCachedMap()
         allAvailabilityZones = cachedMapBuilder.of(EntityType.availabilityZone, 3600).buildMultiRegionCachedMap()
+        allSubnets = cachedMapBuilder.of(EntityType.subnet, 3600).buildMultiRegionCachedMap()
+        allVpcs = cachedMapBuilder.of(EntityType.vpc, 3600).buildMultiRegionCachedMap()
         allKeyPairs = cachedMapBuilder.of(EntityType.keyPair).buildMultiRegionCachedMap()
         allImages = cachedMapBuilder.of(EntityType.image, 120).buildMultiRegionCachedMap()
         allInstances = cachedMapBuilder.of(EntityType.instance, 120).buildMultiRegionCachedMap()

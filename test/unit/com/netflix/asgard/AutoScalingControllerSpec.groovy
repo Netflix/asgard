@@ -210,8 +210,10 @@ class AutoScalingControllerSpec extends Specification {
         List<String> securityGroupNames = attrs['securityGroups']*.groupName
         assert securityGroupNames.containsAll(['akms', 'helloworld', 'helloworld-frontend', 'helloworld-nactest',
                 'helloworld-tmp', 'ntsuiboot'])
-        ['t1.micro', 'm1.small', 'c1.medium', 'm1.large', 'm2.xlarge', 'c1.xlarge', 'm1.xlarge', 'm2.2xlarge',
-                'cc1.4xlarge', 'm2.4xlarge', 'cg1.4xlarge', 'cc2.8xlarge'] == attrs['instanceTypes']*.name
+        [
+                't1.micro', 'm1.small', 'c1.medium', 'm1.large', 'm2.xlarge', 'c1.xlarge', 'm1.xlarge', 'm2.2xlarge',
+                'cc1.4xlarge', 'm2.4xlarge', 'cg1.4xlarge', 'cc2.8xlarge', 'huge.mainframe'
+        ] == attrs['instanceTypes']*.name
     }
 
     def "create should handle invalid inputs"() {
