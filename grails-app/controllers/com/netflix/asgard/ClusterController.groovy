@@ -211,6 +211,7 @@ class ClusterController {
                     healthCheckGracePeriod: params.healthCheckGracePeriod as Integer ?: lastGracePeriod,
                     batchSize: params.batchSize as Integer ?: GroupResizeOperation.DEFAULT_BATCH_SIZE,
                     loadBalancerNames: loadBalancerNames ?: lastGroup.loadBalancerNames,
+                    iamInstanceProfile: params.iamInstanceProfile ?: lastLaunchConfig.iamInstanceProfile,
                     keyName: params.keyName ?: lastLaunchConfig.keyName,
                     availabilityZones: selectedZones,
                     zoneRebalancingSuspended: azRebalanceSuspended,

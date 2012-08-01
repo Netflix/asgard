@@ -36,6 +36,7 @@ import com.netflix.asgard.model.ScalingPolicyData
 
     String kernelId
     String ramdiskId
+    String iamInstanceProfile
     String keyName
 
     def propertyMissing(String name) { common[name] }

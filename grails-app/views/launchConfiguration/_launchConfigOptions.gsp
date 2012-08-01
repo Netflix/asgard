@@ -96,4 +96,12 @@
       <input type="text" id="ramdiskId" name="ramdiskId" value="${params.ramdiskId}"/>
     </td>
   </tr>
+  <tr class="prop advanced">
+    <td class="name">
+      <label for="iamInstanceProfile">IAM Instance Profile:</label>
+    </td>
+    <td>
+      <input type="text" id="iamInstanceProfile" name="iamInstanceProfile" value="${params.iamInstanceProfile}"/>
+    </td>
+  </tr>
 </tbody>
