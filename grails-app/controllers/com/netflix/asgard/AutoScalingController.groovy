@@ -30,6 +30,7 @@ import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingProcessType
+import com.netflix.asgard.model.GroupedInstance
 import grails.converters.JSON
 import grails.converters.XML
 import org.joda.time.DateTime
@@ -109,7 +110,7 @@ class AutoScalingController {
         } else {
             AutoScalingGroupData groupData = awsAutoScalingService.buildAutoScalingGroupData(userContext, group)
             Multiset<String> zonesWithInstanceCounts = TreeMultiset.create()
-            for (com.amazonaws.services.autoscaling.model.Instance instance in groupData?.instances) {
+            for (GroupedInstance instance in groupData?.instances) {
                 zonesWithInstanceCounts.add(instance.availabilityZone)
             }
             String appName = Relationships.appNameFromGroupName(name)
