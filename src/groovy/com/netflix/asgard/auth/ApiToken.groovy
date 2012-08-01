@@ -146,13 +146,32 @@ class ApiToken implements AuthenticationToken {
         Time.format(expires)
     }
 
+    /**
+     * Compute a HMAC hash to validate the contents of this key using the supplied encryption key.
+     *
+     * Not to be confused with generating a delicious hash of sweet potatoes, curry powder, and zucchini.
+     *
+     * @param encryptionKey Key used as the HMAC signing key for the hash
+     * @return First 7 characters of base64 encoded HMAC that was computed.
+     */
     private String generateHash(String encryptionKey) {
         String stringToHash = "username:${username},purpose:${purpose},email:${email},expires:${expires.millis}"
-        Mac mac = Mac.getInstance(HMAC_SHA1_ALGORITHM)
+
+        // Get an hmac_sha1 key from the raw key bytes
         SecretKeySpec signingKey = new SecretKeySpec(encryptionKey.bytes, HMAC_SHA1_ALGORITHM)
+
+        // Get an hmac_sha1 Mac instance and initialize with the signing key
+        Mac mac = Mac.getInstance(HMAC_SHA1_ALGORITHM)
         mac.init(signingKey)
+
+        // Compute the hmac on input data bytes
         byte[] rawHmac = mac.doFinal(stringToHash.bytes)
-        rawHmac.encodeBase64().toString()[0..6]
+
+        // Base64-encode the hmac
+        String fullHash = rawHmac.encodeBase64().toString()
+
+        // To keep the token size small, only check the first 7 characters (a la git)
+        fullHash[0..7]
     }
 
     boolean equals(Object obj) {
