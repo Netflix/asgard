@@ -64,7 +64,7 @@ class ApiTokenControllerSpec extends ControllerSpec {
         controller.response.contentAsString == 'You must be logged in to use this feature.'
     }
 
-    def 'should return error for invalid generate request'() {
+    def 'should return api token for valid request'() {
         secretService.apiEncryptionKeys >> ['key']
         configService.apiTokenExpirationDays >> 90
         subject.principal >> 'test@netflix.com'
@@ -80,7 +80,7 @@ class ApiTokenControllerSpec extends ControllerSpec {
         controller.flash.apiToken == new ApiToken('ThisPurpose', 'testDL@netflix.com', 90, 'key')
     }
 
-    def 'should return api token for valid request'() {
+    def 'should return error for invalid generate request'() {
         configService
         GenerateApiTokenCommand command = new GenerateApiTokenCommand()
         command.validate()
