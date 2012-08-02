@@ -141,7 +141,7 @@ import com.netflix.asgard.Check
      * @param securityGroups that all belong to the same region
      * @return map of security groups that have been grouped by purpose
      */
-    Map<String, Set<SecurityGroup>> groupSecurityGroupsByPurpose(Collection<SecurityGroup> securityGroups) {
+    Map<String, List<SecurityGroup>> groupSecurityGroupsByPurpose(Collection<SecurityGroup> securityGroups) {
         if (!securityGroups) {
             return Collections.emptyMap()
         }
