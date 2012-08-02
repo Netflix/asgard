@@ -14,6 +14,7 @@
  */
 package com.netflix.asgard.model
 
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.Subnet
 import com.google.common.base.Function
 import com.google.common.collect.Maps
@@ -117,5 +118,60 @@ import com.netflix.asgard.Check
             it.purpose == purpose && (!it.target || it.target == target)
         }
         subnetsForPurpose*.availabilityZone as Set
+    }
+
+    /**
+     * Find the purpose associated with subnetIds
+     *
+     * @param  subnetIds the first one with a purpose is used
+     * @return the associated purpose or an empty String if none exists
+     */
+    String getPurposeForSubnets(List<String> subnetIds) {
+        if (!subnetIds) {
+            return ''
+        }
+        String subnetId = subnetIds[0]?.trim()
+        allSubnets.find { it.subnetId == subnetId }?.purpose ?: ''
+    }
+
+    /**
+     * Separate Security Groups based on purpose. Security Groups that are not in a VPC will be keyed with a null.
+     * Purposes that span VPCs in the same region are invalid and will be ignored.
+     *
+     * @param securityGroups that all belong to the same region
+     * @return map of security groups that have been grouped by purpose
+     */
+    Map<String, Set<SecurityGroup>> groupSecurityGroupsByPurpose(Collection<SecurityGroup> securityGroups) {
+        if (!securityGroups) {
+            return Collections.emptyMap()
+        }
+        Map<String, String> purposeToVpcId = mapPurposeToVpcId()
+        Map<Object, List<SecurityGroup>> securityGroupsGroupedByVpcId = securityGroups.groupBy { it.vpcId }
+        Collection<String> validPurposes = (purposeToVpcId.keySet() + null) // the absence of a purpose is also relevant
+        validPurposes.inject([:]) { Map securityGroupsGroupedByPurpose, String purpose ->
+            List<SecurityGroup> purposedSecurityGroups = securityGroupsGroupedByVpcId[purposeToVpcId[purpose]]
+            securityGroupsGroupedByPurpose[purpose] = purposedSecurityGroups.sort { it.groupName?.toLowerCase() }
+            securityGroupsGroupedByPurpose
+        } as Map
+    }
+
+    private Map<String, String> mapPurposeToVpcId() {
+        Map<Object, List<SubnetData>> subnetsGroupedByPurpose = allSubnets.groupBy { it.purpose }
+        subnetsGroupedByPurpose.inject([:]) { Map purposeToVpcId, Map.Entry entry ->
+            String purpose = entry.key
+            if (!purpose) {
+                return purposeToVpcId
+            }
+            List<SubnetData> subnets = entry.value as List
+            Collection<String> distinctVpcIds = subnets*.vpcId.unique()
+            try {
+                // There should only be one VPC ID per purpose or the mapping from purpose to VPC is ambiguous.
+                String vpcId = Check.lone(distinctVpcIds, String)
+                purposeToVpcId[purpose] = vpcId
+            } catch (Exception ignore) {
+                // We just ignore purposes that are misconfigured so that the rest of the subnet purposes can be used.
+            }
+            purposeToVpcId
+        } as Map
     }
 }

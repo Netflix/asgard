@@ -15,14 +15,19 @@
  */
 package com.netflix.asgard.model
 
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Tag
 import spock.lang.Specification
 
 class SubnetsSpec extends Specification {
 
-    static SubnetData subnet(String id, String zone, String purpose, SubnetTarget target) {
-        new SubnetData(subnetId: id, availabilityZone: zone, purpose: purpose, target: target)
+    static SubnetData subnet(String id, String zone, String purpose, SubnetTarget target, String vpcId = 'vpc-1') {
+        new SubnetData(subnetId: id, availabilityZone: zone, purpose: purpose, target: target, vpcId: vpcId)
+    }
+
+    static SecurityGroup securityGroup(String id, String vpcId = null) {
+        new SecurityGroup(groupId: id, groupName: id, vpcId: vpcId)
     }
 
     Subnets subnets
@@ -70,7 +75,7 @@ class SubnetsSpec extends Specification {
 
     def 'should find subnet by ID'() {
         SubnetData expectedSubnet = new SubnetData(subnetId: 'subnet-e9b0a3a1', availabilityZone: 'us-east-1a',
-                purpose: 'internal', target: SubnetTarget.EC2)
+                purpose: 'internal', target: SubnetTarget.EC2, vpcId: 'vpc-1')
         expect: expectedSubnet == subnets.findSubnetById('subnet-e9b0a3a1')
     }
 
@@ -257,5 +262,83 @@ class SubnetsSpec extends Specification {
 
         expect:
         expectedZones == subnets.getZonesForPurpose('internal', SubnetTarget.ELB)
+    }
+
+    def 'should return purpose for subnet ID'() {
+        expect: 'external' == subnets.getPurposeForSubnets(['subnet-e9b0a3a2'])
+    }
+
+    def 'should return purpose for first subnet ID if there are multiple'() {
+        expect: 'external' == subnets.getPurposeForSubnets(['subnet-e9b0a3a2', 'subnet-e9b0a3a1'])
+    }
+
+    def 'should return empty String if there is no subnet ID'() {
+        expect: '' == subnets.getPurposeForSubnets(null)
+    }
+
+    def 'should return empty String if there is no subnet in cache with ID'() {
+        expect: '' == subnets.getPurposeForSubnets(['subnet-deadbeef'])
+    }
+
+    def 'should group security groups by purpose'() {
+        subnets = new Subnets([
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a3', 'us-east-1a', 'internal', SubnetTarget.ELB),
+                subnet('subnet-e9b0a3a4', 'us-east-1a', 'external', SubnetTarget.ELB),
+                subnet('subnet-e9b0a3a5', 'us-east-1b', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c6', 'us-east-1c', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c7', 'us-east-1c', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c8', 'us-east-1d', 'internal', SubnetTarget.ELB),
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'alternateVpc', SubnetTarget.EC2, 'vpc-2'),
+                subnet('subnet-e9b0a3a1', 'us-east-1a', null, null, 'vpc-2'),
+        ])
+        Collection<SecurityGroup> securityGroups = [
+                securityGroup('sg-1'),
+                securityGroup('sg-2'),
+                securityGroup('sg-3', 'vpc-1'),
+                securityGroup('sg-4', 'vpc-1'),
+                securityGroup('sg-5', 'vpc-2'),
+        ]
+
+        expect:
+        subnets.groupSecurityGroupsByPurpose(securityGroups) == [
+                (null): [securityGroup('sg-1'), securityGroup('sg-2')],
+                internal: [securityGroup('sg-3', 'vpc-1'), securityGroup('sg-4', 'vpc-1')],
+                external: [securityGroup('sg-3', 'vpc-1'), securityGroup('sg-4', 'vpc-1')],
+                alternateVpc: [securityGroup('sg-5', 'vpc-2')],
+        ]
+    }
+
+    def 'should omit grouped security groups for purpose in multiple VPCs'() {
+        subnets = new Subnets([
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a2', 'us-east-1a', 'internal', SubnetTarget.ELB),
+                subnet('subnet-e9b0a3a3', 'us-east-1a', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a4', 'us-east-1a', null, null),
+                subnet('subnet-e9b0a3a5', 'us-east-1a', 'internal', SubnetTarget.EC2, 'vpc-2'),
+                subnet('subnet-e9b0a3a6', 'us-east-1a', null, null, 'vpc-2'),
+        ])
+        Collection<SecurityGroup> securityGroups = [
+                securityGroup('sg-1'),
+                securityGroup('sg-2', 'vpc-1'),
+                securityGroup('sg-3', 'vpc-2'),
+        ]
+
+        expect:
+        subnets.groupSecurityGroupsByPurpose(securityGroups) == [
+                (null): [securityGroup('sg-1')],
+                external: [securityGroup('sg-2', 'vpc-1')],
+        ]
+    }
+
+    def 'should return empty when grouping no security groups'() {
+        expect:
+        subnets.groupSecurityGroupsByPurpose([]).isEmpty()
+    }
+
+    def 'should return empty when grouping null security groups'() {
+        expect:
+        subnets.groupSecurityGroupsByPurpose(null).isEmpty()
     }
 }
