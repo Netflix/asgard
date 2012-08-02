@@ -50,11 +50,11 @@ class Check {
      * @throws IllegalStateException if the collection has 0, 2 or more elements
      * @throws NullPointerException if the collection is null
      */
-    static <T> T lone(List<T> collection, def type) {
+    static <T> T lone(Collection<T> collection, def type) {
         if (notNull(collection, type).size() != 1) {
             throw new IllegalStateException(message("Found ${collection.size()} ${Meta.pretty(type)} items instead of 1"))
         }
-        collection[0];
+        collection.iterator().next();
     }
 
     /**
