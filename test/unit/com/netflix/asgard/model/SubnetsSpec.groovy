@@ -332,6 +332,25 @@ class SubnetsSpec extends Specification {
         ]
     }
 
+    def 'should omit grouped security groups for purpose in no VPC'() {
+        subnets = new Subnets([
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a4', 'us-east-1a', null, null),
+                subnet('subnet-e9b0a3a5', 'us-east-1a', 'external', SubnetTarget.EC2, 'vpc-2'),
+                subnet('subnet-e9b0a3a6', 'us-east-1a', null, null, 'vpc-2'),
+        ])
+        Collection<SecurityGroup> securityGroups = [
+                securityGroup('sg-1'),
+                securityGroup('sg-2', 'vpc-1'),
+        ]
+
+        expect:
+        subnets.groupSecurityGroupsByPurpose(securityGroups) == [
+                (null): [securityGroup('sg-1')],
+                internal: [securityGroup('sg-2', 'vpc-1')],
+        ]
+    }
+
     def 'should return empty when grouping no security groups'() {
         expect:
         subnets.groupSecurityGroupsByPurpose([]).isEmpty()

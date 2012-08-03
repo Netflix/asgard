@@ -150,7 +150,9 @@ import com.netflix.asgard.Check
         Collection<String> validPurposes = (purposeToVpcId.keySet() + null) // the absence of a purpose is also relevant
         validPurposes.inject([:]) { Map securityGroupsGroupedByPurpose, String purpose ->
             List<SecurityGroup> purposedSecurityGroups = securityGroupsGroupedByVpcId[purposeToVpcId[purpose]]
-            securityGroupsGroupedByPurpose[purpose] = purposedSecurityGroups.sort { it.groupName?.toLowerCase() }
+            if (purposedSecurityGroups) {
+                securityGroupsGroupedByPurpose[purpose] = purposedSecurityGroups.sort { it.groupName?.toLowerCase() }
+            }
             securityGroupsGroupedByPurpose
         } as Map
     }
