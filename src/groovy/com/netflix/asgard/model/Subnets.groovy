@@ -121,9 +121,9 @@ import com.netflix.asgard.Check
     }
 
     /**
-     * Find the purpose associated with subnetIds
+     * Find the purpose associated with subnetIds. We really only look at the first one and are not validating anything.
      *
-     * @param  subnetIds the first one with a purpose is used
+     * @param  subnetIds list of Subnet IDs should all have the same purpose in theory
      * @return the associated purpose or an empty String if none exists
      */
     String getPurposeForSubnets(List<String> subnetIds) {
