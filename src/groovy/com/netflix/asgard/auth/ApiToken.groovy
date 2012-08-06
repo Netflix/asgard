@@ -36,7 +36,7 @@ import org.joda.time.format.DateTimeFormatter
 class ApiToken implements AuthenticationToken {
 
     private static final String HMAC_SHA1_ALGORITHM = 'HmacSHA1'
-    private static final DateTimeFormatter TOKEN_DATE_FORMAT = DateTimeFormat.forPattern('yyyy-MM-dd')
+    protected static final DateTimeFormatter TOKEN_DATE_FORMAT = DateTimeFormat.forPattern('yyyy-MM-dd')
 
     /**
      * User generated string to indicate what script(s) this token will be used for
