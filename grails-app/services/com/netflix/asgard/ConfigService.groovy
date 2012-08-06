@@ -166,11 +166,11 @@ class ConfigService {
     }
 
     String getLoadBalancerUsernameFile() {
-        grailsApplication.config.secret?.loadBalancerUsernameFile ?: null
+        grailsApplication.config.secret?.loadBalancerUsernameFileName ?: null
     }
 
     String getLoadBalancerPasswordFile() {
-        grailsApplication.config.secret?.loadBalancerPasswordFile ?: null
+        grailsApplication.config.secret?.loadBalancerPasswordFileName ?: null
     }
 
     String getSecretLocalDirectory() {
@@ -262,7 +262,7 @@ class ConfigService {
     }
 
     /*
-     * @return true if api key based authentication is active, false otherwise
+     * @return true if api token based authentication is active, false otherwise
      */
     boolean isApiTokenEnabled() {
         grailsApplication.config.security?.apiToken?.enabled ?: false
@@ -270,16 +270,18 @@ class ConfigService {
 
     /**
      * @return List of encryption keys for hashing api keys. The first item is used as the current key for new requests.
+     *         The remaining keys in the list are used to validate tokens that are already in circulation. This provides
+     *         a way to gracefully retire keys.
      */
     List<String> getApiEncryptionKeys() {
         grailsApplication.config.security?.apiToken?.encryptionKeys ?: []
     }
 
     /**
-     * @return Filename containing a list of keys to use for hashing api keys.
+     * @return File name containing a list of keys to use for hashing api keys.
      */
-    String getApiEncryptionKeyFile() {
-        grailsApplication.config.secret?.apiEncryptionKeyFile ?: null
+    String getApiEncryptionKeyFileName() {
+        grailsApplication.config.secret?.apiEncryptionKeyFileName ?: null
     }
 
     /**

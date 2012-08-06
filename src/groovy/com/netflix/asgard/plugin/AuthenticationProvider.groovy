@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest
 import org.apache.shiro.authc.AuthenticationInfo
 
 /**
- * Interface for implementing a authentication strategy for Asgard. Security is implemented using the Grails Apache
+ * Interface for implementing an authentication strategy for Asgard. Security is implemented using the Grails Apache
  * Shiro plugin and makes use of Shiro classes.
  *
  * Implementations of this class can be wired up in Config.groovy in the entry plugins/authenticationProvider.

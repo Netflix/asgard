@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.netflix.asgard
 
 import com.netflix.asgard.auth.ApiToken
@@ -47,7 +46,7 @@ class ApiTokenController {
             chain(action: 'create', model:[cmd: cmd], params: params)
         } else {
             flash.apiToken = new ApiToken(cmd.purpose, cmd.email, configService.apiTokenExpirationDays,
-                    secretService.apiEncryptionKeys[0])
+                    secretService.currentApiEncryptionKey)
             redirect(action: 'show')
         }
     }

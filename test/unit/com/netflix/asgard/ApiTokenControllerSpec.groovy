@@ -65,7 +65,7 @@ class ApiTokenControllerSpec extends ControllerSpec {
     }
 
     def 'should return api token for valid request'() {
-        secretService.apiEncryptionKeys >> ['key']
+        secretService.currentApiEncryptionKey >> 'key'
         configService.apiTokenExpirationDays >> 90
         subject.principal >> 'test@netflix.com'
         GenerateApiTokenCommand command = new GenerateApiTokenCommand(purpose: 'ThisPurpose',

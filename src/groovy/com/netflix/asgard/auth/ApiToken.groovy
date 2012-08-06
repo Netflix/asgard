@@ -103,7 +103,7 @@ class ApiToken implements AuthenticationToken {
         DateTime expires = TOKEN_DATE_FORMAT.parseDateTime(tokens[1])
         String username = tokens[2]
         String hash = tokens[3]
-        String email = (tokens.size() == 5) ?  tokens[4] : username
+        String email = (tokens.size() == 5) ? tokens[4] : username
         new ApiToken(purpose, expires, username, hash, email)
     }
 
@@ -129,9 +129,9 @@ class ApiToken implements AuthenticationToken {
     /**
      * Returns API Token as a String. This will be the input to validate requests.
      *
-     * @return String representation of this token. Token can be reconstructed using {@link fromApiTokenString(String}
+     * @return String representation of this token. Token can be reconstructed using {@link fromApiTokenString(String)}
      */
-    String generateTokenString() {
+    String getTokenString() {
         List<String> components = [purpose, TOKEN_DATE_FORMAT.print(expires), username, hash]
         if (username != email) {
             components << email
@@ -142,7 +142,7 @@ class ApiToken implements AuthenticationToken {
     /**
      * @return This token's expiration date in Asgard standard ISO readable format
      */
-    String getExpiresISOFormatted() {
+    String getExpiresReadable() {
         Time.format(expires)
     }
 
@@ -188,12 +188,20 @@ class ApiToken implements AuthenticationToken {
         Objects.hashCode(purpose, expires, username, hash, email)
     }
 
-    /***** Methods for Shiro AuthenticationToken *****/
-
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.apache.shiro.authc.AuthenticationToken#getCredentials()
+     */
     Object getCredentials() {
-        generateTokenString()
+        getTokenString()
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.apache.shiro.authc.AuthenticationToken#getPrincipal()
+     */
     Object getPrincipal() {
         username
     }

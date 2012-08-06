@@ -38,7 +38,7 @@
           <tbody>
           <tr class="prop">
             <td valign="top" class="name">
-              <label for="name">Purpose:</label>
+              <label for="purpose">Purpose:</label>
             </td>
             <td valign="top">
               <input type="text" id="purpose" name="purpose" value="${params.purpose}" class="required"/>

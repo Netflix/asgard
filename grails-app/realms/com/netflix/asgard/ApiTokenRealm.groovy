@@ -36,7 +36,7 @@ class ApiTokenRealm implements ApplicationContextAware {
             throw new AuthenticationException('API Key cannot be null')
         }
 
-        ApiToken apiToken = (ApiToken)authToken
+        ApiToken apiToken = (ApiToken) authToken
         // Realms are not lazy loaded so have to load this way to prevent eager loading of SecretService.
         ApiTokenService apiTokenService = applicationContext.getBean(ApiTokenService)
         if (!apiTokenService.tokenValid(apiToken)) {

@@ -166,7 +166,7 @@ class SecretServiceSpec extends Specification {
         setupKeysInConfig()
         setupRemoteServerInfo()
         configService.apiTokenEnabled >> true
-        configService.apiEncryptionKeyFile >> 'encryptionkeys'
+        configService.apiEncryptionKeyFileName >> 'encryptionkeys'
         mockFetchRemote('encryptionkeys', 'key1\nkey2')
 
         when:

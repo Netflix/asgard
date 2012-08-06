@@ -1,8 +1,3 @@
-import com.netflix.asgard.auth.ApiToken
-import org.apache.shiro.SecurityUtils
-import org.apache.shiro.authc.AuthenticationException
-import org.apache.shiro.grails.ConfigUtils
-
 /*
  * Copyright 2012 Netflix, Inc.
  *
@@ -18,10 +13,14 @@ import org.apache.shiro.grails.ConfigUtils
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.netflix.asgard.auth.ApiToken
+import org.apache.shiro.SecurityUtils
+import org.apache.shiro.authc.AuthenticationException
+import org.apache.shiro.grails.ConfigUtils
 
- class ApiTokenFilters {
+class ApiTokenFilters {
 
-     private static final String API_TOKEN_PARAM = 'asgardApiToken'
+    private static final String API_TOKEN_PARAM = 'asgardApiToken'
 
     def filters = {
         all(controller: '*', action: '*') {
@@ -34,10 +33,9 @@ import org.apache.shiro.grails.ConfigUtils
                 try {
                     SecurityUtils.subject.login(token)
                     return true
-                }
-                catch (AuthenticationException e) {
+                } catch (AuthenticationException e) {
                     log.warn('Failed to authenticate API Key', e)
-                    render(status: 401,test: e.message)
+                    render(status: 401, test: e.message)
                 }
                 false
             }

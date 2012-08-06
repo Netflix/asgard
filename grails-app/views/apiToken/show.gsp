@@ -32,7 +32,7 @@
         <tbody>
         <tr class="prop">
           <td class="name">Token:</td>
-          <td class="value">${flash.apiToken.generateTokenString()}
+          <td class="value">${flash.apiToken.tokenString}
           </td>
         </tr>
         <tr class="prop">
@@ -45,7 +45,7 @@
         </tr>
         <tr class="prop">
           <td class="name">Expires:</td>
-          <td class="value">${flash.apiToken.expiresISOFormatted}</td>
+          <td class="value">${flash.apiToken.expiresReadable}</td>
         </tr>
         </tbody>
       </table>

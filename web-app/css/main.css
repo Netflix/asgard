@@ -136,7 +136,7 @@ div.clear   { clear: both; }
 .login, .authentication      { float: right; padding: 10px 15px 0 0; }
 .authentication              { background: url("../images/downarrowlight.gif") no-repeat scroll 98% 92% transparent; }
 .authentication ul           { padding-top: 5px; display: none; list-style-type: none; position: absolute; }
-.authentication ul li        { border-color: #AAA; border-width: 1px; border-style: solid; padding: 3px 10px 3px 5px;}
+.authentication ul li        { border-color: #AAA; border-width: 1px; border-style: solid; padding: 3px 10px 3px 5px; }
 .authentication:hover ul     { display: block; }
 .authentication ul li:hover  { background-color: #888A85; }
 

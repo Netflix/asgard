@@ -30,13 +30,12 @@ class AuthController {
         String targetUri = session[AUTH_TARGET_URL] ?: '/'
         session.removeAttribute(AUTH_TARGET_URL)
 
-        try{
+        try {
             SecurityUtils.subject.login(authToken)
             redirect(uri: targetUri)
-        }
-        catch (AuthenticationException e){
+        } catch (AuthenticationException e) {
             log.error('Authentication failed for token ${authToken}', e)
-            render(status: 401,text: "Authentication failed with message ${e.message}")
+            render(status: 401, text: "Authentication failed with message ${e.message}")
         }
     }
 

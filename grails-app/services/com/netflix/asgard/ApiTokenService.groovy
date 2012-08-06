@@ -36,7 +36,7 @@ class ApiTokenService implements InitializingBean {
     private Cache<String, String> tokensAlertsSent
 
     void afterPropertiesSet() {
-        tokensAlertsSent =  new CacheBuilder()
+        tokensAlertsSent = new CacheBuilder()
                 .expireAfterWrite(configService.apiTokenExpiryWarningIntervalMinutes, TimeUnit.MINUTES)
                 .maximumSize(256)
                 .build()
@@ -67,8 +67,8 @@ class ApiTokenService implements InitializingBean {
                     "Key: ${apiToken.credentials}\n" +
                     "Purpose: ${apiToken.purpose}\n" +
                     "Registered by: ${apiToken.username}\n" +
-                    "Expires: ${apiToken.expiresISOFormatted}\n\n" +
-                    "Please generate a new key.")
+                    "Expires: ${apiToken.expiresReadable}\n\n" +
+                    "Please generate a new token.")
             tokensAlertsSent.put(apiToken.credentials, apiToken.credentials)
         }
     }
