@@ -34,6 +34,7 @@
         <thead>
         <tr>
           <th>Subnet ID</th>
+          <th>VPC ID</th>
           <th>State</th>
           <th>Availability Zone</th>
           <th>Available</th>
@@ -46,6 +47,7 @@
         <g:each var="subnet" in="${subnets}" status="i">
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
             <td>${subnet.subnetId}</td>
+            <td>${subnet.vpcId}</td>
             <td>${subnet.state}</td>
             <td><g:availabilityZone value="${subnet.availabilityZone}"/></td>
             <td>${subnet.availableIpAddressCount}</td>
