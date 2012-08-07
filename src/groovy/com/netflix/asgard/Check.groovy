@@ -54,7 +54,7 @@ class Check {
         if (notNull(collection, type).size() != 1) {
             throw new IllegalStateException(message("Found ${collection.size()} ${Meta.pretty(type)} items instead of 1"))
         }
-        collection.iterator().next();
+        collection.iterator().next()
     }
 
     /**
