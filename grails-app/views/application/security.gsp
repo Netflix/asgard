@@ -44,6 +44,10 @@
             <td class="name">Security Group Description:</td>
             <td class="value">${group.description}</td>
           </tr>
+          <tr class="prop">
+            <td class="name">Security Group VPC ID:</td>
+            <td class="value">${group.vpcId}</td>
+          </tr>
           <tr>
             <td class="name">Security Groups Accessible from this Application:</td>
             <td class="list">
