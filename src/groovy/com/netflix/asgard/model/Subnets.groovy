@@ -134,7 +134,7 @@ import com.netflix.asgard.Check
     }
 
     /**
-     * Provides a one to one mapping from a Subnet purpose to it's VPC ID. Purposes that span VPCs in the same region
+     * Provides a one to one mapping from a Subnet purpose to its VPC ID. Purposes that span VPCs in the same region
      * are invalid and will be left out of the map.
      *
      * @return map of subnet purposes to their VPC ID
@@ -148,12 +148,10 @@ import com.netflix.asgard.Check
             }
             List<SubnetData> subnets = entry.value as List
             Collection<String> distinctVpcIds = subnets*.vpcId.unique()
-            try {
-                // There should only be one VPC ID per purpose or the mapping from purpose back to VPC is ambiguous.
-                String vpcId = Check.lone(distinctVpcIds, String)
-                purposeToVpcId[purpose] = vpcId
-            } catch (Exception ignore) {
-                // We just ignore purposes that are misconfigured so that the rest of the subnet purposes can be used.
+            // There should only be one VPC ID per purpose or the mapping from purpose back to VPC is ambiguous.
+            // We just ignore purposes that are misconfigured so that the rest of the subnet purposes can be used.
+            if (distinctVpcIds.size() == 1) {
+                purposeToVpcId[purpose] = distinctVpcIds.iterator().next()
             }
             purposeToVpcId
         } as Map
