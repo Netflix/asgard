@@ -32,7 +32,13 @@
         <g:link class="edit" action="edit" params="[id:app.name]">Edit Application</g:link>
         <input type="hidden" name="name" value="${app.name}"/>
         <g:buttonSubmit class="delete" data-warning="Really delete application '${app.name}'?" action="delete" value="Delete Application"/>
-        <g:buttonSubmit class="securityEdit" action="security">Edit Application Security Access</g:buttonSubmit>
+        <g:if test="${appSecurityGroup}">
+          <input type="hidden" name="securityGroupId" value="${appSecurityGroup.groupId}"/>
+          <g:buttonSubmit class="securityEdit" action="security">Edit Application Security Access</g:buttonSubmit>
+        </g:if>
+        <g:else>
+          <g:link class="create" controller="security" action="create" params="[id:app.name]">Create Security Group</g:link>
+        </g:else>
       </g:form>
     </div>
     <div class="dialog">
