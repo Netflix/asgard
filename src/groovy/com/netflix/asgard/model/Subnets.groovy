@@ -118,4 +118,42 @@ import com.netflix.asgard.Check
         }
         subnetsForPurpose*.availabilityZone as Set
     }
+
+    /**
+     * Find the purpose associated with subnetIds. We really only look at the first one and are not validating anything.
+     *
+     * @param  subnetIds list of Subnet IDs should all have the same purpose in theory
+     * @return the associated purpose or an empty String if none exists
+     */
+    String getPurposeForSubnets(List<String> subnetIds) {
+        if (!subnetIds) {
+            return ''
+        }
+        String subnetId = subnetIds[0]?.trim()
+        allSubnets.find { it.subnetId == subnetId }?.purpose ?: ''
+    }
+
+    /**
+     * Provides a one to one mapping from a Subnet purpose to its VPC ID. Purposes that span VPCs in the same region
+     * are invalid and will be left out of the map.
+     *
+     * @return map of subnet purposes to their VPC ID
+     */
+    Map<String, String> mapPurposeToVpcId() {
+        Map<Object, List<SubnetData>> subnetsGroupedByPurpose = allSubnets.groupBy { it.purpose }
+        subnetsGroupedByPurpose.inject([:]) { Map purposeToVpcId, Map.Entry entry ->
+            String purpose = entry.key
+            if (!purpose) {
+                return purposeToVpcId
+            }
+            List<SubnetData> subnets = entry.value as List
+            Collection<String> distinctVpcIds = subnets*.vpcId.unique()
+            // There should only be one VPC ID per purpose or the mapping from purpose back to VPC is ambiguous.
+            // We just ignore purposes that are misconfigured so that the rest of the subnet purposes can be used.
+            if (distinctVpcIds.size() == 1) {
+                purposeToVpcId[purpose] = distinctVpcIds.iterator().next()
+            }
+            purposeToVpcId
+        } as Map
+    }
 }
