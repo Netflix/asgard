@@ -221,6 +221,7 @@ import org.apache.commons.collections.HashBag
 
     def security = {
         String name = params.name
+        String securityGroupId = params.securityGroupId
         UserContext userContext = UserContext.of(request)
         AppRegistration app = applicationService.getRegisteredApplication(userContext, name)
         if (!app) {
@@ -228,15 +229,11 @@ import org.apache.commons.collections.HashBag
             redirect(action: 'list')
             return
         }
-        SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
+        SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, securityGroupId)
         if (!group) {
-            awsEc2Service.createSecurityGroup(userContext, name, app.description) // TODO move creation to update?
-            group = awsEc2Service.getSecurityGroup(userContext, name)
-            if (!group) {
-                flash.message = "Could not retrieve or create Security Group '${name}'"
-                redirect(action: 'list')
-                return
-            }
+            flash.message = "Could not retrieve or create Security Group '${name}'"
+            redirect(action: 'list')
+            return
         }
         [
                 app: app,

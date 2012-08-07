@@ -389,12 +389,11 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      * Returns a filtered and sorted list of security groups to show in UI lists. Special groups are suppressed.
      *
      * @param userContext who, where, why
-     * @param vpcId only groups with a specified VPC id will be shown (no VPC id indicates non-VPC groups)
      * @return list of security groups
      */
-    List<SecurityGroup> getEffectiveSecurityGroups(UserContext userContext, String vpcId = null) {
+    List<SecurityGroup> getEffectiveSecurityGroups(UserContext userContext) {
         getSecurityGroups(userContext).findAll {
-            isSecurityGroupEditable(it.groupName) && it.vpcId == vpcId
+            isSecurityGroupEditable(it.groupName)
         }.sort { it.groupName.toLowerCase() }
     }
 
@@ -437,9 +436,13 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         } catch (AmazonServiceException e) {
             // Can't find a security group with that request.
             if (e.errorCode == 'InvalidParameterValue' && !groupId) {
-                // It's likely a VPC security group which we can't reference by name. Let's brute force this thing.
-                group = awsClient.by(region).describeSecurityGroups().securityGroups.find { it.groupName == groupName }
-                // Using a name in the AWS request for a VPC SG will result in an error unlike the above line
+                // It's likely a VPC security group which we can't reference by name. Maybe it has an ID in the cache.
+                SecurityGroup cachedGroup = caches.allSecurityGroups.by(region).get(groupName)
+                if (cachedGroup) {
+                    request = new DescribeSecurityGroupsRequest(groupIds: [cachedGroup.groupId])
+                    DescribeSecurityGroupsResult result = awsClient.by(region).describeSecurityGroups(request)
+                    group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
+                }
             }
         }
         if (groupName) {
@@ -457,7 +460,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      * @return list of security group options for display
      */
     List<SecurityGroupOption> getSecurityGroupOptionsForTarget(UserContext userContext, SecurityGroup targetGroup) {
-        Collection<SecurityGroup> sourceGroups = getEffectiveSecurityGroups(userContext, targetGroup.vpcId)
+        Collection<SecurityGroup> sourceGroups = getEffectiveSecurityGroups(userContext).findAll {
+            targetGroup.vpcId == it.vpcId
+        }
         String guessedPorts = bestIngressPortsFor(targetGroup)
         sourceGroups.collect { SecurityGroup sourceGroup ->
             buildSecurityGroupOption(sourceGroup, targetGroup, guessedPorts)
@@ -473,7 +478,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      * @return list of security group options for display
      */
     List<SecurityGroupOption> getSecurityGroupOptionsForSource(UserContext userContext, SecurityGroup sourceGroup) {
-        Collection<SecurityGroup> targetGroups = getEffectiveSecurityGroups(userContext, sourceGroup.vpcId)
+        Collection<SecurityGroup> targetGroups = getEffectiveSecurityGroups(userContext).findAll {
+            sourceGroup.vpcId == it.vpcId
+        }
         targetGroups.collect { SecurityGroup targetGroup ->
             String guessedPorts = bestIngressPortsFor(targetGroup)
             buildSecurityGroupOption(sourceGroup, targetGroup, guessedPorts)
@@ -535,7 +542,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         }
         // This method gets called hundreds of times for one user request so don't call Amazon unless necessary.
         if (somethingChanged) {
-            getSecurityGroup(userContext, targetGroup.groupName)
+            getSecurityGroup(userContext, targetGroup.groupId)
         }
     }
 

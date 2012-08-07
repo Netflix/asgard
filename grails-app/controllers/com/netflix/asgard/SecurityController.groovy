@@ -78,12 +78,12 @@ class SecurityController {
 
     def create = {
         UserContext userContext = UserContext.of(request)
-        String name = params.name
+        String name = params.id ?: params.name
         String description = ''
         List<AppRegistration> applications = []
         if (name) {
             AppRegistration app = applicationService.getRegisteredApplication(userContext, name)
-            description = app.description
+            description = app?.description
         } else {
             applications = applicationService.getRegisteredApplications(userContext)
         }
@@ -93,7 +93,7 @@ class SecurityController {
             selectedVpcIds: params.selectedVpcIds,
             enableVpc: params.enableVpc,
             name: name,
-            description: description ?: params.description,
+            description: params.description ?: description,
         ]
     }
 

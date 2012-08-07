@@ -254,8 +254,9 @@ class AwsEc2ServiceSpec extends Specification {
             e.errorCode = 'InvalidParameterValue'
             throw e
         }
-        1 * mockAmazonEC2.describeSecurityGroups() >> new DescribeSecurityGroupsResult(
-                securityGroups: [securityGroup])
+        1 * mockSecurityGroupCache.get('super_secure') >> securityGroup
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >>
+                new DescribeSecurityGroupsResult(securityGroups: [securityGroup])
         1 * mockSecurityGroupCache.put('super_secure', securityGroup)
         0 * _
     }
@@ -277,7 +278,7 @@ class AwsEc2ServiceSpec extends Specification {
         0 * _
     }
 
-    def 'should not try to find non cached VPC Security Group by name with if given id'() {
+    def 'should not try to find non cached VPC Security Group by name if given id'() {
         when:
         SecurityGroup actualSecurityGroup =  awsEc2Service.getSecurityGroup(userContext, 'sg-123')
 
