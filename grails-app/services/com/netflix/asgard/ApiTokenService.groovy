@@ -23,6 +23,9 @@ import java.util.concurrent.TimeUnit
 import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
 
+/**
+ * Service class for validating {@link ApiToken} objects
+ */
 class ApiTokenService implements InitializingBean {
 
     def configService

@@ -46,7 +46,8 @@ class OneLoginAuthenticationProvider implements AuthenticationProvider {
         AccountSettings accSettings = new AccountSettings(idpSsoTargetUrl: oneloginUrl)
 
         AuthRequest authReq = new AuthRequest(appSettings, accSettings)
-        String samlRequest = AuthRequest.getRidOfCRLF(URLEncoder.encode(authReq.getRequest(AuthRequest.base64),'UTF-8'))
+        String samlRequest = AuthRequest.getRidOfCRLF(URLEncoder.encode(authReq.getRequest(AuthRequest.base64),
+                'UTF-8'))
         "${accSettings.idp_sso_target_url}?SAMLRequest=${samlRequest}"
     }
 
