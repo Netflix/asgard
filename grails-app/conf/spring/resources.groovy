@@ -21,6 +21,7 @@ import com.netflix.asgard.Region
 import com.netflix.asgard.ServiceInitLoggingBeanPostProcessor
 import com.netflix.asgard.SnsTaskFinishedListener
 import com.netflix.asgard.ThreadScheduler
+import com.netflix.asgard.auth.OneLoginAuthenticationProvider
 import groovy.io.FileType
 
 beans = {
@@ -39,6 +40,12 @@ beans = {
 
     snsTaskFinishedListener(SnsTaskFinishedListener) { bean ->
         bean.lazyInit = true
+    }
+
+    if (application.config.plugin?.authenticationProvider == 'oneLoginAuthenticationProvider') {
+        oneLoginAuthenticationProvider(OneLoginAuthenticationProvider) { bean ->
+            bean.lazyInit = true
+        }
     }
 
     //**** Plugin behavior
