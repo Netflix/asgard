@@ -54,6 +54,7 @@
     <input type="text" class="number" id="healthCheckGracePeriod" name="healthCheckGracePeriod" value="${group?.healthCheckGracePeriod == null ? '600' : group?.healthCheckGracePeriod}"/> seconds
   </td>
 </tr>
+<g:render template="/common/vpcSelection" model="[awsAction: 'Launch', awsObject: 'instances']"/>
 <tr class="prop advanced">
   <td class="name">
     <label for="selectedZones">Availablity Zones:</label>

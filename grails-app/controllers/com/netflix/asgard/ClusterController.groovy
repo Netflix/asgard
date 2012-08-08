@@ -116,8 +116,16 @@ class ClusterController {
                             'nextGroupName': nextGroupName,
                             'okayToCreateGroup': okayToCreateGroup,
                             'recommendedNextStep': recommendedNextStep,
-                            buildServer: grailsApplication.config.cloud.buildServer
+                            buildServer: grailsApplication.config.cloud.buildServer,
                     ])
+                    List<String> selectedLoadBalancers = Requests.ensureList(params.selectedLoadBalancers)
+                    if (selectedLoadBalancers) {
+                        attributes['selectedLoadBalancers'] = selectedLoadBalancers
+                    }
+                    List<String> selectedSecurityGroups = Requests.ensureList(params.selectedSecurityGroups)
+                    if (selectedSecurityGroups) {
+                        attributes['selectedSecurityGroups'] = selectedSecurityGroups
+                    }
                     return attributes
                 }
                 xml { new XML(cluster).render(response) }
@@ -214,7 +222,8 @@ class ClusterController {
                     keyName: params.keyName ?: lastLaunchConfig.keyName,
                     availabilityZones: selectedZones,
                     zoneRebalancingSuspended: azRebalanceSuspended,
-                    scalingPolicies: newScalingPolicies
+                    scalingPolicies: newScalingPolicies,
+                    vpcZoneIdentifier: lastGroup.vpcZoneIdentifier,
             )
 
             def operation = pushService.startGroupCreate(options)

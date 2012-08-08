@@ -264,20 +264,25 @@ class SubnetsSpec extends Specification {
         expectedZones == subnets.getZonesForPurpose('internal', SubnetTarget.ELB)
     }
 
-    def 'should return purpose for subnet ID'() {
-        expect: 'external' == subnets.getPurposeForSubnets(['subnet-e9b0a3a2'])
+    def 'should return subnet for subnet ID'() {
+        SubnetData expectedSubnet = subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2)
+
+        expect:
+        subnets.coerceLoneOrNoneFromIds(['subnet-e9b0a3a2']) == expectedSubnet
     }
 
-    def 'should return purpose for first subnet ID if there are multiple'() {
-        expect: 'external' == subnets.getPurposeForSubnets(['subnet-e9b0a3a2', 'subnet-e9b0a3a1'])
+    def 'should return subnet for first subnet ID if there are multiple'() {
+        SubnetData expectedSubnet = subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2)
+
+        expect: subnets.coerceLoneOrNoneFromIds(['subnet-e9b0a3a2', 'subnet-e9b0a3a1']) == expectedSubnet
     }
 
-    def 'should return empty String if there is no subnet ID'() {
-        expect: '' == subnets.getPurposeForSubnets(null)
+    def 'should return null if there is no subnet ID'() {
+        expect: null == subnets.coerceLoneOrNoneFromIds(null)
     }
 
-    def 'should return empty String if there is no subnet in cache with ID'() {
-        expect: '' == subnets.getPurposeForSubnets(['subnet-deadbeef'])
+    def 'should return null if there is no subnet in cache with ID'() {
+        expect: null == subnets.coerceLoneOrNoneFromIds(['subnet-deadbeef'])
     }
 
     def 'should map purpose to VPC ID'() {

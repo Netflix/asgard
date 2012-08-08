@@ -103,7 +103,8 @@ class RollingPushOperation extends AbstractPushOperation {
                 withLaunchConfigurationName(newLaunchName)
         String userData = launchTemplateService.buildUserData(options.common.userContext, groupForUserData)
         Time.sleepCancellably 100 // tiny pause before LC create to avoid rate limiting
-        Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(options.securityGroups)
+        Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(options.securityGroups,
+                group.VPCZoneIdentifier, options.userContext.region)
         task.log("Updating launch from ${oldLaunch.launchConfigurationName} with ${options.imageId} into ${newLaunchName}")
         awsAutoScalingService.createLaunchConfiguration(options.common.userContext, newLaunchName,
                 options.imageId, oldLaunch.keyName, securityGroups, userData,

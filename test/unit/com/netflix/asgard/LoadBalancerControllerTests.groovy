@@ -28,6 +28,7 @@ class LoadBalancerControllerTests extends ControllerUnitTestCase {
         controller.awsLoadBalancerService = Mocks.awsLoadBalancerService()
         controller.applicationService = Mocks.applicationService()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
+        controller.awsEc2Service = Mocks.awsEc2Service()
     }
 
     void testShow() {

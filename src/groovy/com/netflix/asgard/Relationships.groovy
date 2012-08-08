@@ -372,6 +372,14 @@ class Relationships {
             return null
         }
     }
+
+    static List<String> subnetIdsFromVpcZoneIdentifier(String vpcZoneIdentifier) {
+        vpcZoneIdentifier?.tokenize(',') ?: []
+    }
+
+    static String vpcZoneIdentifierFromSubnetIds(List<String> subnetIds) {
+        subnetIds.join(',')
+    }
 }
 
 @Retention(RetentionPolicy.RUNTIME)

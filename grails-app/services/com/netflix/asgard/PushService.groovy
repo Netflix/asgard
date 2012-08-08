@@ -17,8 +17,12 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.Image
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.netflix.asgard.model.SubnetTarget
+import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.ZoneAvailability
 import com.netflix.asgard.push.GroupActivateOperation
 import com.netflix.asgard.push.GroupCreateOperation
@@ -145,13 +149,19 @@ class PushService {
         Boolean imageListIsShort = images.size() < fullCount
         List<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext).
                 sort { it.loadBalancerName.toLowerCase() }
+        Collection<AvailabilityZone> zones = awsEc2Service.getAvailabilityZones(userContext)
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        Collection<String> subnetPurposes = subnets.getPurposesForZones(zones*.zoneName, SubnetTarget.EC2).sort()
+        Collection<SecurityGroup> effectiveSecurityGroups = awsEc2Service.getEffectiveSecurityGroups(userContext)
+        List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)
+        String vpcId = subnets.coerceLoneOrNoneFromIds(subnetIds)?.vpcId
         Map result = [
                 appName: appName,
                 name: name,
                 cluster: Relationships.clusterFromGroupName(name),
                 variables: Relationships.dissectCompoundName(name),
                 actionName: actionName,
-                zoneList: awsEc2Service.getAvailabilityZones(userContext),
+                zoneList: zones,
                 // launch config values: list & selection pairs
                 images: images.sort { it.imageLocation.toLowerCase() },
                 image: lc.imageId,
@@ -159,13 +169,15 @@ class PushService {
                 instanceTypes: instanceTypeService.getInstanceTypes(userContext),
                 instanceType: instanceType,
                 zoneAvailabilities: zoneAvailabilities,
-                securityGroups: awsEc2Service.getEffectiveSecurityGroups(userContext),
-                loadBalancers: loadBalancers,
+                vpcZoneIdentifier: group.VPCZoneIdentifier,
+                vpcId: vpcId,
+                subnetPurposes: subnetPurposes,
+                loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
                 selectedLoadBalancers: group.loadBalancerNames,
+                securityGroupsGroupedByVpcId: effectiveSecurityGroups.groupBy { it.vpcId },
+                selectedSecurityGroups: lc.securityGroups,
                 defKey: awsEc2Service.defaultKeyName,
                 keys: awsEc2Service.getKeys(userContext).sort { it.keyName.toLowerCase() },
-                selectedSecurityGroups: lc.securityGroups,
-
                 // Rolling push process options
                 relaunchCount: relaunchCount,
                 concurrentRelaunches: 1,

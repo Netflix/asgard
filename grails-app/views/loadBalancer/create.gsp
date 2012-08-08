@@ -89,6 +89,7 @@
                 <h2>Configuration</h2>
               </td>
             </tr>
+            <g:render template="/common/vpcSelection" model="[awsAction: 'Create', awsObject: 'ELB']"/>
             <tr class="prop">
               <td class="name">
                 <label for="selectedZones">Availablity Zones:</label>
@@ -101,6 +102,7 @@
                 </select>
               </td>
             </tr>
+            <g:render template="/common/securityGroupSelection" />
             <tr class="prop">
               <td class="name">
                   <label>Listeners:</label>

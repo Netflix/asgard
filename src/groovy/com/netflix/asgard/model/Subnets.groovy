@@ -50,6 +50,16 @@ import com.netflix.asgard.Check
     }
 
     /**
+     * Find the subnet associated with one of Subnet IDs. It is assumed that they all have the same relevant attributes.
+     *
+     * @param  subnetIds Subnet IDs
+     * @return the Subnet or null
+     */
+    SubnetData coerceLoneOrNoneFromIds(Collection<String> subnetIds) {
+        subnetIds ? findSubnetById(subnetIds.iterator().next()?.trim()) : null
+    }
+
+    /**
      * Find the subnet IDs that map to specific zones
      *
      * @param  zones the zones in AWS that you want Subnet IDs for
@@ -117,20 +127,6 @@ import com.netflix.asgard.Check
             it.purpose == purpose && (!it.target || it.target == target)
         }
         subnetsForPurpose*.availabilityZone as Set
-    }
-
-    /**
-     * Find the purpose associated with subnetIds. We really only look at the first one and are not validating anything.
-     *
-     * @param  subnetIds list of Subnet IDs should all have the same purpose in theory
-     * @return the associated purpose or an empty String if none exists
-     */
-    String getPurposeForSubnets(List<String> subnetIds) {
-        if (!subnetIds) {
-            return ''
-        }
-        String subnetId = subnetIds[0]?.trim()
-        allSubnets.find { it.subnetId == subnetId }?.purpose ?: ''
     }
 
     /**

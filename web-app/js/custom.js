@@ -719,6 +719,31 @@ jQuery(document).ready(function() {
     };
     setJsonValue();
 
+    var setUpVpcRelatedAttributes = function() {
+        jQuery('input[name="subnetPurpose"]').click(function() {
+            var vpcId, securityGroupSelectForVpcId, allSecurityGroupSelects, loadBalancerSelectForVpcId,
+                allLoadBalancerSelects;
+            vpcId = jQuery(this).attr('vpcid');
+
+            // Display Security Group select based on VPC ID
+            securityGroupSelectForVpcId = jQuery('.securityGroupsSelect.vpcId' + vpcId);
+            allSecurityGroupSelects = jQuery('.securityGroupsSelect');
+            allSecurityGroupSelects.children().prop('disabled', true);
+            securityGroupSelectForVpcId.children().prop('disabled', false);
+            allSecurityGroupSelects.addClass('concealed');
+            securityGroupSelectForVpcId.removeClass('concealed');
+
+            // Display Load Balancer select based on VPC ID
+            loadBalancerSelectForVpcId = jQuery('.loadBalancersSelect.vpcId' + vpcId);
+            allLoadBalancerSelects = jQuery('.loadBalancersSelect');
+            allLoadBalancerSelects.children().prop('disabled', true);
+            loadBalancerSelectForVpcId.children().prop('disabled', false);
+            allLoadBalancerSelects.addClass('concealed');
+            loadBalancerSelectForVpcId.removeClass('concealed');
+        });
+    };
+    setUpVpcRelatedAttributes();
+
     // Cluster page
     var setUpClusterPage = function() {
         var config, jCreateContainer, jCreateAdvancedTrs;

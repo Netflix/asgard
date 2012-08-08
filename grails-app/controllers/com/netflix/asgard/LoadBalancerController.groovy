@@ -17,12 +17,16 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.HealthCheck
 import com.amazonaws.services.elasticloadbalancing.model.Listener
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.InstanceStateData
+import com.netflix.asgard.model.SubnetTarget
+import com.netflix.asgard.model.Subnets
 import grails.converters.JSON
 import grails.converters.XML
+import com.amazonaws.services.ec2.model.SecurityGroup
 
 class LoadBalancerController {
 
@@ -70,12 +74,14 @@ class LoadBalancerController {
                     groups.collect { Relationships.clusterFromGroupName(it.autoScalingGroupName) }.unique()
             List<InstanceStateData> instanceStateDatas = awsLoadBalancerService.getInstanceStateDatas(
                     userContext, name, groups)
+            String subnetPurpose = awsEc2Service.getSubnets(userContext).coerceLoneOrNoneFromIds(lb.subnets)?.purpose
             Map details = [
                     loadBalancer: lb,
                     app: applicationService.getRegisteredApplication(userContext, appName),
                     clusters: clusterNames,
                     groups: groups,
-                    instanceStates: instanceStateDatas
+                    instanceStates: instanceStateDatas,
+                    subnetPurpose: subnetPurpose ?: '',
             ]
             withFormat {
                 html { return details }
@@ -87,10 +93,29 @@ class LoadBalancerController {
 
     def create = {
         UserContext userContext = UserContext.of(request)
+        Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
+        Collection<AvailabilityZone> preselectedAvailabilityZones = availabilityZones.findAll {
+            it.shouldBePreselected(params.selectedZones, null)
+        }
+        Collection<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
+            it.groupName?.toLowerCase()
+        }
+        Map<Object, List<SecurityGroup>> securityGroupsGroupedByVpcId= effectiveGroups.groupBy { it.vpcId }
+        securityGroupsGroupedByVpcId[null] = [] // Security Groups are not allowed on non-VPC ELBs
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        Collection<String> zoneNames = preselectedAvailabilityZones*.zoneName
+        Set<String> purposesForZones = subnets.getPurposesForZones(zoneNames, SubnetTarget.ELB).sort()
+        Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId().subMap(purposesForZones)
         [
             applications: applicationService.getRegisteredApplicationsForLoadBalancer(userContext),
             stacks: stackService.getStacks(userContext),
-            zoneList: awsEc2Service.getAvailabilityZones(userContext)
+            zoneList: availabilityZones,
+            subnetPurpose: params.subnetPurpose,
+            subnetPurposes: purposesForZones.sort(),
+            purposeToVpcId: purposeToVpcId,
+            vpcId: purposeToVpcId[params.subnetPurpose],
+            securityGroupsGroupedByVpcId: securityGroupsGroupedByVpcId,
+            selectedSecurityGroups: Requests.ensureList(params.selectedSecurityGroups),
         ]
     }
 
@@ -107,6 +132,7 @@ class LoadBalancerController {
 
             UserContext userContext = UserContext.of(request)
             List<String> zoneList = Requests.ensureList(params.selectedZones)
+            List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups)
             try {
                 Listener listener1 = new Listener().withProtocol(params.protocol1).
                         withLoadBalancerPort(params.lbPort1.toInteger()).
@@ -117,7 +143,9 @@ class LoadBalancerController {
                             .withProtocol(params.protocol2)
                             .withLoadBalancerPort(params.lbPort2.toInteger()).withInstancePort(params.instancePort2.toInteger()))
                 }
-                awsLoadBalancerService.createLoadBalancer(userContext, lbName, zoneList, listeners)
+                String subnetPurpose = params.subnetPurpose
+                awsLoadBalancerService.createLoadBalancer(userContext, lbName, zoneList, listeners, securityGroups,
+                        subnetPurpose)
                 updateHealthCheck(userContext, lbName, params)
                 flash.message = "Load Balancer '${lbName}' has been created. You should now file two tickets: " +
                         "one Eng Tools Jira ticket for Security Group ingress access, " +
@@ -157,24 +185,37 @@ class LoadBalancerController {
         UserContext userContext = UserContext.of(request)
         LoadBalancerDescription lb = awsLoadBalancerService.getLoadBalancer(userContext, name)
 
-        // Zones
-
-        List<String> origZones = lb.availabilityZones.sort()
         List<String> zoneList = Requests.ensureList(params.selectedZones)
-        zoneList = zoneList.sort()
-
-        List<String> removedZones = origZones - zoneList
-        List<String> addedZones = zoneList - origZones
-
-        if (addedZones.size() > 0) {
-            awsLoadBalancerService.addZones(userContext, name, addedZones)
-            def msg = "Added zone${addedZones.size() == 1 ? '' : 's'} $addedZones to load balancer. "
-            flash.message = flash.message ? flash.message + msg : msg
-        }
-        if (removedZones.size() > 0) {
-            awsLoadBalancerService.removeZones(userContext, name, removedZones)
-            def msg = "Removed zone${removedZones.size() == 1 ? '' : 's'} $removedZones from load balancer. "
-            flash.message = flash.message ? flash.message + msg : msg
+        if (lb.subnets) {
+            // Update subnets
+            Subnets subnets = awsEc2Service.getSubnets(userContext)
+            String subnetPurpose = subnets.coerceLoneOrNoneFromIds(lb.subnets)?.purpose
+            List<String> newSubnetsIds = subnets.getSubnetIdsForZones(zoneList, subnetPurpose, SubnetTarget.ELB)
+            try {
+                List<String> updateSubnetsMsgs = awsLoadBalancerService.updateSubnets(userContext, name, lb.subnets,
+                        newSubnetsIds)
+                updateSubnetsMsgs.each { flash.message + it }
+            }
+            catch (AmazonServiceException ase) {
+                String msg = "Failed to update subnets: ${ase} "
+                flash.message = flash.message ? flash.message + msg : msg
+            }
+        } else {
+            // Update zones
+            List<String> origZones = lb.availabilityZones.sort()
+            zoneList = zoneList.sort()
+            List<String> removedZones = origZones - zoneList
+            List<String> addedZones = zoneList - origZones
+            if (addedZones.size() > 0) {
+                awsLoadBalancerService.addZones(userContext, name, addedZones)
+                def msg = "Added zone${addedZones.size() == 1 ? '' : 's'} $addedZones to load balancer. "
+                flash.message = flash.message ? flash.message + msg : msg
+            }
+            if (removedZones.size() > 0) {
+                awsLoadBalancerService.removeZones(userContext, name, removedZones)
+                def msg = "Removed zone${removedZones.size() == 1 ? '' : 's'} $removedZones from load balancer. "
+                flash.message = flash.message ? flash.message + msg : msg
+            }
         }
 
         // Health check

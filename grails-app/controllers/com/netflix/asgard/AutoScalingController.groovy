@@ -22,6 +22,7 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
+import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.google.common.collect.Multiset
@@ -30,10 +31,13 @@ import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingProcessType
+import com.netflix.asgard.model.SubnetTarget
+import com.netflix.asgard.model.Subnets
 import grails.converters.JSON
 import grails.converters.XML
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import com.amazonaws.services.ec2.model.SecurityGroup
 
 class AutoScalingController {
 
@@ -123,6 +127,8 @@ class AutoScalingController {
             }
             Integer instanceCount = group.instances.size()
             Boolean runHealthChecks = params.runHealthChecks || instanceCount < 20
+            List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)
+            String subnetPurpose = awsEc2Service.getSubnets(userContext).coerceLoneOrNoneFromIds(subnetIds)?.purpose
 
             final Map<AutoScalingProcessType, String> processTypeToProcessStatusMessage = [:]
             AutoScalingProcessType.with { [Launch, AZRebalance, Terminate, AddToLoadBalancer] }.each {
@@ -163,6 +169,7 @@ class AutoScalingController {
                     app: applicationService.getRegisteredApplication(userContext, appName),
                     buildServer: grailsApplication.config.cloud.buildServer,
                     alarmsByName: alarmsByName,
+                    subnetPurpose: subnetPurpose ?: '',
                     vpcZoneIdentifier: group.VPCZoneIdentifier
             ]
             withFormat {
@@ -196,7 +203,8 @@ class AutoScalingController {
             processes << new SuspendedProcess().withProcessName(AutoScalingProcessType.AZRebalance.name())
         }
         List<String> selectedZones = Requests.ensureList(params.selectedZones)
-        List<String> zones = selectedZones ?: awsEc2Service.getRecommendedAvailabilityZones(userContext)*.zoneName
+        Collection<AvailabilityZone> recommendedZones = awsEc2Service.getRecommendedAvailabilityZones(userContext)
+        List<String> zones = selectedZones ?: recommendedZones*.zoneName
         AutoScalingGroup group = new AutoScalingGroup(
                 minSize: tryParse(params.min),
                 desiredCapacity: tryParse(params.desiredCapacity),
@@ -207,16 +215,28 @@ class AutoScalingController {
                 availabilityZones: zones,
                 suspendedProcesses: processes
         )
+        Collection<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
+            it.groupName?.toLowerCase()
+        }
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        Set<String> purposesForZones = subnets.getPurposesForZones(recommendedZones*.zoneName, SubnetTarget.EC2)
+        Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId().subMap(purposesForZones)
         [
                 applications: applicationService.getRegisteredApplications(userContext),
                 group: group,
                 stacks: stackService.getStacks(userContext),
-                zoneList: awsEc2Service.getRecommendedAvailabilityZones(userContext),
-                loadBalancers: loadBalancers,
+                zoneList: recommendedZones,
                 images: awsEc2Service.getAccountImages(userContext).sort { it.imageLocation.toLowerCase() },
                 defKey: awsEc2Service.defaultKeyName,
                 keys: awsEc2Service.getKeys(userContext).sort { it.keyName.toLowerCase() },
-                securityGroups: awsEc2Service.getEffectiveSecurityGroups(userContext),
+                subnetPurpose: params.subnetPurpose,
+                subnetPurposes: purposesForZones.sort(),
+                purposeToVpcId: purposeToVpcId,
+                vpcId: purposeToVpcId[params.subnetPurpose],
+                loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
+                selectedLoadBalancers: Requests.ensureList(params.selectedLoadBalancers),
+                securityGroupsGroupedByVpcId: effectiveGroups.groupBy { it.vpcId },
+                selectedSecurityGroups: Requests.ensureList(params.selectedSecurityGroups),
                 instanceTypes: instanceTypeService.getInstanceTypes(userContext)
         ]
     }
@@ -249,6 +269,14 @@ class AutoScalingController {
                     withMinSize(minSize.toInteger()).withDesiredCapacity(desiredCapacity.toInteger()).
                     withMaxSize(maxSize.toInteger()).withDefaultCooldown(defaultCooldown.toInteger()).
                     withHealthCheckType(healthCheckType).withHealthCheckGracePeriod(healthCheckGracePeriod)
+
+            // If this ASG lauches VPC instances, we must find the proper subnets and add them.
+            String subnetPurpose = params.subnetPurpose
+            if (subnetPurpose) {
+                List<String> subnetIds = awsEc2Service.getSubnets(userContext).
+                        getSubnetIdsForZones(availabilityZones, subnetPurpose, SubnetTarget.EC2)
+                groupTemplate.withVPCZoneIdentifier(Relationships.vpcZoneIdentifierFromSubnetIds(subnetIds))
+            }
 
             final Collection<AutoScalingProcessType> suspendedProcesses = Sets.newHashSet()
             if (params.azRebalance == 'disabled') {
