@@ -28,6 +28,13 @@ class SecretService implements InitializingBean {
     String loadBalancerUserName
     String loadBalancerPassword
 
+    /**
+     * A list of keys used for encrypting {@link ApiToken} objects. The first item in the list is the one used for encrypting
+     * newly generated API Token. Subsequent items in the list are keys used in the past that should be retired
+     * eventually.
+     */
+    List<String> apiEncryptionKeys = []
+
     void afterPropertiesSet() {
         if (configService.online) {
             String awsAccessId = configService.accessId ?: fetch(configService.accessIdFileName)
@@ -37,7 +44,17 @@ class SecretService implements InitializingBean {
                 loadBalancerUserName = fetchRemote(configService.loadBalancerUsernameFile)
                 loadBalancerPassword = fetchRemote(configService.loadBalancerPasswordFile)
             }
+            if (configService.apiTokenEnabled) {
+                apiEncryptionKeys = configService.apiEncryptionKeys ?: fetchList(configService.apiEncryptionKeyFileName)
+            }
         }
+    }
+
+    /**
+     * @return The current in use encryption key
+     */
+    String getCurrentApiEncryptionKey() {
+        apiEncryptionKeys[0]
     }
 
     private String fetch(String fileName) {
@@ -59,5 +76,9 @@ class SecretService implements InitializingBean {
         String secretValue = sshService.call(user, server, command)
 
         Check.notEmpty(secretValue as String, fileName)
+    }
+
+    private List<String> fetchList(String fileName) {
+        fileName ? fetch(fileName)?.tokenize() : []
     }
 }
