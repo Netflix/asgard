@@ -119,7 +119,6 @@ grails.project.dependency.resolution = {
     plugins {
         compile ":hibernate:$grailsVersion"
         compile ":compress:0.4"
-        compile ':shiro:1.1.4'
 
         test(':spock:0.6') {
             exclude 'spock-grails-support'
