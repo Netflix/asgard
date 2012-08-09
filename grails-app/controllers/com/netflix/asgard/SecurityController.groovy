@@ -80,11 +80,22 @@ class SecurityController {
 
     def create = {
         UserContext userContext = UserContext.of(request)
+        String name = params.id ?: params.name
+        String description = ''
+        List<AppRegistration> applications = []
+        if (name) {
+            AppRegistration app = applicationService.getRegisteredApplication(userContext, name)
+            description = app?.description
+        } else {
+            applications = applicationService.getRegisteredApplications(userContext)
+        }
         [
-            applications: applicationService.getRegisteredApplications(userContext),
+            applications: applications,
             vpcIds: awsEc2Service.getVpcs(userContext)*.vpcId,
             selectedVpcIds: params.selectedVpcIds,
-            enableVpc: params.enableVpc
+            enableVpc: params.enableVpc,
+            name: name,
+            description: params.description ?: description,
         ]
     }
 
