@@ -720,7 +720,13 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         if (from == From.CACHE) {
             return caches.allInstances.by(userContext.region).get(instanceId)
         }
-        List<Instance> instances = getInstanceReservation(userContext, instanceId)?.instances
+        List<Instance> instances
+        try {
+            instances = getInstanceReservation(userContext, instanceId)?.instances
+        } catch (AmazonServiceException ase) {
+            log.error "Request for instance ${instanceId} failed because ${ase}"
+            // Squash and return null
+        }
         instances ? instances[0] : null
     }
 
@@ -742,14 +748,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     Reservation getInstanceReservation(UserContext userContext, String instanceId) {
         Check.notNull(instanceId, Reservation, "instanceId")
-        def result
-        try {
-            result = awsClient.by(userContext.region).describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId))
-        }
-        catch (AmazonServiceException ase) {
-            log.info "Request for instance ${instanceId} failed because ${ase}"
-            return null
-        }
+        def result = awsClient.by(userContext.region).describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId))
         List<Reservation> reservations = result.reservations
         if (reservations.size() < 1 || reservations[0].instances.size() < 1) {
             log.info "Request for instance ${instanceId} failed because the instance no longer exists"
