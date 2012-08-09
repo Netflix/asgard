@@ -153,7 +153,16 @@ class InstanceController {
             appInst = discoveryService.getAppInstance(userContext, instanceId)
             appName = appInst?.appName
         }
-        Reservation instRsrv = instanceId ? awsEc2Service.getInstanceReservation(userContext, instanceId) : null
+        Reservation instRsrv
+        try {
+            instRsrv = instanceId ? awsEc2Service.getInstanceReservation(userContext, instanceId) : null
+        } catch (AmazonServiceException ase) {
+            log.error "Request for instance ${instanceId} failed because ${ase}"
+            if (!appInst) {
+                throw ase
+            }
+        }
+
         Instance instance = instRsrv ? instRsrv.instances[0] : null
         if (!appInst && !instance) {
             String identifier = instanceId ?: "${params.appName}/${params.hostName}"
