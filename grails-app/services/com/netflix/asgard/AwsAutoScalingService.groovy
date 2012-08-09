@@ -787,8 +787,8 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
 
     void createLaunchConfiguration(UserContext userContext, String name, String imageId, String keyName,
-            Collection<String> securityGroups, String userData, String instanceType, String kernelId, String ramdiskId, String iamInstanceProfile,
-            Collection<BlockDeviceMapping> blockDeviceMappings, Task existingTask = null) {
+            Collection<String> securityGroups, String userData, String instanceType, String kernelId, String ramdiskId,
+            String iamInstanceProfile, Collection<BlockDeviceMapping> blockDeviceMappings, Task existingTask = null) {
         taskService.runTask(userContext, "Create Launch Configuration '${name}' with image '${imageId}'", { Task task ->
             Check.notNull(name, LaunchConfiguration, "name")
             Check.notNull(imageId, LaunchConfiguration, "imageId")
