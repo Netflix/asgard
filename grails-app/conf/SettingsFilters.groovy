@@ -17,6 +17,7 @@
 class SettingsFilters {
 
     def configService
+    def pluginService
     def grailsApplication
 
     def filters = {
@@ -33,6 +34,8 @@ class SettingsFilters {
                 request.platformserviceExists = grailsApplication.config.cloud.platformserviceRegions ? true : false
                 request.ticketLabel = configService.ticketLabel
                 request.fullTicketLabel = configService.fullTicketLabel
+                request.authenticationEnabled = (pluginService.authenticationProvider != null)
+                request.apiTokenEnabled = configService.apiTokenEnabled
                 // If the last value is falsy and there is no explicit return statement then this filter method will
                 // return a falsy value and cause requests to fail silently.
                 return true
