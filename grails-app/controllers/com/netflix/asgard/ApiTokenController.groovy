@@ -18,7 +18,6 @@ package com.netflix.asgard
 import com.netflix.asgard.auth.ApiToken
 import org.apache.shiro.SecurityUtils
 
-@RegionAgnostic
 class ApiTokenController {
 
     def configService

@@ -18,11 +18,11 @@ package com.netflix.asgard
 
 import com.netflix.asgard.auth.AsgardToken
 import com.netflix.asgard.plugin.AuthenticationProvider
-import grails.plugin.spock.ControllerSpec
 import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.subject.Subject
+import spock.lang.Specification
 
-class AuthControllerSpec extends ControllerSpec {
+class AuthControllerSpec extends Specification {
 
     Subject subject = Mock(Subject)
     AsgardToken asgardToken = Mock(AsgardToken)
@@ -43,8 +43,8 @@ class AuthControllerSpec extends ControllerSpec {
         controller.beforeInterceptor()
 
         then:
-        controller.renderArgs.status == 403
-        controller.response.contentAsString == 'Authentication is not configured.'
+        response.status == 403
+        response.contentAsString == 'Authentication is not configured.'
     }
 
     def 'sign in should redirect to target url'() {
@@ -58,7 +58,7 @@ class AuthControllerSpec extends ControllerSpec {
         then:
         1 * subject.login(asgardToken)
         controller.session[AuthController.AUTH_TARGET_URL] == null
-        redirectArgs.uri == '/test'
+        response.redirectUrl == '/test'
     }
 
     def 'sign in should redirect to index page if no target url'() {
@@ -69,7 +69,7 @@ class AuthControllerSpec extends ControllerSpec {
 
         then:
         1 * subject.login(asgardToken)
-        redirectArgs.uri == '/'
+        response.redirectUrl == '/'
     }
 
     def 'should return 401 if AuthenticationException thrown'() {
@@ -80,8 +80,8 @@ class AuthControllerSpec extends ControllerSpec {
         controller.signIn()
 
         then:
-        controller.renderArgs.status == 401
-        controller.response.contentAsString == 'Authentication failed with message Chaos!!'
+        response.status == 401
+        response.contentAsString == 'Authentication failed with message Chaos!!'
     }
 
     private prepareAuthentication() {

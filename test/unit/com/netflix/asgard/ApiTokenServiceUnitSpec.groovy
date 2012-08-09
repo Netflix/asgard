@@ -19,7 +19,7 @@ import com.netflix.asgard.auth.ApiToken
 import org.apache.shiro.subject.Subject
 import spock.lang.Specification
 
-class ApiTokenServiceSpec extends Specification {
+class ApiTokenServiceUnitSpec extends Specification {
 
     ApiToken apiToken
     def configService = Mock(ConfigService)

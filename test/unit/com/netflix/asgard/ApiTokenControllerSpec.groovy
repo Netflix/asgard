@@ -16,12 +16,12 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.auth.ApiToken
-import grails.plugin.spock.ControllerSpec
 import grails.test.MockUtils
 import org.apache.shiro.subject.Subject
+import spock.lang.Specification
 import spock.lang.Unroll
 
-class ApiTokenControllerSpec extends ControllerSpec {
+class ApiTokenControllerSpec extends Specification {
 
     def configService = Mock(ConfigService)
     def secretService = Mock(SecretService)
@@ -48,8 +48,8 @@ class ApiTokenControllerSpec extends ControllerSpec {
         controller.beforeInterceptor()
 
         then:
-        controller.renderArgs.status == 401
-        controller.response.contentAsString == 'This feature is disabled.'
+        response.status == 401
+        response.contentAsString == 'This feature is disabled.'
     }
 
     def 'should return 401 if user is not authenticated'() {
@@ -60,8 +60,8 @@ class ApiTokenControllerSpec extends ControllerSpec {
         controller.beforeInterceptor()
 
         then:
-        controller.renderArgs.status == 401
-        controller.response.contentAsString == 'You must be logged in to use this feature.'
+        response.status == 401
+        response.contentAsString == 'You must be logged in to use this feature.'
     }
 
     def 'should return api token for valid request'() {
@@ -76,8 +76,8 @@ class ApiTokenControllerSpec extends ControllerSpec {
         controller.generate(command)
 
         then:
-        redirectArgs.action == 'show'
-        controller.flash.apiToken == new ApiToken('ThisPurpose', 'testDL@netflix.com', 90, 'key')
+        response.redirectUrl == '/apiToken/show'
+        flash.apiToken == new ApiToken('ThisPurpose', 'testDL@netflix.com', 90, 'key')
     }
 
     def 'should return error for invalid generate request'() {
@@ -89,7 +89,7 @@ class ApiTokenControllerSpec extends ControllerSpec {
         controller.generate(command)
 
         then:
-        chainArgs.action == 'create'
+        response.redirectedUrl == '/apiToken/create'
     }
 
     @Unroll("hasErrors should return #valid when purpose is #purpose")
