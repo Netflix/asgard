@@ -20,6 +20,8 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.GroupedInstance
+import com.netflix.asgard.model.ScalingPolicyData
+import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.push.CommonPushOptions
 import com.netflix.asgard.push.GroupActivateOperation
@@ -31,8 +33,6 @@ import com.netflix.asgard.push.InitialTraffic
 import grails.converters.JSON
 import grails.converters.XML
 
-import com.netflix.asgard.model.ScalingPolicyData
-
 class ClusterController {
 
     def static allowedMethods = [createNextGroup: 'POST', resize: 'POST', delete: 'POST', activate: 'POST',
@@ -40,6 +40,7 @@ class ClusterController {
 
     def grailsApplication
     def awsAutoScalingService
+    def awsEc2Service
     def configService
     def mergedInstanceService
     def pushService
@@ -197,6 +198,9 @@ class ClusterController {
             }
 
             Integer lastGracePeriod = lastGroup.healthCheckGracePeriod
+            Subnets subnets = awsEc2Service.getSubnets(userContext)
+            String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForZones(lastGroup.vpcZoneIdentifier,
+                    selectedZones)
             GroupCreateOptions options = new GroupCreateOptions(
                     common: new CommonPushOptions(
                             userContext: userContext,
@@ -223,7 +227,7 @@ class ClusterController {
                     availabilityZones: selectedZones,
                     zoneRebalancingSuspended: azRebalanceSuspended,
                     scalingPolicies: newScalingPolicies,
-                    vpcZoneIdentifier: lastGroup.vpcZoneIdentifier,
+                    vpcZoneIdentifier: vpcZoneIdentifier,
             )
 
             def operation = pushService.startGroupCreate(options)

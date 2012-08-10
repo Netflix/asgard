@@ -163,6 +163,72 @@ class SubnetsSpec extends Specification {
         expect: subnets.getSubnetIdsForZones(['us-east-1a'], '').isEmpty()
     }
 
+    def 'should construct VPC Zone Identifier for zones'() {
+        subnets = new Subnets([
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a3', 'us-east-1a', 'internal', SubnetTarget.ELB),
+                subnet('subnet-e9b0a3a4', 'us-east-1a', null, SubnetTarget.EC2),
+                subnet('subnet-e9b0a3b1', 'us-east-1b', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3b2', 'us-east-1b', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c1', 'us-east-1c', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c2', 'us-east-1c', 'external', SubnetTarget.EC2),
+        ])
+        String existingVpcZoneIdentifier = 'subnet-e9b0a3a1,subnet-e9b0a3b1'
+        List<String> zones = ['us-east-1a', 'us-east-1c']
+        String expectedVpcZoneIdentifier = 'subnet-e9b0a3a1,subnet-e9b0a3c1'
+
+        expect:
+        expectedVpcZoneIdentifier == subnets.constructNewVpcZoneIdentifierForZones(existingVpcZoneIdentifier, zones)
+    }
+
+    def 'should construct null VPC Zone Identifier for subnets without purpose'() {
+        subnets = new Subnets([
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a3', 'us-east-1a', 'internal', SubnetTarget.ELB),
+                subnet('subnet-e9b0a3a4', 'us-east-1a', null, SubnetTarget.EC2),
+                subnet('subnet-e9b0a3b1', 'us-east-1b', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3b2', 'us-east-1b', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c1', 'us-east-1c', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c2', 'us-east-1c', 'external', SubnetTarget.EC2),
+        ])
+        String existingVpcZoneIdentifier = 'subnet-e9b0a3a4'
+        List<String> zones = ['us-east-1a', 'us-east-1c']
+
+        expect:
+        null == subnets.constructNewVpcZoneIdentifierForZones(existingVpcZoneIdentifier, zones)
+    }
+
+    def 'should construct null VPC Zone Identifier for null zones'() {
+        String existingVpcZoneIdentifier = 'subnet-e9b0a3a1,subnet-e9b0a3a2'
+
+        expect:
+        null == subnets.constructNewVpcZoneIdentifierForZones(existingVpcZoneIdentifier, null)
+    }
+
+    def 'should construct null VPC Zone Identifier for empty zones'() {
+        String existingVpcZoneIdentifier = 'subnet-e9b0a3a1,subnet-e9b0a3a2'
+
+        expect:
+        null == subnets.constructNewVpcZoneIdentifierForZones(existingVpcZoneIdentifier, [])
+    }
+
+    def 'should construct null VPC Zone Identifier for null existing VPC Zone Identifier'() {
+        List<String> zones = ['us-east-1a', 'us-east-1b']
+
+        expect:
+        null == subnets.constructNewVpcZoneIdentifierForZones(null, zones)
+    }
+
+    def 'should construct null VPC Zone Identifier for invalid existing VPC Zone Identifier'() {
+        String existingVpcZoneIdentifier = 'subnet-deadbeef'
+        List<String> zones = ['us-east-1a', 'us-east-1b']
+
+        expect:
+        null == subnets.constructNewVpcZoneIdentifierForZones(existingVpcZoneIdentifier, zones)
+    }
+
     def 'should return purposes for zones and target'() {
         Set<String> expectedPurposes = ['internal', 'external'] as Set
         expect: expectedPurposes == subnets.getPurposesForZones(['us-east-1a', 'us-east-1b'], SubnetTarget.EC2)

@@ -152,7 +152,7 @@ class PushService {
         Collection<AvailabilityZone> zones = awsEc2Service.getAvailabilityZones(userContext)
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         Collection<String> subnetPurposes = subnets.getPurposesForZones(zones*.zoneName, SubnetTarget.EC2).sort()
-        Collection<SecurityGroup> effectiveSecurityGroups = awsEc2Service.getEffectiveSecurityGroups(userContext)
+        List<SecurityGroup> effectiveSecurityGroups = awsEc2Service.getEffectiveSecurityGroups(userContext)
         List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)
         String vpcId = subnets.coerceLoneOrNoneFromIds(subnetIds)?.vpcId
         Map result = [

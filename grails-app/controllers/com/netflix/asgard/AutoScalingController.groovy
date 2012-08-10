@@ -215,7 +215,7 @@ class AutoScalingController {
                 availabilityZones: zones,
                 suspendedProcesses: processes
         )
-        Collection<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
+        List<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
             it.groupName?.toLowerCase()
         }
         Subnets subnets = awsEc2Service.getSubnets(userContext)

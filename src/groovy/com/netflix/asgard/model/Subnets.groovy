@@ -20,6 +20,7 @@ import com.google.common.collect.Maps
 import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
 import com.netflix.asgard.Check
+import com.netflix.asgard.Relationships
 
 /**
  * These are nontrivial queries we like to perform on subnets.
@@ -151,5 +152,27 @@ import com.netflix.asgard.Check
             }
             purposeToVpcId
         } as Map
+    }
+
+    /**
+     * Construct a new VPC Zone Identifier based on an existing VPC Zone Identifier and a list of zones.
+     * A VPC Zone Identifier is really just a comma delimited list of subnet IDs.
+     * I'm not happy that this method has to exist. It's just a wrapper around other methods that operate on a cleaner
+     * abstraction without knowledge of the unfortunate structure of VPC Zone Identifier.
+     *
+     * @param  vpcZoneIdentifier is used to derive a subnet purpose from
+     * @param  zones which the new VPC Zone Identifier will contain
+     * @return a new VPC Zone Identifier or null if no purpose was derived
+     */
+    String constructNewVpcZoneIdentifierForZones(String vpcZoneIdentifier, List<String> zones) {
+        List<String> oldSubnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(vpcZoneIdentifier)
+        String purpose = coerceLoneOrNoneFromIds(oldSubnetIds)?.purpose
+        if (purpose) {
+            List<String> newSubnetIds = getSubnetIdsForZones(zones, purpose, SubnetTarget.EC2) // This is only for ASGs.
+            if (newSubnetIds) {
+                return Relationships.vpcZoneIdentifierFromSubnetIds(newSubnetIds)
+            }
+        }
+        return null
     }
 }

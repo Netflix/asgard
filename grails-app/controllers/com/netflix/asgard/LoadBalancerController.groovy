@@ -97,10 +97,10 @@ class LoadBalancerController {
         Collection<AvailabilityZone> preselectedAvailabilityZones = availabilityZones.findAll {
             it.shouldBePreselected(params.selectedZones, null)
         }
-        Collection<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
+        List<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
             it.groupName?.toLowerCase()
         }
-        Map<Object, List<SecurityGroup>> securityGroupsGroupedByVpcId= effectiveGroups.groupBy { it.vpcId }
+        Map<Object, List<SecurityGroup>> securityGroupsGroupedByVpcId = effectiveGroups.groupBy { it.vpcId }
         securityGroupsGroupedByVpcId[null] = [] // Security Groups are not allowed on non-VPC ELBs
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         Collection<String> zoneNames = preselectedAvailabilityZones*.zoneName

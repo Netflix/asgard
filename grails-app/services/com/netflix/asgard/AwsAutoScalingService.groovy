@@ -52,7 +52,6 @@ import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SimpleDbSequenceLocator
-import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.push.AsgDeletionMode
 import com.netflix.asgard.push.Cluster
@@ -481,13 +480,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 new UpdateAutoScalingGroupRequest()).withHealthCheckType(autoScalingGroupData.healthCheckType.name())
 
         Subnets subnets = awsEc2Service.getSubnets(userContext)
-        List<String> oldSubnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)
-        String purpose = subnets.coerceLoneOrNoneFromIds(oldSubnetIds)?.purpose
-        if (purpose) {
-            List<String> newSubnetIds = subnets.getSubnetIdsForZones(autoScalingGroupData.availabilityZones, purpose,
-                    SubnetTarget.EC2)
-            request.withVPCZoneIdentifier(Relationships.vpcZoneIdentifierFromSubnetIds(newSubnetIds))
-        }
+        String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForZones(group.VPCZoneIdentifier,
+                autoScalingGroupData.availabilityZones)
+        request.withVPCZoneIdentifier(vpcZoneIdentifier)
 
         taskService.runTask(userContext, "Update Autoscaling Group '${autoScalingGroupData.autoScalingGroupName}'", { Task task ->
             processTypesToSuspend.each {
