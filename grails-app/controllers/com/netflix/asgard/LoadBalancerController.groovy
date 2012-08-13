@@ -180,6 +180,38 @@ class LoadBalancerController {
         ]
     }
 
+    private void updateLbSubnets(UserContext userContext, String lbName, List<String> zones, List<String> subnetNames) {
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        String subnetPurpose = subnets.coerceLoneOrNoneFromIds(subnetNames)?.purpose
+        List<String> newSubnetsIds = subnets.getSubnetIdsForZones(zones, subnetPurpose, SubnetTarget.ELB)
+        try {
+            List<String> updateSubnetsMsgs = awsLoadBalancerService.updateSubnets(userContext, lbName, subnetNames,
+                    newSubnetsIds)
+            updateSubnetsMsgs.each { flash.message + it }
+        }
+        catch (AmazonServiceException ase) {
+            String msg = "Failed to update subnets: ${ase} "
+            flash.message = flash.message ? flash.message + msg : msg
+        }
+    }
+
+    private void updateLbZones(UserContext userContext, String lbName, List<String> zones) {
+        List<String> origZones = lb.availabilityZones.sort()
+        zones = zones.sort()
+        List<String> removedZones = origZones - zones
+        List<String> addedZones = zones - origZones
+        if (addedZones.size() > 0) {
+            awsLoadBalancerService.addZones(userContext, lbName, addedZones)
+            def msg = "Added zone${addedZones.size() == 1 ? '' : 's'} $addedZones to load balancer. "
+            flash.message = flash.message ? flash.message + msg : msg
+        }
+        if (removedZones.size() > 0) {
+            awsLoadBalancerService.removeZones(userContext, lbName, removedZones)
+            def msg = "Removed zone${removedZones.size() == 1 ? '' : 's'} $removedZones from load balancer. "
+            flash.message = flash.message ? flash.message + msg : msg
+        }
+    }
+
     def update = {
         String name = params.name
         UserContext userContext = UserContext.of(request)
@@ -187,35 +219,9 @@ class LoadBalancerController {
 
         List<String> zoneList = Requests.ensureList(params.selectedZones)
         if (lb.subnets) {
-            // Update subnets
-            Subnets subnets = awsEc2Service.getSubnets(userContext)
-            String subnetPurpose = subnets.coerceLoneOrNoneFromIds(lb.subnets)?.purpose
-            List<String> newSubnetsIds = subnets.getSubnetIdsForZones(zoneList, subnetPurpose, SubnetTarget.ELB)
-            try {
-                List<String> updateSubnetsMsgs = awsLoadBalancerService.updateSubnets(userContext, name, lb.subnets,
-                        newSubnetsIds)
-                updateSubnetsMsgs.each { flash.message + it }
-            }
-            catch (AmazonServiceException ase) {
-                String msg = "Failed to update subnets: ${ase} "
-                flash.message = flash.message ? flash.message + msg : msg
-            }
+            updateLbSubnets(userContext, name, zoneList, lb.subnets)
         } else {
-            // Update zones
-            List<String> origZones = lb.availabilityZones.sort()
-            zoneList = zoneList.sort()
-            List<String> removedZones = origZones - zoneList
-            List<String> addedZones = zoneList - origZones
-            if (addedZones.size() > 0) {
-                awsLoadBalancerService.addZones(userContext, name, addedZones)
-                def msg = "Added zone${addedZones.size() == 1 ? '' : 's'} $addedZones to load balancer. "
-                flash.message = flash.message ? flash.message + msg : msg
-            }
-            if (removedZones.size() > 0) {
-                awsLoadBalancerService.removeZones(userContext, name, removedZones)
-                def msg = "Removed zone${removedZones.size() == 1 ? '' : 's'} $removedZones from load balancer. "
-                flash.message = flash.message ? flash.message + msg : msg
-            }
+            updateLbZones(userContext, name, zoneList)
         }
 
         // Health check

@@ -38,12 +38,8 @@ class LaunchTemplateService {
      */
     Collection<String> includeDefaultSecurityGroups(List<String> securityGroups, String vpcZoneIdentifier = null,
         Region region = null) {
-        List<String> defaultSecurityGroupNames
-        if (vpcZoneIdentifier) {
-            defaultSecurityGroupNames = configService.defaultVpcSecurityGroupNames
-        } else {
-            defaultSecurityGroupNames = configService.defaultSecurityGroups
-        }
+        List<String> defaultSecurityGroupNames =
+            vpcZoneIdentifier ? configService.defaultVpcSecurityGroupNames : configService.defaultSecurityGroups
         List<String> defaultSecurityGroups = defaultSecurityGroupNames
         // Use IDs rather than names if VPC or ids were specified
         if (vpcZoneIdentifier || (securityGroups && securityGroups[0].startsWith('sg-')) ) {
