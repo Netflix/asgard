@@ -166,13 +166,13 @@ class SecurityController {
 
     def delete = {
         UserContext userContext = UserContext.of(request)
-        String name = params.name
-        String id = params.id
+        def name = params.name ?: params.id
         String msg
         try {
-            if (awsEc2Service.getSecurityGroup(userContext, id)) {
-                awsEc2Service.removeSecurityGroup(userContext, name, id)
-                msg = "Security Group '${name}' has been deleted."
+            SecurityGroup securityGroup = awsEc2Service.getSecurityGroup(userContext, name)
+            if (securityGroup) {
+                awsEc2Service.removeSecurityGroup(userContext, name, securityGroup.groupId)
+                msg = "Security Group '${securityGroup.groupName}' has been deleted."
             } else {
                 msg = "Security Group '${name}' does not exist."
             }
@@ -180,7 +180,7 @@ class SecurityController {
             redirect(action: result)
         } catch (Exception e) {
             flash.message = "Could not delete Security Group: ${e}"
-            redirect(action: show, params: [id: id])
+            redirect(action: show, params: [id: name])
         }
     }
 
