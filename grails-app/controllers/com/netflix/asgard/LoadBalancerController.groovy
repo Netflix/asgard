@@ -183,10 +183,10 @@ class LoadBalancerController {
     private void updateLbSubnets(UserContext userContext, String lbName, List<String> zones, List<String> subnetNames) {
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         String subnetPurpose = subnets.coerceLoneOrNoneFromIds(subnetNames)?.purpose
-        List<String> newSubnetsIds = subnets.getSubnetIdsForZones(zones, subnetPurpose, SubnetTarget.ELB)
+        List<String> newSubnetIds = subnets.getSubnetIdsForZones(zones, subnetPurpose, SubnetTarget.ELB)
         try {
             List<String> updateSubnetsMsgs = awsLoadBalancerService.updateSubnets(userContext, lbName, subnetNames,
-                    newSubnetsIds)
+                    newSubnetIds)
             updateSubnetsMsgs.each { flash.message + it }
         }
         catch (AmazonServiceException ase) {

@@ -438,7 +438,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                         launchConfigurationName: launchConfigName, minSize: minSize, desiredCapacity: desiredCapacity,
                         maxSize: maxSize, defaultCooldown: defaultCooldown, healthCheckType: healthCheckType,
                         healthCheckGracePeriod: healthCheckGracePeriod, availabilityZones: availabilityZones,
-                        loadBalancerNames: loadBalancerNames, vPCZoneIdentifier: VPCZoneIdentifier)
+                        loadBalancerNames: loadBalancerNames, VPCZoneIdentifier: VPCZoneIdentifier)
             }
             awsClient.by(userContext.region).createAutoScalingGroup(request)
             suspendedProcesses.each {
