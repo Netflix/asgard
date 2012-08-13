@@ -51,7 +51,8 @@ import com.netflix.asgard.Relationships
     }
 
     /**
-     * Find the subnet associated with one of Subnet IDs. It is assumed that they all have the same relevant attributes.
+     * Find the subnet associated with the first Subnet ID. This is useful in cases where the attribute you care about
+     * is guaranteed to be the same for all subnets.
      *
      * @param  subnetIds Subnet IDs
      * @return the Subnet or null

@@ -17,16 +17,16 @@
 --%>
 <tr class="prop advanced ${subnetPurposes ? '' : 'concealed'}">
   <td class="name">
-    <label for="subnetPurpose">VPC:</label>
+    VPC:
   </td>
   <td>
     <div>
-      <g:radio name="subnetPurpose" value="" vpcid="" checked="${!subnetPurpose}"/>
+      <g:radio name="subnetPurpose" id="subnetRadioNonVpc" value="" data-vpcid="" checked="${!subnetPurpose}"/>
       <label class="choice">${awsAction} non-VPC ${awsObject}</label>
     </div>
     <g:each var="purpose" in="${subnetPurposes}">
       <div>
-        <g:radio name="subnetPurpose" value="${purpose}" vpcid="${purposeToVpcId[purpose]}"
+        <g:radio name="subnetPurpose" id="subnetRadio${purpose}" value="${purpose}" data-vpcid="${purposeToVpcId[purpose]}"
                  checked="${subnetPurpose == purpose ? 'true' : ''}"/>
         <label class="choice">${awsAction} '${purpose}' VPC ${awsObject}</label>
       </div>

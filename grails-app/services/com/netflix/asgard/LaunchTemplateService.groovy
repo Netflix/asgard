@@ -37,7 +37,7 @@ class LaunchTemplateService {
      * @return new Collection of Security Group names or IDs without duplicates
      */
     Collection<String> includeDefaultSecurityGroups(List<String> securityGroups, String vpcZoneIdentifier = null,
-        Region region = null) {
+            Region region = null) {
         List<String> defaultSecurityGroupNames =
             vpcZoneIdentifier ? configService.defaultVpcSecurityGroupNames : configService.defaultSecurityGroups
         List<String> defaultSecurityGroups = defaultSecurityGroupNames
