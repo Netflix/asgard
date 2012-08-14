@@ -31,6 +31,12 @@ class ConfigService {
         grailsApplication.config.cloud?.defaultMetricNamespace ?: 'AWS/EC2'
     }
 
+    /**
+     * Gets the Amazon Web Services account number for the current environment. This must be the first account number
+     * string in the awsAccounts list in Config.groovy.
+     *
+     * @return the AWS account number for the current environment
+     */
     String getAwsAccountNumber() {
         grailsApplication.config?.grails?.awsAccounts[0]
     }
@@ -44,11 +50,23 @@ class ConfigService {
         grailsApplication.config?.grails?.awsAccountNames ?: [:]
     }
 
+    /**
+     * Finds the Discovery server URL for the specified region, or null if there isn't one
+     *
+     * @param region the region in which to look for a Discovery URL
+     * @return the Discovery server URL for the specified region, or null if there isn't one
+     */
     String getRegionalDiscoveryServer(Region region) {
         Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.eureka?.regionsToServers
         regionsToDiscoveryServers ? regionsToDiscoveryServers[region] : null
     }
 
+    /**
+     * Checks whether a Discovery URL is known for a specified region
+     *
+     * @param region the region in which to check for the existence of a Discovery URL
+     * @return true if there is a Discovery URL in the specified region, false otherwise
+     */
     boolean doesRegionalDiscoveryExist(Region region) {
         getRegionalDiscoveryServer(region) ? true : false
     }
@@ -73,6 +91,9 @@ class ConfigService {
         matches.keySet()
     }
 
+    /**
+     * @return the full local system path to the directory where Asgard stores its configuration files
+     */
     String getAsgardHome() {
         grailsApplication.config?.asgardHome
     }
