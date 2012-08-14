@@ -91,7 +91,7 @@ class AwsSnsService implements CacheInitializer, InitializingBean {
         caches.allTopics.by(userContext.region).list()
     }
 
-    TopicData getTopic(UserContext userContext, String topicName, From from  = From.AWS) {
+    TopicData getTopic(UserContext userContext, String topicName, From from = From.AWS) {
         if (!topicName) { return null }
         Region region = userContext.region
         if (from == From.CACHE) {
