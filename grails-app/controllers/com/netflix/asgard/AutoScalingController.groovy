@@ -202,9 +202,8 @@ class AutoScalingController {
         if (params.azRebalance == 'disabled') {
             processes << new SuspendedProcess().withProcessName(AutoScalingProcessType.AZRebalance.name())
         }
-        List<String> selectedZones = Requests.ensureList(params.selectedZones)
         Collection<AvailabilityZone> recommendedZones = awsEc2Service.getRecommendedAvailabilityZones(userContext)
-        List<String> zones = selectedZones ?: recommendedZones*.zoneName
+        Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(recommendedZones, params.selectedZones)
         AutoScalingGroup group = new AutoScalingGroup(
                 minSize: tryParse(params.min),
                 desiredCapacity: tryParse(params.desiredCapacity),
@@ -212,15 +211,14 @@ class AutoScalingController {
                 defaultCooldown: tryParse(params.defaultCooldown),
                 healthCheckType: params.healthCheckType,
                 healthCheckGracePeriod: tryParse(params.healthCheckGracePeriod),
-                availabilityZones: zones,
+                availabilityZones: selectedZones,
                 suspendedProcesses: processes
         )
         List<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
             it.groupName?.toLowerCase()
         }
         Subnets subnets = awsEc2Service.getSubnets(userContext)
-        Set<String> purposesForZones = subnets.getPurposesForZones(recommendedZones*.zoneName, SubnetTarget.EC2)
-        Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId().subMap(purposesForZones)
+        Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
         [
                 applications: applicationService.getRegisteredApplications(userContext),
                 group: group,
@@ -230,7 +228,9 @@ class AutoScalingController {
                 defKey: awsEc2Service.defaultKeyName,
                 keys: awsEc2Service.getKeys(userContext).sort { it.keyName.toLowerCase() },
                 subnetPurpose: params.subnetPurpose,
-                subnetPurposes: purposesForZones.sort(),
+                subnetPurposes: subnets.getPurposesForZones(recommendedZones*.zoneName, SubnetTarget.EC2).sort(),
+                zonesGroupedByPurpose: subnets.groupZonesByPurpose(SubnetTarget.EC2),
+                selectedZones: selectedZones,
                 purposeToVpcId: purposeToVpcId,
                 vpcId: purposeToVpcId[params.subnetPurpose],
                 loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },

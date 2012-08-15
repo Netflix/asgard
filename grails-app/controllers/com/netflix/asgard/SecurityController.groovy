@@ -166,7 +166,7 @@ class SecurityController {
 
     def delete = {
         UserContext userContext = UserContext.of(request)
-        def name = params.name ?: params.id
+        String name = params.name ?: params.id
         String msg
         try {
             SecurityGroup securityGroup = awsEc2Service.getSecurityGroup(userContext, name)

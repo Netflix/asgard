@@ -15,20 +15,16 @@
     limitations under the License.
 
 --%>
-<tr class="prop advanced ${subnetPurposes ? '' : 'concealed'}">
+<tr class="prop advanced">
   <td class="name">
-    VPC:
+    <label for="selectedZones">Availablity Zones:</label>
   </td>
   <td>
-    <div>
-      <g:radio name="subnetPurpose" id="subnetRadioNonVpc" value="" data-vpcid="" data-purpose="" checked="${!subnetPurpose}"/>
-      <label class="choice">${awsAction} non-VPC ${awsObject}</label>
-    </div>
-    <g:each var="purpose" in="${subnetPurposes}">
-      <div>
-        <g:radio name="subnetPurpose" id="subnetRadio${purpose}" value="${purpose}" data-vpcid="${purposeToVpcId[purpose]}"
-                 data-purpose="${purpose}" checked="${subnetPurpose == purpose ? 'true' : ''}"/>
-        <label class="choice">${awsAction} '${purpose}' VPC ${awsObject}</label>
+    <g:each var="purposeForZones" in="${zonesGroupedByPurpose?.keySet()}">
+      <div class="zonesSelect subnetPurpose${purposeForZones ?: ''} ${subnetPurpose == purposeForZones ? '' : 'concealed'}">
+        <g:select name="selectedZones" multiple="multiple" size="5"
+                  disabled="${subnetPurpose == purposeForZones ? '' : 'true'}" data-placeholder="Select zones"
+                  from="${zonesGroupedByPurpose[purposeForZones]}" value="${selectedZones}" />
       </div>
     </g:each>
   </td>

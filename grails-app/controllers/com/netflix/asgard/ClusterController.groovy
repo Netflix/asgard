@@ -17,10 +17,13 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.ec2.model.AvailabilityZone
+import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.GroupedInstance
 import com.netflix.asgard.model.ScalingPolicyData
+import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.push.CommonPushOptions
@@ -41,6 +44,7 @@ class ClusterController {
     def grailsApplication
     def awsAutoScalingService
     def awsEc2Service
+    def awsLoadBalancerService
     def configService
     def mergedInstanceService
     def pushService
@@ -109,25 +113,30 @@ class ClusterController {
 
                     boolean showAllImages = params.allImages ? true : false
                     Map attributes = pushService.prepareEdit(userContext, lastGroup.autoScalingGroupName, showAllImages,
-                            actionName)
+                            actionName, Requests.ensureList(params.selectedSecurityGroups))
+                    Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
+                    Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(availabilityZones,
+                            params.selectedZones, lastGroup)
+                    Subnets subnets = awsEc2Service.getSubnets(userContext)
+                    List<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext).
+                            sort { it.loadBalancerName.toLowerCase() }
+                    List<String> selectedLoadBalancers = Requests.ensureList(params.selectedLoadBalancers) ?: lastGroup.loadBalancerNames
                     attributes.putAll([
-                            'cluster': cluster,
-                            'runningTasks': runningTasks,
-                            'group': lastGroup,
-                            'nextGroupName': nextGroupName,
-                            'okayToCreateGroup': okayToCreateGroup,
-                            'recommendedNextStep': recommendedNextStep,
+                            cluster: cluster,
+                            runningTasks: runningTasks,
+                            group: lastGroup,
+                            nextGroupName: nextGroupName,
+                            okayToCreateGroup: okayToCreateGroup,
+                            recommendedNextStep: recommendedNextStep,
                             buildServer: grailsApplication.config.cloud.buildServer,
+                            vpcZoneIdentifier: lastGroup.vpcZoneIdentifier,
+                            zonesGroupedByPurpose: subnets.groupZonesByPurpose(SubnetTarget.EC2),
+                            selectedZones: selectedZones,
+                            subnetPurposes: subnets.getPurposesForZones(availabilityZones*.zoneName, SubnetTarget.EC2).sort(),
+                            loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
+                            selectedLoadBalancers: selectedLoadBalancers,
                     ])
-                    List<String> selectedLoadBalancers = Requests.ensureList(params.selectedLoadBalancers)
-                    if (selectedLoadBalancers) {
-                        attributes['selectedLoadBalancers'] = selectedLoadBalancers
-                    }
-                    List<String> selectedSecurityGroups = Requests.ensureList(params.selectedSecurityGroups)
-                    if (selectedSecurityGroups) {
-                        attributes['selectedSecurityGroups'] = selectedSecurityGroups
-                    }
-                    return attributes
+                    attributes
                 }
                 xml { new XML(cluster).render(response) }
                 json { new JSON(cluster).render(response) }

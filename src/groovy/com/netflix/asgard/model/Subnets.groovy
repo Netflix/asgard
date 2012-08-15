@@ -21,6 +21,7 @@ import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
 import com.netflix.asgard.Check
 import com.netflix.asgard.Relationships
+import com.google.common.base.Supplier
 
 /**
  * These are nontrivial queries we like to perform on subnets.
@@ -87,7 +88,27 @@ import com.netflix.asgard.Relationships
     }
 
     /**
-     * Find the purposes that are common to all specified zones
+     * Group each zone to the subnet purposes it contains.
+     *
+     * @param  target is the type of AWS object the subnet applies to (null means any object type)
+     * @return zone name to subnet purposes
+     */
+    Map<String, Collection<String>> groupZonesByPurpose(SubnetTarget target = null) {
+        Multimap<String, String> zonesGroupedByPurpose = Multimaps.newSetMultimap([:], { [] as SortedSet } as Supplier)
+        allSubnets.each {
+            if (!it.target || it.target == target) {
+                zonesGroupedByPurpose.put(it.purpose, it.availabilityZone)
+                zonesGroupedByPurpose.put(null, it.availabilityZone)
+            }
+        }
+        zonesGroupedByPurpose.keySet().inject([:]) { Map zoneListsByPurpose, String purpose ->
+            zoneListsByPurpose[purpose] = zonesGroupedByPurpose.get(purpose) as List
+            zoneListsByPurpose
+        } as Map
+    }
+
+    /**
+     * Find all purposes across all specified zones for the specified target.
      *
      * @param  zones the zones in AWS that you want purposes for
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
@@ -98,10 +119,8 @@ import com.netflix.asgard.Relationships
             return Collections.emptySet()
         }
         Map<String, Collection<SubnetData>> zonesToSubnets = mapZonesToTargetSubnets(target).asMap()
-        zones.inject(null) { Collection<String> purposeIntersection, String zone ->
-            Collection<SubnetData> subnetsForZone = zonesToSubnets[zone]
-            List<String> purposes = subnetsForZone.collect { it.purpose }
-            purposeIntersection == null ? purposes : purposeIntersection.intersect(purposes)
+        zones.inject([]) { Collection<String> allPurposes, String zone ->
+            allPurposes + zonesToSubnets[zone].collect { it.purpose }
         } as Set
     }
 
@@ -111,24 +130,6 @@ import com.netflix.asgard.Relationships
             (!it.target || it.target == target) && it.purpose
         }
         Multimaps.index(targetSubnetsWithPurpose, { it.availabilityZone } as Function)
-    }
-
-    /**
-     * Find the zones with VPCs that have the specified purpose
-     *
-     * @param  purpose the VPC purpose want AWS zone names for
-     * @param  target is the type of AWS object the subnet applies to (null means any object type)
-     * @return the set of distinct zones that contain a VPC with the specified purpose or an empty Set
-     */
-    Set<String> getZonesForPurpose(String purpose, SubnetTarget target) {
-        if (!purpose) {
-            return Collections.emptySet()
-        }
-        Collection<SubnetData> subnetsForPurpose = allSubnets.findAll {
-            // Find ones with a matching purpose, and if they have a target then it should match
-            it.purpose == purpose && (!it.target || it.target == target)
-        }
-        subnetsForPurpose*.availabilityZone as Set
     }
 
     /**

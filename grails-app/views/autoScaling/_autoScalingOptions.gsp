@@ -55,18 +55,7 @@
   </td>
 </tr>
 <g:render template="/common/vpcSelection" model="[awsAction: 'Launch', awsObject: 'instances']"/>
-<tr class="prop advanced">
-  <td class="name">
-    <label for="selectedZones">Availablity Zones:</label>
-  </td>
-  <td>
-    <select multiple="true" id="selectedZones" name="selectedZones" size="5">
-      <g:each var="z" in="${zoneList}">
-        <option value="${z.zoneName}" ${z.shouldBePreselected(params.selectedZones, group) ? 'selected' : ''}>${z.zoneName}</option>
-      </g:each>
-    </select>
-  </td>
-</tr>
+<g:render template="/common/zoneSelection" />
 <tr class="prop advanced">
   <td class="name">
     AZ Rebalancing:

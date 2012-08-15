@@ -721,25 +721,26 @@ jQuery(document).ready(function() {
 
     var setUpVpcRelatedAttributes = function() {
         jQuery('input[name="subnetPurpose"]').click(function() {
-            var vpcId, securityGroupSelectForVpcId, allSecurityGroupSelects, loadBalancerSelectForVpcId,
-                allLoadBalancerSelects;
+            var vpcId, vpcIdLocator, purpose, purposeLocator, displaySelected;
+
+            displaySelected = function(elements, locator) {
+                var selected, unselected;
+                selected = elements.filter(locator);
+                unselected = elements.not(locator);
+                unselected.children(':input').prop('disabled', true);
+                selected.children(':input').prop('disabled', false);
+                unselected.addClass('concealed');
+                selected.removeClass('concealed');
+            };
+
             vpcId = jQuery(this).data('vpcid');
+            vpcIdLocator = '.vpcId' + vpcId;
+            displaySelected(jQuery('.securityGroupsSelect'), vpcIdLocator);
+            displaySelected(jQuery('.loadBalancersSelect'), vpcIdLocator);
 
-            // Display Security Group select based on VPC ID
-            securityGroupSelectForVpcId = jQuery('.securityGroupsSelect .vpcId' + vpcId);
-            allSecurityGroupSelects = jQuery('.securityGroupsSelect');
-            allSecurityGroupSelects.children().prop('disabled', true);
-            securityGroupSelectForVpcId.children().prop('disabled', false);
-            allSecurityGroupSelects.addClass('concealed');
-            securityGroupSelectForVpcId.removeClass('concealed');
-
-            // Display Load Balancer select based on VPC ID
-            loadBalancerSelectForVpcId = jQuery('.loadBalancersSelect .vpcId' + vpcId);
-            allLoadBalancerSelects = jQuery('.loadBalancersSelect');
-            allLoadBalancerSelects.children().prop('disabled', true);
-            loadBalancerSelectForVpcId.children().prop('disabled', false);
-            allLoadBalancerSelects.addClass('concealed');
-            loadBalancerSelectForVpcId.removeClass('concealed');
+            purpose = jQuery(this).data('purpose');
+            purposeLocator = '.subnetPurpose' + purpose;
+            displaySelected(jQuery('.zonesSelect'), purposeLocator);
         });
     };
     setUpVpcRelatedAttributes();

@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.ec2.model.AvailabilityZone
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.HealthCheck
 import com.amazonaws.services.elasticloadbalancing.model.Listener
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
@@ -26,7 +27,6 @@ import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
 import grails.converters.JSON
 import grails.converters.XML
-import com.amazonaws.services.ec2.model.SecurityGroup
 
 class LoadBalancerController {
 
@@ -93,25 +93,22 @@ class LoadBalancerController {
 
     def create = {
         UserContext userContext = UserContext.of(request)
-        Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
-        Collection<AvailabilityZone> preselectedAvailabilityZones = availabilityZones.findAll {
-            it.shouldBePreselected(params.selectedZones, null)
-        }
         List<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
             it.groupName?.toLowerCase()
         }
         Map<Object, List<SecurityGroup>> securityGroupsGroupedByVpcId = effectiveGroups.groupBy { it.vpcId }
         securityGroupsGroupedByVpcId[null] = [] // Security Groups are not allowed on non-VPC ELBs
+        Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
+        Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(availabilityZones, params.selectedZones)
         Subnets subnets = awsEc2Service.getSubnets(userContext)
-        Collection<String> zoneNames = preselectedAvailabilityZones*.zoneName
-        Set<String> purposesForZones = subnets.getPurposesForZones(zoneNames, SubnetTarget.ELB).sort()
-        Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId().subMap(purposesForZones)
+        Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
         [
             applications: applicationService.getRegisteredApplicationsForLoadBalancer(userContext),
             stacks: stackService.getStacks(userContext),
-            zoneList: availabilityZones,
             subnetPurpose: params.subnetPurpose,
-            subnetPurposes: purposesForZones.sort(),
+            subnetPurposes: subnets.getPurposesForZones(availabilityZones*.zoneName, SubnetTarget.ELB).sort(),
+            zonesGroupedByPurpose: subnets.groupZonesByPurpose(SubnetTarget.ELB),
+            selectedZones: selectedZones,
             purposeToVpcId: purposeToVpcId,
             vpcId: purposeToVpcId[params.subnetPurpose],
             securityGroupsGroupedByVpcId: securityGroupsGroupedByVpcId,
