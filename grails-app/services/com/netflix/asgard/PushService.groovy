@@ -165,6 +165,7 @@ class PushService {
                 defKey: awsEc2Service.defaultKeyName,
                 keys: awsEc2Service.getKeys(userContext).sort { it.keyName.toLowerCase() },
                 selectedSecurityGroups: lc.securityGroups,
+                iamInstanceProfile: lc.iamInstanceProfile,
 
                 // Rolling push process options
                 relaunchCount: relaunchCount,
