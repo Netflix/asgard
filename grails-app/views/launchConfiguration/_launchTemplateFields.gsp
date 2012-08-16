@@ -62,3 +62,9 @@
     <td class="value">${launchTemplate.blockDeviceMappings}</td>
   </tr>
 </g:if>
+<g:if test="${launchTemplate.iamInstanceProfile}">
+  <tr class="prop">
+    <td class="name">IAM Instance Profile:</td>
+    <td class="value">${launchTemplate.iamInstanceProfile}</td>
+  </tr>
+</g:if>
