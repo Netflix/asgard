@@ -105,9 +105,10 @@ class RollingPushOperation extends AbstractPushOperation {
         Time.sleepCancellably 100 // tiny pause before LC create to avoid rate limiting
         Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(options.securityGroups)
         task.log("Updating launch from ${oldLaunch.launchConfigurationName} with ${options.imageId} into ${newLaunchName}")
+        String iamInstanceProfile = options.iamInstanceProfile ?: null
         awsAutoScalingService.createLaunchConfiguration(options.common.userContext, newLaunchName,
                 options.imageId, oldLaunch.keyName, securityGroups, userData,
-                options.instanceType, oldLaunch.kernelId, oldLaunch.ramdiskId, oldLaunch.iamInstanceProfile,
+                options.instanceType, oldLaunch.kernelId, oldLaunch.ramdiskId, iamInstanceProfile,
                 oldLaunch.blockDeviceMappings, task)
 
         Time.sleepCancellably 200 // small pause before ASG update to avoid rate limiting

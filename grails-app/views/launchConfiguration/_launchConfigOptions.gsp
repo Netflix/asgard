@@ -101,7 +101,7 @@
       <label for="iamInstanceProfile">IAM Instance Profile:</label>
     </td>
     <td>
-      <input type="text" id="iamInstanceProfile" name="iamInstanceProfile" value="${params.iamInstanceProfile}"/>
+      <input type="text" id="iamInstanceProfile" name="iamInstanceProfile" value="${params.iamInstanceProfile ?: iamInstanceProfile}"/>
     </td>
   </tr>
 </tbody>
