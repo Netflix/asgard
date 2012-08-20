@@ -59,7 +59,7 @@
             <td>${fastProperty?.ts}</td>
             <td class="updatedBy">${fastProperty?.updatedBy?.encodeAsHTML()}</td>
             <td class="sourceOfUpdate">${fastProperty?.sourceOfUpdate?.encodeAsHTML()}</td>
-            <td>${fastProperty?.region}</td>
+            <td class="region">${fastProperty?.region}</td>
             <td class="app"><g:linkObject type="application" name="${fastProperty?.appId?.toLowerCase()}">${fastProperty?.appId}</g:linkObject></td>
             <td class="var">${fastProperty?.stack?.encodeAsHTML()}</td>
             <td class="var">${fastProperty?.countries?.encodeAsHTML()}</td>
