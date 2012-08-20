@@ -290,9 +290,10 @@ class AutoScalingController {
             String instanceType = params.instanceType
             String kernelId = params.kernelId ?: null
             String ramdiskId = params.ramdiskId ?: null
+            String iamInstanceProfile = params.iamInstanceProfile ?: null
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(imageId).
                     withKernelId(kernelId).withInstanceType(instanceType).withKeyName(keyName).withRamdiskId(ramdiskId).
-                    withSecurityGroups(securityGroups)
+                    withSecurityGroups(securityGroups).withIamInstanceProfile(iamInstanceProfile)
 
             CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
                     userContext, groupTemplate, launchConfigTemplate, suspendedProcesses)

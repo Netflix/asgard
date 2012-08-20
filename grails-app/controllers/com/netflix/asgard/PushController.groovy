@@ -87,7 +87,8 @@ class PushController {
                 newestFirst: params.newestFirst == 'true',
                 relaunchCount: relaunchCount,
                 concurrentRelaunches: concurrentRelaunches,
-                rudeShutdown: params.containsKey('rudeShutdown')
+                rudeShutdown: params.containsKey('rudeShutdown'),
+                iamInstanceProfile: params.iamInstanceProfile
         )
 
         try {

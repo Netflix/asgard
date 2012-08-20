@@ -77,7 +77,8 @@ class GroupCreateOperation extends AbstractPushOperation {
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(options.common.imageId).
                     withKernelId(options.kernelId).withInstanceType(options.common.instanceType).
                     withKeyName(options.keyName).withRamdiskId(options.ramdiskId).
-                    withSecurityGroups(options.common.securityGroups)
+                    withSecurityGroups(options.common.securityGroups).
+                    withIamInstanceProfile(options.iamInstanceProfile)
 
             final Collection<AutoScalingProcessType> suspendedProcesses = Sets.newHashSet()
             if (options.zoneRebalancingSuspended) {
