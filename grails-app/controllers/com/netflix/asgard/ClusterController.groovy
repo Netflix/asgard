@@ -45,7 +45,7 @@ class ClusterController {
     def pushService
     def taskService
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: list, params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -280,6 +280,6 @@ class ClusterController {
     }
 
     private void redirectToTask(String taskId) {
-        redirect(controller: 'task', action:show, params: [id: taskId])
+        redirect(controller: 'task', action: 'show', params: [id: taskId])
     }
 }
