@@ -51,7 +51,7 @@ class AutoScalingController {
 
     def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', postpone: 'POST', pushStart: 'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: list, params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -228,7 +228,7 @@ class AutoScalingController {
     def save = { GroupCreateCommand cmd ->
 
         if (cmd.hasErrors()) {
-            chain(action:create, model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
+            chain(action: create, model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
         } else {
 
             // Auto Scaling Group name
@@ -356,7 +356,7 @@ class AutoScalingController {
                 nextAction = edit
             }
         }
-        redirect(action: nextAction, params: [name:name])
+        redirect(action: nextAction, params: [name: name])
     }
 
     def delete = {
@@ -411,11 +411,6 @@ class AutoScalingController {
                 }
             }
         }
-    }
-
-    def createLC = {
-        //println "ASG.createCL: ${params}"
-        redirect(controller:"launchConfiguration", action:"create", params:['appName':params.appName,'groupName':params.name])
     }
 
     def anyInstance = {
