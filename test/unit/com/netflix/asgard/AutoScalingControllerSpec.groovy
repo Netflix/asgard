@@ -204,11 +204,11 @@ class AutoScalingControllerSpec extends ControllerSpec {
                 'videometadata'] == attrs['applications']*.name
         ['', 'example'] == attrs['stacks']*.name
         ['us-east-1a', 'us-east-1c', 'us-east-1d'] == attrs['zoneList']*.zoneName
-        ['helloworld--frontend', 'ntsuiboot--frontend'] == attrs['loadBalancers']*.loadBalancerName
+        ['helloworld--frontend', 'ntsuiboot--frontend'] == attrs.loadBalancersGroupedByVpcId[null]*.loadBalancerName
         'ami-83bd7fea' in attrs['images']*.imageId
         'nf-test-keypair-a' == attrs['defKey']
         ['amzn-linux', 'hadoop', 'nf-support', 'nf-test-keypair-a'] == attrs['keys']*.keyName
-        List<String> securityGroupNames = attrs['securityGroups']*.groupName
+        List<String> securityGroupNames = attrs.securityGroupsGroupedByVpcId[null]*.groupName
         assert securityGroupNames.containsAll(['akms', 'helloworld', 'helloworld-frontend', 'helloworld-nactest',
                 'helloworld-tmp', 'ntsuiboot'])
         [

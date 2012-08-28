@@ -18,8 +18,13 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing
+import com.amazonaws.services.elasticloadbalancing.model.AttachLoadBalancerToSubnetsRequest
 import com.amazonaws.services.elasticloadbalancing.model.DescribeInstanceHealthResult
+import com.amazonaws.services.elasticloadbalancing.model.DescribeLoadBalancersRequest
+import com.amazonaws.services.elasticloadbalancing.model.DescribeLoadBalancersResult
+import com.amazonaws.services.elasticloadbalancing.model.DetachLoadBalancerFromSubnetsRequest
 import com.amazonaws.services.elasticloadbalancing.model.InstanceState
+import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.InstanceStateData
 import spock.lang.Specification
 
@@ -29,12 +34,22 @@ class AwsLoadBalancerServiceSpec extends Specification {
     UserContext userContext
     AmazonElasticLoadBalancing mockAmazonElasticLoadBalancing
     AwsLoadBalancerService awsLoadBalancerService
+    CachedMap cachedMap = Mock(CachedMap)
 
     def setup() {
         userContext = UserContext.auto(Region.US_EAST_1)
         mockAmazonElasticLoadBalancing = Mock(AmazonElasticLoadBalancing)
         MultiRegionAwsClient awsClient = new MultiRegionAwsClient({ mockAmazonElasticLoadBalancing })
-        awsLoadBalancerService = new AwsLoadBalancerService(awsClient: awsClient)
+        TaskService taskService = new TaskService() {
+            def runTask(UserContext userContext, String name, Closure work, Link link = null) {
+                work(new Task())
+            }
+        }
+        Caches caches = new Caches(new MockCachedMapBuilder([
+                (EntityType.loadBalancer): cachedMap
+        ]))
+        awsLoadBalancerService = new AwsLoadBalancerService(awsClient: awsClient, taskService: taskService,
+                caches: caches)
     }
 
     def 'instance state data should include and be sorted by availability zone and auto scaling group'() {
@@ -71,5 +86,46 @@ class AwsLoadBalancerServiceSpec extends Specification {
                 [instanceId: 'i-87654321', state: 'OutOfService', reasonCode: 'Instance', description: unhealthy,
                         availabilityZone: 'us-east-1b', autoScalingGroupName: 'autocomplete-v105']
         ].collect { new InstanceStateData(it) }
+    }
+
+    def 'should update subnets'() {
+        Collection<String> oldSubnets = ['subnet-101', 'subnet-102', 'subnet-103']
+        Collection<String> newSubnets = ['subnet-103', 'subnet-104']
+
+        when:
+        List<String> messages = awsLoadBalancerService.updateSubnets(userContext, 'lb1', oldSubnets, newSubnets)
+
+        then:
+        messages == [
+                "Added subnet [subnet-104] to Load Balancer 'lb1'.",
+                "Removed subnets [subnet-101, subnet-102] from Load Balancer 'lb1'."
+        ]
+        1 * mockAmazonElasticLoadBalancing.attachLoadBalancerToSubnets(new AttachLoadBalancerToSubnetsRequest(
+                loadBalancerName: 'lb1', subnets: ['subnet-104']))
+        1 * mockAmazonElasticLoadBalancing.detachLoadBalancerFromSubnets(new DetachLoadBalancerFromSubnetsRequest(
+                loadBalancerName: 'lb1', subnets: ['subnet-101', 'subnet-102']))
+        1 * mockAmazonElasticLoadBalancing.describeLoadBalancers(new DescribeLoadBalancersRequest(
+                loadBalancerNames: ['lb1'])) >> new DescribeLoadBalancersResult(loadBalancerDescriptions: [
+                        new LoadBalancerDescription()
+                ])
+        1 * cachedMap.put('lb1', _)
+        0 * _._
+    }
+
+    def 'should not update subnets if nothing changed'() {
+        Collection<String> oldSubnets = ['subnet-101', 'subnet-102', 'subnet-103']
+        Collection<String> newSubnets = ['subnet-101', 'subnet-102', 'subnet-103']
+
+        when:
+        List<String> messages = awsLoadBalancerService.updateSubnets(userContext, 'lb1', oldSubnets, newSubnets)
+
+        then:
+        messages == []
+        1 * mockAmazonElasticLoadBalancing.describeLoadBalancers(new DescribeLoadBalancersRequest(
+                loadBalancerNames: ['lb1'])) >> new DescribeLoadBalancersResult(loadBalancerDescriptions: [
+                new LoadBalancerDescription(loadBalancerName: 'lb1')
+        ])
+        1 * cachedMap.put('lb1', _)
+        0 * _._
     }
 }

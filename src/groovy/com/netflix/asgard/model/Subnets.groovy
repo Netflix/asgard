@@ -20,6 +20,8 @@ import com.google.common.collect.Maps
 import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
 import com.netflix.asgard.Check
+import com.netflix.asgard.Relationships
+import com.google.common.base.Supplier
 
 /**
  * These are nontrivial queries we like to perform on subnets.
@@ -50,6 +52,17 @@ import com.netflix.asgard.Check
     }
 
     /**
+     * Find the subnet associated with the first Subnet ID. This is useful in cases where the attribute you care about
+     * is guaranteed to be the same for all subnets.
+     *
+     * @param  subnetIds Subnet IDs
+     * @return the Subnet or null
+     */
+    SubnetData coerceLoneOrNoneFromIds(Collection<String> subnetIds) {
+        subnetIds ? findSubnetById(subnetIds.iterator().next()?.trim()) : null
+    }
+
+    /**
      * Find the subnet IDs that map to specific zones
      *
      * @param  zones the zones in AWS that you want Subnet IDs for
@@ -75,7 +88,27 @@ import com.netflix.asgard.Check
     }
 
     /**
-     * Find the purposes that are common to all specified zones
+     * Group each zone to the subnet purposes it contains.
+     *
+     * @param  target is the type of AWS object the subnet applies to (null means any object type)
+     * @return zone name to subnet purposes
+     */
+    Map<String, Collection<String>> groupZonesByPurpose(SubnetTarget target = null) {
+        Multimap<String, String> zonesGroupedByPurpose = Multimaps.newSetMultimap([:], { [] as SortedSet } as Supplier)
+        allSubnets.each {
+            if (!it.target || it.target == target) {
+                zonesGroupedByPurpose.put(it.purpose, it.availabilityZone)
+                zonesGroupedByPurpose.put(null, it.availabilityZone)
+            }
+        }
+        zonesGroupedByPurpose.keySet().inject([:]) { Map zoneListsByPurpose, String purpose ->
+            zoneListsByPurpose[purpose] = zonesGroupedByPurpose.get(purpose) as List
+            zoneListsByPurpose
+        } as Map
+    }
+
+    /**
+     * Find all purposes across all specified zones for the specified target.
      *
      * @param  zones the zones in AWS that you want purposes for
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
@@ -86,10 +119,8 @@ import com.netflix.asgard.Check
             return Collections.emptySet()
         }
         Map<String, Collection<SubnetData>> zonesToSubnets = mapZonesToTargetSubnets(target).asMap()
-        zones.inject(null) { Collection<String> purposeIntersection, String zone ->
-            Collection<SubnetData> subnetsForZone = zonesToSubnets[zone]
-            List<String> purposes = subnetsForZone.collect { it.purpose }
-            purposeIntersection == null ? purposes : purposeIntersection.intersect(purposes)
+        zones.inject([]) { Collection<String> allPurposes, String zone ->
+            allPurposes + zonesToSubnets[zone].collect { it.purpose }
         } as Set
     }
 
@@ -99,38 +130,6 @@ import com.netflix.asgard.Check
             (!it.target || it.target == target) && it.purpose
         }
         Multimaps.index(targetSubnetsWithPurpose, { it.availabilityZone } as Function)
-    }
-
-    /**
-     * Find the zones with VPCs that have the specified purpose
-     *
-     * @param  purpose the VPC purpose want AWS zone names for
-     * @param  target is the type of AWS object the subnet applies to (null means any object type)
-     * @return the set of distinct zones that contain a VPC with the specified purpose or an empty Set
-     */
-    Set<String> getZonesForPurpose(String purpose, SubnetTarget target) {
-        if (!purpose) {
-            return Collections.emptySet()
-        }
-        Collection<SubnetData> subnetsForPurpose = allSubnets.findAll {
-            // Find ones with a matching purpose, and if they have a target then it should match
-            it.purpose == purpose && (!it.target || it.target == target)
-        }
-        subnetsForPurpose*.availabilityZone as Set
-    }
-
-    /**
-     * Find the purpose associated with subnetIds. We really only look at the first one and are not validating anything.
-     *
-     * @param  subnetIds list of Subnet IDs should all have the same purpose in theory
-     * @return the associated purpose or an empty String if none exists
-     */
-    String getPurposeForSubnets(List<String> subnetIds) {
-        if (!subnetIds) {
-            return ''
-        }
-        String subnetId = subnetIds[0]?.trim()
-        allSubnets.find { it.subnetId == subnetId }?.purpose ?: ''
     }
 
     /**
@@ -155,5 +154,27 @@ import com.netflix.asgard.Check
             }
             purposeToVpcId
         } as Map
+    }
+
+    /**
+     * Construct a new VPC Zone Identifier based on an existing VPC Zone Identifier and a list of zones.
+     * A VPC Zone Identifier is really just a comma delimited list of subnet IDs.
+     * I'm not happy that this method has to exist. It's just a wrapper around other methods that operate on a cleaner
+     * abstraction without knowledge of the unfortunate structure of VPC Zone Identifier.
+     *
+     * @param  vpcZoneIdentifier is used to derive a subnet purpose from
+     * @param  zones which the new VPC Zone Identifier will contain
+     * @return a new VPC Zone Identifier or null if no purpose was derived
+     */
+    String constructNewVpcZoneIdentifierForZones(String vpcZoneIdentifier, List<String> zones) {
+        List<String> oldSubnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(vpcZoneIdentifier)
+        String purpose = coerceLoneOrNoneFromIds(oldSubnetIds)?.purpose
+        if (purpose) {
+            List<String> newSubnetIds = getSubnetIdsForZones(zones, purpose, SubnetTarget.EC2) // This is only for ASGs.
+            if (newSubnetIds) {
+                return Relationships.vpcZoneIdentifierFromSubnetIds(newSubnetIds)
+            }
+        }
+        return null
     }
 }

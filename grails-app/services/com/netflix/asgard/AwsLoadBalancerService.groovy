@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing
+import com.amazonaws.services.elasticloadbalancing.model.AttachLoadBalancerToSubnetsRequest
 import com.amazonaws.services.elasticloadbalancing.model.ConfigureHealthCheckRequest
 import com.amazonaws.services.elasticloadbalancing.model.CreateLoadBalancerListenersRequest
 import com.amazonaws.services.elasticloadbalancing.model.CreateLoadBalancerRequest
@@ -26,6 +27,7 @@ import com.amazonaws.services.elasticloadbalancing.model.DeleteLoadBalancerReque
 import com.amazonaws.services.elasticloadbalancing.model.DeregisterInstancesFromLoadBalancerRequest
 import com.amazonaws.services.elasticloadbalancing.model.DescribeInstanceHealthRequest
 import com.amazonaws.services.elasticloadbalancing.model.DescribeLoadBalancersRequest
+import com.amazonaws.services.elasticloadbalancing.model.DetachLoadBalancerFromSubnetsRequest
 import com.amazonaws.services.elasticloadbalancing.model.DisableAvailabilityZonesForLoadBalancerRequest
 import com.amazonaws.services.elasticloadbalancing.model.EnableAvailabilityZonesForLoadBalancerRequest
 import com.amazonaws.services.elasticloadbalancing.model.Instance
@@ -38,6 +40,8 @@ import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.InstanceStateData
+import com.netflix.asgard.model.SubnetTarget
+import com.netflix.asgard.model.Subnets
 import org.springframework.beans.factory.InitializingBean
 
 class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
@@ -176,11 +180,19 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
 
     // mutators
 
-    LoadBalancerDescription createLoadBalancer(UserContext userContext, String name, Collection<String> zoneList,
-                                               Collection<Listener> listeners) {
+    LoadBalancerDescription createLoadBalancer(UserContext userContext, String name, List<String> zoneList,
+            Collection<Listener> listeners, Collection<String> securityGroups, String subnetPurpose) {
         taskService.runTask(userContext, "Create Load Balancer ${name}", { task ->
-            def request = new CreateLoadBalancerRequest()
-                    .withLoadBalancerName(name).withListeners(listeners).withAvailabilityZones(zoneList)
+            def request = new CreateLoadBalancerRequest(loadBalancerName: name, listeners: listeners,
+                    securityGroups: securityGroups)
+            if (subnetPurpose) {
+                // If this is a VPC ELB then we must find the proper subnets and add them.
+                Subnets subnets = awsEc2Service.getSubnets(userContext)
+                List<String> subnetIds = subnets.getSubnetIdsForZones(zoneList, subnetPurpose, SubnetTarget.ELB)
+                request.withSubnets(subnetIds)
+            } else {
+                request.withAvailabilityZones(zoneList)
+            }
             awsClient.by(userContext.region).createLoadBalancer(request)  // has result
         }, Link.to(EntityType.loadBalancer, name))
         getLoadBalancer(userContext, name)
@@ -194,6 +206,35 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
             awsClient.by(userContext.region).enableAvailabilityZonesForLoadBalancer(request)  // has result
         }, Link.to(EntityType.loadBalancer, name))
         getLoadBalancer(userContext, name)
+    }
+
+    List<String> updateSubnets(UserContext userContext, String name, Collection<String> oldSubnetIds,
+            Collection<String> newSubnetIds) {
+        Collection<String> addedSubnetIds = newSubnetIds - oldSubnetIds
+        Collection<String> removedSubnetIds = oldSubnetIds - newSubnetIds
+        List<String> messages = []
+        taskService.runTask(userContext, "Updating subnets of Load Balancer '${name}'", { Task task ->
+            if (addedSubnetIds) {
+                String workDescription = "${displayItems('subnet', addedSubnetIds)} to Load Balancer '${name}'."
+                task.log("Add ${workDescription}")
+                awsClient.by(userContext.region).attachLoadBalancerToSubnets(
+                        new AttachLoadBalancerToSubnetsRequest(loadBalancerName: name, subnets: addedSubnetIds))
+                messages << "Added ${workDescription}"
+            }
+            if (removedSubnetIds) {
+                String workDescription = "${displayItems('subnet', removedSubnetIds)} from Load Balancer '${name}'."
+                task.log("Remove ${workDescription}")
+                awsClient.by(userContext.region).detachLoadBalancerFromSubnets(
+                        new DetachLoadBalancerFromSubnetsRequest(loadBalancerName: name, subnets: removedSubnetIds))
+                messages << "Removed ${workDescription}"
+            }
+        }, Link.to(EntityType.loadBalancer, name))
+        getLoadBalancer(userContext, name)
+        messages
+    }
+
+    private String displayItems(String type, Collection<String> items) {
+        "${type}${items.size() == 1 ? '' : 's'} ${items}"
     }
 
     LoadBalancerDescription removeZones(UserContext userContext, String name, Collection<String> zones) {
