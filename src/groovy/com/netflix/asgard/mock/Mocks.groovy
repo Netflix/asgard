@@ -347,7 +347,6 @@ class Mocks {
             pushService.configService = configService()
             pushService.awsAutoScalingService = awsAutoScalingService()
             pushService.awsEc2Service = awsEc2Service()
-            pushService.awsLoadBalancerService = awsLoadBalancerService()
             pushService.instanceTypeService = instanceTypeService()
             pushService.restClientService = restClientService()
         }

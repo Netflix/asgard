@@ -87,6 +87,7 @@ import com.google.common.collect.Lists
 import com.google.common.collect.Multiset
 import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.cache.CacheInitializer
+import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.SecurityGroupOption
 import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.ZoneAvailability
@@ -1046,5 +1047,21 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             caches.allSnapshots.by(userContext.region).remove(snapshotId)
         }
         taskService.runTask(userContext, msg, work, Link.to(EntityType.snapshot, snapshotId), existingTask)
+    }
+
+    /**
+     * Determines the zones that should be preselected.
+     *
+     * @param availabilityZones pool of potential zones
+     * @param selectedZoneNames zones names that have previously been selected
+     * @param group an optional ASG with zone selections
+     * @return preselected zone names
+     */
+    Collection<String> preselectedZoneNames(Collection<AvailabilityZone> availabilityZones,
+            Collection<String> selectedZoneNames, AutoScalingGroupData group = null) {
+        Collection<AvailabilityZone> preselectedAvailabilityZones = availabilityZones.findAll {
+            it.shouldBePreselected(selectedZoneNames, group)
+        }
+        preselectedAvailabilityZones*.zoneName
     }
 }

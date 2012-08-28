@@ -89,18 +89,9 @@
                 <h2>Configuration</h2>
               </td>
             </tr>
-            <tr class="prop">
-              <td class="name">
-                <label for="selectedZones">Availablity Zones:</label>
-              </td>
-              <td>
-                <select multiple="true" id="selectedZones" name="selectedZones">
-                  <g:each var="z" in="${zoneList}">
-                    <option value="${z.zoneName}" ${z.shouldBePreselected(params.selectedZones, null) ? 'selected' : ''}>${z.zoneName}</option>
-                  </g:each>
-                </select>
-              </td>
-            </tr>
+            <g:render template="/common/vpcSelection" model="[awsAction: 'Create', awsObject: 'ELB']"/>
+            <g:render template="/common/zoneSelection" />
+            <g:render template="/common/securityGroupSelection" />
             <tr class="prop">
               <td class="name">
                   <label>Listeners:</label>

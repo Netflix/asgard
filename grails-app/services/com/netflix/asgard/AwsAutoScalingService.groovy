@@ -52,6 +52,7 @@ import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SimpleDbSequenceLocator
+import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.push.AsgDeletionMode
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.retriever.AwsResultsRetriever
@@ -425,19 +426,20 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         }
     }
 
-    private AutoScalingGroup createAutoScalingGroup(UserContext userContext, String name,
-            launchConfigurationName, minSize, desiredCapacity, maxSize, defaultCooldown, String healthCheckType,
-            Integer healthCheckGracePeriod, List<String> availabilityZones,
-            Collection<AutoScalingProcessType> suspendedProcesses,
-            List<String> loadBalancerNames, Task existingTask = null) {
+    private AutoScalingGroup createAutoScalingGroup(UserContext userContext, AutoScalingGroup groupTemplate,
+            String launchConfigName, Collection<AutoScalingProcessType> suspendedProcesses,
+            Task existingTask = null) {
+        String name = groupTemplate.autoScalingGroupName
+
         taskService.runTask(userContext, "Create Autoscaling Group '${name}'", { Task task ->
-            def request = new CreateAutoScalingGroupRequest()
-                    .withAutoScalingGroupName(name)
-                    .withLaunchConfigurationName(launchConfigurationName)
-                    .withMinSize(minSize).withDesiredCapacity(desiredCapacity).withMaxSize(maxSize)
-                    .withDefaultCooldown(defaultCooldown)
-                    .withHealthCheckType(healthCheckType).withHealthCheckGracePeriod(healthCheckGracePeriod)
-                    .withAvailabilityZones(availabilityZones).withLoadBalancerNames(loadBalancerNames)
+            CreateAutoScalingGroupRequest request = null
+            groupTemplate.with {
+                request = new CreateAutoScalingGroupRequest(autoScalingGroupName: name,
+                        launchConfigurationName: launchConfigName, minSize: minSize, desiredCapacity: desiredCapacity,
+                        maxSize: maxSize, defaultCooldown: defaultCooldown, healthCheckType: healthCheckType,
+                        healthCheckGracePeriod: healthCheckGracePeriod, availabilityZones: availabilityZones,
+                        loadBalancerNames: loadBalancerNames, VPCZoneIdentifier: VPCZoneIdentifier)
+            }
             awsClient.by(userContext.region).createAutoScalingGroup(request)
             suspendedProcesses.each {
                 suspendProcess(userContext, it, name, task)
@@ -476,6 +478,11 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
         UpdateAutoScalingGroupRequest request = BeanState.ofSourceBean(autoScalingGroupData).injectState(
                 new UpdateAutoScalingGroupRequest()).withHealthCheckType(autoScalingGroupData.healthCheckType.name())
+
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForZones(group.VPCZoneIdentifier,
+                autoScalingGroupData.availabilityZones)
+        request.withVPCZoneIdentifier(vpcZoneIdentifier)
 
         taskService.runTask(userContext, "Update Autoscaling Group '${autoScalingGroupData.autoScalingGroupName}'", { Task task ->
             processTypesToSuspend.each {
@@ -742,11 +749,10 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         String groupName = groupTemplate.autoScalingGroupName
         String launchConfigName = Relationships.buildLaunchConfigurationName(groupName)
         String msg = "Create Auto Scaling Group '${groupName}'"
-        Collection<String> securityGroups = launchTemplateService.
-                includeDefaultSecurityGroups(launchConfigTemplate.securityGroups)
 
+        Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(
+                launchConfigTemplate.securityGroups, groupTemplate.VPCZoneIdentifier, userContext.region)
         taskService.runTask(userContext, msg, { Task task ->
-
             AutoScalingGroup groupForUserData = new AutoScalingGroup().
                     withAutoScalingGroupName(groupTemplate.autoScalingGroupName).
                     withLaunchConfigurationName(launchConfigName)
@@ -765,11 +771,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             }
 
             try {
-                createAutoScalingGroup(userContext, groupName, launchConfigName, groupTemplate.minSize,
-                        groupTemplate.desiredCapacity, groupTemplate.maxSize, groupTemplate.defaultCooldown,
-                        groupTemplate.healthCheckType, groupTemplate.healthCheckGracePeriod,
-                        groupTemplate.availabilityZones, suspendedProcesses, groupTemplate.loadBalancerNames,
-                        task)
+                createAutoScalingGroup(userContext, groupTemplate, launchConfigName, suspendedProcesses, task)
                 result.autoScalingGroupCreated = true
             } catch (AmazonServiceException autoScalingCreateException) {
                 result.autoScalingCreateException = autoScalingCreateException

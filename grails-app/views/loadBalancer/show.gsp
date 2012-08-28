@@ -61,6 +61,14 @@
           </td>
         </tr>
         <tr class="prop">
+          <td class="name">VPC Purpose:</td>
+          <td class="value">${subnetPurpose}</td>
+        </tr>
+        <tr class="prop">
+          <td class="name">Subnets:</td>
+          <td class="value">${loadBalancer.subnets}</td>
+        </tr>
+        <tr class="prop">
           <td class="name">Listeners:</td>
           <td>
             <g:if test="${loadBalancer.listenerDescriptions}">

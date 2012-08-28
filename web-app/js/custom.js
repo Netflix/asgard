@@ -719,6 +719,32 @@ jQuery(document).ready(function() {
     };
     setJsonValue();
 
+    var setUpVpcRelatedAttributes = function() {
+        jQuery('input[name="subnetPurpose"]').click(function() {
+            var vpcId, vpcIdLocator, purpose, purposeLocator, displaySelected;
+
+            displaySelected = function(elements, locator) {
+                var selected, unselected;
+                selected = elements.filter(locator);
+                unselected = elements.not(locator);
+                unselected.children(':input').prop('disabled', true);
+                selected.children(':input').prop('disabled', false);
+                unselected.addClass('concealed');
+                selected.removeClass('concealed');
+            };
+
+            vpcId = jQuery(this).data('vpcid');
+            vpcIdLocator = '.vpcId' + vpcId;
+            displaySelected(jQuery('.securityGroupsSelect'), vpcIdLocator);
+            displaySelected(jQuery('.loadBalancersSelect'), vpcIdLocator);
+
+            purpose = jQuery(this).data('purpose');
+            purposeLocator = '.subnetPurpose' + purpose;
+            displaySelected(jQuery('.zonesSelect'), purposeLocator);
+        });
+    };
+    setUpVpcRelatedAttributes();
+
     // Cluster page
     var setUpClusterPage = function() {
         var config, jCreateContainer, jCreateAdvancedTrs;

@@ -372,6 +372,28 @@ class Relationships {
             return null
         }
     }
+
+    /**
+     * Convert a VPC Zone Identifier into a list of subnet IDs.
+     * A VPC Zone Identifier is really just a comma delimited list of subnet IDs.
+     *
+     * @param vpcZoneIdentifier the VPC Zone Identifier
+     * @return list of subnet IDs
+     */
+    static List<String> subnetIdsFromVpcZoneIdentifier(String vpcZoneIdentifier) {
+        vpcZoneIdentifier?.tokenize(',') ?: []
+    }
+
+    /**
+     * Convert a list of subnet IDs into a VPC Zone Identifier.
+     * A VPC Zone Identifier is really just a comma delimited list of subnet IDs.
+     *
+     * @param subnetIds the list of subnet IDs
+     * @return the VPC Zone Identifier
+     */
+    static String vpcZoneIdentifierFromSubnetIds(List<String> subnetIds) {
+        subnetIds.join(',')
+    }
 }
 
 @Retention(RetentionPolicy.RUNTIME)
