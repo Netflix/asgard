@@ -348,7 +348,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     List<ScalingPolicy> getScalingPoliciesForGroup(UserContext userContext, String autoScalingGroupName) {
         if (!autoScalingGroupName) { return [] }
-        final DescribePoliciesRequest request = new DescribePoliciesRequest(autoScalingGroupName: autoScalingGroupName)
+        def request = new DescribePoliciesRequest(autoScalingGroupName: autoScalingGroupName)
         awsClient.by(userContext.region).describePolicies(request).scalingPolicies
     }
 
