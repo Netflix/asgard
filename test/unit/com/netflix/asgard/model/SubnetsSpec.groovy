@@ -302,7 +302,7 @@ class SubnetsSpec extends Specification {
         expect:
         subnets.groupZonesByPurpose(null) == [
                 internal: ['us-east-1b'],
-                (null): ['us-east-1a', 'us-east-1b'],
+                (null): ['us-east-1b'],
         ]
     }
 
@@ -316,7 +316,7 @@ class SubnetsSpec extends Specification {
         expect:
         subnets.groupZonesByPurpose(SubnetTarget.ELB) == [
                 internal: ['us-east-1b', 'us-east-1c'],
-                (null): ['us-east-1a', 'us-east-1b', 'us-east-1c'],
+                (null): ['us-east-1b', 'us-east-1c'],
         ]
     }
 
