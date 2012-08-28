@@ -116,7 +116,7 @@ class ClusterController {
                             actionName, Requests.ensureList(params.selectedSecurityGroups))
                     Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
                     Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(availabilityZones,
-                            params.selectedZones, lastGroup)
+                            Requests.ensureList(params.selectedZones), lastGroup)
                     Subnets subnets = awsEc2Service.getSubnets(userContext)
                     List<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext).
                             sort { it.loadBalancerName.toLowerCase() }

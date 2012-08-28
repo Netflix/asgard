@@ -100,13 +100,14 @@ class LoadBalancerController {
         Map<Object, List<SecurityGroup>> securityGroupsGroupedByVpcId = effectiveGroups.groupBy { it.vpcId }
         securityGroupsGroupedByVpcId[null] = [] // Security Groups are not allowed on non-VPC ELBs
         Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
-        Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(availabilityZones, params.selectedZones)
+        Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(availabilityZones,
+                Requests.ensureList(params.selectedZones))
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
         [
             applications: applicationService.getRegisteredApplicationsForLoadBalancer(userContext),
             stacks: stackService.getStacks(userContext),
-            subnetPurpose: params.subnetPurpose,
+            subnetPurpose: params.subnetPurpose ?: null,
             subnetPurposes: subnets.getPurposesForZones(availabilityZones*.zoneName, SubnetTarget.ELB).sort(),
             zonesGroupedByPurpose: subnets.groupZonesByPurpose(SubnetTarget.ELB),
             selectedZones: selectedZones,
@@ -141,7 +142,7 @@ class LoadBalancerController {
                             .withProtocol(params.protocol2)
                             .withLoadBalancerPort(params.lbPort2.toInteger()).withInstancePort(params.instancePort2.toInteger()))
                 }
-                String subnetPurpose = params.subnetPurpose
+                String subnetPurpose = params.subnetPurpose ?: null
                 awsLoadBalancerService.createLoadBalancer(userContext, lbName, zoneList, listeners, securityGroups,
                         subnetPurpose)
                 updateHealthCheck(userContext, lbName, params)
@@ -191,9 +192,7 @@ class LoadBalancerController {
         }
     }
 
-    private void updateLbZones(UserContext userContext, String lbName, List<String> zones) {
-        List<String> origZones = lb.availabilityZones.sort()
-        zones = zones.sort()
+    private void updateLbZones(UserContext userContext, String lbName, List<String> zones, List<String> origZones) {
         List<String> removedZones = origZones - zones
         List<String> addedZones = zones - origZones
         if (addedZones.size() > 0) {
@@ -217,7 +216,7 @@ class LoadBalancerController {
         if (lb.subnets) {
             updateLbSubnets(userContext, name, zoneList, lb.subnets)
         } else {
-            updateLbZones(userContext, name, zoneList)
+            updateLbZones(userContext, name, zoneList, lb.availabilityZones)
         }
 
         // Health check
