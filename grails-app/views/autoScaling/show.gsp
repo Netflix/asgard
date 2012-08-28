@@ -212,6 +212,45 @@ ${a.cause} : ${a.description} (${a.progress}% done) (Status: ${a.statusCode})
         </tr>
 
         <tr class="prop">
+          <td><h2>Scheduled Actions</h2></td>
+        </tr>
+        <tr class="prop">
+          <td colspan="2">
+            <table>
+              <tr>
+                <td colspan="100%" class="subitems">
+                  <div class="buttons">
+                    <span class="count">Total Actions: <span>${scheduledActions.size()}</span></span>
+                    <g:link class="create" controller="scheduledAction" action="create"
+                            params="[id: group.autoScalingGroupName]">Create New Scheduled Action</g:link>
+                  </div>
+                </td>
+              </tr>
+            </table>
+            <g:if test="${scheduledActions.size() >= 1}">
+              <table id="scheduledActionTable" class="sortable list">
+                <tr>
+                  <th>Action Name</th>
+                  <th>Recurrence</th>
+                  <th>Min</th>
+                  <th>Max</th>
+                  <th>Desired</th>
+                </tr>
+                <g:each var="action" in="${scheduledActions}" status="i">
+                  <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+                    <td><g:linkObject type="scheduledAction" name="${action.scheduledActionName}"/></td>
+                    <td>${action.recurrence}</td>
+                    <td>${action.minSize}</td>
+                    <td>${action.maxSize}</td>
+                    <td>${action.desiredCapacity}</td>
+                  </tr>
+                </g:each>
+              </table>
+            </g:if>
+          </td>
+        </tr>
+
+        <tr class="prop">
           <td><h2>Instances</h2></td>
         </tr>
         <tr class="prop">
