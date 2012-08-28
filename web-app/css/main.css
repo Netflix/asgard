@@ -206,6 +206,7 @@ th.desc a                   { background-image: url(../images/skin/sorted_desc.g
 .list .fastProperties .var            { max-width:  60px; word-wrap: break-word; white-space: normal; }
 .list .fastProperties .propKey        { max-width: 400px; word-wrap: break-word; }
 .list .fastProperties .propValue      { max-width: 200px; word-wrap: break-word; }
+.list .fastProperties .region         { max-width:  90px; word-wrap: break-word; }
 .list .fastProperties .stack          { max-width:  80px; word-wrap: break-word; }
 .list .fastProperties .updatedBy      { max-width:  80px; word-wrap: break-word; }
 .list .fastProperties .sourceOfUpdate { max-width:  50px; word-wrap: break-word; }

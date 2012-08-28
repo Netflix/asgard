@@ -37,14 +37,14 @@
       <table class="sortable fastProperties">
         <thead>
         <tr>
-          <th>Application</th>
-          <th>Env</th>
           <th class="sorttable_alpha">Property</th>
+          <th>Env</th>
           <th class="sorttable_alpha">Value</th>
           <th>Timestamp</th>
           <th class="sorttable_alpha">Updated By</th>
           <th class="sorttable_alpha">Source</th>
           <th>Region</th>
+          <th>Application</th>
           <th class="sorttable_alpha">Stack</th>
           <th class="sorttable_alpha">Countries</th>
           <th class="sorttable_alpha">${ticketLabel.encodeAsHTML()}</th>
@@ -53,14 +53,14 @@
         <tbody>
         <g:each var="fastProperty" in="${fastProperties}" status="i">
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-            <td class="app"><g:linkObject type="application" name="${fastProperty?.appId?.toLowerCase()}">${fastProperty?.appId}</g:linkObject></td>
-            <td>${fastProperty?.env}</td>
             <td class="propKey"><g:linkObject type="fastProperty" name="${fastProperty?.id}">${fastProperty?.key}</g:linkObject></td>
+            <td>${fastProperty?.env}</td>
             <td class="propValue">${fastProperty?.value?.encodeAsHTML()}</td>
             <td>${fastProperty?.ts}</td>
             <td class="updatedBy">${fastProperty?.updatedBy?.encodeAsHTML()}</td>
             <td class="sourceOfUpdate">${fastProperty?.sourceOfUpdate?.encodeAsHTML()}</td>
-            <td>${fastProperty?.region}</td>
+            <td class="region">${fastProperty?.region}</td>
+            <td class="app"><g:linkObject type="application" name="${fastProperty?.appId?.toLowerCase()}">${fastProperty?.appId}</g:linkObject></td>
             <td class="var">${fastProperty?.stack?.encodeAsHTML()}</td>
             <td class="var">${fastProperty?.countries?.encodeAsHTML()}</td>
             <td class="var">${fastProperty?.cmcTicket?.encodeAsHTML()}</td>

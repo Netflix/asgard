@@ -34,6 +34,7 @@ class LoadBalancerController {
     def awsEc2Service
     def awsLoadBalancerService
     def awsAutoScalingService
+    def configService
     def stackService
 
     // The delete, save and update actions only accept POST requests
@@ -144,9 +145,7 @@ class LoadBalancerController {
                 awsLoadBalancerService.createLoadBalancer(userContext, lbName, zoneList, listeners, securityGroups,
                         subnetPurpose)
                 updateHealthCheck(userContext, lbName, params)
-                flash.message = "Load Balancer '${lbName}' has been created. You should now file two tickets: " +
-                        "one Eng Tools Jira ticket for Security Group ingress access, " +
-                        "and one Service Now ticket for a new public CNAME."
+                flash.message = "Load Balancer '${lbName}' has been created. " + configService.postElbCreationMessage
                 redirect(action:show, params:[name:lbName])
             } catch (Exception e) {
                 flash.message = "Could not create Load Balancer: ${e}"
