@@ -120,7 +120,12 @@ class ClusterController {
                     Subnets subnets = awsEc2Service.getSubnets(userContext)
                     List<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext).
                             sort { it.loadBalancerName.toLowerCase() }
-                    List<String> selectedLoadBalancers = Requests.ensureList(params.selectedLoadBalancers) ?: lastGroup.loadBalancerNames
+                    List<String> selectedLoadBalancers = Requests.ensureList(params.selectedLoadBalancers) ?: lastGroup
+                            .loadBalancerNames
+                    List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(lastGroup.vpcZoneIdentifier)
+                    String subnetPurpose = subnets.coerceLoneOrNoneFromIds(subnetIds)?.purpose
+                    Set<String> subnetPurposes = subnets.getPurposesForZones(availabilityZones*.zoneName,
+                            SubnetTarget.EC2).sort()
                     attributes.putAll([
                             cluster: cluster,
                             runningTasks: runningTasks,
@@ -132,7 +137,8 @@ class ClusterController {
                             vpcZoneIdentifier: lastGroup.vpcZoneIdentifier,
                             zonesGroupedByPurpose: subnets.groupZonesByPurpose(SubnetTarget.EC2),
                             selectedZones: selectedZones,
-                            subnetPurposes: subnets.getPurposesForZones(availabilityZones*.zoneName, SubnetTarget.EC2).sort(),
+                            subnetPurposes: subnetPurposes,
+                            subnetPurpose: subnetPurpose ?: null,
                             loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
                             selectedLoadBalancers: selectedLoadBalancers,
                     ])
