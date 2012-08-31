@@ -167,6 +167,10 @@ import com.google.common.base.Supplier
      * @return a new VPC Zone Identifier or null if no purpose was derived
      */
     String constructNewVpcZoneIdentifierForZones(String vpcZoneIdentifier, List<String> zones) {
+        if (!zones) {
+            // No zones were selected because there was no chance to change them. Keep the VPC Zone Identifier.
+            return vpcZoneIdentifier
+        }
         List<String> oldSubnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(vpcZoneIdentifier)
         String purpose = coerceLoneOrNoneFromIds(oldSubnetIds)?.purpose
         if (purpose) {

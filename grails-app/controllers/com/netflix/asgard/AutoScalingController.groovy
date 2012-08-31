@@ -328,6 +328,7 @@ class AutoScalingController {
                 launchSuspended: group?.isProcessSuspended(AutoScalingProcessType.Launch),
                 terminateSuspended: group?.isProcessSuspended(AutoScalingProcessType.Terminate),
                 addToLoadBalancerSuspended: group?.isProcessSuspended(AutoScalingProcessType.AddToLoadBalancer),
+                vpcZoneIdentifier: group.VPCZoneIdentifier,
         ]
     }
 
