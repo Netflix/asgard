@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
+import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.Image
@@ -73,6 +74,7 @@ class Caches {
     final MultiRegionCachedMap<SimpleQueue> allQueues
     final MultiRegionCachedMap<ReservedInstances> allReservedInstancesGroups
     final MultiRegionCachedMap<ScalingPolicy> allScalingPolicies
+    final MultiRegionCachedMap<ScheduledUpdateGroupAction> allScheduledActions
     final MultiRegionCachedMap<SecurityGroup> allSecurityGroups
     final MultiRegionCachedMap<Snapshot> allSnapshots
     final MultiRegionCachedMap<SourceSecurityGroup> allSourceSecurityGroups
@@ -115,6 +117,7 @@ class Caches {
         allFastProperties = cachedMapBuilder.of(EntityType.fastProperty, 180).buildMultiRegionCachedMap(configService?.
                 platformServiceRegions)
         allScalingPolicies = cachedMapBuilder.of(EntityType.scalingPolicy, 120).buildMultiRegionCachedMap()
+        allScheduledActions = cachedMapBuilder.of(EntityType.scheduledAction, 120).buildMultiRegionCachedMap()
         allApplications = cachedMapBuilder.of(EntityType.application, 120).buildCachedMap()
         allApplicationMetrics = cachedMapBuilder.of(EntityType.applicationMetric, 120).buildCachedMap()
 
