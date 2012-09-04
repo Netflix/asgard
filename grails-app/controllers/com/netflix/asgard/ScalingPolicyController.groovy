@@ -86,7 +86,7 @@ class ScalingPolicyController {
                 json { new JSON(result).render(response) }
             }
         } else {
-            Requests.renderNotFound('ScalingPolicyData', scalingPolicyName, this)
+            Requests.renderNotFound('Scaling Policy', scalingPolicyName, this)
         }
     }
 
@@ -117,9 +117,9 @@ class ScalingPolicyController {
         if (scalingPolicy) {
             awsAutoScalingService.deleteScalingPolicy(userContext, scalingPolicy)
             flash.message = "Scaling Policy '${scalingPolicyName}' has been deleted."
-            redirect(controller: 'autoScaling', action: 'show', params: [name: scalingPolicy.autoScalingGroupName])
+            redirect(controller: 'autoScaling', action: 'show', params: [id: scalingPolicy.autoScalingGroupName])
         } else {
-            Requests.renderNotFound('ScalingPolicyData', scalingPolicyName, this)
+            Requests.renderNotFound('Scaling Policy', scalingPolicyName, this)
         }
     }
 
@@ -183,13 +183,13 @@ class ScalingPolicyController {
                 Enum.valueOf(AdjustmentType, cmd.adjustmentType) : AdjustmentType.PercentChangeInCapacity
             UserContext userContext = UserContext.of(request)
             ScalingPolicy policy = awsAutoScalingService.getScalingPolicy(userContext, cmd.policyName)
-            policy.with {
-                adjustmentType = inputAdjustmentType
-                scalingAdjustment = cmd.adjustment
-                cooldown = cmd.cooldown
-                minAdjustmentStep = cmd.minAdjustmentStep
-            }
             try {
+                policy.with {
+                    adjustmentType = inputAdjustmentType
+                    scalingAdjustment = cmd.adjustment
+                    cooldown = cmd.cooldown
+                    minAdjustmentStep = cmd.minAdjustmentStep
+                }
                 awsAutoScalingService.updateScalingPolicy(userContext, ScalingPolicyData.fromPolicyAndAlarms(policy))
                 flash.message = "Scaling Policy '${policy.policyName}' has been updated."
                 redirect(action: 'show', params: [id: policy.policyName])
