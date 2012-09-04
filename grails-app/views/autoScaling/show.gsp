@@ -173,7 +173,7 @@ ${a.cause} : ${a.description} (${a.progress}% done) (Status: ${a.statusCode})
               <tr>
                 <td colspan="100%" class="subitems">
                   <div class="buttons">
-                    <span class="count">Total Policies: <span>${scalingPolicies.size()}</span></span>
+                    <span class="count">Total Policies: ${scalingPolicies.size()}</span>
                     <g:link class="create" controller="scalingPolicy" action="create"
                             params="[id: group.autoScalingGroupName]">Create New Scaling Policy</g:link>
                   </div>
@@ -220,7 +220,7 @@ ${a.cause} : ${a.description} (${a.progress}% done) (Status: ${a.statusCode})
               <tr>
                 <td colspan="100%" class="subitems">
                   <div class="buttons">
-                    <span class="count">Total Actions: <span>${scheduledActions.size()}</span></span>
+                    <span class="count">Total Actions: ${scheduledActions.size()}</span>
                     <g:link class="create" controller="scheduledAction" action="create"
                             params="[id: group.autoScalingGroupName]">Create New Scheduled Action</g:link>
                   </div>

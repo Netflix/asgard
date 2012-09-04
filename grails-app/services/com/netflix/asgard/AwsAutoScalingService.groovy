@@ -363,14 +363,14 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     List<ScalingPolicy> getScalingPoliciesForGroup(UserContext userContext, String autoScalingGroupName) {
         if (!autoScalingGroupName) { return [] }
-        def request = new DescribePoliciesRequest(autoScalingGroupName: autoScalingGroupName)
+        DescribePoliciesRequest request = new DescribePoliciesRequest(autoScalingGroupName: autoScalingGroupName)
         awsClient.by(userContext.region).describePolicies(request).scalingPolicies
     }
 
     List<ScheduledUpdateGroupAction> getScheduledActionsForGroup(UserContext userContext, String autoScalingGroupName) {
         if (!autoScalingGroupName) { return [] }
         def request = new DescribeScheduledActionsRequest(autoScalingGroupName: autoScalingGroupName)
-        awsClient.by(userContext.region).describeScheduledActions(request).scheduledUpdateGroupActions
+        awsClient.by(userContext.region).describeScheduledActions(request)?.scheduledUpdateGroupActions
     }
 
     List<ScalingPolicyData> getScalingPolicyDatas(UserContext userContext, String autoScalingGroupName) {

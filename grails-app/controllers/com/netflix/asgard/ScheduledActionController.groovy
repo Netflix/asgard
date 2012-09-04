@@ -27,8 +27,6 @@ class ScheduledActionController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: list, params: params) }
-
     def create = {
         String groupName = params.id ?: params.group
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(UserContext.of(request), groupName)
@@ -44,7 +42,7 @@ class ScheduledActionController {
             ]
         } else {
             flash.message = "Group '${groupName}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
         }
     }
 
@@ -79,7 +77,7 @@ class ScheduledActionController {
             ]
         } else {
             flash.message = "Scheduled Action '${name}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
         }
     }
 
