@@ -177,7 +177,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
 
     /**
      * Get the email address of the relevant app, or empty string if no email address can be found for the specified
-     * appl name.
+     * app name.
      *
      * @param appName the name of the app that has the email address
      * @return the email address associated with the app, or empty string if no email address can be found
