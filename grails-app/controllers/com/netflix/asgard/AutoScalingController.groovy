@@ -20,6 +20,7 @@ import com.amazonaws.services.autoscaling.model.Activity
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
+import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.AvailabilityZone
@@ -119,9 +120,11 @@ class AutoScalingController {
             String appName = Relationships.appNameFromGroupName(name)
             List<Activity> activities = []
             List<ScalingPolicy> scalingPolicies = []
+            List<ScheduledUpdateGroupAction> scheduledActions = []
             try {
                 activities = awsAutoScalingService.getAutoScalingGroupActivities(userContext, name, DEFAULT_ACTIVITIES)
                 scalingPolicies = awsAutoScalingService.getScalingPoliciesForGroup(userContext, name)
+                scheduledActions = awsAutoScalingService.getScheduledActionsForGroup(userContext, name)
             } catch (AmazonServiceException ignored) {
                 // The ASG stopped existing. This race condition happens during automated polling in a unit test.
             }
@@ -165,6 +168,7 @@ class AutoScalingController {
                     terminateStatus: processTypeToProcessStatusMessage[AutoScalingProcessType.Terminate],
                     addToLoadBalancerStatus: processTypeToProcessStatusMessage[AutoScalingProcessType.AddToLoadBalancer],
                     scalingPolicies: scalingPolicies,
+                    scheduledActions: scheduledActions,
                     activities: activities,
                     app: applicationService.getRegisteredApplication(userContext, appName),
                     buildServer: grailsApplication.config.cloud.buildServer,
