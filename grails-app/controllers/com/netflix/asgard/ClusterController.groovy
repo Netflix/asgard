@@ -185,7 +185,7 @@ class ClusterController {
             String appName = Relationships.appNameFromGroupName(name)
             List<String> lastSecurityGroups = lastLaunchConfig.securityGroups
             List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups ?: lastSecurityGroups)
-            List<String> selectedZones = Requests.ensureList(params.selectedZones ?: lastGroup.availabilityZones)
+            List<String> selectedZones = Requests.ensureList(params.selectedZones)
             List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
             String azRebalance = params.azRebalance
             boolean lastRebalanceSuspended = lastGroup.isProcessSuspended(AutoScalingProcessType.AZRebalance)
@@ -240,7 +240,7 @@ class ClusterController {
                     loadBalancerNames: loadBalancerNames ?: lastGroup.loadBalancerNames,
                     iamInstanceProfile: params.iamInstanceProfile ?: null,
                     keyName: params.keyName ?: lastLaunchConfig.keyName,
-                    availabilityZones: selectedZones,
+                    availabilityZones: selectedZones ?: lastGroup.availabilityZones,
                     zoneRebalancingSuspended: azRebalanceSuspended,
                     scalingPolicies: newScalingPolicies,
                     vpcZoneIdentifier: vpcZoneIdentifier,

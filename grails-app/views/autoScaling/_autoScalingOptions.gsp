@@ -54,8 +54,14 @@
     <input type="text" class="number" id="healthCheckGracePeriod" name="healthCheckGracePeriod" value="${group?.healthCheckGracePeriod == null ? '600' : group?.healthCheckGracePeriod}"/> seconds
   </td>
 </tr>
-<g:render template="/common/vpcSelection" model="[awsAction: 'Launch', awsObject: 'instances']"/>
-<g:render template="/common/zoneSelection" />
+<g:if test="${!subnetPurpose && vpcZoneIdentifier}">
+  <td class="name">VPC:</td>
+  <td class="warning">The subnet is misconfigured without a purpose.</td>
+</g:if>
+<g:else>
+  <g:render template="/common/vpcSelection" model="[awsAction: 'Launch', awsObject: 'instances']"/>
+  <g:render template="/common/zoneSelection" />
+</g:else>
 <tr class="prop advanced">
   <td class="name">
     AZ Rebalancing:
