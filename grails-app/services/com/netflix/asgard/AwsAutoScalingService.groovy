@@ -545,6 +545,10 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForZones(group.VPCZoneIdentifier,
                 autoScalingGroupData.availabilityZones)
         request.withVPCZoneIdentifier(vpcZoneIdentifier)
+        if (!autoScalingGroupData.availabilityZones) {
+            // No zones were selected because there was no chance to change them. Keep the old zones.
+            request.availabilityZones = group.availabilityZones
+        }
 
         taskService.runTask(userContext, "Update Autoscaling Group '${autoScalingGroupData.autoScalingGroupName}'", { Task task ->
             processTypesToSuspend.each {

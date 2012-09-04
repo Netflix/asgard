@@ -200,18 +200,18 @@ class SubnetsSpec extends Specification {
         null == subnets.constructNewVpcZoneIdentifierForZones(existingVpcZoneIdentifier, zones)
     }
 
-    def 'should construct null VPC Zone Identifier for null zones'() {
-        String existingVpcZoneIdentifier = 'subnet-e9b0a3a1,subnet-e9b0a3a2'
+    def 'should copy VPC Zone Identifier for null zones'() {
+        String vpcZoneIdentifier = 'subnet-e9b0a3a1,subnet-e9b0a3a2'
 
         expect:
-        null == subnets.constructNewVpcZoneIdentifierForZones(existingVpcZoneIdentifier, null)
+        vpcZoneIdentifier == subnets.constructNewVpcZoneIdentifierForZones(vpcZoneIdentifier, null)
     }
 
-    def 'should construct null VPC Zone Identifier for empty zones'() {
-        String existingVpcZoneIdentifier = 'subnet-e9b0a3a1,subnet-e9b0a3a2'
+    def 'should copy VPC Zone Identifier for empty zones'() {
+        String vpcZoneIdentifier = 'subnet-e9b0a3a1,subnet-e9b0a3a2'
 
         expect:
-        null == subnets.constructNewVpcZoneIdentifierForZones(existingVpcZoneIdentifier, [])
+        vpcZoneIdentifier == subnets.constructNewVpcZoneIdentifierForZones(vpcZoneIdentifier, [])
     }
 
     def 'should construct null VPC Zone Identifier for null existing VPC Zone Identifier'() {
