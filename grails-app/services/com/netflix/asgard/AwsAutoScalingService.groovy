@@ -437,7 +437,6 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 actionNames << action.scheduledActionName
                 if (index >= 1) { Time.sleepCancellably(250) } // Avoid rate limits when there are many policies
                 task.log("Create Scheduled Action '${action.autoScalingGroupName}'")
-                println request
                 awsClient.by(userContext.region).putScheduledUpdateGroupAction(request)
             }
         }, null, existingTask)
