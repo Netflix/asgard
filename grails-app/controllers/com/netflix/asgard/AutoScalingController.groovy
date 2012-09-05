@@ -321,12 +321,14 @@ class AutoScalingController {
             return
         }
         Subnets subnets = awsEc2Service.getSubnets(userContext)
+        List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)
+        String subnetPurpose = awsEc2Service.getSubnets(userContext).coerceLoneOrNoneFromIds(subnetIds)?.purpose
         return [
                 group: group,
                 loadBalancers: awsLoadBalancerService.getLoadBalancers(userContext),
                 launchConfigurations: awsAutoScalingService.getLaunchConfigurationNamesForAutoScalingGroup(
                      userContext, name).sort { it.toLowerCase() },
-                subnetPurpose: params.subnetPurpose ?: null,
+                subnetPurpose: params.subnetPurpose ?: subnetPurpose,
                 zonesGroupedByPurpose: subnets.groupZonesByPurpose(SubnetTarget.EC2),
                 selectedZones: Requests.ensureList(params.selectedZones) ?: group?.availabilityZones,
                 launchSuspended: group?.isProcessSuspended(AutoScalingProcessType.Launch),
