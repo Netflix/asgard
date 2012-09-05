@@ -15,7 +15,7 @@
     limitations under the License.
 
 --%>
-<table>
+<table class="clear">
   <tr>
     <td colspan="100%" class="subitems">
       <div class="buttons">
