@@ -255,6 +255,26 @@ class ConfigService {
     }
 
     /**
+     * Gets the context string used in constructing Eureka URLs. The context varies depending on how Eureka is
+     * configured.
+     *
+     * @return the context string for constructing URLs to make eureka calls
+     */
+    String getEurekaUrlContext() {
+        grailsApplication.config.eureka?.urlContext ?: 'eureka'
+    }
+
+    /**
+     * Gets the port number (as a String) used in constructing Eureka URLs. The port varies depending on how Eureka
+     * or is configured.
+     *
+     * @return the port for constructing URLs to make eureka calls
+     */
+    String getEurekaPort() {
+        grailsApplication.config.eureka?.port ?: '80'
+    }
+
+    /**
      * @return Default Security Groups.
      */
     List<String> getDefaultSecurityGroups() {

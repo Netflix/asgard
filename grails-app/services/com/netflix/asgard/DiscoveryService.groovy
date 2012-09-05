@@ -46,6 +46,8 @@ class DiscoveryService implements CacheInitializer {
 
     private String chooseHealthyDiscoveryServer(String hostName) {
         if (grailsApplication.config.server.online) {
+            String port = configService.eurekaPort
+            String context = configService.eurekaUrlContext
             // Pick the first Discovery server that is healthy.
             InetAddress[] addresses = []
             try {
@@ -55,7 +57,7 @@ class DiscoveryService implements CacheInitializer {
             }
             for (InetAddress address in addresses) {
                 // Check health of Discovery host
-                String healthcheckUrl = "http://${address.canonicalHostName}:7001/discovery/healthcheck"
+                String healthcheckUrl = "http://${address.canonicalHostName}:${port}/${context}/healthcheck"
                 if (restClientService.getResponseCode(healthcheckUrl) == 200) {
                     return address.canonicalHostName
                 }
@@ -67,7 +69,7 @@ class DiscoveryService implements CacheInitializer {
     String findBaseUrl(Region region, Boolean dynamic) {
         String hostName = configService.getRegionalDiscoveryServer(region)
         String serverName = dynamic ? chooseHealthyDiscoveryServer(hostName) : hostName
-        serverName ? "http://${serverName}:7001/discovery" : null
+        serverName ? "http://${serverName}:${configService.eurekaPort}/${configService.eurekaUrlContext}" : null
     }
 
     String findBaseApiUrl(Region region, Boolean dynamic = true) {
