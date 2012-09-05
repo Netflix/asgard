@@ -347,6 +347,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Finds scaling policy specified by name.
+     *
      * @param name of the scaling policy to retrieve
      * @return scaling policy details for name, null if no name was specified
      */
@@ -357,9 +358,10 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Finds all scaling policies specified by name.
-     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describePolicies(DescribePoliciesRequest)
+     *
      * @param names of the scaling policies to retrieve
      * @return scaling policy details for names, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describePolicies(DescribePoliciesRequest)
      */
     List<ScalingPolicy> getScalingPolicies(UserContext userContext, Collection<String> policyNames) {
         if (!policyNames) { return [] }
@@ -373,6 +375,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Finds all scaling policies for a region.
+     *
      * @return scaling policy action details
      */
     Collection<ScalingPolicy> getAllScalingPolicies(UserContext userContext) {
@@ -381,9 +384,10 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Finds all scaling policies for an ASG.
-     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describePolicies(DescribePoliciesRequest)
+     *
      * @param name of the ASG
      * @return scaling policy details, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describePolicies(DescribePoliciesRequest)
      */
     List<ScalingPolicy> getScalingPoliciesForGroup(UserContext userContext, String autoScalingGroupName) {
         if (!autoScalingGroupName) { return [] }
@@ -416,9 +420,10 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Creates scaling policies based on details. Will update existing ones.
-     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScalingPolicy(PutScalingPolicyRequest)
+     *
      * @param names of the scaling policies to retrieve
      * @return updated scaling policy names
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScalingPolicy(PutScalingPolicyRequest)
      */
     List<String> createScalingPolicies(UserContext userContext, Collection<ScalingPolicyData> scalingPolicies,
                                Task existingTask = null) {
@@ -446,8 +451,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Updates a scaling policy based on details. Will try to create one if it does not exist.
-     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScalingPolicy(PutScalingPolicyRequest)
+     *
      * @param scaling policy details to update with
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScalingPolicy(PutScalingPolicyRequest)
      */
     void updateScalingPolicy(UserContext userContext, ScalingPolicyData policy, Task existingTask = null) {
         taskService.runTask(userContext, "Update Scaling Policy '${policy.policyName}'", { Task task ->
@@ -457,8 +463,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Deletes a scaling policy.
-     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#deletePolicy(DeletePolicyRequest)
+     *
      * @param scalingPolicy details for scaling policy to delete
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#deletePolicy(DeletePolicyRequest)
      */
     void deleteScalingPolicy(UserContext userContext, ScalingPolicy scalingPolicy, Task existingTask = null) {
         // TODO - this method needs to calculate only alarms that will be orphaned, and delete them in a single call
@@ -473,6 +480,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Finds scheduled action specified by name.
+     *
      * @param name of the scheduled action to retrieve
      * @return scheduled action details for name, null if no name was specified
      */
@@ -483,9 +491,10 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Finds all scheduled actions specified by name.
-     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describeScheduledActions(DescribeScheduledActionsRequest)
+     *
      * @param names of the scheduled actions to retrieve
      * @return scheduled action details for names, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describeScheduledActions(DescribeScheduledActionsRequest)
      */
     List<ScheduledUpdateGroupAction> getScheduledActions(UserContext userContext, Collection<String> names) {
         if (!names) { return [] }
@@ -495,9 +504,10 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Finds all scheduled actions for an ASG.
-     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describeScheduledActions(DescribeScheduledActionsRequest)
+     *
      * @param name of the ASG
      * @return scheduled action details, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describeScheduledActions(DescribeScheduledActionsRequest)
      */
     List<ScheduledUpdateGroupAction> getScheduledActionsForGroup(UserContext userContext, String autoScalingGroupName) {
         if (!autoScalingGroupName) { return [] }
@@ -511,6 +521,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Finds all scheduled actions for a region.
+     *
      * @return scheduled action details
      */
     Collection<ScheduledUpdateGroupAction> getAllScheduledActions(UserContext userContext) {
@@ -519,9 +530,10 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Creates scheduled actions based on details. Will update existing ones.
-     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScheduledUpdateGroupAction(PutScheduledUpdateGroupActionRequest)
+     *
      * @param names of the scheduled actions to retrieve
      * @return updated scheduled action names
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScheduledUpdateGroupAction(PutScheduledUpdateGroupActionRequest)
      */
     List<String> createScheduledActions(UserContext userContext, Collection<ScheduledUpdateGroupAction> actions,
                                        Task existingTask = null) {
@@ -546,8 +558,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Updates a scheduled action based on details. Will try to create one if it does not exist.
-     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScheduledUpdateGroupAction(PutScheduledUpdateGroupActionRequest)
+     *
      * @param scheduled action details to update with
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScheduledUpdateGroupAction(PutScheduledUpdateGroupActionRequest)
      */
     void updateScheduledAction(UserContext userContext, ScheduledUpdateGroupAction action, Task existingTask = null) {
         def request = new PutScheduledUpdateGroupActionRequest(scheduledActionName: action.scheduledActionName,
@@ -561,8 +574,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     /**
      * Deletes a scheduled action.
-     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#deleteScheduledAction(DeleteScheduledActionRequest)
+     *
      * @param action details for action to delete
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#deleteScheduledAction(DeleteScheduledActionRequest)
      */
     void deleteScheduledAction(UserContext userContext, ScheduledUpdateGroupAction action, Task existingTask = null) {
         taskService.runTask(userContext, "Delete Scheduled Action '${action.scheduledActionName}'", { Task task ->
