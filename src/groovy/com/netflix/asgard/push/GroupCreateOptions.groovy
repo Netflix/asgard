@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.push
 
+import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.netflix.asgard.model.ScalingPolicyData
 
 @Immutable final class GroupCreateOptions {
@@ -31,6 +32,7 @@ import com.netflix.asgard.model.ScalingPolicyData
     String vpcZoneIdentifier
     boolean zoneRebalancingSuspended
     Collection<ScalingPolicyData> scalingPolicies
+    Collection<ScheduledUpdateGroupAction> scheduledActions
 
     /** The number of instances to create at a time while inflating the auto scaling group. */
     Integer batchSize
