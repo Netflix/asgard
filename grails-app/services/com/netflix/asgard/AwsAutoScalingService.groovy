@@ -36,6 +36,7 @@ import com.amazonaws.services.autoscaling.model.DescribePoliciesResult
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult
 import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsRequest
+import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsResult
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.PutScalingPolicyRequest
@@ -75,6 +76,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     def awsEc2Service
     def awsLoadBalancerService
     def awsSimpleDbService
+    def configService
     Caches caches
     def discoveryService
     def emailerService
@@ -94,6 +96,16 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         }
         protected List<ScalingPolicy> accessResult(DescribePoliciesResult result) {
             result.scalingPolicies
+        }
+    }
+
+    final AwsResultsRetriever scheduledActionRetriever = new AwsResultsRetriever<ScheduledUpdateGroupAction,
+            DescribeScheduledActionsRequest, DescribeScheduledActionsResult>() {
+        protected DescribeScheduledActionsResult makeRequest(Region region, DescribeScheduledActionsRequest request) {
+            awsClient.by(region).describeScheduledActions(request)
+        }
+        protected List<ScheduledUpdateGroupAction> accessResult(DescribeScheduledActionsResult result) {
+            result.scheduledUpdateGroupActions
         }
     }
 
@@ -123,6 +135,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 { Region region -> caches.allClusters.by(region).fill() })
         caches.allLaunchConfigurations.ensureSetUp({ Region region -> retrieveLaunchConfigurations(region) })
         caches.allScalingPolicies.ensureSetUp({ Region region -> retrieveScalingPolicies(region) })
+        caches.allScheduledActions.ensureSetUp({ Region region -> retrieveScheduledActions(region) })
     }
 
     // Clusters
@@ -332,46 +345,54 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         activities
     }
 
+    /**
+     * Finds scaling policy specified by name.
+     *
+     * @param name of the scaling policy to retrieve
+     * @return scaling policy details for name, null if no name was specified
+     */
     ScalingPolicy getScalingPolicy(UserContext userContext, String policyName) {
         if (!policyName) { return null }
         Check.loneOrNone(getScalingPolicies(userContext, [policyName]), ScalingPolicy)
     }
 
+    /**
+     * Finds all scaling policies specified by name.
+     *
+     * @param names of the scaling policies to retrieve
+     * @return scaling policy details for names, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describePolicies(DescribePoliciesRequest)
+     */
     List<ScalingPolicy> getScalingPolicies(UserContext userContext, Collection<String> policyNames) {
         if (!policyNames) { return [] }
         final DescribePoliciesRequest request = new DescribePoliciesRequest(policyNames: policyNames)
         awsClient.by(userContext.region).describePolicies(request).scalingPolicies
     }
 
-    ScheduledUpdateGroupAction getScheduledAction(UserContext userContext, String name) {
-        if (!name) { return null }
-        Check.loneOrNone(getScheduledActions(userContext, [name]), ScheduledUpdateGroupAction)
-    }
-
-    List<ScheduledUpdateGroupAction> getScheduledActions(UserContext userContext, Collection<String> names) {
-        if (!names) { return [] }
-        def request = new DescribeScheduledActionsRequest(scheduledActionNames: names)
-        awsClient.by(userContext.region).describeScheduledActions(request).scheduledUpdateGroupActions
-    }
-
-    List<ScalingPolicy> retrieveScalingPolicies(Region region) {
+    private List<ScalingPolicy> retrieveScalingPolicies(Region region) {
         scalingPolicyRetriever.retrieve(region, new DescribePoliciesRequest())
     }
 
+    /**
+     * Finds all scaling policies for a region.
+     *
+     * @return scaling policy action details
+     */
     Collection<ScalingPolicy> getAllScalingPolicies(UserContext userContext) {
         caches.allScalingPolicies.by(userContext.region).list()
     }
 
+    /**
+     * Finds all scaling policies for an ASG.
+     *
+     * @param name of the ASG
+     * @return scaling policy details, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describePolicies(DescribePoliciesRequest)
+     */
     List<ScalingPolicy> getScalingPoliciesForGroup(UserContext userContext, String autoScalingGroupName) {
         if (!autoScalingGroupName) { return [] }
         DescribePoliciesRequest request = new DescribePoliciesRequest(autoScalingGroupName: autoScalingGroupName)
         awsClient.by(userContext.region).describePolicies(request).scalingPolicies
-    }
-
-    List<ScheduledUpdateGroupAction> getScheduledActionsForGroup(UserContext userContext, String autoScalingGroupName) {
-        if (!autoScalingGroupName) { return [] }
-        def request = new DescribeScheduledActionsRequest(autoScalingGroupName: autoScalingGroupName)
-        awsClient.by(userContext.region).describeScheduledActions(request)?.scheduledUpdateGroupActions
     }
 
     List<ScalingPolicyData> getScalingPolicyDatas(UserContext userContext, String autoScalingGroupName) {
@@ -397,6 +418,13 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         scalingPolicyDatas
     }
 
+    /**
+     * Creates scaling policies based on details. Will update existing ones.
+     *
+     * @param names of the scaling policies to retrieve
+     * @return updated scaling policy names
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScalingPolicy(PutScalingPolicyRequest)
+     */
     List<String> createScalingPolicies(UserContext userContext, Collection<ScalingPolicyData> scalingPolicies,
                                Task existingTask = null) {
         List<String> scalingPolicyNames = []
@@ -409,11 +437,11 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             scalingPolicies.eachWithIndex { ScalingPolicyData scalingPolicyData, int policyIndex ->
                 PutScalingPolicyRequest request = scalingPolicyData.toPutScalingPolicyRequest(nextPolicyId(userContext))
                 scalingPolicyNames << request.policyName
-                if (policyIndex >= 1) { Time.sleepCancellably(250) } // Avoid rate limits when there are many policies
+                if (policyIndex >= 1) { Time.sleepCancellably(configService.cloudThrottle) }
                 task.log("Create Scaling Policy '${request.policyName}'")
                 final PutScalingPolicyResult result = awsClient.by(userContext.region).putScalingPolicy(request)
                 scalingPolicyData.alarms.eachWithIndex { AlarmData alarm, int alarmIndex ->
-                    if (alarmIndex >= 1) { Time.sleepCancellably(250) } // Avoid rate limits when there are many alarms
+                    if (alarmIndex >= 1) { Time.sleepCancellably(configService.cloudThrottle) }
                     awsCloudWatchService.createAlarm(userContext, alarm, result.policyARN, existingTask)
                 }
             }
@@ -421,43 +449,24 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         scalingPolicyNames
     }
 
-    List<String> createScheduledActions(UserContext userContext, Collection<ScheduledUpdateGroupAction> actions,
-                                       Task existingTask = null) {
-        List<String> actionNames = []
-        if (!actions) {
-            return actionNames
-        }
-        Integer count = actions.size()
-        String msg = "Create ${count} Scheduled Action${count == 1 ? '' : 's'}"
-        taskService.runTask(userContext, msg, { Task task ->
-            actions.eachWithIndex { ScheduledUpdateGroupAction action, int index ->
-                def request = new PutScheduledUpdateGroupActionRequest(scheduledActionName: action.scheduledActionName,
-                        autoScalingGroupName: action.autoScalingGroupName, minSize: action.minSize,
-                        maxSize: action.maxSize, desiredCapacity: action.desiredCapacity, recurrence: action.recurrence)
-                actionNames << action.scheduledActionName
-                if (index >= 1) { Time.sleepCancellably(250) } // Avoid rate limits when there are many policies
-                task.log("Create Scheduled Action '${action.autoScalingGroupName}'")
-                awsClient.by(userContext.region).putScheduledUpdateGroupAction(request)
-            }
-        }, null, existingTask)
-        actionNames
-    }
-
-    void updateScheduledAction(UserContext userContext, ScheduledUpdateGroupAction action, Task existingTask = null) {
-        def request = new PutScheduledUpdateGroupActionRequest(scheduledActionName: action.scheduledActionName,
-                autoScalingGroupName: action.autoScalingGroupName, minSize: action.minSize, maxSize: action.maxSize,
-                desiredCapacity: action.desiredCapacity, recurrence: action.recurrence)
-        taskService.runTask(userContext, "Update Scheduled Action '${action.scheduledActionName}'", { Task task ->
-                awsClient.by(userContext.region).putScheduledUpdateGroupAction(request)
-        }, Link.to(EntityType.scheduledAction, action.scheduledActionName), existingTask)
-    }
-
+    /**
+     * Updates a scaling policy based on details. Will try to create one if it does not exist.
+     *
+     * @param scaling policy details to update with
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScalingPolicy(PutScalingPolicyRequest)
+     */
     void updateScalingPolicy(UserContext userContext, ScalingPolicyData policy, Task existingTask = null) {
         taskService.runTask(userContext, "Update Scaling Policy '${policy.policyName}'", { Task task ->
-                awsClient.by(userContext.region).putScalingPolicy(policy.toPutScalingPolicyRequest())
+            awsClient.by(userContext.region).putScalingPolicy(policy.toPutScalingPolicyRequest())
         }, Link.to(EntityType.scalingPolicy, policy.policyName), existingTask)
     }
 
+    /**
+     * Deletes a scaling policy.
+     *
+     * @param scalingPolicy details for scaling policy to delete
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#deletePolicy(DeletePolicyRequest)
+     */
     void deleteScalingPolicy(UserContext userContext, ScalingPolicy scalingPolicy, Task existingTask = null) {
         // TODO - this method needs to calculate only alarms that will be orphaned, and delete them in a single call
         taskService.runTask(userContext, "Delete Scaling Policy '${scalingPolicy.policyName}'", { Task task ->
@@ -469,6 +478,106 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         getScalingPolicy(userContext, scalingPolicy.policyName)
     }
 
+    /**
+     * Finds scheduled action specified by name.
+     *
+     * @param name of the scheduled action to retrieve
+     * @return scheduled action details for name, null if no name was specified
+     */
+    ScheduledUpdateGroupAction getScheduledAction(UserContext userContext, String name) {
+        if (!name) { return null }
+        Check.loneOrNone(getScheduledActions(userContext, [name]), ScheduledUpdateGroupAction)
+    }
+
+    /**
+     * Finds all scheduled actions specified by name.
+     *
+     * @param names of the scheduled actions to retrieve
+     * @return scheduled action details for names, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describeScheduledActions(DescribeScheduledActionsRequest)
+     */
+    List<ScheduledUpdateGroupAction> getScheduledActions(UserContext userContext, Collection<String> names) {
+        if (!names) { return [] }
+        DescribeScheduledActionsRequest request = new DescribeScheduledActionsRequest(scheduledActionNames: names)
+        awsClient.by(userContext.region).describeScheduledActions(request).scheduledUpdateGroupActions
+    }
+
+    /**
+     * Finds all scheduled actions for an ASG.
+     *
+     * @param name of the ASG
+     * @return scheduled action details, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describeScheduledActions(DescribeScheduledActionsRequest)
+     */
+    List<ScheduledUpdateGroupAction> getScheduledActionsForGroup(UserContext userContext, String autoScalingGroupName) {
+        if (!autoScalingGroupName) { return [] }
+        def request = new DescribeScheduledActionsRequest(autoScalingGroupName: autoScalingGroupName)
+        awsClient.by(userContext.region).describeScheduledActions(request)?.scheduledUpdateGroupActions
+    }
+
+    private List<ScheduledUpdateGroupAction> retrieveScheduledActions(Region region) {
+        scheduledActionRetriever.retrieve(region, new DescribeScheduledActionsRequest())
+    }
+
+    /**
+     * Finds all scheduled actions for a region.
+     *
+     * @return scheduled action details
+     */
+    Collection<ScheduledUpdateGroupAction> getAllScheduledActions(UserContext userContext) {
+        caches.allScheduledActions.by(userContext.region).list()
+    }
+
+    /**
+     * Creates scheduled actions based on details. Will update existing ones.
+     *
+     * @param names of the scheduled actions to retrieve
+     * @return updated scheduled action names
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScheduledUpdateGroupAction(PutScheduledUpdateGroupActionRequest)
+     */
+    List<String> createScheduledActions(UserContext userContext, Collection<ScheduledUpdateGroupAction> actions,
+                                       Task existingTask = null) {
+        List<String> actionNames = []
+        if (!actions) {
+            return actionNames
+        }
+        Integer count = actions.size()
+        String msg = "Create ${count} Scheduled Action${count == 1 ? '' : 's'}"
+        taskService.runTask(userContext, msg, { Task task ->
+            actions.eachWithIndex { ScheduledUpdateGroupAction action, int index ->
+                PutScheduledUpdateGroupActionRequest request = BeanState.ofSourceBean(action).
+                        ignoreProperties(['startTime', 'time']).injectState(new PutScheduledUpdateGroupActionRequest())
+                actionNames << action.scheduledActionName
+                if (index >= 1) { Time.sleepCancellably(configService.cloudThrottle) }
+                task.log("Create Scheduled Action '${action.autoScalingGroupName}'")
+                awsClient.by(userContext.region).putScheduledUpdateGroupAction(request)
+            }
+        }, null, existingTask)
+        actionNames
+    }
+
+    /**
+     * Updates a scheduled action based on details. Will try to create one if it does not exist.
+     *
+     * @param scheduled action details to update with
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScheduledUpdateGroupAction(PutScheduledUpdateGroupActionRequest)
+     */
+    void updateScheduledAction(UserContext userContext, ScheduledUpdateGroupAction action, Task existingTask = null) {
+        def request = new PutScheduledUpdateGroupActionRequest(scheduledActionName: action.scheduledActionName,
+                autoScalingGroupName: action.autoScalingGroupName, minSize: action.minSize, maxSize: action.maxSize,
+                desiredCapacity: action.desiredCapacity, recurrence: action.recurrence)
+        taskService.runTask(userContext, "Update Scheduled Action '${action.scheduledActionName}'", { Task task ->
+            awsClient.by(userContext.region).putScheduledUpdateGroupAction(request)
+        }, Link.to(EntityType.scheduledAction, action.scheduledActionName), existingTask)
+    }
+
+
+    /**
+     * Deletes a scheduled action.
+     *
+     * @param action details for action to delete
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#deleteScheduledAction(DeleteScheduledActionRequest)
+     */
     void deleteScheduledAction(UserContext userContext, ScheduledUpdateGroupAction action, Task existingTask = null) {
         taskService.runTask(userContext, "Delete Scheduled Action '${action.scheduledActionName}'", { Task task ->
             def request = new DeleteScheduledActionRequest(scheduledActionName: action.scheduledActionName,

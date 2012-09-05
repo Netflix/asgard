@@ -27,6 +27,22 @@ class ScheduledActionController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
+    def index = { redirect(action: 'list', params: params) }
+
+    def list = {
+        UserContext userContext = UserContext.of(request)
+        List<ScheduledUpdateGroupAction> scheduledActions = awsAutoScalingService.getAllScheduledActions(userContext).sort { it.scheduledActionName }
+        withFormat {
+            html {
+                [
+                        scheduledActions: scheduledActions,
+                ]
+            }
+            xml { new XML(scheduledActions).render(response) }
+            json { new JSON(scheduledActions).render(response) }
+        }
+    }
+
     def create = {
         String groupName = params.id ?: params.group
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(UserContext.of(request), groupName)

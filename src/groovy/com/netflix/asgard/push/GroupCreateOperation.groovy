@@ -95,6 +95,7 @@ class GroupCreateOperation extends AbstractPushOperation {
             if (result.succeeded()) {
                 // Add scalingPolicies to ASG. In the future this might need to be its own operation for reuse.
                 awsAutoScalingService.createScalingPolicies(options.common.userContext, options.scalingPolicies, task)
+                awsAutoScalingService.createScheduledActions(options.common.userContext, options.scheduledActions, task)
 
                 // If the user wanted any instances then start a resize operation.
                 if (options.minSize > 0) {
