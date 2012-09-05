@@ -267,4 +267,11 @@ class ConfigService {
     List<String> getDefaultVpcSecurityGroupNames() {
         grailsApplication.config.cloud?.defaultVpcSecurityGroupNames ?: []
     }
+
+    /**
+     * @return Amount of time to wait between AWS calls.
+     */
+    int getCloudThrottle() {
+        grailsApplication.config.cloud?.throttleMillis ?: 250
+    }
 }

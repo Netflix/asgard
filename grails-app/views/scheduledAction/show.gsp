@@ -15,7 +15,6 @@
     limitations under the License.
 
 --%>
-<%@ page import="com.netflix.asgard.model.AlarmData" %>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -24,7 +23,7 @@
 </head>
 <body>
   <div class="body">
-    <h1>Action Details</h1>
+    <h1>Scheduled Action Details</h1>
     <g:if test="${flash.message}">
       <div class="message">${flash.message}</div>
     </g:if>
@@ -61,10 +60,6 @@
           <td class="value">${scheduledAction.endTime}</td>
         </tr>
         <tr class="prop">
-          <td class="name">Recurrence:</td>
-          <td class="value">${scheduledAction.recurrence}</td>
-        </tr>
-        <tr class="prop">
           <td class="name">Minimum Size:</td>
           <td class="value">${scheduledAction.minSize}</td>
         </tr>
@@ -75,6 +70,10 @@
         <tr class="prop">
           <td class="name">Desired Capacity:</td>
           <td class="value">${scheduledAction.desiredCapacity}</td>
+        </tr>
+        <tr class="prop">
+          <td class="name">Recurrence:</td>
+          <td class="value">${scheduledAction.recurrence}</td>
         </tr>
         </tbody>
       </table>

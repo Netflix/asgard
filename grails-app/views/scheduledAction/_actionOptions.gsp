@@ -19,10 +19,6 @@
   <td class="name"><label>Auto Scaling Group:</label></td>
   <td class="value"><g:linkObject type="autoScaling" name="${group}"/></td>
 </tr>
-<tr class="prop" title="The regular schedule that an action occurs. When Start Time and End Time are specified with, they form the boundaries of the recurring action.">
-  <td class="name"><label for="recurrence">Recurrence:</label></td>
-  <td class="value"><g:textField name="recurrence" value="${recurrence}"/>&nbsp;<a href="http://en.wikipedia.org/wiki/Cron">What's this?</a></td>
-</tr>
 <tbody class="numbers">
 <tr class="prop" title="The minimum size of the Auto Scaling group.">
   <td class="name">

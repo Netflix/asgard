@@ -15,7 +15,6 @@
     limitations under the License.
 
 --%>
-<%@ page import="com.netflix.asgard.model.ScalingPolicyData" %>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -44,6 +43,10 @@
           </td>
         </tr>
         <g:render template="actionOptions"/>
+        <tr class="prop" title="The regular schedule that an action occurs. When Start Time and End Time are specified they form the boundaries of the recurring action.">
+          <td class="name"><label for="recurrence">Recurrence:</label></td>
+          <td class="value"><g:textField name="recurrence" value="${recurrence}"/>&nbsp;<a href="http://en.wikipedia.org/wiki/Cron">What's this?</a></td>
+        </tr>
         </tbody>
       </table>
     </div>

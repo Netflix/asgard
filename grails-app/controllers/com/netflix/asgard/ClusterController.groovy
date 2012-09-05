@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.AutoScalingGroupData
@@ -212,6 +213,21 @@ class ClusterController {
                 policy.copyForAsg(nextGroupName)
             }
 
+            List<ScheduledUpdateGroupAction> lastScheduledActions = awsAutoScalingService.getScheduledActionsForGroup(
+                    userContext, lastGroup.autoScalingGroupName)
+            List<String> ignoredScheduledActionProperties = ['startTime', 'time', 'autoScalingGroupName',
+                    'scheduledActionName', 'scheduledActionARN']
+            List<ScheduledUpdateGroupAction> newScheduledActions = lastScheduledActions.collect {
+                ScheduledUpdateGroupAction newScheduledAction = BeanState.ofSourceBean(it).
+                        ignoreProperties(ignoredScheduledActionProperties).injectState(new ScheduledUpdateGroupAction())
+                String id = awsAutoScalingService.nextPolicyId(userContext)
+                newScheduledAction.with {
+                    autoScalingGroupName = nextGroupName
+                    scheduledActionName = Relationships.buildScalingPolicyName(nextGroupName, id)
+                }
+                newScheduledAction
+            }
+
             Integer lastGracePeriod = lastGroup.healthCheckGracePeriod
             Subnets subnets = awsEc2Service.getSubnets(userContext)
             String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForZones(lastGroup.vpcZoneIdentifier,
@@ -243,6 +259,7 @@ class ClusterController {
                     availabilityZones: selectedZones ?: lastGroup.availabilityZones,
                     zoneRebalancingSuspended: azRebalanceSuspended,
                     scalingPolicies: newScalingPolicies,
+                    scheduledActions: newScheduledActions,
                     vpcZoneIdentifier: vpcZoneIdentifier,
             )
 
