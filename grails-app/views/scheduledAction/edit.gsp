@@ -42,12 +42,17 @@
           <td class="value">${name}</td>
         </tr>
         <g:render template="actionOptions"/>
+        <tr class="prop">
+          <td class="name">Recurrence:</td>
+          <td class="value">${recurrence}</td>
+        </tr>
         </tbody>
       </table>
     </div>
     <div class="buttons">
       <input type="hidden" name="actionName" value="${name}"/>
       <input type="hidden" name="group" value="${group}"/>
+      <input type="hidden" name="recurrence" value="${recurrence}"/>
       <g:buttonSubmit class="save" value="update">Update Scheduled Action</g:buttonSubmit>
     </div>
   </g:form>

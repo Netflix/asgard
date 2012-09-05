@@ -152,9 +152,7 @@ class ScheduledActionController {
                     maxSize = cmd.max
                     desiredCapacity = cmd.desired
                 }
-                // Updating alone (recreating) would not allow new recurrence values to be set.
-                awsAutoScalingService.deleteScheduledAction(userContext, scheduledAction)
-                awsAutoScalingService.createScheduledActions(userContext, [scheduledAction])
+                awsAutoScalingService.updateScheduledAction(userContext, scheduledAction)
                 flash.message = "Scheduled Action '${scheduledAction.scheduledActionName}' has been updated."
                 redirect(action: 'show', params: [id: scheduledAction.scheduledActionName])
             } catch (Exception e) {

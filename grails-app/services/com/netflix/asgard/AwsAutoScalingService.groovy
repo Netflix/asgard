@@ -545,6 +545,21 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
 
     /**
+     * Updates a scheduled action based on details. Will try to create one if it does not exist.
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScheduledUpdateGroupAction(PutScheduledUpdateGroupActionRequest)
+     * @param scheduled action details to update with
+     */
+    void updateScheduledAction(UserContext userContext, ScheduledUpdateGroupAction action, Task existingTask = null) {
+        def request = new PutScheduledUpdateGroupActionRequest(scheduledActionName: action.scheduledActionName,
+                autoScalingGroupName: action.autoScalingGroupName, minSize: action.minSize, maxSize: action.maxSize,
+                desiredCapacity: action.desiredCapacity, recurrence: action.recurrence)
+        taskService.runTask(userContext, "Update Scheduled Action '${action.scheduledActionName}'", { Task task ->
+            awsClient.by(userContext.region).putScheduledUpdateGroupAction(request)
+        }, Link.to(EntityType.scheduledAction, action.scheduledActionName), existingTask)
+    }
+
+
+    /**
      * Deletes a scheduled action.
      * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#deleteScheduledAction(DeleteScheduledActionRequest)
      * @param action details for action to delete

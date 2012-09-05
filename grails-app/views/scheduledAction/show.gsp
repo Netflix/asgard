@@ -61,10 +61,6 @@
           <td class="value">${scheduledAction.endTime}</td>
         </tr>
         <tr class="prop">
-          <td class="name">Recurrence:</td>
-          <td class="value">${scheduledAction.recurrence}</td>
-        </tr>
-        <tr class="prop">
           <td class="name">Minimum Size:</td>
           <td class="value">${scheduledAction.minSize}</td>
         </tr>
@@ -75,6 +71,10 @@
         <tr class="prop">
           <td class="name">Desired Capacity:</td>
           <td class="value">${scheduledAction.desiredCapacity}</td>
+        </tr>
+        <tr class="prop">
+          <td class="name">Recurrence:</td>
+          <td class="value">${scheduledAction.recurrence}</td>
         </tr>
         </tbody>
       </table>
