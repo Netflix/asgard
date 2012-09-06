@@ -441,3 +441,6 @@ div.grippie { background: #EEEEEE url(../images/grippie.png) no-repeat scroll ce
 .concealed                          { display: none      }
 .customOrExistingInput div          { line-height: 22px; }
 
+.select2-container-multi .select2-choices .select2-search-field { border-style: none }
+.select2-container .select2-choice span { font-weight: normal }
+
