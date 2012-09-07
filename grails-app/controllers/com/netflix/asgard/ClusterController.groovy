@@ -136,7 +136,7 @@ class ClusterController {
                             recommendedNextStep: recommendedNextStep,
                             buildServer: grailsApplication.config.cloud.buildServer,
                             vpcZoneIdentifier: lastGroup.vpcZoneIdentifier,
-                            zonesGroupedByPurpose: subnets.groupZonesByPurpose(SubnetTarget.EC2),
+                            zonesGroupedByPurpose: subnets.groupZonesByPurpose(availabilityZones*.zoneName, SubnetTarget.EC2),
                             selectedZones: selectedZones,
                             subnetPurposes: subnetPurposes,
                             subnetPurpose: subnetPurpose ?: null,
