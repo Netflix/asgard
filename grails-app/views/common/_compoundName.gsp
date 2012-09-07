@@ -48,13 +48,12 @@
     </tr>
     <tr>
       <td><g:select title="The application that will run on the instances" name="appName"
-          noSelection="['':'-Application-']" value="${params.appName}" from="${applications}"
-          optionKey="name" optionValue="name"/></td>
+          noSelection="['':'']" value="${params.appName}" from="${applications}"
+          optionKey="name" optionValue="name" data-placeholder="-Application-"/></td>
       <td>
         <div>
-          <select id="stack" name="stack" title="The name of the stack of applications being logically deployed and managed together">
-            <option value="">-Stack-</option>
-            <option disabled>------------</option>
+          <select id="stack" name="stack" title="The name of the stack of applications being logically deployed and managed together" data-placeholder="-Stack-">
+            <option value=""></option>
             <g:each var="st" in="${stacks}">
               <option value="${st.name}" ${params.stack == st.name ? "selected" : ""}>${st.name ?: "(no stack)"}</option>
             </g:each>

@@ -42,8 +42,8 @@
           </td>
           <td>
             <g:select class="required" name="appName"
-                      noSelection="['':'-Choose application-']" value="${appName}" from="${applications}"
-                      optionKey="name" optionValue="name"/>
+                      noSelection="['':'']" value="${appName}" from="${applications}"
+                      optionKey="name" optionValue="name" data-placeholder="-Choose application-"/>
           </td>
         </tr>
         <tr class="prop">
