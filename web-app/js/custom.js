@@ -673,6 +673,7 @@ jQuery(document).ready(function() {
         enableVpc.click(function() {
             isVpc = enableVpc.is(':checked');
             vpcId.prop('disabled', !isVpc);
+            vpcId.select2(isVpc ? 'enable' : 'disable')
         });
     };
     setUpEnableVpc();
@@ -728,7 +729,9 @@ jQuery(document).ready(function() {
                 selected = elements.filter(locator);
                 unselected = elements.not(locator);
                 unselected.children(':input').prop('disabled', true);
+                unselected.children('select').select2('disable');
                 selected.children(':input').prop('disabled', false);
+                selected.children('select').select2('enable');
                 unselected.addClass('concealed');
                 selected.removeClass('concealed');
             };
@@ -741,6 +744,7 @@ jQuery(document).ready(function() {
             purpose = jQuery(this).data('purpose');
             purposeLocator = '.subnetPurpose' + purpose;
             displaySelected(jQuery('.zonesSelect'), purposeLocator);
+            enableSelect2ForVisible();
         });
     };
     setUpVpcRelatedAttributes();
@@ -755,6 +759,7 @@ jQuery(document).ready(function() {
         jCreateAdvancedTrs = jCreateContainer.find('.advanced');
         jQuery('#showAdvancedOptionsToCreateNextGroup').click(function() {
             jCreateContainer.toggleClass('hideAdvancedItems');
+            enableSelect2ForVisible();
             jCreateAdvancedTrs.find(':visible').yellowFade();
         });
 
@@ -1238,7 +1243,7 @@ jQuery(document).ready(function() {
     setUpListFilters();
 
     // Add filter to all long select lists
-    var setUpSelects = function() {
+    var enableSelect2ForVisible = function() {
 
         var config, setUpSelectFilters;
 
@@ -1247,10 +1252,10 @@ jQuery(document).ready(function() {
             maxOptionsForRequiredSearch: 1000 // for performance, searching 6000 amis is slow
         };
 
-        setUpSelectFilters = function() {
-            jQuery('select:not(#regionSwitcher)').each(function() {
+        convertSelects = function() {
+            jQuery('select:visible:not(#regionSwitcher)').each(function() {
             	var options = { 
-	    			width: 'resolve', 
+	    			width: (jQuery(this).outerWidth() + 10) + "px",
 	    			dropdownCss: { width: 'auto'}
             	}
             	if (config.minOptionCountForSearch) {
@@ -1262,8 +1267,12 @@ jQuery(document).ready(function() {
             	jQuery(this).select2(options);
             });
         };
-        jQuery(document).ready(setUpSelectFilters);
+        convertSelects();
     };
+    
+    var setUpSelects = function() {
+        jQuery(document).ready(enableSelect2ForVisible);
+    }
     setUpSelects();
 
     /**
