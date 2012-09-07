@@ -286,10 +286,47 @@ class SubnetsSpec extends Specification {
         ])
 
         expect:
-        subnets.groupZonesByPurpose(SubnetTarget.EC2) == [
+        subnets.groupZonesByPurpose(['us-east-1a', 'us-east-1b', 'us-east-1c'], SubnetTarget.EC2) == [
                 internal: ['us-east-1a', 'us-east-1c'],
                 external: ['us-east-1a', 'us-east-1b', 'us-east-1c'],
                 (null): ['us-east-1a', 'us-east-1b', 'us-east-1c'],
+        ]
+    }
+
+    def 'should return zones grouped by purpose filtered by specified zones'() {
+        subnets = new Subnets([
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a3', 'us-east-1a', 'internal', SubnetTarget.ELB),
+                subnet('subnet-e9b0a3a5', 'us-east-1b', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c6', 'us-east-1c', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c7', 'us-east-1c', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c8', 'us-east-1d', 'internal', SubnetTarget.ELB),
+        ])
+
+        expect:
+        subnets.groupZonesByPurpose(['us-east-1a', 'us-east-1b'], SubnetTarget.EC2) == [
+                internal: ['us-east-1a'],
+                external: ['us-east-1a', 'us-east-1b'],
+                (null): ['us-east-1a', 'us-east-1b'],
+        ]
+    }
+    def 'should return zones grouped by purpose including extra specified zones'() {
+        subnets = new Subnets([
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3a3', 'us-east-1a', 'internal', SubnetTarget.ELB),
+                subnet('subnet-e9b0a3a5', 'us-east-1b', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c6', 'us-east-1c', 'internal', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c7', 'us-east-1c', 'external', SubnetTarget.EC2),
+                subnet('subnet-e9b0a3c8', 'us-east-1d', 'internal', SubnetTarget.ELB),
+        ])
+
+        expect:
+        subnets.groupZonesByPurpose(['us-east-1a', 'us-east-1b', 'us-east-1c', 'us-east-1e'], SubnetTarget.EC2) == [
+                internal: ['us-east-1a', 'us-east-1c'],
+                external: ['us-east-1a', 'us-east-1b', 'us-east-1c'],
+                (null): ['us-east-1a', 'us-east-1b', 'us-east-1c', 'us-east-1e'],
         ]
     }
 
@@ -300,9 +337,9 @@ class SubnetsSpec extends Specification {
         ])
 
         expect:
-        subnets.groupZonesByPurpose(null) == [
+        subnets.groupZonesByPurpose(['us-east-1a', 'us-east-1b', 'us-east-1c'], null) == [
                 internal: ['us-east-1b'],
-                (null): ['us-east-1b'],
+                (null): ['us-east-1a', 'us-east-1b', 'us-east-1c'], // target doesn't apply for non-VPC
         ]
     }
 
@@ -314,9 +351,9 @@ class SubnetsSpec extends Specification {
         ])
 
         expect:
-        subnets.groupZonesByPurpose(SubnetTarget.ELB) == [
+        subnets.groupZonesByPurpose(['us-east-1a', 'us-east-1b', 'us-east-1c'], SubnetTarget.ELB) == [
                 internal: ['us-east-1b', 'us-east-1c'],
-                (null): ['us-east-1b', 'us-east-1c'],
+                (null): ['us-east-1a', 'us-east-1b', 'us-east-1c'], // target doesn't apply for non-VPC
         ]
     }
 

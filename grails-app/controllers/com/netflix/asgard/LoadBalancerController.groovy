@@ -109,7 +109,7 @@ class LoadBalancerController {
             stacks: stackService.getStacks(userContext),
             subnetPurpose: params.subnetPurpose ?: null,
             subnetPurposes: subnets.getPurposesForZones(availabilityZones*.zoneName, SubnetTarget.ELB).sort(),
-            zonesGroupedByPurpose: subnets.groupZonesByPurpose(SubnetTarget.ELB),
+            zonesGroupedByPurpose: subnets.groupZonesByPurpose(availabilityZones*.zoneName, SubnetTarget.ELB),
             selectedZones: selectedZones,
             purposeToVpcId: purposeToVpcId,
             vpcId: purposeToVpcId[params.subnetPurpose],
