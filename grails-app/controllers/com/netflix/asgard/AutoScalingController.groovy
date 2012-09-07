@@ -228,13 +228,12 @@ class AutoScalingController {
                 applications: applicationService.getRegisteredApplications(userContext),
                 group: group,
                 stacks: stackService.getStacks(userContext),
-                zoneList: recommendedZones,
                 images: awsEc2Service.getAccountImages(userContext).sort { it.imageLocation.toLowerCase() },
                 defKey: awsEc2Service.defaultKeyName,
                 keys: awsEc2Service.getKeys(userContext).sort { it.keyName.toLowerCase() },
                 subnetPurpose: params.subnetPurpose ?: null,
                 subnetPurposes: subnets.getPurposesForZones(recommendedZones*.zoneName, SubnetTarget.EC2).sort(),
-                zonesGroupedByPurpose: subnets.groupZonesByPurpose(SubnetTarget.EC2),
+                zonesGroupedByPurpose: subnets.groupZonesByPurpose(recommendedZones*.zoneName, SubnetTarget.EC2),
                 selectedZones: selectedZones,
                 purposeToVpcId: purposeToVpcId,
                 vpcId: purposeToVpcId[params.subnetPurpose],
@@ -323,13 +322,14 @@ class AutoScalingController {
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)
         String subnetPurpose = awsEc2Service.getSubnets(userContext).coerceLoneOrNoneFromIds(subnetIds)?.purpose
+        Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
         return [
                 group: group,
                 loadBalancers: awsLoadBalancerService.getLoadBalancers(userContext),
                 launchConfigurations: awsAutoScalingService.getLaunchConfigurationNamesForAutoScalingGroup(
                      userContext, name).sort { it.toLowerCase() },
                 subnetPurpose: params.subnetPurpose ?: subnetPurpose,
-                zonesGroupedByPurpose: subnets.groupZonesByPurpose(SubnetTarget.EC2),
+                zonesGroupedByPurpose: subnets.groupZonesByPurpose(availabilityZones*.zoneName, SubnetTarget.EC2),
                 selectedZones: Requests.ensureList(params.selectedZones) ?: group?.availabilityZones,
                 launchSuspended: group?.isProcessSuspended(AutoScalingProcessType.Launch),
                 terminateSuspended: group?.isProcessSuspended(AutoScalingProcessType.Terminate),

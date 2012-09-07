@@ -88,17 +88,19 @@ import com.google.common.base.Supplier
     }
 
     /**
-     * Group each zone to the subnet purposes it contains.
+     * Group zones by subnet purposes they contain.
      *
+     * @param  allAvailabilityZones complete list of zones to group
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
-     * @return zone name to subnet purposes
+     * @return zone name to subnet purposes, a null key indicates zones allowed for use outside of VPC
      */
-    Map<String, Collection<String>> groupZonesByPurpose(SubnetTarget target = null) {
+    Map<String, Collection<String>> groupZonesByPurpose(Collection<String> allAvailabilityZones,
+            SubnetTarget target = null) {
         Multimap<String, String> zonesGroupedByPurpose = Multimaps.newSetMultimap([:], { [] as SortedSet } as Supplier)
+        zonesGroupedByPurpose.putAll(null, allAvailabilityZones)
         allSubnets.each {
-            if (!it.target || it.target == target) {
+            if (it.availabilityZone in allAvailabilityZones && (!it.target || it.target == target)) {
                 zonesGroupedByPurpose.put(it.purpose, it.availabilityZone)
-                zonesGroupedByPurpose.put(null, it.availabilityZone)
             }
         }
         zonesGroupedByPurpose.keySet().inject([:]) { Map zoneListsByPurpose, String purpose ->

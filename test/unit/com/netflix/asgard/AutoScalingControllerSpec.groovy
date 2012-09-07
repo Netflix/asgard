@@ -203,7 +203,7 @@ class AutoScalingControllerSpec extends ControllerSpec {
         ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot',
                 'videometadata'] == attrs['applications']*.name
         ['', 'example'] == attrs['stacks']*.name
-        ['us-east-1a', 'us-east-1c', 'us-east-1d'] == attrs['zoneList']*.zoneName
+        ['us-east-1a', 'us-east-1c', 'us-east-1d'] == attrs['zonesGroupedByPurpose'][null]
         ['helloworld--frontend', 'ntsuiboot--frontend'] == attrs.loadBalancersGroupedByVpcId[null]*.loadBalancerName
         'ami-83bd7fea' in attrs['images']*.imageId
         'nf-test-keypair-a' == attrs['defKey']
