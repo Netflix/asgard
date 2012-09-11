@@ -157,7 +157,7 @@ class SecurityController {
             }
         } else {
             flash.message = "Security Group '${name}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
         }
     }
 
@@ -183,10 +183,10 @@ class SecurityController {
                 msg = "Security Group '${name}' does not exist."
             }
             flash.message = msg
-            redirect(action: result)
+            redirect(action: 'result')
         } catch (Exception e) {
             flash.message = "Could not delete Security Group: ${e}"
-            redirect(action: show, params: [id: name])
+            redirect(action: 'show', params: [id: name])
         }
     }
 

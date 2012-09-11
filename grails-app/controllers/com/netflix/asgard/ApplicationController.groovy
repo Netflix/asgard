@@ -157,9 +157,7 @@ class ApplicationController {
 
     def save = { ApplicationCreateCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action:create, model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
-            chain(action: 'create', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
-            chain(action: create, model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model:[cmd:cmd], params: params) // Use chain to pass both the errors and the params
         } else {
             String name = params.name
             UserContext userContext = UserContext.of(request)
@@ -205,8 +203,6 @@ class ApplicationController {
         } catch (Exception e) {
             flash.message = "Could not update Application: ${e}"
         }
-        redirect(action:show, params:[name:name])
-        redirect(action: 'show', params:[name:name])
         redirect(action: 'show', params: [name: name])
     }
 
