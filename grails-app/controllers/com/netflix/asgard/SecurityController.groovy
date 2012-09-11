@@ -137,23 +137,27 @@ class SecurityController {
     }
 
     def update = {
-        String name = params.name
-        String id = params.id
+        String name = params.name ?: params.id
+        List<String> selectedGroups = Requests.ensureList(params.selectedGroups)
         UserContext userContext = UserContext.of(request)
-        if (awsEc2Service.isSecurityGroupEditable(name)) {
-            List<String> selectedGroups = Requests.ensureList(params.selectedGroups)
-            SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, id)
-            try {
-                updateSecurityIngress(userContext, group, selectedGroups, params)
-                flash.message = "Security Group '${name}' has been updated."
-                redirect(action: 'show', params: [id: id])
-            } catch (Exception e) {
-                flash.message = "Could not update Security Group: ${e}"
-                redirect(action: 'edit', params: [id: id])
+        SecurityGroup securityGroup = awsEc2Service.getSecurityGroup(userContext, name)
+        if (securityGroup) {
+            if (awsEc2Service.isSecurityGroupEditable(securityGroup.groupName)) {
+                try {
+                    updateSecurityIngress(userContext, securityGroup, selectedGroups, params)
+                    flash.message = "Security Group '${securityGroup.groupName}' has been updated."
+                    redirect(action: 'show', params: [id: securityGroup.groupId])
+                } catch (Exception e) {
+                    flash.message = "Could not update Security Group: ${e}"
+                    redirect(action: 'edit', params: [id: securityGroup.groupId])
+                }
+            } else {
+                flash.message = "Security group '${securityGroup.groupName}' should not be modified with this tool."
+                redirect(action: 'list')
             }
         } else {
-            flash.message = "Security group '${name}' should not be modified with this tool."
-            redirect(action: 'list')
+            flash.message = "Security Group '${name}' does not exist."
+            redirect(action: result)
         }
     }
 
@@ -168,13 +172,13 @@ class SecurityController {
 
     def delete = {
         UserContext userContext = UserContext.of(request)
-        String name = params.name
-        String id = params.id
+        String name = params.name ?: params.id
         String msg
         try {
-            if (awsEc2Service.getSecurityGroup(userContext, id)) {
-                awsEc2Service.removeSecurityGroup(userContext, name, id)
-                msg = "Security Group '${name}' has been deleted."
+            SecurityGroup securityGroup = awsEc2Service.getSecurityGroup(userContext, name)
+            if (securityGroup) {
+                awsEc2Service.removeSecurityGroup(userContext, name, securityGroup.groupId)
+                msg = "Security Group '${securityGroup.groupName}' has been deleted."
             } else {
                 msg = "Security Group '${name}' does not exist."
             }
@@ -182,7 +186,7 @@ class SecurityController {
             redirect(action: result)
         } catch (Exception e) {
             flash.message = "Could not delete Security Group: ${e}"
-            redirect(action: show, params: [id: id])
+            redirect(action: show, params: [id: name])
         }
     }
 

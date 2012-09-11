@@ -21,10 +21,13 @@
     <label for="selectedLoadBalancers">Load Balancers<br/>(cannot be added<br/>or removed later):</label>
   </td>
   <td>
-    <select multiple="true" id="selectedLoadBalancers" name="selectedLoadBalancers" size="10">
-      <g:each var="elb" in="${loadBalancers}">
-        <option value="${elb.loadBalancerName}" ${Requests.ensureList(selectedLoadBalancers ?: params.selectedLoadBalancers).contains(elb.loadBalancerName) ? 'selected' : ''}>${elb.loadBalancerName}</option>
-      </g:each>
-    </select>
+    <g:each var="vpcIdForLoadBalancer" in="${loadBalancersGroupedByVpcId?.keySet()}">
+      <div class="loadBalancersSelect vpcId${vpcIdForLoadBalancer ?: ''} ${vpcId == vpcIdForLoadBalancer ? '' : 'concealed'}">
+        <g:select name="selectedLoadBalancers" multiple="multiple" size="5"
+                  disabled="${vpcId == vpcIdForLoadBalancer ? '' : 'true'}"
+                  optionKey="loadBalancerName" optionValue="loadBalancerName" data-placeholder="Select load balancers"
+                  from="${loadBalancersGroupedByVpcId[vpcIdForLoadBalancer]}" value="${selectedLoadBalancers}" />
+      </div>
+    </g:each>
   </td>
 </tr>

@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
+import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.Image
@@ -80,6 +81,8 @@ import java.lang.reflect.Modifier
     static final EntityType<SimpleQueue> queue = create('Queue', { it.name })
     static final EntityType<ReservedInstances> reservation = create('Reservation', { it.reservedInstancesId })
     static final EntityType<ScalingPolicy> scalingPolicy = create('Scaling Policy', { it.policyName })
+    static final EntityType<ScheduledUpdateGroupAction> scheduledAction = create('ScheduledAction',
+            { it.scheduledActionName })
     static final EntityType<SecurityGroup> security = create('Security Group', { it.groupName })
     static final EntityType<Snapshot> snapshot = create('Storage Snapshot', { it.snapshotId }, 'snap-')
     static final EntityType<SourceSecurityGroup> sourceSecurityGroup = create('Source Security Group', { it.groupName })

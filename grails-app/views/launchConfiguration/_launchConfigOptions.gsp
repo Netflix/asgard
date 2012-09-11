@@ -68,18 +68,7 @@
       </select>
     </td>
   </tr>
-  <tr class="prop advanced">
-    <td class="name">
-      <label for="selectedSecurityGroups">Security Groups:</label>
-    </td>
-    <td>
-      <select multiple="true" size="5" id="selectedSecurityGroups" name="selectedSecurityGroups" data-placeholder="Select security groups">
-        <g:each var="g" in="${securityGroups}">
-          <option value="${g.groupName}" ${Requests.ensureList(params.selectedSecurityGroups).contains(g.groupName) || selectedSecurityGroups?.contains(g.groupName) ? "selected" : ""}>${g.groupName}</option>
-        </g:each>
-      </select>
-    </td>
-  </tr>
+  <g:render template="/common/securityGroupSelection" />
   <tr class="prop advanced">
     <td class="name">
       <label for="kernelId">Kernel ID:</label>
@@ -94,6 +83,14 @@
     </td>
     <td>
       <input type="text" id="ramdiskId" name="ramdiskId" value="${params.ramdiskId}"/>
+    </td>
+  </tr>
+  <tr class="prop advanced">
+    <td class="name">
+      <label for="iamInstanceProfile">IAM Instance Profile:</label>
+    </td>
+    <td>
+      <input type="text" id="iamInstanceProfile" name="iamInstanceProfile" value="${params.iamInstanceProfile ?: iamInstanceProfile}"/>
     </td>
   </tr>
 </tbody>

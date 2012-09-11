@@ -17,10 +17,15 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
+import com.amazonaws.services.ec2.model.AvailabilityZone
+import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.GroupedInstance
 import com.netflix.asgard.model.ScalingPolicyData
+import com.netflix.asgard.model.SubnetTarget
+import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.push.CommonPushOptions
 import com.netflix.asgard.push.GroupActivateOperation
@@ -41,12 +46,14 @@ class ClusterController {
 
     def grailsApplication
     def awsAutoScalingService
+    def awsEc2Service
+    def awsLoadBalancerService
     def configService
     def mergedInstanceService
     def pushService
     def taskService
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -109,17 +116,36 @@ class ClusterController {
 
                     boolean showAllImages = params.allImages ? true : false
                     Map attributes = pushService.prepareEdit(userContext, lastGroup.autoScalingGroupName, showAllImages,
-                            actionName)
+                            actionName, Requests.ensureList(params.selectedSecurityGroups))
+                    Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
+                    Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(availabilityZones,
+                            Requests.ensureList(params.selectedZones), lastGroup)
+                    Subnets subnets = awsEc2Service.getSubnets(userContext)
+                    List<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext).
+                            sort { it.loadBalancerName.toLowerCase() }
+                    List<String> selectedLoadBalancers = Requests.ensureList(params.selectedLoadBalancers) ?: lastGroup
+                            .loadBalancerNames
+                    List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(lastGroup.vpcZoneIdentifier)
+                    String subnetPurpose = subnets.coerceLoneOrNoneFromIds(subnetIds)?.purpose
+                    Set<String> subnetPurposes = subnets.getPurposesForZones(availabilityZones*.zoneName,
+                            SubnetTarget.EC2).sort()
                     attributes.putAll([
-                            'cluster': cluster,
-                            'runningTasks': runningTasks,
-                            'group': lastGroup,
-                            'nextGroupName': nextGroupName,
-                            'okayToCreateGroup': okayToCreateGroup,
-                            'recommendedNextStep': recommendedNextStep,
-                            buildServer: grailsApplication.config.cloud.buildServer
+                            cluster: cluster,
+                            runningTasks: runningTasks,
+                            group: lastGroup,
+                            nextGroupName: nextGroupName,
+                            okayToCreateGroup: okayToCreateGroup,
+                            recommendedNextStep: recommendedNextStep,
+                            buildServer: grailsApplication.config.cloud.buildServer,
+                            vpcZoneIdentifier: lastGroup.vpcZoneIdentifier,
+                            zonesGroupedByPurpose: subnets.groupZonesByPurpose(availabilityZones*.zoneName, SubnetTarget.EC2),
+                            selectedZones: selectedZones,
+                            subnetPurposes: subnetPurposes,
+                            subnetPurpose: subnetPurpose ?: null,
+                            loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
+                            selectedLoadBalancers: selectedLoadBalancers,
                     ])
-                    return attributes
+                    attributes
                 }
                 xml { new XML(cluster).render(response) }
                 json { new JSON(cluster).render(response) }
@@ -162,7 +188,7 @@ class ClusterController {
             String appName = Relationships.appNameFromGroupName(name)
             List<String> lastSecurityGroups = lastLaunchConfig.securityGroups
             List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups ?: lastSecurityGroups)
-            List<String> selectedZones = Requests.ensureList(params.selectedZones ?: lastGroup.availabilityZones)
+            List<String> selectedZones = Requests.ensureList(params.selectedZones)
             List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
             String azRebalance = params.azRebalance
             boolean lastRebalanceSuspended = lastGroup.isProcessSuspended(AutoScalingProcessType.AZRebalance)
@@ -189,7 +215,25 @@ class ClusterController {
                 policy.copyForAsg(nextGroupName)
             }
 
+            List<ScheduledUpdateGroupAction> lastScheduledActions = awsAutoScalingService.getScheduledActionsForGroup(
+                    userContext, lastGroup.autoScalingGroupName)
+            List<String> ignoredScheduledActionProperties = ['startTime', 'time', 'autoScalingGroupName',
+                    'scheduledActionName', 'scheduledActionARN']
+            List<ScheduledUpdateGroupAction> newScheduledActions = lastScheduledActions.collect {
+                ScheduledUpdateGroupAction newScheduledAction = BeanState.ofSourceBean(it).
+                        ignoreProperties(ignoredScheduledActionProperties).injectState(new ScheduledUpdateGroupAction())
+                String id = awsAutoScalingService.nextPolicyId(userContext)
+                newScheduledAction.with {
+                    autoScalingGroupName = nextGroupName
+                    scheduledActionName = Relationships.buildScalingPolicyName(nextGroupName, id)
+                }
+                newScheduledAction
+            }
+
             Integer lastGracePeriod = lastGroup.healthCheckGracePeriod
+            Subnets subnets = awsEc2Service.getSubnets(userContext)
+            String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForZones(lastGroup.vpcZoneIdentifier,
+                    selectedZones)
             GroupCreateOptions options = new GroupCreateOptions(
                     common: new CommonPushOptions(
                             userContext: userContext,
@@ -212,10 +256,13 @@ class ClusterController {
                     healthCheckGracePeriod: params.healthCheckGracePeriod as Integer ?: lastGracePeriod,
                     batchSize: params.batchSize as Integer ?: GroupResizeOperation.DEFAULT_BATCH_SIZE,
                     loadBalancerNames: loadBalancerNames ?: lastGroup.loadBalancerNames,
+                    iamInstanceProfile: params.iamInstanceProfile ?: null,
                     keyName: params.keyName ?: lastLaunchConfig.keyName,
-                    availabilityZones: selectedZones,
+                    availabilityZones: selectedZones ?: lastGroup.availabilityZones,
                     zoneRebalancingSuspended: azRebalanceSuspended,
-                    scalingPolicies: newScalingPolicies
+                    scalingPolicies: newScalingPolicies,
+                    scheduledActions: newScheduledActions,
+                    vpcZoneIdentifier: vpcZoneIdentifier,
             )
 
             def operation = pushService.startGroupCreate(options)

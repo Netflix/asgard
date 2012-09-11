@@ -62,6 +62,7 @@ class AutoScalingGroupData {
     final Date expirationTime
     final String expirationDurationString
     final Collection<ScalingPolicyData> scalingPolicies
+    final String vpcZoneIdentifier
 
     static AutoScalingGroupData from(AutoScalingGroup awsAutoScalingGroup,
                                      Map<String, Collection<LoadBalancerDescription>> instanceIdsToLoadBalancerLists,
@@ -86,8 +87,14 @@ class AutoScalingGroupData {
                 instanceIdsToLoadBalancerLists,
                 mergedInstances,
                 imageIdsToImages,
-                scalingPolicies
+                scalingPolicies,
+                ensureValidVpcZoneIdentifier(awsAutoScalingGroup.VPCZoneIdentifier)
         )
+    }
+
+    /** The VPC Zone ID from AWS will be an empty String for non-VPC ASGs. Sending it back to AWS results in an error.*/
+    private static ensureValidVpcZoneIdentifier(String vpcZoneIdentifier) {
+        vpcZoneIdentifier ?: null
     }
 
     static AutoScalingGroupData forUpdate(String name, String launchConfigurationName,
@@ -121,7 +128,7 @@ class AutoScalingGroupData {
             String launchConfigurationName, List<String> loadBalancerNames,
             Map<String, Collection<LoadBalancerDescription>> instanceIdsToLoadBalancerLists,
             List<MergedInstance> mergedInstances, Map<String, Image> imageIdsToImages,
-            Collection<ScalingPolicyData> scalingPolicies) {
+            Collection<ScalingPolicyData> scalingPolicies, String vpcZoneIdentifier = null) {
 
         this.autoScalingGroupName = autoScalingGroupName
         this.createdTime = createdTime ? new Date(createdTime.time) : null
@@ -156,6 +163,7 @@ class AutoScalingGroupData {
         this.loadBalancerNames = Collections.unmodifiableList(new ArrayList<String>(loadBalancerNames))
         this.statesToInstanceList = calculateStatesToInstanceList()
         this.scalingPolicies = ImmutableSet.copyOf(scalingPolicies)
+        this.vpcZoneIdentifier = vpcZoneIdentifier
     }
 
     boolean isProcessSuspended(AutoScalingProcessType autoScalingProcessType) {

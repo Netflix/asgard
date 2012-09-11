@@ -51,7 +51,7 @@ class LaunchTemplateServiceSpec extends Specification {
 
     def 'should include default VPC security group IDs'() {
         when:
-        Set<String> securityGroups = launchTemplateService.includeDefaultVpcSecurityGroups([], Region.US_EAST_1)
+        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups([], 'vpc-1', Region.US_EAST_1)
 
         then:
         securityGroups == ['sg-101', 'sg-102'] as Set
@@ -63,7 +63,7 @@ class LaunchTemplateServiceSpec extends Specification {
     def 'should not include duplicate VPC security group IDs'() {
         when:
         Set<String> securityGroups = launchTemplateService.
-                includeDefaultVpcSecurityGroups(['sg1', 'sg-102'], Region.US_EAST_1)
+                includeDefaultSecurityGroups(['sg1', 'sg-102'], 'vpc-1', Region.US_EAST_1)
 
         then:
         securityGroups == ['sg1', 'sg-101', 'sg-102'] as Set
@@ -74,12 +74,35 @@ class LaunchTemplateServiceSpec extends Specification {
 
     def 'should not include default VPC security group IDs not in cache'() {
         when:
-        Set<String> securityGroups = launchTemplateService.includeDefaultVpcSecurityGroups(['sg1'], Region.US_EAST_1)
+        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(['sg1'], 'vpc-1',
+                Region.US_EAST_1)
 
         then:
         securityGroups == ['sg1', 'sg-101'] as Set
         1 * mockConfigService.defaultVpcSecurityGroupNames >> ['dsg1', 'dsg2']
         1 * mockSecurityGroupCache.get('dsg1') >> new SecurityGroup(groupId: 'sg-101')
         1 * mockSecurityGroupCache.get('dsg2') >> null
+    }
+
+    def 'should consistently use id rather than name when ids are specified'() {
+        mockConfigService.defaultSecurityGroups >> ['dsg1']
+        mockSecurityGroupCache.get('dsg1') >> new SecurityGroup(groupId: 'sg-101')
+
+        when:
+        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(['sg-100'])
+
+        then:
+        securityGroups == ['sg-100', 'sg-101'] as Set
+    }
+
+    def 'should consistently use name rather than id when names are specified'() {
+        mockConfigService.defaultSecurityGroups >> ['dsg1']
+        mockSecurityGroupCache.get('dsg1') >> new SecurityGroup(groupId: 'sg-101')
+
+        when:
+        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(['sg1'])
+
+        then:
+        securityGroups == ['sg1', 'dsg1'] as Set
     }
 }

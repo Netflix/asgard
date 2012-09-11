@@ -105,6 +105,7 @@
          <li class="menuButton"><g:link class="autoScaling" controller="autoScaling" action="list">Auto Scaling Groups</g:link></li>
          <li class="menuButton"><g:link class="launchConfigs" controller="launchConfiguration" action="list">Launch Configurations</g:link></li>
          <li class="menuButton"><g:link class="scalingPolicy" controller="scalingPolicy" action="list">Scaling Policies</g:link></li>
+         <li class="menuButton"><g:link class="scheduledAction" controller="scheduledAction" action="list">Scheduled Actions</g:link></li>
          <li class="menuButton"><g:link class="alarm" controller="alarm" action="list">CloudWatch Alarms</g:link></li>
        </ul>
      </li>

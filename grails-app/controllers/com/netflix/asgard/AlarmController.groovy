@@ -35,7 +35,7 @@ class AlarmController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -228,8 +228,8 @@ class AlarmValidationCommand {
     String policy
 
     static constraints = {
-        comparisonOperator(nullable:false, blank:false)
-        threshold(nullable:false)
+        comparisonOperator(nullable: false, blank: false)
+        threshold(nullable: false)
         metric(nullable: true, validator: { Object value, AlarmValidationCommand cmd ->
             (value && cmd.namespace) || cmd.existingMetric
         })

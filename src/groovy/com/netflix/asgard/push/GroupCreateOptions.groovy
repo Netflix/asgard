@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.push
 
+import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.netflix.asgard.model.ScalingPolicyData
 import groovy.transform.Immutable
 
@@ -29,14 +30,17 @@ import groovy.transform.Immutable
     Integer healthCheckGracePeriod
     List<String> loadBalancerNames
     List<String> availabilityZones
+    String vpcZoneIdentifier
     boolean zoneRebalancingSuspended
     Collection<ScalingPolicyData> scalingPolicies
+    Collection<ScheduledUpdateGroupAction> scheduledActions
 
     /** The number of instances to create at a time while inflating the auto scaling group. */
     Integer batchSize
 
     String kernelId
     String ramdiskId
+    String iamInstanceProfile
     String keyName
 
     def propertyMissing(String name) { common[name] }

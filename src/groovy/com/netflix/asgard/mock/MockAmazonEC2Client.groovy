@@ -342,7 +342,7 @@ class MockAmazonEC2Client extends AmazonEC2Client {
 
     DescribeReservedInstancesResult describeReservedInstances(DescribeReservedInstancesRequest describeReservedInstancesRequest) { null }
 
-    DescribeSubnetsResult describeSubnets(DescribeSubnetsRequest describeSubnetsRequest) { null }
+    DescribeSubnetsResult describeSubnets(DescribeSubnetsRequest describeSubnetsRequest) { new DescribeSubnetsResult() }
 
     DescribeAvailabilityZonesResult describeAvailabilityZones(
             DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest) {
@@ -519,7 +519,7 @@ class MockAmazonEC2Client extends AmazonEC2Client {
 
     void deleteSpotDatafeedSubscription(DeleteSpotDatafeedSubscriptionRequest deleteSpotDatafeedSubscriptionRequest) {}
 
-    DescribeVpcsResult describeVpcs(DescribeVpcsRequest describeVpcsRequest) { null }
+    DescribeVpcsResult describeVpcs(DescribeVpcsRequest describeVpcsRequest) { new DescribeVpcsResult() }
 
     void deactivateLicense(DeactivateLicenseRequest deactivateLicenseRequest) {}
 
@@ -612,7 +612,7 @@ class MockAmazonEC2Client extends AmazonEC2Client {
         new DescribeReservedInstancesResult()
     }
 
-    DescribeSubnetsResult describeSubnets() { null }
+    DescribeSubnetsResult describeSubnets() { new DescribeSubnetsResult() }
 
     DescribeAvailabilityZonesResult describeAvailabilityZones() { null }
 
@@ -644,7 +644,7 @@ class MockAmazonEC2Client extends AmazonEC2Client {
 
     void deleteSpotDatafeedSubscription() {}
 
-    DescribeVpcsResult describeVpcs() { null }
+    DescribeVpcsResult describeVpcs() { new DescribeVpcsResult() }
 
     DescribeAddressesResult describeAddresses() { null }
 

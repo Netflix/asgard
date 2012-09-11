@@ -30,6 +30,8 @@ class ClusterControllerTests {
         controller.mergedInstanceService = Mocks.mergedInstanceService()
         controller.pushService = Mocks.pushService()
         controller.taskService = Mocks.taskService()
+        controller.awsEc2Service = Mocks.awsEc2Service()
+        controller.awsLoadBalancerService = Mocks.awsLoadBalancerService()
     }
 
     void testShow() {

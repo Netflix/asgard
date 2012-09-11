@@ -72,11 +72,13 @@ class GroupCreateOperation extends AbstractPushOperation {
                     withAvailabilityZones(options.availabilityZones).withLoadBalancerNames(options.loadBalancerNames).
                     withMinSize(0).withDesiredCapacity(0).withMaxSize(options.maxSize).
                     withDefaultCooldown(options.defaultCooldown).withHealthCheckType(options.healthCheckType).
-                    withHealthCheckGracePeriod(options.healthCheckGracePeriod)
+                    withHealthCheckGracePeriod(options.healthCheckGracePeriod).
+                    withVPCZoneIdentifier(options.vpcZoneIdentifier)
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(options.common.imageId).
                     withKernelId(options.kernelId).withInstanceType(options.common.instanceType).
                     withKeyName(options.keyName).withRamdiskId(options.ramdiskId).
-                    withSecurityGroups(options.common.securityGroups)
+                    withSecurityGroups(options.common.securityGroups).
+                    withIamInstanceProfile(options.iamInstanceProfile)
 
             final Collection<AutoScalingProcessType> suspendedProcesses = Sets.newHashSet()
             if (options.zoneRebalancingSuspended) {
@@ -93,6 +95,7 @@ class GroupCreateOperation extends AbstractPushOperation {
             if (result.succeeded()) {
                 // Add scalingPolicies to ASG. In the future this might need to be its own operation for reuse.
                 awsAutoScalingService.createScalingPolicies(options.common.userContext, options.scalingPolicies, task)
+                awsAutoScalingService.createScheduledActions(options.common.userContext, options.scheduledActions, task)
 
                 // If the user wanted any instances then start a resize operation.
                 if (options.minSize > 0) {

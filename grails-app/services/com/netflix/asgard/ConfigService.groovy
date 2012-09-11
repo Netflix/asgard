@@ -90,6 +90,14 @@ class ConfigService {
         grailsApplication.config.cloud?.alertingServiceConfigUrl ?: null
     }
 
+    /**
+     * @return the message to show users after they create an elastic load balancer
+     */
+    String getPostElbCreationMessage() {
+        grailsApplication.config.cloud?.postElbCreateMessage ?:
+                'Contact your cloud admin to enable security group ingress permissions from elastic load balancers.'
+    }
+
     List<Region> getPlatformServiceRegions() {
         List<Region> activeRegions = Region.limitedRegions ?: Region.values()
         List<Region> platformServiceRegions = grailsApplication.config?.cloud?.platformserviceRegions ?: []
@@ -339,5 +347,11 @@ class ConfigService {
     String getCanonicalServerName() {
         Environment currentEnvironment = serverEnvironments.find { it.name == accountName }
         currentEnvironment?.canonicalDnsName ?: "asgard ${accountName}"
+    }
+    /**
+     * @return Amount of time to wait between AWS calls.
+     */
+    int getCloudThrottle() {
+        grailsApplication.config.cloud?.throttleMillis ?: 250
     }
 }

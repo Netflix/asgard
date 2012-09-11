@@ -43,7 +43,8 @@ class PushController {
 
         Map attrs = [:]
         try {
-            attrs = pushService.prepareEdit(userContext, name, showAllImages, actionName)
+            attrs = pushService.prepareEdit(userContext, name, showAllImages, actionName,
+                    Requests.ensureList(params.selectedSecurityGroups))
         } catch (NoSuchObjectException ignored) {
             Requests.renderNotFound('Auto Scaling Group', name, this)
             return
@@ -88,7 +89,8 @@ class PushController {
                 newestFirst: params.newestFirst == 'true',
                 relaunchCount: relaunchCount,
                 concurrentRelaunches: concurrentRelaunches,
-                rudeShutdown: params.containsKey('rudeShutdown')
+                rudeShutdown: params.containsKey('rudeShutdown'),
+                iamInstanceProfile: params.iamInstanceProfile
         )
 
         try {

@@ -26,9 +26,9 @@ class DbSecurityController {
     def awsRdsService
     def awsEc2Service
 
-    def static allowedMethods = [save:'POST', update:'POST', delete:'POST']
+    def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -117,7 +117,7 @@ class DbSecurityController {
         } catch (Exception e) {
             flash.message = "Could not update DB Security Group: ${e}"
         }
-        redirect(action: 'show', params:[name:name])
+        redirect(action: 'show', params: [name: name])
     }
 
     private void updateDBSecurityIngress(UserContext userContext, DBSecurityGroup targetGroup, List<String> selectedGroups, List<String> ipRanges) {

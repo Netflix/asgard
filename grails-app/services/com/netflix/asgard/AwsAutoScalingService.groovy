@@ -26,6 +26,7 @@ import com.amazonaws.services.autoscaling.model.CreateLaunchConfigurationRequest
 import com.amazonaws.services.autoscaling.model.DeleteAutoScalingGroupRequest
 import com.amazonaws.services.autoscaling.model.DeleteLaunchConfigurationRequest
 import com.amazonaws.services.autoscaling.model.DeletePolicyRequest
+import com.amazonaws.services.autoscaling.model.DeleteScheduledActionRequest
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult
 import com.amazonaws.services.autoscaling.model.DescribeLaunchConfigurationsRequest
@@ -34,12 +35,16 @@ import com.amazonaws.services.autoscaling.model.DescribePoliciesRequest
 import com.amazonaws.services.autoscaling.model.DescribePoliciesResult
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult
+import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsRequest
+import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsResult
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.PutScalingPolicyRequest
 import com.amazonaws.services.autoscaling.model.PutScalingPolicyResult
+import com.amazonaws.services.autoscaling.model.PutScheduledUpdateGroupActionRequest
 import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
+import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest
 import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGroupRequest
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
@@ -52,6 +57,7 @@ import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SimpleDbSequenceLocator
+import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.push.AsgDeletionMode
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.retriever.AwsResultsRetriever
@@ -70,6 +76,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     def awsEc2Service
     def awsLoadBalancerService
     def awsSimpleDbService
+    def configService
     Caches caches
     def discoveryService
     def emailerService
@@ -89,6 +96,16 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         }
         protected List<ScalingPolicy> accessResult(DescribePoliciesResult result) {
             result.scalingPolicies
+        }
+    }
+
+    final AwsResultsRetriever scheduledActionRetriever = new AwsResultsRetriever<ScheduledUpdateGroupAction,
+            DescribeScheduledActionsRequest, DescribeScheduledActionsResult>() {
+        protected DescribeScheduledActionsResult makeRequest(Region region, DescribeScheduledActionsRequest request) {
+            awsClient.by(region).describeScheduledActions(request)
+        }
+        protected List<ScheduledUpdateGroupAction> accessResult(DescribeScheduledActionsResult result) {
+            result.scheduledUpdateGroupActions
         }
     }
 
@@ -118,6 +135,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 { Region region -> caches.allClusters.by(region).fill() })
         caches.allLaunchConfigurations.ensureSetUp({ Region region -> retrieveLaunchConfigurations(region) })
         caches.allScalingPolicies.ensureSetUp({ Region region -> retrieveScalingPolicies(region) })
+        caches.allScheduledActions.ensureSetUp({ Region region -> retrieveScheduledActions(region) })
     }
 
     // Clusters
@@ -327,28 +345,53 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         activities
     }
 
+    /**
+     * Finds scaling policy specified by name.
+     *
+     * @param name of the scaling policy to retrieve
+     * @return scaling policy details for name, null if no name was specified
+     */
     ScalingPolicy getScalingPolicy(UserContext userContext, String policyName) {
         if (!policyName) { return null }
         Check.loneOrNone(getScalingPolicies(userContext, [policyName]), ScalingPolicy)
     }
 
+    /**
+     * Finds all scaling policies specified by name.
+     *
+     * @param names of the scaling policies to retrieve
+     * @return scaling policy details for names, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describePolicies(DescribePoliciesRequest)
+     */
     List<ScalingPolicy> getScalingPolicies(UserContext userContext, Collection<String> policyNames) {
         if (!policyNames) { return [] }
         final DescribePoliciesRequest request = new DescribePoliciesRequest(policyNames: policyNames)
         awsClient.by(userContext.region).describePolicies(request).scalingPolicies
     }
 
-    List<ScalingPolicy> retrieveScalingPolicies(Region region) {
+    private List<ScalingPolicy> retrieveScalingPolicies(Region region) {
         scalingPolicyRetriever.retrieve(region, new DescribePoliciesRequest())
     }
 
+    /**
+     * Finds all scaling policies for a region.
+     *
+     * @return scaling policy action details
+     */
     Collection<ScalingPolicy> getAllScalingPolicies(UserContext userContext) {
         caches.allScalingPolicies.by(userContext.region).list()
     }
 
+    /**
+     * Finds all scaling policies for an ASG.
+     *
+     * @param name of the ASG
+     * @return scaling policy details, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describePolicies(DescribePoliciesRequest)
+     */
     List<ScalingPolicy> getScalingPoliciesForGroup(UserContext userContext, String autoScalingGroupName) {
         if (!autoScalingGroupName) { return [] }
-        final DescribePoliciesRequest request = new DescribePoliciesRequest(autoScalingGroupName: autoScalingGroupName)
+        DescribePoliciesRequest request = new DescribePoliciesRequest(autoScalingGroupName: autoScalingGroupName)
         awsClient.by(userContext.region).describePolicies(request).scalingPolicies
     }
 
@@ -375,6 +418,13 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         scalingPolicyDatas
     }
 
+    /**
+     * Creates scaling policies based on details. Will update existing ones.
+     *
+     * @param names of the scaling policies to retrieve
+     * @return updated scaling policy names
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScalingPolicy(PutScalingPolicyRequest)
+     */
     List<String> createScalingPolicies(UserContext userContext, Collection<ScalingPolicyData> scalingPolicies,
                                Task existingTask = null) {
         List<String> scalingPolicyNames = []
@@ -387,11 +437,11 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             scalingPolicies.eachWithIndex { ScalingPolicyData scalingPolicyData, int policyIndex ->
                 PutScalingPolicyRequest request = scalingPolicyData.toPutScalingPolicyRequest(nextPolicyId(userContext))
                 scalingPolicyNames << request.policyName
-                if (policyIndex >= 1) { Time.sleepCancellably(250) } // Avoid rate limits when there are many policies
+                if (policyIndex >= 1) { Time.sleepCancellably(configService.cloudThrottle) }
                 task.log("Create Scaling Policy '${request.policyName}'")
                 final PutScalingPolicyResult result = awsClient.by(userContext.region).putScalingPolicy(request)
                 scalingPolicyData.alarms.eachWithIndex { AlarmData alarm, int alarmIndex ->
-                    if (alarmIndex >= 1) { Time.sleepCancellably(250) } // Avoid rate limits when there are many alarms
+                    if (alarmIndex >= 1) { Time.sleepCancellably(configService.cloudThrottle) }
                     awsCloudWatchService.createAlarm(userContext, alarm, result.policyARN, existingTask)
                 }
             }
@@ -399,12 +449,24 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         scalingPolicyNames
     }
 
+    /**
+     * Updates a scaling policy based on details. Will try to create one if it does not exist.
+     *
+     * @param scaling policy details to update with
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScalingPolicy(PutScalingPolicyRequest)
+     */
     void updateScalingPolicy(UserContext userContext, ScalingPolicyData policy, Task existingTask = null) {
         taskService.runTask(userContext, "Update Scaling Policy '${policy.policyName}'", { Task task ->
-                awsClient.by(userContext.region).putScalingPolicy(policy.toPutScalingPolicyRequest())
+            awsClient.by(userContext.region).putScalingPolicy(policy.toPutScalingPolicyRequest())
         }, Link.to(EntityType.scalingPolicy, policy.policyName), existingTask)
     }
 
+    /**
+     * Deletes a scaling policy.
+     *
+     * @param scalingPolicy details for scaling policy to delete
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#deletePolicy(DeletePolicyRequest)
+     */
     void deleteScalingPolicy(UserContext userContext, ScalingPolicy scalingPolicy, Task existingTask = null) {
         // TODO - this method needs to calculate only alarms that will be orphaned, and delete them in a single call
         taskService.runTask(userContext, "Delete Scaling Policy '${scalingPolicy.policyName}'", { Task task ->
@@ -416,6 +478,115 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         getScalingPolicy(userContext, scalingPolicy.policyName)
     }
 
+    /**
+     * Finds scheduled action specified by name.
+     *
+     * @param name of the scheduled action to retrieve
+     * @return scheduled action details for name, null if no name was specified
+     */
+    ScheduledUpdateGroupAction getScheduledAction(UserContext userContext, String name) {
+        if (!name) { return null }
+        Check.loneOrNone(getScheduledActions(userContext, [name]), ScheduledUpdateGroupAction)
+    }
+
+    /**
+     * Finds all scheduled actions specified by name.
+     *
+     * @param names of the scheduled actions to retrieve
+     * @return scheduled action details for names, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describeScheduledActions(DescribeScheduledActionsRequest)
+     */
+    List<ScheduledUpdateGroupAction> getScheduledActions(UserContext userContext, Collection<String> names) {
+        if (!names) { return [] }
+        DescribeScheduledActionsRequest request = new DescribeScheduledActionsRequest(scheduledActionNames: names)
+        awsClient.by(userContext.region).describeScheduledActions(request).scheduledUpdateGroupActions
+    }
+
+    /**
+     * Finds all scheduled actions for an ASG.
+     *
+     * @param name of the ASG
+     * @return scheduled action details, empty if no names were specified
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#describeScheduledActions(DescribeScheduledActionsRequest)
+     */
+    List<ScheduledUpdateGroupAction> getScheduledActionsForGroup(UserContext userContext, String autoScalingGroupName) {
+        if (!autoScalingGroupName) { return [] }
+        def request = new DescribeScheduledActionsRequest(autoScalingGroupName: autoScalingGroupName)
+        awsClient.by(userContext.region).describeScheduledActions(request)?.scheduledUpdateGroupActions
+    }
+
+    private List<ScheduledUpdateGroupAction> retrieveScheduledActions(Region region) {
+        scheduledActionRetriever.retrieve(region, new DescribeScheduledActionsRequest())
+    }
+
+    /**
+     * Finds all scheduled actions for a region.
+     *
+     * @return scheduled action details
+     */
+    Collection<ScheduledUpdateGroupAction> getAllScheduledActions(UserContext userContext) {
+        caches.allScheduledActions.by(userContext.region).list()
+    }
+
+    /**
+     * Creates scheduled actions based on details. Will update existing ones.
+     *
+     * @param names of the scheduled actions to retrieve
+     * @return updated scheduled action names
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScheduledUpdateGroupAction(PutScheduledUpdateGroupActionRequest)
+     */
+    List<String> createScheduledActions(UserContext userContext, Collection<ScheduledUpdateGroupAction> actions,
+                                       Task existingTask = null) {
+        List<String> actionNames = []
+        if (!actions) {
+            return actionNames
+        }
+        Integer count = actions.size()
+        String msg = "Create ${count} Scheduled Action${count == 1 ? '' : 's'}"
+        taskService.runTask(userContext, msg, { Task task ->
+            actions.eachWithIndex { ScheduledUpdateGroupAction action, int index ->
+                PutScheduledUpdateGroupActionRequest request = BeanState.ofSourceBean(action).
+                        ignoreProperties(['startTime', 'time']).injectState(new PutScheduledUpdateGroupActionRequest())
+                actionNames << action.scheduledActionName
+                if (index >= 1) { Time.sleepCancellably(configService.cloudThrottle) }
+                task.log("Create Scheduled Action '${action.autoScalingGroupName}'")
+                awsClient.by(userContext.region).putScheduledUpdateGroupAction(request)
+            }
+        }, null, existingTask)
+        actionNames
+    }
+
+    /**
+     * Updates a scheduled action based on details. Will try to create one if it does not exist.
+     *
+     * @param scheduled action details to update with
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#putScheduledUpdateGroupAction(PutScheduledUpdateGroupActionRequest)
+     */
+    void updateScheduledAction(UserContext userContext, ScheduledUpdateGroupAction action, Task existingTask = null) {
+        def request = new PutScheduledUpdateGroupActionRequest(scheduledActionName: action.scheduledActionName,
+                autoScalingGroupName: action.autoScalingGroupName, minSize: action.minSize, maxSize: action.maxSize,
+                desiredCapacity: action.desiredCapacity, recurrence: action.recurrence)
+        taskService.runTask(userContext, "Update Scheduled Action '${action.scheduledActionName}'", { Task task ->
+            awsClient.by(userContext.region).putScheduledUpdateGroupAction(request)
+        }, Link.to(EntityType.scheduledAction, action.scheduledActionName), existingTask)
+    }
+
+
+    /**
+     * Deletes a scheduled action.
+     *
+     * @param action details for action to delete
+     * @see com.amazonaws.services.autoscaling.AmazonAutoScaling#deleteScheduledAction(DeleteScheduledActionRequest)
+     */
+    void deleteScheduledAction(UserContext userContext, ScheduledUpdateGroupAction action, Task existingTask = null) {
+        taskService.runTask(userContext, "Delete Scheduled Action '${action.scheduledActionName}'", { Task task ->
+            def request = new DeleteScheduledActionRequest(scheduledActionName: action.scheduledActionName,
+                    autoScalingGroupName: action.autoScalingGroupName)
+            awsClient.by(userContext.region).deleteScheduledAction(request)
+        }, Link.to(EntityType.autoScaling, action.autoScalingGroupName), existingTask)
+        getScheduledAction(userContext, action.scheduledActionName)
+    }
+
     String nextPolicyId(UserContext userContext) {
         try {
             return awsSimpleDbService.incrementAndGetSequenceNumber(userContext, sequenceLocator)
@@ -425,19 +596,20 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         }
     }
 
-    private AutoScalingGroup createAutoScalingGroup(UserContext userContext, String name,
-            launchConfigurationName, minSize, desiredCapacity, maxSize, defaultCooldown, String healthCheckType,
-            Integer healthCheckGracePeriod, List<String> availabilityZones,
-            Collection<AutoScalingProcessType> suspendedProcesses,
-            List<String> loadBalancerNames, Task existingTask = null) {
+    private AutoScalingGroup createAutoScalingGroup(UserContext userContext, AutoScalingGroup groupTemplate,
+            String launchConfigName, Collection<AutoScalingProcessType> suspendedProcesses,
+            Task existingTask = null) {
+        String name = groupTemplate.autoScalingGroupName
+
         taskService.runTask(userContext, "Create Autoscaling Group '${name}'", { Task task ->
-            def request = new CreateAutoScalingGroupRequest()
-                    .withAutoScalingGroupName(name)
-                    .withLaunchConfigurationName(launchConfigurationName)
-                    .withMinSize(minSize).withDesiredCapacity(desiredCapacity).withMaxSize(maxSize)
-                    .withDefaultCooldown(defaultCooldown)
-                    .withHealthCheckType(healthCheckType).withHealthCheckGracePeriod(healthCheckGracePeriod)
-                    .withAvailabilityZones(availabilityZones).withLoadBalancerNames(loadBalancerNames)
+            CreateAutoScalingGroupRequest request = null
+            groupTemplate.with {
+                request = new CreateAutoScalingGroupRequest(autoScalingGroupName: name,
+                        launchConfigurationName: launchConfigName, minSize: minSize, desiredCapacity: desiredCapacity,
+                        maxSize: maxSize, defaultCooldown: defaultCooldown, healthCheckType: healthCheckType,
+                        healthCheckGracePeriod: healthCheckGracePeriod, availabilityZones: availabilityZones,
+                        loadBalancerNames: loadBalancerNames, VPCZoneIdentifier: VPCZoneIdentifier)
+            }
             awsClient.by(userContext.region).createAutoScalingGroup(request)
             suspendedProcesses.each {
                 suspendProcess(userContext, it, name, task)
@@ -476,6 +648,15 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
         UpdateAutoScalingGroupRequest request = BeanState.ofSourceBean(autoScalingGroupData).injectState(
                 new UpdateAutoScalingGroupRequest()).withHealthCheckType(autoScalingGroupData.healthCheckType.name())
+
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForZones(group.VPCZoneIdentifier,
+                autoScalingGroupData.availabilityZones)
+        request.withVPCZoneIdentifier(vpcZoneIdentifier)
+        if (!autoScalingGroupData.availabilityZones) {
+            // No zones were selected because there was no chance to change them. Keep the old zones.
+            request.availabilityZones = group.availabilityZones
+        }
 
         taskService.runTask(userContext, "Update Autoscaling Group '${autoScalingGroupData.autoScalingGroupName}'", { Task task ->
             processTypesToSuspend.each {
@@ -742,11 +923,10 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         String groupName = groupTemplate.autoScalingGroupName
         String launchConfigName = Relationships.buildLaunchConfigurationName(groupName)
         String msg = "Create Auto Scaling Group '${groupName}'"
-        Collection<String> securityGroups = launchTemplateService.
-                includeDefaultSecurityGroups(launchConfigTemplate.securityGroups)
 
+        Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(
+                launchConfigTemplate.securityGroups, groupTemplate.VPCZoneIdentifier, userContext.region)
         taskService.runTask(userContext, msg, { Task task ->
-
             AutoScalingGroup groupForUserData = new AutoScalingGroup().
                     withAutoScalingGroupName(groupTemplate.autoScalingGroupName).
                     withLaunchConfigurationName(launchConfigName)
@@ -758,18 +938,14 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 createLaunchConfiguration(userContext, launchConfigName, launchConfigTemplate.imageId,
                         launchConfigTemplate.keyName, securityGroups, userData,
                         launchConfigTemplate.instanceType, launchConfigTemplate.kernelId,
-                        launchConfigTemplate.ramdiskId, null, task)
+                        launchConfigTemplate.ramdiskId, launchConfigTemplate.iamInstanceProfile, null, task)
                 result.launchConfigCreated = true
             } catch (AmazonServiceException launchConfigCreateException) {
                 result.launchConfigCreateException = launchConfigCreateException
             }
 
             try {
-                createAutoScalingGroup(userContext, groupName, launchConfigName, groupTemplate.minSize,
-                        groupTemplate.desiredCapacity, groupTemplate.maxSize, groupTemplate.defaultCooldown,
-                        groupTemplate.healthCheckType, groupTemplate.healthCheckGracePeriod,
-                        groupTemplate.availabilityZones, suspendedProcesses, groupTemplate.loadBalancerNames,
-                        task)
+                createAutoScalingGroup(userContext, groupTemplate, launchConfigName, suspendedProcesses, task)
                 result.autoScalingGroupCreated = true
             } catch (AmazonServiceException autoScalingCreateException) {
                 result.autoScalingCreateException = autoScalingCreateException
@@ -788,7 +964,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     void createLaunchConfiguration(UserContext userContext, String name, String imageId, String keyName,
             Collection<String> securityGroups, String userData, String instanceType, String kernelId, String ramdiskId,
-            Collection<BlockDeviceMapping> blockDeviceMappings, Task existingTask = null) {
+            String iamInstanceProfile, Collection<BlockDeviceMapping> blockDeviceMappings, Task existingTask = null) {
         taskService.runTask(userContext, "Create Launch Configuration '${name}' with image '${imageId}'", { Task task ->
             Check.notNull(name, LaunchConfiguration, "name")
             Check.notNull(imageId, LaunchConfiguration, "imageId")
@@ -800,6 +976,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                     .withImageId(imageId).withKeyName(keyName).withSecurityGroups(securityGroups)
                     .withUserData(encodedUserData).withInstanceType(instanceType)
                     .withBlockDeviceMappings(blockDeviceMappings)
+                    .withIamInstanceProfile(iamInstanceProfile)
             // Be careful not to set empties back into these fields--null is OK
             if (kernelId != '') { request.setKernelId(kernelId) }
             if (ramdiskId != '') { request.setRamdiskId(ramdiskId) }

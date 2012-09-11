@@ -54,18 +54,14 @@
     <input type="text" class="number" id="healthCheckGracePeriod" name="healthCheckGracePeriod" value="${group?.healthCheckGracePeriod == null ? '600' : group?.healthCheckGracePeriod}"/> seconds
   </td>
 </tr>
-<tr class="prop advanced">
-  <td class="name">
-    <label for="selectedZones">Availablity Zones:</label>
-  </td>
-  <td>
-    <select multiple="true" id="selectedZones" name="selectedZones" size="5">
-      <g:each var="z" in="${zoneList}">
-        <option value="${z.zoneName}" ${z.shouldBePreselected(params.selectedZones, group) ? 'selected' : ''}>${z.zoneName}</option>
-      </g:each>
-    </select>
-  </td>
-</tr>
+<g:if test="${!subnetPurpose && vpcZoneIdentifier}">
+  <td class="name">VPC:</td>
+  <td class="warning">The subnet is misconfigured without a purpose.</td>
+</g:if>
+<g:else>
+  <g:render template="/common/vpcSelection" model="[awsAction: 'Launch', awsObject: 'instances']"/>
+  <g:render template="/common/zoneSelection" />
+</g:else>
 <tr class="prop advanced">
   <td class="name">
     AZ Rebalancing:

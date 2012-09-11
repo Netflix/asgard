@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import org.apache.ivy.plugins.resolver.FileSystemResolver
+import org.apache.ivy.plugins.resolver.URLResolver
+
 grails.project.work.dir = 'work'
 grails.project.class.dir = 'target/classes'
 grails.project.test.class.dir = 'target/test-classes'
@@ -45,6 +48,32 @@ grails.project.dependency.resolution = {
         grailsHome()
         grailsCentral()
         mavenCentral()
+
+        // Optional custom repository for dependencies.
+        Closure internalRepo = {
+            String repoUrl = 'http://artifacts/ext-releases-local'
+            String artifactPattern = '[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]'
+            String ivyPattern = '[organisation]/[module]/[revision]/[module]-[revision]-ivy.[ext]'
+            URLResolver urlLibResolver = new URLResolver()
+            urlLibResolver.with {
+                name = repoUrl
+                addArtifactPattern("${repoUrl}/${artifactPattern}")
+                addIvyPattern("${repoUrl}/${ivyPattern}")
+                m2compatible = true
+            }
+            resolver urlLibResolver
+
+            String localDir = System.getenv('IVY_LOCAL_REPO') ?: "${System.getProperty('user.home')}/ivy2-local"
+            FileSystemResolver localLibResolver = new FileSystemResolver()
+            localLibResolver.with {
+                name = localDir
+                addArtifactPattern("${localDir}/${artifactPattern}")
+                addIvyPattern("${localDir}/${ivyPattern}")
+            }
+            resolver localLibResolver
+        }
+        // Comment or uncomment the next line to toggle the use of an internal artifacts repository.
+        //internalRepo()
     }
 
     dependencies {
