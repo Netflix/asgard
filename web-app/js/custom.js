@@ -1254,16 +1254,18 @@ jQuery(document).ready(function() {
 
         convertSelects = function() {
             jQuery('select:visible:not(#regionSwitcher)').each(function() {
+                var clearable = jQuery(this).is('.clearableSelect');
             	var options = { 
-	    			width: (jQuery(this).outerWidth() + 10) + "px",
-	    			dropdownCss: { width: 'auto'}
+	    			width: (jQuery(this).outerWidth() + (clearable ? 20 : 10)) + "px",
+	    			dropdownCss: { width: 'auto'},
+                    allowClear: clearable
             	}
             	if (config.minOptionCountForSearch) {
             		options['minimumResultsForSearch'] = config.minOptionCountForSearch;
             	}
             	if (config.maxOptionsForRequiredSearch && this.options.length > config.maxOptionsForRequiredSearch) {
             		options['minimumInputLength'] = 3;
-            	} 
+            	}
             	jQuery(this).select2(options);
             });
         };
