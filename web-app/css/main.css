@@ -441,4 +441,5 @@ div.grippie { background: #EEEEEE url(../images/grippie.png) no-repeat scroll ce
 .concealed                          { display: none      }
 .customOrExistingInput div          { line-height: 22px; }
 
+.securityGroupsSelect select { 	min-width: 120px; }
 .select2-container a { font-weight: normal; }
