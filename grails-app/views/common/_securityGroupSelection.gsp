@@ -24,7 +24,7 @@
       <div class="securityGroupsSelect vpcId${vpcIdForSecurityGroup ?: ''} ${vpcId == vpcIdForSecurityGroup ? '' : 'concealed'}">
         <g:select name="selectedSecurityGroups" multiple="multiple" size="5"
                   disabled="${vpcId == vpcIdForSecurityGroup ? '' : 'true'}"
-                  optionKey="${vpcId ? 'groupId' : 'groupName'}" optionValue="groupName" data-placeholder="Select security groups"
+                  optionKey="${vpcIdForSecurityGroup ? 'groupId' : 'groupName'}" optionValue="groupName" data-placeholder="Select security groups"
                   from="${securityGroupsGroupedByVpcId[vpcIdForSecurityGroup]}" value="${selectedSecurityGroups}" />
       </div>
     </g:each>
