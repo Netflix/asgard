@@ -19,8 +19,6 @@ import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 
 class ObjectLinkTagLib extends ApplicationTagLib {
 
-    def grailsApplication
-
     def linkObject = { attrs, body ->
         String objectId = attrs.remove('name')
         if (!objectId) { return }
