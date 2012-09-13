@@ -169,6 +169,9 @@ class ApiToken implements AuthenticationToken {
 
         // Base64-encode the hmac
         String fullHash = rawHmac.encodeBase64().toString()
+        println stringToHash
+        println fullHash
+        println getTokenString()
 
         // To keep the token size small, only check the first 7 characters (a la git)
         fullHash[0..7]
