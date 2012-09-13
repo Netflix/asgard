@@ -31,7 +31,6 @@ class MonkeyPatcherTests {
 
     @Test
     void testAddClassNameToStringOutputForAmazonServiceException() {
-        Mocks.monkeyPatcherService().addClassNameToStringOutputForAmazonServiceException()
         AmazonServiceException ase = new AmazonServiceException('Bad things happened')
         ase.errorCode = 'Throttling'
         ase.requestId = '45678'
