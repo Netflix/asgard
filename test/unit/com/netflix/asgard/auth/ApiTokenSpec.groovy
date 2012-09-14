@@ -77,7 +77,7 @@ class ApiTokenSpec extends Specification {
     }
 
     def 'should validate a token that expires 800 years from now'() {
-        String semiEternalToken = 'TestScript:2833-12-20:testUser@netflix.com:aDMawMPo:testDL@netflix.com'
+        String semiEternalToken = 'TestScript:2833-12-20:testUser@netflix.com:xh20q18Y:testDL@netflix.com'
 
         when:
         ApiToken parsedToken = ApiToken.fromApiTokenString(semiEternalToken)

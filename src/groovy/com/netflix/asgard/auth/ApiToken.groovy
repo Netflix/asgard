@@ -23,6 +23,7 @@ import javax.crypto.spec.SecretKeySpec
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.AuthenticationToken
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
@@ -155,7 +156,8 @@ class ApiToken implements AuthenticationToken {
      * @return First 7 characters of base64 encoded HMAC that was computed.
      */
     private String generateHash(String encryptionKey) {
-        String stringToHash = "username:${username},purpose:${purpose},email:${email},expires:${expires.millis}"
+        long expiresUTC = expires.withZoneRetainFields(DateTimeZone.UTC).millis
+        String stringToHash = "username:${username},purpose:${purpose},email:${email},expires:${expiresUTC}"
 
         // Get an hmac_sha1 key from the raw key bytes
         SecretKeySpec signingKey = new SecretKeySpec(encryptionKey.bytes, HMAC_SHA1_ALGORITHM)
@@ -169,9 +171,6 @@ class ApiToken implements AuthenticationToken {
 
         // Base64-encode the hmac
         String fullHash = rawHmac.encodeBase64().toString()
-        println stringToHash
-        println fullHash
-        println getTokenString()
 
         // To keep the token size small, only check the first 7 characters (a la git)
         fullHash[0..7]
