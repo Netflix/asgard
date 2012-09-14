@@ -12,7 +12,7 @@ class AuthController {
 
     def index = { redirect(action: 'login', params: params) }
 
-    def beforeInterceptor() {
+    def beforeInterceptor = {
         if (!pluginService.authenticationProvider) {
             render(status: 403, text: 'Authentication is not configured.')
             return false
