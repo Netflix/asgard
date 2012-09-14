@@ -16,12 +16,13 @@ package com.netflix.asgard.model
 
 import com.amazonaws.services.ec2.model.Subnet
 import com.google.common.base.Function
+import com.google.common.base.Supplier
 import com.google.common.collect.Maps
 import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
 import com.netflix.asgard.Check
 import com.netflix.asgard.Relationships
-import com.google.common.base.Supplier
+import groovy.transform.Immutable
 
 /**
  * These are nontrivial queries we like to perform on subnets.

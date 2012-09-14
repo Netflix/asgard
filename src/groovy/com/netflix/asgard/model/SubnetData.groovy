@@ -17,6 +17,7 @@ package com.netflix.asgard.model
 import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Tag
 import grails.converters.JSON
+import groovy.transform.Immutable
 import org.codehaus.groovy.grails.web.json.JSONElement
 
 /**
@@ -29,22 +30,22 @@ import org.codehaus.groovy.grails.web.json.JSONElement
     private static final String METADATA_TAG_KEY = 'immutable_metadata'
 
     /** {@link com.amazonaws.services.ec2.model.Subnet#subnetId} */
-    String subnetId;
+    String subnetId
 
     /** {@link com.amazonaws.services.ec2.model.Subnet#state} */
-    String state;
+    String state
 
     /** {@link com.amazonaws.services.ec2.model.Subnet#vpcId} */
-    String vpcId;
+    String vpcId
 
     /** {@link com.amazonaws.services.ec2.model.Subnet#cidrBlock} */
-    String cidrBlock;
+    String cidrBlock
 
     /** {@link com.amazonaws.services.ec2.model.Subnet#availableIpAddressCount} */
-    Integer availableIpAddressCount;
+    Integer availableIpAddressCount
 
     /** {@link com.amazonaws.services.ec2.model.Subnet#availabilityZone} */
-    String availabilityZone;
+    String availabilityZone
 
     /** A label that indicates the purpose of this Subnet's configuration. */
     String purpose
