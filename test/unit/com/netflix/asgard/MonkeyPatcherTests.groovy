@@ -26,7 +26,7 @@ class MonkeyPatcherTests {
 
     @Before
     void setUp() {
-        Mocks.monkeyPatcherService().createDynamicMethods()
+        Mocks.monkeyPatcherService().afterPropertiesSet()
     }
 
     @Test
