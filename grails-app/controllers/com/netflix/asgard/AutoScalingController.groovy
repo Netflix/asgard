@@ -25,6 +25,7 @@ import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.Image
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.google.common.collect.Multiset
 import com.google.common.collect.Sets
@@ -33,14 +34,13 @@ import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.GroupedInstance
-import com.netflix.grails.contextParam.ContextParam
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import com.amazonaws.services.ec2.model.SecurityGroup
 
 @ContextParam('region')
 class AutoScalingController {
@@ -398,7 +398,7 @@ class AutoScalingController {
                 nextAction = 'edit'
             }
         }
-        redirect(action: nextAction, params: [name: name])
+        redirect(action: nextAction, params: [id: name])
     }
 
     def delete = {
@@ -423,7 +423,7 @@ class AutoScalingController {
                 showGroupNext = true
             }
         }
-        showGroupNext ? redirect(action: 'show', params: [name: name]) : redirect(action: 'list')
+        showGroupNext ? redirect(action: 'show', params: [id: name]) : redirect(action: 'list')
     }
 
     def postpone = {

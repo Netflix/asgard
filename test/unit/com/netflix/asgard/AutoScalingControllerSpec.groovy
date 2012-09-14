@@ -15,22 +15,21 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.autoscaling.model.Alarm
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.autoscaling.model.ScalingPolicy
+import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.google.common.collect.ImmutableSet
+import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
-import com.netflix.asgard.mock.Mocks
-import com.amazonaws.services.autoscaling.model.ScalingPolicy
-import com.amazonaws.services.autoscaling.model.Alarm
-import com.amazonaws.services.cloudwatch.model.MetricAlarm
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup
-import java.util.List
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
 class AutoScalingControllerSpec extends Specification {
 
     void setup() {
-        Mocks.createDynamicMethods() 
+        Mocks.createDynamicMethods()
         TestUtils.setUpMockRequest()
         controller.grailsApplication = Mocks.grailsApplication()
         controller.applicationService = Mocks.applicationService()
@@ -141,7 +140,7 @@ class AutoScalingControllerSpec extends Specification {
                 'newlaunchConfiguration', [], [:], null, null, []), ImmutableSet.of(AutoScalingProcessType.Launch),
                 ImmutableSet.of(AutoScalingProcessType.Terminate))
         0 * _._
-        '/autoScaling/show?name=hiyaworld-example-v042' == response.redirectUrl
+        '/autoScaling/show/hiyaworld-example-v042' == response.redirectUrl
         "AutoScaling Group 'hiyaworld-example-v042' has been updated." == controller.flash.message
     }
 
@@ -190,7 +189,7 @@ class AutoScalingControllerSpec extends Specification {
         controller.update()
 
         then:
-        '/autoScaling/edit?name=hiyaworld-example-v042' == response.redirectUrl
+        '/autoScaling/edit/hiyaworld-example-v042' == response.redirectUrl
         "Could not update AutoScaling Group: java.lang.IllegalStateException: Uh Oh!" == controller.flash.message
     }
 
