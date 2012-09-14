@@ -24,7 +24,7 @@ import org.joda.time.DateTime
 class RelationshipsTests extends GrailsUnitTestCase {
 
     void setUp() {
-        Mocks.monkeyPatcherService().createDynamicMethods()
+        Mocks.createDynamicMethods() 
     }
 
     private void assertPushSequenceSortResult(List<String> expectedResult, List<String> input) {

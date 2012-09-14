@@ -45,7 +45,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
     final awsAutoScalingService = Mocks.newAwsAutoScalingService()
 
     def setup() {
-        Mocks.monkeyPatcherService().createDynamicMethods()
+        Mocks.createDynamicMethods() 
     }
 
     def 'should update ASG with proper AWS requests'() {

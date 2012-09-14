@@ -30,7 +30,7 @@ import spock.lang.Specification
 class AutoScalingControllerSpec extends Specification {
 
     void setup() {
-        Mocks.monkeyPatcherService().createDynamicMethods()
+        Mocks.createDynamicMethods() 
         TestUtils.setUpMockRequest()
         controller.grailsApplication = Mocks.grailsApplication()
         controller.applicationService = Mocks.applicationService()

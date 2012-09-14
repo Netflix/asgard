@@ -23,7 +23,7 @@ class AutoScalingGroupTests extends GroovyTestCase {
 
     void testCopy() {
 
-        Mocks.monkeyPatcherService().createDynamicMethods()
+        Mocks.createDynamicMethods() 
 
         Mocks.awsAutoScalingService()
 

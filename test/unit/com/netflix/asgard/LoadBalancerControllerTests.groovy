@@ -22,7 +22,7 @@ class LoadBalancerControllerTests {
 
     @Before
     void setUp() {
-        Mocks.monkeyPatcherService().createDynamicMethods()
+        Mocks.createDynamicMethods() 
         TestUtils.setUpMockRequest()
         mockForConstraintsTests(LoadBalancerCreateCommand)
         controller.awsLoadBalancerService = Mocks.awsLoadBalancerService()

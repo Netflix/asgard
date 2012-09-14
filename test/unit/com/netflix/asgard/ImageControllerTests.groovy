@@ -24,7 +24,7 @@ class ImageControllerTests {
 
     @Before
     void setUp() {
-        Mocks.monkeyPatcherService().createDynamicMethods()
+        Mocks.createDynamicMethods() 
         TestUtils.setUpMockRequest()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
         controller.awsEc2Service = Mocks.awsEc2Service()

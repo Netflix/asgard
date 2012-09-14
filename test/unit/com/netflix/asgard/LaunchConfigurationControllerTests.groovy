@@ -22,7 +22,7 @@ class LaunchConfigurationControllerTests {
 
     @Before
     void setUp() {
-        Mocks.monkeyPatcherService().createDynamicMethods()
+        Mocks.createDynamicMethods() 
         TestUtils.setUpMockRequest()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
         controller.applicationService = Mocks.applicationService()

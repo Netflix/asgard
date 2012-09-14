@@ -33,7 +33,7 @@ import grails.test.MockUtils
 class AwsEc2ServiceTests extends GrailsUnitTestCase {
 
     void setUp() {
-        Mocks.monkeyPatcherService().createDynamicMethods()
+        Mocks.createDynamicMethods() 
     }
 
     void testGetSpotInstanceRequests() {

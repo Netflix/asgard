@@ -23,7 +23,7 @@ class ClusterControllerTests {
 
     @Before
     void setUp() {
-        Mocks.monkeyPatcherService().createDynamicMethods()
+        Mocks.createDynamicMethods() 
         TestUtils.setUpMockRequest()
         controller.grailsApplication = Mocks.grailsApplication()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()

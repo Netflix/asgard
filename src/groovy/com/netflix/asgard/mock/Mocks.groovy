@@ -651,4 +651,8 @@ class Mocks {
             sleep 10
         }
     }
+
+    static void createDynamicMethods()  {
+        monkeyPatcherService().createDynamicMethods()
+    }
 }

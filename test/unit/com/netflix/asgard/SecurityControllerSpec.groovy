@@ -31,7 +31,7 @@ class SecurityControllerSpec extends Specification {
     AmazonEC2 amazonEC2 = Mock(AmazonEC2)
 
     void setup() {
-        Mocks.monkeyPatcherService().createDynamicMethods()
+        Mocks.createDynamicMethods() 
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(SecurityCreateCommand)
         controller.awsEc2Service = Mocks.newAwsEc2Service(amazonEC2)
