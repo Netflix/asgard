@@ -23,10 +23,10 @@
       <label for="useExistingMetric">Use Existing Metric</label>
     </div>
     <div class="${ !useExistingMetric ? 'concealed' : '' }">
-      <g:select name="existingMetric" noSelection="${existingMetric ? null : ['':'Select One...']}"
+      <g:select name="existingMetric" noSelection="['':'']"
                 value="${existingMetric?.encodeAsHTML()}"
                 from="${metrics}" optionKey="${ { it.encodeAsHTML() } }" optionValue="displayText"
-                disabled="${!useExistingMetric}"/>
+                disabled="${!useExistingMetric}" data-placeholder="Select One..."/>
     </div>
     <div class="${ useExistingMetric ? 'concealed' : '' }">
       <label for="namespace">Namespace:</label>

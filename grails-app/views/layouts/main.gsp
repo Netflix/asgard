@@ -23,6 +23,7 @@
   <meta http-equiv="X-UA-Compatible" content="chrome=1">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <link rel="stylesheet" href="${resource(dir: 'css', file: 'main.css')}?v=${build}"/>
+  <link rel="stylesheet" href="${resource(dir: 'js/select2-3.2', file: 'select2.css')}?v=${build}"/>
   <!--[if IE]>
     <link rel="stylesheet" href="${resource(dir: 'css', file: 'ie.css')}?v=${build}"/>
   <![endif]-->
@@ -133,6 +134,7 @@
   </script>
   <script type="text/javascript" src="${resource(dir: 'js', file: 'jquery.js')}?v=${build}"></script>
   <script defer type="text/javascript" src="${resource(dir: 'js', file: 'custom.js')}?v=${build}"></script>
+  <script defer type="text/javascript" src="${resource(dir: 'js/select2-3.2', file: 'select2.min.js')}?v=${build}"></script>
   <g:render template="/layouts/occasion"/>
 </body>
 </html>

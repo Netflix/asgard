@@ -48,8 +48,8 @@
               </td>
               <td>
                 <g:select title="The application that will run on the load balanced instances" name="appName"
-                        noSelection="['':'-Choose application-']" value="${params.appName}" from="${applications}"
-                        optionKey="name" optionValue="name"/>
+                        noSelection="['':'']" value="${params.appName}" from="${applications}"
+                        optionKey="name" optionValue="name" data-placeholder="-Choose application-"/>
               </td>
             </tr>
             <tr class="prop">
@@ -58,9 +58,8 @@
               </td>
               <td>
                 <div>
-                  <select id="stack" name="stack" title="The name of the stack of applications being logically deployed and managed together">
-                    <option value="">-Choose stack-</option>
-                    <option disabled>----------------</option>
+                  <select id="stack" name="stack" title="The name of the stack of applications being logically deployed and managed together" data-placeholder="-Choose stack-">
+                    <option value=""></option>
                     <g:each var="st" in="${stacks}">
                       <option value="${st.name}" ${params.stack == st.name ? "selected" : ""}>${st.name ?: "(no stack)"}</option>
                     </g:each>
