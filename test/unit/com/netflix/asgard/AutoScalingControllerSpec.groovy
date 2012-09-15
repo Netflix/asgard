@@ -137,7 +137,7 @@ class AutoScalingControllerSpec extends Specification {
         1 * mockAutoScalingService.updateAutoScalingGroup(_, new AutoScalingGroupData(
                 'hiyaworld-example-v042', null, 31, 153, [],
                 "EC2", 17, [] as Set, 42, null, ['us-feast'], 256, [],
-                'newlaunchConfiguration', [], [:], null, null, []), ImmutableSet.of(AutoScalingProcessType.Launch),
+                'newlaunchConfiguration', [], [:], [], [:], []), ImmutableSet.of(AutoScalingProcessType.Launch),
                 ImmutableSet.of(AutoScalingProcessType.Terminate))
         0 * _._
         '/autoScaling/show/hiyaworld-example-v042' == response.redirectUrl
