@@ -43,8 +43,8 @@
           </td>
           <td>
             <g:select title="The application that this property is used for"
-                      name="appId" noSelection="['':'']" value="${params.appId}" from="${appNames}" 
-                      class="clearableSelect" data-placeholder="Default (all apps)"/>
+                      name="appId" noSelection="['':'Default (all apps)']" value="${params.appId}" from="${appNames}"
+                      class="allowEmptySelect" />
           </td>
         </tr>
         <tr class="prop">
@@ -53,9 +53,9 @@
           </td>
           <td>
             <g:select title="The AWS region that this property is used in, or blank for all regions"
-                      name="fastPropertyRegion" noSelection="['':'']" value="${params.fastPropertyRegion}"
-                      from="${regionOptions}" class="clearableSelect"
-                      optionKey="code" optionValue="description" data-placeholder="Default (all regions)"/>
+                      name="fastPropertyRegion" noSelection="['':'Default (all regions)']"
+                      value="${params.fastPropertyRegion}" from="${regionOptions}" class="allowEmptySelect"
+                      optionKey="code" optionValue="description"/>
           </td>
         </tr>
         <g:if test="${showPropertyServerId}">

@@ -1254,11 +1254,10 @@ jQuery(document).ready(function() {
 
         convertSelects = function() {
             jQuery('select:visible:not(#regionSwitcher)').each(function() {
-                var clearable = jQuery(this).is('.clearableSelect');
+                var selectElement = jQuery(this);
                 var options = {
-                    width: (jQuery(this).outerWidth() + (clearable ? 20 : 10)) + "px",
-                    dropdownCss: { width: 'auto'},
-                    allowClear: clearable
+                    width: (selectElement.outerWidth() + 10) + 'px',
+                    dropdownCss: { width: 'auto'}
                 };
                 if (config.minOptionCountForSearch) {
                     options['minimumResultsForSearch'] = config.minOptionCountForSearch;
@@ -1266,7 +1265,11 @@ jQuery(document).ready(function() {
                 if (config.maxOptionsForRequiredSearch && this.options.length > config.maxOptionsForRequiredSearch) {
                     options['minimumInputLength'] = 3;
                 }
-                jQuery(this).select2(options);
+                selectElement.select2(options);
+                // hack so select2 selects the first item when it's a blank value
+                if (selectElement.is('.allowEmptySelect') && selectElement.select2('val') == '') {
+                    selectElement.select2('val', '');
+                }
             });
         };
         convertSelects();

@@ -58,9 +58,12 @@
               </td>
               <td>
                 <div>
-                  <g:select title="The name of the stack of applications being logically deployed and managed together" name="stack"
-                      noSelection="['':'']" value="${params.appName}" from="${stacks}"
-                      optionKey="name" optionValue="name" class="clearableSelect" data-placeholder="-Choose stack-"/>
+                  <select id="stack" name="stack" title="The name of the stack of applications being logically deployed and managed together" data-placeholder="-Choose stack-">
+                    <option value=""></option>
+                    <g:each var="st" in="${stacks}">
+                      <option value="${st.name}" ${params.stack == st.name ? "selected" : ""}>${st.name ?: "(no stack)"}</option>
+                    </g:each>
+                  </select>
                 </div>
                 <div>
                   <g:textField name="newStack" placeholder="New Stack" value="${params.newStack}"/>
