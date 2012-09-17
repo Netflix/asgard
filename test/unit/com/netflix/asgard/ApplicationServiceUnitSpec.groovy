@@ -23,8 +23,11 @@ class ApplicationServiceUnitSpec extends Specification {
     final Collection<String> APP_NAMES = ['aws_stats', 'api', 'cryptex','helloworld','abcache']
 
     def allApplications = Mock(CachedMap)
-    def caches = Mock(Caches)
+    def caches = new Caches(new MockCachedMapBuilder([
+        (EntityType.application): allApplications,
+    ]))
     ApplicationService applicationService = new ApplicationService(caches: caches)
+
 
     def 'should return correct apps for load balancer'() {
         mockApplications()
@@ -52,7 +55,6 @@ class ApplicationServiceUnitSpec extends Specification {
     }
 
     void mockApplications() {
-        caches.allApplications >> allApplications
         allApplications.list() >> APP_NAMES.collect { new AppRegistration(name: it)}
     }
 }

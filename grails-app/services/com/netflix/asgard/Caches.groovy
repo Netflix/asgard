@@ -51,9 +51,9 @@ import com.netflix.asgard.push.Cluster
  */
 class Caches {
 
-    CachedMap<AppRegistration> allApplications
-    CachedMap<ApplicationMetrics> allApplicationMetrics
-    CachedMap<HardwareProfile> allHardwareProfiles
+    final CachedMap<AppRegistration> allApplications
+    final CachedMap<ApplicationMetrics> allApplicationMetrics
+    final CachedMap<HardwareProfile> allHardwareProfiles
 
     final MultiRegionCachedMap<MetricAlarm> allAlarms
     final MultiRegionCachedMap<ApplicationInstance> allApplicationInstances
@@ -84,9 +84,9 @@ class Caches {
     final MultiRegionCachedMap<Volume> allVolumes
     final MultiRegionCachedMap<Vpc> allVpcs
 
-    MultiRegionInstancePrices allOnDemandPrices
-    MultiRegionInstancePrices allReservedPrices
-    MultiRegionInstancePrices allSpotPrices
+    final MultiRegionInstancePrices allOnDemandPrices
+    final MultiRegionInstancePrices allReservedPrices
+    final MultiRegionInstancePrices allSpotPrices
 
     Caches(CachedMapBuilder cachedMapBuilder, ConfigService configService = null) {
 
