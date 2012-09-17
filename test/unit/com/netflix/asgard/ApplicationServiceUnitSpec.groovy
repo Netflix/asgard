@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
+import grails.test.mixin.*
 import spock.lang.Specification
 
 class ApplicationServiceUnitSpec extends Specification {
@@ -27,7 +28,6 @@ class ApplicationServiceUnitSpec extends Specification {
         (EntityType.application): allApplications,
     ]))
     ApplicationService applicationService = new ApplicationService(caches: caches)
-
 
     def 'should return correct apps for load balancer'() {
         mockApplications()
