@@ -48,8 +48,8 @@ class QueueControllerTests extends ControllerUnitTestCase {
 
         assert '0' == humanReadableAttributes['Approximate Number Of Messages']
         assert '0' == humanReadableAttributes['Approximate Number Of Messages Not Visible']
-        assert humanReadableAttributes['Created Timestamp'] in ['2009-12-08 16:18:09 PST', '2009-12-09 00:18:09 UTC']
-        assert humanReadableAttributes['Last Modified Timestamp'] in ['2011-07-25 13:16:39 PDT', '2011-07-25 20:16:39 UTC']
+        assert humanReadableAttributes['Created Timestamp'] ==~ /2009-12-0(8|9)\ \d{2}:\d{2}:\d{2}\ [A-Z]{3,4}/
+        assert humanReadableAttributes['Last Modified Timestamp'] ==~ /2011-07-2(5|6)\ \d{2}:\d{2}:\d{2}\ [A-Z]{3,4}/
         assert '8192 bytes' == humanReadableAttributes['Maximum Message Size']
         assert humanReadableAttributes['Message Retention Period'] in ['4d', '96h'] // TODO why are these format results different in Jenkins and IntelliJ?
         assert 'arn:aws:sqs:us-east-1:179000000000:goofy' == humanReadableAttributes['Queue Arn']
