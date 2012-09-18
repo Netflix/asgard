@@ -252,25 +252,16 @@ class ConfigService {
      */
     int getHttpConnPoolMaxForRoute() {
         grailsApplication.config.httpConnPool?.maxSize ?: 5
-    }                 
+    }
 
     /** HTTP proxy settings */
+    String getProxyHost() {
+        grailsApplication.config.proxy?.host ?: null
+    }
 
-	String getProxyHost() {
-		grailsApplication.config.proxy?.host ?: null
-	}     
-
-	int getProxyPort() {
-		grailsApplication.config.proxy?.port ?: -1
-	}   
-	
-	String getProxyUserName() {
-		grailsApplication.config.proxy?.userName ?: null
-	}
-	
-	String getProxyPassword() {
-		grailsApplication.config.proxy?.password ?: null
-	}
+    int getProxyPort() {
+        grailsApplication.config.proxy?.port ?: -1
+    }
 
     /**
      * @return Default Security Groups.

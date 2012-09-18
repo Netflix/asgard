@@ -51,11 +51,11 @@ class RestClientService implements InitializingBean {
     final ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager()
     final HttpClient httpClient = new DefaultHttpClient(connectionManager)
 
-    public void afterPropertiesSet() throws Exception {                           
-	    if (configService.proxyHost) {
-			final HttpHost proxy = new HttpHost(configService.proxyHost, configService.proxyPort, "http")  
-		    httpClient.params.setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy)
-	    }
+    public void afterPropertiesSet() throws Exception {
+        if (configService.proxyHost) {
+            final HttpHost proxy = new HttpHost(configService.proxyHost, configService.proxyPort, "http")
+            httpClient.params.setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy)
+        }
         // Switch to ClientPNames.CONN_MANAGER_TIMEOUT when upgrading http-client 4.2
         httpClient.params.setLongParameter(ConnManagerPNames.TIMEOUT, configService.httpConnPoolTimeout)
         connectionManager.maxTotal = configService.httpConnPoolMaxSize

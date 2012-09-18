@@ -44,8 +44,8 @@ class AwsClientService implements InitializingBean {
     static transactional = false
 
     def grailsApplication
-    def secretService                  
-	def configService
+    def secretService
+    def configService
 
     /**
      * Interface names mapped to ClientTypes wrapper objects. For each interface name, a real and fake concrete class
@@ -68,14 +68,14 @@ class AwsClientService implements InitializingBean {
                 AmazonSNS: concrete(AmazonSNSClient, MockAmazonSnsClient),
                 AmazonSQS: concrete(AmazonSQSClient, MockAmazonSqsClient)
         ]
-		clientConfiguration = new ClientConfiguration()
-		clientConfiguration.proxyHost = configService.proxyHost
-		clientConfiguration.proxyPort = configService.proxyPort
+        clientConfiguration = new ClientConfiguration()
+        clientConfiguration.proxyHost = configService.proxyHost
+        clientConfiguration.proxyPort = configService.proxyPort
     }
 
     public <T> T create(Class<T> interfaceType) {
         Class implementationType = interfaceSimpleNamesToAwsClientClasses[interfaceType.simpleName]
-		implementationType.newInstance(secretService.awsCredentials, clientConfiguration) as T
+        implementationType.newInstance(secretService.awsCredentials, clientConfiguration) as T
     }
 
     Class concrete(Class real, Class fake) {
