@@ -38,6 +38,7 @@ import com.amazonaws.services.simpledb.model.SelectResult
 import com.amazonaws.services.simpledb.model.UpdateCondition
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.joda.time.format.ISODateTimeFormat
+import com.amazonaws.ClientConfiguration
 
 class MockAmazonSimpleDBClient extends AmazonSimpleDBClient {
 
@@ -88,8 +89,8 @@ class MockAmazonSimpleDBClient extends AmazonSimpleDBClient {
         )]
     }
 
-    MockAmazonSimpleDBClient(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonSimpleDBClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockAppItems = loadMockAppItems()
         mockDomains = loadMockDomains()
     }

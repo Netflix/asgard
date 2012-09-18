@@ -65,6 +65,7 @@ import com.amazonaws.services.rds.model.RestoreDBInstanceFromDBSnapshotRequest
 import com.amazonaws.services.rds.model.RestoreDBInstanceToPointInTimeRequest
 import com.amazonaws.services.rds.model.RevokeDBSecurityGroupIngressRequest
 import com.netflix.asgard.BeanState
+import com.amazonaws.ClientConfiguration
 
 class MockAmazonRDSClient extends AmazonRDSClient {
 
@@ -84,8 +85,8 @@ class MockAmazonRDSClient extends AmazonRDSClient {
         [new DBSnapshot().withDBSnapshotIdentifier('mickeymouse')]
     }
 
-    MockAmazonRDSClient(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonRDSClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockDbInstances = loadMockDbInstances()
         mockDbSecurityGroups = loadMockDbSecurityGroups()
         mockDbSnapshots = loadMockDbSnapshots()
