@@ -673,6 +673,7 @@ jQuery(document).ready(function() {
         enableVpc.click(function() {
             isVpc = enableVpc.is(':checked');
             vpcId.prop('disabled', !isVpc);
+            vpcId.select2(isVpc ? 'enable' : 'disable')
         });
     };
     setUpEnableVpc();
@@ -728,7 +729,9 @@ jQuery(document).ready(function() {
                 selected = elements.filter(locator);
                 unselected = elements.not(locator);
                 unselected.children(':input').prop('disabled', true);
+                unselected.children('select').select2('disable');
                 selected.children(':input').prop('disabled', false);
+                selected.children('select').select2('enable');
                 unselected.addClass('concealed');
                 selected.removeClass('concealed');
             };
@@ -741,6 +744,7 @@ jQuery(document).ready(function() {
             purpose = jQuery(this).data('purpose');
             purposeLocator = '.subnetPurpose' + purpose;
             displaySelected(jQuery('.zonesSelect'), purposeLocator);
+            enableSelect2ForVisible();
         });
     };
     setUpVpcRelatedAttributes();
@@ -755,6 +759,7 @@ jQuery(document).ready(function() {
         jCreateAdvancedTrs = jCreateContainer.find('.advanced');
         jQuery('#showAdvancedOptionsToCreateNextGroup').click(function() {
             jCreateContainer.toggleClass('hideAdvancedItems');
+            enableSelect2ForVisible();
             jCreateAdvancedTrs.find(':visible').yellowFade();
         });
 
@@ -1238,153 +1243,38 @@ jQuery(document).ready(function() {
     setUpListFilters();
 
     // Add filter to all long select lists
-    var setUpSelectFilters = function() {
+    var enableSelect2ForVisible = function() {
 
-        var config, prepareOptions, doesValueMatchFilter, identifyOptions, runOptionFilter, addSelectFilter,
-                prepopulateSelectFilter, setUpSelectFilters;
+        var config, setUpSelectFilters;
 
         config = {
-            minOptionCount: 10
+            minOptionCountForSearch: 10,
+            maxOptionsForRequiredSearch: 1000 // for performance, searching 6000 amis is slow
         };
 
-        prepareOptions = function(controller) {
-            var i, option, text;
-            var options = controller.select.options;
-            for (i = 0; i < options.length; i++) {
-                option = options[i];
-                text = option.text;
-                option.filterContent = text.toLowerCase();
-                option.origIndex = i;
-            }
-            return true;
-        };
-
-        doesValueMatchFilter = function(value, filterString) {
-            var itMatches = true;
-            jQuery(filterString.split(' ')).each(function() {
-                itMatches = itMatches && value.indexOf(this) >= 0;
-            });
-            return itMatches;
-        };
-
-        identifyOptions = function(controller, filterString) {
-            var i, option;
-            var optionLists = {
-                hits: [],
-                misses: []
-            };
-            // Make one big array of all shown and hidden options
-            var allOptions = controller.hidden.concat(jQuery.array(controller.select.options));
-            if (filterString) {
-                for (i = 0; i < allOptions.length; i++) {
-                    option = allOptions[i];
-                    if (doesValueMatchFilter(option.filterContent, filterString)) { optionLists.hits.push(option); }
-                    else { optionLists.misses.push(option); }
+        convertSelects = function() {
+            jQuery('select:visible:not(#regionSwitcher)').each(function() {
+                var selectElement = jQuery(this);
+                var options = {
+                    width: (selectElement.outerWidth() + 10) + 'px',
+                    dropdownCss: { width: 'auto'}
+                };
+                if (config.minOptionCountForSearch) {
+                    options['minimumResultsForSearch'] = config.minOptionCountForSearch;
                 }
-            }
-            // No filter string? Then show all options.
-            else {
-                optionLists.hits = allOptions;
-            }
-            return optionLists;
-        };
-
-        /**
-         * Do not modify the DOM for each option. Instead, create a replacement select outside the DOM, modify the
-         * select completely, then replace the old select with the new select in the DOM.
-         *
-         * @param controller the object that holds the various elements used or controlled by the filter
-         */
-        runOptionFilter = function(controller) {
-            var jNewSelect;
-            var input = controller.filterInput;
-            var jOldSelect = jQuery(controller.select);
-            var oldValue = jOldSelect.val();
-            var filterString = input.value.toLowerCase();
-
-            // Organize all options into optionsToShow and optionsToHide
-            var optionLists = identifyOptions(controller, filterString);
-
-            // Build a replacement select.
-            jNewSelect = jOldSelect.clone().empty();
-            optionLists.hits.sort(function(a, b) {
-                return (a.origIndex < b.origIndex) ? -1 : (a.origIndex > b.origIndex) ? 1 : 0;
-            });
-            jNewSelect.append(optionLists.hits);
-            // Make the first option selected instead of the last one. Try to keep any selection that existed before.
-            jNewSelect[0].selectedIndex = 0;
-            jNewSelect.val(oldValue ? oldValue : '');
-            jOldSelect.replaceWith(jNewSelect);
-            controller.hidden = optionLists.misses;
-            controller.select = jNewSelect[0];
-
-            // This should count as a change event for other event listeners to notice.
-            jNewSelect.change();
-
-            return true;
-        };
-
-        addSelectFilter = function(select) {
-            var controller = {};
-            var timer;
-            var input = jQuery('<input type="text" placeholder="Filter"/>').keyup(
-                function() {
-                    if (timer) { clearTimeout(timer); }
-                    timer = setTimeout(function() { runOptionFilter(controller); }, 300);
-                    return true;
+                if (config.maxOptionsForRequiredSearch && this.options.length > config.maxOptionsForRequiredSearch) {
+                    options['minimumInputLength'] = 3;
                 }
-            ).keypress(
-                function(event) {
-                    var key = (event.keyCode ? event.keyCode : event.which);
-                    return key != 13; // Allow normal behavior for all keys except Enter
-                }
-            );
-            var filterContainer = jQuery('<div class="filter" title="Separate word fragments by spaces for advanced filtering"/>');
-            filterContainer.append(input);
-
-            controller.select = select;
-            controller.hidden = [];
-            controller.filterInput = input[0];
-            controller.filterContainer = filterContainer[0];
-            prepareOptions(controller);
-            filterContainer.insertAfter(select);
-
-            return controller;
-        };
-
-        prepopulateSelectFilter = function(controller) {
-            var optionLists;
-            var jSelect = jQuery(controller.select);
-            var selectedOption = jSelect.find('option:selected')[0];
-            var defaultFilter = jSelect.attr('data-defaultfilter');
-            if (defaultFilter) {
-                optionLists = identifyOptions(controller, defaultFilter);
-                if (optionLists.hits.length > 0 && doesValueMatchFilter(selectedOption.filterContent, defaultFilter)) {
-                    // Set the default value, then blur to help the placeholder shim work.
-                    var jInput = jQuery(controller.filterInput);
-                    jInput.val(defaultFilter);
-                    jInput.blur();
-                    runOptionFilter(controller);
-                }
-            }
-        };
-
-        setUpSelectFilters = function() {
-
-            var controllers = [];
-            jQuery('select').each(function() {
-                if ((!config.minOptionCount || this.options.length > config.minOptionCount)) {
-                    controllers.push(addSelectFilter(this));
+                selectElement.select2(options);
+                // hack so select2 selects the first item when it's a blank value
+                if (selectElement.is('.allowEmptySelect') && selectElement.select2('val') == '') {
+                    selectElement.select2('val', '');
                 }
             });
-
-            jQuery(controllers).each(function() { prepopulateSelectFilter(this); });
-
-           // jQuery('select[multiple]').chosen();
         };
-        jQuery(document).ready(setUpSelectFilters);
+        convertSelects();
     };
-    setUpSelectFilters();
+    enableSelect2ForVisible();
 
     /**
       SortTable
