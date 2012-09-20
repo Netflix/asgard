@@ -47,8 +47,8 @@
                 </g:if>
                 <g:else>
                   <g:select class="required" title="The application that will run on the instances that use this security group" name="appName"
-                            noSelection="['':'-Choose application-']" value="${params.appName}" from="${applications}"
-                            optionKey="name" optionValue="name"/>
+                            noSelection="['':'']" value="${params.appName}" from="${applications}"
+                            optionKey="name" optionValue="name" data-placeholder="-Choose application-"/>
                 </g:else>
               </td>
             </tr>

@@ -63,7 +63,7 @@
     </g:if>
     <ul class="groupReplacingPush">
       <g:each var="autoScalingGroup" in="${cluster}">
-        <li class="${autoScalingGroup.seemsDisabled() ? 'disabledGroup' : ''}">
+        <li class="clusterAsgForm ${autoScalingGroup.seemsDisabled() ? 'disabledGroup' : ''}">
           <g:form method="post" class="validate">
             <g:hiddenField name="name" value="${autoScalingGroup.autoScalingGroupName}"/>
             <h2><g:linkObject type="autoScaling" name="${autoScalingGroup.autoScalingGroupName}"/></h2>
@@ -153,7 +153,7 @@
         </li>
       </g:each>
       <g:if test="${okayToCreateGroup}">
-        <li class="create hideAdvancedItems">
+        <li class="clusterAsgForm create hideAdvancedItems">
           <g:form method="post" class="validate" action="createNextGroup">
             <g:hiddenField name="name" value="${cluster.name}" />
             <h2>Create Next Group:</h2>

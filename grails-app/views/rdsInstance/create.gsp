@@ -59,7 +59,7 @@
           </tr>
           <tr class="prop">
             <td class="name" title="DB Class"><label for="dBInstanceClass">DB Class:</label></td>
-            <td class="value"><g:select name="dBInstanceClass" noSelection="['':'-Choose your database class-']" value="${params.dBInstanceClass }" from="${allDBInstanceClasses}"/></td>
+            <td class="value"><g:select name="dBInstanceClass" noSelection="['':'']" value="${params.dBInstanceClass }" from="${allDBInstanceClasses}" data-placeholder="-DB class-"/></td>
           </tr>
           <tr class="prop" title="The name of the database engine to be used for this instance.">
             <td class="name"><label for="engine">DB Engine:</label></td>
@@ -71,7 +71,7 @@
           </tr>
           <tr class="prop">
             <td class="name" title="Availability Zone"><label for="availabilityZone">Availability Zone:</label></td>
-            <td class="value"><g:select name="availabilityZone" noSelection="['':'-Choose your Availability Zone-']" value="${params.availabilityZone }" from="${zoneList.zoneName}"/></td>
+            <td class="value"><g:select name="availabilityZone" noSelection="['':'']" value="${params.availabilityZone }" from="${zoneList.zoneName}" data-placeholder="-Zone-"/></td>
           </tr>
           <tr class="prop">
             <td class="name" title="Master User Name"><label for="masterUsername">Master User Name:</label></td>

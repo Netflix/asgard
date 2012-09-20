@@ -36,8 +36,8 @@
   </td>
   <td>
     <g:select name="comparisonOperator"
-              noSelection="${comparisonOperator ? null : ['':'Select One...']}" value="${comparisonOperator}"
-              from="${comparisonOperators}"/>
+              noSelection="['':'']" value="${comparisonOperator}"
+              from="${comparisonOperators}" data-placeholder="Select One..."/>
   </td>
 </tr>
 <tbody class="numbers">

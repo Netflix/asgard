@@ -48,7 +48,7 @@
           </tr>
           <tr class="prop">
             <td class="name" title="DB Class"><label for="dBInstanceClass">DB Class:</label></td>
-            <td class="value"><g:select name="dBInstanceClass" noSelection="['':'-Choose your database class-']" value="${dbInstance.dBInstanceClass }" from="${allDBInstanceClasses}"/></td>
+            <td class="value"><g:select name="dBInstanceClass" noSelection="['':'']" value="${dbInstance.dBInstanceClass }" from="${allDBInstanceClasses}" data-placeholder="-Choose your database class-"/></td>
           </tr>
           <tr class="prop">
             <td class="name" title="Master User Password"><label for="masterUserPassword">Master User Password:</label></td>

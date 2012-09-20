@@ -419,7 +419,7 @@ td.checkbox          { text-align: center; }
 .cluster h3            {                  margin-bottom: 8px; }
 .cluster ul.tasks      { padding-left: 0; margin-bottom: 10px; list-style-type: none; }
 .groupReplacingPush    { padding: 0;      margin: 0; clear: both; }
-.groupReplacingPush li { padding: 10px;   margin-right: 14px; margin-bottom: 14px; display: inline-block; float: left; max-width: 340px; border-style: solid; border-color: #CCC #999 #999 #CCC; border-width: 1px 2px 2px 1px; }
+.groupReplacingPush li.clusterAsgForm { padding: 10px;   margin-right: 14px; margin-bottom: 14px; display: inline-block; float: left; max-width: 340px; border-style: solid; border-color: #CCC #999 #999 #CCC; border-width: 1px 2px 2px 1px; }
 .cluster div.intro          { float: left; margin-right: 40px; }
 .cluster table.reservations { float: left; margin-bottom: 14px; width: auto; }
 .groupReplacingPush .batchResizeContainer { display: none; padding: 0 8px; }
@@ -449,3 +449,5 @@ div.grippie { background: #EEEEEE url(../images/grippie.png) no-repeat scroll ce
 .concealed                          { display: none      }
 .customOrExistingInput div          { line-height: 22px; }
 
+.securityGroupsSelect select { 	min-width: 120px; }
+.select2-container a { font-weight: normal; }
