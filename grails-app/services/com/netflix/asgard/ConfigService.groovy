@@ -269,6 +269,13 @@ class ConfigService {
     }
 
     /**
+     * @return subnet purposes that should have an internal scheme for ELBs.
+     */
+    List<String> getInternalSubnetPurposes() {
+        grailsApplication.config.cloud?.internalSubnetPurposes ?: ['internal']
+    }
+    
+    /**
      * @return Amount of time to wait between AWS calls.
      */
     int getCloudThrottle() {
