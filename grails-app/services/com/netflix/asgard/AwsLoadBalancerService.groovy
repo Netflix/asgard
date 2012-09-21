@@ -53,6 +53,7 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
     def awsClientService
     def awsEc2Service
     Caches caches
+    def configService
     def taskService
 
     void afterPropertiesSet() {
@@ -186,6 +187,9 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
             def request = new CreateLoadBalancerRequest(loadBalancerName: name, listeners: listeners,
                     securityGroups: securityGroups)
             if (subnetPurpose) {
+                if (subnetPurpose in configService.getInternalSubnetPurposes()) {
+                    request.scheme = 'internal'
+                }
                 // If this is a VPC ELB then we must find the proper subnets and add them.
                 Subnets subnets = awsEc2Service.getSubnets(userContext)
                 List<String> subnetIds = subnets.getSubnetIdsForZones(zoneList, subnetPurpose, SubnetTarget.ELB)
