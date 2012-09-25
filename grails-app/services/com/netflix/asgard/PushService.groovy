@@ -155,6 +155,9 @@ class PushService {
                 cluster: Relationships.clusterFromGroupName(name),
                 variables: Relationships.dissectCompoundName(name),
                 actionName: actionName,
+                allTerminationPolicies: awsAutoScalingService.terminationPolicyTypes,
+                terminationPolicy: group.terminationPolicies[0],
+
                 // launch config values: list & selection pairs
                 images: images.sort { it.imageLocation.toLowerCase() },
                 image: lc.imageId,

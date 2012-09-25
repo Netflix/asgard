@@ -120,6 +120,13 @@ class ConfigService {
         grailsApplication.config?.cloud?.customIntanceTypes ?: []
     }
 
+    /**
+     * @return the default auto scaling termination policy name to suggest when creating new auto scaling groups
+     */
+    String getDefaultTerminationPolicy() {
+        grailsApplication.config?.cloud?.defaultAutoScalingTerminationPolicy ?: 'Default'
+    }
+
     List<String> getAwsAccounts() {
         grailsApplication.config?.grails?.awsAccounts ?: []
     }
@@ -274,7 +281,7 @@ class ConfigService {
     List<String> getInternalSubnetPurposes() {
         grailsApplication.config.cloud?.internalSubnetPurposes ?: ['internal']
     }
-    
+
     /**
      * @return Amount of time to wait between AWS calls.
      */

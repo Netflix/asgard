@@ -182,7 +182,7 @@ class GroupResizeOperation extends AbstractPushOperation {
         final AutoScalingGroupData autoScalingGroupData = AutoScalingGroupData.forUpdate(
                 group.autoScalingGroupName,
                 group.launchConfigurationName, newMin, newDesiredCapacity, newMax, group.defaultCooldown,
-                group.healthCheckType, group.healthCheckGracePeriod,
+                group.healthCheckType, group.healthCheckGracePeriod, group.terminationPolicies,
                 group.availabilityZones
         )
         awsAutoScalingService.updateAutoScalingGroup(userContext, autoScalingGroupData, suspendedProcessTypes, [], task)

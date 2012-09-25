@@ -54,6 +54,18 @@
     <input type="text" class="number" id="healthCheckGracePeriod" name="healthCheckGracePeriod" value="${group?.healthCheckGracePeriod == null ? '600' : group?.healthCheckGracePeriod}"/> seconds
   </td>
 </tr>
+<tr class="prop advanced" title="The algorithm to use when selecting which instance to terminate">
+  <td class="name">
+    <label for="terminationPolicy">Termination Policy:</label>
+  </td>
+  <td>
+    <select id="terminationPolicy" name="terminationPolicy">
+      <g:each in="${allTerminationPolicies}" var="policy">
+        <option ${terminationPolicy == policy ? 'selected' : ''} value="${policy}">${policy}</option>
+      </g:each>
+    </select>
+  </td>
+</tr>
 <g:if test="${!subnetPurpose && vpcZoneIdentifier}">
   <td class="name">VPC:</td>
   <td class="warning">The subnet is misconfigured without a purpose.</td>

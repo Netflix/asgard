@@ -44,6 +44,7 @@ import com.amazonaws.services.autoscaling.model.DescribeScalingProcessTypesReque
 import com.amazonaws.services.autoscaling.model.DescribeScalingProcessTypesResult
 import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsRequest
 import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsResult
+import com.amazonaws.services.autoscaling.model.DescribeTerminationPolicyTypesResult
 import com.amazonaws.services.autoscaling.model.DisableMetricsCollectionRequest
 import com.amazonaws.services.autoscaling.model.EnableMetricsCollectionRequest
 import com.amazonaws.services.autoscaling.model.ExecutePolicyRequest
@@ -200,4 +201,8 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
     void shutdown() {}
 
     ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest request) { null }
+
+    DescribeTerminationPolicyTypesResult describeTerminationPolicyTypes() {
+        new DescribeTerminationPolicyTypesResult().withTerminationPolicyTypes(['OldestFirst', 'NewestFirst', 'Default'])
+    }
 }

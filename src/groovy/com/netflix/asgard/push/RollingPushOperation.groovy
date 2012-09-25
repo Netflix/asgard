@@ -117,7 +117,7 @@ class RollingPushOperation extends AbstractPushOperation {
         final AutoScalingGroupData autoScalingGroupData = AutoScalingGroupData.forUpdate(
                 groupName, newLaunchName,
                 group.minSize, group.desiredCapacity, group.maxSize, group.defaultCooldown,
-                group.healthCheckType, group.healthCheckGracePeriod, group.availabilityZones
+                group.healthCheckType, group.healthCheckGracePeriod, group.terminationPolicies, group.availabilityZones
         )
         awsAutoScalingService.updateAutoScalingGroup(options.common.userContext, autoScalingGroupData, [], [], task)
     }

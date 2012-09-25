@@ -89,6 +89,7 @@ import java.lang.reflect.Modifier
             { it.spotInstanceRequestId }, 'sir-')
     static final EntityType<Subnet> subnet = create('Subnet', { it.subnetId }, 'subnet-')
     static final EntityType<Task> task = create('Task', { it.id })
+    static final EntityType<String> terminationPolicyType = create('Termination Policy Type', { it })
     static final EntityType<TopicData> topic = create('Topic', { it.name })
     static final EntityType<Volume> volume = create('Volume', { it.volumeId }, 'vol-')
     static final EntityType<Vpc> vpc = create('VPC', { it.vpcId }, 'vpc-')

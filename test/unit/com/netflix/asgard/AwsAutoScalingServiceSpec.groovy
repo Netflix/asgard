@@ -28,6 +28,7 @@ import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest
 import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
+import com.amazonaws.services.cloudwatch.model.Dimension
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AlarmData
@@ -38,7 +39,6 @@ import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.AwsRequestEqualityMixin
 import com.netflix.asgard.model.ScalingPolicyData
 import spock.lang.Specification
-import com.amazonaws.services.cloudwatch.model.Dimension
 
 @SuppressWarnings(["GroovyPointlessArithmetic", "GroovyAssignabilityCheck"])
 class AwsAutoScalingServiceSpec extends Specification {
@@ -65,7 +65,7 @@ class AwsAutoScalingServiceSpec extends Specification {
         //noinspection GroovyAccessibility
         when:
         awsAutoScalingService.updateAutoScalingGroup(Mocks.userContext(),
-                new AutoScalingGroupData('hiyaworld-example-v042', null, 31, 153, [], 'EC2', 17, [],
+                new AutoScalingGroupData('hiyaworld-example-v042', null, 31, 153, [], 'EC2', 17, [], [],
                 42, null, ['us-feast'], 256, [], 'newlaunchConfiguration', [], [:], [], [:], []),
                 AutoScalingProcessType.with { [Launch, AZRebalance] },
                 AutoScalingProcessType.with { [AddToLoadBalancer] })
@@ -99,6 +99,7 @@ class AwsAutoScalingServiceSpec extends Specification {
                 .withAvailabilityZones("us-feast")
                 .withHealthCheckType('EC2')
                 .withHealthCheckGracePeriod(17)
+                .withTerminationPolicies([])
         })
         0 * mockAmazonAutoScalingClient.updateAutoScalingGroup(_)
 
