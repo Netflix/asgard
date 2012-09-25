@@ -45,7 +45,7 @@ class ConfigService {
     }
 
     String getRegionalDiscoveryServer(Region region) {
-        Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.cloud?.discoveryServers
+        Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.eureka?.regionsToServers
         regionsToDiscoveryServers ? regionsToDiscoveryServers[region] : null
     }
 
