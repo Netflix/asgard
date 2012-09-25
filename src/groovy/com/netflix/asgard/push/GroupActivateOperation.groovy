@@ -81,7 +81,7 @@ class GroupActivateOperation extends AbstractPushOperation {
                 }
 
                 if (configService.doesRegionalDiscoveryExist(userContext.region)) {
-                    task.log("Registering instance${instanceIds.size() == 1 ? '' : 's'} ${instanceIds} with Discovery")
+                    task.log("Registering instance${instanceIds.size() == 1 ? '' : 's'} ${instanceIds} with Eureka")
                     discoveryService.enableAppInstances(userContext, appName, instanceIds, task)
                     Duration waitTime = discoveryService.timeToWaitAfterDiscoveryChange
                     task.log("Waiting ${Time.format(waitTime)} for clients to use new instances")

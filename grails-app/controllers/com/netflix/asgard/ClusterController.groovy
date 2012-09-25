@@ -201,7 +201,7 @@ class ClusterController {
             boolean checkHealth = params.containsKey('checkHealth')
             boolean discoveryExists = configService.doesRegionalDiscoveryExist(userContext.region)
             if (discoveryExists && initialTraffic == InitialTraffic.PREVENTED && !checkHealth) {
-                flash.message = "Due to a Discovery limitation, you must enable traffic and/or wait for health checks"
+                flash.message = "Due to a Eureka limitation, you must enable traffic and/or wait for health checks"
                 redirect(action: show, params: [id: name])
                 return
             }

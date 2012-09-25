@@ -83,7 +83,7 @@ class GroupDeactivateOperation extends AbstractPushOperation {
 
                 if (configService.doesRegionalDiscoveryExist(userContext.region)) {
                     task.log("Taking instance${instanceIds.size() == 1 ? '' : 's'} ${instanceIds} " +
-                            "OUT_OF_SERVICE in Discovery")
+                            "OUT_OF_SERVICE in Eureka")
                     discoveryService.disableAppInstances(userContext, appName, instanceIds, task)
                     Duration waitTime = discoveryService.timeToWaitAfterDiscoveryChange
                     task.log("Waiting ${Time.format(waitTime)} for clients to stop using instances")

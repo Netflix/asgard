@@ -82,7 +82,7 @@ class DiscoveryService implements CacheInitializer {
         try {
             InetAddress address = InetAddress.getByName(discoveryHostName)
             InetAddress[] addresses = InetAddress.getAllByName(discoveryHostName)
-            msg = "Can't connect to Discovery $region at $url using ${address.hostAddress} " +
+            msg = "Can't connect to Eureka $region at $url using ${address.hostAddress} " +
                     "IP address. Found ${addresses.size()} address${addresses.size() == 1 ? '' : 'es'} for " +
                     "$discoveryHostName: "
             addresses.each { InetAddress addr ->
@@ -92,7 +92,7 @@ class DiscoveryService implements CacheInitializer {
             msg = "Unknown host ${discoveryHostName}: ${uhe}"
             log.warn(uhe)
         } catch (Exception errorLookingUpDiscovery) {
-            msg = "Error looking up Discovery: ${errorLookingUpDiscovery}"
+            msg = "Error looking up Eureka: ${errorLookingUpDiscovery}"
             log.warn(errorLookingUpDiscovery)
         }
         emailerService.sendExceptionEmail(msg, e)
@@ -206,22 +206,22 @@ class DiscoveryService implements CacheInitializer {
     /** Disables one or more application instances with a given app and host names by setting status to OUT_OF_SERVICE */
     void disableAppInstances(UserContext userContext, String appName, List<String> hostNames,
                              Task existingTask = null) {
-        taskService.runTask(userContext, "Disable '${hostNames}' in Discovery", { task ->
+        taskService.runTask(userContext, "Disable '${hostNames}' in Eureka", { task ->
             for (int i = 0 ; i < hostNames.size(); i++) {
                 if (i > 0) { Time.sleepCancellably(150) } // Avoid denial of service attack on Discovery
                 changeAppInstanceStatus(userContext, appName, hostNames[i], "OUT_OF_SERVICE")
-                task.log("Disabled '${hostNames[i]}' in Discovery")
+                task.log("Disabled '${hostNames[i]}' in Eureka")
             }
         }, null, existingTask)
     }
 
     /** Enables one or more application instances with a given app and host names by setting status to UP */
     void enableAppInstances(UserContext userContext, String appName, List<String> hostNames, Task existingTask = null) {
-        taskService.runTask(userContext, "Enable '${hostNames}' in Discovery", { task ->
+        taskService.runTask(userContext, "Enable '${hostNames}' in Eureka", { task ->
             for (int i = 0 ; i < hostNames.size(); i++) {
                 if (i > 0) { Time.sleepCancellably(150) } // Avoid denial of service attack on Discovery
                 changeAppInstanceStatus(userContext, appName, hostNames[i], "UP")
-                task.log("Enabled '${hostNames[i]}' in Discovery")
+                task.log("Enabled '${hostNames[i]}' in Eureka")
             }
         }, null, existingTask)
     }

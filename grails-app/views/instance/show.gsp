@@ -61,11 +61,11 @@
         <g:if test="${appName}">
           <input type="hidden" name="appName" value="${appName}"/>
           <div class="buttons">
-            <h3>Discovery:</h3>
+            <h3>Eureka:</h3>
             <g:buttonSubmit class="outOfService"
-                    action="takeOutOfService" value="Deactivate in Discovery" title="Prevent Discovery from listing this instance for use by other applications." />
+                    action="takeOutOfService" value="Deactivate in Eureka" title="Prevent Eureka from listing this instance for use by other applications." />
             <g:buttonSubmit class="inService"
-                    action="putInService" value="Activate in Discovery" title="Allow Discovery to list this instance for use by other applications." />
+                    action="putInService" value="Activate in Eureka" title="Allow Eureka to list this instance for use by other applications." />
           </div>
         </g:if>
       </g:form>
@@ -81,7 +81,7 @@
             </g:if>
           </td>
         </tr>
-        <tr class="prop" title="Effective public hostname from Discovery or EC2">
+        <tr class="prop" title="Effective public hostname from Eureka or EC2">
           <td class="name">DNS Name:</td>
           <td class="value">${baseServer}</td>
         </tr>
@@ -97,7 +97,7 @@
         </g:each>
         <g:if test="${discoveryExists}">
           <tr class="prop">
-            <td><h2 title="Information from Discovery">Discovery</h2></td>
+            <td><h2 title="Information from Eureka">Eureka</h2></td>
           </tr>
           <g:if test="${discInstance}">
             <tr class="prop">
@@ -139,7 +139,7 @@
             </tr>
           </g:if>
           <g:else>
-            <tr><td>Not found in Discovery</td></tr>
+            <tr><td>Not found in Eureka</td></tr>
           </g:else>
         </g:if>
         <tr class="prop">
