@@ -17,7 +17,6 @@ package com.netflix.asgard.push
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.netflix.asgard.EntityType
-import com.netflix.asgard.From
 import com.netflix.asgard.Link
 import com.netflix.asgard.Relationships
 import com.netflix.asgard.Spring
