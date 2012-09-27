@@ -283,7 +283,7 @@ ${a.cause} : ${a.description} (${a.progress}% done) (Status: ${a.statusCode})
                     </g:if>
                     <th>ELBs</th>
                     <g:if test="${discoveryExists}">
-                      <th>Discovery</th>
+                      <th>Eureka</th>
                       <th>Health</th>
                     </g:if>
                   </tr>

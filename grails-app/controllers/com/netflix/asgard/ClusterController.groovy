@@ -125,7 +125,7 @@ class ClusterController {
                             .loadBalancerNames
                     List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(lastGroup.vpcZoneIdentifier)
                     String subnetPurpose = subnets.coerceLoneOrNoneFromIds(subnetIds)?.purpose
-                    Set<String> subnetPurposes = subnets.getPurposesForZones(availabilityZones*.zoneName,
+                    List<String> subnetPurposes = subnets.getPurposesForZones(availabilityZones*.zoneName,
                             SubnetTarget.EC2).sort()
                     attributes.putAll([
                             cluster: cluster,
@@ -184,8 +184,7 @@ class ClusterController {
             String lcName = lastGroup.launchConfigurationName
             LaunchConfiguration lastLaunchConfig = awsAutoScalingService.getLaunchConfiguration(userContext, lcName)
             String appName = Relationships.appNameFromGroupName(name)
-            List<String> lastSecurityGroups = lastLaunchConfig.securityGroups
-            List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups ?: lastSecurityGroups)
+            List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups)
             List<String> selectedZones = Requests.ensureList(params.selectedZones ?: lastGroup.availabilityZones)
             List<String> termPolicies = Requests.ensureList(params.terminationPolicy ?: lastGroup.terminationPolicies)
             List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
@@ -202,7 +201,7 @@ class ClusterController {
             boolean checkHealth = params.containsKey('checkHealth')
             boolean discoveryExists = configService.doesRegionalDiscoveryExist(userContext.region)
             if (discoveryExists && initialTraffic == InitialTraffic.PREVENTED && !checkHealth) {
-                flash.message = "Due to a Discovery limitation, you must enable traffic and/or wait for health checks"
+                flash.message = "Due to a Eureka limitation, you must enable traffic and/or wait for health checks"
                 redirect(action: show, params: [id: name])
                 return
             }
@@ -231,7 +230,8 @@ class ClusterController {
 
             Integer lastGracePeriod = lastGroup.healthCheckGracePeriod
             Subnets subnets = awsEc2Service.getSubnets(userContext)
-            String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForZones(lastGroup.vpcZoneIdentifier,
+            String subnetPurpose = params.subnetPurpose
+            String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForPurposeAndZones(subnetPurpose,
                     selectedZones)
             GroupCreateOptions options = new GroupCreateOptions(
                     common: new CommonPushOptions(

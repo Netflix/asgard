@@ -45,7 +45,7 @@ class ConfigService {
     }
 
     String getRegionalDiscoveryServer(Region region) {
-        Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.cloud?.discoveryServers
+        Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.eureka?.regionsToServers
         regionsToDiscoveryServers ? regionsToDiscoveryServers[region] : null
     }
 
@@ -259,6 +259,26 @@ class ConfigService {
      */
     int getHttpConnPoolMaxForRoute() {
         grailsApplication.config.httpConnPool?.maxSize ?: 5
+    }
+
+    /**
+     * Gets the context string used in constructing Eureka URLs. The context varies depending on how Eureka is
+     * configured.
+     *
+     * @return the context string for constructing URLs to make eureka calls
+     */
+    String getEurekaUrlContext() {
+        grailsApplication.config.eureka?.urlContext ?: 'eureka'
+    }
+
+    /**
+     * Gets the port number (as a String) used in constructing Eureka URLs. The port varies depending on how Eureka
+     * or is configured.
+     *
+     * @return the port for constructing URLs to make eureka calls
+     */
+    String getEurekaPort() {
+        grailsApplication.config.eureka?.port ?: '80'
     }
 
     /**

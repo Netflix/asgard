@@ -272,7 +272,7 @@ class GroupResizeOperation extends AbstractPushOperation {
             if (hasTooMuchTimePassedSinceBatchStart()) {
                 Integer unhealthyCount = idsOfInstancesThatAreNotYetHealthy.size()
                 throw new PushException("Timeout waiting ${Time.format(calculateMaxTimePerBatch())} " +
-                        "for instances to register with Discovery and pass a health check. " +
+                        "for instances to register with Eureka and pass a health check. " +
                         "Expected ${newMin} discoverable, healthy instance${newMin == 1 ? '' : 's'}, but " +
                         "auto scaling group '${autoScalingGroupName}' still has ${unhealthyCount} " +
                         "undiscoverable or unhealthy instance${unhealthyCount == 1 ? '': 's'} " +
@@ -316,7 +316,7 @@ class GroupResizeOperation extends AbstractPushOperation {
         } as List
         if (upInstanceIds) {
             discoveryService.disableAppInstances(userContext, appName, upInstanceIds, task)
-            task.log("${upInstanceIds} deactivated in Discovery")
+            task.log("${upInstanceIds} deactivated in Eureka")
         }
     }
 

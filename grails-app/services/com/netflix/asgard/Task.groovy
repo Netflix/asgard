@@ -52,7 +52,7 @@ class Task {
     }
 
     String getSummary() {
-        "nac${env} ${userContext?.region} task started by ${userContext?.clientHostName} ${status} in ${env}: ${name}"
+        "Asgard task ${status} in ${env} ${userContext?.region} by ${userContext?.clientHostName}: ${name}"
     }
 
     String getLogAsString() {

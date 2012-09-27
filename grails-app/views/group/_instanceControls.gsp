@@ -22,7 +22,7 @@
         <span class="count">Total Instances: <span class="instanceCount">${instanceCount}</span></span>
         <g:if test="${discoveryExists}">
           <a class="monitor healthCheckRunLink${runHealthChecks ? " autoLaunch" : ""}" href="javascript:;"
-             title="Check the Discovery status and health check result of all instances.">Run All Health Checks</a>
+             title="Check the Eureka status and health check result of all instances.">Run All Health Checks</a>
         </g:if>
         <g:buttonSubmit class="stop terminateMany" title="Terminate the selected instances."
                         controller="instance" action="terminate" value="Terminate Instances"/>
@@ -36,11 +36,11 @@
       </div>
       <g:if test="${discoveryExists}">
         <div class="buttons">
-          <label>Discovery:</label>
-          <g:buttonSubmit class="outOfService" title="Prevent Discovery from listing the selected instances for use by other applications."
-                          controller="instance" action="takeOutOfService" value="Deactivate in Discovery"/>
-          <g:buttonSubmit class="inService" title="Allow Discovery to list the selected instances for use by other applications."
-                          controller="instance" action="putInService" value="Activate in Discovery"/>
+          <label>Eureka:</label>
+          <g:buttonSubmit class="outOfService" title="Prevent Eureka from listing the selected instances for use by other applications."
+                          controller="instance" action="takeOutOfService" value="Deactivate in Eureka"/>
+          <g:buttonSubmit class="inService" title="Allow Eureka to list the selected instances for use by other applications."
+                          controller="instance" action="putInService" value="Activate in Eureka"/>
         </div>
       </g:if>
     </td>

@@ -175,12 +175,23 @@ import com.google.common.base.Supplier
         }
         List<String> oldSubnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(vpcZoneIdentifier)
         String purpose = coerceLoneOrNoneFromIds(oldSubnetIds)?.purpose
+        constructNewVpcZoneIdentifierForPurposeAndZones(purpose, zones)
+    }
+
+    /**
+     * Construct a new VPC Zone Identifier based on a subnet purpose and a list of zones.
+     *
+     * @param  purpose is used to derive a subnet purpose from
+     * @param  zones which the new VPC Zone Identifier will contain
+     * @return a new VPC Zone Identifier or null if no purpose was specified
+     */
+    String constructNewVpcZoneIdentifierForPurposeAndZones(String purpose, List<String> zones) {
         if (purpose) {
             List<String> newSubnetIds = getSubnetIdsForZones(zones, purpose, SubnetTarget.EC2) // This is only for ASGs.
             if (newSubnetIds) {
                 return Relationships.vpcZoneIdentifierFromSubnetIds(newSubnetIds)
             }
         }
-        return null
+        null
     }
 }
