@@ -26,7 +26,7 @@ class MockFastProperties {
       <env>test</env>
       <appId>akms</appId>
       <updatedBy>tjones</updatedBy>
-      <sourceOfUpdate>nac</sourceOfUpdate>
+      <sourceOfUpdate>asgard</sourceOfUpdate>
       <ts>2011-10-19T17:17:44.757Z</ts>
     </property>
     <property>
@@ -39,7 +39,7 @@ class MockFastProperties {
       <updatedBy>wsmith</updatedBy>
       <stack></stack>
       <region></region>
-      <sourceOfUpdate>nac</sourceOfUpdate>
+      <sourceOfUpdate>asgard</sourceOfUpdate>
       <cmcTicket></cmcTicket>
       <ts>2011-12-22T22:39:41.012Z</ts>
     </property>

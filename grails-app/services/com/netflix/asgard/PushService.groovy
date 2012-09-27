@@ -108,7 +108,7 @@ class PushService {
             task.log "Image $imageId can now be used in $addedNames account${addedNames.size() == 1 ? '' : 's'}"
             String promotionTargetServer = grailsApplication.config.promote?.targetServer ?: null
             if (promotionTargetServer) {
-                // Update the nacprod cache
+                // Update the cache of the promotion target server (such as production)
                 Integer responseCode = restClientService.getResponseCode("${promotionTargetServer}/")
                 if (responseCode == 200) {
                     String url = "${promotionTargetServer}/${userContext.region.code}/image/show/${imageId}"
