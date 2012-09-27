@@ -116,11 +116,11 @@
       <p>AWS Region: ${region}</p>
       <p>AWS Accounts: ${grailsApplication.config.grails.awsAccountNames}</p>
       <g:if test="${discoveryUrl}">
-        <p>Discovery UI: <a href="${discoveryUrl}">${discoveryUrl}</a></p>
-        <p>Discovery XML: <a href="${discoveryApiUrl}">${discoveryApiUrl}</a></p>
+        <p>Eureka UI: <a href="${discoveryUrl}">${discoveryUrl}</a></p>
+        <p>Eureka XML: <a href="${discoveryApiUrl}">${discoveryApiUrl}</a></p>
       </g:if>
       <g:else>
-        Discovery: There is no Discovery URL for <strong>${grailsApplication.config.cloud.accountName}</strong> in <strong>${region}</strong>
+        Eureka: There is no Eureka URL for <strong>${grailsApplication.config.cloud.accountName}</strong> in <strong>${region}</strong>
       </g:else>
       <p>Hostname: ${InetAddress.localHost.hostName}, IP: ${InetAddress.localHost.hostAddress}</p>
       <p>Version: <g:meta name="app.version"/></p>
