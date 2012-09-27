@@ -49,6 +49,7 @@ class AutoScalingGroupData {
     final ImmutableList<TagDescription> tags
     final AutoScalingGroupHealthCheckType healthCheckType
     final Integer healthCheckGracePeriod
+    final List<String> terminationPolicies
     final ImmutableSet<AutoScalingProcessType> suspendedProcessTypes
     final Integer desiredCapacity
     final String status
@@ -75,6 +76,7 @@ class AutoScalingGroupData {
                 awsAutoScalingGroup.tags,
                 awsAutoScalingGroup.healthCheckType,
                 awsAutoScalingGroup.healthCheckGracePeriod,
+                awsAutoScalingGroup.terminationPolicies,
                 awsAutoScalingGroup.suspendedProcessTypes,
                 awsAutoScalingGroup.desiredCapacity,
                 awsAutoScalingGroup.status,
@@ -99,7 +101,7 @@ class AutoScalingGroupData {
     static AutoScalingGroupData forUpdate(String name, String launchConfigurationName,
                                               minSize, desiredCapacity, maxSize, defaultCooldown,
                                               String healthCheckType, Integer healthCheckGracePeriod,
-                                              Collection<String> availabilityZones) {
+                                              List<String> terminationPolicies, Collection<String> availabilityZones) {
 
         new AutoScalingGroupData(
                 name,
@@ -109,6 +111,7 @@ class AutoScalingGroupData {
                 [],
                 healthCheckType,
                 healthCheckGracePeriod,
+                terminationPolicies,
                 [],
                 desiredCapacity,
                 null,
@@ -122,9 +125,9 @@ class AutoScalingGroupData {
 
     private AutoScalingGroupData(String autoScalingGroupName, Date createdTime, Integer minSize, Integer maxSize,
             List<TagDescription> tags, String healthCheckType, Integer healthCheckGracePeriod,
-            Collection<AutoScalingProcessType> suspendedProcessTypes, Integer desiredCapacity, String status,
-            Collection<String> availabilityZones, Integer defaultCooldown, List<Instance> instances,
-            String launchConfigurationName, List<String> loadBalancerNames,
+            List<String> terminationPolicies, Collection<AutoScalingProcessType> suspendedProcessTypes,
+            Integer desiredCapacity, String status, Collection<String> availabilityZones, Integer defaultCooldown,
+            List<Instance> instances, String launchConfigurationName, List<String> loadBalancerNames,
             Map<String, Collection<LoadBalancerDescription>> instanceIdsToLoadBalancerLists,
             List<MergedInstance> mergedInstances, Map<String, Image> imageIdsToImages,
             Collection<ScalingPolicyData> scalingPolicies, String vpcZoneIdentifier = null) {
@@ -141,7 +144,7 @@ class AutoScalingGroupData {
         this.expirationDurationString = determineExpirationDurationString()
         this.healthCheckType = AutoScalingGroupHealthCheckType.by(healthCheckType)
         this.healthCheckGracePeriod = healthCheckGracePeriod
-
+        this.terminationPolicies = ImmutableList.copyOf(terminationPolicies)
         this.desiredCapacity = desiredCapacity
         this.status = status
         this.availabilityZones = Collections.unmodifiableList(new ArrayList<String>(availabilityZones).sort())
@@ -242,7 +245,7 @@ class AutoScalingGroupData {
     }
 
     Boolean seemsDisabled() {
-        getSuspendedPrimaryProcessTypes() || expirationTime
+        return (getSuspendedPrimaryProcessTypes() || expirationTime)
     }
 
     boolean isZoneRebalancingSuspended() {

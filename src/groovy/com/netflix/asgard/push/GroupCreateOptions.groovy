@@ -27,6 +27,7 @@ import com.netflix.asgard.model.ScalingPolicyData
     Integer defaultCooldown
     String healthCheckType
     Integer healthCheckGracePeriod
+    List<String> terminationPolicies
     List<String> loadBalancerNames
     List<String> availabilityZones
     String vpcZoneIdentifier

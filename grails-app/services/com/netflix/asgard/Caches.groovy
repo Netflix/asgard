@@ -54,6 +54,7 @@ class Caches {
     final CachedMap<AppRegistration> allApplications
     final CachedMap<ApplicationMetrics> allApplicationMetrics
     final CachedMap<HardwareProfile> allHardwareProfiles
+    final CachedMap<String> allTerminationPolicyTypes
 
     final MultiRegionCachedMap<MetricAlarm> allAlarms
     final MultiRegionCachedMap<ApplicationInstance> allApplicationInstances
@@ -127,5 +128,6 @@ class Caches {
         allReservedPrices = MultiRegionInstancePrices.create('Reserved Prices')
         allSpotPrices = MultiRegionInstancePrices.create('Spot Prices')
         allInstanceTypes = cachedMapBuilder.of(EntityType.instanceType).buildMultiRegionCachedMap()
+        allTerminationPolicyTypes = cachedMapBuilder.of(EntityType.terminationPolicyType, 3600).buildCachedMap()
     }
 }
