@@ -214,7 +214,7 @@ class AutoScalingControllerSpec extends ControllerSpec {
         'nf-test-keypair-a' == attrs['defKey']
         ['amzn-linux', 'hadoop', 'nf-support', 'nf-test-keypair-a'] == attrs['keys']*.keyName
         List<String> securityGroupNames = attrs.securityGroupsGroupedByVpcId[null]*.groupName
-        assert securityGroupNames.containsAll(['akms', 'helloworld', 'helloworld-frontend', 'helloworld-nactest',
+        assert securityGroupNames.containsAll(['akms', 'helloworld', 'helloworld-frontend', 'helloworld-asgardtest',
                 'helloworld-tmp', 'ntsuiboot'])
         [
                 't1.micro', 'm1.small', 'c1.medium', 'm1.large', 'm2.xlarge', 'c1.xlarge', 'm1.xlarge', 'm2.2xlarge',
