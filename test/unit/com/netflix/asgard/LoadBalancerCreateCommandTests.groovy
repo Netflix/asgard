@@ -32,7 +32,7 @@ class LoadBalancerCreateCommandTests {
         MockUtils.prepareForConstraintsTests(LoadBalancerCreateCommand)
         def appServiceMock = mockFor(ApplicationService)
         appServiceMock.demand.getRegisteredApplicationForLoadBalancer { UserContext uc, String name ->
-         name == 'abcache' ? new AppRegistration(name: name) : null
+            name == 'abcache' ? new AppRegistration(name: name) : null
         }
         appService = appServiceMock.createMock()
     }

@@ -21,7 +21,7 @@ import spock.lang.Specification
 
 class ApplicationServiceUnitSpec extends Specification {
 
-    final Collection<String> APP_NAMES = ['aws_stats', 'api', 'cryptex','helloworld','abcache']
+    final Collection<String> APP_NAMES = ['aws_stats', 'api', 'cryptex', 'helloworld', 'abcache']
 
     def allApplications = Mock(CachedMap)
     def caches = new Caches(new MockCachedMapBuilder([
