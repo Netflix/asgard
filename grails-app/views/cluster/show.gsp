@@ -110,7 +110,7 @@
                 <th>Build</th>
                 <th>ELB</th>
                 <g:if test="${discoveryExists}">
-                  <th>Disc</th>
+                  <th>Eureka</th>
                 </g:if>
               </tr>
               <g:set var="statesToInstanceLists" value="${autoScalingGroup.statesToInstanceList}"/>

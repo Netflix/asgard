@@ -634,9 +634,9 @@ class RelationshipsTests extends GrailsUnitTestCase {
 
     void testBuildAutoScalingGroupName() {
 
-        assert "helloworld-nactest" == Relationships.buildGroupName([appName: "helloworld", stack: "nactest", detail: null])
-        assert "helloworld-nactest" == Relationships.buildGroupName([appName: "helloworld", stack: "nactest", detail: ""])
-        assert "helloworld-nactest-2" == Relationships.buildGroupName([appName: "helloworld", stack: "nactest", detail: "2"])
+        assert "helloworld-asgardtest" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest", detail: null])
+        assert "helloworld-asgardtest" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest", detail: ""])
+        assert "helloworld-asgardtest-2" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest", detail: "2"])
         assert "helloworld" == Relationships.buildGroupName([appName: "helloworld", stack: "", detail: ""])
         assert "helloworld" == Relationships.buildGroupName([appName: "helloworld", stack: null, detail: null])
         assert "discovery-us-east-1d" == Relationships.buildGroupName([appName: "discovery", stack: "us", detail: "east-1d"])
@@ -646,14 +646,14 @@ class RelationshipsTests extends GrailsUnitTestCase {
         assert "merchweb--loadtest" == Relationships.buildGroupName([appName: "merchweb", stack: null, detail: "loadtest"])
 
         def exceptionThrown = false
-        try { Relationships.buildGroupName([appName: "", stack: "nactest", detail: "2"]) } catch (IllegalArgumentException ignored) { exceptionThrown = true }
+        try { Relationships.buildGroupName([appName: "", stack: "asgardtest", detail: "2"]) } catch (IllegalArgumentException ignored) { exceptionThrown = true }
         assert exceptionThrown
 
         def npeThrown = false
-        try { Relationships.buildGroupName([appName: null, stack: "nactest", detail: "2"]) } catch (NullPointerException ignored) { npeThrown = true }
+        try { Relationships.buildGroupName([appName: null, stack: "asgardtest", detail: "2"]) } catch (NullPointerException ignored) { npeThrown = true }
         assert npeThrown
 
-        assert "helloworld-nactest" == Relationships.buildGroupName([appName: "helloworld", stack: "nactest", detail: null])
+        assert "helloworld-asgardtest" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest", detail: null])
 
         assert 'cass-nccpintegration-random-junk-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-w0A-z0useast1a' ==
                 Relationships.buildGroupName(appName: "cass", stack: "nccpintegration",
@@ -677,9 +677,9 @@ class RelationshipsTests extends GrailsUnitTestCase {
     }
 
     void testBuildLoadBalancerName() {
-        assert "helloworld-nactest" == Relationships.buildLoadBalancerName("helloworld", "nactest", null)
-        assert "helloworld-nactest" == Relationships.buildLoadBalancerName("helloworld", "nactest", "")
-        assert "helloworld-nactest-frontend" == Relationships.buildLoadBalancerName("helloworld", "nactest", "frontend")
+        assert "helloworld-asgardtest" == Relationships.buildLoadBalancerName("helloworld", "asgardtest", null)
+        assert "helloworld-asgardtest" == Relationships.buildLoadBalancerName("helloworld", "asgardtest", "")
+        assert "helloworld-asgardtest-frontend" == Relationships.buildLoadBalancerName("helloworld", "asgardtest", "frontend")
         assert "helloworld" == Relationships.buildLoadBalancerName("helloworld", "", "")
         assert "helloworld" == Relationships.buildLoadBalancerName("helloworld", null, null)
         assert "discovery-us-east-1d" == Relationships.buildLoadBalancerName("discovery", "us", "east-1d")
@@ -689,11 +689,11 @@ class RelationshipsTests extends GrailsUnitTestCase {
         assert "merchweb--frontend" == Relationships.buildLoadBalancerName("merchweb", null, "frontend")
 
         def exceptionThrown = false
-        try { Relationships.buildLoadBalancerName("", "nactest", "frontend") } catch (IllegalArgumentException ignored) { exceptionThrown = true }
+        try { Relationships.buildLoadBalancerName("", "asgardtest", "frontend") } catch (IllegalArgumentException ignored) { exceptionThrown = true }
         assert exceptionThrown
 
         def npeThrown = false
-        try { Relationships.buildLoadBalancerName(null, "nactest", "frontend") } catch (NullPointerException ignored) { npeThrown = true }
+        try { Relationships.buildLoadBalancerName(null, "asgardtest", "frontend") } catch (NullPointerException ignored) { npeThrown = true }
         assert npeThrown
     }
 

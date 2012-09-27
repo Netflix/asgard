@@ -94,6 +94,10 @@
           <td class="name">ASG Health Check Grace Period:</td>
           <td class="value">${group.healthCheckGracePeriod} second${group.healthCheckGracePeriod == 1 ? '' : 's'}</td>
         </tr>
+        <tr class="prop" title="The algorithm to use when selecting which instance to terminate">
+          <td class="name">Termination Policies:</td>
+          <td class="value">${group.terminationPolicies}</td>
+        </tr>
         <tr class="prop">
           <td class="name">Availablility Zones:</td>
           <td class="value">
@@ -279,7 +283,7 @@ ${a.cause} : ${a.description} (${a.progress}% done) (Status: ${a.statusCode})
                     </g:if>
                     <th>ELBs</th>
                     <g:if test="${discoveryExists}">
-                      <th>Discovery</th>
+                      <th>Eureka</th>
                       <th>Health</th>
                     </g:if>
                   </tr>

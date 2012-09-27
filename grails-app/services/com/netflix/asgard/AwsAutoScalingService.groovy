@@ -135,6 +135,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 { Region region -> caches.allClusters.by(region).fill() })
         caches.allLaunchConfigurations.ensureSetUp({ Region region -> retrieveLaunchConfigurations(region) })
         caches.allScalingPolicies.ensureSetUp({ Region region -> retrieveScalingPolicies(region) })
+        caches.allTerminationPolicyTypes.ensureSetUp({ Region region -> retrieveTerminationPolicyTypes() })
         caches.allScheduledActions.ensureSetUp({ Region region -> retrieveScheduledActions(region) })
     }
 
@@ -311,6 +312,17 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         def groups = getAutoScalingGroups(userContext)
         //println "Looking for group for " + lcName
         groups.find { it.launchConfigurationName == lcName }
+    }
+
+    /**
+     * @return List of all auto scaling termination policy types
+     */
+    List<String> getTerminationPolicyTypes() {
+        caches.allTerminationPolicyTypes.list().sort()
+    }
+
+    private List<String> retrieveTerminationPolicyTypes() {
+        awsClient.by(Region.defaultRegion()).describeTerminationPolicyTypes().terminationPolicyTypes
     }
 
     private static final Integer MAX_RECORDS_PER_REQUEST = 50
@@ -606,7 +618,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             groupTemplate.with {
                 request = new CreateAutoScalingGroupRequest(autoScalingGroupName: name,
                         launchConfigurationName: launchConfigName, minSize: minSize, desiredCapacity: desiredCapacity,
-                        maxSize: maxSize, defaultCooldown: defaultCooldown, healthCheckType: healthCheckType,
+                        maxSize: maxSize, defaultCooldown: defaultCooldown,
+                        terminationPolicies: terminationPolicies,
+                        healthCheckType: healthCheckType,
                         healthCheckGracePeriod: healthCheckGracePeriod, availabilityZones: availabilityZones,
                         loadBalancerNames: loadBalancerNames, VPCZoneIdentifier: VPCZoneIdentifier)
             }
@@ -825,7 +839,8 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 final AutoScalingGroupData autoScalingGroupData = AutoScalingGroupData.forUpdate(
                         group.autoScalingGroupName, group.launchConfigurationName,
                         group.minSize - 1, group.desiredCapacity, group.maxSize, group.defaultCooldown,
-                        group.healthCheckType, group.healthCheckGracePeriod, group.availabilityZones)
+                        group.healthCheckType, group.healthCheckGracePeriod, group.terminationPolicies,
+                        group.availabilityZones)
                 updateAutoScalingGroup(userContext, autoScalingGroupData)
             }
             String msg = "Terminate instance '${instanceId}' and shrink auto scaling group '${group.autoScalingGroupName}'"

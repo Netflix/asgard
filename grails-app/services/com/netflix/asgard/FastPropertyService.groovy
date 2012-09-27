@@ -31,6 +31,8 @@ import org.apache.http.HttpStatus
 class FastPropertyService implements CacheInitializer {
 
     static transactional = false
+    
+    private static final String SOURCE_OF_UPDATE = 'asgard'
 
     def grailsApplication
     def applicationService
@@ -91,7 +93,7 @@ class FastPropertyService implements CacheInitializer {
             builder.stack(stack)
             builder.countries(countries)
             builder.updatedBy(updatedBy)
-            builder.sourceOfUpdate('nac')
+            builder.sourceOfUpdate(SOURCE_OF_UPDATE)
             builder.cmcTicket(userContext.ticket)
         }
 
@@ -148,7 +150,7 @@ class FastPropertyService implements CacheInitializer {
                     builder.propertyId(id)
                     builder.value(value)
                     builder.updatedBy(updatedBy)
-                    builder.sourceOfUpdate('nac')
+                    builder.sourceOfUpdate(SOURCE_OF_UPDATE)
                     builder.cmcTicket(userContext.ticket)
                 }
                 String xmlString = writer.toString()
@@ -195,7 +197,7 @@ class FastPropertyService implements CacheInitializer {
                 String uriBase = "http://${hostAndPort}/platformservice/REST/v1/props/property/${URLEncoder.encode(id)}"
                 String encodedUpdatedBy = URLEncoder.encode(updatedBy)
                 String encodedCmcTicket = URLEncoder.encode(userContext.ticket ?: '')
-                String params = "source=nac&updatedBy=${encodedUpdatedBy}&cmcTicket=${encodedCmcTicket}"
+                String params = "source=${SOURCE_OF_UPDATE}&updatedBy=${encodedUpdatedBy}&cmcTicket=${encodedCmcTicket}"
                 String uriPath = "${uriBase}?${params}"
                 task.log("Deleting data at ${uriPath}")
                 restClientService.delete(uriPath)

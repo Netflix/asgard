@@ -46,7 +46,7 @@ class ConfigService {
     }
 
     String getRegionalDiscoveryServer(Region region) {
-        Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.cloud?.discoveryServers
+        Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.eureka?.regionsToServers
         regionsToDiscoveryServers ? regionsToDiscoveryServers[region] : null
     }
 
@@ -119,6 +119,13 @@ class ConfigService {
      */
     List<InstanceTypeData> getCustomInstanceTypes() {
         grailsApplication.config?.cloud?.customIntanceTypes ?: []
+    }
+
+    /**
+     * @return the default auto scaling termination policy name to suggest when creating new auto scaling groups
+     */
+    String getDefaultTerminationPolicy() {
+        grailsApplication.config?.cloud?.defaultAutoScalingTerminationPolicy ?: 'Default'
     }
 
     List<String> getAwsAccounts() {
@@ -256,6 +263,26 @@ class ConfigService {
     }
 
     /**
+     * Gets the context string used in constructing Eureka URLs. The context varies depending on how Eureka is
+     * configured.
+     *
+     * @return the context string for constructing URLs to make eureka calls
+     */
+    String getEurekaUrlContext() {
+        grailsApplication.config.eureka?.urlContext ?: 'eureka'
+    }
+
+    /**
+     * Gets the port number (as a String) used in constructing Eureka URLs. The port varies depending on how Eureka
+     * or is configured.
+     *
+     * @return the port for constructing URLs to make eureka calls
+     */
+    String getEurekaPort() {
+        grailsApplication.config.eureka?.port ?: '80'
+    }
+
+    /**
      * @return Default Security Groups.
      */
     List<String> getDefaultSecurityGroups() {
@@ -348,6 +375,13 @@ class ConfigService {
         Environment currentEnvironment = serverEnvironments.find { it.name == accountName }
         currentEnvironment?.canonicalDnsName ?: "asgard ${accountName}"
     }
+    /**
+     * @return subnet purposes that should have an internal scheme for ELBs.
+     */
+    List<String> getInternalSubnetPurposes() {
+        grailsApplication.config.cloud?.internalSubnetPurposes ?: ['internal']
+    }
+
     /**
      * @return Amount of time to wait between AWS calls.
      */

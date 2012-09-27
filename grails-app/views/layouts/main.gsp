@@ -79,7 +79,7 @@
       </g:if>
       <div class="search" title="Find entities by name">
         <form action="/search" method="GET">
-          %{--<input type="search" results="10" autosave="nac${env}globalsearch" name="q" placeholder="Global search by names"  value="${params.q}">--}%
+          %{--<input type="search" results="10" autosave="asgard${env}globalsearch" name="q" placeholder="Global search by names" value="${params.q}">--}%
         </form>
       </div>
     </g:if>

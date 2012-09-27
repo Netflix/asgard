@@ -117,7 +117,7 @@ class RollingPushOperation extends AbstractPushOperation {
         final AutoScalingGroupData autoScalingGroupData = AutoScalingGroupData.forUpdate(
                 groupName, newLaunchName,
                 group.minSize, group.desiredCapacity, group.maxSize, group.defaultCooldown,
-                group.healthCheckType, group.healthCheckGracePeriod, group.availabilityZones
+                group.healthCheckType, group.healthCheckGracePeriod, group.terminationPolicies, group.availabilityZones
         )
         awsAutoScalingService.updateAutoScalingGroup(options.common.userContext, autoScalingGroupData, [], [], task)
     }
@@ -231,7 +231,7 @@ class RollingPushOperation extends AbstractPushOperation {
                     task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance ${instanceInfo.id} to go from Pending to InService")
                     instanceInfo.state = InstanceState.running
                     if (options.checkHealth) {
-                        task.log("Waiting up to ${Time.format(InstanceState.running.timeOutToExitState)} for Discovery registration of ${options.appName} on ${instanceInfo.id}")
+                        task.log("Waiting up to ${Time.format(InstanceState.running.timeOutToExitState)} for Eureka registration of ${options.appName} on ${instanceInfo.id}")
                     }
                 }
                 break
@@ -239,14 +239,14 @@ class RollingPushOperation extends AbstractPushOperation {
             case InstanceState.running:
                 if (options.checkHealth) {
 
-                    // Discovery isn't yet strong enough to handle sustained rapid fire requests.
+                    // Eureka isn't yet strong enough to handle sustained rapid fire requests.
                     Time.sleepCancellably(discoveryService.MILLIS_DELAY_BETWEEN_DISCOVERY_CALLS)
 
                     ApplicationInstance appInst = discoveryService.getAppInstance(userContext,
                             options.common.appName, instanceInfo.id)
                     if (appInst) {
                         task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance " +
-                                "${instanceInfo.id} to go from InService to registered with Discovery")
+                                "${instanceInfo.id} to go from InService to registered with Eureka")
                         instanceInfo.state = InstanceState.registered
                         def healthCheckUrl = appInst.healthCheckUrl
                         if (healthCheckUrl) {

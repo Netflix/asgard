@@ -231,6 +231,8 @@ class AutoScalingController {
                 applications: applicationService.getRegisteredApplications(userContext),
                 group: group,
                 stacks: stackService.getStacks(userContext),
+                allTerminationPolicies: awsAutoScalingService.terminationPolicyTypes,
+                terminationPolicy: configService.defaultTerminationPolicy,
                 images: awsEc2Service.getAccountImages(userContext).sort { it.imageLocation.toLowerCase() },
                 defKey: awsEc2Service.defaultKeyName,
                 keys: awsEc2Service.getKeys(userContext).sort { it.keyName.toLowerCase() },
@@ -269,13 +271,15 @@ class AutoScalingController {
             def defaultCooldown = params.defaultCooldown ?: 10
             String healthCheckType = AutoScalingGroupHealthCheckType.ensureValidType(params.healthCheckType)
             Integer healthCheckGracePeriod = params.healthCheckGracePeriod as Integer
+            List<String> terminationPolicies = Requests.ensureList(params.terminationPolicy)
             List<String> availabilityZones = Requests.ensureList(params.selectedZones)
             List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
             AutoScalingGroup groupTemplate = new AutoScalingGroup().withAutoScalingGroupName(groupName).
                     withAvailabilityZones(availabilityZones).withLoadBalancerNames(loadBalancerNames).
                     withMinSize(minSize.toInteger()).withDesiredCapacity(desiredCapacity.toInteger()).
                     withMaxSize(maxSize.toInteger()).withDefaultCooldown(defaultCooldown.toInteger()).
-                    withHealthCheckType(healthCheckType).withHealthCheckGracePeriod(healthCheckGracePeriod)
+                    withHealthCheckType(healthCheckType).withHealthCheckGracePeriod(healthCheckGracePeriod).
+                    withTerminationPolicies(terminationPolicies)
 
             // If this ASG lauches VPC instances, we must find the proper subnets and add them.
             String subnetPurpose = params.subnetPurpose ?: null
@@ -331,6 +335,8 @@ class AutoScalingController {
                 loadBalancers: awsLoadBalancerService.getLoadBalancers(userContext),
                 launchConfigurations: awsAutoScalingService.getLaunchConfigurationNamesForAutoScalingGroup(
                      userContext, name).sort { it.toLowerCase() },
+                allTerminationPolicies: awsAutoScalingService.terminationPolicyTypes,
+                terminationPolicy: group.terminationPolicies[0],
                 subnetPurpose: params.subnetPurpose ?: subnetPurpose,
                 zonesGroupedByPurpose: subnets.groupZonesByPurpose(availabilityZones*.zoneName, SubnetTarget.EC2),
                 selectedZones: Requests.ensureList(params.selectedZones) ?: group?.availabilityZones,
@@ -370,10 +376,12 @@ class AutoScalingController {
             flash.message = "Error: Desired capacity ${desiredCapacity} is lower than max size ${maxSize}"
             nextAction = 'edit'
         } else {
+            AutoScalingGroup asg = awsAutoScalingService.getAutoScalingGroup(userContext, name)
             String lcName = params.launchConfiguration
             Integer defaultCooldown = (params.defaultCooldown ?: 10) as Integer
             String healthCheckType = AutoScalingGroupHealthCheckType.ensureValidType(params.healthCheckType)
             Integer healthCheckGracePeriod = params.healthCheckGracePeriod as Integer
+            List<String> terminationPolicies = Requests.ensureList(params.terminationPolicy) ?: asg.terminationPolicies
             List<String> availabilityZones = Requests.ensureList(params.selectedZones)
             Collection<AutoScalingProcessType> suspendProcesses = Sets.newHashSet()
             Collection<AutoScalingProcessType> resumeProcesses = Sets.newHashSet()
@@ -386,8 +394,8 @@ class AutoScalingController {
                 }
             }
             final AutoScalingGroupData autoScalingGroupData = AutoScalingGroupData.forUpdate(
-                    name, lcName, minSize, desiredCapacity,
-                    maxSize, defaultCooldown, healthCheckType, healthCheckGracePeriod, availabilityZones
+                    name, lcName, minSize, desiredCapacity, maxSize, defaultCooldown, healthCheckType,
+                    healthCheckGracePeriod, terminationPolicies, availabilityZones
             )
             try {
                 awsAutoScalingService.updateAutoScalingGroup(userContext, autoScalingGroupData, suspendProcesses,

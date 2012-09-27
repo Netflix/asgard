@@ -121,9 +121,9 @@ input.number                     { width: 36px;  }
 
 /* HALLOWEEN ICON OVERRIDES */
 .halloween .nav .home          { background-image: url(../images/occasion/halloween/24/Tomb.png);         }
-.halloween .nav .users         { background-image: url(../images/occasion/halloween/24/Vampire.png);      }
+.halloween .nav .users         { background-image: url(../images/occasion/halloween/24/vampire.png);      }
 .halloween .nav .launchConfigs { background-image: url(../images/occasion/halloween/24/Vixen.png);        }
-.halloween .nav .instanceTypes { background-image: url(../images/occasion/halloween/24/Bats.png);         }
+.halloween .nav .instanceTypes { background-image: url(../images/occasion/halloween/24/bats.png);         }
 .halloween .nav .tasks         { background-image: url(../images/occasion/halloween/24/Boiler.png);       }
 
 /* General page body */

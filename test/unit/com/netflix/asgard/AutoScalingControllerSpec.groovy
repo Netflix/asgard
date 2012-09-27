@@ -37,6 +37,7 @@ class AutoScalingControllerSpec extends Specification {
         controller.awsEc2Service = Mocks.awsEc2Service()
         controller.awsCloudWatchService = Mocks.awsCloudWatchService()
         controller.awsLoadBalancerService = Mocks.awsLoadBalancerService()
+        controller.configService = Mocks.configService()
         controller.instanceTypeService = Mocks.instanceTypeService()
         controller.stackService = Mocks.stackService()
     }
@@ -134,9 +135,12 @@ class AutoScalingControllerSpec extends Specification {
 
         then:
         // There should be one update with appropriate ASG data
+        1 * mockAutoScalingService.getAutoScalingGroup(_, 'hiyaworld-example-v042') >> {
+            new AutoScalingGroup(autoScalingGroupName: 'hiyaworld-example-v042')
+        }
         1 * mockAutoScalingService.updateAutoScalingGroup(_, new AutoScalingGroupData(
                 'hiyaworld-example-v042', null, 31, 153, [],
-                "EC2", 17, [] as Set, 42, null, ['us-feast'], 256, [],
+                "EC2", 17, [], [] as Set, 42, null, ['us-feast'], 256, [],
                 'newlaunchConfiguration', [], [:], [], [:], []), ImmutableSet.of(AutoScalingProcessType.Launch),
                 ImmutableSet.of(AutoScalingProcessType.Terminate))
         0 * _._
@@ -177,6 +181,7 @@ class AutoScalingControllerSpec extends Specification {
         awsAutoScalingService.updateAutoScalingGroup(_, _, _, _) >> {
             throw new IllegalStateException("Uh Oh!")
         }
+        awsAutoScalingService.getAutoScalingGroup(_, _) >> { new AutoScalingGroup() }
         controller.awsAutoScalingService = awsAutoScalingService
 
         controller.params.with {
@@ -207,7 +212,7 @@ class AutoScalingControllerSpec extends Specification {
         'nf-test-keypair-a' == attrs['defKey']
         ['amzn-linux', 'hadoop', 'nf-support', 'nf-test-keypair-a'] == attrs['keys']*.keyName
         List<String> securityGroupNames = attrs.securityGroupsGroupedByVpcId[null]*.groupName
-        assert securityGroupNames.containsAll(['akms', 'helloworld', 'helloworld-frontend', 'helloworld-nactest',
+        assert securityGroupNames.containsAll(['akms', 'helloworld', 'helloworld-frontend', 'helloworld-asgardtest',
                 'helloworld-tmp', 'ntsuiboot'])
         [
                 't1.micro', 'm1.small', 'c1.medium', 'm1.large', 'm2.xlarge', 'c1.xlarge', 'm1.xlarge', 'm2.2xlarge',

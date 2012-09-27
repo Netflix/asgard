@@ -64,7 +64,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
         //noinspection GroovyAccessibility
         when:
         awsAutoScalingService.updateAutoScalingGroup(Mocks.userContext(),
-                new AutoScalingGroupData('hiyaworld-example-v042', null, 31, 153, [], 'EC2', 17, [],
+                new AutoScalingGroupData('hiyaworld-example-v042', null, 31, 153, [], 'EC2', 17, [], [],
                 42, null, ['us-feast'], 256, [], 'newlaunchConfiguration', [], [:], [], [:], []),
                 AutoScalingProcessType.with { [Launch, AZRebalance] },
                 AutoScalingProcessType.with { [AddToLoadBalancer] })
@@ -98,6 +98,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
                 .withAvailabilityZones("us-feast")
                 .withHealthCheckType('EC2')
                 .withHealthCheckGracePeriod(17)
+                .withTerminationPolicies([])
         })
         0 * mockAmazonAutoScalingClient.updateAutoScalingGroup(_)
 
