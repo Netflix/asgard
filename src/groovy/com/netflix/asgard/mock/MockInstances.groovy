@@ -481,7 +481,7 @@ class MockInstances {
         {
           "class": "com.amazonaws.services.ec2.model.GroupIdentifier",
           "groupId": "sg-e87caf81",
-          "groupName": "helloworld-nactest"
+          "groupName": "helloworld-asgardtest"
         },
         {
           "class": "com.amazonaws.services.ec2.model.GroupIdentifier",
@@ -783,7 +783,7 @@ class MockInstances {
         {
           "class": "com.amazonaws.services.ec2.model.GroupIdentifier",
           "groupId": "sg-e87caf81",
-          "groupName": "helloworld-nactest"
+          "groupName": "helloworld-asgardtest"
         },
         {
           "class": "com.amazonaws.services.ec2.model.GroupIdentifier",
@@ -1559,7 +1559,7 @@ class MockInstances {
         {
           "class": "com.amazonaws.services.ec2.model.GroupIdentifier",
           "groupId": "sg-e87caf81",
-          "groupName": "helloworld-nactest"
+          "groupName": "helloworld-asgardtest"
         },
         {
           "class": "com.amazonaws.services.ec2.model.GroupIdentifier",

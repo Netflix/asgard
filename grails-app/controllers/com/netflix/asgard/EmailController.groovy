@@ -20,8 +20,8 @@ package com.netflix.asgard
     def emailerService
 
     /**
-     * Hit "http://localhost:8080/nac/email?to=me@somewhere.com&subject=hello+world&body=This+is+a+test" to send an email to yourself
-    */
+     * Hit /email?to=me@somewhere.com&subject=hello+world&body=This+is+a+test to send an email to yourself
+     */
     def index = {
         // Each "email" is a simple Map
         def email = [

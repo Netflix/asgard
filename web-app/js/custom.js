@@ -573,7 +573,7 @@ jQuery(document).ready(function() {
 
     var setUpCommonUserInterfaceEnhancements = function() {
 
-        // Don't let any ajax responses use browser cache in NAC
+        // Don't let any ajax responses use browser cache
         jQuery.ajaxSetup({ cache: false });
 
         // Decorate the menu buttons that have drop down lists. Do the work that CSS3 isn't ready to do yet.

@@ -110,9 +110,9 @@ class MockSecurityGroups {
   },
   {
     "class": "com.amazonaws.services.ec2.model.SecurityGroup",
-    "description": "For NAC testing.",
+    "description": "For Asgard testing.",
     "groupId": "sg-e87caf81",
-    "groupName": "helloworld-nactest",
+    "groupName": "helloworld-asgardtest",
     "ipPermissions":
     [
       {
@@ -169,7 +169,7 @@ class MockSecurityGroups {
   },
   {
     "class": "com.amazonaws.services.ec2.model.SecurityGroup",
-    "description": "Temp sec group for nac testing",
+    "description": "Temp sec group for Asgard testing",
     "groupId": "sg-08c76d61",
     "groupName": "helloworld-tmp",
     "ipPermissions":
