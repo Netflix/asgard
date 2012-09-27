@@ -36,6 +36,7 @@ class AutoScalingControllerSpec extends ControllerSpec {
         controller.awsEc2Service = Mocks.awsEc2Service()
         controller.awsCloudWatchService = Mocks.awsCloudWatchService()
         controller.awsLoadBalancerService = Mocks.awsLoadBalancerService()
+        controller.configService = Mocks.configService()
         controller.instanceTypeService = Mocks.instanceTypeService()
         controller.stackService = Mocks.stackService()
     }
@@ -133,9 +134,12 @@ class AutoScalingControllerSpec extends ControllerSpec {
 
         then:
         // There should be one update with appropriate ASG data
+        1 * mockAutoScalingService.getAutoScalingGroup(_, 'hiyaworld-example-v042') >> {
+            new AutoScalingGroup(autoScalingGroupName: 'hiyaworld-example-v042')
+        }
         1 * mockAutoScalingService.updateAutoScalingGroup(_, new AutoScalingGroupData(
                 'hiyaworld-example-v042', null, 31, 153, [],
-                "EC2", 17, [] as Set, 42, null, ['us-feast'], 256, [],
+                "EC2", 17, [], [] as Set, 42, null, ['us-feast'], 256, [],
                 'newlaunchConfiguration', [], [:], [], [:], []), ImmutableSet.of(AutoScalingProcessType.Launch),
                 ImmutableSet.of(AutoScalingProcessType.Terminate))
         0 * _._
@@ -177,6 +181,7 @@ class AutoScalingControllerSpec extends ControllerSpec {
         awsAutoScalingService.updateAutoScalingGroup(_, _, _, _) >> {
             throw new IllegalStateException("Uh Oh!")
         }
+        awsAutoScalingService.getAutoScalingGroup(_, _) >> { new AutoScalingGroup() }
         controller.awsAutoScalingService = awsAutoScalingService
 
         controller.params.with {

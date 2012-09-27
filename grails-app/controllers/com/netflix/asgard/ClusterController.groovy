@@ -185,7 +185,8 @@ class ClusterController {
             LaunchConfiguration lastLaunchConfig = awsAutoScalingService.getLaunchConfiguration(userContext, lcName)
             String appName = Relationships.appNameFromGroupName(name)
             List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups)
-            List<String> selectedZones = Requests.ensureList(params.selectedZones)
+            List<String> selectedZones = Requests.ensureList(params.selectedZones ?: lastGroup.availabilityZones)
+            List<String> termPolicies = Requests.ensureList(params.terminationPolicy ?: lastGroup.terminationPolicies)
             List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
             String azRebalance = params.azRebalance
             boolean lastRebalanceSuspended = lastGroup.isProcessSuspended(AutoScalingProcessType.AZRebalance)
@@ -252,6 +253,7 @@ class ClusterController {
                     defaultCooldown: params.defaultCooldown as Integer ?: lastGroup.defaultCooldown,
                     healthCheckType: params.healthCheckType ?: lastGroup.healthCheckType.name(),
                     healthCheckGracePeriod: params.healthCheckGracePeriod as Integer ?: lastGracePeriod,
+                    terminationPolicies: termPolicies,
                     batchSize: params.batchSize as Integer ?: GroupResizeOperation.DEFAULT_BATCH_SIZE,
                     loadBalancerNames: loadBalancerNames ?: lastGroup.loadBalancerNames,
                     iamInstanceProfile: params.iamInstanceProfile ?: null,
