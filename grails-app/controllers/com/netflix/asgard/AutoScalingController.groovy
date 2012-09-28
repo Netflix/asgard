@@ -403,7 +403,7 @@ class AutoScalingController {
                 nextAction = edit
             }
         }
-        redirect(action: nextAction, params: [name: name])
+        redirect(action: nextAction, params: [id: name])
     }
 
     def delete = {

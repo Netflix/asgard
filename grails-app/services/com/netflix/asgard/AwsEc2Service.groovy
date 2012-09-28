@@ -995,7 +995,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     private List<Snapshot> retrieveSnapshots(Region region) {
-        awsClient.by(region).describeSnapshots().snapshots
+        List<String> owners = configService.publicResourceAccounts + configService.awsAccounts
+        DescribeSnapshotsRequest request = new DescribeSnapshotsRequest().withOwnerIds(owners)
+        awsClient.by(region).describeSnapshots(request).snapshots
     }
 
     Snapshot getSnapshot(UserContext userContext, String snapshotId, From from = From.AWS) {
