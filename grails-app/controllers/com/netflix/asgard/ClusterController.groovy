@@ -184,7 +184,8 @@ class ClusterController {
             String lcName = lastGroup.launchConfigurationName
             LaunchConfiguration lastLaunchConfig = awsAutoScalingService.getLaunchConfiguration(userContext, lcName)
             String appName = Relationships.appNameFromGroupName(name)
-            List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups)
+            List<String> lastSecurityGroups = lastLaunchConfig.securityGroups
+            List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups ?: lastSecurityGroups)
             List<String> selectedZones = Requests.ensureList(params.selectedZones ?: lastGroup.availabilityZones)
             List<String> termPolicies = Requests.ensureList(params.terminationPolicy ?: lastGroup.terminationPolicies)
             List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
