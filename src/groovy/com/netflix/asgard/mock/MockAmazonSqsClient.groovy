@@ -30,6 +30,7 @@ import com.amazonaws.services.sqs.model.ListQueuesRequest
 import com.amazonaws.services.sqs.model.ListQueuesResult
 import com.netflix.asgard.Region
 import com.netflix.asgard.model.SimpleQueue
+import com.amazonaws.ClientConfiguration
 
 class MockAmazonSqsClient extends AmazonSQSClient {
 
@@ -48,8 +49,8 @@ class MockAmazonSqsClient extends AmazonSQSClient {
         ])]
     }
 
-    MockAmazonSqsClient(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonSqsClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockQueues = loadMockQueues()
     }
 

@@ -192,6 +192,7 @@ import com.amazonaws.services.ec2.model.Volume
 import com.amazonaws.services.ec2.model.VolumeAttachment
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.joda.time.format.ISODateTimeFormat
+import com.amazonaws.ClientConfiguration
 
 class MockAmazonEC2Client extends AmazonEC2Client {
 
@@ -322,8 +323,8 @@ class MockAmazonEC2Client extends AmazonEC2Client {
         }
     }
 
-    MockAmazonEC2Client(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonEC2Client(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockImages = loadMockImages()
         mockInstances = loadMockInstances()
         mockSpotInstanceRequests = loadMockSpotInstanceRequests()

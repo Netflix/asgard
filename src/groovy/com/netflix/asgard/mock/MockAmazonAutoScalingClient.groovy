@@ -63,6 +63,7 @@ import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGr
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.joda.time.format.ISODateTimeFormat
+import com.amazonaws.ClientConfiguration
 
 class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
 
@@ -104,8 +105,8 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
         }
     }
 
-    MockAmazonAutoScalingClient(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonAutoScalingClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockAsgs = loadMockAsgs()
         mockLaunchConfigs = loadMockLaunchConfigs()
     }

@@ -333,6 +333,7 @@ class Mocks {
             awsClientService = new AwsClientService()
             awsClientService.grailsApplication = grailsApplication()
             awsClientService.secretService = new SecretService()
+            awsClientService.configService = configService()
             awsClientService.afterPropertiesSet()
         }
         awsClientService

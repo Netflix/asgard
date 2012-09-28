@@ -282,6 +282,15 @@ class ConfigService {
         grailsApplication.config.httpConnPool?.maxSize ?: 5
     }
 
+    /** HTTP proxy settings */
+    String getProxyHost() {
+        grailsApplication.config.proxy?.host ?: null
+    }
+
+    int getProxyPort() {
+        grailsApplication.config.proxy?.port ?: -1
+    }
+
     /**
      * Gets the context string used in constructing Eureka URLs. The context varies depending on how Eureka is
      * configured.
