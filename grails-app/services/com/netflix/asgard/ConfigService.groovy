@@ -282,11 +282,16 @@ class ConfigService {
         grailsApplication.config.httpConnPool?.maxSize ?: 5
     }
 
-    /** HTTP proxy settings */
+    /**
+     * @return HTTP proxy host name, or null if unspecified
+     */
     String getProxyHost() {
         grailsApplication.config.proxy?.host ?: null
     }
 
+    /**
+     * @return port number for the proxy to use, or -1 if not specified because HTTP client will treat -1 as default
+     */
     int getProxyPort() {
         grailsApplication.config.proxy?.port ?: -1
     }
