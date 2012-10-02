@@ -17,6 +17,7 @@ package com.netflix.asgard.mock
 
 import com.amazonaws.AmazonClientException
 import com.amazonaws.AmazonServiceException
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model.CreateQueueRequest
@@ -30,7 +31,6 @@ import com.amazonaws.services.sqs.model.ListQueuesRequest
 import com.amazonaws.services.sqs.model.ListQueuesResult
 import com.netflix.asgard.Region
 import com.netflix.asgard.model.SimpleQueue
-import com.amazonaws.ClientConfiguration
 
 class MockAmazonSqsClient extends AmazonSQSClient {
 

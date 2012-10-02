@@ -16,6 +16,7 @@
 package com.netflix.asgard.mock
 
 import com.amazonaws.AmazonWebServiceRequest
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.rds.AmazonRDSClient
@@ -65,7 +66,6 @@ import com.amazonaws.services.rds.model.RestoreDBInstanceFromDBSnapshotRequest
 import com.amazonaws.services.rds.model.RestoreDBInstanceToPointInTimeRequest
 import com.amazonaws.services.rds.model.RevokeDBSecurityGroupIngressRequest
 import com.netflix.asgard.BeanState
-import com.amazonaws.ClientConfiguration
 
 class MockAmazonRDSClient extends AmazonRDSClient {
 
