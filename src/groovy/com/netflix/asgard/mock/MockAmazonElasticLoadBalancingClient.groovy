@@ -16,6 +16,7 @@
 package com.netflix.asgard.mock
 
 import com.amazonaws.AmazonWebServiceRequest
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient
@@ -56,7 +57,6 @@ import com.amazonaws.services.elasticloadbalancing.model.SetLoadBalancerPolicies
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.joda.time.format.ISODateTimeFormat
-import com.amazonaws.ClientConfiguration
 
 class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingClient {
 

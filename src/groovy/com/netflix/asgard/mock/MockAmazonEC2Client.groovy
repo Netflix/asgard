@@ -17,6 +17,7 @@ package com.netflix.asgard.mock
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.AmazonWebServiceRequest
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.ec2.AmazonEC2Client
@@ -192,7 +193,6 @@ import com.amazonaws.services.ec2.model.Volume
 import com.amazonaws.services.ec2.model.VolumeAttachment
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.joda.time.format.ISODateTimeFormat
-import com.amazonaws.ClientConfiguration
 
 class MockAmazonEC2Client extends AmazonEC2Client {
 

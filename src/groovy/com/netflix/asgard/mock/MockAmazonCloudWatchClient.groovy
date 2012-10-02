@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.mock
 
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient
 import com.amazonaws.services.cloudwatch.model.DescribeAlarmsRequest
@@ -22,7 +23,6 @@ import com.amazonaws.services.cloudwatch.model.DescribeAlarmsResult
 import com.amazonaws.services.cloudwatch.model.ListMetricsRequest
 import com.amazonaws.services.cloudwatch.model.ListMetricsResult
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
-import com.amazonaws.ClientConfiguration
 
 class MockAmazonCloudWatchClient extends AmazonCloudWatchClient {
 
