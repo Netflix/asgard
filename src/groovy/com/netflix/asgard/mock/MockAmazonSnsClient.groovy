@@ -27,6 +27,7 @@ import com.amazonaws.services.sns.model.ListTopicsRequest
 import com.amazonaws.services.sns.model.ListTopicsResult
 import com.amazonaws.services.sns.model.Topic
 import com.netflix.asgard.model.TopicData
+import com.amazonaws.ClientConfiguration
 
 class MockAmazonSnsClient extends AmazonSNSClient {
 
@@ -36,8 +37,8 @@ class MockAmazonSnsClient extends AmazonSNSClient {
         [new Topic().withTopicArn('arn:aws:sns:us-east-1:179000000000:abadmin-testConformity-Report')]
     }
 
-    MockAmazonSnsClient(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonSnsClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockTopics = loadMockTopics()
     }
 

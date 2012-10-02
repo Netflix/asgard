@@ -22,6 +22,7 @@ import com.amazonaws.services.cloudwatch.model.DescribeAlarmsResult
 import com.amazonaws.services.cloudwatch.model.ListMetricsRequest
 import com.amazonaws.services.cloudwatch.model.ListMetricsResult
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
+import com.amazonaws.ClientConfiguration
 
 class MockAmazonCloudWatchClient extends AmazonCloudWatchClient {
 
@@ -31,8 +32,8 @@ class MockAmazonCloudWatchClient extends AmazonCloudWatchClient {
         [new MetricAlarm().withAlarmName('goofy')]
     }
 
-    MockAmazonCloudWatchClient(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonCloudWatchClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockAlarms = loadMockAlarms()
     }
 

@@ -20,16 +20,18 @@ import grails.converters.JSON
 import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
 import java.util.concurrent.TimeUnit
-import org.apache.http.HttpEntity
+import org.apache.http.HttpEntity           
+import org.apache.http.HttpHost
 import org.apache.http.HttpResponse
-import org.apache.http.client.HttpClient
+import org.apache.http.client.HttpClient    
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
 import org.apache.http.client.methods.HttpUriRequest
-import org.apache.http.conn.params.ConnManagerPNames
+import org.apache.http.conn.params.ConnManagerPNames     
+import org.apache.http.conn.params.ConnRoutePNames
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager
@@ -50,6 +52,10 @@ class RestClientService implements InitializingBean {
     final HttpClient httpClient = new DefaultHttpClient(connectionManager)
 
     public void afterPropertiesSet() throws Exception {
+        if (configService.proxyHost) {
+            final HttpHost proxy = new HttpHost(configService.proxyHost, configService.proxyPort, "http")
+            httpClient.params.setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy)
+        }
         // Switch to ClientPNames.CONN_MANAGER_TIMEOUT when upgrading http-client 4.2
         httpClient.params.setLongParameter(ConnManagerPNames.TIMEOUT, configService.httpConnPoolTimeout)
         connectionManager.maxTotal = configService.httpConnPoolMaxSize

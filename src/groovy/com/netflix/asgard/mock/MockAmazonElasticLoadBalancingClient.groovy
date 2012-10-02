@@ -56,6 +56,7 @@ import com.amazonaws.services.elasticloadbalancing.model.SetLoadBalancerPolicies
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.joda.time.format.ISODateTimeFormat
+import com.amazonaws.ClientConfiguration
 
 class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingClient {
 
@@ -90,8 +91,8 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
         }
     }
 
-    MockAmazonElasticLoadBalancingClient(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonElasticLoadBalancingClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockLoadBalancers = loadMockLoadBalancers()
     }
 
