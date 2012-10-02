@@ -17,6 +17,7 @@ package com.netflix.asgard.mock
 
 import com.amazonaws.AmazonClientException
 import com.amazonaws.AmazonServiceException
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.sns.AmazonSNSClient
 import com.amazonaws.services.sns.model.GetTopicAttributesRequest
@@ -27,7 +28,6 @@ import com.amazonaws.services.sns.model.ListTopicsRequest
 import com.amazonaws.services.sns.model.ListTopicsResult
 import com.amazonaws.services.sns.model.Topic
 import com.netflix.asgard.model.TopicData
-import com.amazonaws.ClientConfiguration
 
 class MockAmazonSnsClient extends AmazonSNSClient {
 

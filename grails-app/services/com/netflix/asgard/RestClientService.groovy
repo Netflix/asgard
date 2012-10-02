@@ -53,7 +53,7 @@ class RestClientService implements InitializingBean {
 
     public void afterPropertiesSet() throws Exception {
         if (configService.proxyHost) {
-            final HttpHost proxy = new HttpHost(configService.proxyHost, configService.proxyPort, "http")
+            final HttpHost proxy = new HttpHost(configService.proxyHost, configService.proxyPort, 'http')
             httpClient.params.setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy)
         }
         // Switch to ClientPNames.CONN_MANAGER_TIMEOUT when upgrading http-client 4.2
@@ -180,21 +180,21 @@ class RestClientService implements InitializingBean {
                         "${httpResponse.statusLine.reasonPhrase}. Content: ${httpPost.entity}")
             }
             statusCode
-        }
+        } as int
     }
 
     int put(String uri) {
-        executeAndProcessResponse(new HttpPut(uri), readStatusCode)
+        executeAndProcessResponse(new HttpPut(uri), readStatusCode) as int
     }
 
     int delete(String uri) {
-        executeAndProcessResponse(new HttpDelete(uri), readStatusCode)
+        executeAndProcessResponse(new HttpDelete(uri), readStatusCode) as int
     }
 
     Integer getResponseCode(String url) {
         Integer statusCode = null
         try {
-            statusCode = executeAndProcessResponse(getWithTimeout(url, 2000), readStatusCode)
+            statusCode = executeAndProcessResponse(getWithTimeout(url, 2000), readStatusCode) as Integer
         } catch (Exception ignored) {
             // Ignore and return null
         }
