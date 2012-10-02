@@ -1245,7 +1245,7 @@ jQuery(document).ready(function() {
     // Add filter to all long select lists
     var enableSelect2ForVisible = function() {
 
-        var config, setUpSelectFilters;
+        var config, convertSelects;
 
         config = {
             minOptionCountForSearch: 10,
