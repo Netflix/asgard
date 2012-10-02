@@ -53,7 +53,7 @@ class RestClientService implements InitializingBean {
 
     public void afterPropertiesSet() throws Exception {
         if (configService.proxyHost) {
-            final HttpHost proxy = new HttpHost(configService.proxyHost, configService.proxyPort, "http")
+            final HttpHost proxy = new HttpHost(configService.proxyHost, configService.proxyPort, 'http')
             httpClient.params.setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy)
         }
         // Switch to ClientPNames.CONN_MANAGER_TIMEOUT when upgrading http-client 4.2
