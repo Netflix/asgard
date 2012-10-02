@@ -180,21 +180,21 @@ class RestClientService implements InitializingBean {
                         "${httpResponse.statusLine.reasonPhrase}. Content: ${httpPost.entity}")
             }
             statusCode
-        }
+        } as int
     }
 
     int put(String uri) {
-        executeAndProcessResponse(new HttpPut(uri), readStatusCode)
+        executeAndProcessResponse(new HttpPut(uri), readStatusCode) as int
     }
 
     int delete(String uri) {
-        executeAndProcessResponse(new HttpDelete(uri), readStatusCode)
+        executeAndProcessResponse(new HttpDelete(uri), readStatusCode) as int
     }
 
     Integer getResponseCode(String url) {
         Integer statusCode = null
         try {
-            statusCode = executeAndProcessResponse(getWithTimeout(url, 2000), readStatusCode)
+            statusCode = executeAndProcessResponse(getWithTimeout(url, 2000), readStatusCode) as Integer
         } catch (Exception ignored) {
             // Ignore and return null
         }
