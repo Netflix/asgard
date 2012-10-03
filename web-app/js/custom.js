@@ -802,11 +802,13 @@ jQuery(document).ready(function() {
 
     // Task page
     var setUpTaskPage = function() {
+        var autoScroller;
+
         // Ajax log polling for task logging page
         if (jQuery('.task textarea#log').exists()) {
             // Auto-scroll support for progressive log output.
             //   See http://radio.javaranch.com/pascarello/2006/08/17/1155837038219.html
-            function AutoScroller(scrollContainer) {
+            autoScroller = function(scrollContainer) {
 
                 return {
                     bottomThreshold : 25,
@@ -844,7 +846,7 @@ jQuery(document).ready(function() {
                         return initScrollTop
                     }
                 };
-            }
+            };
 
             var logElem = jQuery('textarea#log');
             var jStatus = jQuery('#taskStatus');
@@ -852,7 +854,7 @@ jQuery(document).ready(function() {
             var jDurationString = jQuery('#taskDurationString');
             var jUpdateTime = jQuery('#taskUpdateTime');
             var jCancellationForm = jQuery('#taskCancellationForm');
-            var scroller = new AutoScroller(logElem[0]);
+            var scroller = autoScroller(logElem[0]);
             var poller;
             var ajaxOptions = {
                 url: document.location.href + '.json',
