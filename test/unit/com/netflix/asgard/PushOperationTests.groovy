@@ -17,10 +17,10 @@ package com.netflix.asgard
 
 import com.amazonaws.services.ec2.model.Instance
 import com.netflix.asgard.push.CommonPushOptions
+import com.netflix.asgard.push.RollingPushOperation
 import com.netflix.asgard.push.RollingPushOptions
 import grails.test.GrailsUnitTestCase
 import org.joda.time.DateTime
-import com.netflix.asgard.push.RollingPushOperation
 
 class PushOperationTests extends GrailsUnitTestCase {
 
@@ -39,6 +39,7 @@ class PushOperationTests extends GrailsUnitTestCase {
     def idEclair = "i-7129a61b"
     def idFondue = "i-a3c24cc9"
     def idGelato = "i-6b3bad00"
+    def idNull = "i-deleted"
 
     List<Instance> mockEc2Instances = [
         new Instance(instanceId: idAlmond, launchTime: dateAlmond),
@@ -86,7 +87,8 @@ class PushOperationTests extends GrailsUnitTestCase {
         List<com.amazonaws.services.autoscaling.model.Instance> asgInstances = [
             new com.amazonaws.services.autoscaling.model.Instance(instanceId: idBurger),
             new com.amazonaws.services.autoscaling.model.Instance(instanceId: idGelato),
-            new com.amazonaws.services.autoscaling.model.Instance(instanceId: idDanish)
+            new com.amazonaws.services.autoscaling.model.Instance(instanceId: idDanish),
+            new com.amazonaws.services.autoscaling.model.Instance(instanceId: idNull)
         ]
         return asgInstances
     }
@@ -96,7 +98,7 @@ class PushOperationTests extends GrailsUnitTestCase {
         // Ranges dictate how many times the method is expected to be called.
         def awsEc2Control = mockFor(AwsEc2Service)
         awsEc2Control.demand.getInstances(0..0) { UserContext userContext -> mockEc2Instances}
-        awsEc2Control.demand.getInstance(3..3) { UserContext userContext, instanceId->
+        awsEc2Control.demand.getInstance(4..4) { UserContext userContext, instanceId->
             mockEc2Instances.find{it.instanceId == instanceId}
         }
         RollingPushOperation pushOperation = new RollingPushOperation(options)
