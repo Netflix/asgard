@@ -234,6 +234,9 @@ class ClusterController {
             String subnetPurpose = params.subnetPurpose
             String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForPurposeAndZones(subnetPurpose,
                     selectedZones)
+            if (params.noDefaults != 'true') {
+                loadBalancerNames = loadBalancerNames ?: lastGroup.loadBalancerNames
+            }
             GroupCreateOptions options = new GroupCreateOptions(
                     common: new CommonPushOptions(
                             userContext: userContext,
@@ -256,7 +259,7 @@ class ClusterController {
                     healthCheckGracePeriod: params.healthCheckGracePeriod as Integer ?: lastGracePeriod,
                     terminationPolicies: termPolicies,
                     batchSize: params.batchSize as Integer ?: GroupResizeOperation.DEFAULT_BATCH_SIZE,
-                    loadBalancerNames: loadBalancerNames ?: lastGroup.loadBalancerNames,
+                    loadBalancerNames: loadBalancerNames,
                     iamInstanceProfile: params.iamInstanceProfile ?: null,
                     keyName: params.keyName ?: lastLaunchConfig.keyName,
                     availabilityZones: selectedZones ?: lastGroup.availabilityZones,
