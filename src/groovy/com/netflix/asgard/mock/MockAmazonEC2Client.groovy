@@ -17,6 +17,7 @@ package com.netflix.asgard.mock
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.AmazonWebServiceRequest
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.ec2.AmazonEC2Client
@@ -322,8 +323,8 @@ class MockAmazonEC2Client extends AmazonEC2Client {
         }
     }
 
-    MockAmazonEC2Client(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonEC2Client(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockImages = loadMockImages()
         mockInstances = loadMockInstances()
         mockSpotInstanceRequests = loadMockSpotInstanceRequests()

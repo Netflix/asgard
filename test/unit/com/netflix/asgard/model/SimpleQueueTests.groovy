@@ -16,6 +16,8 @@
 package com.netflix.asgard.model
 
 import com.netflix.asgard.Region
+import com.netflix.asgard.Time
+import org.joda.time.DateTime
 
 class SimpleQueueTests extends GroovyTestCase {
 
@@ -31,6 +33,8 @@ class SimpleQueueTests extends GroovyTestCase {
 
     void testHumanReadableAttributes() {
 
+        String timestamp = '1234566789'
+
         String url = 'https://sqs.us-east-1.amazonaws.com/179000000000/com_netflix_log4n_test_queue_error'
         SimpleQueue queue = new SimpleQueue(url)
         queue.attributes = [
@@ -41,11 +45,11 @@ class SimpleQueueTests extends GroovyTestCase {
                 VisibilityTimeout: '45',
                 MaximumMessageSize: '2048',
                 MessageRetentionPeriod: '3600',
-                CreatedTimestamp: '1234566789',
-                LastModifiedTimestamp: '1234566789'
+                CreatedTimestamp: timestamp,
+                LastModifiedTimestamp: timestamp
         ]
         Map<String, String> actualHumanReadableMap = queue.humanReadableAttributes
-        Map<String, String> pstExpectedResult = [
+        Map<String, String> expectedResult = [
                 'Approximate Number Of Messages': '11908',
                 'Approximate Number Of Messages Not Visible': '10515',
                 'Queue Arn': 'arn:aws:sqs:us-east-1:179000000000:com_netflix_log4n_test_queue_error',
@@ -53,14 +57,10 @@ class SimpleQueueTests extends GroovyTestCase {
                 'Visibility Timeout': '45 seconds',
                 'Maximum Message Size': '2048 bytes',
                 'Message Retention Period': '1h',
-                'Created Timestamp': '2009-02-13 15:13:09 PST',
-                'Last Modified Timestamp': '2009-02-13 15:13:09 PST']
+                /* using Time.format here makes this test independent of timezone it is running in */
+                'Created Timestamp': Time.format(new DateTime(Long.parseLong(timestamp) * 1000)),
+                'Last Modified Timestamp': Time.format(new DateTime(Long.parseLong(timestamp) * 1000))]
 
-        // Some testing servers use UTC timezone
-        Map<String, String> utcExpectedResult = pstExpectedResult.clone() as Map
-        utcExpectedResult['Created Timestamp'] = '2009-02-13 23:13:09 UTC'
-        utcExpectedResult['Last Modified Timestamp'] = '2009-02-13 23:13:09 UTC'
-
-        assert pstExpectedResult == actualHumanReadableMap || utcExpectedResult == actualHumanReadableMap
+        assert expectedResult == actualHumanReadableMap
     }
 }

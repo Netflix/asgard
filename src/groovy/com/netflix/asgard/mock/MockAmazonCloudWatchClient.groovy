@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.mock
 
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient
 import com.amazonaws.services.cloudwatch.model.DescribeAlarmsRequest
@@ -31,8 +32,8 @@ class MockAmazonCloudWatchClient extends AmazonCloudWatchClient {
         [new MetricAlarm().withAlarmName('goofy')]
     }
 
-    MockAmazonCloudWatchClient(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonCloudWatchClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockAlarms = loadMockAlarms()
     }
 

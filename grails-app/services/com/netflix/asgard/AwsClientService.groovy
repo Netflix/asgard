@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient
 import com.amazonaws.services.ec2.AmazonEC2Client
@@ -44,12 +45,15 @@ class AwsClientService implements InitializingBean {
 
     def grailsApplication
     def secretService
+    def configService
 
     /**
      * Interface names mapped to ClientTypes wrapper objects. For each interface name, a real and fake concrete class
      * type should be provided.
      */
-    private Map<String, Class> interfaceSimpleNamesToAwsClientClasses
+    private Map<String, Class> interfaceSimpleNamesToAwsClientClasses 
+
+    private ClientConfiguration clientConfiguration
 
     void afterPropertiesSet() {
         interfaceSimpleNamesToAwsClientClasses = [
@@ -64,11 +68,14 @@ class AwsClientService implements InitializingBean {
                 AmazonSNS: concrete(AmazonSNSClient, MockAmazonSnsClient),
                 AmazonSQS: concrete(AmazonSQSClient, MockAmazonSqsClient)
         ]
+        clientConfiguration = new ClientConfiguration()
+        clientConfiguration.proxyHost = configService.proxyHost
+        clientConfiguration.proxyPort = configService.proxyPort
     }
 
     public <T> T create(Class<T> interfaceType) {
         Class implementationType = interfaceSimpleNamesToAwsClientClasses[interfaceType.simpleName]
-        implementationType.newInstance(secretService.awsCredentials) as T
+        implementationType.newInstance(secretService.awsCredentials, clientConfiguration) as T
     }
 
     Class concrete(Class real, Class fake) {

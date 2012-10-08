@@ -186,7 +186,8 @@ class ClusterController {
             String lcName = lastGroup.launchConfigurationName
             LaunchConfiguration lastLaunchConfig = awsAutoScalingService.getLaunchConfiguration(userContext, lcName)
             String appName = Relationships.appNameFromGroupName(name)
-            List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups)
+            List<String> lastSecurityGroups = lastLaunchConfig.securityGroups
+            List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups ?: lastSecurityGroups)
             List<String> selectedZones = Requests.ensureList(params.selectedZones ?: lastGroup.availabilityZones)
             List<String> termPolicies = Requests.ensureList(params.terminationPolicy ?: lastGroup.terminationPolicies)
             List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
@@ -235,6 +236,9 @@ class ClusterController {
             String subnetPurpose = params.subnetPurpose
             String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForPurposeAndZones(subnetPurpose,
                     selectedZones)
+            if (params.noDefaults != 'true') {
+                loadBalancerNames = loadBalancerNames ?: lastGroup.loadBalancerNames
+            }
             GroupCreateOptions options = new GroupCreateOptions(
                     common: new CommonPushOptions(
                             userContext: userContext,
@@ -257,7 +261,7 @@ class ClusterController {
                     healthCheckGracePeriod: params.healthCheckGracePeriod as Integer ?: lastGracePeriod,
                     terminationPolicies: termPolicies,
                     batchSize: params.batchSize as Integer ?: GroupResizeOperation.DEFAULT_BATCH_SIZE,
-                    loadBalancerNames: loadBalancerNames ?: lastGroup.loadBalancerNames,
+                    loadBalancerNames: loadBalancerNames,
                     iamInstanceProfile: params.iamInstanceProfile ?: null,
                     keyName: params.keyName ?: lastLaunchConfig.keyName,
                     availabilityZones: selectedZones ?: lastGroup.availabilityZones,

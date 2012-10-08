@@ -16,6 +16,7 @@
 package com.netflix.asgard.mock
 
 import com.amazonaws.AmazonWebServiceRequest
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient
@@ -104,8 +105,8 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
         }
     }
 
-    MockAmazonAutoScalingClient(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonAutoScalingClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockAsgs = loadMockAsgs()
         mockLaunchConfigs = loadMockLaunchConfigs()
     }

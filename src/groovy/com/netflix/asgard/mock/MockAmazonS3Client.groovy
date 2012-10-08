@@ -15,13 +15,14 @@
  */
 package com.netflix.asgard.mock
 
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.s3.AmazonS3Client
 
 class MockAmazonS3Client extends AmazonS3Client {
 
-    MockAmazonS3Client(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonS3Client(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
     }
 
     void setEndpoint(String endpoint) {

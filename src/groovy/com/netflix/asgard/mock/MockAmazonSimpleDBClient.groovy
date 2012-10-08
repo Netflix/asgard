@@ -16,6 +16,7 @@
 package com.netflix.asgard.mock
 
 import com.amazonaws.AmazonServiceException
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.simpledb.AmazonSimpleDBClient
 import com.amazonaws.services.simpledb.model.Attribute
@@ -88,8 +89,8 @@ class MockAmazonSimpleDBClient extends AmazonSimpleDBClient {
         )]
     }
 
-    MockAmazonSimpleDBClient(BasicAWSCredentials awsCredentials) {
-        super(awsCredentials)
+    MockAmazonSimpleDBClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
         mockAppItems = loadMockAppItems()
         mockDomains = loadMockDomains()
     }

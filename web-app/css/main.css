@@ -129,7 +129,7 @@ input.number                     { width: 36px;  }
 /* General page body */
 .body       { clear: both; float: left; margin: 0 15px 10px; }
 .emphasized { font-weight: bold; }
-div.clear   { clear: both; }
+.clear      { clear: both; }
 .initial    { color: #204a87; font-weight: bold; }
 .notation   { color: red; font-size: 10px; }
 
