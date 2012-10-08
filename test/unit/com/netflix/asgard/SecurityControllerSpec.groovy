@@ -24,14 +24,16 @@ import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.netflix.asgard.mock.Mocks
 import grails.test.MockUtils
+import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
+@TestFor(SecurityController)
 class SecurityControllerSpec extends Specification {
     AmazonEC2 amazonEC2 = Mock(AmazonEC2)
 
     void setup() {
-        Mocks.createDynamicMethods() 
+        Mocks.createDynamicMethods()
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(SecurityCreateCommand)
         controller.awsEc2Service = Mocks.newAwsEc2Service(amazonEC2)

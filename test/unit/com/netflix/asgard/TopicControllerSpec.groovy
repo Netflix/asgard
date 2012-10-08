@@ -28,9 +28,11 @@ import com.amazonaws.services.sns.model.SubscribeRequest
 import com.amazonaws.services.sns.model.UnsubscribeRequest
 import com.netflix.asgard.mock.Mocks
 import grails.test.MockUtils
+import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
+@TestFor(TopicController)
 class TopicControllerSpec extends Specification {
     AmazonSNS mockAmazonSNS = Mock(AmazonSNS)
 

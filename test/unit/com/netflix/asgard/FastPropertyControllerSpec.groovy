@@ -16,9 +16,11 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
+import grails.test.mixin.TestFor
 import groovy.util.slurpersupport.GPathResult
 import spock.lang.Specification
 
+@TestFor(FastPropertyController)
 class FastPropertyControllerSpec extends Specification {
 
     void setup() {
