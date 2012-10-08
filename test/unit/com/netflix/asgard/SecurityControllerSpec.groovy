@@ -23,14 +23,15 @@ import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.netflix.asgard.mock.Mocks
-import grails.plugin.spock.ControllerSpec
 import grails.test.MockUtils
+import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
-class SecurityControllerSpec extends ControllerSpec {
+class SecurityControllerSpec extends Specification {
     AmazonEC2 amazonEC2 = Mock(AmazonEC2)
 
     void setup() {
+        Mocks.createDynamicMethods() 
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(SecurityCreateCommand)
         controller.awsEc2Service = Mocks.newAwsEc2Service(amazonEC2)
@@ -77,7 +78,7 @@ class SecurityControllerSpec extends ControllerSpec {
         when: controller.show()
 
         then:
-        '/error/missing' == controller.renderArgs.view
+        '/error/missing' == view
         "Security Group 'doesntexist' not found in us-east-1 test" == controller.flash.message
         1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['doesntexist'])) >> {
             throw new AmazonServiceException('Missing Security Group')
@@ -86,7 +87,7 @@ class SecurityControllerSpec extends ControllerSpec {
     }
 
     def 'save should fail without app'() {
-        mockRequest.method = 'POST'
+        request.method = 'POST'
         def p = controller.params
         p.wrongParam = 'helloworld'
         def cmd = new SecurityCreateCommand()
@@ -98,14 +99,12 @@ class SecurityControllerSpec extends ControllerSpec {
         when: controller.save(cmd)
 
         then:
-        controller.create == controller.chainArgs.action
-        p == controller.chainArgs.params
-        cmd == controller.chainArgs.model['cmd']
+        '/security/create?wrongParam=helloworld' == response.redirectUrl
     }
 
     def 'save should create security group'() {
-        mockRequest.method = 'POST'
-        def p = mockParams
+        request.method = 'POST'
+        def p = controller.params
         p.appName = 'helloworld'
         p.detail = 'indiana'
         p.description = 'Only accessible by Indiana Jones'
@@ -119,8 +118,7 @@ class SecurityControllerSpec extends ControllerSpec {
         controller.save(cmd)
 
         then:
-        controller.show == controller.redirectArgs.action
-        'sg-123' == controller.redirectArgs.params.id
+        '/security/show/sg-123' == response.redirectUrl
         controller.flash.message == "Security Group 'helloworld-indiana' has been created."
         1 * amazonEC2.createSecurityGroup(new CreateSecurityGroupRequest(groupName: 'helloworld-indiana',
                 description: 'Only accessible by Indiana Jones')) >> new CreateSecurityGroupResult(groupId: 'sg-123')

@@ -19,8 +19,6 @@ import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 
 class ObjectLinkTagLib extends ApplicationTagLib {
 
-    def regionService
-
     def linkObject = { attrs, body ->
         String objectId = attrs.remove('name')
         if (!objectId) { return }
@@ -61,13 +59,13 @@ class ObjectLinkTagLib extends ApplicationTagLib {
     def createLink = { attrs ->
 
         String controller = attrs.controller ?: controllerName
-        if (regionService.isControllerRegional(controller)) {
+        if (grailsApplication.controllerNamesToContextParams[(controller)].contains('region')) {
             // Get value for region parameter from tag attribute or request attribute. Ensure link has region parameter.
             String region = attrs.region ? attrs.remove('region') : request['region'].toString()
             if (attrs.params)
-                attrs.params.put('region', region);
+                attrs.params.put('region', region)
             else {
-                attrs.params = ['region': region];
+                attrs.params = ['region': region]
             }
         }
         super.createLink.call(attrs)

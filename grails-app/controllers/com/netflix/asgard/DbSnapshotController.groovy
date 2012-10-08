@@ -17,14 +17,16 @@ package com.netflix.asgard
 
 import com.amazonaws.services.rds.model.DBInstance
 import com.amazonaws.services.rds.model.DBSnapshot
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class DbSnapshotController {
 
     def awsRdsService
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -43,7 +45,7 @@ class DbSnapshotController {
             redirect(controller:"rdsInstance", action:'show', params:[name:params.dBInstanceIdentifier])
         } else {
             awsRdsService.createDBSnapshot(userContext, params.dBInstanceIdentifier, params.snapshotName)
-            redirect(action: show, params: [name: params.snapshotName])
+            redirect(action: 'show', params: [name: params.snapshotName])
         }
     }
 
@@ -51,15 +53,15 @@ class DbSnapshotController {
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
             flash.message = "DB Instance name may not be blank."
-            redirect(action: list)
+            redirect(action: 'list')
         } else {
             try {
                 DBInstance instance = awsRdsService.restoreFromSnapshot(userContext, params.name, params.dBInstanceIdentifier)
                 String identifier = instance.getDBInstanceIdentifier()
-                redirect(controller: "rdsInstance", action: show, params: [dBInstanceIdentifier: identifier])
+                redirect(controller: "rdsInstance", action: 'show', params: [dBInstanceIdentifier: identifier])
             } catch (Exception e) {
                 flash.message = "Could not restore from DB Snapshot: ${e}"
-                redirect(action: list)
+                redirect(action: 'list')
             }
         }
     }
@@ -101,7 +103,7 @@ class DbSnapshotController {
         } catch (Exception e) {
             flash.message = "Could not delete DB Snapshot: ${e}"
         }
-        redirect(action: list)
+        redirect(action: 'list')
     }
 
 }

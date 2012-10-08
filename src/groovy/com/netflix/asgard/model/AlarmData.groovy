@@ -21,6 +21,7 @@ import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest
 import com.google.common.collect.Lists
 import com.netflix.asgard.Check
 import com.netflix.asgard.Relationships
+import groovy.transform.Immutable
 
 @Immutable
 final class AlarmData {

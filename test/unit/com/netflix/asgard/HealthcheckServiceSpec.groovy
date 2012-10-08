@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyAccessibility")
-class HealthCheckServiceSpec extends Specification {
+class HealthcheckServiceSpec extends Specification {
 
     HealthcheckService healthcheckService
     ConfigService configService = Mock(ConfigService)

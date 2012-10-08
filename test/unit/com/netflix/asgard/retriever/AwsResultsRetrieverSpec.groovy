@@ -19,18 +19,11 @@ import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryRequest
 import com.amazonaws.services.ec2.model.DescribeSpotPriceHistoryResult
 import com.amazonaws.services.ec2.model.SpotPrice
 import com.netflix.asgard.AwsEc2Service
-import com.netflix.asgard.HasEqualsHashCodeToString
 import com.netflix.asgard.Region
-import com.netflix.asgard.model.AwsRequestEqualityMixin
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
 class AwsResultsRetrieverSpec extends Specification {
-
-    def setup() {
-        DescribeSpotPriceHistoryRequest.mixin AwsRequestEqualityMixin
-        SpotPrice.mixin HasEqualsHashCodeToString
-    }
 
     def 'should retrieve for all tokens'() {
         AwsEc2Service service = Mock(AwsEc2Service)

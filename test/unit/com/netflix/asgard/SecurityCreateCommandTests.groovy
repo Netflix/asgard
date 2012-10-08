@@ -16,15 +16,18 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
-import grails.test.GrailsUnitTestCase
 import grails.test.MockUtils
+import grails.test.mixin.TestFor
+import org.junit.Before
+import org.junit.Test
 
-class SecurityCreateCommandTests extends GrailsUnitTestCase {
+@TestFor(SecurityController)
+class SecurityCreateCommandTests {
 
     def appService
 
+    @Before
     void setUp() {
-        super.setUp()
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(SecurityCreateCommand)
         appService = Mocks.applicationService()
@@ -37,6 +40,7 @@ class SecurityCreateCommandTests extends GrailsUnitTestCase {
         return cmd
     }
 
+    @Test
     void testEmptyAppNameIsNotValid() {
         SecurityCreateCommand cmd = validateParams(appName: "")
         assert cmd.hasErrors()
@@ -44,6 +48,7 @@ class SecurityCreateCommandTests extends GrailsUnitTestCase {
         assert "blank" == cmd.errors.appName
     }
 
+    @Test
     void testBlankAppNameIsNotValid() {
         SecurityCreateCommand cmd = validateParams(appName: "   ")
         assert cmd.hasErrors()
@@ -51,6 +56,7 @@ class SecurityCreateCommandTests extends GrailsUnitTestCase {
         assert "blank" == cmd.errors.appName
     }
 
+    @Test
     void testNullAppNameIsNotValid() {
         SecurityCreateCommand cmd = validateParams(appName: null)
         assert cmd.hasErrors()
@@ -58,6 +64,7 @@ class SecurityCreateCommandTests extends GrailsUnitTestCase {
         assert "nullable" == cmd.errors.appName
     }
 
+    @Test
     void testAppNameWithBadCharacterIsNotValid() {
         SecurityCreateCommand cmd = validateParams(appName: "uses-hyphen")
         assert cmd.hasErrors()
@@ -65,6 +72,7 @@ class SecurityCreateCommandTests extends GrailsUnitTestCase {
         assert "application.name.illegalChar" == cmd.errors.appName
     }
 
+    @Test
     void testUnknownAppNameIsValid() {
         def cmd = validateParams(appName: "never_heard_of_this_app")
         assert cmd.hasErrors()
@@ -72,30 +80,35 @@ class SecurityCreateCommandTests extends GrailsUnitTestCase {
         assert "application.name.nonexistent" == cmd.errors.appName
     }
 
+    @Test
     void testKnownAppNameIsValid() {
         def cmd = validateParams(appName: "abcache")
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
+    @Test
     void testEmptyDetailIsValid() {
         def cmd = validateParams(appName: "abcache", detail:"")
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
+    @Test
     void testNullDetailIsValid() {
         def cmd = validateParams(appName: "abcache", detail:null)
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
+    @Test
     void testDetailIsValid() {
         def cmd = validateParams(appName: "abcache", detail:"iphone")
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
+    @Test
     void testDetailIsInvalid() {
         def cmd = validateParams(appName: "abcache", detail:"iphone/and/ipad")
         assert cmd.hasErrors()
@@ -103,6 +116,7 @@ class SecurityCreateCommandTests extends GrailsUnitTestCase {
         assert "The detail must be empty or consist of alphanumeric characters and hyphens" == cmd.errors.detail
     }
 
+    @Test
     void testTotalNameIsTooLong() {
         def cmd = validateParams(appName: "videometadata",
                 detail:"integration-240-usa-iphone-ipad-ios5-even-numbered-days-except-weekends-and-excluding-when-the-moon-is-full")

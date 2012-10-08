@@ -25,6 +25,7 @@ import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.Image
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.google.common.collect.Multiset
 import com.google.common.collect.Sets
@@ -32,14 +33,16 @@ import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingProcessType
+import com.netflix.asgard.model.GroupedInstance
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import com.amazonaws.services.ec2.model.SecurityGroup
 
+@ContextParam('region')
 class AutoScalingController {
 
     def grailsApplication
@@ -56,7 +59,7 @@ class AutoScalingController {
 
     def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', postpone: 'POST', pushStart: 'POST']
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -114,7 +117,7 @@ class AutoScalingController {
         } else {
             AutoScalingGroupData groupData = awsAutoScalingService.buildAutoScalingGroupData(userContext, group)
             Multiset<String> zonesWithInstanceCounts = TreeMultiset.create()
-            for (com.amazonaws.services.autoscaling.model.Instance instance in groupData?.instances) {
+            for (GroupedInstance instance in groupData?.instances) {
                 zonesWithInstanceCounts.add(instance.availabilityZone)
             }
             String appName = Relationships.appNameFromGroupName(name)
@@ -254,7 +257,7 @@ class AutoScalingController {
     def save = { GroupCreateCommand cmd ->
 
         if (cmd.hasErrors()) {
-            chain(action: create, model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model: [cmd:cmd], params: params) // Use chain to pass both the errors and the params
         } else {
 
             // Auto Scaling Group name
@@ -307,10 +310,10 @@ class AutoScalingController {
                     userContext, groupTemplate, launchConfigTemplate, suspendedProcesses)
             flash.message = result.toString()
             if (result.succeeded()) {
-                redirect(action: show, params: [id: groupName])
+                redirect(action: 'show', params: [id: groupName])
             }
             else {
-                chain(action: create, model: [cmd: cmd], params: params)
+                chain(action: 'create', model: [cmd: cmd], params: params)
             }
         }
     }
@@ -364,14 +367,14 @@ class AutoScalingController {
         Integer minSize = (params.min ?: 0) as Integer
         Integer desiredCapacity = (params.desiredCapacity ?: 0) as Integer
         Integer maxSize = (params.max ?: 0) as Integer
-        def nextAction = show
+        def nextAction = 'show'
 
         if (minSize > desiredCapacity) {
             flash.message = "Error: Minimum size ${minSize} is lower than desired capacity ${desiredCapacity}"
-            nextAction = edit
+            nextAction = 'edit'
         } else if (desiredCapacity > maxSize) {
             flash.message = "Error: Desired capacity ${desiredCapacity} is lower than max size ${maxSize}"
-            nextAction = edit
+            nextAction = 'edit'
         } else {
             AutoScalingGroup asg = awsAutoScalingService.getAutoScalingGroup(userContext, name)
             String lcName = params.launchConfiguration
@@ -400,10 +403,10 @@ class AutoScalingController {
                 flash.message = "AutoScaling Group '${name}' has been updated."
             } catch (Exception e) {
                 flash.message = "Could not update AutoScaling Group: ${e}"
-                nextAction = edit
+                nextAction = 'edit'
             }
         }
-        redirect(action: nextAction, params: [name: name])
+        redirect(action: nextAction, params: [id: name])
     }
 
     def delete = {
@@ -428,14 +431,14 @@ class AutoScalingController {
                 showGroupNext = true
             }
         }
-        showGroupNext ? redirect(action: show, params: [name: name]) : redirect(action: list)
+        showGroupNext ? redirect(action: 'show', params: [id: name]) : redirect(action: 'list')
     }
 
     def postpone = {
         UserContext userContext = UserContext.of(request)
         String name = params.name
         awsAutoScalingService.postponeExpirationTime(userContext, name, Duration.standardDays(1))
-        redirect(action: show, id: name)
+        redirect(action: 'show', id: name)
     }
 
     def generateName = {
@@ -489,7 +492,7 @@ class AutoScalingController {
         String name = params.id ?: params.name
         awsAutoScalingService.removeExpirationTime(userContext, name)
         flash.message = "Removed expiration time from auto scaling group '${name}'"
-        redirect(action: show, id: name)
+        redirect(action: 'show', id: name)
     }
 
     def imageless = {

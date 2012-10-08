@@ -15,25 +15,15 @@
  */
 package com.netflix.asgard.server
 
-import org.apache.commons.lang.builder.EqualsBuilder
-import org.apache.commons.lang.builder.HashCodeBuilder
+import groovy.transform.EqualsAndHashCode
 
+@EqualsAndHashCode
 class Environment {
     String name
     String canonicalDnsName
     List<Server> servers
 
     List<String> getServerNames() { servers*.name }
-
-    @Override
-    public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
-    }
-
-    @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
 
     @Override
     String toString() { name }

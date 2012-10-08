@@ -16,16 +16,18 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.model.SimpleQueue
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class QueueController {
 
     def awsSqsService
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -49,10 +51,10 @@ class QueueController {
         try {
             awsSqsService.createQueue(userContext, queueName, visibilityTimeout)
             flash.message = "Queue '${queueName}' has been created."
-            redirect(action:show, params:[id:queueName])
+            redirect(action: 'show', params:[id:queueName])
         } catch (Exception e) {
             flash.message = "Could not create Queue: ${e}"
-            redirect(action:list)
+            redirect(action: 'list')
         }
     }
 
@@ -65,7 +67,7 @@ class QueueController {
         } catch (Exception e) {
             flash.message = "Could not delete Queue '${queueName}': ${e}"
         }
-        redirect(action:list)
+        redirect(action: 'list')
     }
 
     def show = {
@@ -101,6 +103,6 @@ class QueueController {
         } catch (Exception e) {
             flash.message = "Failed to update Queue '${queueName}': ${e}"
         }
-        redirect(action:show, params:[id:queueName])
+        redirect(action: 'show', params:[id:queueName])
     }
 }

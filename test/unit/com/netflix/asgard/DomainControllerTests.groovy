@@ -17,12 +17,12 @@ package com.netflix.asgard
 
 import com.amazonaws.services.simpledb.model.DomainMetadataResult
 import com.netflix.asgard.mock.Mocks
-import grails.test.ControllerUnitTestCase
+import org.junit.Before
 
-class DomainControllerTests extends ControllerUnitTestCase {
+class DomainControllerTests {
 
+    @Before
     void setUp() {
-        super.setUp()
         TestUtils.setUpMockRequest()
         controller.simpleDbDomainService = Mocks.simpleDbDomainService()
     }
@@ -46,7 +46,7 @@ class DomainControllerTests extends ControllerUnitTestCase {
         def p = controller.params
         p.id = 'doesntexist'
         controller.show()
-        assert '/error/missing' == controller.renderArgs.view
+        assert '/error/missing' == view
         assert "SimpleDB Domain 'doesntexist' not found in us-east-1 test" == controller.flash.message
     }
 }

@@ -26,14 +26,16 @@ import com.google.common.collect.Multiset
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.text.TextLink
 import com.netflix.asgard.text.TextLinkTemplate
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class InstanceController {
 
     final static allowedMethods = [terminate: 'POST', terminateAndShrinkGroup: 'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def awsAutoScalingService
     def awsEc2Service
@@ -235,7 +237,7 @@ class InstanceController {
             if (group) {
                 flash.message = "Terminated instance ${instanceId} and shrunk auto scaling group" +
                         " ${group.autoScalingGroupName} to ${group.desiredCapacity - 1}"
-                redirect(controller: 'autoScaling', action: show, params: [id: group.autoScalingGroupName])
+                redirect(controller: 'autoScaling', action: 'show', params: [id: group.autoScalingGroupName])
                 return
             } else {
                 flash.message = "Termination cancelled because instance ${instanceId} is not in an auto scaling group"
@@ -243,7 +245,7 @@ class InstanceController {
         } catch (AmazonServiceException ase) {
             flash.message = ase.message
         }
-        redirect(action:show, params:[instanceId: instanceId])
+        redirect(action: 'show', params:[instanceId: instanceId])
     }
 
     def reboot = {
@@ -252,7 +254,7 @@ class InstanceController {
         awsEc2Service.rebootInstance(userContext, instanceId)
 
         flash.message = "Rebooting instance '${instanceId}'."
-        redirect(action:show, params:[instanceId:instanceId])
+        redirect(action: 'show', params:[instanceId:instanceId])
     }
 
     def raw = {
@@ -268,13 +270,13 @@ class InstanceController {
     }
 
     private void chooseRedirect(String autoScalingGroupName, List<String> instanceIds, String appName = null) {
-        Map destination = [action: list]
+        Map destination = [action: 'list']
         if (autoScalingGroupName) {
             destination = [controller: 'autoScaling', action: 'show', params: [id: autoScalingGroupName, runHealthChecks: true]]
         } else if (instanceIds.size() == 1) {
-            destination = [action: show, params: [id: instanceIds[0]]]
+            destination = [action: 'show', params: [id: instanceIds[0]]]
         } else if (appName) {
-            destination = [action: list, params: [id: appName]]
+            destination = [action: 'list', params: [id: appName]]
         }
         redirect destination
     }
@@ -334,7 +336,7 @@ class InstanceController {
         Instance instance = awsEc2Service.getInstance(userContext, EntityType.instance.ensurePrefix(params.instanceId))
         if (!instance) {
             flash.message = "EC2 Instance ${params.instanceId} not found."
-            redirect(action:list)
+            redirect(action: 'list')
             return
         } else {
             Map<String, String> publicIps = awsEc2Service.describeAddresses(userContext)
@@ -358,7 +360,7 @@ class InstanceController {
         } catch (Exception e) {
             flash.message = "Could not associate Elastic IP '${publicIp}' with '${instanceId}': ${e}"
         }
-        redirect(action:show, params:[instanceId:instanceId])
+        redirect(action: 'show', params:[instanceId:instanceId])
     }
 
     def takeOutOfService = {
@@ -383,14 +385,14 @@ class InstanceController {
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId)
         UserContext userContext = UserContext.of(request)
         awsEc2Service.createInstanceTag(userContext, [instanceId], params.name, params.value)
-        redirect(action:show, params:[instanceId:instanceId])
+        redirect(action: 'show', params:[instanceId:instanceId])
     }
 
     def removeTag = {
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId)
         UserContext userContext = UserContext.of(request)
         awsEc2Service.deleteInstanceTag(userContext, instanceId, params.name)
-        redirect(action:show, params:[instanceId:instanceId])
+        redirect(action: 'show', params:[instanceId:instanceId])
     }
 
     def userData = {

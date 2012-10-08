@@ -17,12 +17,12 @@ package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.InstanceTypeData
-import grails.test.ControllerUnitTestCase
+import org.junit.Before
 
-class InstanceTypeControllerTests extends ControllerUnitTestCase {
+class InstanceTypeControllerTests {
 
+    @Before
     void setUp() {
-        super.setUp()
         TestUtils.setUpMockRequest()
         controller.instanceTypeService = Mocks.instanceTypeService()
     }

@@ -15,11 +15,10 @@
  */
 package com.netflix.asgard
 
-import grails.plugin.spock.ControllerSpec
-import grails.test.MockUtils
+import spock.lang.Specification
 import spock.lang.Unroll
 
-class InitControllerSpec extends ControllerSpec {
+class InitControllerSpec extends Specification {
 
     static final String SAMPLE_ACCESS_ID = 'AKIAII3BM5ENKCZEI4KQ'
     static final String SAMPLE_SECRET_KEY = 'yHxG2v/AuzKTKWSMT/JgqtlYGrpxdZggmV4Nxl9d'
@@ -29,7 +28,7 @@ class InitControllerSpec extends ControllerSpec {
 
     def setup() {
         TestUtils.setUpMockRequest()
-        MockUtils.prepareForConstraintsTests(InitializeCommand)
+        mockForConstraintsTests(InitializeCommand)
         controller.initService = initService
         controller.configService = configService
     }
@@ -43,7 +42,7 @@ class InitControllerSpec extends ControllerSpec {
         controller.save(command)
 
         then:
-        'home' == redirectArgs.controller
+        '/home' == response.redirectUrl
         'Created Asgard configuration file at asgardHomeDir/Config.groovy.' == controller.flash.message
         //noinspection GroovyPointlessArithmetic
         1 * initService.writeConfig(_)
@@ -59,7 +58,7 @@ class InitControllerSpec extends ControllerSpec {
 
         then:
         'This error' == controller.flash.message
-        'index' == redirectArgs.action
+        '/init/index' == response.redirectUrl
     }
 
     def 'should return error for invalid request'() {
@@ -70,7 +69,8 @@ class InitControllerSpec extends ControllerSpec {
         controller.save(command)
 
         then:
-        'index' == renderArgs.view
+        command.hasErrors()
+        '/init/index' == view
     }
 
     @Unroll("hasErrors should return #valid when accessId is #accessId")

@@ -19,6 +19,7 @@ import com.google.common.base.Predicate
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Maps
+import org.codehaus.groovy.runtime.metaclass.MixinInstanceMetaProperty
 
 /**
  * This is a tool for dealing with the outwardly visible state of objects (in terms of its bean properties).
@@ -82,7 +83,7 @@ class BeanState {
         // Inject properties that exist and look similar
         propertyNamesToValues.each { key, value ->
             final MetaProperty metaProperty = targetMetaPropertiesByName[key]
-            if (!metaProperty) {
+            if (!metaProperty || metaProperty instanceof MixinInstanceMetaProperty) {
                 return // targetBean doesn't have one of these properties
             }
             // If it is a primitive type, box it to simplify comparing types.

@@ -18,13 +18,15 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.netflix.asgard.model.AlarmData
-import com.netflix.asgard.model.AlarmData.ComparisonOperator
-import com.netflix.asgard.model.AlarmData.Statistic
 import com.netflix.asgard.model.MetricId
 import com.netflix.asgard.model.TopicData
+import com.netflix.asgard.model.AlarmData.ComparisonOperator
+import com.netflix.asgard.model.AlarmData.Statistic
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class AlarmController {
 
     def awsCloudWatchService
@@ -33,7 +35,7 @@ class AlarmController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -53,7 +55,7 @@ class AlarmController {
         ScalingPolicy policy = awsAutoScalingService.getScalingPolicy(userContext, policyName)
         if (!policy) {
             flash.message = "Policy '${policyName}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
             return
         }
         awsCloudWatchService.prepareForAlarmCreation(userContext, policy.autoScalingGroupName, params) <<
@@ -86,7 +88,7 @@ class AlarmController {
         MetricAlarm alarm = awsCloudWatchService.getAlarm(userContext, alarmName)
         if (!alarm) {
             flash.message = "Alarm '${alarmName}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
             return
         }
         AlarmData alarmData = AlarmData.fromMetricAlarm(alarm)
@@ -109,7 +111,7 @@ class AlarmController {
     }
 
     private void chooseRedirect(List<String> policies) {
-        Map destination = [action: result]
+        Map destination = [action: 'result']
         if (policies?.size() == 1) {
             destination = [controller: 'scalingPolicy', action: 'show', id: policies[0]]
         }
@@ -228,7 +230,7 @@ class AlarmValidationCommand {
     static constraints = {
         comparisonOperator(nullable: false, blank: false)
         threshold(nullable: false)
-        metric(validator: { Object value, AlarmValidationCommand cmd ->
+        metric(nullable: true, validator: { Object value, AlarmValidationCommand cmd ->
             (value && cmd.namespace) || cmd.existingMetric
         })
     }

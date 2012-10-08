@@ -18,14 +18,14 @@ package com.netflix.asgard
 import grails.converters.JSON
 import grails.converters.XML
 
-@RegionAgnostic class TaskController {
+class TaskController {
 
     def taskService
 
     // the delete, save and update actions only accept POST requests
     def static allowedMethods = [cancel:'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         Collection<Task> running = taskService.getRunning().reverse()
@@ -83,9 +83,9 @@ import grails.converters.XML
         }
 
         if (task.objectId && task.objectType) {
-            redirect(controller: task.objectType.name(), action: show, params: [id: task.objectId])
+            redirect(controller: task.objectType.name(), action: 'show', params: [id: task.objectId])
         } else {
-            redirect(action:list)
+            redirect(action: 'list')
         }
     }
 

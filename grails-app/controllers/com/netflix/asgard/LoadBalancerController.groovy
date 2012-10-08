@@ -25,9 +25,11 @@ import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.InstanceStateData
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class LoadBalancerController {
 
     def applicationService
@@ -147,7 +149,7 @@ class LoadBalancerController {
                         subnetPurpose)
                 updateHealthCheck(userContext, lbName, params)
                 flash.message = "Load Balancer '${lbName}' has been created. " + configService.postElbCreationMessage
-                redirect(action:show, params:[name:lbName])
+                redirect(action: 'show', params:[name:lbName])
             } catch (Exception e) {
                 flash.message = "Could not create Load Balancer: ${e}"
                 chain(action: 'create', model: [cmd: cmd], params: params)
@@ -330,7 +332,7 @@ class LoadBalancerCreateCommand {
             }
         })
 
-        stack(validator: { value, command->
+        stack(nullable: true, validator: { value, command->
             if (value && !Relationships.checkName(value)) {
                 return "The stack must be empty or consist of alphanumeric characters"
             }
@@ -339,7 +341,7 @@ class LoadBalancerCreateCommand {
             }
         })
 
-        newStack(validator: { value, command->
+        newStack(nullable: true, validator: { value, command->
             if (value && !Relationships.checkName(value)) {
                 return "stack.illegalChar"
             }
@@ -351,7 +353,7 @@ class LoadBalancerCreateCommand {
             }
         })
 
-        detail(validator: { value, command->
+        detail(nullable: true, validator: { value, command->
             if (value && !Relationships.checkDetail(value)) {
                 return "The detail must be empty or consist of alphanumeric characters and hyphens"
             }
@@ -364,13 +366,13 @@ class LoadBalancerCreateCommand {
         lbPort1(nullable: false, range: 0..65535)
         instancePort1(nullable: false, range: 0..65535)
 
-        protocol2(validator: { value, command->
+        protocol2(nullable: true, validator: { value, command->
             if (value && (!command.lbPort2 || !command.instancePort2) ) {
                 return "Please enter port numbers for the second protocol"
             }
         })
-        lbPort2(range: 0..65535)
-        instancePort2(range: 0..65535)
+        lbPort2(nullable: true, range: 0..65535)
+        instancePort2(nullable: true, range: 0..65535)
 
         target(nullable: false, blank: false)
         interval(nullable: false, range: 0..1000)

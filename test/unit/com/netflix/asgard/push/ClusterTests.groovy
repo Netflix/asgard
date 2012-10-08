@@ -23,6 +23,7 @@ import com.netflix.asgard.model.AutoScalingGroupData
 class ClusterTests extends GroovyTestCase {
 
     void setUp() {
+        Mocks.createDynamicMethods() 
         Mocks.awsAutoScalingService()
     }
 

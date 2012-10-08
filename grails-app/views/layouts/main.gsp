@@ -61,6 +61,22 @@
       <div class="ticket" title="${fullTicketLabel} number for logging change actions.">
         <input type="text" name="ticket" placeholder="${ticketLabel}" id="ticketNumber" title="${fullTicketLabel} number" class="${ticketRequired ? 'required' : 'optional'}"/>
       </div>
+      <g:if test="${authenticationEnabled}">
+        <shiro:isLoggedIn>
+          <div class="authentication">
+            Logged in as <shiro:principal/>
+            <ul>
+              <g:if test="${apiTokenEnabled}">
+                <li><g:link controller="apiToken" action="create">Generate API Token</g:link></li>
+              </g:if>
+              <li><g:link controller="auth" action="signOut" params="${[targetUri: request.requestURL.encodeAsHTML()]}">Logout</g:link></li>
+            </ul>
+          </div>
+        </shiro:isLoggedIn>
+        <shiro:isNotLoggedIn>
+          <g:link controller="auth" action="login" class="login" params="${[targetUri: request.requestURL.encodeAsHTML()]}">Login</g:link> 
+        </shiro:isNotLoggedIn>
+      </g:if>
       <div class="search" title="Find entities by name">
         <form action="/search" method="GET">
           %{--<input type="search" results="10" autosave="asgard${env}globalsearch" name="q" placeholder="Global search by names" value="${params.q}">--}%

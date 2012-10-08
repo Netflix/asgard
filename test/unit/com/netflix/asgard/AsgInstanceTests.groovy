@@ -18,20 +18,14 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.mock.Mocks
-import org.apache.commons.lang.builder.EqualsBuilder
 
 class AsgInstanceTests extends GroovyTestCase {
 
     void testCopy() {
 
-        Mocks.awsAutoScalingService()
+        Mocks.createDynamicMethods() 
 
-        // Amazon didn't write an equals method but we need one for this test.
-        if (!(Instance.class.methods as List).contains("equals")) {
-            Instance.metaClass.equals = {that->
-                EqualsBuilder.reflectionEquals(delegate, that);
-            }
-        }
+        Mocks.awsAutoScalingService()
 
         Instance original = new Instance().withInstanceId("i-test").withAvailabilityZone("us-east-1d").withLifecycleState("running")
 

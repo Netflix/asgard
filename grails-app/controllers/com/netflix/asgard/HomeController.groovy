@@ -15,7 +15,7 @@
  */
 package com.netflix.asgard
 
-@RegionAgnostic class HomeController {
+class HomeController {
 
     // Warm caches in service classes when home page is invoked.
     def configService

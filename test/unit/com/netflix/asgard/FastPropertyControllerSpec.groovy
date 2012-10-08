@@ -16,10 +16,10 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
-import grails.plugin.spock.ControllerSpec
 import groovy.util.slurpersupport.GPathResult
+import spock.lang.Specification
 
-class FastPropertyControllerSpec extends ControllerSpec {
+class FastPropertyControllerSpec extends Specification {
 
     void setup() {
         TestUtils.setUpMockRequest()
@@ -57,12 +57,11 @@ class FastPropertyControllerSpec extends ControllerSpec {
 
     def 'show should return data'() {
         given:
-        FastProperty.mixin HasEqualsHashCodeToString
         Map expected = [
                 fastProperty: FastProperty.fromXml(mockXmlSingle('1'))
         ]
         controller.fastPropertyService = Mock(FastPropertyService)
-        mockParams.id = 'hello'
+        controller.params.id = 'hello'
 
         when:
         Map actual = controller.show()

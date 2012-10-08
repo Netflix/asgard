@@ -21,7 +21,7 @@ import grails.converters.JSON
 import grails.converters.XML
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
-@RegionAgnostic class ServerController {
+class ServerController {
 
     def serverService
     def taskService
@@ -63,19 +63,19 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
         String forceNowValue = params.forceNow
         SwitchAttemptResult switchAttemptResult = serverService.moveTrafficTo(targetServer, forceNowValue)
         flash.messages = switchAttemptResult.messages
-        redirect(action: all, params: [format: 'json'])
+        redirect(action: 'all', params: [format: 'json'])
     }
 
     def startTrafficMover = {
         String targetServer = pickServer(params)
         serverService.startTrafficMover(targetServer)
         flash.messages = ['Started thread to move traffic after tasks finish on sister server']
-        redirect(action: all, params: [format: 'json'])
+        redirect(action: 'all', params: [format: 'json'])
     }
 
     def cancelTrafficMover = {
         flash.messages = serverService.cancelTrafficMover()
-        redirect(action: all, params: [format: 'json'])
+        redirect(action: 'all', params: [format: 'json'])
     }
 
     def runningTaskCount = {

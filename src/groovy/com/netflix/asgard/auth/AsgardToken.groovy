@@ -13,17 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard.auth
 
-import java.lang.annotation.ElementType
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
-import java.lang.annotation.Target
+import org.apache.shiro.authc.AuthenticationToken
 
 /**
- * Annotation for controller classes to indicate that they should not use region-specific URLs for link generation or
- * for redirects.
+ * Interface for Shiro AuthenticationToken classes used by Asgard's pluggable security architecture. Instances of
+ * {@link AuthenticationProvider} also require an implementation of this interface.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@interface RegionAgnostic {}
+interface AsgardToken extends AuthenticationToken { }

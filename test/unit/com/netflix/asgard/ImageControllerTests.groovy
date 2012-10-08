@@ -18,12 +18,13 @@ package com.netflix.asgard
 import com.amazonaws.services.ec2.model.Image
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.MassDeleteRequest
-import grails.test.ControllerUnitTestCase
+import org.junit.Before
 
-class ImageControllerTests extends ControllerUnitTestCase {
+class ImageControllerTests {
 
+    @Before
     void setUp() {
-        super.setUp()
+        Mocks.createDynamicMethods() 
         TestUtils.setUpMockRequest()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
         controller.awsEc2Service = Mocks.awsEc2Service()
@@ -40,7 +41,7 @@ class ImageControllerTests extends ControllerUnitTestCase {
     void testShowNonExistent() {
         controller.params.imageId ='ami-doesntexist'
         controller.show()
-        assert '/error/missing' == controller.renderArgs.view
+        assert '/error/missing' == view
         assert "Image 'ami-doesntexist' not found in us-east-1 test" == controller.flash.message
     }
 

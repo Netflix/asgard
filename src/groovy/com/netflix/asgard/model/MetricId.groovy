@@ -20,6 +20,7 @@ import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 import grails.converters.JSON
+import groovy.transform.Immutable
 import java.util.concurrent.TimeUnit
 import org.codehaus.groovy.grails.web.json.JSONElement
 import org.codehaus.groovy.grails.web.json.JSONWriter

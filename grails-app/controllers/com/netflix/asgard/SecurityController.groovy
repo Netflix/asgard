@@ -18,9 +18,11 @@ package com.netflix.asgard
 import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class SecurityController {
 
     def applicationService
@@ -30,7 +32,7 @@ class SecurityController {
 
     def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -99,7 +101,7 @@ class SecurityController {
 
     def save = { SecurityCreateCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action: create, model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
         } else {
             UserContext userContext = UserContext.of(request)
             String name = Relationships.buildAppDetailName(params.appName, params.detail)
@@ -111,10 +113,10 @@ class SecurityController {
                 } else {
                     flash.message = "Security Group '${name}' already exists."
                 }
-                redirect(action: show, params: [id: securityGroup.groupId])
+                redirect(action: 'show', params: [id: securityGroup.groupId])
             } catch (Exception e) {
                 flash.message = "Could not create Security Group: ${e}"
-                chain(action: create, model: [cmd: cmd], params: params)
+                chain(action: 'create', model: [cmd: cmd], params: params)
             }
         }
     }
@@ -155,7 +157,7 @@ class SecurityController {
             }
         } else {
             flash.message = "Security Group '${name}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
         }
     }
 
@@ -181,10 +183,10 @@ class SecurityController {
                 msg = "Security Group '${name}' does not exist."
             }
             flash.message = msg
-            redirect(action: result)
+            redirect(action: 'result')
         } catch (Exception e) {
             flash.message = "Could not delete Security Group: ${e}"
-            redirect(action: show, params: [id: name])
+            redirect(action: 'show', params: [id: name])
         }
     }
 
@@ -216,7 +218,7 @@ class SecurityCreateCommand {
             }
         })
 
-        detail(validator: { value, command->
+        detail(nullable: true, validator: { value, command->
             if (value && !Relationships.checkDetail(value)) {
                 return 'The detail must be empty or consist of alphanumeric characters and hyphens'
             }

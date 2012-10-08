@@ -40,6 +40,8 @@ class MonkeyPatcherService implements InitializingBean {
 
     static transactional = false
 
+    private static final originalASEToString = AmazonServiceException.metaClass.pickMethod('toString', [] as Class[])
+
     def grailsApplication
 
     @Override
@@ -216,10 +218,8 @@ class MonkeyPatcherService implements InitializingBean {
      * Monkey patches AmazonServiceException to include the exception class name in the toString output
      */
     void addClassNameToStringOutputForAmazonServiceException() {
-
-        MetaMethod oldToStringMethod = AmazonServiceException.metaClass.pickMethod('toString', [] as Class[])
         AmazonServiceException.metaClass.toString = { ->
-            "${delegate.getClass().getSimpleName()}: ${oldToStringMethod.invoke(delegate)}"
+            "${delegate.getClass().getSimpleName()}: ${originalASEToString.invoke(delegate)}"
         }
     }
 }
