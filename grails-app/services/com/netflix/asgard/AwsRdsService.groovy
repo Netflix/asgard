@@ -46,7 +46,7 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
 
     static final Integer DEFAULT_PORT = 3306
 
-    final enum Engine {
+    enum Engine {
         MySQL("MySQL"),
         OracleSE1("oracle-se1"),
         OracleSE("oracle-se"),

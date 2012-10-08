@@ -30,7 +30,7 @@ package com.netflix.asgard.model
  * ReplaceUnhealthy
  * ScheduledActions
  */
-final enum AutoScalingProcessType {
+enum AutoScalingProcessType {
     Launch('new instance launching'),
     Terminate('instance termination'),
     AZRebalance('availability zone rebalancing'),
