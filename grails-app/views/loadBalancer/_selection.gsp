@@ -24,7 +24,7 @@
     <g:each var="vpcIdForLoadBalancer" in="${loadBalancersGroupedByVpcId?.keySet()}">
       <div class="loadBalancersSelect vpcId${vpcIdForLoadBalancer ?: ''} ${vpcId == vpcIdForLoadBalancer ? '' : 'concealed'}">
         <g:select name="selectedLoadBalancers" multiple="multiple" size="5"
-                  disabled="${vpcId == vpcIdForLoadBalancer ? '' : 'true'}"
+                  disabled="${vpcId == vpcIdForLoadBalancer ? 'false' : 'true'}"
                   optionKey="loadBalancerName" optionValue="loadBalancerName" data-placeholder="Select load balancers"
                   from="${loadBalancersGroupedByVpcId[vpcIdForLoadBalancer]}" value="${selectedLoadBalancers}" />
       </div>
