@@ -233,7 +233,7 @@ class ScalingPolicyCreateCommand {
         cooldown(nullable: false)
         threshold(nullable: false)
         comparisonOperator(nullable: false, blank: false)
-        metric(validator: { Object value, ScalingPolicyCreateCommand cmd ->
+        metric(nullable: true, validator: { Object value, ScalingPolicyCreateCommand cmd ->
             (value && cmd.namespace) || cmd.existingMetric
         })
     }
