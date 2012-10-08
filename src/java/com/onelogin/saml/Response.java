@@ -56,7 +56,8 @@ public class Response {
 		
 		X509Certificate cert = certificate.getX509Cert();		
 		DOMValidateContext ctx = new DOMValidateContext(cert.getPublicKey() , nodes.item(0));				
-		XMLSignatureFactory sigF = XMLSignatureFactory.getInstance("DOM");
+		XMLSignatureFactory sigF = XMLSignatureFactory.getInstance("DOM",
+		        new org.jcp.xml.dsig.internal.dom.XMLDSigRI());
 		XMLSignature xmlSignature = sigF.unmarshalXMLSignature(ctx);
 		
 		return xmlSignature.validate(ctx);
