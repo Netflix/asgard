@@ -15,10 +15,13 @@
  */
 package com.netflix.asgard
 
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import groovy.util.slurpersupport.GPathResult
-import org.apache.commons.lang.builder.ToStringBuilder
 import org.springframework.web.util.HtmlUtils
 
+@EqualsAndHashCode
+@ToString
 class FastProperty {
 
     String id
@@ -53,10 +56,5 @@ class FastProperty {
     private String generateId(String key, String appId, String env, String region, String serverId, String stack,
                       String countries) {
         "${key ?: ''}|${appId ?: ''}|${env ?: ''}|${region ?: ''}|${serverId ?: ''}|${stack ?: ''}|${countries ?: ''}"
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
     }
 }

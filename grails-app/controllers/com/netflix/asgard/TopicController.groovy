@@ -17,9 +17,11 @@ package com.netflix.asgard
 
 import com.netflix.asgard.model.SubscriptionData
 import com.netflix.asgard.model.TopicData
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class TopicController {
 
     def awsSnsService
@@ -28,7 +30,7 @@ class TopicController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', subscribe: 'POST', unsubscribe: 'POST', publish: 'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)

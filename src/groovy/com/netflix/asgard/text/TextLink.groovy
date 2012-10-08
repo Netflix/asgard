@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard.text
 
+import groovy.transform.Immutable
+
 /**
  * A simple bean to store the URL and display text of a hyperlink.
  */

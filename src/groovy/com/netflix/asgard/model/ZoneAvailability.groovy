@@ -16,6 +16,7 @@
 package com.netflix.asgard.model
 
 import com.netflix.asgard.Ensure
+import groovy.transform.Immutable
 
 /**
  * Data holder for display info about how many instances are reserved, in use, and available in an availability zone,

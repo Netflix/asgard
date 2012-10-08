@@ -36,19 +36,19 @@ import com.netflix.asgard.model.AlarmData.ComparisonOperator
 import com.netflix.asgard.model.AlarmData.Statistic
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
-import com.netflix.asgard.model.AwsRequestEqualityMixin
 import com.netflix.asgard.model.ScalingPolicyData
 import spock.lang.Specification
 
 @SuppressWarnings(["GroovyPointlessArithmetic", "GroovyAssignabilityCheck"])
-class AwsAutoScalingServiceSpec extends Specification {
+class AwsAutoScalingServiceUnitSpec extends Specification {
+
+    final awsAutoScalingService = Mocks.newAwsAutoScalingService()
+
+    def setup() {
+        Mocks.createDynamicMethods() 
+    }
 
     def 'should update ASG with proper AWS requests'() {
-
-        [UpdateAutoScalingGroupRequest, SuspendProcessesRequest, ResumeProcessesRequest].each {
-            it.mixin AwsRequestEqualityMixin
-        }
-
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         mockAmazonAutoScalingClient.describeAutoScalingGroups(_ as DescribeAutoScalingGroupsRequest) >> {
             List<SuspendedProcess> suspendedProcesses = AutoScalingProcessType.with { [AZRebalance, AddToLoadBalancer] }
@@ -59,7 +59,6 @@ class AwsAutoScalingServiceSpec extends Specification {
         }
         mockAmazonAutoScalingClient.describePolicies(_) >> {[]}
 
-        final AwsAutoScalingService awsAutoScalingService = Mocks.newAwsAutoScalingService()
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
 
         //noinspection GroovyAccessibility
@@ -106,7 +105,6 @@ class AwsAutoScalingServiceSpec extends Specification {
     }
 
     def 'should create launch config and ASG'() {
-        final AwsAutoScalingService awsAutoScalingService = Mocks.newAwsAutoScalingService()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         mockAmazonAutoScalingClient.describeLaunchConfigurations(_) >> {
             new DescribeLaunchConfigurationsResult()
@@ -146,7 +144,6 @@ class AwsAutoScalingServiceSpec extends Specification {
     }
 
     def 'should get scaling policies'() {
-        final AwsAutoScalingService awsAutoScalingService = Mocks.newAwsAutoScalingService()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
         final AwsCloudWatchService mockAwsCloudWatchService = Mock(AwsCloudWatchService)

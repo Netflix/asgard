@@ -19,7 +19,7 @@ import grails.converters.JSON
 import grails.converters.XML
 import org.apache.commons.lang.StringEscapeUtils
 
-@RegionAgnostic class SearchController {
+class SearchController {
 
     def searchService
 

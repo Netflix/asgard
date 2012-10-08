@@ -26,7 +26,7 @@ import grails.converters.XML
 import org.apache.commons.collections.Bag
 import org.apache.commons.collections.HashBag
 
-@RegionAgnostic class ApplicationController {
+class ApplicationController {
 
     def applicationService
     def awsEc2Service
@@ -157,7 +157,7 @@ import org.apache.commons.collections.HashBag
 
     def save = { ApplicationCreateCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action: create, model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model:[cmd:cmd], params: params) // Use chain to pass both the errors and the params
         } else {
             String name = params.name
             UserContext userContext = UserContext.of(request)

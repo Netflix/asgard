@@ -15,7 +15,7 @@
  */
 package com.netflix.asgard
 
-@RegionAgnostic class EmailController {
+class EmailController {
 
     def emailerService
 

@@ -15,16 +15,18 @@
  */
 package com.netflix.asgard
 
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class FastPropertyController {
 
     def grailsApplication
 
     def fastPropertyService
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -88,10 +90,10 @@ class FastPropertyController {
 
             fastPropertyService.create(userContext, property, value, appId, region, stack, countries, updatedBy)
             flash.message = "Fast Property '${property}' has been created. The change may take a while to propagate."
-            redirect(action: list)
+            redirect(action: 'list')
         } catch (Exception e) {
             flash.message = e.message ?: e.cause?.message
-            chain(action: create, params: Requests.cap(params))
+            chain(action: 'create', params: Requests.cap(params))
         }
     }
 
@@ -122,7 +124,7 @@ class FastPropertyController {
         } catch (Exception e) {
             flash.message = "Unable to update Fast Property '${id}': ${e}"
         }
-        redirect(action: show, id: id)
+        redirect(action: 'show', id: id)
     }
 
     def delete = {
@@ -132,7 +134,7 @@ class FastPropertyController {
         String updatedBy = params.updatedBy?.decodeHTML()
         fastPropertyService.deleteFastProperty(userContext, id, updatedBy, fastPropertyRegion)
         flash.message = "Fast Property '${id}' deleted. The change may take a while to propagate."
-        redirect(action: result)
+        redirect(action: 'result')
     }
 
     def result = { render view: '/common/result' }

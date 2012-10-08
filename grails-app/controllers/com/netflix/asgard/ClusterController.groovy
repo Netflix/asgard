@@ -34,9 +34,11 @@ import com.netflix.asgard.push.GroupDeactivateOperation
 import com.netflix.asgard.push.GroupDeleteOperation
 import com.netflix.asgard.push.GroupResizeOperation
 import com.netflix.asgard.push.InitialTraffic
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class ClusterController {
 
     def static allowedMethods = [createNextGroup: 'POST', resize: 'POST', delete: 'POST', activate: 'POST',
@@ -51,7 +53,7 @@ class ClusterController {
     def pushService
     def taskService
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -150,7 +152,7 @@ class ClusterController {
             }
         } else {
             params['id'] = cluster.name
-            redirect(action: show, params: params)
+            redirect(action: 'show', params: params)
         }
     }
 
@@ -174,7 +176,7 @@ class ClusterController {
 
         if (!cluster) {
             flash.message = "No auto scaling groups exist with cluster name ${name}"
-            redirect(action: result)
+            redirect(action: 'result')
             return
         }
 
@@ -203,7 +205,7 @@ class ClusterController {
             boolean discoveryExists = configService.doesRegionalDiscoveryExist(userContext.region)
             if (discoveryExists && initialTraffic == InitialTraffic.PREVENTED && !checkHealth) {
                 flash.message = "Due to a Eureka limitation, you must enable traffic and/or wait for health checks"
-                redirect(action: show, params: [id: name])
+                redirect(action: 'show', params: [id: name])
                 return
             }
 

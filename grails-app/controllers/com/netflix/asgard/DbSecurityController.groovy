@@ -16,9 +16,11 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.rds.model.DBSecurityGroup
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class DbSecurityController {
 
     def awsRdsService
@@ -26,7 +28,7 @@ class DbSecurityController {
 
     def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -73,7 +75,7 @@ class DbSecurityController {
         } catch (Exception e) {
             flash.message = "Could not create DB Security Group: ${e}"
         }
-        redirect(action:list)
+        redirect(action: 'list')
     }
 
     def edit = {
@@ -115,7 +117,7 @@ class DbSecurityController {
         } catch (Exception e) {
             flash.message = "Could not update DB Security Group: ${e}"
         }
-        redirect(action:show, params: [name: name])
+        redirect(action: 'show', params: [name: name])
     }
 
     private void updateDBSecurityIngress(UserContext userContext, DBSecurityGroup targetGroup, List<String> selectedGroups, List<String> ipRanges) {
@@ -140,7 +142,7 @@ class DbSecurityController {
         } catch (Exception e) {
             flash.message = "Could not delete DB Security Group: ${e}"
         }
-        redirect(action: list)
+        redirect(action: 'list')
     }
 
 }

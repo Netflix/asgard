@@ -16,15 +16,15 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
-import grails.test.ControllerUnitTestCase
-import grails.test.MockUtils
+import org.junit.Before
 
-class LoadBalancerControllerTests extends ControllerUnitTestCase {
+class LoadBalancerControllerTests {
 
+    @Before
     void setUp() {
-        super.setUp()
+        Mocks.createDynamicMethods() 
         TestUtils.setUpMockRequest()
-        MockUtils.prepareForConstraintsTests(LoadBalancerCreateCommand)
+        mockForConstraintsTests(LoadBalancerCreateCommand)
         controller.awsLoadBalancerService = Mocks.awsLoadBalancerService()
         controller.applicationService = Mocks.applicationService()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
@@ -45,12 +45,12 @@ class LoadBalancerControllerTests extends ControllerUnitTestCase {
     void testShowNonExistent() {
         controller.params.name ='doesntexist'
         controller.show()
-        assert '/error/missing' == controller.renderArgs.view
+        assert '/error/missing' == view
         assert "Load Balancer 'doesntexist' not found in us-east-1 test" == controller.flash.message
     }
 
     void testSaveWithoutMostParams() {
-        mockRequest.method = 'POST'
+        request.method = 'POST'
         def p = controller.params
         p.appName = 'helloworld'
         def cmd = new LoadBalancerCreateCommand(appName: p.appName)
@@ -58,14 +58,13 @@ class LoadBalancerControllerTests extends ControllerUnitTestCase {
         cmd.validate()
         assert cmd.hasErrors()
         controller.save(cmd)
-        assert 'create' == controller.chainArgs.action
-        assert p == controller.chainArgs.params
-        assert cmd == controller.chainArgs.model['cmd']
+        assert response.redirectUrl == '/loadBalancer/create?appName=helloworld'
+        assert flash.chainModel.cmd == cmd
     }
 
     void testSaveSuccessfully() {
-        mockRequest.method = 'POST'
-        def p = mockParams
+        request.method = 'POST'
+        def p = controller.params
         p.appName = 'helloworld'
         p.stack = 'unittest'
         p.detail ='frontend'
@@ -85,9 +84,8 @@ class LoadBalancerControllerTests extends ControllerUnitTestCase {
         cmd.validate()
         assert !cmd.hasErrors()
         controller.save(cmd)
-        assert controller.show == controller.redirectArgs.action
-        assert 'helloworld-unittest-frontend' == controller.redirectArgs.params.name
-        assert controller.flash.message.startsWith("Load Balancer 'helloworld-unittest-frontend' has been created.")
+        assert '/loadBalancer/show?name=helloworld-unittest-frontend' == response.redirectUrl
+        assert flash.message.startsWith("Load Balancer 'helloworld-unittest-frontend' has been created.")
     }
 
 }

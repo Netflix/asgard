@@ -16,6 +16,7 @@
 package com.netflix.asgard.model
 
 import com.netflix.asgard.Region
+import groovy.transform.Immutable
 
 @Immutable final class SimpleDbSequenceLocator {
     Region region

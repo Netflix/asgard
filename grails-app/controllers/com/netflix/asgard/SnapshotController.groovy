@@ -17,14 +17,16 @@ package com.netflix.asgard
 
 import com.amazonaws.services.ec2.model.Snapshot
 import com.amazonaws.services.ec2.model.Volume
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class SnapshotController {
 
     def awsEc2Service
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -67,7 +69,7 @@ class SnapshotController {
     def create = {
         UserContext userContext = UserContext.of(request)
         def snapshot = awsEc2Service.createSnapshot(userContext, params.volumeId, params.description)
-        redirect(action:show, params:[id:snapshot?.snapshotId])
+        redirect(action: 'show', params:[id:snapshot?.snapshotId])
     }
 
     def delete = {
@@ -97,7 +99,7 @@ class SnapshotController {
             message = "Error deleting snapshot${snapshotIds.size() == 1 ? '' : 's'} ${snapshotIds}: ${e}"
         }
         flash.message = message
-        redirect(action: result)
+        redirect(action: 'result')
     }
 
     def result = { render view: '/common/result' }
@@ -118,7 +120,7 @@ class SnapshotController {
                 redirect(controller:"volume", action:'show', params:[id:volume.volumeId])
             } catch (Exception e) {
                 flash.message = "Could not restore from EBS Snapshot: ${e}"
-                redirect(action:show, params:[id:snapshotId])
+                redirect(action: 'show', params:[id:snapshotId])
             }
         }
     }

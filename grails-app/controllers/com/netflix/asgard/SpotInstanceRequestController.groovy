@@ -15,12 +15,14 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.ec2.model.CancelledSpotInstanceRequest
 import com.amazonaws.services.ec2.model.SpotInstanceRequest
+import com.netflix.asgard.model.SpotInstanceRequestListType
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
-import com.amazonaws.services.ec2.model.CancelledSpotInstanceRequest
-import com.netflix.asgard.model.SpotInstanceRequestListType
 
+@ContextParam('region')
 class SpotInstanceRequestController {
 
     def awsEc2Service
@@ -28,7 +30,7 @@ class SpotInstanceRequestController {
 
     final static allowedMethods = [cancel: 'POST']
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -60,7 +62,7 @@ class SpotInstanceRequestController {
         List<CancelledSpotInstanceRequest> cancelledSirs = spotInstanceRequestService.cancelSpotInstanceRequests(
                 userContext, sirIds)
         flash.message = "Cancelled Spot Instance Requests: ${cancelledSirs*.spotInstanceRequestId}"
-        redirect(action: result)
+        redirect(action: 'result')
     }
 
     def result = { render view: '/common/result' }

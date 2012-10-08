@@ -15,20 +15,21 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.autoscaling.model.Alarm
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.autoscaling.model.ScalingPolicy
+import com.amazonaws.services.cloudwatch.model.MetricAlarm
+import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AutoScalingGroupData
-import grails.plugin.spock.ControllerSpec
 import com.netflix.asgard.model.AutoScalingProcessType
-import com.google.common.collect.ImmutableSet
-import com.amazonaws.services.autoscaling.model.ScalingPolicy
-import com.amazonaws.services.autoscaling.model.Alarm
-import com.amazonaws.services.cloudwatch.model.MetricAlarm
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
-class AutoScalingControllerSpec extends ControllerSpec {
+class AutoScalingControllerSpec extends Specification {
 
     void setup() {
+        Mocks.createDynamicMethods()
         TestUtils.setUpMockRequest()
         controller.grailsApplication = Mocks.grailsApplication()
         controller.applicationService = Mocks.applicationService()
@@ -42,7 +43,7 @@ class AutoScalingControllerSpec extends ControllerSpec {
     }
 
     def 'show should return ASG info'() {
-        mockParams.name = 'helloworld-example-v015'
+        controller.params.name = 'helloworld-example-v015'
 
         when:
         final attrs = controller.show()
@@ -58,7 +59,7 @@ class AutoScalingControllerSpec extends ControllerSpec {
      }
 
     def 'show should return Alarm info'() {
-        mockParams.name = 'helloworld-example-v015'
+        controller.params.name = 'helloworld-example-v015'
         AwsAutoScalingService mockAwsAutoScalingService = Mock(AwsAutoScalingService)
         controller.awsAutoScalingService = mockAwsAutoScalingService
         mockAwsAutoScalingService.getAutoScalingGroup(_, _) >> {
@@ -88,24 +89,24 @@ class AutoScalingControllerSpec extends ControllerSpec {
     }
 
     def 'show should indicate nonexistent ASG'() {
-        mockParams.name = 'doesntexist'
+        controller.params.name = 'doesntexist'
 
         when:
         controller.show()
 
         then:
-        '/error/missing' == renderArgs.view
+        '/error/missing' == view
         "Auto Scaling Group 'doesntexist' not found in us-east-1 test" == controller.flash.message
     }
 
     def 'show should indicate nonexistent ASG if invalid characters are used'() {
-        mockParams.name = 'nccp-moviecontrol%27'
+        controller.params.name = 'nccp-moviecontrol%27'
 
         when:
         controller.show()
 
         then:
-        '/error/missing' == renderArgs.view
+        '/error/missing' == view
         "Auto Scaling Group 'nccp-moviecontrol%27' not found in us-east-1 test" == controller.flash.message
     }
 
@@ -143,9 +144,8 @@ class AutoScalingControllerSpec extends ControllerSpec {
                 'newlaunchConfiguration', [], [:], [], [:], []), ImmutableSet.of(AutoScalingProcessType.Launch),
                 ImmutableSet.of(AutoScalingProcessType.Terminate))
         0 * _._
-        'hiyaworld-example-v042' == redirectArgs.params.name
+        '/autoScaling/show/hiyaworld-example-v042' == response.redirectUrl
         "AutoScaling Group 'hiyaworld-example-v042' has been updated." == controller.flash.message
-        controller.show == redirectArgs.action
     }
 
     def 'update should fail for invalid process values'() {
@@ -194,10 +194,8 @@ class AutoScalingControllerSpec extends ControllerSpec {
         controller.update()
 
         then:
-        'hiyaworld-example-v042' == redirectArgs.params.name
+        '/autoScaling/edit/hiyaworld-example-v042' == response.redirectUrl
         "Could not update AutoScaling Group: java.lang.IllegalStateException: Uh Oh!" == controller.flash.message
-        controller.edit == redirectArgs.action
-
     }
 
     void "create should populate model"() {

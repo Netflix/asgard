@@ -32,6 +32,10 @@ import grails.test.MockUtils
 
 class AwsEc2ServiceTests extends GrailsUnitTestCase {
 
+    void setUp() {
+        Mocks.createDynamicMethods() 
+    }
+
     void testGetSpotInstanceRequests() {
         AwsEc2Service awsEc2Service = Mocks.awsEc2Service()
         Region region = Region.defaultRegion()

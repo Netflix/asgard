@@ -52,7 +52,7 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
             }
         })
 
-        stack(validator: { value, command ->
+        stack(nullable: true, validator: { value, command ->
             if (value && !Relationships.checkName(value)) {
                 return "The stack must be empty or consist of alphanumeric characters"
             }
@@ -61,7 +61,7 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
             }
         })
 
-        newStack(validator: { value, command ->
+        newStack(nullable: true, validator: { value, command ->
             if (value && !Relationships.checkName(value)) {
                 return "stack.illegalChar"
             }
@@ -73,7 +73,7 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
             }
         })
 
-        detail(validator: { value, command ->
+        detail(nullable: true, validator: { value, command ->
             if (value && !Relationships.checkDetail(value)) {
                 return "The detail must be empty or consist of alphanumeric characters and hyphens"
             }

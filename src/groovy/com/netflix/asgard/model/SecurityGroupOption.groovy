@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard.model
 
+import groovy.transform.Immutable
+
 /**
  * Data holder for the accessibility state of one SecurityGroup or load-balancer-oriented SourceSecurityGroup in
  * relation to another SecurityGroup. Useful for displaying a list of selected and unselected security groups and the

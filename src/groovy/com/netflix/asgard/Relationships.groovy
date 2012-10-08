@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy
 import java.lang.annotation.Target
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import groovy.transform.Immutable
 import org.apache.commons.lang.WordUtils
 import org.apache.commons.lang.builder.ToStringBuilder
 import org.joda.time.DateTime

@@ -18,7 +18,6 @@ package com.netflix.asgard.model
 import com.amazonaws.services.cloudwatch.model.Dimension
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest
-import com.netflix.asgard.HasEqualsHashCodeToString
 import com.netflix.asgard.model.AlarmData.ComparisonOperator
 import com.netflix.asgard.model.AlarmData.Statistic
 import spock.lang.Specification
@@ -196,8 +195,6 @@ class AlarmDataSpec extends Specification {
     }
 
     def 'should create put alarm request'() {
-        Dimension.mixin(HasEqualsHashCodeToString)
-
         when:
         final PutMetricAlarmRequest alarm = alarmData.
                 toPutMetricAlarmRequest('arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600')

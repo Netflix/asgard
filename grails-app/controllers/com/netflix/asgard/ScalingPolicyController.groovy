@@ -19,15 +19,17 @@ import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.netflix.asgard.model.AlarmData
-import com.netflix.asgard.model.AlarmData.ComparisonOperator
-import com.netflix.asgard.model.AlarmData.Statistic
 import com.netflix.asgard.model.MetricId
 import com.netflix.asgard.model.ScalingPolicyData
-import com.netflix.asgard.model.ScalingPolicyData.AdjustmentType
 import com.netflix.asgard.model.TopicData
+import com.netflix.asgard.model.AlarmData.ComparisonOperator
+import com.netflix.asgard.model.AlarmData.Statistic
+import com.netflix.asgard.model.ScalingPolicyData.AdjustmentType
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class ScalingPolicyController {
 
     def awsAutoScalingService
@@ -37,7 +39,7 @@ class ScalingPolicyController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -69,7 +71,7 @@ class ScalingPolicyController {
             ] << awsCloudWatchService.prepareForAlarmCreation(UserContext.of(request), groupName, params)
         } else {
             flash.message = "Group '${groupName}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
         }
     }
 
@@ -106,7 +108,7 @@ class ScalingPolicyController {
             ]
         } else {
             flash.message = "Policy '${policyName}' does not exist."
-            redirect(action: result)
+            redirect(action: 'result')
         }
     }
 

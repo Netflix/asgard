@@ -17,6 +17,7 @@ package com.netflix.asgard.model
 
 import com.amazonaws.services.sns.model.SubscribeRequest
 import com.amazonaws.services.sns.model.Subscription
+import groovy.transform.Immutable
 
 @Immutable final class SubscriptionData implements Comparable<SubscriptionData> {
 

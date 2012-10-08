@@ -16,6 +16,7 @@
 package com.netflix.asgard.push
 
 import com.netflix.asgard.UserContext
+import groovy.transform.Immutable
 
 @Immutable final class CommonPushOptions {
     UserContext userContext

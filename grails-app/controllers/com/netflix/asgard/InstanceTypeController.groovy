@@ -16,14 +16,16 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.model.InstanceTypeData
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class InstanceTypeController {
 
     def instanceTypeService
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)

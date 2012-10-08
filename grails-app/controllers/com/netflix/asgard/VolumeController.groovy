@@ -17,12 +17,14 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.ec2.model.Volume
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class VolumeController {
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def awsEc2Service
 
@@ -43,10 +45,10 @@ class VolumeController {
             Volume volume = awsEc2Service.createVolume(userContext, params.volumeSize as Integer,
                     params.availabilityZone)
             flash.message = "EBS Volume '${volume.volumeId}' has been created."
-            redirect(action: show, params: [id: volume.volumeId])
+            redirect(action: 'show', params:[id:volume.volumeId])
         } catch (AmazonServiceException ase) {
             flash.message = "Could not create EBS Volume: ${ase}"
-            redirect(action: list)
+            redirect(action: 'list')
         }
     }
 
@@ -70,7 +72,7 @@ class VolumeController {
         } catch (Exception e) {
             flash.message = "Could not delete volume: ${e}"
         }
-        redirect(action:list)
+        redirect(action: 'list')
     }
 
     def show = {
@@ -98,6 +100,6 @@ class VolumeController {
         } catch (Exception e) {
             flash.message = "Could not detach EBS Volume ${volumeId}: ${e}"
         }
-        redirect(action: show, params: [id: volumeId])
+        redirect(action: 'show', params:[id:volumeId])
     }
 }

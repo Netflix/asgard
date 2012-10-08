@@ -39,7 +39,7 @@ import com.netflix.asgard.model.ZoneAvailability
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
-class AwsEc2ServiceSpec extends Specification {
+class AwsEc2ServiceUnitSpec extends Specification {
 
     UserContext userContext
     AmazonEC2 mockAmazonEC2

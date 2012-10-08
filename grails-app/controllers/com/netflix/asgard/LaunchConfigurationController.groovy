@@ -17,12 +17,14 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.ISODateTimeFormat
 
+@ContextParam('region')
 class LaunchConfigurationController {
 
     def applicationService
@@ -33,7 +35,7 @@ class LaunchConfigurationController {
 
     def static allowedMethods = [delete:'POST', save:'POST', update:'POST', cleanup: 'POST', massDelete: 'POST']
 
-    def index = { redirect(action:list, params:params) }
+    def index = { redirect(action: 'list', params:params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)
@@ -119,7 +121,7 @@ class LaunchConfigurationController {
                 flash.message = "Could not delete Launch Configuration: ${e}"
             }
         }
-        redirect(action:list)
+        redirect(action: 'list')
     }
 
     def massDelete = {

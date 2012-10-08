@@ -40,17 +40,17 @@
       </tr>
       </thead>
       <tbody>
-      <g:each var="owner" in="${owners}" status="i">
+      <g:each var="theOwner" in="${owners}" status="i">
         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-          <td><g:link class="user" action="list" id="${owner.name}">${owner.name}</g:link></td>
+          <td><g:link class="user" action="list" id="${theOwner.name}">${theOwner.name}</g:link></td>
           <td>
-            <g:each in="${owner.emails}" var="email">
+            <g:each in="${theOwner.emails}" var="email">
               <g:link class="user" action="list" id="${email}">${email}</g:link><br/>
             </g:each>
           </td>
-          <td><g:link class="application" controller="application" action="list" id="${owner.name}">${owner.appNames.size()}</g:link></td>
-          <td><g:link class="autoScaling" controller="autoScaling" action="list" id="${owner.appNames.join(',')}">${owner.autoScalingGroupCount}</g:link></td>
-          <td><g:link class="instance" controller="instance" action="list" id="${owner.appNames.join(',')}">${owner.instanceCount}</g:link></td>
+          <td><g:link class="application" controller="application" action="list" id="${theOwner.name}">${theOwner.appNames.size()}</g:link></td>
+          <td><g:link class="autoScaling" controller="autoScaling" action="list" id="${theOwner.appNames.join(',')}">${theOwner.autoScalingGroupCount}</g:link></td>
+          <td><g:link class="instance" controller="instance" action="list" id="${theOwner.appNames.join(',')}">${theOwner.instanceCount}</g:link></td>
         </tr>
       </g:each>
       </tbody>

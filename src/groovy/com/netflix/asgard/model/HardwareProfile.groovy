@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.model
 
+import groovy.transform.Immutable
 @Immutable final class HardwareProfile {
     String instanceType
     String description

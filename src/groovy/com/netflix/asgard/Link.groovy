@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard
 
+import groovy.transform.Immutable
+
 @Immutable final class Link {
     EntityType type
     String id

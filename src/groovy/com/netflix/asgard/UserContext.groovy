@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import groovy.transform.Immutable
 import javax.servlet.http.HttpServletRequest
 
 @Immutable final class UserContext {

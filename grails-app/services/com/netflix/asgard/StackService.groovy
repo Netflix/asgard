@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import groovy.transform.Canonical
 
 class StackService {
 
@@ -23,7 +24,7 @@ class StackService {
     def awsAutoScalingService
 
     Collection<StackInfo> getStacks(UserContext userContext) {
-        Collection<StackInfo> stacks = new TreeSet<StackInfo>();
+        Collection<StackInfo> stacks = new TreeSet<StackInfo>()
         Collection<AutoScalingGroup> groups = awsAutoScalingService.getAutoScalingGroups(userContext)
         groups.each {
             String stackName = Relationships.stackNameFromGroupName(it.autoScalingGroupName)
@@ -33,7 +34,11 @@ class StackService {
     }
 }
 
-@Mixin(HasEqualsHashCodeToString)
-class StackInfo extends HasCompareTo {
+@Canonical
+class StackInfo implements Comparable<StackInfo> {
     String name
+
+    public int compareTo(StackInfo that) {
+        this.name <=> that.name
+    }
 }

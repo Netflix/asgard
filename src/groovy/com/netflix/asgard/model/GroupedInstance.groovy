@@ -21,11 +21,14 @@ import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.AppVersion
 import com.netflix.asgard.MergedInstance
 import com.netflix.asgard.Relationships
-import org.apache.commons.lang.builder.ToStringBuilder
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 /**
  * Immutable custom representation of an AWS instance in an AutoScalingGroupData.
  */
+@EqualsAndHashCode
+@ToString
 class GroupedInstance {
 
     final String instanceId
@@ -90,9 +93,5 @@ class GroupedInstance {
         this.imageId = imageId
         this.discoveryStatus = discoveryStatus
         this.healthCheckUrl = healthCheckUrl
-    }
-
-    String toString() {
-        ToStringBuilder.reflectionToString(this).toString()
     }
 }

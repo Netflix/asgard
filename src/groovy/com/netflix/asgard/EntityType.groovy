@@ -45,6 +45,7 @@ import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.model.SimpleQueue
 import com.netflix.asgard.model.TopicData
 import com.netflix.asgard.push.Cluster
+import groovy.transform.Immutable
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 

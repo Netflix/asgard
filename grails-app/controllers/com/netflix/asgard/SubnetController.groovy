@@ -24,7 +24,7 @@ class SubnetController {
 
     def awsEc2Service
 
-    def index = { redirect(action: list, params: params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)

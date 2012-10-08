@@ -18,12 +18,12 @@ package com.netflix.asgard
 import grails.converters.JSON
 import grails.converters.XML
 
-@RegionAgnostic class RegionController {
+class RegionController {
 
     def configService
 
     def index = {
-        chain(action: list, params: [format: request.format])
+        chain(action: 'list', params: [format: request.format])
     }
 
     def list = {

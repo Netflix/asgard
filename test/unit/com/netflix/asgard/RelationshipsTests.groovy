@@ -23,6 +23,10 @@ import org.joda.time.DateTime
 
 class RelationshipsTests extends GrailsUnitTestCase {
 
+    void setUp() {
+        Mocks.createDynamicMethods() 
+    }
+
     private void assertPushSequenceSortResult(List<String> expectedResult, List<String> input) {
         assert expectedResult == input.collect {
             AutoScalingGroupData.from(new AutoScalingGroup().withAutoScalingGroupName(it), null, null, null, [])

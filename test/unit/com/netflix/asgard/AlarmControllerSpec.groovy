@@ -25,13 +25,12 @@ import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AlarmData
-import com.netflix.asgard.model.AwsRequestEqualityMixin
 import com.netflix.asgard.model.TopicData
-import grails.plugin.spock.ControllerSpec
 import grails.test.MockUtils
+import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
-class AlarmControllerSpec extends ControllerSpec {
+class AlarmControllerSpec extends Specification {
 
     void setup() {
         TestUtils.setUpMockRequest()
@@ -62,16 +61,11 @@ class AlarmControllerSpec extends ControllerSpec {
         controller.show()
 
         then:
-        '/error/missing' == controller.renderArgs.view
+        '/error/missing' == view
         "Alarm 'doesntexist' not found in us-east-1 test" == controller.flash.message
     }
 
     def 'save should create alarm'() {
-        Dimension.mixin HasEqualsHashCodeToString
-        [PutMetricAlarmRequest].each {
-            it.mixin AwsRequestEqualityMixin
-        }
-
         final awsCloudWatchService = Mocks.newAwsCloudWatchService()
         final mockAmazonCloudWatchClient = Mock(AmazonCloudWatch)
         mockAmazonCloudWatchClient.describeAlarms(_) >> { new DescribeAlarmsResult() }
@@ -106,8 +100,7 @@ class AlarmControllerSpec extends ControllerSpec {
         controller.save(createCommand)
 
         then:
-        'show' == redirectArgs.action
-        'nflx_newton_client-v003-1' == redirectArgs.params.id
+        '/alarm/show/nflx_newton_client-v003-1' == response.redirectedUrl
 
         1 * awsSnsService.getTopic(_, 'api-prodConformity-Report') >> {
             new TopicData('arn:aws:sns:blah')
@@ -154,21 +147,17 @@ class AlarmControllerSpec extends ControllerSpec {
         controller.save(createCommand)
 
         then:
-        'create' == chainArgs.action
+        '/alarm/create' == response.redirectedUrl
     }
 
     def 'delete should remove alarm'() {
-        [DeleteAlarmsRequest, DescribeAlarmsRequest].each {
-            it.mixin AwsRequestEqualityMixin
-        }
-
         final awsCloudWatchService = Mocks.newAwsCloudWatchService()
         final mockAmazonCloudWatchClient = Mock(AmazonCloudWatch)
         mockAmazonCloudWatchClient.describeAlarms(_) >> { new DescribeAlarmsResult() }
         awsCloudWatchService.awsClient = new MultiRegionAwsClient({ mockAmazonCloudWatchClient })
         controller.awsCloudWatchService = awsCloudWatchService
 
-        mockParams.with {
+        controller.params.with {
             id = 'scale-up-alarm-helloworld--scalingtest-v000-CPUUtilization-87'
         }
 

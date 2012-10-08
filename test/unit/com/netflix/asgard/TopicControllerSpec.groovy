@@ -27,16 +27,16 @@ import com.amazonaws.services.sns.model.PublishRequest
 import com.amazonaws.services.sns.model.SubscribeRequest
 import com.amazonaws.services.sns.model.UnsubscribeRequest
 import com.netflix.asgard.mock.Mocks
-import grails.plugin.spock.ControllerSpec
 import grails.test.MockUtils
+import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
-class TopicControllerSpec extends ControllerSpec {
+class TopicControllerSpec extends Specification {
     AmazonSNS mockAmazonSNS = Mock(AmazonSNS)
 
     void setup() {
         TestUtils.setUpMockRequest()
-        mockRequest.region = Region.defaultRegion()
+        request.region = Region.defaultRegion()
         MockUtils.prepareForConstraintsTests(SaveTopicCommand)
         MockUtils.prepareForConstraintsTests(SubscribeCommand)
         MockUtils.prepareForConstraintsTests(UnsubscribeCommand)
@@ -48,7 +48,7 @@ class TopicControllerSpec extends ControllerSpec {
     }
 
     def 'show should display Topic'() {
-        mockParams.id = 'abadmin-testConformity-Report'
+        controller.params.id = 'abadmin-testConformity-Report'
 
         when:
         Map model = controller.show()
@@ -65,14 +65,14 @@ class TopicControllerSpec extends ControllerSpec {
     }
 
     def 'show should indicate Topic does not exist'() {
-        mockParams.id = 'doesntexist'
+        controller.params.id = 'doesntexist'
 
         when:
         controller.show()
 
         then:
-        '/error/missing' == controller.renderArgs.view
-        "Topic 'doesntexist' not found in us-east-1 test" == controller.flash.message
+        '/error/missing' == view
+        "Topic 'doesntexist' not found in us-east-1 test" == flash.message
         1 * mockAmazonSNS.getTopicAttributes(_) >> {
             throw new AmazonServiceException("No attributes for this one.")
         }
@@ -87,7 +87,7 @@ class TopicControllerSpec extends ControllerSpec {
         controller.save(cmd)
 
         then:
-        chainArgs.action == 'create'
+        response.redirectUrl == '/topic/create'
     }
 
     def 'save should fail with error'() {
@@ -101,8 +101,8 @@ class TopicControllerSpec extends ControllerSpec {
         controller.save(cmd)
 
         then:
-        chainArgs.action == 'create'
-        controller.flash.message == "Could not create Topic 'app-test': java.lang.IllegalArgumentException: SNS service problems!"
+        response.redirectUrl == '/topic/create'
+        flash.message == "Could not create Topic 'app-test': java.lang.IllegalArgumentException: SNS service problems!"
     }
 
     def 'save should create Topic'() {
@@ -113,9 +113,8 @@ class TopicControllerSpec extends ControllerSpec {
         controller.save(cmd)
 
         then:
-        redirectArgs.action == 'show'
-        redirectArgs.params == [id: "app-test"]
-        controller.flash.message == "Topic 'app-test' has been created."
+        response.redirectUrl == '/topic/show/app-test'
+        flash.message == "Topic 'app-test' has been created."
         1 * mockAmazonSNS.createTopic(new CreateTopicRequest(name: 'app-test')) >> {
             new CreateTopicResult()
         }
@@ -123,14 +122,14 @@ class TopicControllerSpec extends ControllerSpec {
     }
 
     def 'delete should delete Topic'() {
-        mockParams.id = 'arn:aws:sns:us-east-1:179000000000:a_test'
+        controller.params.id = 'arn:aws:sns:us-east-1:179000000000:a_test'
 
         when:
         controller.delete()
 
         then:
-        redirectArgs.action == 'result'
-        controller.flash.message == "Topic 'a_test' has been deleted."
+        response.redirectUrl == '/topic/result'
+        flash.message == "Topic 'a_test' has been deleted."
         1 * mockAmazonSNS.deleteTopic(new DeleteTopicRequest(topicArn: 'arn:aws:sns:us-east-1:179000000000:a_test'))
         0 * _._
     }
@@ -143,8 +142,8 @@ class TopicControllerSpec extends ControllerSpec {
         controller.subscribe(cmd)
 
         then:
-        redirectArgs.action == 'show'
-        controller.flash.message == "Subscribed 'rick@grimes.com' to Topic 'a_test'."
+        response.redirectUrl == '/topic/show/a_test'
+        flash.message == "Subscribed 'rick@grimes.com' to Topic 'a_test'."
         1 * mockAmazonSNS.subscribe(new SubscribeRequest(topicArn: 'arn:aws:sns:us-east-1:179000000000:a_test',
                 endpoint: 'rick@grimes.com', protocol: 'email'))
         0 * _._
@@ -158,8 +157,8 @@ class TopicControllerSpec extends ControllerSpec {
         controller.unsubscribe(cmd)
 
         then:
-        redirectArgs.action == 'show'
-        controller.flash.message == "Unsubscribed from Topic 'a_test'."
+        response.redirectUrl == '/topic/show/a_test'
+        flash.message == "Unsubscribed from Topic 'a_test'."
         1 * mockAmazonSNS.unsubscribe(new UnsubscribeRequest(subscriptionArn: 'arn:subscriptionArn'))
         0 * _._
     }
@@ -173,8 +172,8 @@ class TopicControllerSpec extends ControllerSpec {
         controller.publish(cmd)
 
         then:
-        redirectArgs.action == 'show'
-        controller.flash.message == "Published to Topic 'a_test'."
+        response.redirectUrl == '/topic/show/a_test'
+        flash.message == "Published to Topic 'a_test'."
         1 * mockAmazonSNS.publish(new PublishRequest(topicArn: 'arn:aws:sns:us-east-1:179000000000:a_test',
                 subject: 'Regarding the unfortunate incident', message: 'Sorry about your carpet. K thanx, bye!'))
         0 * _._

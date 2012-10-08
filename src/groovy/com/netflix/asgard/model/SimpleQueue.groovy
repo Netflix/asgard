@@ -15,10 +15,11 @@
  */
 package com.netflix.asgard.model
 
-import com.netflix.asgard.HasEqualsHashCodeToString
 import com.netflix.asgard.Meta
 import com.netflix.asgard.Region
 import com.netflix.asgard.Time
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import java.util.regex.Matcher
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -27,7 +28,8 @@ import org.joda.time.Duration
  * Representation of a Simple Queue Service (SQS) object.
  * Not named Queue, because that would collide with java.util.Queue in Groovy default imports.
  */
-@Mixin(HasEqualsHashCodeToString)
+@EqualsAndHashCode
+@ToString
 class SimpleQueue {
     String url
     String name

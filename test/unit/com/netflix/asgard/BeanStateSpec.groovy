@@ -15,11 +15,12 @@
  */
 package com.netflix.asgard
 
-import spock.lang.Specification
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.ImmutableMap
 import com.amazonaws.services.rds.model.DBInstance
 import com.amazonaws.services.rds.model.CreateDBInstanceRequest
+import groovy.transform.Canonical
+import spock.lang.Specification
 
 class BeanStateSpec extends Specification {
 
@@ -153,7 +154,7 @@ class BeanStateSpec extends Specification {
             request
     }
 
-    @Mixin(HasEqualsHashCodeToString)
+    @Canonical
     static class Bean {
         String string1
         String string2
@@ -161,7 +162,7 @@ class BeanStateSpec extends Specification {
         Collection<String> collection1
     }
 
-    @Mixin(HasEqualsHashCodeToString)
+    @Canonical
     static class BeanWithOverlappingState {
         String string1
         int int1
@@ -170,32 +171,32 @@ class BeanStateSpec extends Specification {
         Collection collection2
     }
 
-    @Mixin(HasEqualsHashCodeToString)
+    @Canonical
     static class BeanWithWiderType {
         Object string1
     }
 
-    @Mixin(HasEqualsHashCodeToString)
+    @Canonical
     static class BeanWithNarrowerType {
         StringBuffer string1
     }
 
-    @Mixin(HasEqualsHashCodeToString)
+    @Canonical
     static class BeanWithPrimitive {
         int int1
     }
 
-    @Mixin(HasEqualsHashCodeToString)
+    @Canonical
     static class BeanWithObjectWrapper {
         Integer int1
     }
 
-    @Mixin(HasEqualsHashCodeToString)
+    @Canonical
     static class BeanWithDifferentGenerics {
         Collection<Integer> collection1
     }
 
-    @Mixin(HasEqualsHashCodeToString)
+    @Canonical
     static class ImmutableBean {
         final String string1
         final int int1
@@ -203,12 +204,6 @@ class BeanStateSpec extends Specification {
 
         // not final, but still no constructor
         String getString2() { 'Ricky Gervais' }
-
-        ImmutableBean(String string1, int int1, Collection collection1) {
-            this.string1 = string1
-            this.int1 = int1
-            this.collection1 = collection1
-        }
     }
 
 }

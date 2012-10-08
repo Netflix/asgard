@@ -16,12 +16,12 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
-import grails.test.ControllerUnitTestCase
+import org.junit.Before
 
-class ApplicationControllerTests extends ControllerUnitTestCase {
+class ApplicationControllerTests {
 
+    @Before
     void setUp() {
-        super.setUp()
         TestUtils.setUpMockRequest()
         controller.awsEc2Service = Mocks.awsEc2Service()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
@@ -46,7 +46,7 @@ class ApplicationControllerTests extends ControllerUnitTestCase {
         def p = controller.params
         p.name ='doesntexist'
         controller.show()
-        assert '/error/missing' == controller.renderArgs.view
+        assert '/error/missing' == view
         assert "Application 'doesntexist' not found in us-east-1 test" == controller.flash.message
     }
 }

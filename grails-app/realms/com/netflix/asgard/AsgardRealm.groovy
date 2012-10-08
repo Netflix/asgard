@@ -13,14 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.netflix.asgard
 
-import org.apache.commons.lang.builder.CompareToBuilder
+import com.netflix.asgard.auth.AsgardToken
+import org.apache.shiro.authc.AuthenticationToken
 
-class HasCompareTo implements Comparable {
+/**
+ * Security realm implementation which delegates to the configured {@link AuthenticationProvider}.
+ */
+class AsgardRealm {
 
-    @Override
-    int compareTo(Object that) {
-        return CompareToBuilder.reflectionCompare(this, that);
+    static authTokenClass = AsgardToken
+
+    def pluginService
+
+    def authenticate(AuthenticationToken authToken) {
+        pluginService.authenticationProvider.authenticate(authToken)
     }
+
 }
