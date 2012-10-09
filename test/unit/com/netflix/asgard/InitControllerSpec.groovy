@@ -15,9 +15,11 @@
  */
 package com.netflix.asgard
 
+import grails.test.mixin.TestFor
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@TestFor(InitController)
 class InitControllerSpec extends Specification {
 
     static final String SAMPLE_ACCESS_ID = 'AKIAII3BM5ENKCZEI4KQ'

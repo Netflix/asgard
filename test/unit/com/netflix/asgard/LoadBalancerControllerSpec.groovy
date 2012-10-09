@@ -21,9 +21,12 @@ import com.amazonaws.services.elasticloadbalancing.model.DeleteLoadBalancerListe
 import com.amazonaws.services.elasticloadbalancing.model.Listener
 import com.netflix.asgard.mock.Mocks
 import grails.test.MockUtils
+import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
+
+@TestFor(LoadBalancerController)
 class LoadBalancerControllerSpec extends Specification {
 
     AmazonElasticLoadBalancing mockElb = Mock(AmazonElasticLoadBalancing)
