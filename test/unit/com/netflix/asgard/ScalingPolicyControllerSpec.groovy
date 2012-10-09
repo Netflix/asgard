@@ -32,9 +32,11 @@ import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AlarmData
 import com.netflix.asgard.model.TopicData
 import grails.test.MockUtils
+import grails.test.mixin.TestFor
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyPointlessArithmetic")
+@TestFor(ScalingPolicyController)
 class ScalingPolicyControllerSpec extends Specification {
 
     void setup() {

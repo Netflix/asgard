@@ -17,8 +17,10 @@ package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
 import grails.test.MockUtils
+import grails.test.mixin.TestFor
 import spock.lang.Specification
 
+@TestFor(RdsInstanceController)
 class RdsInstanceControllerSpec extends Specification {
 
     final showParams = [

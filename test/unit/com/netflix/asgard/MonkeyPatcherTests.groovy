@@ -75,10 +75,10 @@ class MonkeyPatcherTests {
     @SuppressWarnings("GroovyAssignabilityCheck")
     void testImageKeepForever() {
         Image image = new Image()
-        assertFalse image.keepForever
+        assert !image.keepForever
         image.tags = [new Tag('expiration_time', 'the future')]
-        assertFalse image.keepForever
+        assert !image.keepForever
         image.tags = [new Tag('expiration_time', 'never')]
-        assertTrue image.keepForever
+        assert image.keepForever == true
     }
 }

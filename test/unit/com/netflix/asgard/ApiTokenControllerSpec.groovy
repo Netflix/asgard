@@ -17,10 +17,12 @@ package com.netflix.asgard
 
 import com.netflix.asgard.auth.ApiToken
 import grails.test.MockUtils
+import grails.test.mixin.TestFor
 import org.apache.shiro.subject.Subject
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@TestFor(ApiTokenController)
 class ApiTokenControllerSpec extends Specification {
 
     def configService = Mock(ConfigService)
