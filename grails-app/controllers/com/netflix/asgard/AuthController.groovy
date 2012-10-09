@@ -33,7 +33,7 @@ class AuthController {
             SecurityUtils.subject.login(authToken)
             redirect(uri: targetUri)
         } catch (AuthenticationException e) {
-            log.error('Authentication failed for token ${authToken}', e)
+            log.error("Authentication failed for token ${authToken}", e)
             render(status: 401, text: "Authentication failed with message ${e.message}")
         }
     }
