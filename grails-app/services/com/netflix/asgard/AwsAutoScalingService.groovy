@@ -920,19 +920,19 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     List<LaunchConfiguration> retrieveLaunchConfigurations(Region region) {
         List<LaunchConfiguration> configs = []
-        DescribeLaunchConfigurationsResult result = retrieveLaunchConfigurations(region, null)
+        DescribeLaunchConfigurationsResult result = retrieveLaunchConfigurationsForToken(region, null)
         while (true) {
             configs.addAll(result.getLaunchConfigurations())
             if (result.getNextToken() == null) {
                 break
             }
-            result = retrieveLaunchConfigurations(region, result.getNextToken())
+            result = retrieveLaunchConfigurationsForToken(region, result.getNextToken())
         }
         configs.each { ensureUserDataIsDecodedAndTruncated(it) }
         configs
     }
 
-    private DescribeLaunchConfigurationsResult retrieveLaunchConfigurations(Region region, String nextToken) {
+    private DescribeLaunchConfigurationsResult retrieveLaunchConfigurationsForToken(Region region, String nextToken) {
         awsClient.by(region).describeLaunchConfigurations(new DescribeLaunchConfigurationsRequest().withNextToken(nextToken))
     }
 
