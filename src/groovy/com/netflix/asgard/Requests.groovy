@@ -145,7 +145,7 @@ class Requests {
                 controller.render(view: '/error/missing')
             }
             xml { controller.render(contentType: 'application/xml') { error(message) } }
-            json { controller.render(contentType: 'application/json') { error(message) } }
+            json { controller.render(contentType: 'application/json') { [error: message] } }
         }
     }
 }
