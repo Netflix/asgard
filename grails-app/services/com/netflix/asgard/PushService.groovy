@@ -169,7 +169,7 @@ class PushService {
                 purposeToVpcId: purposeToVpcId,
                 securityGroupsGroupedByVpcId: effectiveSecurityGroups.groupBy { it.vpcId },
                 selectedSecurityGroups: selectedSecurityGroups ?: lc.securityGroups,
-                defKey: awsEc2Service.defaultKeyName,
+                defKey: lc.keyName,
                 keys: awsEc2Service.getKeys(userContext).sort { it.keyName.toLowerCase() },
                 iamInstanceProfile: lc.iamInstanceProfile,
                 // Rolling push process options
