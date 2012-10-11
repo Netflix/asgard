@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.InstanceType
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.InstanceProductType
@@ -102,5 +103,24 @@ class InstanceTypeServiceTests extends GroovyTestCase {
         assert 0.48 == euWestReservedPricing.get(InstanceType.M22xlarge, InstanceProductType.LINUX_UNIX)
         assert 0.96 == euWestReservedPricing.get(InstanceType.M24xlarge, InstanceProductType.LINUX_UNIX)
         assertNull euWestReservedPricing.get(InstanceType.Cg14xlarge, InstanceProductType.LINUX_UNIX)
+    }
+
+    void testFindRelevantInstanceTypesFor64BitImage() {
+        InstanceTypeService instanceTypeService = Mocks.instanceTypeService()
+        Image image = new Image(architecture: 'x86_64')
+        List<String> expected64BitInstanceTypes = ['t1.micro', 'm1.small', 'c1.medium', 'm1.large', 'm2.xlarge',
+                'c1.xlarge', 'm1.xlarge', 'm2.2xlarge', 'cc1.4xlarge', 'm2.4xlarge', 'cg1.4xlarge', 'cc2.8xlarge',
+                'huge.mainframe']
+
+        assertEquals(expected64BitInstanceTypes,
+                instanceTypeService.findRelevantInstanceTypesForImage(Mocks.userContext(), image)*.name)
+    }
+
+    void testFindRelevantInstanceTypesFor32BitImage() {
+        InstanceTypeService instanceTypeService = Mocks.instanceTypeService()
+        Image image = new Image(architecture: 'i386')
+        List<String> expected32BitInstaceTypes = ['t1.micro', 'm1.small', 'c1.medium']
+        assertEquals(expected32BitInstaceTypes,
+            instanceTypeService.findRelevantInstanceTypesForImage(Mocks.userContext(), image)*.name)
     }
 }

@@ -85,7 +85,7 @@ class InstanceTypeService implements CacheInitializer {
     Collection<InstanceTypeData> findRelevantInstanceTypesForImage(UserContext userContext, Image image) {
         Collection<InstanceTypeData> instanceTypes = getInstanceTypes(userContext)
         String instanceTypeArch = imageArchToInstanceTypeArch[image.architecture]
-        instanceTypes.findAll { it.hardwareProfile.architecture == instanceTypeArch }
+        instanceTypes.findAll { it.hardwareProfile.architecture.contains(instanceTypeArch) }
     }
 
     InstanceTypeData getInstanceType(UserContext userContext, String instanceTypeName) {
