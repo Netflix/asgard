@@ -19,6 +19,10 @@ import com.netflix.asgard.mock.Mocks
 
 class LaunchTemplateServiceTests extends GroovyTestCase {
 
+    void setUp() {
+        Mocks.createDynamicMethods()
+    }
+
     void testIncludeDefaultSecurityGroups() {
         LaunchTemplateService launchTemplateService = Mocks.launchTemplateService()
         List<String> original = ["account_batch", "abcache"]
