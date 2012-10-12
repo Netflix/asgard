@@ -186,10 +186,9 @@ class ClusterController {
             String lcName = lastGroup.launchConfigurationName
             LaunchConfiguration lastLaunchConfig = awsAutoScalingService.getLaunchConfiguration(userContext, lcName)
             String appName = Relationships.appNameFromGroupName(name)
-            List<String> lastSecurityGroups = lastLaunchConfig.securityGroups
-            List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups ?: lastSecurityGroups)
-            List<String> selectedZones = Requests.ensureList(params.selectedZones ?: lastGroup.availabilityZones)
-            List<String> termPolicies = Requests.ensureList(params.terminationPolicy ?: lastGroup.terminationPolicies)
+            List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups)
+            List<String> selectedZones = Requests.ensureList(params.selectedZones) ?: lastGroup.availabilityZones
+            List<String> termPolicies = Requests.ensureList(params.terminationPolicy)
             List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
             String azRebalance = params.azRebalance
             boolean lastRebalanceSuspended = lastGroup.isProcessSuspended(AutoScalingProcessType.AZRebalance)
@@ -236,8 +235,14 @@ class ClusterController {
             String subnetPurpose = params.subnetPurpose
             String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForPurposeAndZones(subnetPurpose,
                     selectedZones)
-            if (params.noDefaults != 'true') {
+            String iamInstanceProfile = params.iamInstanceProfile ?: null
+            if (params.noOptionalDefaults != 'true') {
+                securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
+                termPolicies = termPolicies ?: lastGroup.terminationPolicies
                 loadBalancerNames = loadBalancerNames ?: lastGroup.loadBalancerNames
+                vpcZoneIdentifier = vpcZoneIdentifier ?: subnets.constructNewVpcZoneIdentifierForZones(lastGroup.vpcZoneIdentifier,
+                        selectedZones)
+                iamInstanceProfile = iamInstanceProfile ?: lastLaunchConfig.iamInstanceProfile
             }
             GroupCreateOptions options = new GroupCreateOptions(
                     common: new CommonPushOptions(
@@ -262,15 +267,14 @@ class ClusterController {
                     terminationPolicies: termPolicies,
                     batchSize: params.batchSize as Integer ?: GroupResizeOperation.DEFAULT_BATCH_SIZE,
                     loadBalancerNames: loadBalancerNames,
-                    iamInstanceProfile: params.iamInstanceProfile ?: null,
+                    iamInstanceProfile: iamInstanceProfile,
                     keyName: params.keyName ?: lastLaunchConfig.keyName,
-                    availabilityZones: selectedZones ?: lastGroup.availabilityZones,
+                    availabilityZones: selectedZones,
                     zoneRebalancingSuspended: azRebalanceSuspended,
                     scalingPolicies: newScalingPolicies,
                     scheduledActions: newScheduledActions,
                     vpcZoneIdentifier: vpcZoneIdentifier,
             )
-
             def operation = pushService.startGroupCreate(options)
             flash.message = "${operation.task.name} has been started."
             redirectToTask(operation.taskId)

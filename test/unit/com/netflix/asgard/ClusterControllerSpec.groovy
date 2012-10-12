@@ -35,7 +35,7 @@ class ClusterControllerSpec extends Specification {
         launchConfigurationName: 'helloworld-lc', healthCheckType: AutoScalingGroupHealthCheckType.EC2,
         instances: [new Instance(instanceId: 'i-6ef9f30e'), new Instance(instanceId: 'i-95fe1df6')],
         availabilityZones: ['us-east-1c'], loadBalancerNames: ['hello-elb'], terminationPolicies: ['hello-tp'],
-        vPCZoneIdentifier: 'lastVpcZoneIdentifier')
+        vPCZoneIdentifier: 'subnet-1')
     final LaunchConfiguration launchConfiguration = new LaunchConfiguration(imageId: 'lastImageId',
             instanceType: 'lastInstanceType', keyName: 'lastKeyName', securityGroups: ['sg-123', 'sg-456'],
             iamInstanceProfile: 'lastIamProfile')
@@ -147,8 +147,8 @@ class ClusterControllerSpec extends Specification {
                 assert healthCheckType == 'EC2'
                 assert healthCheckGracePeriod == 42
                 assert defaultCooldown == 360
-                assert vpcZoneIdentifier == null
-                assert iamInstanceProfile == null
+                assert vpcZoneIdentifier == 'subnet-1'
+                assert iamInstanceProfile == 'lastIamProfile'
             }
             true
         }) >> { args ->
@@ -159,12 +159,12 @@ class ClusterControllerSpec extends Specification {
         }
     }
 
-    def 'next group should have no defaults'() {
+    def 'next group should have no defaults for optional fields'() {
         controller.awsAutoScalingService.getCluster(_, 'helloworld-example') >> conctructClusterFromAsg(asg)
         controller.awsAutoScalingService.getLaunchConfiguration(_, 'helloworld-lc') >> launchConfiguration
         controller.params.with {
             name = 'helloworld-example'
-            noDefaults = 'true'
+            noOptionalDefaults = 'true'
         }
 
         when:
@@ -176,11 +176,11 @@ class ClusterControllerSpec extends Specification {
                 assert common.appName == 'helloworld'
                 assert common.imageId == 'lastImageId'
                 assert common.instanceType == 'lastInstanceType'
-                assert common.securityGroups == ['sg-123', 'sg-456']
+                assert common.securityGroups == []
                 assert keyName == 'lastKeyName'
                 assert availabilityZones == ['us-east-1c']
                 assert loadBalancerNames == []
-                assert terminationPolicies == ['hello-tp']
+                assert terminationPolicies == []
                 assert zoneRebalancingSuspended == false
                 assert minSize == 3
                 assert desiredCapacity == 5
