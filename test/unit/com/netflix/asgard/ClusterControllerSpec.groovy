@@ -40,7 +40,7 @@ class ClusterControllerSpec extends Specification {
             instanceType: 'lastInstanceType', keyName: 'lastKeyName', securityGroups: ['sg-123', 'sg-456'],
             iamInstanceProfile: 'lastIamProfile')
 
-    final Closure<Cluster> conctructClusterFromAsg = { AutoScalingGroup asg ->
+    final Closure<Cluster> constructClusterFromAsg = { AutoScalingGroup asg ->
         new Cluster([AutoScalingGroupData.from(asg, [:], [], [:], [])])
     }
 
@@ -122,7 +122,7 @@ class ClusterControllerSpec extends Specification {
     }
 
     def 'next group should have defaults'() {
-        controller.awsAutoScalingService.getCluster(_, 'helloworld-example') >> conctructClusterFromAsg(asg)
+        controller.awsAutoScalingService.getCluster(_, 'helloworld-example') >> constructClusterFromAsg(asg)
         controller.awsAutoScalingService.getLaunchConfiguration(_, 'helloworld-lc') >> launchConfiguration
         controller.params.name = 'helloworld-example'
 
@@ -160,7 +160,7 @@ class ClusterControllerSpec extends Specification {
     }
 
     def 'next group should have no defaults for optional fields'() {
-        controller.awsAutoScalingService.getCluster(_, 'helloworld-example') >> conctructClusterFromAsg(asg)
+        controller.awsAutoScalingService.getCluster(_, 'helloworld-example') >> constructClusterFromAsg(asg)
         controller.awsAutoScalingService.getLaunchConfiguration(_, 'helloworld-lc') >> launchConfiguration
         controller.params.with {
             name = 'helloworld-example'
@@ -201,7 +201,7 @@ class ClusterControllerSpec extends Specification {
     }
 
     def 'next group should have selections over defaults'() {
-        controller.awsAutoScalingService.getCluster(_, 'helloworld-example') >> conctructClusterFromAsg(asg)
+        controller.awsAutoScalingService.getCluster(_, 'helloworld-example') >> constructClusterFromAsg(asg)
         controller.awsAutoScalingService.getLaunchConfiguration(_, 'helloworld-lc') >> launchConfiguration
         controller.params.with() {
             name = 'helloworld-example'
