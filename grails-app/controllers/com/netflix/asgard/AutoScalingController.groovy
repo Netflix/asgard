@@ -447,8 +447,8 @@ class AutoScalingController {
                 if (params.appName) {
                     try {
                         String groupName = Relationships.buildGroupName(params, true)
-                        Names names = Relationships.dissectCompoundName(groupName)
-                        List<String> envVars = names.labeledEnvironmentVariables(configService.userDataVarPrefix)
+                        List<String> envVars = Relationships.labeledEnvironmentVariables(groupName,
+                                configService.userDataVarPrefix)
                         Map result = [groupName: groupName, envVars: envVars]
                         render(result as JSON)
                     } catch (Exception e) {

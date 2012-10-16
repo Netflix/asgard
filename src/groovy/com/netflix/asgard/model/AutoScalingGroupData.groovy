@@ -178,7 +178,7 @@ class AutoScalingGroupData {
     }
 
     Map<String, String> getVariables() {
-        Relationships.dissectCompoundName(autoScalingGroupName).parts()
+        Relationships.parts(autoScalingGroupName)
     }
 
     AppVersion getMostCommonAppVersion() {
