@@ -18,13 +18,15 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AutoScalingGroupData
+import com.netflix.frigga.Names
+import com.netflix.frigga.ami.AppVersion
 import grails.test.GrailsUnitTestCase
 import org.joda.time.DateTime
 
 class RelationshipsTests extends GrailsUnitTestCase {
 
     void setUp() {
-        Mocks.createDynamicMethods() 
+        Mocks.createDynamicMethods()
     }
 
     private void assertPushSequenceSortResult(List<String> expectedResult, List<String> input) {
@@ -385,27 +387,6 @@ class RelationshipsTests extends GrailsUnitTestCase {
         assert null == names.zone
     }
 
-    void testExtractLabeledVariable() {
-        assert 'sony' == Relationships.extractLabeledVariable('-p0sony', 'p')
-        assert 'northamerica' == Relationships.extractLabeledVariable('-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a', 'c')
-        assert 'prod' == Relationships.extractLabeledVariable('-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a', 'd')
-        assert 'gamesystems' == Relationships.extractLabeledVariable('-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a', 'h')
-        assert 'vizio' == Relationships.extractLabeledVariable('-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a', 'p')
-        assert '27' == Relationships.extractLabeledVariable('-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a', 'r')
-        assert 'nccp' == Relationships.extractLabeledVariable('-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a', 'u')
-        assert 'A' == Relationships.extractLabeledVariable('-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a', 'x')
-        assert 'useast1a' == Relationships.extractLabeledVariable('-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a', 'z')
-        assert null == Relationships.extractLabeledVariable('-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a', 'a')
-        assert null == Relationships.extractLabeledVariable('', 'a')
-        assert null == Relationships.extractLabeledVariable(null, 'a')
-        assert null == Relationships.extractLabeledVariable(null, '')
-        assert null == Relationships.extractLabeledVariable(null, null)
-        assert null == Relationships.extractLabeledVariable('', null)
-        assert null == Relationships.extractLabeledVariable('-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a', null)
-        assert null == Relationships.extractLabeledVariable('-p0sony', '')
-        assert null == Relationships.extractLabeledVariable('-p0sony', null)
-    }
-
     void testDissectAppVersion() {
 
         AppVersion appVersion = Relationships.dissectAppVersion("helloworld-1.0.0-592112.h154/WE-WAPP-helloworld/154")
@@ -439,62 +420,6 @@ class RelationshipsTests extends GrailsUnitTestCase {
         assertNull Relationships.dissectAppVersion(null)
         assertNull Relationships.dissectAppVersion("")
         assertNull Relationships.dissectAppVersion("blah blah blah")
-    }
-
-    void testAppVersionCompareTo() {
-
-        AppVersion appVersion = new AppVersion("app", "1.2.3", "WE-WAPP-app", "456", "1234567")
-
-        assert appVersion == appVersion
-        assert 0 == (appVersion <=> appVersion)
-
-        AppVersion same = new AppVersion("app", "1.2.3", "WE-WAPP-app", "456", "1234567")
-        assert appVersion == same
-        assert 0 == (appVersion <=> same)
-        assert 0 == (same <=> appVersion)
-
-        assert appVersion != null
-        assert 1 == (appVersion <=> null)
-        assert -1 == (null <=> appVersion)
-
-        assert appVersion != "foo"
-        shouldFail(ClassCastException) {
-            appVersion <=> "foo"
-        }
-        shouldFail(ClassCastException) {
-            "foo" <=> appVersion
-        }
-
-        def assertIsLessThan = { lesser, greater ->
-            assert lesser != greater
-            assert -1 == (lesser.compareTo(greater))
-            assert 1 == (greater.compareTo(lesser))
-        }
-
-        assertIsLessThan(new AppVersion(null, "1.2.3", "WE-WAPP-app", "456", "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("", "1.2.3", "WE-WAPP-app", "456", "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("App", "1.2.3", "WE-WAPP-app", "456", "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("ape", "1.2.3", "WE-WAPP-app", "456", "1234567"), appVersion)
-
-        assertIsLessThan(new AppVersion("app", null, "WE-WAPP-app", "456", "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("app", "", "WE-WAPP-app", "456", "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("app", "0.1.2", "WE-WAPP-app", "456", "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("app", "1.2.2", "WE-WAPP-app", "456", "1234567"), appVersion)
-
-        assertIsLessThan(new AppVersion("app", "1.2.3", null, "456", "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("app", "1.2.3", "", "456", "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("app", "1.2.3", "WE-WAPP-App", "456", "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("app", "1.2.3", "WE-WAPP-ape", "456", "1234567"), appVersion)
-
-        assertIsLessThan(new AppVersion("app", "1.2.3", "WE-WAPP-app", null, "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("app", "1.2.3", "WE-WAPP-app", "", "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("app", "1.2.3", "WE-WAPP-app", "234", "1234567"), appVersion)
-        assertIsLessThan(new AppVersion("app", "1.2.3", "WE-WAPP-app", "344", "1234567"), appVersion)
-
-        assertIsLessThan(new AppVersion("app", "1.2.3", "WE-WAPP-app", "456", null), appVersion)
-        assertIsLessThan(new AppVersion("app", "1.2.3", "WE-WAPP-app", "456", ""), appVersion)
-        assertIsLessThan(new AppVersion("app", "1.2.3", "WE-WAPP-app", "456", "1000000"), appVersion)
-        assertIsLessThan(new AppVersion("app", "1.2.3", "WE-WAPP-app", "456", "1234566"), appVersion)
     }
 
     void testPackageFromAppVersion() {
@@ -728,6 +653,23 @@ class RelationshipsTests extends GrailsUnitTestCase {
     void testBuildPolicyName() {
         assert 'helloworld--scalingtest-v000-99999' == Relationships.buildScalingPolicyName(
                 'helloworld--scalingtest-v000', '99999')
+    }
+
+    void testLabeledEnvironmentVariables() {
+        Names names = new Names('test')
+        names.partners = 'sony'
+        assert ['export NETFLIX_PARTNERS=sony'] == Relationships.labeledEnvironmentVariables(names, 'NETFLIX_')
+        names.devPhase = 'stage'
+        assert ['export NETFLIX_DEV_PHASE=stage', 'export NETFLIX_PARTNERS=sony'] ==
+                Relationships.labeledEnvironmentVariables(names, 'NETFLIX_')
+    }
+
+    void testParts() {
+        Names names = new Names('test')
+        names.partners = 'sony'
+        assert ['Partners': 'sony'] == Relationships.parts(names)
+        names.devPhase = 'stage'
+        assert ['Dev Phase': 'stage', 'Partners': 'sony'] == Relationships.parts(names)
     }
 
 }
