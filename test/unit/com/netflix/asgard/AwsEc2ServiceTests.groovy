@@ -27,6 +27,7 @@ import com.amazonaws.services.ec2.model.SpotInstanceRequest
 import com.amazonaws.services.ec2.model.Tag
 import com.google.common.collect.Multiset
 import com.netflix.asgard.mock.Mocks
+import com.netflix.frigga.ami.AppVersion
 import grails.test.GrailsUnitTestCase
 import grails.test.MockUtils
 

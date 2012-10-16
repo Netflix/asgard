@@ -22,11 +22,11 @@ import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
-import com.netflix.asgard.AppVersion
 import com.netflix.asgard.MergedInstance
 import com.netflix.asgard.Relationships
 import com.netflix.asgard.TagNames
 import com.netflix.asgard.Time
+import com.netflix.frigga.ami.AppVersion
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import org.apache.commons.collections.Bag
