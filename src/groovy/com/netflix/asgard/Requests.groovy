@@ -76,10 +76,23 @@ class Requests {
                 "CLIENTHOST" : getClientHostName(request),
                 "CLIENTIP" : getClientIpAddress(request)
         ]
-        StringWriter sw = new StringWriter()
-        PrettyWriter prettyWriter = new PrettyWriter(sw)
-        prettyWriter.println(props)
-        sw.toString()
+        prettyPrint(props)
+    }
+
+    private static String prettyPrint(def value, String label = null, int indent = 0) {
+        String spaces = ' ' * indent
+        String output = spaces
+        if (label) {
+            output += "${label} : "
+        }
+        if (value instanceof Map) {
+            output += "[\n"
+            value.each { k, v ->  output += prettyPrint(v, k, indent + 5) }
+            output += "${spaces}]\n"
+        } else {
+            output += "${value}\n"
+        }
+        output
     }
 
     static List<String> ensureList(def stringParam) {
