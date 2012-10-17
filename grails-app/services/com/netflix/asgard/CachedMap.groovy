@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.google.common.collect.Maps
+import com.google.common.collect.Sets
 import com.netflix.asgard.cache.Action
 import com.netflix.asgard.cache.Fillable
 import com.netflix.asgard.cache.JournalRecord
@@ -169,8 +170,8 @@ class CachedMap<T> implements Fillable {
         items.each { T val -> datasource.put(entityType.key(val), val) }
 
         Set<String> datasourceKeys = datasource.keySet()
-        Set<String> deleteCandidates = cachedKeys.minus(datasourceKeys)
-        Set<String> addCandidates = datasourceKeys.minus(cachedKeys)
+        Set<String> deleteCandidates = Sets.difference(cachedKeys, datasourceKeys).immutableCopy()
+        Set<String> addCandidates = Sets.difference(datasourceKeys, cachedKeys).immutableCopy()
         Set<String> updateCandidates = cachedKeys.intersect(datasourceKeys)
 
         // If the cache has an object that is missing from the datasource and the object was created before this fill
