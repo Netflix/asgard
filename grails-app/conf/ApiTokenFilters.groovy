@@ -46,6 +46,10 @@ class ApiTokenFilters {
                     SecurityUtils.subject?.logout()
                     ConfigUtils.removePrincipal(SecurityUtils.subject?.principal)
                 }
+
+                // If the last value is falsy and there is no explicit return statement then this filter method will
+                // return a falsy value and cause requests to fail silently.
+                return true
             }
         }
     }
