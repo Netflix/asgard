@@ -90,7 +90,8 @@ class PushController {
                 relaunchCount: relaunchCount,
                 concurrentRelaunches: concurrentRelaunches,
                 rudeShutdown: params.containsKey('rudeShutdown'),
-                iamInstanceProfile: params.iamInstanceProfile
+                iamInstanceProfile: params.iamInstanceProfile,
+                keyName: params.keyName
         )
 
         try {
