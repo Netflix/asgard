@@ -187,9 +187,10 @@ class ClusterController {
             LaunchConfiguration lastLaunchConfig = awsAutoScalingService.getLaunchConfiguration(userContext, lcName)
             String appName = Relationships.appNameFromGroupName(name)
             List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups)
-            List<String> selectedZones = Requests.ensureList(params.selectedZones) ?: lastGroup.availabilityZones
             List<String> termPolicies = Requests.ensureList(params.terminationPolicy)
             List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
+            // Availability zones default to the last group's value since this field is required.
+            List<String> selectedZones = Requests.ensureList(params.selectedZones) ?: lastGroup.availabilityZones
             String azRebalance = params.azRebalance
             boolean lastRebalanceSuspended = lastGroup.isProcessSuspended(AutoScalingProcessType.AZRebalance)
             boolean azRebalanceSuspended = (azRebalance == null) ? lastRebalanceSuspended : (azRebalance == 'disabled')
