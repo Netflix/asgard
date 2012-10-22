@@ -187,7 +187,7 @@ class InstanceController {
                     baseServer: baseServer,
                     instance: instance,
                     linkGroupingsToListsOfTextLinks: linkGroupingsToListsOfTextLinks,
-                    securityGroups: instRsrv?.groupNames?.sort(),
+                    securityGroups: instance?.securityGroups?.sort(),
                     image: image,
                     cluster: clusterName,
                     group: group,

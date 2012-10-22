@@ -252,7 +252,7 @@
               <table>
                 <g:each var="g" in="${securityGroups}">
                   <tr class="prop">
-                    <td class="value"><g:linkObject type="security" name="${g}"/></td>
+                    <td class="value"><g:linkObject type="security" name="${g.groupId}">${g.groupName}</g:linkObject></td>
                   </tr>
                 </g:each>
               </table>
