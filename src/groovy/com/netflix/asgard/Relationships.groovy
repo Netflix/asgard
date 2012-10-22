@@ -108,17 +108,17 @@ class Relationships {
 
     static String buildGroupName(Map params, Boolean doValidation = false) {
         new AutoScalingGroupNameBuilder(
-                appName: params.get("appName"),
+                appName: params.appName,
                 stack: params.newStack ?: params.stack,
-                detail: params.get("detail"),
-                countries: params.get("countries"),
-                devPhase: params.get("devPhase"),
-                hardware: params.get("hardware"),
-                partners: params.get("partners"),
-                revision: params.get("revision"),
-                usedBy: params.get("usedBy"),
-                redBlackSwap: params.get("redBlackSwap"),
-                zoneVar: params.get("zoneVar")).buildGroupName()
+                detail: params.detail,
+                countries: params.countries,
+                devPhase: params.devPhase,
+                hardware: params.hardware,
+                partners: params.partners,
+                revision: params.revision,
+                usedBy: params.usedBy,
+                redBlackSwap: params.redBlackSwap,
+                zoneVar: params.zoneVar).buildGroupName()
     }
 
     /**
