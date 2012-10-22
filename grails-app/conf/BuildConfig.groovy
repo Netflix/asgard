@@ -126,6 +126,7 @@ grails.project.dependency.resolution = {
                 // Call Perforce in process. Delete when user data no longer come from Perforce at deployment time.
                 'com.perforce:p4java:2010.1.269249',
 
+                // Rules for AWS named objects.
                 'com.netflix.frigga:frigga:0.2'
         ) { // Exclude superfluous and dangerous transitive dependencies
             excludes(
