@@ -156,7 +156,7 @@
         <li class="clusterAsgForm create hideAdvancedItems">
           <g:form method="post" class="validate" action="createNextGroup">
             <g:hiddenField name="name" value="${cluster.name}" />
-            <g:hiddenField name="noDefaults" value="true" />
+            <g:hiddenField name="noOptionalDefaults" value="true" />
             <h2>Create Next Group:</h2>
             <span class="toggle fakeLink" id="showAdvancedOptionsToCreateNextGroup">Advanced Options</span>
             <div class="clear"></div>
