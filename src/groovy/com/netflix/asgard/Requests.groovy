@@ -79,18 +79,27 @@ class Requests {
         prettyPrint(props)
     }
 
-    private static String prettyPrint(def value, String label = null, int indent = 0) {
+    private static String prettyPrint(def value, int indent = 0, String label = null) {
         String spaces = ' ' * indent
         String output = spaces
         if (label) {
             output += "${label} : "
         }
         if (value instanceof Map) {
-            output += "[\n"
-            value.each { k, v ->  output += prettyPrint(v, k, indent + 5) }
+            output += '[\n'
+            value.each { k, v ->  output += prettyPrint(v, indent + 5, k) }
+            output += "${spaces}]\n"
+        } else if  (value instanceof Collection || value?.class?.array) {
+            output += '[\n'
+            value.each { it -> output += prettyPrint(it, indent + 5)}
             output += "${spaces}]\n"
         } else {
-            output += "${value}\n"
+            if (value?.hasProperty('name') && value?.hasProperty('value')) {
+                output += "${value.name}=${value.value}"
+            } else {
+                output += value
+            }
+            output += ';\n'
         }
         output
     }
@@ -109,10 +118,10 @@ class Requests {
      * @param response the http servlet response
      */
     static void preventCaching(HttpServletResponse response) {
-        response.setHeader('Cache-Control', 'no-cache'); // HTTP 1.1
-        response.addHeader('Cache-Control', "no-store"); // http://stackoverflow.com/questions/866822/why-both-no-cache-and-no-store-should-be-used-in-http-response
-        response.setHeader('Pragma', 'no-cache'); // HTTP 1.0
-        response.setDateHeader ('Expires', 0); // Prevent caching at the proxy server
+        response.setHeader('Cache-Control', 'no-cache') // HTTP 1.1
+        response.addHeader('Cache-Control', "no-store") // http://stackoverflow.com/questions/866822/why-both-no-cache-and-no-store-should-be-used-in-http-response
+        response.setHeader('Pragma', 'no-cache') // HTTP 1.0
+        response.setDateHeader ('Expires', 0) // Prevent caching at the proxy server
     }
 
     /**
