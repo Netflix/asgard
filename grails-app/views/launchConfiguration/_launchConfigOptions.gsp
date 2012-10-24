@@ -30,7 +30,7 @@
     <td>
       <select id="imageId" name="imageId">
         <g:each var="im" in="${images}">
-          <option value="${im.imageId}" ${params.imageId == im.imageId || im.imageId == image ? "selected" : ""}>${im.imageLocation} | ${im.architecture} | ${im.imageId}</option>
+          <option value="${im.imageId}" ${params.imageId == im.imageId || im.imageId == image ? "selected" : ""}>${im.imageLocation} | ${im.imageId}</option>
         </g:each>
       </select>
       <br/>
