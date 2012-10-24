@@ -363,6 +363,15 @@ class ConfigService {
         grailsApplication.config.cloud?.defaultVpcSecurityGroupNames ?: []
     }
 
+    /**
+     * @return the maximum number of characters from the user data string to be stores in the launch configuration
+     *          cache, with a minimum of 0 and a default of {@code Integer.MAX_VALUE}
+     */
+    int getCachedUserDataMaxLength() {
+        int maxLength = grailsApplication.config.cloud?.cachedUserDataMaxLength ?: Integer.MAX_VALUE
+        Math.max(0, maxLength)
+    }
+
     /*
      * @return true if api token based authentication is active, false otherwise
      */
