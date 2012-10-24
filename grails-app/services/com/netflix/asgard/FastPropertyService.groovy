@@ -31,7 +31,7 @@ import org.apache.http.HttpStatus
 class FastPropertyService implements CacheInitializer {
 
     static transactional = false
-    
+
     private static final String SOURCE_OF_UPDATE = 'asgard'
 
     def grailsApplication
@@ -188,10 +188,17 @@ class FastPropertyService implements CacheInitializer {
 
             taskService.runTask(userContextToFindPlatformService, "Delete Fast Property '${id}'", { Task task ->
 
+                UserContext userContextThatDelivered = userContext
                 String hostAndPort = platformServiceHostAndPort(userContextToFindPlatformService)
+                if (hostAndPort) {
+                    userContextThatDelivered = userContextToFindPlatformService
+                } else {
+                    hostAndPort = platformServiceHostAndPort(userContext)
+                }
                 if (!hostAndPort) {
+                    List<Region> regionsChecked = [userContext.region, userContextToFindPlatformService.region].unique()
                     throw new ServerNotActiveException(
-                                "Unable to find working platformservice instance in ${userContext.region}")
+                            "Unable to find working platformservice instance in ${regionsChecked}")
                 }
 
                 String uriBase = "http://${hostAndPort}/platformservice/REST/v1/props/property/${URLEncoder.encode(id)}"
@@ -203,12 +210,12 @@ class FastPropertyService implements CacheInitializer {
                 restClientService.delete(uriPath)
 
                 // Wait for platformservice instances to propagate the change so get calls fail
-                while (get(userContextToFindPlatformService, id)) {
+                while (get(userContextThatDelivered, id)) {
                     Time.sleepCancellably(500)
                 }
 
                 // Update target regional cache. Also update user's current context regional cache if different from target.
-                if (userContext.region != userContextToFindPlatformService.region) {
+                if (userContext.region != userContextThatDelivered.region) {
                     get(userContext, id)
                 }
             }, Link.to(EntityType.fastProperty, id), existingTask)
