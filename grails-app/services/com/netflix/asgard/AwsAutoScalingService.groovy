@@ -411,7 +411,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         if (!autoScalingGroupName) { return [] }
         final List<ScalingPolicy> scalingPolicies = getScalingPoliciesForGroup(userContext, autoScalingGroupName)
         Map<ScalingPolicy, Collection<MetricAlarm>> scalingPolicyToAlarms = [:]
-        final Collection<Alarm> alarmReferences = scalingPolicies*.alarms.flatten()
+        final Collection<Alarm> alarmReferences = scalingPolicies*.alarms.flatten() as Collection<Alarm>
         final Collection<MetricAlarm> alarms = awsCloudWatchService.getAlarms(userContext, alarmReferences*.alarmName)
         final Map<String, ScalingPolicy> alarmNameToScalingPolicy = [:]
         scalingPolicies.each { ScalingPolicy scalingPolicy ->

@@ -22,7 +22,6 @@
   <title>RDS Instances</title>
 </head>
 <body>
-  <!-- <div class="nav"></div> -->
   <div class="body">
     <h1>Running RDS Instances in ${region.description}</h1>
     <g:if test="${flash.message}">
