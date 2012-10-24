@@ -451,3 +451,4 @@ div.grippie { background: #EEEEEE url(../images/grippie.png) no-repeat scroll ce
 
 .securityGroupsSelect select { 	min-width: 120px; }
 .select2-container a { font-weight: normal; }
+.select2-drop .select2-results .select2-result-label { padding-right: 15px; }
