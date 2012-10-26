@@ -171,7 +171,10 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
 
     void updateAutoScalingGroup(UpdateAutoScalingGroupRequest updateAutoScalingGroupRequest) {}
 
-    DescribeScheduledActionsResult describeScheduledActions(DescribeScheduledActionsRequest describeScheduledActionsRequest) { null }
+    DescribeScheduledActionsResult describeScheduledActions(
+            DescribeScheduledActionsRequest describeScheduledActionsRequest) {
+        new DescribeScheduledActionsResult(scheduledUpdateGroupActions: [])
+    }
 
     void suspendProcesses(SuspendProcessesRequest suspendProcessesRequest) {}
 
@@ -197,7 +200,9 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
 
     DescribeAutoScalingInstancesResult describeAutoScalingInstances() { null }
 
-    DescribeScheduledActionsResult describeScheduledActions() { null }
+    DescribeScheduledActionsResult describeScheduledActions() {
+        new DescribeScheduledActionsResult(scheduledUpdateGroupActions: [])
+    }
 
     void shutdown() {}
 
