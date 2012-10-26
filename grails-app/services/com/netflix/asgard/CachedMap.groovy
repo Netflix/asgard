@@ -167,7 +167,7 @@ class CachedMap<T> implements Fillable {
         Set<String> cachedKeys = new HashSet<String>(map.keySet())
         Map<String, T> datasource = new HashMap<String, T>()
         Collection<T> items = retriever()
-        items.each { T val -> datasource.put(entityType.key(val), val) }
+        items.each { val -> datasource.put(entityType.key(val), val) }
 
         Set<String> datasourceKeys = datasource.keySet()
         Set<String> deleteCandidates = Sets.difference(cachedKeys, datasourceKeys).immutableCopy()
