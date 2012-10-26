@@ -15,7 +15,7 @@
     limitations under the License.
 
 --%>
-<%@ page import="com.netflix.asgard.Requests" %>
+<%@ page import="com.netflix.asgard.model.InstancePriceType; com.netflix.asgard.Requests" %>
 
 <tbody valign="top">
   <tr class="advanced">
@@ -69,6 +69,21 @@
     </td>
   </tr>
   <g:render template="/common/securityGroupSelection" />
+  <tr class="prop advanced">
+    <td class="name">
+      <label>Pricing:</label>
+    </td>
+    <td>
+      <div>
+        <g:radio name="pricing" id="onDemand" value="${InstancePriceType.ON_DEMAND.name()}" checked="${!pricing || pricing == InstancePriceType.ON_DEMAND.name()}"/>
+        <label for="onDemand" class="choice">On-Demand</label>
+      </div>
+      <div>
+        <g:radio name="pricing" id="spot" value="${InstancePriceType.SPOT.name()}" checked="${pricing == InstancePriceType.SPOT.name()}"/>
+        <label for="spot" class="choice">Spot</label>
+      </div>
+    </td>
+  </tr>
   <tr class="prop advanced">
     <td class="name">
       <label for="kernelId">Kernel ID:</label>

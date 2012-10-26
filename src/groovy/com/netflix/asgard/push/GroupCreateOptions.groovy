@@ -35,6 +35,7 @@ import groovy.transform.Immutable
     boolean zoneRebalancingSuspended
     Collection<ScalingPolicyData> scalingPolicies
     Collection<ScheduledUpdateGroupAction> scheduledActions
+    String spotPrice
 
     /** The number of instances to create at a time while inflating the auto scaling group. */
     Integer batchSize

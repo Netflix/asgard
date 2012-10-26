@@ -14,6 +14,7 @@ import com.netflix.asgard.push.GroupCreateOptions
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 import com.netflix.asgard.model.SubnetData
+import com.netflix.asgard.model.InstancePriceType
 
 @SuppressWarnings("GroovyPointlessArithmetic")
 @TestFor(ClusterController)
@@ -38,7 +39,7 @@ class ClusterControllerSpec extends Specification {
         vPCZoneIdentifier: 'subnet-1')
     final LaunchConfiguration launchConfiguration = new LaunchConfiguration(imageId: 'lastImageId',
             instanceType: 'lastInstanceType', keyName: 'lastKeyName', securityGroups: ['sg-123', 'sg-456'],
-            iamInstanceProfile: 'lastIamProfile')
+            iamInstanceProfile: 'lastIamProfile', spotPrice: '1.23')
 
     final Closure<Cluster> constructClusterFromAsg = { AutoScalingGroup asg ->
         new Cluster([AutoScalingGroupData.from(asg, [:], [], [:], [])])
@@ -149,6 +150,7 @@ class ClusterControllerSpec extends Specification {
                 assert defaultCooldown == 360
                 assert vpcZoneIdentifier == 'subnet-1'
                 assert iamInstanceProfile == 'lastIamProfile'
+                assert spotPrice == '1.23'
             }
             true
         }) >> { args ->
@@ -190,6 +192,7 @@ class ClusterControllerSpec extends Specification {
                 assert defaultCooldown == 360
                 assert vpcZoneIdentifier == null
                 assert iamInstanceProfile == null
+                assert spotPrice == '1.23'
             }
             true
         }) >> { args ->
@@ -221,6 +224,7 @@ class ClusterControllerSpec extends Specification {
             iamInstanceProfile = 'newIamProfile'
             keyName = 'newKeyName'
             subnetPurpose = 'external'
+            pricing = InstancePriceType.ON_DEMAND.name()
         }
 
         when:
@@ -246,6 +250,7 @@ class ClusterControllerSpec extends Specification {
                 assert defaultCooldown == 720
                 assert vpcZoneIdentifier == 'subnet-4'
                 assert iamInstanceProfile == 'newIamProfile'
+                assert spotPrice == null
             }
             true
         }) >> { args ->

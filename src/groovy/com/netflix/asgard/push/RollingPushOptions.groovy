@@ -22,6 +22,7 @@ final class RollingPushOptions {
     Boolean newestFirst
     Boolean rudeShutdown
     String iamInstanceProfile
+    String spotPrice
 
     Boolean shouldWaitAfterBoot() {
         Math.max(0, common.afterBootWait) && !common.checkHealth

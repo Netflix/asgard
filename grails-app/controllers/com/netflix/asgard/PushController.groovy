@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.push.CommonPushOptions
 import com.netflix.asgard.push.PushException
 import com.netflix.asgard.push.RollingPushOperation
@@ -32,6 +33,7 @@ class PushController {
     def awsEc2Service
     def applicationService
     def pushService
+    def spotInstanceRequestService
     def grailsApplication
 
     def index = { redirect(controller:"autoScaling", action:"list", params:params) }
@@ -73,6 +75,11 @@ class PushController {
         relaunchCount = Ensure.bounded(0, relaunchCount, group.instances.size())
         concurrentRelaunches = Ensure.bounded(0, concurrentRelaunches, relaunchCount)
 
+        String spotPrice = null
+        if (params.pricing == InstancePriceType.SPOT.name()) {
+            spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, params.instanceType)
+        }
+
         RollingPushOptions pushOptions = new RollingPushOptions(
                 common: new CommonPushOptions(
                     userContext: userContext,
@@ -90,7 +97,8 @@ class PushController {
                 relaunchCount: relaunchCount,
                 concurrentRelaunches: concurrentRelaunches,
                 rudeShutdown: params.containsKey('rudeShutdown'),
-                iamInstanceProfile: params.iamInstanceProfile
+                iamInstanceProfile: params.iamInstanceProfile,
+                spotPrice: spotPrice
         )
 
         try {
