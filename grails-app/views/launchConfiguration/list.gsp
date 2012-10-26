@@ -36,7 +36,6 @@
           <th>Name</th>
           <th>Image ID</th>
           <th>Security Groups</th>
-          <th>User Data</th>
           <th>Instance Type</th>
           <th>Created Time</th>
         </tr>
@@ -51,7 +50,6 @@
                 <g:linkObject type="security" name="${secgroup}"/><br>
               </g:each>
             </td>
-            <td class="truncate"><pre>${config.userDataTruncated}</pre></td>
             <td>${config.instanceType}</td>
             <td class="date"><g:formatDate date="${config.createdTime}"/></td>
           </tr>
