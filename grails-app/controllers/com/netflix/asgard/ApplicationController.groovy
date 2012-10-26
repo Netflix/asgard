@@ -213,6 +213,10 @@ class ApplicationController {
         try {
             applicationService.deleteRegisteredApplication(userContext, name)
             flash.message = "Application '${name}' has been deleted."
+        } catch (ValidationException ve) {
+            flash.message = "Could not delete Application: ${ve.message}"
+            redirect(action: 'show', params: [name: name])
+            return
         } catch (Exception e) {
             flash.message = "Could not delete Application: ${e}"
         }
