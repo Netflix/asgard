@@ -39,7 +39,7 @@ class ConfigService {
      * @return the AWS account number for the current environment
      */
     String getAwsAccountNumber() {
-        grailsApplication.config?.grails?.awsAccounts[0]
+        grailsApplication.config.grails?.awsAccounts[0]
     }
 
     /**
@@ -48,7 +48,7 @@ class ConfigService {
      * @return Map <String, String> account numbers to account names
      */
     Map<String, String> getAwsAccountNames() {
-        grailsApplication.config?.grails?.awsAccountNames ?: [:]
+        grailsApplication.config.grails?.awsAccountNames ?: [:]
     }
 
     /**
@@ -73,7 +73,7 @@ class ConfigService {
     }
 
     String getTicketLabel() {
-        grailsApplication.config?.ticket?.label ?: 'Ticket'
+        grailsApplication.config.ticket?.label ?: 'Ticket'
     }
 
     String getFullTicketLabel() {
@@ -96,7 +96,7 @@ class ConfigService {
      * @return the full local system path to the directory where Asgard stores its configuration files
      */
     String getAsgardHome() {
-        grailsApplication.config?.asgardHome
+        grailsApplication.config.asgardHome
     }
 
     boolean isAppConfigured() {
@@ -121,12 +121,12 @@ class ConfigService {
 
     List<Region> getPlatformServiceRegions() {
         List<Region> activeRegions = Region.limitedRegions ?: Region.values()
-        List<Region> platformServiceRegions = grailsApplication.config?.cloud?.platformserviceRegions ?: []
+        List<Region> platformServiceRegions = grailsApplication.config.cloud?.platformserviceRegions ?: []
         platformServiceRegions.intersect(activeRegions)
     }
 
     boolean getUseJitter() {
-        Boolean result = grailsApplication.config?.thread?.useJitter
+        Boolean result = grailsApplication.config.thread?.useJitter
         if (result == null) {
             return true
         }
@@ -139,18 +139,18 @@ class ConfigService {
      * @return List <InstanceTypeData> the custom instance types, or an empty list
      */
     List<InstanceTypeData> getCustomInstanceTypes() {
-        grailsApplication.config?.cloud?.customIntanceTypes ?: []
+        grailsApplication.config.cloud?.customIntanceTypes ?: []
     }
 
     /**
      * @return the default auto scaling termination policy name to suggest when creating new auto scaling groups
      */
     String getDefaultTerminationPolicy() {
-        grailsApplication.config?.cloud?.defaultAutoScalingTerminationPolicy ?: 'Default'
+        grailsApplication.config.cloud?.defaultAutoScalingTerminationPolicy ?: 'Default'
     }
 
     List<String> getAwsAccounts() {
-        grailsApplication.config?.grails?.awsAccounts ?: []
+        grailsApplication.config.grails?.awsAccounts ?: []
     }
 
     /**
@@ -159,11 +159,11 @@ class ConfigService {
      * @return List < String > account numbers/names, or empty list if not configured
      */
     List<String> getPublicResourceAccounts() {
-        grailsApplication.config?.cloud?.publicResourceAccounts ?: []
+        grailsApplication.config.cloud?.publicResourceAccounts ?: []
     }
 
     List<String> getDiscouragedAvailabilityZones() {
-        grailsApplication.config?.cloud?.discouragedAvailabilityZones ?: []
+        grailsApplication.config.cloud?.discouragedAvailabilityZones ?: []
     }
 
     Map<String, List<TextLinkTemplate>> getInstanceLinkGroupingsToLinkTemplateLists() {
@@ -171,7 +171,7 @@ class ConfigService {
     }
 
     String getDefaultKeyName() {
-        grailsApplication.config?.cloud?.defaultKeyName ?: ''
+        grailsApplication.config.cloud?.defaultKeyName ?: ''
     }
 
     /**
