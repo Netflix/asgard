@@ -254,8 +254,8 @@ class Relationships {
         subnetIds.join(',')
     }
 
-    private static List<String> LABELED_ENV_VAR_FIELDS = ["countries", "devPhase", "hardware", "partners",
-            "revision", "usedBy", "redBlackSwap", "zone"].sort()
+    private static List<String> LABELED_ENV_VAR_FIELDS = ['countries', 'devPhase', 'hardware', 'partners',
+            'revision', 'usedBy', 'redBlackSwap', 'zone'].sort()
 
     static List<String> labeledEnvironmentVariables(String asgName, String prefix) {
         labeledEnvironmentVariables(dissectCompoundName(asgName), prefix)
@@ -273,7 +273,7 @@ class Relationships {
         envVars
     }
 
-    private static PARTS_FIELDS = (LABELED_ENV_VAR_FIELDS + ["stack", "detail"]).sort()
+    private static PARTS_FIELDS = (LABELED_ENV_VAR_FIELDS + ['stack', 'detail']).sort()
 
     static Map<String, String> parts(String asgName) {
         parts(dissectCompoundName(asgName))
