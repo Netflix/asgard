@@ -451,3 +451,6 @@ div.grippie { background: #EEEEEE url(../images/grippie.png) no-repeat scroll ce
 
 .securityGroupsSelect select { 	min-width: 120px; }
 .select2-container a { font-weight: normal; }
+
+/* Prevent wrapping due to width of Windows/Linux scrollbars */
+.select2-drop .select2-results .select2-result-label { padding-right: 15px; }
