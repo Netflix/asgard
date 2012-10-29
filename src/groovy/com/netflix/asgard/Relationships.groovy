@@ -25,7 +25,6 @@ import com.netflix.frigga.elb.LoadBalancerNameBuilder
 import org.apache.commons.lang.WordUtils
 import org.joda.time.DateTime
 
-
 /**
  * Utility class for handling relationships between different cloud objects and Netflix concepts, including naming
  * rules.
@@ -261,7 +260,6 @@ class Relationships {
     static List<String> labeledEnvironmentVariables(String asgName, String prefix) {
         labeledEnvironmentVariables(dissectCompoundName(asgName), prefix)
     }
-
 
     static List<String> labeledEnvironmentVariables(Names names, String prefix) {
         Check.notNull(prefix, String, 'prefix')
