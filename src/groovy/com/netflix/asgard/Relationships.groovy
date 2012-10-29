@@ -265,9 +265,9 @@ class Relationships {
         Check.notNull(prefix, String, 'prefix')
         List<String> envVars = []
 
-        LABELED_ENV_VAR_FIELDS.each { String name ->
-            if (names[name]) {
-                envVars << "export ${prefix}${Meta.splitCamelCase(name, "_").toUpperCase()}=${names[name]}"
+        LABELED_ENV_VAR_FIELDS.each { String field ->
+            if (names[field]) {
+                envVars << "export ${prefix}${Meta.splitCamelCase(field, "_").toUpperCase()}=${names[field]}"
             }
         }
         envVars
@@ -281,9 +281,9 @@ class Relationships {
 
     static Map<String, String> parts(Names names) {
         Map<String, String> parts = [:]
-        PARTS_FIELDS.each { String name ->
-            if (names[name]) {
-                parts[WordUtils.capitalize(Meta.splitCamelCase(name, " "))] = names[name]
+        PARTS_FIELDS.each { String field ->
+            if (names[field]) {
+                parts[WordUtils.capitalize(Meta.splitCamelCase(field, " "))] = names[field]
             }
         }
         parts
