@@ -18,9 +18,9 @@ package com.netflix.asgard.model
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
-import com.netflix.asgard.AppVersion
 import com.netflix.asgard.MergedInstance
 import com.netflix.asgard.Relationships
+import com.netflix.frigga.ami.AppVersion
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 

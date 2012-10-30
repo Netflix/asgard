@@ -16,17 +16,14 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.model.AutoScalingGroupData
-import java.lang.annotation.ElementType
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
-import java.lang.annotation.Target
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-import groovy.transform.Immutable
+import com.netflix.frigga.NameValidation
+import com.netflix.frigga.Names
+import com.netflix.frigga.ami.AppVersion
+import com.netflix.frigga.ami.BaseAmiInfo
+import com.netflix.frigga.autoscaling.AutoScalingGroupNameBuilder
+import com.netflix.frigga.elb.LoadBalancerNameBuilder
 import org.apache.commons.lang.WordUtils
-import org.apache.commons.lang.builder.ToStringBuilder
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 
 /**
  * Utility class for handling relationships between different cloud objects and Netflix concepts, including naming
@@ -86,11 +83,7 @@ class Relationships {
     }
 
     static String appNameFromGroupName(String autoScalingGroupName) {
-        Matcher nameMatcher = NAME_PATTERN.matcher(autoScalingGroupName)
-        if (nameMatcher.matches()) {
-            return nameMatcher.group(1)
-        }
-        ''
+        dissectCompoundName(autoScalingGroupName).app ?: ''
     }
 
     static String stackNameFromGroupName(String autoScalingGroupName) {
@@ -101,22 +94,6 @@ class Relationships {
         dissectCompoundName(autoScalingGroupName).cluster ?: ''
     }
 
-    private static final String NAME_CHARS = 'a-zA-Z0-9._'
-    private static final String NAME_HYPHEN_CHARS = '-a-zA-Z0-9._'
-    private static final String PUSH_FORMAT = /v([0-9]{3})/
-    private static final String LABELED_VAR_SEPARATOR = '0'
-    private static final String LABELED_VARIABLE = /[a-zA-Z][${LABELED_VAR_SEPARATOR}][a-zA-Z0-9]+/
-    private static final Pattern NAME_PATTERN = Pattern.
-            compile(/^([$NAME_CHARS]+)(?:-([$NAME_CHARS]*))?(?:-([$NAME_HYPHEN_CHARS]*?))?$/)
-
-    static final String COUNTRIES_KEY = 'c'
-    static final String DEV_PHASE_KEY = 'd'
-    static final String HARDWARE_KEY = 'h'
-    static final String PARTNERS_KEY = 'p'
-    static final String REVISION_KEY = 'r'
-    static final String USED_BY_KEY = 'u'
-    static final String RED_BLACK_SWAP_KEY = 'w'
-    static final String ZONE_KEY = 'z'
 
     /**
      * Breaks down the name of an auto scaling group or load balancer into its component parts.
@@ -125,94 +102,22 @@ class Relationships {
      * @return Names a data object containing the component parts of the compound name
      */
     static Names dissectCompoundName(String compoundName) {
-
-        if (!compoundName) { return new Names([:]) }
-
-        Matcher pushMatcher = compoundName =~ /^([$NAME_HYPHEN_CHARS]*)-($PUSH_FORMAT)$/
-        Boolean hasPush = pushMatcher.matches()
-        String cluster = hasPush ? pushMatcher[0][1] : compoundName
-        String push = hasPush ? pushMatcher[0][2] : null
-        Integer sequence = hasPush ? pushMatcher[0][3] as Integer : null
-
-        Matcher labeledVarsMatcher = cluster =~ /^([$NAME_HYPHEN_CHARS]*?)((-$LABELED_VARIABLE)*)$/
-        Boolean labeledAndUnlabeledMatches = labeledVarsMatcher.matches()
-        if (!labeledAndUnlabeledMatches) {
-            return new Names([:])
-        }
-        String unlabeledVars = labeledVarsMatcher[0][1]
-        String labeledVariables = labeledVarsMatcher[0][2]
-
-        Matcher nameMatcher = NAME_PATTERN.matcher(unlabeledVars)
-        def parts = nameMatcher[0]
-        String app = parts[1]
-        String stack = parts[2] ?: null
-        String detail = parts[3] ?: null
-
-        String countries    = extractLabeledVariable(labeledVariables, COUNTRIES_KEY)
-        String devPhase     = extractLabeledVariable(labeledVariables, DEV_PHASE_KEY)
-        String hardware     = extractLabeledVariable(labeledVariables, HARDWARE_KEY)
-        String partners     = extractLabeledVariable(labeledVariables, PARTNERS_KEY)
-        String revision     = extractLabeledVariable(labeledVariables, REVISION_KEY)
-        String usedBy       = extractLabeledVariable(labeledVariables, USED_BY_KEY)
-        String redBlackSwap = extractLabeledVariable(labeledVariables, RED_BLACK_SWAP_KEY)
-        String zone         = extractLabeledVariable(labeledVariables, ZONE_KEY)
-
-        new Names(group: compoundName, cluster: cluster, app: app, stack: stack, detail: detail, push: push,
-                sequence: sequence, countries: countries, devPhase: devPhase, hardware: hardware, partners: partners,
-                revision: revision, usedBy: usedBy, redBlackSwap: redBlackSwap, zone: zone)
-    }
-
-    static String extractLabeledVariable(String labeledVariablesString, String labelKey) {
-        if (labeledVariablesString && labelKey) {
-            Matcher labelMatcher = labeledVariablesString =~
-                    /.*?-${labelKey}${LABELED_VAR_SEPARATOR}([$NAME_CHARS]*).*?$/
-            Boolean hasLabel = labelMatcher.matches()
-            if (hasLabel) {
-                def parts = labelMatcher[0]
-                return parts[1]
-            }
-        }
-        null
+        Names.parseName(compoundName)
     }
 
     static String buildGroupName(Map params, Boolean doValidation = false) {
-        String appName = params.appName
-        Check.notEmpty(appName, "appName")
-
-        String stack = params.newStack ?: params.stack
-        String detail = params.detail
-        String countries = params.countries
-        String devPhase = params.devPhase
-        String hardware = params.hardware
-        String partners = params.partners
-        String revision = params.revision
-        String usedBy = params.usedBy
-        String redBlackSwap = params.redBlackSwap
-        String zoneVar = params.zoneVar
-
-        if (doValidation) {
-            if ([appName, stack, countries, devPhase, hardware, partners, revision, usedBy, redBlackSwap, zoneVar].
-                    any { it && !Relationships.checkName(it) } || (detail && !Relationships.checkDetail(detail))) {
-                throw new IllegalArgumentException('(Use alphanumeric characters only)')
-            }
-        }
-
-        String sep = LABELED_VAR_SEPARATOR
-
-        // Build the labeled variables for the end of the group name.
-        String labeledVars = ''
-        if (countries)    { labeledVars +=      "-${COUNTRIES_KEY}${sep}${countries}"    }
-        if (devPhase)     { labeledVars +=      "-${DEV_PHASE_KEY}${sep}${devPhase}"     }
-        if (hardware)     { labeledVars +=       "-${HARDWARE_KEY}${sep}${hardware}"     }
-        if (partners)     { labeledVars +=       "-${PARTNERS_KEY}${sep}${partners}"     }
-        if (revision)     { labeledVars +=       "-${REVISION_KEY}${sep}${revision}"     }
-        if (usedBy)       { labeledVars +=        "-${USED_BY_KEY}${sep}${usedBy}"       }
-        if (redBlackSwap) { labeledVars += "-${RED_BLACK_SWAP_KEY}${sep}${redBlackSwap}" }
-        if (zoneVar)      { labeledVars +=           "-${ZONE_KEY}${sep}${zoneVar}"      }
-
-        String result = combineAppStackDetail(appName, stack, detail) + labeledVars
-
-        return result
+        new AutoScalingGroupNameBuilder(
+                appName: params.appName,
+                stack: params.newStack ?: params.stack,
+                detail: params.detail,
+                countries: params.countries,
+                devPhase: params.devPhase,
+                hardware: params.hardware,
+                partners: params.partners,
+                revision: params.revision,
+                usedBy: params.usedBy,
+                redBlackSwap: params.redBlackSwap,
+                zoneVar: params.zoneVar).buildGroupName()
     }
 
     /**
@@ -234,7 +139,7 @@ class Relationships {
      * @return Boolean true if the name ends with the reserved format
      */
     static Boolean usesReservedFormat(String name) {
-        name ==~ /.*?$PUSH_FORMAT/ || name ==~ /^(.*?-)?$LABELED_VARIABLE.*?$/
+        NameValidation.usesReservedFormat(name)
     }
 
     /**
@@ -258,7 +163,7 @@ class Relationships {
      * @return true if the name is valid
      */
     static Boolean checkName(String name) {
-        name ==~ /^[$NAME_CHARS]+$/
+        NameValidation.checkName(name)
     }
 
     /**
@@ -270,7 +175,7 @@ class Relationships {
      * @return true if the detail is valid
      */
     static Boolean checkDetail(String detail) {
-        detail ==~ /^[$NAME_HYPHEN_CHARS]+$/
+        NameValidation.checkDetail(detail)
     }
 
     static String buildLaunchConfigurationName(String autoScalingGroupName) {
@@ -286,7 +191,7 @@ class Relationships {
     }
 
     static String buildLoadBalancerName(String appName, String stack, String detail) {
-        return combineAppStackDetail(appName, stack, detail)
+        new LoadBalancerNameBuilder(appName: appName, stack: stack, detail: detail).buildLoadBalancerName()
     }
 
     static String buildAppDetailName(String appName, String detail) {
@@ -306,72 +211,25 @@ class Relationships {
         [autoScalingGroupName, id].join('-')
     }
 
-    private static String combineAppStackDetail(String appName, String stack, String detail) {
-        Check.notEmpty(appName, "appName")
-        // Use empty strings, not null references that output "null"
-        stack = stack ?: ""
-        detail = detail ?: ""
-
-        return detail ? "$appName-$stack-$detail" : stack ? "$appName-$stack" : appName
-    }
-
-    /**
-     * All of these are valid:
-     * subscriberha-1.0.0-586499
-     * subscriberha-1.0.0-586499.h150
-     * subscriberha-1.0.0-586499.h150/WE-WAPP-subscriberha/150
-     */
-    static final Pattern APP_VERSION_PATTERN =
-            ~/([$NAME_HYPHEN_CHARS]+)-([0-9.]+)-([0-9]{5,7})(?:[.]h([0-9]+))?(?:\/([-a-zA-z0-9]+)\/([0-9]+))?/
-
     static String packageFromAppVersion(String appVersion) {
         dissectAppVersion(appVersion)?.packageName
     }
 
     static AppVersion dissectAppVersion(String appVersion) {
-        Matcher matcher = appVersion =~ APP_VERSION_PATTERN
-        if (matcher.matches()) {
-            return new AppVersion(packageName: matcher[0][1], version: matcher[0][2], changelist: matcher[0][3],
-                    buildNumber: matcher[0][4], buildJobName: matcher[0][5])
-        }
-        null
+        AppVersion.parseName(appVersion)
     }
 
-    private final static def IMAGE_ID = /ami-[a-z0-9]{8}/
-
     static String baseAmiIdFromDescription(String imageDescription) {
-        // base_ami_id=ami-1eb75c77,base_ami_name=servicenet-roku-qadd.dc.81210.10.44
-        Matcher matcher = imageDescription =~ /^.*?base_ami_id=($IMAGE_ID).*?$/
-        if (matcher.matches()) { return matcher[0][1] }
-        // store=ebs,ancestor_name=ebs-centosbase-x86_64-20101124,ancestor_id=ami-7b4eb912
-        matcher = imageDescription =~ /^.*?ancestor_id=($IMAGE_ID).*?$/
-        if (matcher.matches()) { return matcher[0][1] }
-        null
+        BaseAmiInfo.parseDescription(imageDescription).baseAmiId
     }
 
     static String baseAmiNameFromDescription(String imageDescription) {
-        // base_ami_id=ami-1eb75c77,base_ami_name=servicenet-roku-qadd.dc.81210.10.44
-        Matcher matcher = imageDescription =~ /^.*?base_ami_name=([^,]+).*?$/
-        if (matcher.matches()) { return matcher[0][1] }
-        // store=ebs,ancestor_name=ebs-centosbase-x86_64-20101124,ancestor_id=ami-7b4eb912
-        matcher = imageDescription =~ /^.*?ancestor_name=([^,]+).*?$/
-        if (matcher.matches()) { return matcher[0][1] }
-        null
+        BaseAmiInfo.parseDescription(imageDescription).baseAmiName
     }
 
     static DateTime baseAmiDateFromDescription(String imageDescription) {
-        String name = baseAmiNameFromDescription(imageDescription)
-        Matcher matcher = name =~ /.*\-(20[0-9]{6})(\-.*)?/
-        String dateString = null
-        if (matcher.matches()) { dateString = matcher[0][1] }
-
-        try {
-            // Example: 20100823
-            return dateString ? DateTimeFormat.forPattern("yyyyMMdd").parseDateTime(dateString) : null
-        } catch (Exception ignored) {
-            // Ignore failure.
-            return null
-        }
+        Date date = BaseAmiInfo.parseDescription(imageDescription).baseAmiDate
+        date ? new DateTime(date) : null
     }
 
     /**
@@ -395,95 +253,41 @@ class Relationships {
     static String vpcZoneIdentifierFromSubnetIds(List<String> subnetIds) {
         subnetIds.join(',')
     }
-}
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-@interface LabeledEnvVar {}
+    private static List<String> LABELED_ENV_VAR_FIELDS = ['countries', 'devPhase', 'hardware', 'partners',
+            'revision', 'usedBy', 'redBlackSwap', 'zone'].sort()
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-@interface DisplayVar {}
+    static List<String> labeledEnvironmentVariables(String asgName, String prefix) {
+        labeledEnvironmentVariables(dissectCompoundName(asgName), prefix)
+    }
 
-@Immutable final class Names {
-    String group
-    String cluster
-    String app
-    @DisplayVar String stack
-    @DisplayVar String detail
-    String push
-    Integer sequence
-    @LabeledEnvVar String countries
-    @LabeledEnvVar String devPhase
-    @LabeledEnvVar String hardware
-    @LabeledEnvVar String partners
-    @LabeledEnvVar String revision
-    @LabeledEnvVar String usedBy
-    @LabeledEnvVar String redBlackSwap
-    @LabeledEnvVar String zone
-
-    List<String> labeledEnvironmentVariables(String prefix) {
+    static List<String> labeledEnvironmentVariables(Names names, String prefix) {
         Check.notNull(prefix, String, 'prefix')
         List<String> envVars = []
 
-        this.class.declaredFields.findAll { it.declaredAnnotations.any { it instanceof LabeledEnvVar } }.
-                collect { it.name }.sort().each { String name ->
-            if (this[name]) {
-                envVars << "export ${prefix}${Meta.splitCamelCase(name, "_").toUpperCase()}=${this[name]}"
+        LABELED_ENV_VAR_FIELDS.each { String field ->
+            if (names[field]) {
+                envVars << "export ${prefix}${Meta.splitCamelCase(field, "_").toUpperCase()}=${names[field]}"
             }
         }
         envVars
     }
 
-    Map<String, String> parts() {
+    private static PARTS_FIELDS = (LABELED_ENV_VAR_FIELDS + ['stack', 'detail']).sort()
+
+    static Map<String, String> parts(String asgName) {
+        parts(dissectCompoundName(asgName))
+    }
+
+    static Map<String, String> parts(Names names) {
         Map<String, String> parts = [:]
-        this.class.declaredFields.
-                findAll { it.declaredAnnotations.any { it instanceof DisplayVar || it instanceof LabeledEnvVar } }.
-                collect { it.name }.sort().each { String name ->
-            if (this[name]) {
-                parts[WordUtils.capitalize(Meta.splitCamelCase(name, " "))] = this[name]
+        PARTS_FIELDS.each { String field ->
+            if (names[field]) {
+                parts[WordUtils.capitalize(Meta.splitCamelCase(field, " "))] = names[field]
             }
         }
-        return parts
+        parts
     }
 }
 
-@Immutable final class AppVersion implements Comparable {
-    String packageName
-    String version
-    String buildJobName
-    String buildNumber
-    String changelist
 
-    int compareTo(Object o) {
-        if (equals (o)) { // if x.equals(y), then x.compareTo(y) should be 0
-            return 0
-        }
-
-        if (o == null) {
-            return 1  // equals(null) can never be true, so compareTo(null) should never be 0
-        }
-
-        AppVersion other = o as AppVersion // ClassCastException is the desired result here
-
-        packageName <=> other.packageName ?:
-        version <=> other.version ?:
-        buildJobName <=> other.buildJobName ?:
-        buildNumber <=> other.buildNumber ?:
-        changelist <=> other.changelist
-    }
-
-    /**
-     *  Had performance issues related to https://jira.codehaus.org/browse/GROOVY-5249 with @Immutable implementation
-     */
-    @Override
-    String toString() {
-        new ToStringBuilder(this)
-            .append('packageName', packageName)
-            .append('version', version)
-            .append('buildJobName', buildJobName)
-            .append('buildNumber', buildNumber)
-            .append('changelist', changelist)
-            .toString()
-    }
-}

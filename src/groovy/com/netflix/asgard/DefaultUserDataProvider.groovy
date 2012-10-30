@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.plugin.UserDataProvider
+import com.netflix.frigga.Names
 import javax.xml.bind.DatatypeConverter
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -38,7 +39,8 @@ class DefaultUserDataProvider implements UserDataProvider {
             exportVar('AUTO_SCALE_GROUP', autoScalingGroupName) +
             exportVar('LAUNCH_CONFIG', launchConfigName) +
             exportVar('EC2_REGION', userContext.region.code, false)
-        List<String> additionalEnvVars = names.labeledEnvironmentVariables(configService.userDataVarPrefix)
+        List<String> additionalEnvVars = Relationships.labeledEnvironmentVariables(names,
+                configService.userDataVarPrefix)
         result += additionalEnvVars ? additionalEnvVars.join('\n') : ''
         DatatypeConverter.printBase64Binary(result.bytes)
     }

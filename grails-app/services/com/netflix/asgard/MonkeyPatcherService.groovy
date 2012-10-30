@@ -128,7 +128,7 @@ class MonkeyPatcherService implements InitializingBean {
         }
         if (!(AutoScalingGroup.class.methods as List).contains("getVariables")) {
             AutoScalingGroup.metaClass.getVariables = { ->
-                Relationships.dissectCompoundName(delegate.autoScalingGroupName).parts()
+                Relationships.parts(delegate.autoScalingGroupName)
             }
         }
 
