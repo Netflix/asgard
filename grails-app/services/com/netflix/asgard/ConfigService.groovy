@@ -425,7 +425,7 @@ class ConfigService {
     }
 
     /**
-     * @return The IAM role that will be used as default
+     * @return The AWS Identity and Access Management (IAM) role that will be used by default. http://aws.amazon.com/iam
      */
     String getDefaultIamRole() {
         grailsApplication.config.cloud?.defaultIamRole ?: null
