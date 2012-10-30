@@ -91,6 +91,7 @@ import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.SecurityGroupOption
 import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.ZoneAvailability
+import com.netflix.frigga.ami.AppVersion
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import org.apache.commons.codec.binary.Base64

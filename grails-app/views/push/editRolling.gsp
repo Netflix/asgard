@@ -45,7 +45,7 @@
             <td class="name">Auto Scaling Group:</td>
             <td><g:linkObject type="autoScaling" name="${name}"/></td>
           </tr>
-          <g:each in="${variables.parts()}" var="entry">
+          <g:each in="${variables}" var="entry">
             <tr class="prop">
               <td class="name">${entry.key}:</td>
               <td class="value">${entry.value}</td>

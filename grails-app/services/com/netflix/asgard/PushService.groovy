@@ -155,7 +155,7 @@ class PushService {
                 appName: appName,
                 name: name,
                 cluster: Relationships.clusterFromGroupName(name),
-                variables: Relationships.dissectCompoundName(name),
+                variables: Relationships.parts(name),
                 actionName: actionName,
                 allTerminationPolicies: awsAutoScalingService.terminationPolicyTypes,
                 terminationPolicy: group.terminationPolicies[0],
