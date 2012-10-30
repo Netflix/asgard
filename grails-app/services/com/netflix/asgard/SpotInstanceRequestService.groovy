@@ -164,6 +164,13 @@ class SpotInstanceRequestService implements CacheInitializer {
             it.instanceId || (it.state in SPOT_INSTANCE_REQUEST_LIVE_STATES) }
     }
 
+    /**
+     * Recommends an ideal spot price based on the instance type. Currently this will be the on-demand value.
+     *
+     * @param userContext who made the call, why, and in what region
+     * @param instanceType the type of instance
+     * @return recommend spot price
+     */
     String recommendSpotPrice(UserContext userContext, String instanceType) {
         InstanceTypeData instanceTypeData = instanceTypeService.getInstanceType(userContext, instanceType)
         instanceTypeData.linuxOnDemandPrice.toString()

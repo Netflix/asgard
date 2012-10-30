@@ -6,6 +6,8 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingGroupMixin
+import com.netflix.asgard.model.InstancePriceType
+import com.netflix.asgard.model.SubnetData
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.push.Cluster
@@ -13,8 +15,6 @@ import com.netflix.asgard.push.GroupCreateOperation
 import com.netflix.asgard.push.GroupCreateOptions
 import grails.test.mixin.TestFor
 import spock.lang.Specification
-import com.netflix.asgard.model.SubnetData
-import com.netflix.asgard.model.InstancePriceType
 
 @SuppressWarnings("GroovyPointlessArithmetic")
 @TestFor(ClusterController)
