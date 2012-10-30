@@ -17,7 +17,6 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
-import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.push.Cluster
@@ -89,80 +88,6 @@ class AwsAutoScalingServiceTests extends GroovyTestCase {
     void testGetAutoScalingGroupNonExistent() {
         AwsAutoScalingService asgService = Mocks.awsAutoScalingService()
         assertNull asgService.getAutoScalingGroup(userContext, "doesn't exist")
-    }
-
-    void testLaunchConfigurationGetUserDataTruncated() {
-        String typicalUserData = '#!/bin/bash\n' +
-                'set -x\n' +
-                '\n' +
-                'PATH=/bin:/usr/bin:/usr/sbin:/sbin\n' +
-                '\n' +
-                'app="abcache"\n' +
-                'appenv="test"\n' +
-                'appuser="${app}${appenv}"\n' +
-                'autogrp="abcache"\n' +
-                'setenv_sh="/apps/tomcat/bin/setenv.sh"\n' +
-                'NFenv="/apps/tomcat/bin/netflix.env"\n' +
-                'server_template_xml="/apps/tomcat/conf/server_template.xml"\n' +
-                'server_xml="/apps/tomcat/conf/server.xml"\n' +
-                'instanceid=`/usr/bin/instance-id`\n' +
-                'appdynappname="Cloud Milestones - $appenv AWS"\n' +
-                'cf1=/apps/appagent/conf/controller-info-template.xml\n' +
-                'cf2=/apps/machineagent/conf/controller-info-template.xml\n' +
-                'cf3=/apps/machineagent/monitors/JMXPollMonitor/monitor-template.xml\n' +
-                'cf4=/apps/nimbus/robot/robot-template.cfg\n' +
-                'cf5=/apps/machineagent/monitors/ApacheErrors/monitor-template.xml\n' +
-                'appdynappname="Cloud Milestones - test AWS'
-
-        String unusualUserData = "require 'open-uri'\n" +
-                "require 'socket'\n" +
-                "require 'rexml/document'\n" +
-                "require 'ftools'\n" +
-                "require 'fileutils'\n" +
-                "\n" +
-                'env="test"' +
-                'controller_ip =  "ec2-174-129-234-182.compute-1.amazonaws.com"\n' +
-                'app_name = "Cloud Milestones - #{env} AWS"\n' +
-                'tier_name = "PlayReady DRM"\n' +
-                'paths=["c:/apps/appagent/conf/controller-info-template.xml", "c:/apps/machineagent/conf/controller-info-template.xml"]\n' +
-                '\n' +
-                'def get_instance_id\n' +
-                "    return  open('http://169.254.169.254/latest/meta-data/instance-id').read\n" +
-                'end\n' +
-                '\n' +
-                'def get_hostname\n' +
-                '    return Socket.gethostname\n' +
-                'end\n' +
-                '\n' +
-                '# Keep polling hostname until the hostname is updated or \n' +
-                '# this function times out. We need to do this because a new Windows\n' +
-                '# EC2 instance will have its hostname updated during its first startup, \n' +
-                "# and we don't know when this process finishes. \n" +
-                'def pending_hostname(timeout=600) \n' +
-                '    hostname = get_hostname\n' +
-                '    new_hostname = hostname\n' +
-                '    puts "initial hostname: #{hostname}"\n' +
-                '    elapsed = 0\n' +
-                "    interval = 2'\n"
-
-        Mocks.awsAutoScalingService()
-
-        LaunchConfiguration configTypical = new LaunchConfiguration(userData: typicalUserData)
-        assertEquals '...app="abcache"\n' +
-                'appenv="test"\n' +
-                'appuser="${app}${appenv}"\n' +
-                'autogrp="abcache"...', configTypical.userDataTruncated
-
-        LaunchConfiguration configUnusual = new LaunchConfiguration(userData: unusualUserData)
-        assertEquals "require 'open-uri'\n" +
-                "require 'socket'\n" +
-                "require 'rexml/document'\n" +
-                "require 'ftools'\n" +
-                "require 'fileutils'\n" +
-                "\n" +
-                'env="test"' +
-                'controller_ip =  "ec2-174-129-234-182.compute-1.amazonaws.com"\n' +
-                'app_name = "Cloud Milesto...', configUnusual.userDataTruncated
     }
 
     void testAutoScalingGroupGetAppName() {

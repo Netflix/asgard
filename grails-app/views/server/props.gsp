@@ -19,47 +19,58 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
-  <title>Launch Configurations</title>
+  <title>Env Vars and Sys Props</title>
 </head>
 <body>
-<div class="body">
-  <h1>Launch Configurations in ${region.description}${appNames ? ' for ' + appNames : ''}</h1>
-  <g:if test="${flash.message}">
-    <div class="message">${flash.message}</div>
-  </g:if>
-  <g:form method="post">
+  <div class="body">
+    <h1>Environment Variables and System Properties</h1>
+    <g:if test="${flash.message}">
+      <div class="message">${flash.message}</div>
+    </g:if>
+    <h2>Environment Variables</h2>
     <div class="list">
       <div class="buttons"></div>
       <table class="sortable">
         <thead>
         <tr>
-          <th>Name</th>
-          <th>Image ID</th>
-          <th>Security Groups</th>
-          <th>Instance Type</th>
-          <th>Created Time</th>
+          <th>Key</th>
+          <th>Value</th>
         </tr>
         </thead>
         <tbody>
-        <g:each var="config" in="${launchConfigurations}" status="i">
+        <g:each var="envVar" in="${environmentVariables}" status="i">
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-            <td><g:linkObject type="launchConfiguration" name="${config.launchConfigurationName}"/></td>
-            <td><g:linkObject type="image" name="${config.imageId}"/></td>
-            <td>
-              <g:each var="secgroup" in="${config.securityGroups}">
-                <g:linkObject type="security" name="${secgroup}"/><br>
-              </g:each>
-            </td>
-            <td>${config.instanceType}</td>
-            <td class="date"><g:formatDate date="${config.createdTime}"/></td>
+            <td>${envVar.key}</td>
+            <td>${envVar.value}</td>
           </tr>
         </g:each>
         </tbody>
       </table>
     </div>
-    <div class="paginateButtons">
+    <div class="paginateButtons"></div>
+  </div>
+  <div class="body">
+    <h2>System Properties</h2>
+    <div class="list">
+      <div class="buttons"></div>
+      <table class="sortable">
+        <thead>
+        <tr>
+          <th>Key</th>
+          <th>Value</th>
+        </tr>
+        </thead>
+        <tbody>
+        <g:each var="prop" in="${systemProperties}" status="i">
+          <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+            <td>${prop.key}</td>
+            <td>${prop.value}</td>
+          </tr>
+        </g:each>
+        </tbody>
+      </table>
     </div>
-  </g:form>
-</div>
+    <div class="paginateButtons"></div>
+  </div>
 </body>
 </html>

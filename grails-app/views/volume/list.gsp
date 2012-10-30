@@ -22,7 +22,6 @@
   <title>EBS Volumes</title>
 </head>
 <body>
-  <!-- <div class="nav"></div> -->
   <div class="body">
     <h1>EBS Volumes in ${region.description}</h1>
     <g:if test="${flash.message}">

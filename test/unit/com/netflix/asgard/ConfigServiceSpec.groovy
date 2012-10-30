@@ -26,4 +26,27 @@ class ConfigServiceSpec extends Specification {
         expect:
         configService.getExcludedLaunchPermissionsForMassDelete() == [Mocks.SEG_AWS_ACCOUNT_ID] as Set
     }
+
+    def 'cachedUserDataMaxLength should be huge by default'() {
+        expect:
+        configService.getCachedUserDataMaxLength() == Integer.MAX_VALUE
+    }
+
+    def 'cachedUserDataMaxLength should be at least zero'() {
+        when:
+        ConfigService configService = new ConfigService(grailsApplication: [
+            config: [ cloud: [ cachedUserDataMaxLength: -5 ] ]
+        ])
+        then:
+        configService.getCachedUserDataMaxLength() == 0
+    }
+
+    def 'cachedUserDataMaxLength can be overridden'() {
+        when:
+        ConfigService configService = new ConfigService(grailsApplication: [
+            config: [ cloud: [ cachedUserDataMaxLength: 20 ] ]
+        ])
+        then:
+        configService.getCachedUserDataMaxLength() == 20
+    }
 }

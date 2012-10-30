@@ -17,7 +17,6 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
-import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.AvailabilityZone
@@ -97,20 +96,6 @@ class MonkeyPatcherService implements InitializingBean {
         }
 
         // Auto scaling groups
-        String startOfSectionToHide = "setenv"
-        String commonStart = "#!/bin/bash\nset -x\n\nPATH=/bin:/usr/bin:/usr/sbin:/sbin"
-        if (!(LaunchConfiguration.class.methods as List).contains("getUserDataTruncated")) {
-            LaunchConfiguration.metaClass.getUserDataTruncated = { ->
-                String userDataTrunc = delegate.userData
-                if (userDataTrunc.contains(startOfSectionToHide)) {
-                    userDataTrunc = StringUtils.substringBefore(delegate.userData, startOfSectionToHide).trim() + "..."
-                }
-                if (userDataTrunc.startsWith(commonStart)) {
-                    userDataTrunc = "..." + userDataTrunc.substring(commonStart.length()).trim()
-                }
-                StringUtils.abbreviate(userDataTrunc, 200)
-            }
-        }
         if (!(AutoScalingGroup.class.methods as List).contains("getAppName")) {
             AutoScalingGroup.metaClass.getAppName = { ->
                 Relationships.appNameFromGroupName(delegate.autoScalingGroupName)
