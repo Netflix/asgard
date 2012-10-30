@@ -19,6 +19,7 @@ import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.SecurityGroup
+import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.ZoneAvailability
 import com.netflix.asgard.push.GroupActivateOperation
@@ -149,6 +150,7 @@ class PushService {
         List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)
         String vpcId = subnets.coerceLoneOrNoneFromIds(subnetIds)?.vpcId
         Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
+        String pricing = lc.spotPrice ? InstancePriceType.SPOT.name() : InstancePriceType.ON_DEMAND.name()
         Map result = [
                 appName: appName,
                 name: name,
@@ -177,7 +179,8 @@ class PushService {
                 concurrentRelaunches: 1,
                 checkHealth: configService.doesRegionalDiscoveryExist(userContext.region),
                 afterBootWait: 30,
-                rudeShutdown: false
+                rudeShutdown: false,
+                pricing: pricing,
         ]
         result
     }
