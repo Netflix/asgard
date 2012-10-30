@@ -75,7 +75,7 @@
                         <g:linkObject type="security" name="${pair.groupId}">${pair.groupName}</g:linkObject>
                       </g:if>
                       <g:else>
-                        <div class='security'>${pair.groupName}(${accountNames[pair.userId] ?: pair.userId} ${pair.groupId})</div>
+                        <div class="security">${pair.groupName} (${accountNames[pair.userId] ?: pair.userId} ${pair.groupId})</div>
                       </g:else>
                     </g:each>]
                     ${perm.ipRanges}
