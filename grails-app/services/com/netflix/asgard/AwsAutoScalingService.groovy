@@ -953,7 +953,8 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 createLaunchConfiguration(userContext, launchConfigName, launchConfigTemplate.imageId,
                         launchConfigTemplate.keyName, securityGroups, userData,
                         launchConfigTemplate.instanceType, launchConfigTemplate.kernelId,
-                        launchConfigTemplate.ramdiskId, launchConfigTemplate.iamInstanceProfile, null, task)
+                        launchConfigTemplate.ramdiskId, launchConfigTemplate.iamInstanceProfile, null,
+                        launchConfigTemplate.spotPrice, task)
                 result.launchConfigCreated = true
             } catch (AmazonServiceException launchConfigCreateException) {
                 result.launchConfigCreateException = launchConfigCreateException
@@ -979,7 +980,8 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     void createLaunchConfiguration(UserContext userContext, String name, String imageId, String keyName,
             Collection<String> securityGroups, String userData, String instanceType, String kernelId, String ramdiskId,
-            String iamInstanceProfile, Collection<BlockDeviceMapping> blockDeviceMappings, Task existingTask = null) {
+            String iamInstanceProfile, Collection<BlockDeviceMapping> blockDeviceMappings, String spotPrice,
+            Task existingTask = null) {
         taskService.runTask(userContext, "Create Launch Configuration '${name}' with image '${imageId}'", { Task task ->
             Check.notNull(name, LaunchConfiguration, "name")
             Check.notNull(imageId, LaunchConfiguration, "imageId")
@@ -992,6 +994,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                     .withUserData(encodedUserData).withInstanceType(instanceType)
                     .withBlockDeviceMappings(blockDeviceMappings)
                     .withIamInstanceProfile(iamInstanceProfile)
+                    .withSpotPrice(spotPrice)
             // Be careful not to set empties back into these fields--null is OK
             if (kernelId != '') { request.setKernelId(kernelId) }
             if (ramdiskId != '') { request.setRamdiskId(ramdiskId) }

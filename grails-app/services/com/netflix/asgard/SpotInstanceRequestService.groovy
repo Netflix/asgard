@@ -30,6 +30,7 @@ import com.amazonaws.services.ec2.model.Tag
 import com.google.common.collect.ImmutableList
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.SpotInstanceRequestListType
+import com.netflix.asgard.model.InstanceTypeData
 
 class SpotInstanceRequestService implements CacheInitializer {
 
@@ -161,5 +162,17 @@ class SpotInstanceRequestService implements CacheInitializer {
     private List<SpotInstanceRequest> getLiveSpotInstanceRequests(UserContext userContext) {
         getAllSpotInstanceRequests(userContext).findAll {
             it.instanceId || (it.state in SPOT_INSTANCE_REQUEST_LIVE_STATES) }
+    }
+
+    /**
+     * Recommends an ideal spot price based on the instance type. Currently this will be the on-demand value.
+     *
+     * @param userContext who made the call, why, and in what region
+     * @param instanceType the type of instance
+     * @return recommend spot price
+     */
+    String recommendSpotPrice(UserContext userContext, String instanceType) {
+        InstanceTypeData instanceTypeData = instanceTypeService.getInstanceType(userContext, instanceType)
+        instanceTypeData.linuxOnDemandPrice.toString()
     }
 }

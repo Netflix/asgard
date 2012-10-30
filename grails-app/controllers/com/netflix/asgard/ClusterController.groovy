@@ -23,6 +23,7 @@ import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.GroupedInstance
+import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
@@ -51,6 +52,7 @@ class ClusterController {
     def configService
     def mergedInstanceService
     def pushService
+    def spotInstanceRequestService
     def taskService
 
     def index = { redirect(action: 'list', params: params) }
@@ -208,6 +210,13 @@ class ClusterController {
                 redirect(action: 'show', params: [id: name])
                 return
             }
+            String instanceType = params.instanceType ?: lastLaunchConfig.instanceType
+            String spotPrice = null
+            if (!params.pricing) {
+                spotPrice = lastLaunchConfig.spotPrice
+            } else if (params.pricing == InstancePriceType.SPOT.name()) {
+                spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instanceType)
+            }
 
             final String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
             List<ScalingPolicyData> lastScalingPolicies = awsAutoScalingService.getScalingPolicyDatas(userContext,
@@ -253,7 +262,7 @@ class ClusterController {
                             appName: appName,
                             env: grailsApplication.config.cloud.accountName,
                             imageId: params.imageId ?: lastLaunchConfig.imageId,
-                            instanceType: params.instanceType ?: lastLaunchConfig.instanceType,
+                            instanceType: instanceType,
                             groupName: nextGroupName,
                             securityGroups: securityGroups,
                             maxStartupRetries: params.maxStartupRetries?.toInteger() ?: 5
@@ -275,6 +284,7 @@ class ClusterController {
                     scalingPolicies: newScalingPolicies,
                     scheduledActions: newScheduledActions,
                     vpcZoneIdentifier: vpcZoneIdentifier,
+                    spotPrice: spotPrice
             )
             def operation = pushService.startGroupCreate(options)
             flash.message = "${operation.task.name} has been started."

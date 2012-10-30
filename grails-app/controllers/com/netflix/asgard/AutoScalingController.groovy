@@ -34,6 +34,7 @@ import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.GroupedInstance
+import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
 import com.netflix.grails.contextParam.ContextParam
@@ -55,6 +56,7 @@ class AutoScalingController {
     def configService
     def instanceTypeService
     def mergedInstanceService
+    def spotInstanceRequestService
     def stackService
 
     def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', postpone: 'POST', pushStart: 'POST']
@@ -305,6 +307,9 @@ class AutoScalingController {
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(imageId).
                     withKernelId(kernelId).withInstanceType(instanceType).withKeyName(keyName).withRamdiskId(ramdiskId).
                     withSecurityGroups(securityGroups).withIamInstanceProfile(iamInstanceProfile)
+            if (params.pricing == InstancePriceType.SPOT.name()) {
+                launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instanceType)
+            }
 
             CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
                     userContext, groupTemplate, launchConfigTemplate, suspendedProcesses)

@@ -46,6 +46,12 @@
           <td class="name">Created Time:</td>
           <td class="value"><g:formatDate date="${lc.createdTime}"/></td>
         </tr>
+        <g:if test="${lc.spotPrice}">
+          <tr class="prop">
+            <td class="name">Spot Price:</td>
+            <td class="value">${lc.spotPrice}</td>
+          </tr>
+        </g:if>
         <tr class="prop">
           <td><h2>Referenced From</h2></td>
         </tr>
