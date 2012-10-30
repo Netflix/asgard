@@ -187,7 +187,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
             objectsWithEntities.add('Auto Scaling Groups')
         }
         if (awsLoadBalancerService.getLoadBalancersForApp(userContext, name)) {
-            objectsWithEntities.add('ELBs')
+            objectsWithEntities.add('Load Balancers')
         }
         if (awsEc2Service.getSecurityGroupsForApp(userContext, name)) {
             objectsWithEntities.add('Security Groups')
