@@ -68,6 +68,17 @@ class FastPropertyService implements CacheInitializer {
         caches.allFastProperties.by(userContext.region)?.list() as List ?: []
     }
 
+    /**
+     * Finds all fast properties associated with the supplied application name, based on the region in the user context.
+     *
+     * @param userContext who, where, why
+     * @param name the application name
+     * @return list of fast properties associated with the application
+     */
+    List<FastProperty> getFastPropertiesByAppName(UserContext userContext, String name) {
+        getAll(userContext).findAll { it.appId == name }
+    }
+
     FastProperty get(UserContext userContext, String fastPropertyId) {
         if (!fastPropertyId) { return null }
         String hostAndPort = platformServiceHostAndPort(userContext)

@@ -37,9 +37,14 @@ class ApplicationService implements CacheInitializer, InitializingBean {
     private String domainName
 
     def grailsApplication  // injected after construction
+    def awsAutoScalingService
     def awsClientService
+    def awsEc2Service
+    def awsLoadBalancerService
     Caches caches
     def configService
+    def fastPropertyService
+    def mergedInstanceGroupingService
     def taskService
 
     AmazonSimpleDB simpleDbClient
@@ -169,10 +174,36 @@ class ApplicationService implements CacheInitializer, InitializingBean {
 
     void deleteRegisteredApplication(UserContext userContext, String name) {
         Check.notEmpty(name, "name")
+        validateDelete(userContext, name)
         taskService.runTask(userContext, "Delete registered app ${name}", { task ->
             simpleDbClient.deleteAttributes(new DeleteAttributesRequest(domainName, name.toUpperCase()))
         }, Link.to(EntityType.application, name))
         getRegisteredApplication(userContext, name)
+    }
+
+    private void validateDelete(UserContext userContext, String name) {
+        List<String> objectsWithEntities = []
+        if (awsAutoScalingService.getAutoScalingGroupsForApp(userContext, name)) {
+            objectsWithEntities.add('Auto Scaling Groups')
+        }
+        if (awsLoadBalancerService.getLoadBalancersForApp(userContext, name)) {
+            objectsWithEntities.add('Load Balancers')
+        }
+        if (awsEc2Service.getSecurityGroupsForApp(userContext, name)) {
+            objectsWithEntities.add('Security Groups')
+        }
+        if (mergedInstanceGroupingService.getMergedInstances(userContext, name)) {
+            objectsWithEntities.add('Instances')
+        }
+        if (fastPropertyService.getFastPropertiesByAppName(userContext, name)) {
+            objectsWithEntities.add('Fast Properties')
+        }
+
+        if (objectsWithEntities) {
+            String referencesString = objectsWithEntities.join(', ')
+            String message = "${name} ineligible for delete because it still references ${referencesString}"
+            throw new ValidationException(message)
+        }
     }
 
     /**
