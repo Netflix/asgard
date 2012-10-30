@@ -423,4 +423,11 @@ class ConfigService {
     int getCloudThrottle() {
         grailsApplication.config.cloud?.throttleMillis ?: 250
     }
+
+    /**
+     * @return The AWS Identity and Access Management (IAM) role that will be used by default. http://aws.amazon.com/iam
+     */
+    String getDefaultIamRole() {
+        grailsApplication.config.cloud?.defaultIamRole ?: null
+    }
 }

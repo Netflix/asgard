@@ -191,7 +191,7 @@ class ClusterControllerSpec extends Specification {
                 assert healthCheckGracePeriod == 42
                 assert defaultCooldown == 360
                 assert vpcZoneIdentifier == null
-                assert iamInstanceProfile == null
+                assert iamInstanceProfile == 'lastIamProfile'
                 assert spotPrice == '1.23'
             }
             true
