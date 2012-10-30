@@ -423,4 +423,11 @@ class ConfigService {
     int getCloudThrottle() {
         grailsApplication.config.cloud?.throttleMillis ?: 250
     }
+
+    /**
+     * @return The IAM role that will be used as default
+     */
+    String getDefaultIamRole() {
+        grailsApplication.config.cloud?.defaultIamRole ?: null
+    }
 }

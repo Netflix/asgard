@@ -245,14 +245,14 @@ class ClusterController {
             String subnetPurpose = params.subnetPurpose
             String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForPurposeAndZones(subnetPurpose,
                     selectedZones)
-            String iamInstanceProfile = params.iamInstanceProfile ?: null
+            String iamInstanceProfile = params.iamInstanceProfile ?: lastLaunchConfig.iamInstanceProfile
+            iamInstanceProfile = iamInstanceProfile ?: configService.defaultIamRole
             if (params.noOptionalDefaults != 'true') {
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
                 loadBalancerNames = loadBalancerNames ?: lastGroup.loadBalancerNames
                 vpcZoneIdentifier = vpcZoneIdentifier ?: subnets.constructNewVpcZoneIdentifierForZones(lastGroup.vpcZoneIdentifier,
                         selectedZones)
-                iamInstanceProfile = iamInstanceProfile ?: lastLaunchConfig.iamInstanceProfile
             }
             GroupCreateOptions options = new GroupCreateOptions(
                     common: new CommonPushOptions(

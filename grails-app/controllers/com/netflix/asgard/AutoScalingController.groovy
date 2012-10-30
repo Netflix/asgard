@@ -248,7 +248,8 @@ class AutoScalingController {
                 selectedLoadBalancers: Requests.ensureList(params.selectedLoadBalancers),
                 securityGroupsGroupedByVpcId: effectiveGroups.groupBy { it.vpcId },
                 selectedSecurityGroups: Requests.ensureList(params.selectedSecurityGroups),
-                instanceTypes: instanceTypeService.getInstanceTypes(userContext)
+                instanceTypes: instanceTypeService.getInstanceTypes(userContext),
+                iamInstanceProfile: configService.defaultIamRole
         ]
     }
 
@@ -303,7 +304,7 @@ class AutoScalingController {
             String instanceType = params.instanceType
             String kernelId = params.kernelId ?: null
             String ramdiskId = params.ramdiskId ?: null
-            String iamInstanceProfile = params.iamInstanceProfile ?: null
+            String iamInstanceProfile = params.iamInstanceProfile ?: configService.defaultIamRole
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(imageId).
                     withKernelId(kernelId).withInstanceType(instanceType).withKeyName(keyName).withRamdiskId(ramdiskId).
                     withSecurityGroups(securityGroups).withIamInstanceProfile(iamInstanceProfile)
