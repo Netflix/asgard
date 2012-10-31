@@ -127,7 +127,7 @@ grails.project.dependency.resolution = {
                 'com.perforce:p4java:2010.1.269249',
 
                 // Rules for AWS named objects.
-                'com.netflix.frigga:frigga:0.2'
+                'com.netflix.frigga:frigga:0.3'
         ) { // Exclude superfluous and dangerous transitive dependencies
             excludes(
                     // Some libraries bring older versions of JUnit as a transitive dependency and that can interfere
