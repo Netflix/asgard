@@ -46,7 +46,6 @@ class InitControllerSpec extends Specification {
         then:
         '/home' == response.redirectUrl
         'Created Asgard configuration file at asgardHomeDir/Config.groovy.' == controller.flash.message
-        //noinspection GroovyPointlessArithmetic
         1 * initService.writeConfig(_)
     }
 

@@ -20,7 +20,6 @@ import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.UserIdGroupPair
 import com.amazonaws.services.ec2.model.IpPermission
 
-@SuppressWarnings("GroovyPointlessArithmetic")
 class SecurityGroupDslSpec extends Specification {
 
     def 'should create Security Groups with ingress permissions'() {

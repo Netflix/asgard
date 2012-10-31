@@ -38,7 +38,6 @@ import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.ZoneAvailability
 import spock.lang.Specification
 
-@SuppressWarnings("GroovyPointlessArithmetic")
 class AwsEc2ServiceUnitSpec extends Specification {
 
     UserContext userContext

@@ -22,7 +22,6 @@ import com.netflix.asgard.AwsEc2Service
 import com.netflix.asgard.Region
 import spock.lang.Specification
 
-@SuppressWarnings("GroovyPointlessArithmetic")
 class AwsResultsRetrieverSpec extends Specification {
 
     def 'should retrieve for all tokens'() {

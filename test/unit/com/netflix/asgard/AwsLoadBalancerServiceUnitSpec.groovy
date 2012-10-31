@@ -28,7 +28,6 @@ import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.InstanceStateData
 import spock.lang.Specification
 
-@SuppressWarnings("GroovyPointlessArithmetic")
 class AwsLoadBalancerServiceUnitSpec extends Specification {
 
     UserContext userContext

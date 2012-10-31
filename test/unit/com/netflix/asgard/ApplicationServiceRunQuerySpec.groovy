@@ -60,7 +60,6 @@ class ApplicationServiceRunQuerySpec extends Specification {
         when:
         Collection<AppRegistration> applications = applicationService.retrieveApplications()
 
-        //noinspection GroovyPointlessArithmetic
         then:
         1 * simpleDbClient.createDomain(new CreateDomainRequest(DOMAIN_NAME))
         applications == []

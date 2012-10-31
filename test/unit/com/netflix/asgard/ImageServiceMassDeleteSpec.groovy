@@ -23,7 +23,6 @@ import com.netflix.asgard.model.JanitorMode
 import com.netflix.asgard.model.MassDeleteRequest
 import org.joda.time.DateTime
 
-@SuppressWarnings("GroovyPointlessArithmetic")
 class ImageServiceMassDeleteSpec extends ImageServiceSpec {
 
     MassDeleteRequest prototypeRequest = new MassDeleteRequest(

@@ -26,7 +26,6 @@ import com.netflix.asgard.model.AutoScalingProcessType
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-@SuppressWarnings("GroovyPointlessArithmetic")
 @TestFor(AutoScalingController)
 class AutoScalingControllerSpec extends Specification {
 

@@ -16,7 +16,7 @@ import com.netflix.asgard.push.GroupCreateOptions
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-@SuppressWarnings("GroovyPointlessArithmetic")
+@SuppressWarnings(["GroovyAssignabilityCheck"])
 @TestFor(ClusterController)
 class ClusterControllerSpec extends Specification {
 
