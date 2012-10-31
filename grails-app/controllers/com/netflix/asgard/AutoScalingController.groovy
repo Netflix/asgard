@@ -122,6 +122,16 @@ class AutoScalingController {
             for (GroupedInstance instance in groupData?.instances) {
                 zonesWithInstanceCounts.add(instance.availabilityZone)
             }
+
+            Collection<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext)
+            Collection<LoadBalancerDescription> mismatchedLoadBalancers = loadBalancers.findAll {
+                it.loadBalancerName in groupData.loadBalancerNames &&
+                        it.availabilityZones != groupData.availabilityZones
+            }
+            Map<String, List<String>> mismatchedElbNamesToZoneLists = mismatchedLoadBalancers.collectEntries {
+                [it.loadBalancerName, it.availabilityZones.sort()]
+            }
+
             String appName = Relationships.appNameFromGroupName(name)
             List<Activity> activities = []
             List<ScalingPolicy> scalingPolicies = []
@@ -164,6 +174,7 @@ class AutoScalingController {
                     runHealthChecks: runHealthChecks,
                     group: groupData,
                     zonesWithInstanceCounts: zonesWithInstanceCounts,
+                    mismatchedElbNamesToZoneLists: mismatchedElbNamesToZoneLists,
                     launchConfiguration: launchConfig,
                     image: image,
                     clusterName: Relationships.clusterFromGroupName(name),
