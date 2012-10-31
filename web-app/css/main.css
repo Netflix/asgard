@@ -235,7 +235,7 @@ h3 img  { vertical-align: middle; padding-left: 7px; padding-bottom: 6px; }
 h1, h2, h3, caption { color: #3C617C; font-weight: normal; margin: .8em 0 .8em 0; line-height: normal; }
 
 /* LIST */
-.list table                    { border-collapse: collapse;                                            }
+.list table, table.list        { border-collapse: collapse;                                            }
 .list th, .list td             { border-left: 1px solid #DDD; max-width: 800px; word-wrap: break-word; }
 .list th:hover, .list tr:hover { background: #D8EFFF; }
 ul.links    { padding-left: 0; }
