@@ -77,7 +77,7 @@ class InitService implements ApplicationContextAware {
      * @return true if all caches have completed their initial load, false otherwise
      */
     boolean cachesFilled() {
-        List<Fillable> awaitableCaches = caches.properties.collect { it.value }.findAll { it instanceof Fillable }
-        !awaitableCaches.find { !it.filled }
+        Collection<Fillable> fillableCaches = caches.properties*.value.findAll { it instanceof Fillable }
+        !fillableCaches.find { !it.filled }
     }
 }

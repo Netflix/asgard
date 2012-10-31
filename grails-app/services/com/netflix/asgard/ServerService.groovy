@@ -46,7 +46,7 @@ class ServerService implements InitializingBean {
     void afterPropertiesSet() {
         environments = grailsApplication.config.server.environments ?: []
         serverSuffix = grailsApplication.config.server.suffix ?: ''
-        allServers = environments.collect { it.servers }.flatten().sort { Server s -> s.name }
+        allServers = environments.collect { it.servers }.flatten().sort { Server s -> s.name } as List<Server>
         allServerNames = allServers*.name
     }
 

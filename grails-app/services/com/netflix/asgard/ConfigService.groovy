@@ -39,7 +39,7 @@ class ConfigService {
      * @return the AWS account number for the current environment
      */
     String getAwsAccountNumber() {
-        grailsApplication.config?.grails?.awsAccounts[0]
+        grailsApplication.config.grails?.awsAccounts[0]
     }
 
     /**
@@ -48,7 +48,7 @@ class ConfigService {
      * @return Map <String, String> account numbers to account names
      */
     Map<String, String> getAwsAccountNames() {
-        grailsApplication.config?.grails?.awsAccountNames ?: [:]
+        grailsApplication.config.grails?.awsAccountNames ?: [:]
     }
 
     /**
@@ -73,7 +73,7 @@ class ConfigService {
     }
 
     String getTicketLabel() {
-        grailsApplication.config?.ticket?.label ?: 'Ticket'
+        grailsApplication.config.ticket?.label ?: 'Ticket'
     }
 
     String getFullTicketLabel() {
@@ -96,9 +96,12 @@ class ConfigService {
      * @return the full local system path to the directory where Asgard stores its configuration files
      */
     String getAsgardHome() {
-        grailsApplication.config?.asgardHome
+        grailsApplication.config.asgardHome
     }
 
+    /**
+     * @return true if cloud keys and other minimum configuration has been provided, false otherwise
+     */
     boolean isAppConfigured() {
         grailsApplication.config.appConfigured
     }
@@ -107,6 +110,9 @@ class ConfigService {
         grailsApplication.config.link?.externalLinks?.sort { it.text } ?: []
     }
 
+    /**
+     * @return URL to link to so users can configure alerting for their applications, with a default of null
+     */
     String getAlertingServiceConfigUrl() {
         grailsApplication.config.cloud?.alertingServiceConfigUrl ?: null
     }
@@ -119,14 +125,21 @@ class ConfigService {
                 'Contact your cloud admin to enable security group ingress permissions from elastic load balancers.'
     }
 
+    /**
+     * @return the list of regions in which platformservice is available for fast property reading and writing
+     */
     List<Region> getPlatformServiceRegions() {
         List<Region> activeRegions = Region.limitedRegions ?: Region.values()
-        List<Region> platformServiceRegions = grailsApplication.config?.cloud?.platformserviceRegions ?: []
+        List<Region> platformServiceRegions = grailsApplication.config.cloud?.platformserviceRegions ?: []
         platformServiceRegions.intersect(activeRegions)
     }
 
+    /**
+     * @return true if the initial timing of cache-loading threads should be delayed by small random amounts in order
+     *         to reduce the number of large, simultaneous data retrieval calls to cloud APIs
+     */
     boolean getUseJitter() {
-        Boolean result = grailsApplication.config?.thread?.useJitter
+        Boolean result = grailsApplication.config.thread?.useJitter
         if (result == null) {
             return true
         }
@@ -139,18 +152,18 @@ class ConfigService {
      * @return List <InstanceTypeData> the custom instance types, or an empty list
      */
     List<InstanceTypeData> getCustomInstanceTypes() {
-        grailsApplication.config?.cloud?.customIntanceTypes ?: []
+        grailsApplication.config.cloud?.customIntanceTypes ?: []
     }
 
     /**
      * @return the default auto scaling termination policy name to suggest when creating new auto scaling groups
      */
     String getDefaultTerminationPolicy() {
-        grailsApplication.config?.cloud?.defaultAutoScalingTerminationPolicy ?: 'Default'
+        grailsApplication.config.cloud?.defaultAutoScalingTerminationPolicy ?: 'Default'
     }
 
     List<String> getAwsAccounts() {
-        grailsApplication.config?.grails?.awsAccounts ?: []
+        grailsApplication.config.grails?.awsAccounts ?: []
     }
 
     /**
@@ -159,19 +172,25 @@ class ConfigService {
      * @return List < String > account numbers/names, or empty list if not configured
      */
     List<String> getPublicResourceAccounts() {
-        grailsApplication.config?.cloud?.publicResourceAccounts ?: []
+        grailsApplication.config.cloud?.publicResourceAccounts ?: []
     }
 
+    /**
+     * @return all the names of the availability zones that should not be recommended for use in the current account
+     */
     List<String> getDiscouragedAvailabilityZones() {
-        grailsApplication.config?.cloud?.discouragedAvailabilityZones ?: []
+        grailsApplication.config.cloud?.discouragedAvailabilityZones ?: []
     }
 
     Map<String, List<TextLinkTemplate>> getInstanceLinkGroupingsToLinkTemplateLists() {
         grailsApplication.config.link?.instanceLinkGroupingsToLinkTemplateLists ?: [:]
     }
 
+    /**
+     * @return the name of the account's recommended SSH key registered in the AWS EC2 API
+     */
     String getDefaultKeyName() {
-        grailsApplication.config?.cloud?.defaultKeyName ?: ''
+        grailsApplication.config.cloud?.defaultKeyName ?: ''
     }
 
     /**
@@ -181,6 +200,10 @@ class ConfigService {
         grailsApplication.config.healthCheck?.minimumCounts ?: [:]
     }
 
+    /**
+     * @return true if the current server is meant to be running online to interact with the cloud, false if working
+     *          in offline development mode
+     */
     boolean isOnline() {
         grailsApplication.config.server.online
     }
@@ -225,14 +248,23 @@ class ConfigService {
         grailsApplication.config.secret?.remoteDirectory ?: null
     }
 
+    /**
+     * @return name of the current cloud account, such as "test" or "prod", with a default of null
+     */
     String getAccountName() {
         grailsApplication.config.cloud?.accountName ?: null
     }
 
+    /**
+     * @return CSS class name of the current environment such as test, staging, or prod, with a default of empty string
+     */
     String getEnvStyle() {
         grailsApplication.config.cloud?.envStyle ?: ''
     }
 
+    /**
+     * @return name of the database domain for storing application metadata, with a default of "CLOUD_APPLICATIONS"
+     */
     String getApplicationsDomain() {
         grailsApplication.config.cloud?.applicationsDomain ?: 'CLOUD_APPLICATIONS'
     }
@@ -331,6 +363,15 @@ class ConfigService {
         grailsApplication.config.cloud?.defaultVpcSecurityGroupNames ?: []
     }
 
+    /**
+     * @return the maximum number of characters from the user data string to be stores in the launch configuration
+     *          cache, with a minimum of 0 and a default of {@code Integer.MAX_VALUE}
+     */
+    int getCachedUserDataMaxLength() {
+        int maxLength = grailsApplication.config.cloud?.cachedUserDataMaxLength ?: Integer.MAX_VALUE
+        Math.max(0, maxLength)
+    }
+
     /*
      * @return true if api token based authentication is active, false otherwise
      */
@@ -362,7 +403,7 @@ class ConfigService {
     }
 
     /**
-     * @return Number days before API key expiration to send an email warning
+     * @return Number of days before API key expiration to send an email warning
      */
     int getApiTokenExpiryWarningThresholdDays() {
         grailsApplication.config.security?.apiToken?.expiryWarningThresholdDays ?: 7
@@ -418,7 +459,7 @@ class ConfigService {
     }
 
     /**
-     * @return Amount of time to wait between AWS calls.
+     * @return number of milliseconds to wait between AWS calls
      */
     int getCloudThrottle() {
         grailsApplication.config.cloud?.throttleMillis ?: 250

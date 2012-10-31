@@ -83,6 +83,23 @@ class ServerController {
     }
 
     /**
+     * Displays all environment variables and system properties for debugging.
+     */
+    def props = {
+        Map<String, String> envVars = System.getenv().sort { it.key.toLowerCase() }
+        Map<String, String> systemProperties = [:]
+        for (String name in System.properties.stringPropertyNames().sort { it.toLowerCase() }) {
+            systemProperties.put(name, System.getProperty(name))
+        }
+        Map<String, Map<String, String>> output = [environmentVariables: envVars, systemProperties: systemProperties]
+        withFormat {
+            html { output }
+            json { new JSON(output).render(response) }
+            xml { new XML(output).render(response) }
+        }
+    }
+
+    /**
      * By default the target server that will take traffic is the current server, but any server can switch traffic
      * for any of the primary servers. This is useful for testing and for when the primary servers are busy.
      *

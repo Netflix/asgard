@@ -411,7 +411,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         if (!autoScalingGroupName) { return [] }
         final List<ScalingPolicy> scalingPolicies = getScalingPoliciesForGroup(userContext, autoScalingGroupName)
         Map<ScalingPolicy, Collection<MetricAlarm>> scalingPolicyToAlarms = [:]
-        final Collection<Alarm> alarmReferences = scalingPolicies*.alarms.flatten()
+        final Collection<Alarm> alarmReferences = scalingPolicies*.alarms.flatten() as Collection<Alarm>
         final Collection<MetricAlarm> alarms = awsCloudWatchService.getAlarms(userContext, alarmReferences*.alarmName)
         final Map<String, ScalingPolicy> alarmNameToScalingPolicy = [:]
         scalingPolicies.each { ScalingPolicy scalingPolicy ->
@@ -871,12 +871,21 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             }
             result = retrieveLaunchConfigurations(region, result.getNextToken())
         }
-        configs.each { ensureUserDataIsDecoded(it) }
+        configs.each { ensureUserDataIsDecodedAndTruncated(it) }
         configs
     }
 
     private DescribeLaunchConfigurationsResult retrieveLaunchConfigurations(Region region, String nextToken) {
         awsClient.by(region).describeLaunchConfigurations(new DescribeLaunchConfigurationsRequest().withNextToken(nextToken))
+    }
+
+    private void ensureUserDataIsDecodedAndTruncated(LaunchConfiguration launchConfiguration) {
+        ensureUserDataIsDecoded(launchConfiguration)
+        String userData = launchConfiguration.userData
+        int maxLength = configService.cachedUserDataMaxLength
+        if (userData.length() > maxLength) {
+            launchConfiguration.userData = userData.substring(0, maxLength)
+        }
     }
 
     private void ensureUserDataIsDecoded(LaunchConfiguration launchConfiguration) {
