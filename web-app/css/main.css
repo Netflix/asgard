@@ -162,11 +162,6 @@ input.error      { background-color: #ffc; }
 .error           { color: red; }
 .warning         { color: #D2691E; }
 p.warning        { margin: 5px 0; }
-.zoneA           { color: #4e9a06  }
-.zoneB           { color: #204a87; }
-.zoneC           { color: #ce5c00; }
-.zoneD           { color: #5c3566; }
-.zoneE           { color: #a40000; }
 td.inService     { color: blue; }
 td.outOfService  { color: red; }
 td.health a            { display: none; height: 16px; width: 16px; }
@@ -175,6 +170,15 @@ td.pass                { background: transparent url(../images/tango/16/status/w
 td.fail                { background: transparent url(../images/tango/16/status/weather-storm.png) 5px 50% no-repeat; }
 td.lazy img            { display: none; }
 tr.waiting td.lazy img { display: inline; }
+
+/* Availability Zones with Tango color palette, alternating warm and cool */
+.zoneA { color: #5c3566; }
+.zoneB { color: #ce5c00; }
+.zoneC { color: #4e9a06  }
+.zoneD { color: #a40000; }
+.zoneE { color: #204a87; }
+.zoneF { color: #c4a000; }
+.zoneG { color: #888a85; }
 
 /* TABLES */
 table, fieldset             { border: 1px solid #DDD; }
