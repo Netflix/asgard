@@ -28,6 +28,12 @@ class ConfigService {
 
     def grailsApplication
 
+    /**
+     * Gets the most commonly used namespace for Amazon CloudWatch metrics used for auto scaling policies. If not
+     * configured, this method returns the AWS standard namespace "AWS/EC2".
+     *
+     * @return the default namespace for choosing a CloudWatch metric for a scaling policy
+     */
     String getDefaultMetricNamespace() {
         grailsApplication.config.cloud?.defaultMetricNamespace ?: 'AWS/EC2'
     }
@@ -162,6 +168,13 @@ class ConfigService {
         grailsApplication.config.cloud?.defaultAutoScalingTerminationPolicy ?: 'Default'
     }
 
+    /**
+     * Returns the list of relevant Amazon Web Services account numbers as strings, starting with the account primarily
+     * used by this Asgard instance. All other accounts in the list are candidates for cross-account sharing of
+     * resources such as Amazon Machine Images (AMIs).
+     *
+     * @return list of relevant AWS account numbers, starting with the current account of the current environment
+     */
     List<String> getAwsAccounts() {
         grailsApplication.config.grails?.awsAccounts ?: []
     }
