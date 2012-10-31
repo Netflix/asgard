@@ -94,7 +94,6 @@ class Relationships {
         dissectCompoundName(autoScalingGroupName).cluster ?: ''
     }
 
-
     /**
      * Breaks down the name of an auto scaling group or load balancer into its component parts.
      *

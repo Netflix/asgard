@@ -583,7 +583,6 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         }, Link.to(EntityType.scheduledAction, action.scheduledActionName), existingTask)
     }
 
-
     /**
      * Deletes a scheduled action.
      *
