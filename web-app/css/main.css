@@ -166,9 +166,9 @@ td.inService     { color: blue; }
 td.outOfService  { color: red; }
 td.health              { padding: 6px 0 0 8px; }
 td.health a            { display: none; height: 16px; width: 16px; }
-td.pass a, td.fail a   { display: block; }
-td.pass a              { background: transparent url(../images/tango/16/status/weather-clear.png) no-repeat; }
-td.fail a              { background: transparent url(../images/tango/16/status/weather-storm.png) no-repeat; }
+td.pass a, td.fail a   { display: block; background: transparent no-repeat; }
+td.pass a              { background-image: url(../images/tango/16/status/weather-clear.png); }
+td.fail a              { background-image: url(../images/tango/16/status/weather-storm.png); }
 td.lazy img            { display: none; }
 tr.waiting td.lazy img { display: inline; }
 
@@ -409,8 +409,8 @@ div.filter input                { border: 1px solid #CCC; background-color: #EEF
 .subProperties label                     { color: #999; }
 .subProperties label:not(:first-of-type) { padding-left: 6px; }
 .inconsistent .appVersion, .inconsistent .appVersion a { color: red; }
-.count            { padding-right: 15px; }
-label.choice      { padding-right: 15px; }
+.count              { padding-right: 15px; }
+label.choice        { padding-right: 15px; }
 .environment li a   { padding: 4px 5px 5px 5px; display: block; border-radius: 6px; -moz-border-radius: 6px; -webkit-border-radius: 6px; }
 .environment a.test { background-color: black;   color: white !important; text-shadow: 2px 2px 1px #E9231B; border: 1px solid #666; }
 .environment a.prod { background-color: #E9231B; color: white !important; text-shadow: 2px 2px 1px black;   border: 1px solid #666; }
@@ -451,11 +451,11 @@ div.grippie { background: #EEEEEE url(../images/grippie.png) no-repeat scroll ce
 .messageForIeUsers              { padding: 10px; color: blue; font-size: 13px; font-weight: bold; background-color: white; }
 .chromeFrameInstallDefaultStyle { width: 96%; height: 90%; border: 5px solid blue; z-index: 1000; left: 410px; top: 360px; }
 
-.concealed                          { display: none      }
-.customOrExistingInput div          { line-height: 22px; }
+.concealed                   { display: none      }
+.customOrExistingInput div   { line-height: 22px; }
 
-.securityGroupsSelect select { 	min-width: 120px; }
-.select2-container a { font-weight: normal; }
+.securityGroupsSelect select { min-width: 120px;    }
+.select2-container a         { font-weight: normal; }
 
 /* Prevent wrapping due to width of Windows/Linux scrollbars */
 .select2-drop .select2-results .select2-result-label { padding-right: 15px; }
