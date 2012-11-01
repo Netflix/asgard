@@ -34,6 +34,7 @@
       </div>
     </g:hasErrors>
     <g:form action="save" method="post" class="validate">
+      <g:hiddenField name="requestedFromGui" value="true" />
       <div class="dialog">
         <table>
           <tbody>
@@ -96,6 +97,7 @@
               </select>
             </td>
           </tr>
+          <g:render template="/common/chaosMonkeyOptions" />
           </tbody>
         </table>
       </div>

@@ -17,8 +17,9 @@ package com.netflix.asgard
 
 import javax.servlet.http.HttpServletRequest
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
+import grails.validation.Validateable
 
-@SuppressWarnings("GroovyAssignabilityCheck") class GroupCreateCommand {
+@Validateable @SuppressWarnings("GroovyAssignabilityCheck") class GroupCreateCommand {
 
     def applicationService
     def awsAutoScalingService

@@ -32,6 +32,7 @@ class ApplicationController {
     def awsEc2Service
     def awsAutoScalingService
     def awsLoadBalancerService
+    def cloudReadyService
     def configService
     def discoveryService
 
@@ -131,6 +132,7 @@ class ApplicationController {
                     groups.collect { Relationships.clusterFromGroupName(it.autoScalingGroupName) }.unique()
             request.alertingServiceConfigUrl = configService.alertingServiceConfigUrl
             SecurityGroup appSecurityGroup = awsEc2Service.getSecurityGroup(userContext, name)
+            boolean isChaosMonkeyActive = isChaosMonkeyActive()
             def details = [
                     app: app,
                     strictName: Relationships.checkStrictName(app.name),
@@ -139,8 +141,13 @@ class ApplicationController {
                     balancers: awsLoadBalancerService.getLoadBalancersForApp(userContext, name),
                     securities: awsEc2Service.getSecurityGroupsForApp(userContext, name),
                     appSecurityGroup: appSecurityGroup,
-                    launches: awsAutoScalingService.getLaunchConfigurationsForApp(userContext, name)
+                    launches: awsAutoScalingService.getLaunchConfigurationsForApp(userContext, name),
+                    isChaosMonkeyActive: isChaosMonkeyActive,
+                    chaosMonkeyEditLink: cloudReadyService.constructChaosMonkeyEditLink(userContext.region, app.name)
             ]
+            if (isChaosMonkeyActive) {
+                details.chaosMonkeyStatus = cloudReadyService.chaosMonkeyStatusForApplication(app.name)
+            }
             withFormat {
                 html { return details }
                 xml { new XML(details).render(response) }
@@ -152,11 +159,24 @@ class ApplicationController {
     static String[] typeList = ['Standalone Application', 'Web Application', 'Web Service']
 
     def create = {
-        ['typeList' : typeList]
+        UserContext userContext = UserContext.of(request)
+        [
+                'typeList' : typeList,
+                isChaosMonkeyActive: isChaosMonkeyActive()
+        ]
+    }
+
+    private boolean isChaosMonkeyActive() {
+        configService.cloudReadyUrl as boolean
     }
 
     def save = { ApplicationCreateCommand cmd ->
-        if (cmd.hasErrors()) {
+        boolean isChaosMonkeyChoiceNeglected = params.requestedFromGui == 'true' && isChaosMonkeyActive() &&
+                !params.chaosMonkey
+        if (isChaosMonkeyChoiceNeglected) {
+            flash.message = "Chaos Monkey selection is required."
+        }
+        if (cmd.hasErrors() || isChaosMonkeyChoiceNeglected) {
             chain(action: 'create', model: [cmd: cmd], params: params)
         } else {
             String name = params.name
@@ -166,15 +186,15 @@ class ApplicationController {
             String owner = params.owner
             String email = params.email
             String monitorBucketTypeString = params.monitorBucketType
-            try {
-                MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
-                applicationService.createRegisteredApplication(userContext, name, type, desc, owner, email,
-                        bucketType)
-                flash.message = "Application '${name}' has been created."
+            boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
+            MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
+            CreateApplicationResult result = applicationService.createRegisteredApplication(userContext, name, type,
+                    desc, owner, email, bucketType, enableChaosMonkey)
+            flash.message = result.toString()
+            if (result.succeeded()) {
                 redirect(action: 'show', params: [id: name])
-            } catch (Exception e) {
-                flash.message = "Could not create Application: ${e}"
-                chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass errors and params
+            } else {
+                chain(action: 'create', model: [cmd: cmd], params: params)
             }
         }
     }

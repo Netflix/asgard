@@ -484,4 +484,18 @@ class ConfigService {
     String getDefaultIamRole() {
         grailsApplication.config.cloud?.defaultIamRole ?: null
     }
+
+    /**
+     * @return URL for Cloud Ready REST calls.
+     */
+    String getCloudReadyUrl() {
+        grailsApplication.config.cloud?.cloudReady?.url ?: null
+    }
+
+    /**
+     * @return Regions where Chaos Monkey is indigenous.
+     */
+    Collection<Region> getChaosMonkeyRegions() {
+        grailsApplication.config.cloud?.cloudReady?.chaosMonkey?.regions ?: []
+    }
 }

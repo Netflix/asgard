@@ -91,8 +91,7 @@ class GroupCreateOperation extends AbstractPushOperation {
             }
 
             CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
-                    options.common.userContext, groupTemplate, launchConfigTemplate, suspendedProcesses,
-                    task)
+                    options.common.userContext, groupTemplate, launchConfigTemplate, suspendedProcesses, false, task)
             task.log(result.toString())
             if (result.succeeded()) {
                 // Add scalingPolicies to ASG. In the future this might need to be its own operation for reuse.
