@@ -174,7 +174,10 @@
             <table>
               <g:each in="${groups}" var="g">
                 <tr class="prop">
-                  <td class="value"><g:linkObject type="autoScaling" name="${g.autoScalingGroupName}"/></td>
+                  <td><g:linkObject type="autoScaling" name="${g.autoScalingGroupName}"/></td>
+                  <g:if test="${g.availabilityZones != loadBalancer.availabilityZones}">
+                    <td><g:render template="/common/zoneMismatch" model="[asgZones: g.availabilityZones, elbZones: loadBalancer.availabilityZones]"/></td>
+                  </g:if>
                 </tr>
               </g:each>
             </table>

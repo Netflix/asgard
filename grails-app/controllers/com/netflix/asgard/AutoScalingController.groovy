@@ -122,6 +122,15 @@ class AutoScalingController {
             for (GroupedInstance instance in groupData?.instances) {
                 zonesWithInstanceCounts.add(instance.availabilityZone)
             }
+
+            Collection<LoadBalancerDescription> mismatchedLoadBalancers = group.loadBalancerNames.findResults {
+                LoadBalancerDescription elb = awsLoadBalancerService.getLoadBalancer(userContext, it, From.CACHE)
+                elb.availabilityZones != groupData.availabilityZones ? elb : null
+            }
+            Map<String, List<String>> mismatchedElbNamesToZoneLists = mismatchedLoadBalancers.collectEntries {
+                [it.loadBalancerName, it.availabilityZones.sort()]
+            }
+
             String appName = Relationships.appNameFromGroupName(name)
             List<Activity> activities = []
             List<ScalingPolicy> scalingPolicies = []
@@ -138,10 +147,10 @@ class AutoScalingController {
             List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)
             String subnetPurpose = awsEc2Service.getSubnets(userContext).coerceLoneOrNoneFromIds(subnetIds)?.purpose
 
-            final Map<AutoScalingProcessType, String> processTypeToProcessStatusMessage = [:]
+            final Map<AutoScalingProcessType, String> processTypeToStatusMessage = [:]
             AutoScalingProcessType.with { [Launch, AZRebalance, Terminate, AddToLoadBalancer] }.each {
-                final SuspendedProcess suspendedProcess = group.getSuspendedProcess(it)
-                processTypeToProcessStatusMessage[it] = suspendedProcess ? "Disabled: '${suspendedProcess.suspensionReason}'" : 'Enabled'
+                final SuspendedProcess process = group.getSuspendedProcess(it)
+                processTypeToStatusMessage[it] = process ? "Disabled: '${process.suspensionReason}'" : 'Enabled'
             }
             DateTime dayAfterExpire = groupData?.expirationTimeAsDateTime()?.plusDays(1)
             Duration maxExpirationDuration = AutoScalingGroupData.MAX_EXPIRATION_DURATION
@@ -164,14 +173,15 @@ class AutoScalingController {
                     runHealthChecks: runHealthChecks,
                     group: groupData,
                     zonesWithInstanceCounts: zonesWithInstanceCounts,
+                    mismatchedElbNamesToZoneLists: mismatchedElbNamesToZoneLists,
                     launchConfiguration: launchConfig,
                     image: image,
                     clusterName: Relationships.clusterFromGroupName(name),
                     variables: Relationships.dissectCompoundName(name),
-                    launchStatus: processTypeToProcessStatusMessage[AutoScalingProcessType.Launch],
-                    azRebalanceStatus: processTypeToProcessStatusMessage[AutoScalingProcessType.AZRebalance],
-                    terminateStatus: processTypeToProcessStatusMessage[AutoScalingProcessType.Terminate],
-                    addToLoadBalancerStatus: processTypeToProcessStatusMessage[AutoScalingProcessType.AddToLoadBalancer],
+                    launchStatus: processTypeToStatusMessage[AutoScalingProcessType.Launch],
+                    azRebalanceStatus: processTypeToStatusMessage[AutoScalingProcessType.AZRebalance],
+                    terminateStatus: processTypeToStatusMessage[AutoScalingProcessType.Terminate],
+                    addToLoadBalancerStatus: processTypeToStatusMessage[AutoScalingProcessType.AddToLoadBalancer],
                     scalingPolicies: scalingPolicies,
                     scheduledActions: scheduledActions,
                     activities: activities,
