@@ -141,7 +141,10 @@
             <table>
               <g:each var="lbName" in="${group.loadBalancerNames}">
                 <tr class="prop">
-                  <td class="value"><g:linkObject type="loadBalancer" name="${lbName}"/></td>
+                  <td><g:linkObject type="loadBalancer" name="${lbName}"/></td>
+                  <g:if test="${mismatchedElbNamesToZoneLists[lbName]}">
+                    <td><g:render template="/common/zoneMismatch" model="[asgZones: group.availabilityZones, elbZones: mismatchedElbNamesToZoneLists[lbName]]"/></td>
+                  </g:if>
                 </tr>
               </g:each>
             </table>
