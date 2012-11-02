@@ -9,6 +9,7 @@
     <link rel="icon" type="image/ico" href="//d36cz9buwru1tt.cloudfront.net/favicon.ico">
     <link rel="shortcut icon" type="image/ico" href="//d36cz9buwru1tt.cloudfront.net/favicon.ico">
     <meta name="description" content="Amazon Elastic Compute Cloud (Amazon EC2) provides the flexibility to choose from a number of different instance types to meet your computing needs. Each instance provides a predictable amount of dedicated compute capacity and is charged per instance-hour consumed." /><meta name="keywords" content="" />
+    <meta name="google-site-verification" content="XHghG81ulgiW-3EylGcF48sG28tBW5EH0bNUhgo_DrU" />
 
     <title>Amazon EC2 Instance Types</title>
 
@@ -28,6 +29,8 @@
 
 
 
+
+
     <script src="/js/all_2.js" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -41,6 +44,8 @@
     <!-- layout _210_left -->
     <div id="doc4" class="yui-t2">
         <div id="hd">
+
+
 
 
 
@@ -92,7 +97,7 @@
                 </div>
 
                 <div id="global-top-links">
-                    <a href="https://aws-portal.amazon.com/gp/aws/developer/registration/index.html" id="gtl-sign-up">Sign Up</a>
+                    <a href="https://portal.aws.amazon.com/gp/aws/developer/registration/index.html" id="gtl-sign-up">Sign Up</a>
                     <a href="https://console.aws.amazon.com/s3/home" id="gtl-dd-account-console">My Account / Console</a>
                 </div>
             </div>
@@ -134,15 +139,17 @@
                     <h1>Available Instance Types</h1>
 
                     <a name="std-instances"></a>
-                    <h3>Standard Instances<br><br></h3>
+                    <h2>Standard Instances<br></h2>
 
-                    <p style="padding-left:2em;">Instances of this family are well suited for most applications.</p>
+                    <h3>First Generation<br><br></h3>
+
+                    <p style="padding-left:2em;">First generation (M1) Standard instances provide customers with a balanced set of resources and a low cost platform that is well suited for a wide variety of applications.</p>
 
 
-                    <p style="padding-left:2em;"><strong>Small Instance</strong> &#8211; default<code>++</code></p>
+                    <p style="padding-left:2em;"><strong>M1 Small Instance</strong> &#8211; default<code>++</code></p>
 
 
-                    <p style="padding-left:4em;">1.7 GB memory<br>
+                    <p style="padding-left:4em;">1.7 GiB memory<br>
                         1 EC2 Compute Unit (1 virtual core with 1 EC2 Compute Unit)<br>
                         160 GB instance storage<br>
                         32-bit or 64-bit platform<br>
@@ -150,10 +157,10 @@
                         EBS-Optimized Available: No<br>
                         API name: m1.small</p>
 
-                    <p style="padding-left:2em;"><strong>Medium Instance</strong></code></p>
+                    <p style="padding-left:2em;"><strong>M1 Medium Instance</strong></code></p>
 
 
-                    <p style="padding-left:4em;">3.75 GB memory<br>
+                    <p style="padding-left:4em;">3.75 GiB memory<br>
                         2 EC2 Compute Unit (1 virtual core with 2 EC2 Compute Unit)<br>
                         410 GB instance storage<br>
                         32-bit or 64-bit platform<br>
@@ -162,10 +169,10 @@
                         API name: m1.medium</p>
 
 
-                    <p style="padding-left:2em;"><strong>Large Instance</strong></p>
+                    <p style="padding-left:2em;"><strong>M1 Large Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">7.5 GB memory<br>
+                    <p style="padding-left:4em;">7.5 GiB memory<br>
                         4 EC2 Compute Units (2 virtual cores with 2 EC2 Compute Units each)<br>
                         850 GB instance storage<br>
                         64-bit platform<br>
@@ -174,10 +181,10 @@
                         API name: m1.large</p>
 
 
-                    <p style="padding-left:2em;"><strong>Extra Large Instance</strong></p>
+                    <p style="padding-left:2em;"><strong>M1 Extra Large Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">15 GB memory<br>
+                    <p style="padding-left:4em;">15 GiB memory<br>
                         8 EC2 Compute Units (4 virtual cores with 2 EC2 Compute Units each)<br>
                         1,690 GB instance storage<br>
                         64-bit platform<br>
@@ -185,17 +192,46 @@
                         EBS-Optimized Available: 1000 Mbps<br>
                         API name: m1.xlarge</p>
 
+                    <h3>Second Generation<br><br></h3>
+
+                    <p style="padding-left:2em;">Second generation (M3) Standard instances provide customers with a balanced set of resources and a higher level of processing performance compared to First Generation Standard instances.  Instances in this family are ideal for applications that require higher absolute CPU and memory performance.  Examples of applications that will benefit from the performance of Second Generation Standard instances include encoding, high traffic content management systems, and memcached.</p>
+
+                    <p style="padding-left:2em;"><strong>M3 Extra Large Instance</strong></p>
+
+
+                    <p style="padding-left:4em;">15 GiB memory<br>
+                        13 EC2 Compute Units (4 virtual cores with 3.25 EC2 Compute Units each)<br>
+                        EBS storage only<br>
+                        64-bit platform<br>
+                        I/O Performance: Moderate<br>
+                        EBS-Optimized Available: No<br>
+                        API name: m3.xlarge</p>
+
+                    <p style="padding-left:2em;"><strong>M3 Double Extra Large Instance</strong></p>
+
+
+                    <p style="padding-left:4em;">30 GiB memory<br>
+                        26 EC2 Compute Units (8 virtual cores with 3.25 EC2 Compute Units each)<br>
+                        EBS storage only<br>
+                        64-bit platform<br>
+                        I/O Performance: High<br>
+                        EBS-Optimized Available: No<br>
+                        API name: m3.2xlarge</p>
+
+                    <br>
+
                     <a name="micro-instances"></a>
-                    <h3>Micro Instances<br><br></h3>
+                    <h2>Micro Instances<br></h2>
 
 
                     <p style="padding-left:2em;">Micro instances (t1.micro) provide a small amount of consistent CPU resources and allow you to increase CPU capacity in short bursts when additional cycles are available.  They are well suited for lower throughput applications and web sites that require additional compute cycles periodically.  You can learn more about how you can use Micro instances and appropriate applications in the <a href="http://docs.amazonwebservices.com/AWSEC2/latest/UserGuide/concepts_micro_instances.html">Amazon EC2 documentation</a></p>
 
+                    <br>
 
                     <p style="padding-left:2em;"><strong>Micro Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">613 MB memory<br>
+                    <p style="padding-left:4em;">613 MiB memory<br>
                         Up to 2 EC2 Compute Units (for short periodic bursts)<br>
                         EBS storage only<br>
                         32-bit or 64-bit platform<br>
@@ -203,8 +239,10 @@
                         EBS-Optimized Available: No<br>
                         API name: t1.micro<br></p>
 
+                    <br>
+
                     <a name="himem-instances"></a>
-                    <h3>High-Memory Instances<br><br></h3>
+                    <h2>High-Memory Instances<br></h2>
 
                     <p style="padding-left:2em;">Instances of this family offer large memory sizes for high throughput applications, including database and memory caching applications.</p>
 
@@ -212,7 +250,7 @@
                     <p style="padding-left:2em;"><strong>High-Memory Extra Large Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">17.1 GB of memory<br>
+                    <p style="padding-left:4em;">17.1 GiB of memory<br>
                         6.5 EC2 Compute Units (2 virtual cores with 3.25 EC2 Compute Units each)<br>
                         420 GB of instance storage<br>
                         64-bit platform<br>
@@ -224,7 +262,7 @@
                     <p style="padding-left:2em;"><strong>High-Memory Double Extra Large Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">34.2 GB of memory<br>
+                    <p style="padding-left:4em;">34.2 GiB of memory<br>
                         13 EC2 Compute Units (4 virtual cores with 3.25 EC2 Compute Units each)<br>
                         850 GB of instance storage<br>
                         64-bit platform<br>
@@ -236,7 +274,7 @@
                     <p style="padding-left:2em;"><strong>High-Memory Quadruple Extra Large Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">68.4 GB of memory<br>
+                    <p style="padding-left:4em;">68.4 GiB of memory<br>
                         26 EC2 Compute Units (8 virtual cores with 3.25 EC2 Compute Units each)<br>
                         1690 GB of instance storage<br>
                         64-bit platform<br>
@@ -244,8 +282,10 @@
                         EBS-Optimized Available: 1000 Mbps<br>
                         API name: m2.4xlarge<br></p>
 
+                    <br>
+
                     <a name="std-instances"></a>
-                    <h3>High-CPU Instances<br><br></h3>
+                    <h2>High-CPU Instances<br></h2>
 
 
                     <p style="padding-left:2em;">Instances of this family have proportionally more CPU resources than memory (RAM) and are well suited for compute-intensive applications.</p>
@@ -254,7 +294,7 @@
                     <p style="padding-left:2em;"><strong>High-CPU Medium Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">1.7 GB of memory<br>
+                    <p style="padding-left:4em;">1.7 GiB of memory<br>
                         5 EC2 Compute Units (2 virtual cores with 2.5 EC2 Compute Units each)<br>
                         350 GB of instance storage<br>
                         32-bit or 64-bit platform<br>
@@ -266,7 +306,7 @@
                     <p style="padding-left:2em;"><strong>High-CPU Extra Large Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">7 GB of memory<br>
+                    <p style="padding-left:4em;">7 GiB of memory<br>
                         20 EC2 Compute Units (8 virtual cores with 2.5 EC2 Compute Units each)<br>
                         1690 GB of instance storage<br>
                         64-bit platform<br>
@@ -274,17 +314,19 @@
                         EBS-Optimized Available: No<br>
                         API name: c1.xlarge<br></p>
 
+                    <br>
+
                     <a name="clustercompute-instances"></a>
-                    <h3>Cluster Compute Instances<br><br></h3>
+                    <h2>Cluster Compute Instances<br></h2>
 
 
-                    <p style="padding-left:2em;">Instances of this family provide proportionally high CPU resources with increased network performance and are well suited for High Performance Compute (HPC) applications and other demanding network-bound applications. You can learn more about Cluster instance concepts by reading the <a href="http://docs.amazonwebservices.com/AWSEC2/latest/UserGuide/using_cluster_computing.html">Amazon EC2 documentation</a>. For more information about specific use cases and cluster management options for HPC, please visit the <a href="http://aws.amazon.com/ec2/hpc-applications/">HPC solutions page</a>.</p>
+                    <p style="padding-left:2em;">Instances of this family provide proportionally high CPU resources with increased network performance and are well suited for High Performance Compute (HPC) applications and other demanding network-bound applications. You can learn more about Cluster instance concepts by reading the <a href="http://docs.amazonwebservices.com/AWSEC2/latest/UserGuide/using_cluster_computing.html">Amazon EC2 documentation</a>. For more information about specific use cases and cluster management options for HPC, please visit the <a href="/ec2/hpc-applications/">HPC solutions page</a>.</p>
 
 
                     <p style="padding-left:2em;"><strong>Cluster Compute Quadruple Extra Large Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">23 GB of memory<br>
+                    <p style="padding-left:4em;">23 GiB of memory<br>
                         33.5 EC2 Compute Units (2 x Intel Xeon X5570, quad-core &#8220;Nehalem&#8221; architecture)<br>
                         1690 GB of instance storage<br>
                         64-bit platform<br>
@@ -297,7 +339,7 @@
                     <p style="padding-left:2em;"><strong>Cluster Compute Eight Extra Large Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">60.5 GB of memory<br>
+                    <p style="padding-left:4em;">60.5 GiB of memory<br>
                         88 EC2 Compute Units (2 x Intel Xeon E5-2670, eight-core "Sandy Bridge" architecture)<br>
                         3370 GB of instance storage<br>
                         64-bit platform<br>
@@ -307,17 +349,19 @@
 
                     <p style="padding-left:2em;">*Cluster Compute, Cluster GPU and High I/O instances do not currently support EBS Optimization, but provide customers with high bandwidth networking and can also be used with EBS Provisioned IOPS volumes for improved consistency and performance.</p>
 
+                    <br>
+
                     <a name="clustergpu-instances"></a>
-                    <h3>Cluster GPU Instances<br><br></h3>
+                    <h2>Cluster GPU Instances<br></h2>
 
 
-                    <p style="padding-left:2em;">Instances of this family provide general-purpose graphics processing units (GPUs) with proportionally high CPU and increased network performance for applications benefitting from highly parallelized processing, including HPC, rendering and media processing applications. While Cluster Compute Instances provide the ability to create clusters of instances connected by a low latency, high throughput network, Cluster GPU Instances provide an additional option for applications that can benefit from the efficiency gains of the parallel computing power of GPUs over what can be achieved with traditional processors. <a href="http://aws.amazon.com/ec2/hpc-applications/">Learn more</a> about use of this instance type for HPC applications.</p>
+                    <p style="padding-left:2em;">Instances of this family provide general-purpose graphics processing units (GPUs) with proportionally high CPU and increased network performance for applications benefitting from highly parallelized processing, including HPC, rendering and media processing applications. While Cluster Compute Instances provide the ability to create clusters of instances connected by a low latency, high throughput network, Cluster GPU Instances provide an additional option for applications that can benefit from the efficiency gains of the parallel computing power of GPUs over what can be achieved with traditional processors. <a href="/ec2/hpc-applications/">Learn more</a> about use of this instance type for HPC applications.</p>
 
 
                     <p style="padding-left:2em;"><strong>Cluster GPU Quadruple Extra Large Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">22 GB of memory<br>
+                    <p style="padding-left:4em;">22 GiB of memory<br>
                         33.5 EC2 Compute Units (2 x Intel Xeon X5570, quad-core &#8220;Nehalem&#8221; architecture)<br>
                         2 x NVIDIA Tesla “Fermi” M2050 GPUs<br>
                         1690 GB of instance storage<br>
@@ -328,8 +372,10 @@
 
                     <p style="padding-left:2em;">*Cluster Compute, Cluster GPU and High I/O instances do not currently support EBS Optimization, but provide customers with high bandwidth networking and can also be used with EBS Provisioned IOPS volumes for improved consistency and performance.</p>
 
+                    <br>
+
                     <a name="highio-instances"></a>
-                    <h3>High I/O Instances<br><br></h3>
+                    <h2>High I/O Instances<br></h2>
 
 
                     <p style="padding-left:2em;">Instances of this family provide very high instance storage I/O performance and are ideally suited for many high performance database workloads.  Example applications include NoSQL databases like Cassandra and MongoDB. High I/O instances are backed by Solid State Drives (SSD), and also provide high levels of CPU, memory and network performance.</p>
@@ -337,7 +383,7 @@
                     <p style="padding-left:2em;"><strong>High I/O Quadruple Extra Large Instance</strong></p>
 
 
-                    <p style="padding-left:4em;">60.5 GB of memory<br>
+                    <p style="padding-left:4em;">60.5 GiB of memory<br>
                         35 EC2 Compute Units (16 virtual cores*)<br>
                         2 SSD-based volumes each with 1024 GB of instance storage<br>
                         64-bit platform<br>
@@ -365,13 +411,13 @@
                     <h1>Selecting Instance Types</h1>
 
 
-                    <p>Amazon EC2 instances are grouped into seven families: Standard, Micro, High-Memory, High-CPU, Cluster Compute, Cluster GPU, and High I/O.</p>
+                    <p>Amazon EC2 instances are grouped into eight families: Standard (first and second generation), Micro, High-Memory, High-CPU, Cluster Compute, Cluster GPU, and High I/O.</p>
 
 
-                    <p>Standard Instances have memory to CPU ratios suitable for most general purpose applications; High-Memory instances offer larger memory sizes for high throughput applications, including database and memory caching applications; and High-CPU instances have proportionally more CPU resources than memory (RAM) and are well suited for compute-intensive applications.</p>
+                    <p>Standard Instances have memory to CPU ratios suitable for most general purpose applications; second generation Standard instances provide higher absolute CPU performance for CPU intensive applications; High-Memory instances offer larger memory sizes for memory-intensive applications, including database and memory caching applications; and High-CPU instances have proportionally more CPU resources than memory (RAM) and are well suited for scale out compute-intensive applications.</p>
 
 
-                    <p>Micro instances provide a small amount of consistent CPU resources and allow you to burst CPU capacity when additional cycles are available. They are well suited for lower throughput applications and web sites that consume significant compute cycles periodically.  At steady state, Micro instances receive a fraction of the compute resources that Small instances do. Therefore, if your application has compute-intensive or steady state needs we recommend using a Small instance (or larger, depending on your needs).  However, Micro instances can periodically burst up to 2 ECUs (for short periods of time). This is double the number of ECUs available from a Standard Small instance. Therefore, if you have a relatively low throughput application or web site with an occasional need to consume significant compute cycles, we recommend using Micro instances.</p>
+                    <p>Micro instances provide a small amount of consistent CPU resources and allow you to burst CPU capacity when additional cycles are available. They are well suited for lower throughput applications and web sites that consume significant compute cycles periodically.  At steady state, Micro instances receive a fraction of the compute resources that Small instances do. Therefore, if your application has compute-intensive or steady state needs we recommend using a Small instance (or larger, depending on your needs).  However, Micro instances can provide periodic bursts of additional CPU capability.  Therefore, if you have a relatively low throughput application or web site with an occasional need to consume significant compute cycles, we recommend using Micro instances.</p>
 
 
                     <p>Cluster Compute instances provide a very large amount of CPU coupled with increased network performance making them well suited for High Performance Compute (HPC) applications and other demanding network-bound applications.</p>
@@ -410,7 +456,7 @@
                     <p>Cluster Compute and Cluster GPU instances have <em>very high</em> I/O performance using 10 Gigabit Ethernet for high throughput and reduced network latencies within clusters.</p>
 
 
-                    <p>High I/O Instances are designed to provide customers with a very high amount of low latency storage I/O by taking advantage of direct attached, SSD-backed storage volumes.  High I/O instances can deliver in excess of 100,000 random read IOPS and as many as 80,000 random write IOPS for high performance NoSQL and relationsal database applications.  In addition to storage performance, High I/O instances also have very high I/O performance via 10 Gigabit Ethernet for high throughput and reduced network latencies within clusters.</p>
+                    <p>High I/O Instances are designed to provide customers with a very high amount of low latency storage I/O by taking advantage of direct attached, SSD-backed storage volumes.  High I/O instances can deliver in excess of 100,000 random read IOPS and as many as 80,000 random write IOPS for high performance NoSQL and relational database applications.  In addition to storage performance, High I/O instances also have very high I/O performance via 10 Gigabit Ethernet for high throughput and reduced network latencies within clusters.</p>
 
                     <p>In addition, you can use Amazon EBS to get improved storage I/O performance for disk-bound applications. Amazon EBS standard volumes provide customers with reliable, low cost, persistent storage, and customers can scale I/O performance by striping across many EBS volumes.  Amazon EBS Provisioned IOPS volumes allow customers to provision the desired level of storage volume performance and should be used with Amazon EC2 EBS-Optimized instances to maximize I/O performance and consistency. EBS-Optimized instances provide customers with an optimized configuration and dedicated throughput for consistency of EBS I/O performance.</p>
 
@@ -440,7 +486,11 @@
 
 
 
+
+
                     <div id="subNavA">
+
+
 
 
 
@@ -1071,6 +1121,8 @@
 
 
 
+
+
             <div style="border-top: 1px solid #ccc; margin-bottom: 12px; margin-top: 10px; padding-top: 2px;">
                 <ul class="h_bar">
                     <li class="first">
@@ -1088,6 +1140,7 @@
 
         </div>
     </div>
+
 
 
 
