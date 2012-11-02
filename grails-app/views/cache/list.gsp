@@ -111,7 +111,7 @@
                 <g:each in="${m.regionalCaches.values()}" var="cache">
                   <tr>
                     <td>${cache.name}</td>
-                    <td class="${m.filled ? '' : 'danger'}">${cache.filled ? 'Filled' : 'Not Filled'}</td>
+                    <td class="${cache.filled ? '' : 'danger'}">${cache.filled ? 'Filled' : 'Not Filled'}</td>
                     <td>${cache.timeSinceLastFill}</td>
                     <td>${cache.size}</td>
                   </tr>
