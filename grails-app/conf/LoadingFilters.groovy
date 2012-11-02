@@ -22,7 +22,7 @@ class LoadingFilters {
     def initService
 
     def filters = {
-        all(controller: '(init|healthcheck|server)', invert: true) {
+        all(controller: '(cache|init|healthcheck|server)', invert: true) {
             before = {
                 if (!initService.cachesFilled() && !System.getProperty('skipCacheFill')) {
                     render(status: HttpServletResponse.SC_SERVICE_UNAVAILABLE, view: '/loading')
