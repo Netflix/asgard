@@ -217,8 +217,8 @@ class AutoScalingControllerSpec extends Specification {
         assert securityGroupNames.containsAll(['akms', 'helloworld', 'helloworld-frontend', 'helloworld-asgardtest',
                 'helloworld-tmp', 'ntsuiboot'])
         [
-                't1.micro', 'm1.small', 'c1.medium', 'm1.large', 'm2.xlarge', 'c1.xlarge', 'm1.xlarge', 'm2.2xlarge',
-                'cc1.4xlarge', 'm2.4xlarge', 'cg1.4xlarge', 'cc2.8xlarge', 'huge.mainframe'
+                't1.micro', 'm1.small', 'm1.medium', 'c1.medium', 'm1.large', 'm2.xlarge', 'm1.xlarge', 'c1.xlarge',
+                'm2.2xlarge', 'cc1.4xlarge', 'm2.4xlarge', 'cg1.4xlarge', 'cc2.8xlarge', 'hi1.4xlarge', 'huge.mainframe'
         ] == attrs['instanceTypes']*.name
     }
 
