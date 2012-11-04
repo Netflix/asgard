@@ -520,7 +520,14 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         caches.allSecurityGroups.by(userContext.region).remove(name)
     }
 
-    /** High-level permission update for a group pair: given the desired state, make it so. */
+    /**
+     * High-level permission update for a group pair: given the desired state, make it so.
+     *
+     * @param userContext who, where, why
+     * @param targetGroup the security group of the instances that will be allowed to receive traffic
+     * @param sourceGroup the security group of the instances that will be allowed to send traffic
+     * @param wantPerms the IP permissions that should be entirely and solely in effect when this method completes
+     */
     void updateSecurityGroupPermissions(UserContext userContext, SecurityGroup targetGroup, SecurityGroup sourceGroup,
             List<IpPermission> wantPerms) {
         List<IpPermission> havePerms = getIngressFrom(targetGroup, sourceGroup)
@@ -591,12 +598,25 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         }
     }
 
-    /** Returns the canonical string representation of a from-to port pair. */
+    /**
+     * Returns the canonical string representation of a from-to port pair. If the two numbers are the same, this method
+     * returns the number as string. Otherwise, this method returns a string with the fromPort separated from the toPort
+     * by a hyphen like "7101-7102".
+     *
+     * @param fromPort the low end of a port range
+     * @param toPort the high end of a port range
+     * @return string representation of the port range
+     */
     public static String portString(int fromPort, int toPort) {
         toPort == fromPort ? "${fromPort}" : "${fromPort}-${toPort}"
     }
 
-    /** Converts a string ports representation into a list of partially populated IpPermission instances. */
+    /**
+     * Converts a string ports representation into a list of partially populated IpPermission instances.
+     *
+     * @param portsStr the string representation of a set of comma-separated port ranges, such as "7001,7101-7102"
+     * @return the IpPermission objects populated only with fromPort and toPort integer values
+     */
     static List<IpPermission> permissionsFromString(String portsStr) {
         List<IpPermission> perms = []
         if (portsStr) {
