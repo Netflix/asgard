@@ -103,6 +103,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     static transactional = false
 
     private static Pattern SECURITY_GROUP_ID_PATTERN = ~/sg-[a-f0-9]+/
+    private static final String IP_PROTOCOL = 'tcp'
 
     MultiRegionAwsClient<AmazonEC2> awsClient
     def awsClientService
@@ -526,25 +527,34 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         if (!havePerms && !wantPerms) {
             return
         }
-        Boolean somethingChanged = false
-        havePerms.each { havePerm ->
-            if (!wantPerms.any { wp -> wp.fromPort == havePerm.fromPort && wp.toPort == havePerm.toPort } ) {
-                revokeSecurityGroupIngress(userContext, targetGroup, sourceGroup, 'tcp',
-                        havePerm.fromPort, havePerm.toPort)
-                somethingChanged = true
+        String sourceName = sourceGroup.groupName
+        String targetName = targetGroup.groupName
+        String targetGroupId = targetGroup.groupId
+        String userId = configService.awsAccountNumber
+        List<UserIdGroupPair> pairs = [new UserIdGroupPair().withUserId(userId).withGroupId(sourceGroup.groupId)]
+        List<IpPermission> permissionsToRevoke = determinePermissionsToChange(havePerms, wantPerms, pairs)
+        List<IpPermission> permissionsToAuth = determinePermissionsToChange(wantPerms, havePerms, pairs)
+        if (permissionsToRevoke || permissionsToAuth) {
+            String msg = "Update Security Group Ingress between source '${sourceName}' and target '${targetName}'"
+            taskService.runTask(userContext, msg, { task ->
+                authorizePermissions(userContext, sourceGroup, targetGroup, permissionsToAuth, task)
+                revokePermissions(userContext, sourceGroup, targetGroup, permissionsToRevoke, task)
+                getSecurityGroup(userContext, targetGroupId)
+            }, Link.to(EntityType.security, targetGroupId))
+        }
+    }
+
+    private List<IpPermission> determinePermissionsToChange(List<IpPermission> thesePerms,
+            List<IpPermission> otherPerms, List<UserIdGroupPair> sourcePairs) {
+        thesePerms.inject([]) { List<IpPermission> permissionsToChange, IpPermission perm ->
+            int fromPort = perm.fromPort
+            int toPort = perm.toPort
+            if (!otherPerms.any { otherPerm -> otherPerm.fromPort == fromPort && otherPerm.toPort == toPort }) {
+                permissionsToChange << new IpPermission(userIdGroupPairs: sourcePairs, ipProtocol: IP_PROTOCOL,
+                        fromPort: fromPort, toPort: toPort)
             }
-        }
-        wantPerms.each { wantPerm ->
-            if (!havePerms.any { hp -> hp.fromPort == wantPerm.fromPort && hp.toPort == wantPerm.toPort} ) {
-                authorizeSecurityGroupIngress(userContext, targetGroup, sourceGroup, 'tcp',
-                        wantPerm.fromPort, wantPerm.toPort)
-                somethingChanged = true
-            }
-        }
-        // This method gets called hundreds of times for one user request so don't call Amazon unless necessary.
-        if (somethingChanged) {
-            getSecurityGroup(userContext, targetGroup.groupId)
-        }
+            permissionsToChange
+        } as List
     }
 
     /** Converts a list of IpPermissions into a string representation, or null if none. */
@@ -556,6 +566,28 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             }
         } else {
             return null
+        }
+    }
+
+    private void authorizePermissions(UserContext userContext, SecurityGroup source, SecurityGroup target,
+                                      List<IpPermission> permissionsToAuth, Task task) {
+        if (permissionsToAuth) {
+            String ports = permissionsToString(permissionsToAuth)
+            task.log("Authorize Security Group Ingress from '${source.groupName}' to '${target.groupName}' on ${ports}")
+            AuthorizeSecurityGroupIngressRequest request = new AuthorizeSecurityGroupIngressRequest()
+            request.withGroupId(target.groupId).withIpPermissions(permissionsToAuth)
+            awsClient.by(userContext.region).authorizeSecurityGroupIngress(request)
+        }
+    }
+
+    private void revokePermissions(UserContext userContext, SecurityGroup source, SecurityGroup target,
+                                   List<IpPermission> permissionsToRevoke, Task task) {
+        if (permissionsToRevoke) {
+            String ports = permissionsToString(permissionsToRevoke)
+            task.log("Revoke Security Group Ingress from '${source.groupName}' to '${target.groupName}' on ${ports}")
+            RevokeSecurityGroupIngressRequest request = new RevokeSecurityGroupIngressRequest()
+            request.withGroupId(target.groupId).withIpPermissions(permissionsToRevoke)
+            awsClient.by(userContext.region).revokeSecurityGroupIngress(request)
         }
     }
 
@@ -592,7 +624,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     private String bestIngressPortsFor(SecurityGroup targetGroup) {
         Map guess = ['7001' : 1]
         targetGroup.ipPermissions.each {
-            if (it.ipProtocol == 'tcp' &&  it.userIdGroupPairs.size() > 0) {
+            if (it.ipProtocol == IP_PROTOCOL &&  it.userIdGroupPairs.size() > 0) {
                 Integer count = it.userIdGroupPairs.size()
                 String portRange = portString(it.fromPort, it.toPort)
                 guess[portRange] = guess[portRange] ? guess[portRange] + count : count
@@ -601,38 +633,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         String g = guess.sort { -it.value }.collect { it.key }[0]
         //println "guess: ${target.groupName} ${guess} => ${g}"
         g
-    }
-
-    // TODO refactor the following two methods to take IpPermissions List from callers now that AWS API takes those.
-
-    private void authorizeSecurityGroupIngress(UserContext userContext, SecurityGroup targetgroup, SecurityGroup sourceGroup, String ipProtocol, int fromPort, int toPort) {
-        String groupName = targetgroup.groupName
-        String sourceGroupName = sourceGroup.groupName
-        UserIdGroupPair sourcePair = new UserIdGroupPair().withUserId(accounts[0]).withGroupId(sourceGroup.groupId)
-        List<IpPermission> perms = [
-                new IpPermission()
-                        .withUserIdGroupPairs(sourcePair)
-                        .withIpProtocol(ipProtocol).withFromPort(fromPort).withToPort(toPort)
-        ]
-        taskService.runTask(userContext, "Authorize Security Group Ingress to ${groupName} from ${sourceGroupName} on ${fromPort}-${toPort}", { task ->
-            awsClient.by(userContext.region).authorizeSecurityGroupIngress(
-                    new AuthorizeSecurityGroupIngressRequest().withGroupId(targetgroup.groupId).withIpPermissions(perms))
-        }, Link.to(EntityType.security, groupName))
-    }
-
-    private void revokeSecurityGroupIngress(UserContext userContext, SecurityGroup targetgroup, SecurityGroup sourceGroup, String ipProtocol, int fromPort, int toPort) {
-        String groupName = targetgroup.groupName
-        String sourceGroupName = sourceGroup.groupName
-        UserIdGroupPair sourcePair = new UserIdGroupPair().withUserId(accounts[0]).withGroupId(sourceGroup.groupId)
-        List<IpPermission> perms = [
-                new IpPermission()
-                        .withUserIdGroupPairs(sourcePair)
-                        .withIpProtocol(ipProtocol).withFromPort(fromPort).withToPort(toPort)
-        ]
-        taskService.runTask(userContext, "Revoke Security Group Ingress to ${groupName} from ${sourceGroupName} on ${fromPort}-${toPort}", { task ->
-            awsClient.by(userContext.region).revokeSecurityGroupIngress(
-                    new RevokeSecurityGroupIngressRequest().withGroupId(targetgroup.groupId).withIpPermissions(perms))
-        }, Link.to(EntityType.security, groupName))
     }
 
     // TODO: Delete this method after rewriting AwsResultsRetrieverSpec unit test to use some other use case

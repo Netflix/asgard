@@ -46,6 +46,7 @@ class AwsEc2ServiceUnitSpec extends Specification {
     CachedMap mockInstanceCache
     CachedMap mockReservationCache
     AwsEc2Service awsEc2Service
+    ConfigService configService
 
     def setup() {
         userContext = UserContext.auto(Region.US_EAST_1)
@@ -63,8 +64,9 @@ class AwsEc2ServiceUnitSpec extends Specification {
                 work(new Task())
             }
         }
+        configService = Mock(ConfigService)
         awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }), caches: caches,
-                taskService: taskService)
+                configService: configService, taskService: taskService)
     }
 
     def 'active instances should only include pending and running states'() {
@@ -373,19 +375,20 @@ class AwsEc2ServiceUnitSpec extends Specification {
 
     def 'should update security groups'() {
         List<UserIdGroupPair> userIdGroupPairs = [new UserIdGroupPair(groupId: 'sg-s')]
-        SecurityGroup source = new SecurityGroup(groupName: 'source', groupId: 'sg-s')
-        SecurityGroup target = new SecurityGroup(groupName: 'target', groupId: 'sg-t', ipPermissions: [
-                new IpPermission(fromPort: 1, toPort: 1, userIdGroupPairs: userIdGroupPairs),
-                new IpPermission(fromPort: 2, toPort: 2, userIdGroupPairs: userIdGroupPairs),
+        SecurityGroup source = new SecurityGroup(groupId: 'sg-s')
+        SecurityGroup target = new SecurityGroup(groupId: 'sg-t', ipPermissions: [
+                new IpPermission(ipProtocol: 'tcp', fromPort: 1, toPort: 1, userIdGroupPairs: userIdGroupPairs),
+                new IpPermission(ipProtocol: 'tcp', fromPort: 2, toPort: 2, userIdGroupPairs: userIdGroupPairs),
         ])
 
         when:
         awsEc2Service.updateSecurityGroupPermissions(userContext, target, source, [
-                new IpPermission(fromPort: 2, toPort: 2),
-                new IpPermission(fromPort: 3, toPort: 3),
+                new IpPermission(ipProtocol: 'tcp', fromPort: 2, toPort: 2),
+                new IpPermission(ipProtocol: 'tcp', fromPort: 3, toPort: 3)
         ])
 
         then:
+        1 * configService.getAwsAccountNumber()
         1 * mockAmazonEC2.authorizeSecurityGroupIngress(new AuthorizeSecurityGroupIngressRequest(groupId: 'sg-t',
                 ipPermissions: [
                         new IpPermission(fromPort: 3, toPort: 3, ipProtocol: 'tcp', userIdGroupPairs: userIdGroupPairs),
