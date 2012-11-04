@@ -401,4 +401,17 @@ class AwsEc2ServiceUnitSpec extends Specification {
                 securityGroups: [new SecurityGroup()])
         0 * _
     }
+
+    def 'should convert two port numbers to a port range string'(){
+        expect:
+        '7001-7002' == AwsEc2Service.portString(7001, 7002)
+        '7001' == AwsEc2Service.portString(7001, 7001)
+    }
+
+    def 'should convert a comma-delimited string of port ranges to port-populated IpPermission objects'() {
+        expect:
+        [
+                new IpPermission(fromPort: 7001, toPort: 7001), new IpPermission(fromPort: 7101, toPort: 7102)
+        ] == AwsEc2Service.permissionsFromString('7001,7101-7102')
+    }
 }
