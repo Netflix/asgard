@@ -17,8 +17,10 @@ package com.netflix.asgard
 
 import com.amazonaws.services.simpledb.model.DomainMetadataResult
 import com.netflix.asgard.mock.Mocks
+import grails.test.mixin.TestFor
 import org.junit.Before
 
+@TestFor(DomainController)
 class DomainControllerTests {
 
     @Before

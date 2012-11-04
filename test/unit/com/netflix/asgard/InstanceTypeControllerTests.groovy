@@ -17,8 +17,10 @@ package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.InstanceTypeData
+import grails.test.mixin.TestFor
 import org.junit.Before
 
+@TestFor(InstanceTypeController)
 class InstanceTypeControllerTests {
 
     @Before

@@ -18,8 +18,10 @@ package com.netflix.asgard
 import com.amazonaws.services.ec2.model.Image
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.MassDeleteRequest
+import grails.test.mixin.TestFor
 import org.junit.Before
 
+@TestFor(ImageController)
 class ImageControllerTests {
 
     @Before
