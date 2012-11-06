@@ -17,8 +17,10 @@ package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.SimpleQueue
+import grails.test.mixin.TestFor
 import org.junit.Before
 
+@TestFor(QueueController)
 class QueueControllerTests {
 
     @Before

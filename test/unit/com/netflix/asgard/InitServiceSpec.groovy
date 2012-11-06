@@ -21,7 +21,6 @@ import org.springframework.context.ApplicationContext
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
-@SuppressWarnings("GroovyPointlessArithmetic")
 class InitServiceSpec extends Specification {
 
     static final String ASGARD_HOME = 'asgardtmp'

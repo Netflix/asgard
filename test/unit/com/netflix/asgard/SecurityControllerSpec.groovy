@@ -27,7 +27,6 @@ import grails.test.MockUtils
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-@SuppressWarnings("GroovyPointlessArithmetic")
 @TestFor(SecurityController)
 class SecurityControllerSpec extends Specification {
     AmazonEC2 amazonEC2 = Mock(AmazonEC2)

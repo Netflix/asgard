@@ -18,7 +18,6 @@ package com.netflix.asgard
 import spock.lang.Specification
 import com.amazonaws.services.ec2.model.SecurityGroup
 
-@SuppressWarnings("GroovyPointlessArithmetic")
 class LaunchTemplateServiceSpec extends Specification {
 
     ConfigService mockConfigService = Mock(ConfigService)

@@ -1,1601 +1,1587 @@
 {
-  "vers": 0.01,
-  "config": {
-      "rate": "perhr",
-      "valueColumns": ["linux", "mswin"],
-      "currencies": ["USD"],
-      "regions": [
-          {
-              "region": "us-east",
-              "instanceTypes": [
-                  {
-                      "type": "stdODI",
-                      "sizes": [
-                          {
-                              "size": "sm",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.085"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.12"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "lg",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.34"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.48"
-                                      }
-                                  }
-                              ]
+    "vers": 0.01,
+    "config": {
+        "rate": "perhr",
+        "valueColumns": ["linux", "mswin"],
+        "currencies": ["USD"],
+        "regions": [
+            {
+                "region": "us-east",
+                "instanceTypes": [
+                    {
+                        "type": "stdODI",
+                        "sizes": [
+                            {
+                                "size": "sm",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.065"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.115"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.130"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.230"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "lg",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.260"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.460"
+                                        }
+                                    }
+                                ]
 
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.68"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.96"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "uODI",
-                      "sizes": [
-                          {
-                              "size": "u",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.02"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.03"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiMemODI",
-                      "sizes": [
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.50"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.62"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "1.00"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.24"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "2.00"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "2.48"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiCPUODI",
-                      "sizes": [
-                          {
-                              "size": "med",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.17"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.29"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.68"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.16"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterComputeI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "1.30"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.61"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxxxxxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "2.40"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "2.97"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterGPUI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "2.10"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "2.60"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  }
-              ]
-          },
-          {
-              "region": "us-west-2",
-              "footnotes": {
-                  "*": "clusterOnlyInUSEast"
-              },
-              "instanceTypes": [
-                  {
-                      "type": "stdODI",
-                      "sizes": [
-                          {
-                              "size": "sm",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.085"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.12"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "lg",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.34"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.48"
-                                      }
-                                  }
-                              ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.520"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.920"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "secgenstdODI",
+                        "sizes": [
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.580"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.980"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.160"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.960"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "uODI",
+                        "sizes": [
+                            {
+                                "size": "u",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.020"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.020"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiMemODI",
+                        "sizes": [
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.450"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.570"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.900"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.140"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.800"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "2.280"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiCPUODI",
+                        "sizes": [
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.165"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.285"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.660"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.140"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "clusterComputeI",
+                        "sizes": [
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.300"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.610"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxxxxxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.400"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "2.970"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "clusterGPUI",
+                        "sizes": [
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.100"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "2.600"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiIoODI",
+                        "sizes": [
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.100"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "3.580"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "region": "us-west-2",
+                "instanceTypes": [
+                    {
+                        "type": "stdODI",
+                        "sizes": [
+                            {
+                                "size": "sm",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.065"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.115"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.130"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.230"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "lg",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.260"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.460"
+                                        }
+                                    }
+                                ]
 
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.68"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.96"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "uODI",
-                      "sizes": [
-                          {
-                              "size": "u",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.02"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.03"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiMemODI",
-                      "sizes": [
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.50"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.62"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "1.00"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.24"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "2.00"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "2.48"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiCPUODI",
-                      "sizes": [
-                          {
-                              "size": "med",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.17"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.29"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.68"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.16"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterComputeI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterGPUI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  }
-              ]
-          },
-          {
-              "region": "us-west",
-              "footnotes": {
-                  "*": "clusterOnlyInUSEast"
-              },
-              "instanceTypes": [
-                  {
-                      "type": "stdODI",
-                      "sizes": [
-                          {
-                              "size": "sm",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.095"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.13"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "lg",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.38"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.52"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.76"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.04"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "uODI",
-                      "sizes": [
-                          {
-                              "size": "u",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.025"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.035"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiMemODI",
-                      "sizes": [
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.57"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.69"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "1.14"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.38"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "2.28"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "2.76"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiCPUODI",
-                      "sizes": [
-                          {
-                              "size": "med",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.19"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.31"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.76"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.24"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterComputeI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterGPUI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  }
-              ]
-          },
-          {
-              "region": "eu-ireland",
-              "footnotes": {
-                  "*": "clusterOnlyInUSEast"
-              },
-              "instanceTypes": [
-                  {
-                      "type": "stdODI",
-                      "sizes": [
-                          {
-                              "size": "sm",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.095"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.12"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "lg",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.38"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.48"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.76"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.96"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "uODI",
-                      "sizes": [
-                          {
-                              "size": "u",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.025"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.035"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiMemODI",
-                      "sizes": [
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.57"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.62"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "1.14"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.24"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "2.28"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "2.48"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiCPUODI",
-                      "sizes": [
-                          {
-                              "size": "med",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.19"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.29"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.76"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.16"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterComputeI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterGPUI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  }
-              ]
-          },
-          {
-              "region": "apac-sin",
-              "footnotes": {
-                  "*": "clusterOnlyInUSEast"
-              },
-              "instanceTypes": [
-                  {
-                      "type": "stdODI",
-                      "sizes": [
-                          {
-                              "size": "sm",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.095"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.12"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "lg",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.38"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.48"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.76"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.96"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "uODI",
-                      "sizes": [
-                          {
-                              "size": "u",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.025"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.035"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiMemODI",
-                      "sizes": [
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.57"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.62"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "1.14"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.24"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "2.28"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "2.48"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiCPUODI",
-                      "sizes": [
-                          {
-                              "size": "med",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.19"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.29"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.76"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.16"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterComputeI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterGPUI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  }
-              ]
-          },
-          {
-              "region": "apac-tokyo",
-              "footnotes": {
-                  "*": "Cluster Compute and Cluster GPU Instances are currently only available in the US East (Virginia) Region."
-              },
-              "instanceTypes": [
-                  {
-                      "type": "stdODI",
-                      "sizes": [
-                          {
-                              "size": "sm",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.10"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.12"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "lg",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.40"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.48"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.80"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.96"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "uODI",
-                      "sizes": [
-                          {
-                              "size": "u",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.027"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.035"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiMemODI",
-                      "sizes": [
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.60"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.62"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "1.20"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.24"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "2.39"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "2.48"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiCPUODI",
-                      "sizes": [
-                          {
-                              "size": "med",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.20"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.29"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.80"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.16"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterComputeI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterGPUI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  }
-              ]
-          },
-          {
-              "region": "sa-east-1",
-              "footnotes": {
-                  "*": "clusterOnlyInUSEast"
-              },
-              "instanceTypes": [
-                  {
-                      "type": "stdODI",
-                      "sizes": [
-                          {
-                              "size": "sm",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.115"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.150"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "lg",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.46"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.60"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.92"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.20"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "uODI",
-                      "sizes": [
-                          {
-                              "size": "u",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.027"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.037"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiMemODI",
-                      "sizes": [
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.68"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.80"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "1.36"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.60"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "2.72"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "3.20"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "hiCPUODI",
-                      "sizes": [
-                          {
-                              "size": "med",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.23"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "0.35"
-                                      }
-                                  }
-                              ]
-                          },
-                          {
-                              "size": "xl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "0.92"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "1.40"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterComputeI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  },
-                  {
-                      "type": "clusterGPUI",
-                      "sizes": [
-                          {
-                              "size": "xxxxl",
-                              "valueColumns": [
-                                  {
-                                      "name": "linux",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  },
-                                  {
-                                      "name": "mswin",
-                                      "prices": {
-                                          "USD": "N/A*"
-                                      }
-                                  }
-                              ]
-                          }
-                      ]
-                  }
-              ]
-          }
-      ]
-  }
-  }
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.520"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.920"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "uODI",
+                        "sizes": [
+                            {
+                                "size": "u",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.020"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.020"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiMemODI",
+                        "sizes": [
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.450"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.570"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.900"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.140"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.800"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "2.280"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiCPUODI",
+                        "sizes": [
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.165"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.285"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.660"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.140"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "clusterComputeI",
+                        "sizes": [
+                            {
+                                "size": "xxxxxxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.400"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "2.970"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "region": "us-west",
+                "instanceTypes": [
+                    {
+                        "type": "stdODI",
+                        "sizes": [
+                            {
+                                "size": "sm",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.090"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.125"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.180"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.250"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "lg",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.360"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.500"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.720"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.000"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "uODI",
+                        "sizes": [
+                            {
+                                "size": "u",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.025"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.035"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiMemODI",
+                        "sizes": [
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.506"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.626"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.012"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.252"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.024"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "2.504"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiCPUODI",
+                        "sizes": [
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.186"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.306"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.744"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.224"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "region": "eu-ireland",
+                "instanceTypes": [
+                    {
+                        "type": "stdODI",
+                        "sizes": [
+                            {
+                                "size": "sm",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.085"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.115"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.170"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.230"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "lg",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.340"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.460"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.680"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.920"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "uODI",
+                        "sizes": [
+                            {
+                                "size": "u",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.020"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.035"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiMemODI",
+                        "sizes": [
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.506"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.570"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.012"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.140"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.024"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "2.280"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiCPUODI",
+                        "sizes": [
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.186"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.285"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.744"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.140"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "clusterComputeI",
+                        "sizes": [
+                            {
+                                "size": "xxxxxxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.700"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "2.970"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "clusterGPUI",
+                        "sizes": [
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.36"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "2.60"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiIoODI",
+                        "sizes": [
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.410"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "3.580"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "region": "apac-sin",
+                "instanceTypes": [
+                    {
+                        "type": "stdODI",
+                        "sizes": [
+                            {
+                                "size": "sm",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.085"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.115"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.170"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.230"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "lg",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.340"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.460"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.680"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.920"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "uODI",
+                        "sizes": [
+                            {
+                                "size": "u",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.020"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.020"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiMemODI",
+                        "sizes": [
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.506"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.570"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.012"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.140"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.024"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "2.280"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiCPUODI",
+                        "sizes": [
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.186"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.285"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.744"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.140"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "region": "apac-tokyo",
+                "instanceTypes": [
+                    {
+                        "type": "stdODI",
+                        "sizes": [
+                            {
+                                "size": "sm",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.092"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.115"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.184"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.230"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "lg",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.368"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.460"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.736"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.920"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "uODI",
+                        "sizes": [
+                            {
+                                "size": "u",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.027"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.035"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiMemODI",
+                        "sizes": [
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.518"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.570"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.036"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.140"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.072"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "2.280"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiCPUODI",
+                        "sizes": [
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.190"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.285"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.760"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.140"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "region": "sa-east-1",
+                "instanceTypes": [
+                    {
+                        "type": "stdODI",
+                        "sizes": [
+                            {
+                                "size": "sm",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.115"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.150"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.230"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.300"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "lg",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.460"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.600"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.920"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.200"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "uODI",
+                        "sizes": [
+                            {
+                                "size": "u",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.027"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.037"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiMemODI",
+                        "sizes": [
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.680"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.800"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.360"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.600"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xxxxl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.720"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "3.200"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "hiCPUODI",
+                        "sizes": [
+                            {
+                                "size": "med",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.230"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "0.350"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "xl",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.920"
+                                        }
+                                    },
+                                    {
+                                        "name": "mswin",
+                                        "prices": {
+                                            "USD": "1.400"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

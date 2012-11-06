@@ -16,10 +16,9 @@ import com.netflix.asgard.push.GroupCreateOptions
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-@SuppressWarnings("GroovyPointlessArithmetic")
+@SuppressWarnings(["GroovyAssignabilityCheck"])
 @TestFor(ClusterController)
 class ClusterControllerSpec extends Specification {
-
 
     final Closure<SubnetData> subnet = { String id, String zone, String purpose ->
         new SubnetData(subnetId: id, availabilityZone: zone, purpose: purpose, target: SubnetTarget.EC2, vpcId: 'vpc-1')

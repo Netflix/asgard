@@ -54,7 +54,6 @@ class ApiTokenSpec extends Specification {
         parsedToken.isValid('key')
     }
 
-
     def 'should handle when username and email the same'() {
         ApiToken apiToken = new ApiToken('TestScript', 'testUser@netflix.com', 30, 'key')
 
