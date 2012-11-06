@@ -49,6 +49,13 @@
                      value="${queue.attributes[SimpleQueue.VISIBILITY_TIMEOUT_ATTR_NAME]}"/> seconds
             </td>
           </tr>
+          <tr>
+            <td class="name"><label for="delay">Delay:</label></td>
+            <td>
+              <input class="number" type="text" id="delay" name="delay"
+                     value="${queue.attributes[SimpleQueue.DELAY_SECONDS_ATTR_NAME]}"/> seconds
+            </td>
+          </tr>
           </tbody>
         </table>
       </div>

@@ -36,6 +36,7 @@ class SimpleQueue {
     Map<String, String> attributes = [:]
 
     static final String VISIBILITY_TIMEOUT_ATTR_NAME = 'VisibilityTimeout'
+    static final String DELAY_SECONDS_ATTR_NAME = 'DelaySeconds'
 
     private static Map<String, Closure> ATTR_NAMES_TO_HUMAN_READABILITY_METHODS = [
             'VisibilityTimeout': { "${it} seconds"},
