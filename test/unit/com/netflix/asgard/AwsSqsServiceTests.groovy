@@ -27,10 +27,11 @@ class AwsSqsServiceTests extends GroovyTestCase {
         String name = 'things-to-do'
         assertNull awsSqsService.getQueue(userContext, name)
 
-        awsSqsService.createQueue(userContext, name, 30)
+        awsSqsService.createQueue(userContext, name, 30, 0)
         String account = Mocks.TEST_AWS_ACCOUNT_ID
         Region region = userContext.region
-        SimpleQueue expected = new SimpleQueue(region, account, name).withAttributes([VisibilityTimeout: '30'])
+        SimpleQueue expected = new SimpleQueue(region, account, name)
+                .withAttributes([VisibilityTimeout: '30', DelaySeconds: '0'])
         SimpleQueue actual = awsSqsService.getQueue(userContext, name)
         assert expected == actual
 

@@ -48,8 +48,9 @@ class QueueController {
         UserContext userContext = UserContext.of(request)
         String queueName = params.id
         Integer visibilityTimeout = params.visibilityTimeout as Integer
+        Integer delay = params.delay as Integer
         try {
-            awsSqsService.createQueue(userContext, queueName, visibilityTimeout)
+            awsSqsService.createQueue(userContext, queueName, visibilityTimeout, delay)
             flash.message = "Queue '${queueName}' has been created."
             redirect(action: 'show', params:[id:queueName])
         } catch (Exception e) {
@@ -96,9 +97,10 @@ class QueueController {
     def update = {
         String queueName = params.name
         Integer visibilityTimeout = params.visibilityTimeout as Integer
+        Integer delay = params.delay as Integer
         UserContext userContext = UserContext.of(request)
         try {
-            awsSqsService.updateQueue(userContext, queueName, visibilityTimeout)
+            awsSqsService.updateQueue(userContext, queueName, visibilityTimeout, delay)
             flash.message = "Queue '${queueName}' has been updated."
         } catch (Exception e) {
             flash.message = "Failed to update Queue '${queueName}': ${e}"

@@ -52,6 +52,12 @@
               <input class="number" type="text" id="visibilityTimeout" name="visibilityTimeout" value="${params.visibilityTimeout ?: 30}"/> seconds
             </td>
           </tr>
+          <tr>
+            <td class="name"><label for="delay">Delay:</label></td>
+            <td>
+              <input class="number" type="text" id="delay" name="delay" value="${params.delay ?: 0}"/> seconds
+            </td>
+          </tr>
           </tbody>
         </table>
       </div>
