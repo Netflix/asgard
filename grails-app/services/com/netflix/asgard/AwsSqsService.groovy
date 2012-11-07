@@ -102,13 +102,16 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
         }
     }
 
-    void createQueue(UserContext userContext, String queueName, Integer timeout) {
+    void createQueue(UserContext userContext, String queueName, Integer timeout, Integer delay) {
         Check.notEmpty(queueName, 'queue name')
-        String taskMessage = "Creating queue '${queueName}' with visibility timeout ${timeout}s"
+        String taskMessage = "Creating queue '${queueName}' with visibility timeout ${timeout}s, delay ${delay}s"
         taskService.runTask(userContext, taskMessage, { task ->
             SimpleQueue queue = getQueue(userContext, queueName)
             if (queue == null) {
-                Map<String, String> attributes = [(QueueAttributeName.VisibilityTimeout.toString()): timeout.toString()]
+                Map<String, String> attributes = [
+                    (QueueAttributeName.VisibilityTimeout.toString()): timeout.toString(),
+                    (QueueAttributeName.DelaySeconds.toString()): delay.toString()
+                ]
                 CreateQueueRequest request = new CreateQueueRequest(queueName).withAttributes(attributes)
                 awsClient.by(userContext.region).createQueue(request)
             } else {
@@ -131,16 +134,18 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
         }, Link.to(EntityType.queue, queueName))
     }
 
-    SimpleQueue updateQueue(UserContext userContext, String queueName, Integer timeout) {
+    SimpleQueue updateQueue(UserContext userContext, String queueName, Integer timeout, Integer delay) {
         Check.notEmpty(queueName, 'queue name')
         SimpleQueue queue = null
-        taskService.runTask(userContext, "Update Queue '${queueName}' with timeout ${timeout}", { task ->
-            queue = getQueue(userContext, queueName)
-            Map<String, String> attributes = [:]
-            attributes.put(SimpleQueue.VISIBILITY_TIMEOUT_ATTR_NAME, timeout.toString())
-            SetQueueAttributesRequest request = new SetQueueAttributesRequest(queue.url, attributes)
-            awsClient.by(userContext.region).setQueueAttributes(request)
-            queue = getQueue(userContext, queueName)
+        String msg = "Update Queue '${queueName}' with timeout ${timeout}s, delay ${delay}s"
+        taskService.runTask(userContext, msg, { task ->
+                queue = getQueue(userContext, queueName)
+                Map<String, String> attributes = [
+                    (QueueAttributeName.VisibilityTimeout.toString()) : timeout.toString(),
+                    (QueueAttributeName.DelaySeconds.toString()) : delay.toString()]
+                SetQueueAttributesRequest request = new SetQueueAttributesRequest(queue.url, attributes)
+                awsClient.by(userContext.region).setQueueAttributes(request)
+                queue = getQueue(userContext, queueName)
         }, Link.to(EntityType.queue, queueName))
         queue
     }
