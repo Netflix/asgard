@@ -158,7 +158,7 @@ class ConfigService {
      * @return List <InstanceTypeData> the custom instance types, or an empty list
      */
     List<InstanceTypeData> getCustomInstanceTypes() {
-        grailsApplication.config.cloud?.customIntanceTypes ?: []
+        grailsApplication.config.cloud?.customInstanceTypes ?: []
     }
 
     /**
