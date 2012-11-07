@@ -147,7 +147,7 @@ class Mocks {
                             online: false,
                             cloud: [
                                     accountName: 'test',
-                                    customIntanceTypes: [
+                                    customInstanceTypes: [
                                             new InstanceTypeData(linuxOnDemandPrice: 145.86, hardwareProfile:
                                                     new HardwareProfile(
                                                             instanceType: 'huge.mainframe',
