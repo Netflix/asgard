@@ -109,8 +109,9 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
             SimpleQueue queue = getQueue(userContext, queueName)
             if (queue == null) {
                 Map<String, String> attributes = [
-                    (QueueAttributeName.VisibilityTimeout.toString()) : timeout.toString(),
-                    (QueueAttributeName.DelaySeconds.toString()) : delay.toString()]
+                    (QueueAttributeName.VisibilityTimeout.toString()): timeout.toString(),
+                    (QueueAttributeName.DelaySeconds.toString()): delay.toString()
+                ]
                 CreateQueueRequest request = new CreateQueueRequest(queueName).withAttributes(attributes)
                 awsClient.by(userContext.region).createQueue(request)
             } else {
@@ -136,8 +137,8 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
     SimpleQueue updateQueue(UserContext userContext, String queueName, Integer timeout, Integer delay) {
         Check.notEmpty(queueName, 'queue name')
         SimpleQueue queue = null
-        taskService.runTask(userContext, "Update Queue '${queueName}' with timeout ${timeout}s, delay ${delay}s",
-            { task ->
+        String msg = "Update Queue '${queueName}' with timeout ${timeout}s, delay ${delay}s"
+        taskService.runTask(userContext, msg, { task ->
                 queue = getQueue(userContext, queueName)
                 Map<String, String> attributes = [
                     (QueueAttributeName.VisibilityTimeout.toString()) : timeout.toString(),
