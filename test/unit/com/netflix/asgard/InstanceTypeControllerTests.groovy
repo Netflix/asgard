@@ -17,8 +17,10 @@ package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.InstanceTypeData
+import grails.test.mixin.TestFor
 import org.junit.Before
 
+@TestFor(InstanceTypeController)
 class InstanceTypeControllerTests {
 
     @Before
@@ -30,22 +32,24 @@ class InstanceTypeControllerTests {
     void testList() {
         def attrs = controller.list()
         List<InstanceTypeData> types = attrs.instanceTypes
-        assert 13 == types.size()
+        assert 15 == types.size()
         assert 't1.micro' == types[0].name
-        assert 'Small' == types[1].hardwareProfile.description
-        assert '1.7 GB' == types[2].hardwareProfile.memory
-        assert '22 GB' == types[10].hardwareProfile.memory
-        assert '4 EC2 Compute Units (2 virtual cores with 2 EC2 Compute Units each)' == types[3].hardwareProfile.cpu
-        assert '4 EC2 Compute Units' == types[3].hardwareProfile.cpuSummary
-        assert '(2 virtual cores with 2 EC2 Compute Units each)' == types[3].hardwareProfile.cpuDetail
-        assert '64-bit' == types[4].hardwareProfile.architecture
-        assert 'High' == types[5].hardwareProfile.ioPerformance
+        InstanceTypeData m1Small = types[1]
+        assert 'M1 Small' == m1Small.hardwareProfile.description
+        assert '3.75 GiB' == types.find { it.name == 'm1.medium'}.hardwareProfile.memory
+        assert '68.4 GiB' == types.find { it.name == 'm2.4xlarge' }.hardwareProfile.memory
+        InstanceTypeData c1medium = types.find { it.name == 'c1.medium' }
+        assert '5 EC2 Compute Units (2 virtual cores with 2.5 EC2 Compute Units each)' == c1medium.hardwareProfile.cpu
+        assert '5 EC2 Compute Units' == c1medium.hardwareProfile.cpuSummary
+        assert '(2 virtual cores with 2.5 EC2 Compute Units each)' == c1medium.hardwareProfile.cpuDetail
+        assert '64-bit' == types.find { it.name == 'm1.large' }.hardwareProfile.architecture
+        assert 'Moderate' == types.find { it.name == 'm2.xlarge' }.hardwareProfile.ioPerformance
 
-        assert 0.085 == types[1].linuxOnDemandPrice
-        assert 0.03 == types[1].linuxReservedPrice
-        assert -1 == types[1].linuxSpotPrice
-        assert 0.12 == types[1].windowsOnDemandPrice
-        assert 0.05 == types[1].windowsReservedPrice
-        assert -1 == types[1].windowsSpotPrice
+        assert 0.065 == m1Small.linuxOnDemandPrice
+        assert 0.03 == m1Small.linuxReservedPrice
+        assert 0.007 == m1Small.linuxSpotPrice
+        assert 0.115 == m1Small.windowsOnDemandPrice
+        assert 0.05 == m1Small.windowsReservedPrice
+        assert 0.017 == m1Small.windowsSpotPrice
     }
 }

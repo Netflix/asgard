@@ -39,7 +39,7 @@ import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.ScalingPolicyData
 import spock.lang.Specification
 
-@SuppressWarnings(["GroovyPointlessArithmetic", "GroovyAssignabilityCheck"])
+@SuppressWarnings(["GroovyAssignabilityCheck"])
 class AwsAutoScalingServiceUnitSpec extends Specification {
 
     final awsAutoScalingService = Mocks.newAwsAutoScalingService()

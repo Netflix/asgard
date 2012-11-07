@@ -20,7 +20,6 @@ import com.netflix.asgard.model.Subnets
 import grails.plugin.spock.ControllerSpec
 import com.netflix.asgard.model.SubnetTarget
 
-@SuppressWarnings("GroovyPointlessArithmetic")
 class SubnetControllerSpec extends ControllerSpec {
 
     static SubnetData subnet(String id, String zone, String purpose, SubnetTarget target) {

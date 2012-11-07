@@ -16,8 +16,10 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.mock.Mocks
+import grails.test.mixin.TestFor
 import org.junit.Before
 
+@TestFor(ApplicationController)
 class ApplicationControllerTests {
 
     @Before

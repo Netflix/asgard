@@ -41,32 +41,35 @@ class InstanceTypeServiceTests extends GroovyTestCase {
         RegionalInstancePrices usEastOnDemandPricing = onDemandPricing.get(Region.defaultRegion())
 
         // Linux
-        assert 0.17 == usEastOnDemandPricing.get(InstanceType.C1Medium, InstanceProductType.LINUX_UNIX)
-        assert 0.34 == usEastOnDemandPricing.get(InstanceType.M1Large, InstanceProductType.LINUX_UNIX)
-        assert 0.68 == usEastOnDemandPricing.get(InstanceType.M1Xlarge, InstanceProductType.LINUX_UNIX)
-        assert 0.50 == usEastOnDemandPricing.get(InstanceType.M2Xlarge, InstanceProductType.LINUX_UNIX)
-        assert 1.00 == usEastOnDemandPricing.get(InstanceType.M22xlarge, InstanceProductType.LINUX_UNIX)
-        assert 2.00 == usEastOnDemandPricing.get(InstanceType.M24xlarge, InstanceProductType.LINUX_UNIX)
+        assert 0.165 == usEastOnDemandPricing.get(InstanceType.C1Medium, InstanceProductType.LINUX_UNIX)
+        assert 0.26 == usEastOnDemandPricing.get(InstanceType.M1Large, InstanceProductType.LINUX_UNIX)
+        assert 0.52 == usEastOnDemandPricing.get(InstanceType.M1Xlarge, InstanceProductType.LINUX_UNIX)
+        assert 0.45 == usEastOnDemandPricing.get(InstanceType.M2Xlarge, InstanceProductType.LINUX_UNIX)
+        assert 0.90 == usEastOnDemandPricing.get(InstanceType.M22xlarge, InstanceProductType.LINUX_UNIX)
+        assert 1.80 == usEastOnDemandPricing.get(InstanceType.M24xlarge, InstanceProductType.LINUX_UNIX)
         assert 2.10 == usEastOnDemandPricing.get(InstanceType.Cg14xlarge, InstanceProductType.LINUX_UNIX)
+        assert 1.30 == usEastOnDemandPricing.get(InstanceType.Cc14xlarge, InstanceProductType.LINUX_UNIX)
 
         // Windows
-        assert 0.29 == usEastOnDemandPricing.get(InstanceType.C1Medium, InstanceProductType.WINDOWS)
-        assert 0.48 == usEastOnDemandPricing.get(InstanceType.M1Large, InstanceProductType.WINDOWS)
-        assert 0.96 == usEastOnDemandPricing.get(InstanceType.M1Xlarge, InstanceProductType.WINDOWS)
-        assert 0.62 == usEastOnDemandPricing.get(InstanceType.M2Xlarge, InstanceProductType.WINDOWS)
-        assert 1.24 == usEastOnDemandPricing.get(InstanceType.M22xlarge, InstanceProductType.WINDOWS)
-        assert 2.48 == usEastOnDemandPricing.get(InstanceType.M24xlarge, InstanceProductType.WINDOWS)
+        assert 0.285 == usEastOnDemandPricing.get(InstanceType.C1Medium, InstanceProductType.WINDOWS)
+        assert 0.46 == usEastOnDemandPricing.get(InstanceType.M1Large, InstanceProductType.WINDOWS)
+        assert 0.92 == usEastOnDemandPricing.get(InstanceType.M1Xlarge, InstanceProductType.WINDOWS)
+        assert 0.57 == usEastOnDemandPricing.get(InstanceType.M2Xlarge, InstanceProductType.WINDOWS)
+        assert 1.14 == usEastOnDemandPricing.get(InstanceType.M22xlarge, InstanceProductType.WINDOWS)
+        assert 2.28 == usEastOnDemandPricing.get(InstanceType.M24xlarge, InstanceProductType.WINDOWS)
         assert 2.60 == usEastOnDemandPricing.get(InstanceType.Cg14xlarge, InstanceProductType.WINDOWS)
+        assert 1.61 == usEastOnDemandPricing.get(InstanceType.Cc14xlarge, InstanceProductType.WINDOWS)
 
         // Europe
         RegionalInstancePrices euWestOnDemandPricing = onDemandPricing.get(Region.EU_WEST_1)
-        assert 0.19 == euWestOnDemandPricing.get(InstanceType.C1Medium, InstanceProductType.LINUX_UNIX)
-        assert 0.76 == euWestOnDemandPricing.get(InstanceType.C1Xlarge, InstanceProductType.LINUX_UNIX)
-        assert 0.38 == euWestOnDemandPricing.get(InstanceType.M1Large, InstanceProductType.LINUX_UNIX)
-        assert 0.76 == euWestOnDemandPricing.get(InstanceType.M1Xlarge, InstanceProductType.LINUX_UNIX)
-        assert 1.14 == euWestOnDemandPricing.get(InstanceType.M22xlarge, InstanceProductType.LINUX_UNIX)
-        assert 2.28 == euWestOnDemandPricing.get(InstanceType.M24xlarge, InstanceProductType.LINUX_UNIX)
-        assertNull euWestOnDemandPricing.get(InstanceType.Cg14xlarge, InstanceProductType.LINUX_UNIX)
+        assert 0.186 == euWestOnDemandPricing.get(InstanceType.C1Medium, InstanceProductType.LINUX_UNIX)
+        assert 0.744 == euWestOnDemandPricing.get(InstanceType.C1Xlarge, InstanceProductType.LINUX_UNIX)
+        assert 0.34 == euWestOnDemandPricing.get(InstanceType.M1Large, InstanceProductType.LINUX_UNIX)
+        assert 0.68 == euWestOnDemandPricing.get(InstanceType.M1Xlarge, InstanceProductType.LINUX_UNIX)
+        assert 1.012 == euWestOnDemandPricing.get(InstanceType.M22xlarge, InstanceProductType.LINUX_UNIX)
+        assert 2.024 == euWestOnDemandPricing.get(InstanceType.M24xlarge, InstanceProductType.LINUX_UNIX)
+        assert 2.36 == euWestOnDemandPricing.get(InstanceType.Cg14xlarge, InstanceProductType.LINUX_UNIX)
+        assertNull euWestOnDemandPricing.get(InstanceType.Cc14xlarge, InstanceProductType.LINUX_UNIX)
     }
 
     void testRetrieveInstanceTypeReservedPricingData() {
@@ -108,9 +111,9 @@ class InstanceTypeServiceTests extends GroovyTestCase {
     void testFindRelevantInstanceTypesFor64BitImage() {
         InstanceTypeService instanceTypeService = Mocks.instanceTypeService()
         Image image = new Image(architecture: 'x86_64')
-        List<String> expected64BitInstanceTypes = ['t1.micro', 'm1.small', 'c1.medium', 'm1.large', 'm2.xlarge',
-                'c1.xlarge', 'm1.xlarge', 'm2.2xlarge', 'cc1.4xlarge', 'm2.4xlarge', 'cg1.4xlarge', 'cc2.8xlarge',
-                'huge.mainframe']
+        List<String> expected64BitInstanceTypes = ['t1.micro', 'm1.small', 'm1.medium', 'c1.medium', 'm1.large',
+                'm2.xlarge', 'm1.xlarge', 'c1.xlarge', 'm2.2xlarge', 'cc1.4xlarge', 'm2.4xlarge', 'cg1.4xlarge',
+                'cc2.8xlarge', 'hi1.4xlarge', 'huge.mainframe']
 
         assertEquals(expected64BitInstanceTypes,
                 instanceTypeService.findRelevantInstanceTypesForImage(Mocks.userContext(), image)*.name)
@@ -119,7 +122,7 @@ class InstanceTypeServiceTests extends GroovyTestCase {
     void testFindRelevantInstanceTypesFor32BitImage() {
         InstanceTypeService instanceTypeService = Mocks.instanceTypeService()
         Image image = new Image(architecture: 'i386')
-        List<String> expected32BitInstaceTypes = ['t1.micro', 'm1.small', 'c1.medium']
+        List<String> expected32BitInstaceTypes = ['t1.micro', 'm1.small', 'm1.medium', 'c1.medium']
         assertEquals(expected32BitInstaceTypes,
             instanceTypeService.findRelevantInstanceTypesForImage(Mocks.userContext(), image)*.name)
     }

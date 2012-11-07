@@ -38,7 +38,6 @@ import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.ZoneAvailability
 import spock.lang.Specification
 
-@SuppressWarnings("GroovyPointlessArithmetic")
 class AwsEc2ServiceUnitSpec extends Specification {
 
     UserContext userContext
@@ -262,8 +261,6 @@ class AwsEc2ServiceUnitSpec extends Specification {
     }
 
     def 'should not try to find non cached VPC Security Group by name without specific errorCode'() {
-        SecurityGroup securityGroup = new SecurityGroup(groupId: 'sg-123', groupName: 'super_secure')
-
         when:
         SecurityGroup actualSecurityGroup =  awsEc2Service.getSecurityGroup(userContext, 'super_secure')
 
