@@ -521,7 +521,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     /**
-     * High-level permission update for a group pair: given the desired state, make it so.
+     * High-level permission update for a group pair: given the desired state, make it so. Ensure that all the requested
+     * permissions are authorized for the source to call the target, and ensure that all other permissions from the
+     * source to the target are revoked.
      *
      * @param userContext who, where, why
      * @param targetGroup the security group of the instances that will be allowed to receive traffic
