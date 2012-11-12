@@ -43,7 +43,7 @@ class RegionFilters {
                         actionName && /* Avoid redirecting twice when both action and region are missing */
                         grailsApplication.controllerNamesToContextParams[(controllerName)].contains('region')) {
                     params.region = region.code
-                    redirect(controller: controllerName, params: params)
+                    redirect(controller: controllerName, action: actionName, params: params)
 
                     // Don't execute the controller method for this request
                     return false
