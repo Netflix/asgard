@@ -17,19 +17,24 @@ package com.netflix.asgard
 
 import groovy.transform.Immutable
 import javax.servlet.http.HttpServletRequest
+import org.apache.shiro.SecurityUtils
+import org.apache.shiro.UnavailableSecurityManagerException
 
 @Immutable final class UserContext {
 
-    /** The Change Management Control identifier for tracking user operations */
+    /** The unique identifier of the issue tracker ticket for external recording of system changes. */
     String ticket
 
-    /** The best guess, human readable, canonical network name of the machine that sent the request */
+    /** The system-wide unique id of a logged in user. */
+    String username
+
+    /** The best guess, human readable, canonical network name of the machine that sent the request. */
     String clientHostName
 
-    /** The IP address of the machine that sent the request */
+    /** The IP address of the machine that sent the request. */
     String clientIpAddress
 
-    /** The AWS region that the request is intended to focus on */
+    /** The AWS region that the request is intended to focus on. */
     Region region
 
     /**
@@ -40,8 +45,15 @@ import javax.servlet.http.HttpServletRequest
 
     /** Factory method takes an HttpServletRequest or a MockHttpServletRequest */
     static of(HttpServletRequest request) {
+        String username = null
+        try {
+            username = SecurityUtils.subject?.principal?.toString()
+        } catch (UnavailableSecurityManagerException ignored) {
+            // Keep null username if it cannot be found.
+        }
         new UserContext(
                 ticket: request?.getParameter('ticket')?.trim() ?: request?.getParameter('cmc')?.trim(),
+                username: username,
                 clientHostName: Requests.getClientHostName(request),
                 clientIpAddress: Requests.getClientIpAddress(request),
                 region: request?.getAttribute('region') as Region,

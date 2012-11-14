@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.auth.ApiToken
+import com.netflix.asgard.mock.ShiroTestUtil
 import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.authc.AuthenticationInfo
 import org.apache.shiro.authc.SimpleAuthenticationInfo
