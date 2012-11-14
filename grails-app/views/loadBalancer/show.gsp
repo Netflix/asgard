@@ -176,7 +176,7 @@
                 <tr class="prop">
                   <td><g:linkObject type="autoScaling" name="${g.autoScalingGroupName}"/></td>
                   <g:if test="${g.availabilityZones.sort() != loadBalancer.availabilityZones.sort()}">
-                    <td><g:render template="/common/zoneMismatch" model="[asgZones: g.availabilityZoness.sort(), elbZones: loadBalancer.availabilityZones.sort()]"/></td>
+                    <td><g:render template="/common/zoneMismatch" model="[asgZones: g.availabilityZones.sort(), elbZones: loadBalancer.availabilityZones.sort()]"/></td>
                   </g:if>
                 </tr>
               </g:each>
