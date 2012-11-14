@@ -17,6 +17,7 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.auth.AsgardToken
+import com.netflix.asgard.mock.ShiroTestUtil
 import com.netflix.asgard.plugin.AuthenticationProvider
 import grails.test.mixin.TestFor
 import org.apache.shiro.authc.AuthenticationException

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard.mock
 
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.UnavailableSecurityManagerException
