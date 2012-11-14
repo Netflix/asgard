@@ -17,11 +17,16 @@ package com.netflix.asgard
 
 import groovy.transform.Immutable
 import javax.servlet.http.HttpServletRequest
+import org.apache.shiro.SecurityUtils
+import org.apache.shiro.UnavailableSecurityManagerException
 
 @Immutable final class UserContext {
 
     /** The Change Management Control identifier for tracking user operations */
     String ticket
+
+    /** The system-wide unique id of a logged in user. */
+    String username
 
     /** The best guess, human readable, canonical network name of the machine that sent the request */
     String clientHostName
@@ -40,8 +45,15 @@ import javax.servlet.http.HttpServletRequest
 
     /** Factory method takes an HttpServletRequest or a MockHttpServletRequest */
     static of(HttpServletRequest request) {
+        String username = null
+        try {
+            username = SecurityUtils.subject?.principal?.toString()
+        } catch (UnavailableSecurityManagerException ignored) {
+            // Keep null username if it cannot be found.
+        }
         new UserContext(
                 ticket: request?.getParameter('ticket')?.trim() ?: request?.getParameter('cmc')?.trim(),
+                username: username,
                 clientHostName: Requests.getClientHostName(request),
                 clientIpAddress: Requests.getClientIpAddress(request),
                 region: request?.getAttribute('region') as Region,
