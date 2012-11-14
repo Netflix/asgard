@@ -42,6 +42,7 @@
             <th>Updated</th>
             <th>Duration</th>
             <th>${ticketLabel}</th>
+            <th>Username</th>
             <th class="wrappable">Client (best guess, may be wrong)</th>
             <th>Status</th>
             <th>Operation</th>
@@ -58,6 +59,7 @@
               <td><g:formatDate date="${rti.updateTime}"/></td>
               <td>${rti.durationString}</td>
               <td>${rti.userContext?.ticket}</td>
+              <td>${rti.userContext?.username}</td>
               <td>${rti.userContext?.clientHostName} ${rti.userContext?.clientIpAddress}</td>
               <td>${rti.status}</td>
               <td>${rti.operation}</td>
@@ -84,6 +86,7 @@
           <th>Finished</th>
           <th class="sorttable_nosort">Duration</th>
           <th>${ticketLabel}</th>
+          <th>Username</th>
           <th class="wrappable">Client (best guess, may be wrong)</th>
           <th>Status</th>
         </tr>
@@ -99,6 +102,7 @@
             <td><g:formatDate date="${cti.updateTime}"/></td>
             <td>${cti.durationString}</td>
             <td>${cti.userContext?.ticket}</td>
+            <td>${cti.userContext?.username}</td>
             <td>${cti.userContext?.clientHostName} ${cti.userContext?.clientIpAddress}</td>
             <td class="${cti.status == 'failed' ? 'error' : ''}">${cti.status}</td>
           </tr>

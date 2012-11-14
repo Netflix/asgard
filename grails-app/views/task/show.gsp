@@ -73,6 +73,10 @@
           <td class="value">${task.userContext.ticket}</td>
         </tr>
         <tr class="prop">
+          <td class="name">Username:</td>
+          <td class="value">${task.userContext.username}</td>
+        </tr>
+        <tr class="prop">
           <td class="name">Client Host Name<br/>(best guess,<br/>may be wrong):</td>
           <td class="value">${task.userContext.clientHostName}</td>
         </tr>
