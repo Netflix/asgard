@@ -117,7 +117,7 @@ class DbSecurityController {
         } catch (Exception e) {
             flash.message = "Could not update DB Security Group: ${e}"
         }
-        redirect(action: 'show', params: [name: name])
+        redirect(action: 'show', params: [id: name])
     }
 
     private void updateDBSecurityIngress(UserContext userContext, DBSecurityGroup targetGroup, List<String> selectedGroups, List<String> ipRanges) {
