@@ -15,7 +15,7 @@
  */
 package com.netflix.asgard.auth
 
-import com.netflix.asgard.ShiroTestUtil
+import com.netflix.asgard.mock.ShiroTestUtil
 import org.apache.shiro.subject.Subject
 import org.joda.time.DateTime
 import spock.lang.Specification

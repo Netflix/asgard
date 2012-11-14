@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.auth.ApiToken
+import com.netflix.asgard.mock.ShiroTestUtil
 import grails.test.MockUtils
 import grails.test.mixin.TestFor
 import org.apache.shiro.subject.Subject
