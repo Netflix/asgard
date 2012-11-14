@@ -43,6 +43,8 @@
         <tr>
           <th>Name</th>
           <th>Status</th>
+          <th>Since Last Fill</th>
+          <th>Size</th>
         </tr>
         </thead>
         <tbody>
@@ -50,6 +52,8 @@
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
             <td>${g.name}</td>
             <td class="${g.filled ? '' : 'danger'}">${g.filled ? 'Filled' : 'Not Filled'}</td>
+            <td>${g.timeSinceLastFill}</td>
+            <td>${g.size}</td>
           </tr>
         </g:each>
         </tbody>
