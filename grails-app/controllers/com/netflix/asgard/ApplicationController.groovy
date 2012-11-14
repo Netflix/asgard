@@ -171,7 +171,7 @@ class ApplicationController {
                 applicationService.createRegisteredApplication(userContext, name, type, desc, owner, email,
                         bucketType)
                 flash.message = "Application '${name}' has been created."
-                redirect(action: 'show', params: [name: name])
+                redirect(action: 'show', params: [id: name])
             } catch (Exception e) {
                 flash.message = "Could not create Application: ${e}"
                 chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass errors and params
@@ -203,7 +203,7 @@ class ApplicationController {
         } catch (Exception e) {
             flash.message = "Could not update Application: ${e}"
         }
-        redirect(action: 'show', params: [name: name])
+        redirect(action: 'show', params: [id: name])
     }
 
     def delete = {
@@ -215,7 +215,7 @@ class ApplicationController {
             flash.message = "Application '${name}' has been deleted."
         } catch (ValidationException ve) {
             flash.message = "Could not delete Application: ${ve.message}"
-            redirect(action: 'show', params: [name: name])
+            redirect(action: 'show', params: [id: name])
             return
         } catch (Exception e) {
             flash.message = "Could not delete Application: ${e}"
