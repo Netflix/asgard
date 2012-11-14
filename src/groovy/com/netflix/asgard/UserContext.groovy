@@ -22,19 +22,19 @@ import org.apache.shiro.UnavailableSecurityManagerException
 
 @Immutable final class UserContext {
 
-    /** The Change Management Control identifier for tracking user operations */
+    /** The unique identifier of the issue tracker ticket for external recording of system changes. */
     String ticket
 
     /** The system-wide unique id of a logged in user. */
     String username
 
-    /** The best guess, human readable, canonical network name of the machine that sent the request */
+    /** The best guess, human readable, canonical network name of the machine that sent the request. */
     String clientHostName
 
-    /** The IP address of the machine that sent the request */
+    /** The IP address of the machine that sent the request. */
     String clientIpAddress
 
-    /** The AWS region that the request is intended to focus on */
+    /** The AWS region that the request is intended to focus on. */
     Region region
 
     /**
