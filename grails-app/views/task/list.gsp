@@ -42,7 +42,9 @@
             <th>Updated</th>
             <th>Duration</th>
             <th>${ticketLabel}</th>
-            <th>Username</th>
+            <g:if test="${authenticationEnabled}">
+              <th>Username</th>
+            </g:if>
             <th class="wrappable">Client (best guess, may be wrong)</th>
             <th>Status</th>
             <th>Operation</th>
@@ -59,7 +61,9 @@
               <td><g:formatDate date="${rti.updateTime}"/></td>
               <td>${rti.durationString}</td>
               <td>${rti.userContext?.ticket}</td>
-              <td>${rti.userContext?.username}</td>
+              <g:if test="${authenticationEnabled}">
+                <td>${rti.userContext?.username}</td>
+              </g:if>
               <td>${rti.userContext?.clientHostName} ${rti.userContext?.clientIpAddress}</td>
               <td>${rti.status}</td>
               <td>${rti.operation}</td>
@@ -86,7 +90,9 @@
           <th>Finished</th>
           <th class="sorttable_nosort">Duration</th>
           <th>${ticketLabel}</th>
-          <th>Username</th>
+          <g:if test="${authenticationEnabled}">
+            <th>Username</th>
+          </g:if>
           <th class="wrappable">Client (best guess, may be wrong)</th>
           <th>Status</th>
         </tr>
@@ -102,7 +108,9 @@
             <td><g:formatDate date="${cti.updateTime}"/></td>
             <td>${cti.durationString}</td>
             <td>${cti.userContext?.ticket}</td>
-            <td>${cti.userContext?.username}</td>
+            <g:if test="${authenticationEnabled}">
+              <td>${cti.userContext?.username}</td>
+            </g:if>
             <td>${cti.userContext?.clientHostName} ${cti.userContext?.clientIpAddress}</td>
             <td class="${cti.status == 'failed' ? 'error' : ''}">${cti.status}</td>
           </tr>
