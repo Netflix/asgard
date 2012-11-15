@@ -213,8 +213,12 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         List<AutoScalingGroup> groups = candidates.findAll {
             Relationships.clusterFromGroupName(it.autoScalingGroupName) == clusterName }
 
+        Set<String> asgNamesForCacheRefresh = groups*.autoScalingGroupName as Set
+        // If a separate Asgard instance recently created an ASG then it wouldn't have been found in the cache.
+        asgNamesForCacheRefresh << clusterName
+
         // Reduce the ASG list to the ASGs that still exist in Amazon. As a happy side effect, update the ASG cache.
-        groups = getAutoScalingGroups(userContext, groups*.autoScalingGroupName, loadAutoScalingGroupsFrom)
+        groups = getAutoScalingGroups(userContext, asgNamesForCacheRefresh, loadAutoScalingGroupsFrom)
 
         if (groups.size()) {
             // This looks similar to buildAutoScalingGroupData() but it's faster to prepare the instance, ELB and AMI
