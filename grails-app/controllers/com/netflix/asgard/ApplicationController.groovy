@@ -117,7 +117,6 @@ class ApplicationController {
 
     def show = {
         String name = params.name ?: params.id
-        name = name.toLowerCase() // Without this it could create a duplicate cache entry.
         UserContext userContext = UserContext.of(request)
         AppRegistration app = applicationService.getRegisteredApplication(userContext, name)
         if (!app) {
