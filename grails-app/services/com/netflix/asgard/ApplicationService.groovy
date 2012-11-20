@@ -109,6 +109,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
 
     AppRegistration getRegisteredApplication(UserContext userContext, String name, From from = From.AWS) {
         if (!name) { return null }
+        name = name.toLowerCase()
         if (from == From.CACHE) {
             return caches.allApplications.get(name)
         }
