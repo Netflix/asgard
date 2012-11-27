@@ -17,6 +17,7 @@ Features
 - Sortable instance table on ELB screen
 
 Infrastructure
+- grailsw script for development without an existing Grails installation
 - Externalized string parsing to Frigga lib
 - OneLogin integration with Shiro for authentication
 - Upgrade to Grails 2.1
