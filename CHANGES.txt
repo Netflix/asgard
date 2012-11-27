@@ -1,0 +1,37 @@
+1.1
+
+Features
+- Better select boxes
+- VPC support with subnet purpose labels
+- Instance types hi.4xlarge, m3.xlarge, m3.2xlarge
+- ASG scheduled actions
+- ASG spot pricing
+- IAM instance profiles in ASGs
+- ASG-ELB availability zone mismatch warnings
+- SQS delivery delay
+- Expose AWS SSH keys via REST
+- Use Grails Standalone plugin for easier initial trials
+- Configurable Eureka integration
+- Ability to operate through a network proxy
+- Use custom instance types before Amazon provides them
+- Sortable instance table on ELB screen
+
+Infrastructure
+- grailsw script for development without an existing Grails installation
+- Externalized string parsing to Frigga lib
+- OneLogin integration with Shiro for authentication
+- Upgrade to Grails 2.1
+- Cache debugging view
+
+Bug fixes
+- Allow error-free startup on accounts without SQS
+- More lenient instance types HTML parsing
+- Stop task should redirect to "show"
+- Show Cluster will find new ASG that is not in the cache
+- Show Application with caps should not add cache duplicate
+- Display remote security groups in detail without links
+- Next ASG in Cluster should allow empty lists in REST API
+- Rolling push should respect original SSH Keypair choice
+- Universally public EBS snapshots should not be in cache
+
+
