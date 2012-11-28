@@ -15,6 +15,9 @@
  */
 package com.netflix.asgard
 
+/**
+ * Service for interacting with Cloudready and telling Chaos Monkey who she can kill.
+ */
 class CloudReadyService {
 
     static transactional = false

@@ -1036,6 +1036,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
 }
 
+/**
+ * Records the results of trying to create an Auto Scaling Group.
+ */
 class CreateAutoScalingGroupResult {
     String launchConfigName
     String autoScalingGroupName
@@ -1053,8 +1056,7 @@ class CreateAutoScalingGroupResult {
             output.append("Launch Config '${launchConfigName}' has been created. ")
         }
         if (launchConfigCreateException) {
-            output.append('Could not create Launch Config for new Auto Scaling Group: ' +
-                    launchConfigCreateException.message)
+            output.append("Could not create Launch Config for new Auto Scaling Group: ${launchConfigCreateException}. ")
         }
         if (autoScalingGroupCreated) {
             output.append("Auto Scaling Group '${autoScalingGroupName}' has been created. ")
@@ -1064,12 +1066,10 @@ class CreateAutoScalingGroupResult {
         }
         if (launchConfigDeleted) { output.append("Launch Config '$launchConfigName' has been deleted. ") }
         if (launchConfigDeleteException) {
-            output.append("Failed to delete Launch Config '${launchConfigName}' because: " +
-                    launchConfigDeleteException.message)
+            output.append("Failed to delete Launch Config '${launchConfigName}': ${launchConfigDeleteException}. ")
         }
         if (cloudReadyUnavailable) {
-            String msg = 'Chaos Monkey was not enabled because Cloudready is currently unavailable. '
-            output.append(msg)
+            output.append('Chaos Monkey was not enabled because Cloudready is currently unavailable. ')
         }
         output.toString()
     }

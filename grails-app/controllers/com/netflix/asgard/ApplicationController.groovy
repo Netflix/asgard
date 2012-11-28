@@ -159,9 +159,8 @@ class ApplicationController {
     static String[] typeList = ['Standalone Application', 'Web Application', 'Web Service']
 
     def create = {
-        UserContext userContext = UserContext.of(request)
         [
-                'typeList' : typeList,
+                typeList: typeList,
                 isChaosMonkeyActive: isChaosMonkeyActive()
         ]
     }

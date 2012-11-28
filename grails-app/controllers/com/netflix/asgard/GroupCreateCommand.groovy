@@ -15,9 +15,9 @@
  */
 package com.netflix.asgard
 
+import grails.validation.Validateable
 import javax.servlet.http.HttpServletRequest
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
-import grails.validation.Validateable
 
 @Validateable @SuppressWarnings("GroovyAssignabilityCheck") class GroupCreateCommand {
 

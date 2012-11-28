@@ -144,7 +144,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         taskService.runTask(userContext, creationLogMessage, { task ->
             try {
                 simpleDbClient.putAttributes(new PutAttributesRequest().withDomainName(domainName).
-                    withItemName(name.toUpperCase()).withAttributes(attributes))
+                        withItemName(name.toUpperCase()).withAttributes(attributes))
                 result.appCreated = true
             } catch (AmazonServiceException e) {
                 result.appCreateException = e
@@ -246,6 +246,9 @@ class ApplicationService implements CacheInitializer, InitializingBean {
     }
 }
 
+/**
+ * Records the results of trying to create an Application.
+ */
 class CreateApplicationResult {
     String appName
     Boolean appCreated
@@ -257,14 +260,11 @@ class CreateApplicationResult {
         if (appCreated) {
             output.append("Application '${appName}' has been created. ")
         }
-
         if (appCreateException) {
-            output.append("Could not create Application '${appName}': " + appCreateException.message)
+            output.append("Could not create Application '${appName}': ${appCreateException}. ")
         }
-
         if (cloudReadyUnavailable) {
-            String msg = 'Chaos Monkey was not enabled because Cloudready is currently unavailable. '
-            output.append(msg)
+            output.append('Chaos Monkey was not enabled because Cloudready is currently unavailable. ')
         }
         output.toString()
     }

@@ -253,7 +253,8 @@ class AutoScalingController {
         }
         boolean isChaosMonkeyAvailable = appsWithClusterOptLevel != null
         if (!isChaosMonkeyAvailable) {
-            String msg = "Cloudready could not be contacted. Therefore, you should specify your application's Chaos Monkey settings directly in Cloudready after ASG creation."
+            String msg = "Cloudready could not be contacted. Therefore, you should specify your application's" +
+                    'Chaos Monkey settings directly in Cloudready after ASG creation.'
             flash.message = msg
         }
         [
