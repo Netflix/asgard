@@ -133,4 +133,14 @@ class CloudReadyService {
         def response = restClientService.getAsJson(url)
         response?.applications*.'name' as Set
     }
+
+    /**
+     * Determines if Chaos Monkey is used for a particular Asgard instance.
+     *
+     * @param region optionally check in a specific region (needed for Clusters)
+     * @return indication that Chaos Monkey is in the area
+     */
+    boolean isChaosMonkeyActive(Region region = null) {
+        configService.cloudReadyUrl && (!region || region in configService.chaosMonkeyRegions)
+    }
 }

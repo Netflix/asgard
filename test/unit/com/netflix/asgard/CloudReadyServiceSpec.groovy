@@ -167,4 +167,38 @@ class CloudReadyServiceSpec extends Specification {
         appsWithClusterOptLevel == null
     }
 
+    void 'Chaos Monkey is active if URL is configured'() {
+        expect: cloudReadyService.isChaosMonkeyActive()
+    }
+
+    void 'Chaos Monkey is not active if no URL is configured'() {
+        ConfigService mockConfigService = Mock(ConfigService)
+        cloudReadyService.configService = mockConfigService
+
+        expect: !cloudReadyService.isChaosMonkeyActive()
+    }
+
+    void 'Chaos Monkey is active for region if URL and region are configured'() {
+        expect: cloudReadyService.isChaosMonkeyActive(Region.US_EAST_1)
+    }
+
+    void 'Chaos Monkey is not active for region if no URL is configured'() {
+        ConfigService mockConfigService = Mock(ConfigService)
+        cloudReadyService.configService = mockConfigService
+
+        expect: !cloudReadyService.isChaosMonkeyActive(Region.US_EAST_1)
+    }
+
+    void 'Chaos Monkey is not active if region is not configured'() {
+        expect: !cloudReadyService.isChaosMonkeyActive(Region.US_WEST_1)
+    }
+
+    void 'Chaos Monkey is not active if no region is configured'() {
+        ConfigService mockConfigService = Mock(ConfigService)
+        cloudReadyService.configService = mockConfigService
+        mockConfigService.getCloudReadyUrl() >> 'http://cloudready.com'
+
+        expect: !cloudReadyService.isChaosMonkeyActive(Region.US_EAST_1)
+    }
+
 }

@@ -168,7 +168,7 @@ class AutoScalingController {
                 map
             } as Map
             String clusterName = Relationships.clusterFromGroupName(name)
-            boolean isChaosMonkeyActive = isChaosMonkeyActive(userContext)
+            boolean isChaosMonkeyActive = cloudReadyService.isChaosMonkeyActive(userContext.region)
             def details = [
                     instanceCount: instanceCount,
                     showPostponeButton: showPostponeButton,
@@ -248,7 +248,7 @@ class AutoScalingController {
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
         Set<String> appsWithClusterOptLevel = []
-        if (isChaosMonkeyActive(userContext)) {
+        if (cloudReadyService.isChaosMonkeyActive(userContext.region)) {
             appsWithClusterOptLevel = cloudReadyService.applicationsWithOptLevel('cluster')
         }
         boolean isChaosMonkeyAvailable = appsWithClusterOptLevel != null
@@ -278,7 +278,7 @@ class AutoScalingController {
                 selectedSecurityGroups: Requests.ensureList(params.selectedSecurityGroups),
                 instanceTypes: instanceTypeService.getInstanceTypes(userContext),
                 iamInstanceProfile: configService.defaultIamRole,
-                isChaosMonkeyActive: isChaosMonkeyActive(userContext),
+                isChaosMonkeyActive: cloudReadyService.isChaosMonkeyActive(userContext.region),
                 appsWithClusterOptLevel: appsWithClusterOptLevel ?: []
         ]
     }
@@ -287,21 +287,11 @@ class AutoScalingController {
         s?.isInteger() ? s.toInteger() : null
     }
 
-    private boolean isChaosMonkeyActive(UserContext userContext) {
-        configService.cloudReadyUrl && userContext.region in configService.chaosMonkeyRegions
-    }
-
     def save = { GroupCreateCommand cmd ->
-        UserContext userContext = UserContext.of(request)
-        boolean isChaosMonkeyChoiceNeglected = isChaosMonkeyActive(userContext) && params.requestedFromGui == 'true' &&
-                params.appWithClusterOptLevel == 'true' && !params.chaosMonkey
-        if (isChaosMonkeyChoiceNeglected) {
-            flash.message = "Chaos Monkey selection is required."
-        }
-        if (cmd.hasErrors() || isChaosMonkeyChoiceNeglected) {
+        if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd:cmd], params: params) // Use chain to pass both the errors and the params
         } else {
-
+            UserContext userContext = UserContext.of(request)
             // Auto Scaling Group name
             String groupName = Relationships.buildGroupName(params)
 

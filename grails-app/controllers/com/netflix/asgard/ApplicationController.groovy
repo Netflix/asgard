@@ -132,7 +132,7 @@ class ApplicationController {
                     groups.collect { Relationships.clusterFromGroupName(it.autoScalingGroupName) }.unique()
             request.alertingServiceConfigUrl = configService.alertingServiceConfigUrl
             SecurityGroup appSecurityGroup = awsEc2Service.getSecurityGroup(userContext, name)
-            boolean isChaosMonkeyActive = isChaosMonkeyActive()
+            boolean isChaosMonkeyActive = cloudReadyService.isChaosMonkeyActive()
             def details = [
                     app: app,
                     strictName: Relationships.checkStrictName(app.name),
@@ -161,21 +161,12 @@ class ApplicationController {
     def create = {
         [
                 typeList: typeList,
-                isChaosMonkeyActive: isChaosMonkeyActive()
+                isChaosMonkeyActive: cloudReadyService.isChaosMonkeyActive()
         ]
     }
 
-    private boolean isChaosMonkeyActive() {
-        configService.cloudReadyUrl as boolean
-    }
-
     def save = { ApplicationCreateCommand cmd ->
-        boolean isChaosMonkeyChoiceNeglected = params.requestedFromGui == 'true' && isChaosMonkeyActive() &&
-                !params.chaosMonkey
-        if (isChaosMonkeyChoiceNeglected) {
-            flash.message = "Chaos Monkey selection is required."
-        }
-        if (cmd.hasErrors() || isChaosMonkeyChoiceNeglected) {
+        if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd: cmd], params: params)
         } else {
             String name = params.name
@@ -290,11 +281,17 @@ class ApplicationController {
 }
 
 class ApplicationCreateCommand {
+
+    def cloudReadyService
+
     String name
     String email
     String type
     String description
     String owner
+    String chaosMonkey
+    boolean requestedFromGui
+
     static constraints = {
         name(nullable: false, blank: false, size: 1..Relationships.APPLICATION_MAX_LENGTH,
                 validator: { value, command ->
@@ -309,5 +306,14 @@ class ApplicationCreateCommand {
         type(nullable: false, blank: false)
         description(nullable: false, blank: false)
         owner(nullable: false, blank: false)
+        chaosMonkey(nullable: true, validator: { value, command ->
+            if (!command.chaosMonkey) {
+                boolean isChaosMonkeyChoiceNeglected = command.cloudReadyService.isChaosMonkeyActive() &&
+                        command.requestedFromGui
+                if (isChaosMonkeyChoiceNeglected) {
+                    return 'chaosMonkey.optIn.missing.error'
+                }
+            }
+        })
     }
 }
