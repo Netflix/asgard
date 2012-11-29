@@ -263,8 +263,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
 
     List<AutoScalingGroup> getAutoScalingGroupsForApp(UserContext userContext, String appName) {
-        def pat = ~/^${appName.toLowerCase()}(?:_\d+)?(?:-.+)?$/
-        getAutoScalingGroups(userContext).findAll { it.autoScalingGroupName ==~ pat }
+        getAutoScalingGroups(userContext).findAll {
+            appName.toLowerCase() == Relationships.appNameFromGroupName(it.autoScalingGroupName)
+        }
     }
 
     AutoScalingGroup getAutoScalingGroup(UserContext userContext, String name, From from = From.AWS) {
