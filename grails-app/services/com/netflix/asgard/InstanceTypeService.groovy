@@ -138,10 +138,10 @@ class InstanceTypeService implements CacheInitializer {
                 new InstanceTypeData(
                         hardwareProfile: hardwareProfile,
                         linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
-                        linuxReservedPrice: reservedPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
+                        linuxReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.LINUX_UNIX),
                         linuxSpotPrice: spotPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
                         windowsOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.WINDOWS),
-                        windowsReservedPrice: reservedPrices.get(instanceType, InstanceProductType.WINDOWS),
+                        windowsReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.WINDOWS),
                         windowsSpotPrice: spotPrices.get(instanceType, InstanceProductType.WINDOWS)
                 )
             }
