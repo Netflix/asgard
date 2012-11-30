@@ -155,13 +155,15 @@ class CloudReadyServiceSpec extends Specification {
         appsWithClusterOptLevel == ['helloworld1', 'helloworld2'] as Set
     }
 
-    void 'should not retrieve all application names if cloudready cannot be reached'() {
+    void 'should blow up if cloudready cannot be reached'() {
         String expectUrl = 'http://cloudready.com/chaosmonkey/listApps?format=json&optLevel=cluster'
 
         when:
         Set<String> appsWithClusterOptLevel = cloudReadyService.applicationsWithOptLevel('cluster')
 
         then:
+        ServiceUnavailableException e = thrown(ServiceUnavailableException)
+        e.message == 'Cloudready could not be contacted.'
         1 * mockRestClientService.getAsJson(expectUrl)
         0 * mockRestClientService._
         appsWithClusterOptLevel == null

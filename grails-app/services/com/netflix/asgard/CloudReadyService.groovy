@@ -126,12 +126,16 @@ class CloudReadyService {
      *
      * @param optLevel retrieve application names with this optlevel
      * @return application names or null if Cloudready was unavailable
+     * @throws ServiceUnavailableException if Cloudready could not be reached
      */
-    Set<String> applicationsWithOptLevel(String optLevel) {
+    Set<String> applicationsWithOptLevel(String optLevel) throws ServiceUnavailableException {
         String cloudReadyUrl = configService.cloudReadyUrl
         String url = "${cloudReadyUrl}/chaosmonkey/listApps?format=json&optLevel=${optLevel}"
         def response = restClientService.getAsJson(url)
-        response?.applications*.'name' as Set
+        if (response == null) {
+            throw new ServiceUnavailableException('Cloudready')
+        }
+        response.applications*.'name' as Set
     }
 
     /**

@@ -249,13 +249,12 @@ class AutoScalingController {
         Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
         Set<String> appsWithClusterOptLevel = []
         if (cloudReadyService.isChaosMonkeyActive(userContext.region)) {
-            appsWithClusterOptLevel = cloudReadyService.applicationsWithOptLevel('cluster')
-        }
-        boolean isChaosMonkeyAvailable = appsWithClusterOptLevel != null
-        if (!isChaosMonkeyAvailable) {
-            String msg = "Cloudready could not be contacted. Therefore, you should specify your application's" +
-                    'Chaos Monkey settings directly in Cloudready after ASG creation.'
-            flash.message = msg
+            try {
+                appsWithClusterOptLevel = cloudReadyService.applicationsWithOptLevel('cluster')
+            } catch (ServiceUnavailableException sue) {
+                flash.message = "${sue} Therefore, you should specify your application's" +
+                        'Chaos Monkey settings directly in Cloudready after ASG creation.'
+            }
         }
         [
                 applications: applicationService.getRegisteredApplications(userContext),
