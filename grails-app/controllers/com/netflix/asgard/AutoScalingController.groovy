@@ -252,7 +252,7 @@ class AutoScalingController {
             try {
                 appsWithClusterOptLevel = cloudReadyService.applicationsWithOptLevel('cluster')
             } catch (ServiceUnavailableException sue) {
-                flash.message = "${sue} Therefore, you should specify your application's" +
+                flash.message = "${sue.message} Therefore, you should specify your application's " +
                         'Chaos Monkey settings directly in Cloudready after ASG creation.'
             }
         }
