@@ -18,6 +18,7 @@ package com.netflix.asgard
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @TestMixin(ControllerUnitTestMixin)
 class GroupCreateCommandSpec extends Specification {
@@ -37,7 +38,6 @@ class GroupCreateCommandSpec extends Specification {
         cmd.appName = 'abcache'
         cmd.region = 'us-east-1'
 
-        mockCloudReadyService.isChaosMonkeyActive(Region.US_EAST_1) >> true
         mockApplicationService.getRegisteredApplication(_, 'abcache') >> new AppRegistration()
         mockAwsAutoScalingService.getAutoScalingGroup(_, 'abcache')
     }
@@ -272,59 +272,39 @@ class GroupCreateCommandSpec extends Specification {
         1 * mockApplicationService.getRegisteredApplication(_, 'videometadata') >> new AppRegistration()
     }
 
-    def 'should validate when Chaos Monkey choice is made'() {
-        cmd.chaosMonkey = 'enabled'
-
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-    }
-
-    def 'should validate with no Chaos Monkey choice when Chaos Monkey is not active in region'() {
-        cmd.region = 'us-west-1'
-        cmd.requestedFromGui = true
-        cmd.appWithClusterOptLevel = true
-
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-    }
-
-    def 'should validate with no Chaos Monkey choice when request does not come from GUI'() {
+    @Unroll("""should validate chaosMonkey input #chaosMonkey with error code #chaosMonkeyError when requestedFromGui \
+is #requestedFromGui and isChaosMonkeyActive is #isChaosMonkeyActive and optLevel is #optLevel""")
+    def 'chaosMonkey constraints'() {
+        cmd.chaosMonkey = chaosMonkey
         cmd.region = 'us-east-1'
-        cmd.requestedFromGui = false
-        cmd.appWithClusterOptLevel = true
+        cmd.requestedFromGui = requestedFromGui
+        cmd.appWithClusterOptLevel = optLevel
+        mockCloudReadyService.isChaosMonkeyActive(Region.US_EAST_1) >> isChaosMonkeyActive
 
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-    }
-
-    def 'should validate with no Chaos Monkey choice when opt level of app is not cluster'() {
-        cmd.region = 'us-east-1'
-        cmd.requestedFromGui = true
-        cmd.appWithClusterOptLevel = false
-
-        when: cmd.validate()
+        when:
+        cmd.validate()
 
         then:
-        !cmd.hasErrors()
-    }
+        cmd.errors.chaosMonkey == chaosMonkeyError
 
-    def 'should not validate with no Chaos Monkey choice when it is expected'() {
-        cmd.region = 'us-east-1'
-        cmd.requestedFromGui = true
-        cmd.appWithClusterOptLevel = true
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        cmd.errors.errorCount == 1
-        cmd.errors.chaosMonkey == 'chaosMonkey.optIn.missing.error'
+        where:
+        chaosMonkey | requestedFromGui  | isChaosMonkeyActive   | optLevel  | chaosMonkeyError
+        'enabled'   | true              | true                  | true      | null
+        'enabled'   | false             | true                  | true      | null
+        'enabled'   | true              | false                 | true      | null
+        'enabled'   | true              | true                  | false     | null
+        'enabled'   | true              | false                 | false     | null
+        'enabled'   | false             | true                  | false     | null
+        'enabled'   | false             | false                 | true      | null
+        'enabled'   | false             | false                 | false     | null
+        null        | true              | true                  | true      | 'chaosMonkey.optIn.missing.error'
+        null        | false             | true                  | true      | null
+        null        | true              | false                 | true      | null
+        null        | true              | true                  | false     | null
+        null        | true              | false                 | false     | null
+        null        | false             | true                  | false     | null
+        null        | false             | false                 | true      | null
+        null        | false             | false                 | false     | null
     }
 
 }

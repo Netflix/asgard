@@ -18,6 +18,7 @@ package com.netflix.asgard
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @TestMixin(ControllerUnitTestMixin)
 class ApplicationCreateCommandSpec extends Specification {
@@ -29,53 +30,36 @@ class ApplicationCreateCommandSpec extends Specification {
         mockForConstraintsTests(ApplicationCreateCommand)
         cmd = new ApplicationCreateCommand()
         cmd.cloudReadyService = mockCloudReadyService
+    }
 
+    @Unroll("""should validate chaosMonkey input #chaosMonkey with error code #chaosMonkeyError when requestedFromGui \
+is #requestedFromGui and isChaosMonkeyActive is #isChaosMonkeyActive""")
+    def 'chaosMonkey constraints'() {
         cmd.name = 'helloworld'
         cmd.email = 'me@netflix.com'
         cmd.type = 'service'
         cmd.description = 'Says hello to the world.'
         cmd.owner = 'me'
-    }
+        cmd.chaosMonkey = chaosMonkey
+        cmd.requestedFromGui = requestedFromGui
+        mockCloudReadyService.isChaosMonkeyActive() >> isChaosMonkeyActive
 
-    def 'should validate when Chaos Monkey choice is made'() {
-        cmd.chaosMonkey = 'enabled'
-
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-    }
-
-    def 'should validate with no Chaos Monkey choice when Chaos Monkey is not active'() {
-        cmd.requestedFromGui = true
-
-        when: cmd.validate()
+        when:
+        cmd.validate()
 
         then:
-        !cmd.hasErrors()
-        1 * mockCloudReadyService.isChaosMonkeyActive() >> false
-    }
+        cmd.errors.chaosMonkey == chaosMonkeyError
 
-    def 'should validate with no Chaos Monkey choice when request does not come from GUI'() {
-        cmd.requestedFromGui = false
-
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-        1 * mockCloudReadyService.isChaosMonkeyActive() >> true
-    }
-
-    def 'should not validate with no Chaos Monkey choice when it is expected'() {
-        cmd.requestedFromGui = true
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        cmd.errors.errorCount == 1
-        cmd.errors.chaosMonkey == 'chaosMonkey.optIn.missing.error'
-        1 * mockCloudReadyService.isChaosMonkeyActive() >> true
+        where:
+        chaosMonkey | requestedFromGui  | isChaosMonkeyActive   | chaosMonkeyError
+        'enabled'   | true              | true                  | null
+        'enabled'   | true              | false                 | null
+        'enabled'   | false             | true                  | null
+        'enabled'   | false             | false                 | null
+        null        | true              | true                  | 'chaosMonkey.optIn.missing.error'
+        null        | true              | false                 | null
+        null        | false             | true                  | null
+        null        | false             | false                 | null
     }
 
 }
