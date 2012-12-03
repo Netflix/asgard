@@ -34,236 +34,38 @@ class GroupCreateCommandSpec extends Specification {
         cmd.applicationService = mockApplicationService
         cmd.awsAutoScalingService = mockAwsAutoScalingService
         cmd.cloudReadyService = mockCloudReadyService
+    }
 
-        cmd.appName = 'abcache'
-        cmd.region = 'us-east-1'
-
+    @Unroll("""should validate appName input '#appName' with error code '#error'""")
+    def 'appName constraints'() {
+        cmd.appName = appName
         mockApplicationService.getRegisteredApplication(_, 'abcache') >> new AppRegistration()
-        mockAwsAutoScalingService.getAutoScalingGroup(_, 'abcache')
-    }
 
-    def 'testEmptyAppNameIsNotValid'() {
-        cmd.appName = ''
-
-        when: cmd.validate()
+        when:
+        cmd.validate()
 
         then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'blank' == cmd.errors.appName
+        cmd.errors.appName == error
+
+        where:
+        appName                     | error
+        ''                          | 'blank'
+        '   '                       | 'blank'
+        null                        | 'nullable'
+        'abcachev339'               | 'name.usesReservedFormat'
+        'uses-hyphen'               | 'application.name.illegalChar'
+        'never_heard_of_this_app'   | 'application.name.nonexistent'
+        'abcache'                   | null
     }
 
-    def 'testBlankAppNameIsNotValid'() {
-        cmd.appName = '   '
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'blank' == cmd.errors.appName
-    }
-
-    def 'testNullAppNameIsNotValid'() {
-        cmd.appName = null
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'nullable' == cmd.errors.appName
-    }
-
-    def 'testAppNameWithReservedFormatIsInvalid'() {
-        cmd.appName = 'abcachev339'
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'name.usesReservedFormat' == cmd.errors.appName
-    }
-
-    def 'testAppNameWithBadCharacterIsNotValid'() {
-        cmd.appName = 'uses-hyphen'
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'application.name.illegalChar' == cmd.errors.appName
-    }
-
-    def 'testUnknownAppNameIsValid'() {
-        cmd.appName = 'never_heard_of_this_app'
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'application.name.nonexistent' == cmd.errors.appName
-        1 * mockApplicationService.getRegisteredApplication(_, 'never_heard_of_this_app')
-    }
-
-    def 'testKnownAppNameIsValid'() {
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-        0 == cmd.errors.errorCount
-    }
-
-    def 'testEmptyStackIsValid'() {
-        cmd.stack = ''
-
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-        0 == cmd.errors.errorCount
-    }
-
-    def 'testNullStackIsValid'() {
-        cmd.stack = null
-
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-        0 == cmd.errors.errorCount
-    }
-
-    def 'testStackIsValid'() {
-        cmd.stack = 'iphone'
-
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-        0 == cmd.errors.errorCount
-    }
-
-    def 'testStackIsInvalid'() {
-        cmd.stack = 'iphone-and-ipad'
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'The stack must be empty or consist of alphanumeric characters' == cmd.errors.stack
-    }
-
-    def 'testStackWithReservedFormatIsInvalid'() {
-        cmd.stack = 'v305'
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'name.usesReservedFormat' == cmd.errors.stack
-    }
-
-    def 'testEmptyNewStackIsValid'() {
-        cmd.newStack = ''
-
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-        0 == cmd.errors.errorCount
-    }
-
-    def 'testNullNewStackIsValid'() {
-        cmd.newStack = null
-
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-        0 == cmd.errors.errorCount
-    }
-
-    def 'testNewStackIsValid'() {
-        cmd.newStack = 'iphone'
-
-        when: cmd.validate()
-
-        then:
-        !cmd.hasErrors()
-        0 == cmd.errors.errorCount
-    }
-
-    def 'testNewStackIsInvalid'() {
-        cmd.newStack = 'iphone-and-ipad'
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'stack.illegalChar' == cmd.errors.newStack
-    }
-
-    def 'testNewStackWithReservedFormatIsInvalid'() {
-        cmd.newStack = 'v305'
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'name.usesReservedFormat' == cmd.errors.newStack
-    }
-
-    def 'testStackAndNewStackIsInvalid'() {
-        cmd.stack = 'iphone'
-        cmd.newStack = 'iphone'
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'stack.matchesNewStack' == cmd.errors.newStack
-    }
-
-    def 'testDetailWithReservedFormatIsInvalid'() {
-        cmd.stack = 'iphone'
-        cmd.detail = 'v305'
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'name.usesReservedFormat' == cmd.errors.detail
-    }
-
-    def 'testHyphenatedDetailWithReservedFormatIsInvalid'() {
-        cmd.stack = 'iphone'
-        cmd.detail = 'blah-v305'
-
-        when: cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        1 == cmd.errors.errorCount
-        'name.usesReservedFormat' == cmd.errors.detail
-    }
-
-    def 'testTotalNameIsTooLong'() {
+    def 'should validate with an error when total name is too long'() {
         cmd.appName = 'videometadata'
         cmd.stack = 'navigator'
         cmd.detail = 'integration-240-usa-iphone-ipad-ios5-even-numbered-days-except-weekends-and-excluding-' +
                 'when-the-moon-is-full'
 
-        when: cmd.validate()
+        when:
+        cmd.validate()
 
         then:
         cmd.hasErrors()
@@ -272,8 +74,65 @@ class GroupCreateCommandSpec extends Specification {
         1 * mockApplicationService.getRegisteredApplication(_, 'videometadata') >> new AppRegistration()
     }
 
-    @Unroll("""should validate chaosMonkey input #chaosMonkey with error code #chaosMonkeyError when requestedFromGui \
-is #requestedFromGui and isChaosMonkeyActive is #isChaosMonkeyActive and optLevel is #optLevel""")
+    @Unroll("""should validate stack input '#stack' with error code '#error'""")
+    def 'stack constraints'() {
+        cmd.stack = stack
+
+        when:
+        cmd.validate()
+
+        then:
+        cmd.errors.stack == error
+
+        where:
+        stack               | error
+        ''                  | null
+        null                | null
+        'iphone'            | null
+        'iphone-and-ipad'   | 'The stack must be empty or consist of alphanumeric characters'
+        'v305'              | 'name.usesReservedFormat'
+    }
+
+    @Unroll("""should validate newStack input '#newStack' with error code '#error' when stack is '#stack'""")
+    def 'newStack constraints'() {
+        cmd.stack = stack
+        cmd.newStack = newStack
+
+        when:
+        cmd.validate()
+
+        then:
+        cmd.errors.newStack == error
+
+        where:
+        newStack            | stack     | error
+        ''                  | null      | null
+        null                | null      | null
+        'iphone'            | null      | null
+        'iphone-and-ipad'   | null      | 'stack.illegalChar'
+        'v305'              | null      | 'name.usesReservedFormat'
+        'iphone'            | 'iphone'  | 'stack.matchesNewStack'
+    }
+
+    @Unroll("""should validate detail input '#detail' with error code '#error'""")
+    def 'detail constraints'() {
+        cmd.stack = 'iphone'
+        cmd.detail = detail
+
+        when:
+        cmd.validate()
+
+        then:
+        cmd.errors.detail == error
+
+        where:
+        detail        | error
+        'v305'        | 'name.usesReservedFormat'
+        'blah-v305'   | 'name.usesReservedFormat'
+    }
+
+    @Unroll("""should validate chaosMonkey input '#chaosMonkey' with error code '#error' when requestedFromGui is \
+'#requestedFromGui' and isChaosMonkeyActive is '#isChaosMonkeyActive' and optLevel is '#optLevel'""")
     def 'chaosMonkey constraints'() {
         cmd.chaosMonkey = chaosMonkey
         cmd.region = 'us-east-1'
@@ -285,10 +144,10 @@ is #requestedFromGui and isChaosMonkeyActive is #isChaosMonkeyActive and optLeve
         cmd.validate()
 
         then:
-        cmd.errors.chaosMonkey == chaosMonkeyError
+        cmd.errors.chaosMonkey == error
 
         where:
-        chaosMonkey | requestedFromGui  | isChaosMonkeyActive   | optLevel  | chaosMonkeyError
+        chaosMonkey | requestedFromGui  | isChaosMonkeyActive   | optLevel  | error
         'enabled'   | true              | true                  | true      | null
         'enabled'   | false             | true                  | true      | null
         'enabled'   | true              | false                 | true      | null
@@ -306,5 +165,4 @@ is #requestedFromGui and isChaosMonkeyActive is #isChaosMonkeyActive and optLeve
         null        | false             | false                 | true      | null
         null        | false             | false                 | false     | null
     }
-
 }
