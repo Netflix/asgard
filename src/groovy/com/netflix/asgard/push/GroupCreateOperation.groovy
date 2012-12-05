@@ -94,7 +94,7 @@ class GroupCreateOperation extends AbstractPushOperation {
                     options.common.userContext, groupTemplate, launchConfigTemplate, suspendedProcesses,
                     task)
 
-            log.info """GroupCreateOperation.start Group created with Load Balancers: \
+            log.debug """GroupCreateOperation.start for Cluster '${clusterName}' Group created with Load Balancers: \
 ${groupTemplate.loadBalancerNames} and result ${result}"""
             task.log(result.toString())
             if (result.succeeded()) {
