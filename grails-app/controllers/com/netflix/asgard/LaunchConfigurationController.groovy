@@ -143,7 +143,7 @@ class LaunchConfigurationController {
     }
 
     private String doMassDelete(UserContext userContext, int daysAgo) {
-        Check.atLeast(10, daysAgo, 'daysAgo')
+        Check.atLeast(1, daysAgo, 'daysAgo')
         DateTime cutOffDate = new DateTime().minusDays(daysAgo)
         JanitorMode mode = params.mode ? JanitorMode.valueOf(params.mode) : JanitorMode.EXECUTE
         Collection<AutoScalingGroup> allGroups = awsAutoScalingService.getAutoScalingGroups(userContext)
