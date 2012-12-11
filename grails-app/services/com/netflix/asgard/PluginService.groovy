@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.plugin.AuthenticationProvider
+import com.netflix.asgard.plugin.AuthorizationProvider
 import com.netflix.asgard.plugin.TaskFinishedListener
 import com.netflix.asgard.plugin.UserDataProvider
 import org.springframework.context.ApplicationContext
@@ -24,6 +25,7 @@ import org.springframework.context.ApplicationContextAware
 class PluginService implements ApplicationContextAware {
 
     static final String AUTHENTICATION_PROVIDER = 'authenticationProvider'
+    static final String AUTHORIZATION_PROVIDERS = 'authorizationProviders'
     static final String TASK_FINISHED_LISTENERS = 'taskFinishedListeners'
     static final String USER_DATA_PROVIDER = 'userDataProvider'
 
@@ -36,7 +38,7 @@ class PluginService implements ApplicationContextAware {
     }
 
     Collection<TaskFinishedListener> getTaskFinishedListeners() {
-        List<String> beanNames = configService.pluginNamesToBeanNames[TASK_FINISHED_LISTENERS] ?: [:]
+        List<String> beanNames = configService.pluginNamesToBeanNames[TASK_FINISHED_LISTENERS] ?: []
         beanNames.collect { applicationContext.getBean(it) as TaskFinishedListener }
     }
 
@@ -48,6 +50,14 @@ class PluginService implements ApplicationContextAware {
         if (beanName) {
             return applicationContext.getBean(beanName) as AuthenticationProvider
         }
+    }
+
+    /**
+     * @return A list of configured {@link AuthorizationProvider} Spring beans, empty list if none configured.
+     */
+    Collection<AuthorizationProvider> getAuthorizationProviders() {
+        List<String> beanNames = configService.pluginNamesToBeanNames[AUTHORIZATION_PROVIDERS] ?: []
+        beanNames.collect { applicationContext.getBean(it) as AuthorizationProvider }
     }
 
 }

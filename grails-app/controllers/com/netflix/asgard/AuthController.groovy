@@ -45,4 +45,8 @@ class AuthController {
         String redirectUri = params.targetUri ?: '/'
         redirect(uri: redirectUri)
     }
+
+    def unauthorized = {
+        forward action: 'login'
+    }
 }

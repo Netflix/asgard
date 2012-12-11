@@ -484,4 +484,11 @@ class ConfigService {
     String getDefaultIamRole() {
         grailsApplication.config.cloud?.defaultIamRole ?: null
     }
+
+    /**
+     * @return true if edit links should be hidden for unauthenticated users, false to show edit links to all users
+     */
+    boolean isAuthenticationRequiredForEdit() {
+        grailsApplication.config.security?.authenticationRequiredForEdit ?: null
+    }
 }
