@@ -145,14 +145,16 @@ class LaunchConfigurationController {
     private String doMassDelete(UserContext userContext, int daysAgo) {
         Check.atLeast(1, daysAgo, 'daysAgo')
         DateTime cutOffDate = new DateTime().minusDays(daysAgo)
+        boolean deleteUnreferenced = params.deleteUnreferenced ? Boolean.valueOf(params.deleteUnreferenced) : false
         JanitorMode mode = params.mode ? JanitorMode.valueOf(params.mode) : JanitorMode.EXECUTE
         Collection<AutoScalingGroup> allGroups = awsAutoScalingService.getAutoScalingGroups(userContext)
         Collection<LaunchConfiguration> allConfigs = awsAutoScalingService.getLaunchConfigurations(userContext)
         Collection<LaunchConfiguration> oldUnusedConfigs = allConfigs.findAll { LaunchConfiguration lc ->
             Boolean configIsOld = new DateTime(lc.createdTime.time).isBefore(cutOffDate)
             Boolean configNotInUse = !(allGroups.any { it.launchConfigurationName == lc.launchConfigurationName })
-            configIsOld && configNotInUse
+            (configIsOld && configNotInUse) || (deleteUnreferenced && !autoscalingGroupExists(userContext, lc))
         }
+
         DateTimeFormatter formatter = ISODateTimeFormat.date()
 
         String executeMessage = "Deleting ${oldUnusedConfigs.size()} unused launch configs from before" +
@@ -172,6 +174,10 @@ class LaunchConfigurationController {
             }
         }
         return message
+    }
+
+    private boolean autoscalingGroupExists(UserContext userContext, LaunchConfiguration lc) {
+        awsAutoScalingService.getAutoScalingGroupForLaunchConfig(userContext, lc.launchConfigurationName)
     }
 
 }
