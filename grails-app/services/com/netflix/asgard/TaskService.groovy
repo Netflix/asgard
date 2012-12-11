@@ -32,7 +32,7 @@ class TaskService {
     static transactional = false
     private static final Collection<String> NON_ALERTABLE_ERROR_CODES = ['ValidationError', 'InvalidParameterValue',
             'InvalidGroup.InUse', 'DBInstanceAlreadyExists', 'DuplicateLoadBalancerName', 'InvalidDBInstanceState',
-            'InvalidDBSnapshotState']
+            'InvalidDBSnapshotState', 'InvalidGroup.Duplicate']
 
     def awsSimpleDbService
     def emailerService
