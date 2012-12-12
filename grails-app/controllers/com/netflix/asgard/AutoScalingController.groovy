@@ -239,6 +239,8 @@ class AutoScalingController {
         }
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
+        String subnetPurpose = params.subnetPurpose ?: null
+        String vpcId = purposeToVpcId[subnetPurpose]
         [
                 applications: applicationService.getRegisteredApplications(userContext),
                 group: group,
@@ -248,14 +250,14 @@ class AutoScalingController {
                 images: awsEc2Service.getAccountImages(userContext).sort { it.imageLocation.toLowerCase() },
                 defKey: awsEc2Service.defaultKeyName,
                 keys: awsEc2Service.getKeys(userContext).sort { it.keyName.toLowerCase() },
-                subnetPurpose: params.subnetPurpose ?: null,
+                subnetPurpose: subnetPurpose,
                 subnetPurposes: subnets.getPurposesForZones(recommendedZones*.zoneName, SubnetTarget.EC2).sort(),
                 zonesGroupedByPurpose: subnets.groupZonesByPurpose(recommendedZones*.zoneName, SubnetTarget.EC2),
                 selectedZones: selectedZones,
                 purposeToVpcId: purposeToVpcId,
-                vpcId: purposeToVpcId[params.subnetPurpose],
+                vpcId: vpcId,
                 loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
-                selectedLoadBalancers: Requests.ensureList(params.selectedLoadBalancers),
+                selectedLoadBalancers: Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId ?: ''}"]),
                 securityGroupsGroupedByVpcId: effectiveGroups.groupBy { it.vpcId },
                 selectedSecurityGroups: Requests.ensureList(params.selectedSecurityGroups),
                 instanceTypes: instanceTypeService.getInstanceTypes(userContext),
@@ -276,6 +278,9 @@ class AutoScalingController {
             // Auto Scaling Group name
             String groupName = Relationships.buildGroupName(params)
             UserContext userContext = UserContext.of(request)
+            Subnets subnets = awsEc2Service.getSubnets(userContext)
+            String subnetPurpose = params.subnetPurpose ?: null
+            String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
 
             // Auto Scaling Group
             def minSize = params.min ?: 0
@@ -286,7 +291,7 @@ class AutoScalingController {
             Integer healthCheckGracePeriod = params.healthCheckGracePeriod as Integer
             List<String> terminationPolicies = Requests.ensureList(params.terminationPolicy)
             List<String> availabilityZones = Requests.ensureList(params.selectedZones)
-            List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
+            List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"])
             AutoScalingGroup groupTemplate = new AutoScalingGroup().withAutoScalingGroupName(groupName).
                     withAvailabilityZones(availabilityZones).withLoadBalancerNames(loadBalancerNames).
                     withMinSize(minSize.toInteger()).withDesiredCapacity(desiredCapacity.toInteger()).
@@ -295,10 +300,9 @@ class AutoScalingController {
                     withTerminationPolicies(terminationPolicies)
 
             // If this ASG lauches VPC instances, we must find the proper subnets and add them.
-            String subnetPurpose = params.subnetPurpose ?: null
             if (subnetPurpose) {
-                List<String> subnetIds = awsEc2Service.getSubnets(userContext).
-                        getSubnetIdsForZones(availabilityZones, subnetPurpose, SubnetTarget.EC2)
+                List<String> subnetIds = subnets.getSubnetIdsForZones(availabilityZones, subnetPurpose,
+                        SubnetTarget.EC2)
                 groupTemplate.withVPCZoneIdentifier(Relationships.vpcZoneIdentifierFromSubnetIds(subnetIds))
             }
 
