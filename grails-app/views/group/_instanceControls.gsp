@@ -24,7 +24,7 @@
           <a class="monitor healthCheckRunLink${runHealthChecks ? " autoLaunch" : ""}" href="javascript:;"
              title="Check the Eureka status and health check result of all instances.">Run All Health Checks</a>
         </g:if>
-        <g:buttonSubmit class="stop terminateMany" title="Terminate the selected instances."
+        <g:buttonSubmit class="terminateMany" title="Terminate the selected instances."
                         controller="instance" action="terminate" value="Terminate Instances"/>
       </div>
       <div class="buttons">

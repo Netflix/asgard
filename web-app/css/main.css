@@ -335,6 +335,7 @@ button.resize div, a.resize                   { background-image: url(../images/
 .subitems .buttons button.stop div            { background-image:  url(../images/tango/16/actions/process-stop.png);          }
 .subitems .buttons button.delete div          { background-image:  url(../images/tango/16/places/user-trash.png);             }
 .subitems .buttons button.terminateMany       { display: none; } /* Hide dangerous button until JavaScript validation is ready */
+.subitems .buttons button.terminateMany div   { background-image:  url(../images/tango/16/actions/process-stop.png);          }
 
 /* ICONS FOR STANDARD TEXT LINKS */
 a.application         { padding:  2px 2px  2px 26px; background: url(../images/tango/16/mimetypes/package-x-generic.png)         transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }

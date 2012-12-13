@@ -32,7 +32,7 @@
         <input type="hidden" name="spotInstanceRequestId" value="${spotInstanceRequest.spotInstanceRequestId}"/>
         <div class="buttons">
           <g:buttonSubmit class="stop" action="cancel" value="Cancel Spot Instance Request"
-                  onclick="return confirm('Really cancel Spot Instance Request: ${spotInstanceRequest.spotInstanceRequestId}?');"/>
+                  data-warning="Really cancel Spot Instance Request: ${spotInstanceRequest.spotInstanceRequestId}?"/>
         </div>
       </g:form>
     </g:if>

@@ -592,9 +592,12 @@ jQuery(document).ready(function() {
         jQuery('.requireLogin').bind('click keypress', checkLogin);
 
         // Add confirmation to delete buttons, then display the buttons
-        jQuery('button.delete').bind('click keypress', function() {
-            var warning = jQuery(this).data('warning') || 'Are you sure you want to delete this object?';
-            return confirm(warning);
+        jQuery('button.delete,button.stop,button.warn').bind('click keypress', function() {
+            if (checkLogin()) {
+                var warning = jQuery(this).data('warning') || 'Are you sure you want to delete this object?';
+                return confirm(warning);
+            }
+            return false;
         }).show();
 
         // When the user changes the regionSwitcher drop-down, redirect to a similar page for the selected region.
@@ -983,6 +986,9 @@ jQuery(document).ready(function() {
 
         confirmation = function() {
             var count, suffix, message, safeToProceed;
+            if (!checkLogin()) {
+                return false;
+            }
             count = jInstanceCheckboxes.filter(':checked').size();
             suffix = count === 1 ? '' : 's';
             message = 'Really terminate ' + count + ' selected instance' + suffix + '? This cannot be undone.';

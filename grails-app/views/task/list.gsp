@@ -30,7 +30,7 @@
     <g:form method="post">
       <div class="list">
         <div class="buttons">
-          <g:buttonSubmit class="stop" onclick="return confirm('Really stop the selected task?');" action="cancel" value="Stop Selected Task"/>
+          <g:buttonSubmit class="stop" data-warning="Really stop the selected task?" action="cancel" value="Stop Selected Task"/>
         </div>
         <table class="sortable">
           <thead>

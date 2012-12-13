@@ -32,7 +32,7 @@
       <div class="list">
         <div class="buttons">
           <g:buttonSubmit class="stop" value="Cancel Spot Instance Request(s)" action="cancel"
-                  onclick="return confirm('Really cancel spot instance request(s)?');"/>
+                  data-warning="Really cancel spot instance request(s)?"/>
         </div>
         <table class="sortable">
           <thead>
