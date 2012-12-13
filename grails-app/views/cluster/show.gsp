@@ -78,14 +78,14 @@
             </g:if>
             <g:else>
               <div class="buttons">
-                <g:buttonSubmit class="resize" action="resize" value="Resize" /> <label for="minAndMaxSize_${autoScalingGroup.autoScalingGroupName}">to</label>
+                <g:buttonSubmit class="resize requireLogin" action="resize" value="Resize" /> <label for="minAndMaxSize_${autoScalingGroup.autoScalingGroupName}">to</label>
                 <g:if test="${autoScalingGroup.minSize == autoScalingGroup.maxSize}"  >
-                  <input type="text" size="2" class="groupSize number" id="minAndMaxSize_${autoScalingGroup.autoScalingGroupName}" name="minAndMaxSize" value="${autoScalingGroup.maxSize}"/>
+                  <input type="text" size="2" class="groupSize number requireLogin" id="minAndMaxSize_${autoScalingGroup.autoScalingGroupName}" name="minAndMaxSize" value="${autoScalingGroup.maxSize}"/>
                 </g:if>
                 <g:else>
-                  <input type="text" size="2" class="groupSize number" id="minSize_${autoScalingGroup.autoScalingGroupName}" name="minSize" value="${autoScalingGroup.minSize}"/>
+                  <input type="text" size="2" class="groupSize number requireLogin" id="minSize_${autoScalingGroup.autoScalingGroupName}" name="minSize" value="${autoScalingGroup.minSize}"/>
                   <label for="minSize_${autoScalingGroup.autoScalingGroupName}">min</label> /
-                  <input type="text" size="2" class="groupSize number" id="maxSize_${autoScalingGroup.autoScalingGroupName}" name="maxSize" value="${autoScalingGroup.maxSize}"/>
+                  <input type="text" size="2" class="groupSize number requireLogin" id="maxSize_${autoScalingGroup.autoScalingGroupName}" name="maxSize" value="${autoScalingGroup.maxSize}"/>
                   <label for="maxSize_${autoScalingGroup.autoScalingGroupName}">max</label>
                 </g:else>
                 <div class="batchResizeContainer" id="batchResizeContainer_${autoScalingGroup.autoScalingGroupName}">
@@ -97,8 +97,8 @@
               <div class="buttons">
                 <g:buttonSubmit class="delete" action="delete" value="Delete"
                                 data-warning="Terminate: ${autoScalingGroup.instances.size()} instances and delete Auto Scaling Group '${autoScalingGroup.autoScalingGroupName}'?"/>
-                <g:buttonSubmit class="trafficDisable" action="deactivate" value="Disable" />
-                <g:buttonSubmit class="trafficEnable" action="activate" value="Enable" />
+                <g:buttonSubmit class="requireLogin trafficDisable" action="deactivate" value="Disable" />
+                <g:buttonSubmit class="requireLogin trafficEnable" action="activate" value="Enable" />
               </div>
             </g:else>
             <table class="tiny">
@@ -154,33 +154,40 @@
       </g:each>
       <g:if test="${okayToCreateGroup}">
         <li class="clusterAsgForm create hideAdvancedItems">
-          <g:form method="post" class="validate" action="createNextGroup">
-            <g:hiddenField name="name" value="${cluster.name}" />
-            <g:hiddenField name="noOptionalDefaults" value="true" />
-            <h2>Create Next Group:</h2>
-            <span class="toggle fakeLink" id="showAdvancedOptionsToCreateNextGroup">Advanced Options</span>
-            <div class="clear"></div>
-            <h2>${nextGroupName}</h2>
-            <table>
-              <tr class="advanced"><td colspan="2"><h2>Auto Scaling</h2></td></tr>
-              <g:render template="/autoScaling/autoScalingOptions" />
-              <g:render template="/loadBalancer/selection"/>
-              <g:render template="/launchConfiguration/launchConfigOptions" />
-              <g:render template="/push/startupOptions" />
-              <tr class="advanced">
-                <td>
-                  <label for="trafficAllowed">Enable traffic?</label>
-                </td>
-                <td>
-                  <input id="trafficAllowed" type="checkbox" name="trafficAllowed" checked="checked" />
-                  <label for="trafficAllowed">Send client requests to new instances</label>
-                </td>
-              </tr>
-            </table>
-            <div class="buttons">
-              <g:buttonSubmit class="create" action="createNextGroup" value="Create Next Group ${nextGroupName}" />
-            </div>
-          </g:form>
+          <g:if test="${!requireLoginForEdit}">
+            <g:form method="post" class="validate" action="createNextGroup">
+              <g:hiddenField name="name" value="${cluster.name}" />
+              <g:hiddenField name="noOptionalDefaults" value="true" />
+              <h2>Create Next Group:</h2>
+              <span class="toggle fakeLink" id="showAdvancedOptionsToCreateNextGroup">Advanced Options</span>
+              <div class="clear"></div>
+              <h2>${nextGroupName}</h2>
+              <table>
+                <tr class="advanced"><td colspan="2"><h2>Auto Scaling</h2></td></tr>
+                <g:render template="/autoScaling/autoScalingOptions" />
+                <g:render template="/loadBalancer/selection"/>
+                <g:render template="/launchConfiguration/launchConfigOptions" />
+                <g:render template="/push/startupOptions" />
+                <tr class="advanced">
+                  <td>
+                    <label for="trafficAllowed">Enable traffic?</label>
+                  </td>
+                  <td>
+                    <input id="trafficAllowed" type="checkbox" name="trafficAllowed" checked="checked" />
+                    <label for="trafficAllowed">Send client requests to new instances</label>
+                  </td>
+                </tr>
+              </table>
+              <div class="buttons">
+                <g:buttonSubmit class="create" action="createNextGroup" value="Create Next Group ${nextGroupName}" />
+              </div>
+            </g:form>
+          </g:if>
+          <g:else>
+            <g:link controller="auth" action="login" params="${[targetUri: request.forwardURI.encodeAsHTML()]}">
+              Login to enable Create Next Group.
+            </g:link>
+          </g:else>
         </li>
       </g:if>
     </ul>

@@ -29,17 +29,17 @@
       </div>
       <div class="buttons">
         <label>Load Balancing:</label>
-        <g:buttonSubmit class="removeBalance" title="Remove the selected instances from the group's load balancers."
+        <g:buttonSubmit class="requireLogin removeBalance" title="Remove the selected instances from the group's load balancers."
                         controller="instance" action="deregister" value="Deregister Instances from ELBs"/>
-        <g:buttonSubmit class="instanceBalance" title="Add the selected instances to the group's load balancers."
+        <g:buttonSubmit class="requireLogin instanceBalance" title="Add the selected instances to the group's load balancers."
                         controller="instance" action="register" value="Register Instances with group's ELBs" />
       </div>
       <g:if test="${discoveryExists}">
         <div class="buttons">
           <label>Eureka:</label>
-          <g:buttonSubmit class="outOfService" title="Prevent Eureka from listing the selected instances for use by other applications."
+          <g:buttonSubmit class="requireLogin outOfService" title="Prevent Eureka from listing the selected instances for use by other applications."
                           controller="instance" action="takeOutOfService" value="Deactivate in Eureka"/>
-          <g:buttonSubmit class="inService" title="Allow Eureka to list the selected instances for use by other applications."
+          <g:buttonSubmit class="requireLogin inService" title="Allow Eureka to list the selected instances for use by other applications."
                           controller="instance" action="putInService" value="Activate in Eureka"/>
         </div>
       </g:if>

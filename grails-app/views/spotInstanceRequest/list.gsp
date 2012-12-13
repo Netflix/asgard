@@ -50,7 +50,7 @@
           <tbody>
           <g:each var="sir" in="${spotInstanceRequests}" status="i">
             <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-              <td><g:checkBox name="selectedSpotInstanceRequests" value="${sir.spotInstanceRequestId}" checked="false"/></td>
+              <td><g:checkBox class="requireLogin" name="selectedSpotInstanceRequests" value="${sir.spotInstanceRequestId}" checked="false"/></td>
               <td><g:linkObject name="${sir.spotInstanceRequestId}" /></td>
               <td>${sir.spotPrice}</td>
               <td>${sir.type}</td>

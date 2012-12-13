@@ -40,8 +40,8 @@
       <g:form>
         <input type="hidden" name="name" value="${snapshot.dBSnapshotIdentifier}"/>
         <g:if test="${snapshot}">
-          <g:buttonSubmit class="restore" action="quickRestore" value="Quick Restore"/>
-          <g:textField name="dBInstanceIdentifier" size="50" value="NEW-INSTANCE-NAME"/>
+          <g:buttonSubmit class="requireLogin restore" action="quickRestore" value="Quick Restore"/>
+          <g:textField class="requireLogin" name="dBInstanceIdentifier" size="50" value="NEW-INSTANCE-NAME"/>
         </g:if>
       </g:form>
     </div>

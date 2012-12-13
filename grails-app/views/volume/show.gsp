@@ -38,8 +38,8 @@
       <g:form controller="snapshot">
         <input type="hidden" name="volumeId" value="${volume.volumeId}"/>
         <div class="buttons">
-          <g:buttonSubmit class="takeSnapshot" action="create" value="Take Snapshot"/>
-          <g:textField name="description" size="50" value="--ENTER SNAPSHOT DESCRIPTION HERE--"/>
+          <g:buttonSubmit class="takeSnapshot requireLogin" action="create" value="Take Snapshot"/>
+          <g:textField name="description" size="50" value="--ENTER SNAPSHOT DESCRIPTION HERE--" class="requireLogin"/>
         </div>
       </g:form>
     </g:if>

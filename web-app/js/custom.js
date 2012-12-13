@@ -571,6 +571,16 @@ jQuery(document).ready(function() {
     };
     setUpValidation();
 
+    var checkLogin = function() {
+        if (!browserGlobalsFromServer.requireLoginForEdit) {
+            return true;
+        }
+        if (confirm('This action requires authentication. Would you like to login now?')) {
+            document.location.href = jQuery('a.login').attr('href');
+        }
+        return false;
+    }
+
     var setUpCommonUserInterfaceEnhancements = function() {
 
         // Don't let any ajax responses use browser cache
@@ -578,6 +588,8 @@ jQuery(document).ready(function() {
 
         // Decorate the menu buttons that have drop down lists. Do the work that CSS3 isn't ready to do yet.
         jQuery('.menuButton').has('ul').addClass('dropdown');
+
+        jQuery('.requireLogin').bind('click keypress', checkLogin);
 
         // Add confirmation to delete buttons, then display the buttons
         jQuery('button.delete').bind('click keypress', function() {

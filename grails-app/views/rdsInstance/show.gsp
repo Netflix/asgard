@@ -40,8 +40,8 @@
         <div class="buttons">
           <g:form controller="dbSnapshot">
             <input type="hidden" name="dBInstanceIdentifier" value="${dbInstance.dBInstanceIdentifier}"/>
-            <g:buttonSubmit class="takeSnapshot" action="create" value="Take Snapshot"/>
-            <g:textField name="snapshotName" size="50" value="${dbInstance.dBInstanceIdentifier}-snapshot"/>
+            <g:buttonSubmit class="takeSnapshot requireLogin" action="create" value="Take Snapshot"/>
+            <g:textField class="requireLogin" name="snapshotName" size="50" value="${dbInstance.dBInstanceIdentifier}-snapshot"/>
           </g:form>
         </div>
       </g:if>

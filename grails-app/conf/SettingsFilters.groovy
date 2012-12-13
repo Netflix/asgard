@@ -1,3 +1,5 @@
+import org.apache.shiro.SecurityUtils
+
 /*
  * Copyright 2012 Netflix, Inc.
  *
@@ -36,6 +38,8 @@ class SettingsFilters {
                 request.fullTicketLabel = configService.fullTicketLabel
                 request.authenticationEnabled = (pluginService.authenticationProvider != null)
                 request.apiTokenEnabled = configService.apiTokenEnabled
+                boolean authenticated = !SecurityUtils.subject?.authenticated
+                request.requireLoginForEdit = configService.authenticationRequiredForEdit && authenticated
                 // If the last value is falsy and there is no explicit return statement then this filter method will
                 // return a falsy value and cause requests to fail silently.
                 return true
