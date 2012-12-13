@@ -36,6 +36,8 @@ class InstanceController {
 
     final static allowedMethods = [terminate: 'POST', terminateAndShrinkGroup: 'POST']
 
+    def static editActions = ['associate']
+
     def index = { redirect(action: 'list', params:params) }
 
     def awsAutoScalingService
