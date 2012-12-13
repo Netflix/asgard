@@ -259,7 +259,8 @@ class AutoScalingController {
                 securityGroupsGroupedByVpcId: effectiveGroups.groupBy { it.vpcId },
                 selectedSecurityGroups: Requests.ensureList(params.selectedSecurityGroups),
                 instanceTypes: instanceTypeService.getInstanceTypes(userContext),
-                iamInstanceProfile: configService.defaultIamRole
+                iamInstanceProfile: configService.defaultIamRole,
+                spotUrl: configService.spotUrl
         ]
     }
 

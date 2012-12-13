@@ -148,6 +148,7 @@ ${lastGroup.loadBalancerNames}"""
                             subnetPurpose: subnetPurpose ?: null,
                             loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
                             selectedLoadBalancers: selectedLoadBalancers,
+                            spotUrl: configService.spotUrl
                     ])
                     attributes
                 }

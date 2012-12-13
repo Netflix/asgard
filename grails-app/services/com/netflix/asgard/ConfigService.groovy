@@ -484,4 +484,11 @@ class ConfigService {
     String getDefaultIamRole() {
         grailsApplication.config.cloud?.defaultIamRole ?: null
     }
+
+    /**
+     * @return url with content that people should grok in order to make educated decisions about using Spot Instances
+     */
+    String getSpotUrl() {
+        grailsApplication.config.cloud.spot.infoUrl
+    }
 }
