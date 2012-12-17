@@ -33,12 +33,12 @@ class PluginService implements ApplicationContextAware {
     ConfigService configService
 
     UserDataProvider getUserDataProvider() {
-        String beanName = configService.pluginNamesToBeanNames[USER_DATA_PROVIDER] ?: 'defaultUserDataProvider'
+        String beanName = configService.getBeanNamesForPlugin(USER_DATA_PROVIDER) ?: 'defaultUserDataProvider'
         applicationContext.getBean(beanName) as UserDataProvider
     }
 
     Collection<TaskFinishedListener> getTaskFinishedListeners() {
-        List<String> beanNames = configService.pluginNamesToBeanNames[TASK_FINISHED_LISTENERS] ?: []
+        List<String> beanNames = configService.getBeanNamesForPlugin(TASK_FINISHED_LISTENERS) ?: []
         beanNames.collect { applicationContext.getBean(it) as TaskFinishedListener }
     }
 
@@ -46,7 +46,7 @@ class PluginService implements ApplicationContextAware {
      * @return The configured {@link AuthenticationProvider} Spring bean, null if one isn't configured.
      */
     AuthenticationProvider getAuthenticationProvider() {
-        String beanName = configService.pluginNamesToBeanNames[AUTHENTICATION_PROVIDER] ?: null
+        String beanName = configService.getBeanNamesForPlugin(AUTHENTICATION_PROVIDER)
         if (beanName) {
             return applicationContext.getBean(beanName) as AuthenticationProvider
         }
@@ -56,7 +56,7 @@ class PluginService implements ApplicationContextAware {
      * @return A list of configured {@link AuthorizationProvider} Spring beans, empty list if none configured.
      */
     Collection<AuthorizationProvider> getAuthorizationProviders() {
-        List<String> beanNames = configService.pluginNamesToBeanNames[AUTHORIZATION_PROVIDERS] ?: []
+        List<String> beanNames = configService.getBeanNamesForPlugin(AUTHORIZATION_PROVIDERS) ?: []
         beanNames.collect { applicationContext.getBean(it) as AuthorizationProvider }
     }
 

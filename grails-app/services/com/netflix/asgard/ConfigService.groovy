@@ -287,10 +287,12 @@ class ConfigService {
     }
 
     /**
-     * @return Name of the plugins to the implementing beans, ex. [userDataProvider: 'perforceUserDataProvider']
+     * @param The plugin name
+     * @return The bean names used for this plugin implementation, null if none configured. This can be either a single
+     *          string or a list of strings depending on the plugin.
      */
-    Map<String, Object> getPluginNamesToBeanNames() {
-        grailsApplication.config.plugin ?: [:]
+    Object getBeanNamesForPlugin(String pluginName) {
+        grailsApplication.config.plugin[(pluginName)]
     }
 
     /**
