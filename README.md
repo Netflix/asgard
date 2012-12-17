@@ -16,6 +16,14 @@ Please see the [wiki](https://github.com/Netflix/asgard/wiki).
 
 [Asgard Google group](http://groups.google.com/group/AsgardUsers).
 
+## DEPLOY
+
+Try it on CloudBees (free): 
+
+[<img src="https://d3ko533tu1ozfq.cloudfront.net/clickstart/deployInstantly_white.png">](https://grandcentral.cloudbees.com/?CB_clickstart=https://raw.github.com/CloudBees-community/asgard-clickstart/master/clickstart.json)
+
+
+
 ## LICENSE
 
 Copyright 2012 Netflix, Inc.
