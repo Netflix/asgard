@@ -49,10 +49,8 @@ beans = {
         }
     }
 
-    if (application.config.plugin?.authorizationProviders?.contains('restrictEditAuthorizationProvider')){
-        restrictEditAuthorizationProvider(RestrictEditAuthorizationProvider) { bean ->
-            bean.lazyInit = true
-        }
+    restrictEditAuthorizationProvider(RestrictEditAuthorizationProvider) { bean ->
+        bean.lazyInit = true
     }
 
     //**** Plugin behavior

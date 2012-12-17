@@ -28,7 +28,7 @@ class RestrictEditAuthorizationProvider implements AuthorizationProvider, Initia
     GrailsApplication grailsApplication
 
     @Override
-    void afterPropertiesSet() throws Exception {
+    void afterPropertiesSet() {
         controllerNameToEditActionNames = grailsApplication.controllerClasses.collectEntries { controllerClass ->
             String controllerName = WordUtils.uncapitalize(controllerClass.name)
             [(controllerName): controllerClass.getStaticPropertyValue('editActions', List)]
@@ -36,8 +36,8 @@ class RestrictEditAuthorizationProvider implements AuthorizationProvider, Initia
     }
 
     @Override
-    boolean requiresAuthorization(HttpServletRequest request, String controllerName, String action) {
-        isProtectedResource(controllerName, action) && !SecurityUtils.subject?.authenticated
+    boolean isAuthorized(HttpServletRequest request, String controllerName, String action) {
+        !isProtectedResource(controllerName, action) || SecurityUtils.subject?.authenticated
     }
 
     private boolean isProtectedResource(String controllerName, String action) {

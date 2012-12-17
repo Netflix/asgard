@@ -17,6 +17,6 @@ interface AuthorizationProvider {
      * @param actionName The name of the action being invoked
      * @return true if access is allowed to this resource, false otherwise
      */
-    boolean requiresAuthorization(HttpServletRequest request, String controllerName, String actionName)
+    boolean isAuthorized(HttpServletRequest request, String controllerName, String actionName)
 
 }

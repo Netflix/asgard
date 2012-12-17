@@ -13,7 +13,7 @@ class AuthorizationFilters {
         all(controller: '*', action: '*') {
             before = {
                 Collection<AuthorizationProvider> authorizationProviders = pluginService.authorizationProviders
-                if (authorizationProviders.any { it.requiresAuthorization(request, controllerName, actionName) }) {
+                if (authorizationProviders.any { !it.isAuthorized(request, controllerName, actionName) }) {
                     accessControl()
                 }
                 true
