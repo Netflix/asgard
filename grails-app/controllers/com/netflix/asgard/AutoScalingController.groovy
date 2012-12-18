@@ -53,6 +53,7 @@ class AutoScalingController {
     def awsCloudWatchService
     def awsEc2Service
     def awsLoadBalancerService
+    def cloudReadyService
     def configService
     def instanceTypeService
     def mergedInstanceService
@@ -166,7 +167,8 @@ class AutoScalingController {
                 map.put(alarm.alarmName, alarm)
                 map
             } as Map
-
+            String clusterName = Relationships.clusterFromGroupName(name)
+            boolean isChaosMonkeyActive = cloudReadyService.isChaosMonkeyActive(userContext.region)
             def details = [
                     instanceCount: instanceCount,
                     showPostponeButton: showPostponeButton,
@@ -176,7 +178,7 @@ class AutoScalingController {
                     mismatchedElbNamesToZoneLists: mismatchedElbNamesToZoneLists,
                     launchConfiguration: launchConfig,
                     image: image,
-                    clusterName: Relationships.clusterFromGroupName(name),
+                    clusterName: clusterName,
                     variables: Relationships.dissectCompoundName(name),
                     launchStatus: processTypeToStatusMessage[AutoScalingProcessType.Launch],
                     azRebalanceStatus: processTypeToStatusMessage[AutoScalingProcessType.AZRebalance],
@@ -189,8 +191,14 @@ class AutoScalingController {
                     buildServer: grailsApplication.config.cloud.buildServer,
                     alarmsByName: alarmsByName,
                     subnetPurpose: subnetPurpose ?: null,
-                    vpcZoneIdentifier: group.VPCZoneIdentifier
+                    vpcZoneIdentifier: group.VPCZoneIdentifier,
+                    isChaosMonkeyActive: isChaosMonkeyActive,
+                    chaosMonkeyEditLink: cloudReadyService.constructChaosMonkeyEditLink(userContext.region, appName)
             ]
+            if (isChaosMonkeyActive) {
+                Region region = userContext.region
+                details.chaosMonkeyStatus = cloudReadyService.chaosMonkeyStatusForCluster(region, clusterName)
+            }
             withFormat {
                 html { return details }
                 xml { new XML(details).render(response) }
@@ -239,6 +247,15 @@ class AutoScalingController {
         }
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
+        Set<String> appsWithClusterOptLevel = []
+        if (cloudReadyService.isChaosMonkeyActive(userContext.region)) {
+            try {
+                appsWithClusterOptLevel = cloudReadyService.applicationsWithOptLevel('cluster')
+            } catch (ServiceUnavailableException sue) {
+                flash.message = "${sue.message} Therefore, you should specify your application's " +
+                        'Chaos Monkey settings directly in Cloudready after ASG creation.'
+            }
+        }
         [
                 applications: applicationService.getRegisteredApplications(userContext),
                 group: group,
@@ -259,7 +276,9 @@ class AutoScalingController {
                 securityGroupsGroupedByVpcId: effectiveGroups.groupBy { it.vpcId },
                 selectedSecurityGroups: Requests.ensureList(params.selectedSecurityGroups),
                 instanceTypes: instanceTypeService.getInstanceTypes(userContext),
-                iamInstanceProfile: configService.defaultIamRole
+                iamInstanceProfile: configService.defaultIamRole,
+                isChaosMonkeyActive: cloudReadyService.isChaosMonkeyActive(userContext.region),
+                appsWithClusterOptLevel: appsWithClusterOptLevel ?: []
         ]
     }
 
@@ -268,14 +287,12 @@ class AutoScalingController {
     }
 
     def save = { GroupCreateCommand cmd ->
-
         if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd:cmd], params: params) // Use chain to pass both the errors and the params
         } else {
-
+            UserContext userContext = UserContext.of(request)
             // Auto Scaling Group name
             String groupName = Relationships.buildGroupName(params)
-            UserContext userContext = UserContext.of(request)
 
             // Auto Scaling Group
             def minSize = params.min ?: 0
@@ -321,14 +338,13 @@ class AutoScalingController {
             if (params.pricing == InstancePriceType.SPOT.name()) {
                 launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instanceType)
             }
-
+            boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
             CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
-                    userContext, groupTemplate, launchConfigTemplate, suspendedProcesses)
+                    userContext, groupTemplate, launchConfigTemplate, suspendedProcesses, enableChaosMonkey)
             flash.message = result.toString()
             if (result.succeeded()) {
                 redirect(action: 'show', params: [id: groupName])
-            }
-            else {
+            } else {
                 chain(action: 'create', model: [cmd: cmd], params: params)
             }
         }

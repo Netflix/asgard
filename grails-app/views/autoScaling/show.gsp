@@ -131,6 +131,12 @@
           <td class="name">Adding to Load Balancer:</td>
           <td class="value'}">${addToLoadBalancerStatus}</td>
         </tr>
+        <g:if test="${isChaosMonkeyActive}">
+          <tr class="prop">
+            <td class="name">Chaos Monkey:</td>
+            <td class="value">${chaosMonkeyStatus}<a class="cloudready" href="${chaosMonkeyEditLink}">Edit in Cloudready</a></td>
+          </tr>
+        </g:if>
         <tr class="prop">
           <td class="name">Created Time:</td>
           <td class="value"><g:formatDate date="${group.createdTime}"/></td>
