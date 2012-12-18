@@ -127,6 +127,8 @@ class ClusterController {
                             sort { it.loadBalancerName.toLowerCase() }
                     List<String> selectedLoadBalancers = Requests.ensureList(params.selectedLoadBalancers) ?: lastGroup
                             .loadBalancerNames
+                    log.debug """ClusterController.show for Cluster '${cluster.name}' Load Balancers from last Group: \
+${lastGroup.loadBalancerNames}"""
                     List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(lastGroup.vpcZoneIdentifier)
                     String subnetPurpose = subnets.coerceLoneOrNoneFromIds(subnetIds)?.purpose
                     List<String> subnetPurposes = subnets.getPurposesForZones(availabilityZones*.zoneName,
@@ -247,6 +249,10 @@ class ClusterController {
                     selectedZones)
             String iamInstanceProfile = params.iamInstanceProfile ?: lastLaunchConfig.iamInstanceProfile
             iamInstanceProfile = iamInstanceProfile ?: configService.defaultIamRole
+            log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Selected Load Balancers: \
+${loadBalancerNames}"""
+            log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers from last \
+Group: ${lastGroup.loadBalancerNames}"""
             if (params.noOptionalDefaults != 'true') {
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
@@ -254,6 +260,8 @@ class ClusterController {
                 vpcZoneIdentifier = vpcZoneIdentifier ?: subnets.constructNewVpcZoneIdentifierForZones(lastGroup.vpcZoneIdentifier,
                         selectedZones)
             }
+            log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers for next \
+Group: ${loadBalancerNames}"""
             GroupCreateOptions options = new GroupCreateOptions(
                     common: new CommonPushOptions(
                             userContext: userContext,

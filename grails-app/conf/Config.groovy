@@ -50,6 +50,10 @@ log4j = {
     // Set for a specific service
     debug "grails.app.service.com.netflix.asgard.ServerService"
 
+    // Debug issue with occasional missing ELBs when creating the next ASG in a cluster.
+    debug 'com.netflix.asgard.ClusterController'
+    debug 'com.netflix.asgard.push.GroupCreateOperation'
+
     warn 'org.codehaus.groovy.grails'
 
     // Set this to debug to watch the XML communications to and from Amazon

@@ -437,6 +437,13 @@ class ConfigService {
     }
 
     /**
+     * @return URL to redirect user to on logout to terminate OneLogin session.
+     */
+    String getOneLoginLogoutUrl() {
+        grailsApplication.config.security?.onelogin?.logoutUrl ?: null
+    }
+
+    /**
      * @return Certificate provided by OneLogin used to validate SAML tokens.
      */
     String getOneLoginCertificate() {

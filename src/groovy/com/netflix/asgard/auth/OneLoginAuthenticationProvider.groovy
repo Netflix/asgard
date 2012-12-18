@@ -93,4 +93,9 @@ class OneLoginAuthenticationProvider implements AuthenticationProvider {
             suffix ? samlResponse.nameId.replaceAll("${suffix}\$", '') : samlResponse.nameId
         }
     }
+
+    @Override
+    public String logoutUrl(HttpServletRequest request) {
+        configService.oneLoginLogoutUrl
+    }
 }
