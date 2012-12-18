@@ -496,6 +496,7 @@ class Mocks {
             awsCloudWatchService = awsCloudWatchService()
             emailerService = emailerService()
             awsSimpleDbService = awsSimpleDbService()
+            configService = configService()
             afterPropertiesSet()
             initializeCaches()
             waitForFill(caches.allAutoScalingGroups)
