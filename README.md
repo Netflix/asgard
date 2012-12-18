@@ -2,6 +2,10 @@
 
 Asgard is a web-based tool for managing cloud-based applications and infrastructure.
 
+## BUILD STATUS
+
+[![Build Status](https://buildhive.cloudbees.com/job/michaelneale/job/asgard/badge/icon)](https://buildhive.cloudbees.com/job/michaelneale/job/asgard/)
+
 ## DOWNLOAD
 
 Grab the [latest binary release](http://netflix.box.com/asgard)
