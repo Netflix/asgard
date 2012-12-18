@@ -41,6 +41,7 @@ class AutoScalingControllerSpec extends Specification {
         controller.configService = Mocks.configService()
         controller.instanceTypeService = Mocks.instanceTypeService()
         controller.stackService = Mocks.stackService()
+        controller.cloudReadyService = Mock(CloudReadyService)
     }
 
     def 'show should return ASG info'() {
