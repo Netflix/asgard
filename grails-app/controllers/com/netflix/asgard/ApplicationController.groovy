@@ -32,6 +32,7 @@ class ApplicationController {
     def awsEc2Service
     def awsAutoScalingService
     def awsLoadBalancerService
+    def cloudReadyService
     def configService
     def discoveryService
 
@@ -131,6 +132,7 @@ class ApplicationController {
                     groups.collect { Relationships.clusterFromGroupName(it.autoScalingGroupName) }.unique()
             request.alertingServiceConfigUrl = configService.alertingServiceConfigUrl
             SecurityGroup appSecurityGroup = awsEc2Service.getSecurityGroup(userContext, name)
+            boolean isChaosMonkeyActive = cloudReadyService.isChaosMonkeyActive()
             def details = [
                     app: app,
                     strictName: Relationships.checkStrictName(app.name),
@@ -139,8 +141,13 @@ class ApplicationController {
                     balancers: awsLoadBalancerService.getLoadBalancersForApp(userContext, name),
                     securities: awsEc2Service.getSecurityGroupsForApp(userContext, name),
                     appSecurityGroup: appSecurityGroup,
-                    launches: awsAutoScalingService.getLaunchConfigurationsForApp(userContext, name)
+                    launches: awsAutoScalingService.getLaunchConfigurationsForApp(userContext, name),
+                    isChaosMonkeyActive: isChaosMonkeyActive,
+                    chaosMonkeyEditLink: cloudReadyService.constructChaosMonkeyEditLink(userContext.region, app.name)
             ]
+            if (isChaosMonkeyActive) {
+                details.chaosMonkeyStatus = cloudReadyService.chaosMonkeyStatusForApplication(app.name)
+            }
             withFormat {
                 html { return details }
                 xml { new XML(details).render(response) }
@@ -152,7 +159,10 @@ class ApplicationController {
     static String[] typeList = ['Standalone Application', 'Web Application', 'Web Service']
 
     def create = {
-        ['typeList' : typeList]
+        [
+                typeList: typeList,
+                isChaosMonkeyActive: cloudReadyService.isChaosMonkeyActive()
+        ]
     }
 
     def save = { ApplicationCreateCommand cmd ->
@@ -166,15 +176,15 @@ class ApplicationController {
             String owner = params.owner
             String email = params.email
             String monitorBucketTypeString = params.monitorBucketType
-            try {
-                MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
-                applicationService.createRegisteredApplication(userContext, name, type, desc, owner, email,
-                        bucketType)
-                flash.message = "Application '${name}' has been created."
+            boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
+            MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
+            CreateApplicationResult result = applicationService.createRegisteredApplication(userContext, name, type,
+                    desc, owner, email, bucketType, enableChaosMonkey)
+            flash.message = result.toString()
+            if (result.succeeded()) {
                 redirect(action: 'show', params: [id: name])
-            } catch (Exception e) {
-                flash.message = "Could not create Application: ${e}"
-                chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass errors and params
+            } else {
+                chain(action: 'create', model: [cmd: cmd], params: params)
             }
         }
     }
@@ -271,11 +281,17 @@ class ApplicationController {
 }
 
 class ApplicationCreateCommand {
+
+    def cloudReadyService
+
     String name
     String email
     String type
     String description
     String owner
+    String chaosMonkey
+    boolean requestedFromGui
+
     static constraints = {
         name(nullable: false, blank: false, size: 1..Relationships.APPLICATION_MAX_LENGTH,
                 validator: { value, command ->
@@ -290,5 +306,14 @@ class ApplicationCreateCommand {
         type(nullable: false, blank: false)
         description(nullable: false, blank: false)
         owner(nullable: false, blank: false)
+        chaosMonkey(nullable: true, validator: { value, command ->
+            if (!command.chaosMonkey) {
+                boolean isChaosMonkeyChoiceNeglected = command.cloudReadyService.isChaosMonkeyActive() &&
+                        command.requestedFromGui
+                if (isChaosMonkeyChoiceNeglected) {
+                    return 'chaosMonkey.optIn.missing.error'
+                }
+            }
+        })
     }
 }
