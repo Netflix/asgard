@@ -18,12 +18,12 @@
 <%@ page import="com.netflix.asgard.Requests" %>
 <tr class="prop">
   <td class="name">
-    <label for="selectedLoadBalancers">Load Balancers<br/>(cannot be added<br/>or removed later):</label>
+    <label>Load Balancers<br/>(cannot be added<br/>or removed later):</label>
   </td>
   <td>
     <g:each var="vpcIdForLoadBalancer" in="${loadBalancersGroupedByVpcId?.keySet()}">
       <div class="loadBalancersSelect vpcId${vpcIdForLoadBalancer ?: ''} ${vpcId == vpcIdForLoadBalancer ? '' : 'concealed'}">
-        <g:select name="selectedLoadBalancers" multiple="multiple" size="5"
+        <g:select name="selectedLoadBalancersForVpcId${vpcIdForLoadBalancer ?: ''}" multiple="multiple" size="5"
                   disabled="${vpcId == vpcIdForLoadBalancer ? 'false' : 'true'}"
                   optionKey="loadBalancerName" optionValue="loadBalancerName" data-placeholder="Select load balancers"
                   from="${loadBalancersGroupedByVpcId[vpcIdForLoadBalancer]}" value="${selectedLoadBalancers}" />
