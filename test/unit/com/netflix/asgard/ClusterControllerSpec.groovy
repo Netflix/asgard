@@ -21,7 +21,7 @@ import spock.lang.Specification
 class ClusterControllerSpec extends Specification {
 
     final Closure<SubnetData> subnet = { String id, String zone, String purpose ->
-        new SubnetData(subnetId: id, availabilityZone: zone, purpose: purpose, target: SubnetTarget.EC2, vpcId: 'vpc-1')
+        new SubnetData(subnetId: id, availabilityZone: zone, purpose: purpose, target: SubnetTarget.EC2, vpcId: 'vpc1')
     }
 
     final Subnets subnets = new Subnets([
@@ -210,7 +210,7 @@ class ClusterControllerSpec extends Specification {
             selectedSecurityGroups = 'sg-789'
             selectedZones = 'us-east-1e'
             terminationPolicy = 'hello-tp2'
-            selectedLoadBalancers = 'hello-elb2'
+            selectedLoadBalancersForVpcIdvpc1 = 'hello-elb2'
             azRebalance = 'disabled'
             min = '13'
             desiredCapacity = '15'
