@@ -73,7 +73,6 @@ class InstanceTypeServiceSpec extends Specification {
         List<InstanceTypeData> instanceTypes = instanceTypeService.buildInstanceTypes(Region.defaultRegion())
 
         then:
-        println instanceTypes*.name
         ['m1.small', 'm1.medium', 'm1.large', 'hi1.4xlarge'] == instanceTypes*.name
         ['Small instance', 'Medium instance', 'Large instance', 'SSD'] == instanceTypes*.hardwareProfile*.description
         [0.05, 0.23, 0.68, 3.10] == instanceTypes*.linuxOnDemandPrice
