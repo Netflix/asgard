@@ -53,6 +53,7 @@ class AutoScalingController {
     def awsCloudWatchService
     def awsEc2Service
     def awsLoadBalancerService
+    def cloudReadyService
     def configService
     def instanceTypeService
     def mergedInstanceService
@@ -166,7 +167,8 @@ class AutoScalingController {
                 map.put(alarm.alarmName, alarm)
                 map
             } as Map
-
+            String clusterName = Relationships.clusterFromGroupName(name)
+            boolean isChaosMonkeyActive = cloudReadyService.isChaosMonkeyActive(userContext.region)
             def details = [
                     instanceCount: instanceCount,
                     showPostponeButton: showPostponeButton,
@@ -176,7 +178,7 @@ class AutoScalingController {
                     mismatchedElbNamesToZoneLists: mismatchedElbNamesToZoneLists,
                     launchConfiguration: launchConfig,
                     image: image,
-                    clusterName: Relationships.clusterFromGroupName(name),
+                    clusterName: clusterName,
                     variables: Relationships.dissectCompoundName(name),
                     launchStatus: processTypeToStatusMessage[AutoScalingProcessType.Launch],
                     azRebalanceStatus: processTypeToStatusMessage[AutoScalingProcessType.AZRebalance],
@@ -189,8 +191,14 @@ class AutoScalingController {
                     buildServer: grailsApplication.config.cloud.buildServer,
                     alarmsByName: alarmsByName,
                     subnetPurpose: subnetPurpose ?: null,
-                    vpcZoneIdentifier: group.VPCZoneIdentifier
+                    vpcZoneIdentifier: group.VPCZoneIdentifier,
+                    isChaosMonkeyActive: isChaosMonkeyActive,
+                    chaosMonkeyEditLink: cloudReadyService.constructChaosMonkeyEditLink(userContext.region, appName)
             ]
+            if (isChaosMonkeyActive) {
+                Region region = userContext.region
+                details.chaosMonkeyStatus = cloudReadyService.chaosMonkeyStatusForCluster(region, clusterName)
+            }
             withFormat {
                 html { return details }
                 xml { new XML(details).render(response) }
@@ -239,6 +247,17 @@ class AutoScalingController {
         }
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
+        String subnetPurpose = params.subnetPurpose ?: null
+        String vpcId = purposeToVpcId[subnetPurpose]
+        Set<String> appsWithClusterOptLevel = []
+        if (cloudReadyService.isChaosMonkeyActive(userContext.region)) {
+            try {
+                appsWithClusterOptLevel = cloudReadyService.applicationsWithOptLevel('cluster')
+            } catch (ServiceUnavailableException sue) {
+                flash.message = "${sue.message} Therefore, you should specify your application's " +
+                        'Chaos Monkey settings directly in Cloudready after ASG creation.'
+            }
+        }
         [
                 applications: applicationService.getRegisteredApplications(userContext),
                 group: group,
@@ -248,19 +267,21 @@ class AutoScalingController {
                 images: awsEc2Service.getAccountImages(userContext).sort { it.imageLocation.toLowerCase() },
                 defKey: awsEc2Service.defaultKeyName,
                 keys: awsEc2Service.getKeys(userContext).sort { it.keyName.toLowerCase() },
-                subnetPurpose: params.subnetPurpose ?: null,
+                subnetPurpose: subnetPurpose,
                 subnetPurposes: subnets.getPurposesForZones(recommendedZones*.zoneName, SubnetTarget.EC2).sort(),
                 zonesGroupedByPurpose: subnets.groupZonesByPurpose(recommendedZones*.zoneName, SubnetTarget.EC2),
                 selectedZones: selectedZones,
                 purposeToVpcId: purposeToVpcId,
-                vpcId: purposeToVpcId[params.subnetPurpose],
+                vpcId: vpcId,
                 loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
-                selectedLoadBalancers: Requests.ensureList(params.selectedLoadBalancers),
+                selectedLoadBalancers: Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId ?: ''}"]),
                 securityGroupsGroupedByVpcId: effectiveGroups.groupBy { it.vpcId },
                 selectedSecurityGroups: Requests.ensureList(params.selectedSecurityGroups),
                 instanceTypes: instanceTypeService.getInstanceTypes(userContext),
                 iamInstanceProfile: configService.defaultIamRole,
-                spotUrl: configService.spotUrl
+                spotUrl: configService.spotUrl,
+                isChaosMonkeyActive: cloudReadyService.isChaosMonkeyActive(userContext.region),
+                appsWithClusterOptLevel: appsWithClusterOptLevel ?: []
         ]
     }
 
@@ -269,14 +290,15 @@ class AutoScalingController {
     }
 
     def save = { GroupCreateCommand cmd ->
-
         if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd:cmd], params: params) // Use chain to pass both the errors and the params
         } else {
-
+            UserContext userContext = UserContext.of(request)
             // Auto Scaling Group name
             String groupName = Relationships.buildGroupName(params)
-            UserContext userContext = UserContext.of(request)
+            Subnets subnets = awsEc2Service.getSubnets(userContext)
+            String subnetPurpose = params.subnetPurpose ?: null
+            String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
 
             // Auto Scaling Group
             def minSize = params.min ?: 0
@@ -287,7 +309,7 @@ class AutoScalingController {
             Integer healthCheckGracePeriod = params.healthCheckGracePeriod as Integer
             List<String> terminationPolicies = Requests.ensureList(params.terminationPolicy)
             List<String> availabilityZones = Requests.ensureList(params.selectedZones)
-            List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
+            List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"])
             AutoScalingGroup groupTemplate = new AutoScalingGroup().withAutoScalingGroupName(groupName).
                     withAvailabilityZones(availabilityZones).withLoadBalancerNames(loadBalancerNames).
                     withMinSize(minSize.toInteger()).withDesiredCapacity(desiredCapacity.toInteger()).
@@ -296,10 +318,9 @@ class AutoScalingController {
                     withTerminationPolicies(terminationPolicies)
 
             // If this ASG lauches VPC instances, we must find the proper subnets and add them.
-            String subnetPurpose = params.subnetPurpose ?: null
             if (subnetPurpose) {
-                List<String> subnetIds = awsEc2Service.getSubnets(userContext).
-                        getSubnetIdsForZones(availabilityZones, subnetPurpose, SubnetTarget.EC2)
+                List<String> subnetIds = subnets.getSubnetIdsForZones(availabilityZones, subnetPurpose,
+                        SubnetTarget.EC2)
                 groupTemplate.withVPCZoneIdentifier(Relationships.vpcZoneIdentifierFromSubnetIds(subnetIds))
             }
 
@@ -322,14 +343,13 @@ class AutoScalingController {
             if (params.pricing == InstancePriceType.SPOT.name()) {
                 launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instanceType)
             }
-
+            boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
             CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
-                    userContext, groupTemplate, launchConfigTemplate, suspendedProcesses)
+                    userContext, groupTemplate, launchConfigTemplate, suspendedProcesses, enableChaosMonkey)
             flash.message = result.toString()
             if (result.succeeded()) {
                 redirect(action: 'show', params: [id: groupName])
-            }
-            else {
+            } else {
                 chain(action: 'create', model: [cmd: cmd], params: params)
             }
         }

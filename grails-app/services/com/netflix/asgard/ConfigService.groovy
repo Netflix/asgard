@@ -437,6 +437,13 @@ class ConfigService {
     }
 
     /**
+     * @return URL to redirect user to on logout to terminate OneLogin session.
+     */
+    String getOneLoginLogoutUrl() {
+        grailsApplication.config.security?.onelogin?.logoutUrl ?: null
+    }
+
+    /**
      * @return Certificate provided by OneLogin used to validate SAML tokens.
      */
     String getOneLoginCertificate() {
@@ -490,5 +497,19 @@ class ConfigService {
      */
     String getSpotUrl() {
         grailsApplication.config.cloud.spot.infoUrl
+    }
+
+    /**
+     * @return URL for Cloud Ready REST calls.
+     */
+    String getCloudReadyUrl() {
+        grailsApplication.config.cloud?.cloudReady?.url ?: null
+    }
+
+    /**
+     * @return Regions where Chaos Monkey is indigenous.
+     */
+    Collection<Region> getChaosMonkeyRegions() {
+        grailsApplication.config.cloud?.cloudReady?.chaosMonkey?.regions ?: []
     }
 }

@@ -35,3 +35,8 @@ license {
         gsp='DYNASCRIPT_STYLE'
     }
 }
+
+task(test, type:Exec) {
+ commandLine './grailsw', 'test-app'    
+}
+

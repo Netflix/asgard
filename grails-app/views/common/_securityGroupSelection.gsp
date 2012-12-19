@@ -22,7 +22,7 @@
   <td>
     <g:each var="vpcIdForSecurityGroup" in="${securityGroupsGroupedByVpcId?.keySet()}">
       <div class="securityGroupsSelect vpcId${vpcIdForSecurityGroup ?: ''} ${vpcId == vpcIdForSecurityGroup ? '' : 'concealed'}">
-        <g:select name="selectedSecurityGroups" multiple="multiple" size="5"
+        <g:select name="selectedSecurityGroups" id="selectedSecurityGroupsFor${vpcIdForSecurityGroup}" multiple="multiple" size="5"
                   disabled="${vpcId == vpcIdForSecurityGroup ? 'false' : 'true'}"
                   optionKey="${vpcIdForSecurityGroup ? 'groupId' : 'groupName'}" optionValue="groupName" data-placeholder="Select security groups"
                   from="${securityGroupsGroupedByVpcId[vpcIdForSecurityGroup]}" value="${selectedSecurityGroups}" />
