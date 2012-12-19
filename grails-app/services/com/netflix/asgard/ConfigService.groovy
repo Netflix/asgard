@@ -496,7 +496,7 @@ class ConfigService {
      * @return url with content that people should grok in order to make educated decisions about using Spot Instances
      */
     String getSpotUrl() {
-        grailsApplication.config.cloud.spot.infoUrl
+        grailsApplication.config.cloud?.spot?.infoUrl ?: ''
     }
 
     /**
