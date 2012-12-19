@@ -150,6 +150,7 @@ class InstanceTypeService implements CacheInitializer {
                     windowsSpotPrice: spotPrices.get(instanceType, InstanceProductType.WINDOWS)
                 )
             }
+            instanceTypes.sort { a, b -> a.instanceType <=> b.instanceType }
             // Only include types that have prices listed for this region
             Collection<InstanceTypeData> relevantInstanceTypes = instanceTypes.findAll { it.linuxOnDemandPrice }
             Collection<String> foundInstanceTypeNames = relevantInstanceTypes*.name
