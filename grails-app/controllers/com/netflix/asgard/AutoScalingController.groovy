@@ -279,6 +279,7 @@ class AutoScalingController {
                 selectedSecurityGroups: Requests.ensureList(params.selectedSecurityGroups),
                 instanceTypes: instanceTypeService.getInstanceTypes(userContext),
                 iamInstanceProfile: configService.defaultIamRole,
+                spotUrl: configService.spotUrl,
                 isChaosMonkeyActive: cloudReadyService.isChaosMonkeyActive(userContext.region),
                 appsWithClusterOptLevel: appsWithClusterOptLevel ?: []
         ]

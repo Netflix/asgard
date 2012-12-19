@@ -181,6 +181,7 @@ class PushService {
                 afterBootWait: 30,
                 rudeShutdown: false,
                 pricing: pricing,
+                spotUrl: configService.spotUrl
         ]
         result
     }
