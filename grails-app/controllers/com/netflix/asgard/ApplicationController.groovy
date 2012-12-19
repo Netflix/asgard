@@ -145,9 +145,6 @@ class ApplicationController {
                     isChaosMonkeyActive: isChaosMonkeyActive,
                     chaosMonkeyEditLink: cloudReadyService.constructChaosMonkeyEditLink(userContext.region, app.name)
             ]
-            if (isChaosMonkeyActive) {
-                details.chaosMonkeyStatus = cloudReadyService.chaosMonkeyStatusForApplication(app.name)
-            }
             withFormat {
                 html { return details }
                 xml { new XML(details).render(response) }
