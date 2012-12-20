@@ -91,6 +91,7 @@
        <g:link class="applications" controller="application" action="list">App</g:link>
        <ul>
          <li class="menuButton"><g:link class="applications" controller="application" action="list">Applications</g:link></li>
+         <li class="menuButton"><g:link class="stacks" controller="stack" action="list">Stacks</g:link></li>
          <li class="menuButton"><g:link class="users" controller="application" action="owner">Owners</g:link></li>
          <li class="menuButton"><g:link class="securityGroups" controller="security" action="list">Security Groups</g:link></li>
          <g:if test="${platformserviceExists}">
