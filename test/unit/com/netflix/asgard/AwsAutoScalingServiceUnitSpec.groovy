@@ -22,6 +22,7 @@ import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult
 import com.amazonaws.services.autoscaling.model.DescribeLaunchConfigurationsResult
 import com.amazonaws.services.autoscaling.model.DescribePoliciesResult
+import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
@@ -30,13 +31,18 @@ import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
 import com.amazonaws.services.cloudwatch.model.Dimension
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
+import com.amazonaws.services.ec2.model.Image
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AlarmData
 import com.netflix.asgard.model.AlarmData.ComparisonOperator
 import com.netflix.asgard.model.AlarmData.Statistic
+import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
+import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.ScalingPolicyData
+import com.netflix.asgard.model.StackAsg
+import com.netflix.frigga.ami.AppVersion
 import spock.lang.Specification
 
 @SuppressWarnings(["GroovyAssignabilityCheck"])
@@ -222,4 +228,109 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
         0 * mockAwsCloudWatchService.getAlarms(_, _)
     }
 
+    def 'should retrieve instance health checks'() {
+        CachedMap mockAutoScalingCache = Mock {
+            list() >> [
+                    'service1-int-v007': ['i-10000001'],
+                    'service4-dev-v001': ['i-20000001', 'i-20000002'],
+                    'service5-int-v042': ['i-30000001', 'i-30000002', 'i-30000003']
+            ].collect { asgName, instanceIds ->
+                new AutoScalingGroup(autoScalingGroupName: asgName, instances: instanceIds.
+                        collect { new Instance(instanceId: it) })
+            }
+        }
+        CachedMap mockApplicationInstanceCache = Mock {
+            list() >> [
+                    'i-10000001': 'urlForInstance11',
+                    'i-20000001': 'urlForInstance21',
+                    'i-20000002': 'urlForInstance22',
+                    'i-30000001': 'urlForInstance31',
+                    'i-30000002': 'urlForInstance32'
+            ].collect { id, url ->
+                new ApplicationInstance().with {
+                    it.instanceId = id
+                    it.healthCheckUrl = url
+                    it
+                }
+            }
+        }
+        Caches caches = new Caches(new MockCachedMapBuilder([
+                (EntityType.autoScaling): mockAutoScalingCache,
+                (EntityType.applicationInstance): mockApplicationInstanceCache
+        ]))
+        ConfigService configService = Mock {
+            getSignificantStacks() >> ['int']
+        }
+        AwsEc2Service awsEc2Service = Mock {
+            1 * checkHostHealth('urlForInstance11') >> true
+            1 * checkHostHealth('urlForInstance31') >> true
+            1 * checkHostHealth('urlForInstance32') >> false
+            0 * checkHostHealth(_)
+        }
+        awsAutoScalingService = new AwsAutoScalingService(caches: caches, configService: configService,
+                awsEc2Service: awsEc2Service)
+
+        expect:
+        awsAutoScalingService.retrieveInstanceHealthChecks(Region.US_EAST_1) == [
+                'i-10000001': true,
+                'i-30000001': true,
+                'i-30000002': false
+        ].collect { id, url -> new InstanceHealth(id, url)}
+    }
+
+    def 'should construct Stack'() {
+        CachedMap mockInstanceHealthCache = Mock {
+            get(_) >> new InstanceHealth(null, true)
+        }
+        CachedMap mockAutoScalingCache = Mock {
+            list() >> [
+                    'service1-int-v007': ['i-10000001'],
+                    'service4-dev-v001': ['i-20000001', 'i-20000002'],
+                    'service5-int-v042': ['i-30000001', 'i-30000002', 'i-30000003']
+            ].collect { asgName, instanceIds ->
+                new AutoScalingGroup(autoScalingGroupName: asgName, instances: instanceIds.
+                        collect { new Instance(instanceId: it) }, launchConfigurationName: "lc-${asgName}")
+            }
+        }
+        Caches mockCaches = new Caches(new MockCachedMapBuilder([
+                (EntityType.instanceHealth): mockInstanceHealthCache,
+                (EntityType.autoScaling): mockAutoScalingCache
+        ]))
+        awsAutoScalingService = Spy(AwsAutoScalingService) {
+            1 * getLaunchConfiguration(_, 'lc-service1-int-v007', From.CACHE) >> new LaunchConfiguration(imageId: 'ami-service1')
+            1 * getLaunchConfiguration(_, 'lc-service5-int-v042', From.CACHE) >> new LaunchConfiguration(imageId: 'ami-service5')
+            0 * getLaunchConfiguration(_, _, _)
+        }
+        AwsEc2Service mockAwsEc2Service = Mock {
+            1 * getImage(_, 'ami-service1', From.CACHE) >> {
+                Image image = new Image()
+                image.metaClass.getAppVersion = { 'service1-1.0.0-592112' }
+                image
+            }
+            1 * getImage(_, 'ami-service5', From.CACHE) >> {
+                Image image = new Image()
+                image.metaClass.getAppVersion = { 'service5-1.0.0-592112' }
+                image
+            }
+            0 * getImage(_, _, _)
+        }
+        awsAutoScalingService.with {
+            caches = mockCaches
+            awsEc2Service = mockAwsEc2Service
+        }
+
+        expect:
+        awsAutoScalingService.getStack(new UserContext(region: Region.US_EAST_1), 'int') == [
+                new StackAsg(new AutoScalingGroup(autoScalingGroupName: 'service1-int-v007',
+                        instances: [new Instance(instanceId: 'i-10000001')],
+                        launchConfigurationName: 'lc-service1-int-v007'),
+                        new LaunchConfiguration(imageId: 'ami-service1'),
+                        new AppVersion(packageName: 'service1', version: '1.0.0', changelist: '592112'), 1),
+                new StackAsg(new AutoScalingGroup(autoScalingGroupName: 'service5-int-v042',
+                        instances: [new Instance(instanceId: 'i-30000001'), new Instance(instanceId: 'i-30000002'),
+                        new Instance(instanceId: 'i-30000003')], launchConfigurationName: 'lc-service5-int-v042'),
+                        new LaunchConfiguration(imageId: 'ami-service5'),
+                        new AppVersion(packageName: 'service5', version: '1.0.0', changelist: '592112'), 3)
+        ]
+    }
 }

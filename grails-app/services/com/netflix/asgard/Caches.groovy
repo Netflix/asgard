@@ -39,6 +39,7 @@ import com.amazonaws.services.rds.model.DBSnapshot
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.ApplicationMetrics
 import com.netflix.asgard.model.HardwareProfile
+import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.model.MultiRegionInstancePrices
 import com.netflix.asgard.model.SimpleQueue
@@ -68,6 +69,7 @@ class Caches {
     final MultiRegionCachedMap<FastProperty> allFastProperties
     final MultiRegionCachedMap<Image> allImages
     final MultiRegionCachedMap<Instance> allInstances
+    final MultiRegionCachedMap<InstanceHealth> allInstanceHealthChecks
     final MultiRegionCachedMap<InstanceTypeData> allInstanceTypes
     final MultiRegionCachedMap<KeyPairInfo> allKeyPairs
     final MultiRegionCachedMap<LaunchConfiguration> allLaunchConfigurations
@@ -119,6 +121,7 @@ class Caches {
                 platformServiceRegions)
         allScalingPolicies = cachedMapBuilder.of(EntityType.scalingPolicy, 120).buildMultiRegionCachedMap()
         allScheduledActions = cachedMapBuilder.of(EntityType.scheduledAction, 120).buildMultiRegionCachedMap()
+        allInstanceHealthChecks = cachedMapBuilder.of(EntityType.instanceHealth, 300).buildMultiRegionCachedMap()
         allApplications = cachedMapBuilder.of(EntityType.application, 120).buildCachedMap()
         allApplicationMetrics = cachedMapBuilder.of(EntityType.applicationMetric, 120).buildCachedMap()
 

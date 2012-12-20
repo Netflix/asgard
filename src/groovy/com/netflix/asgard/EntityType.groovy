@@ -41,8 +41,10 @@ import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.ApplicationMetrics
 import com.netflix.asgard.model.HardwareProfile
+import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.model.SimpleQueue
+import com.netflix.asgard.model.StackAsg
 import com.netflix.asgard.model.TopicData
 import com.netflix.asgard.push.Cluster
 import groovy.transform.Immutable
@@ -72,6 +74,7 @@ import java.lang.reflect.Modifier
             { it.instanceType.toString() })
     static final EntityType<Image> image = create('Image', { it.imageId })
     static final EntityType<Instance> instance = create('Instance', { it.instanceId }, 'i-')
+    static final EntityType<InstanceHealth> instanceHealth = create('Instance Health', { it.instanceId })
     static final EntityType<InstanceTypeData> instanceType = create('Instance Type', { it.name })
     static final EntityType<KeyPairInfo> keyPair = create('Key Pair', { it.keyName })
     static final EntityType<LaunchConfiguration> launchConfiguration = create('Launch Configuration',
@@ -88,6 +91,7 @@ import java.lang.reflect.Modifier
     static final EntityType<SourceSecurityGroup> sourceSecurityGroup = create('Source Security Group', { it.groupName })
     static final EntityType<SpotInstanceRequest> spotInstanceRequest = create('Spot Instance Request',
             { it.spotInstanceRequestId }, 'sir-')
+    static final EntityType<Collection<StackAsg>> stack = create('Stack', { it })
     static final EntityType<Subnet> subnet = create('Subnet', { it.subnetId }, 'subnet-')
     static final EntityType<Task> task = create('Task', { it.id })
     static final EntityType<String> terminationPolicyType = create('Termination Policy Type', { it })

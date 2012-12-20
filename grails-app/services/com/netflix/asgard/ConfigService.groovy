@@ -550,4 +550,11 @@ class ConfigService {
     String getBuildServerUrl() {
         grailsApplication.config.cloud?.buildServer ?: ''
     }
+
+    /**
+     * @return Stack names that are revered.
+     */
+    Collection<String> getSignificantStacks() {
+        grailsApplication.config.cloud?.significantStacks ?: []
+    }
 }
