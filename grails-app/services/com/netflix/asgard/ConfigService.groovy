@@ -354,7 +354,7 @@ class ConfigService {
 
     /**
      * Gets the port number (as a String) used in constructing Eureka URLs. The port varies depending on how Eureka
-     * or is configured.
+     * is configured.
      *
      * @return the port for constructing URLs to make eureka calls
      */
