@@ -195,10 +195,6 @@ class AutoScalingController {
                     isChaosMonkeyActive: isChaosMonkeyActive,
                     chaosMonkeyEditLink: cloudReadyService.constructChaosMonkeyEditLink(userContext.region, appName)
             ]
-            if (isChaosMonkeyActive) {
-                Region region = userContext.region
-                details.chaosMonkeyStatus = cloudReadyService.chaosMonkeyStatusForCluster(region, clusterName)
-            }
             withFormat {
                 html { return details }
                 xml { new XML(details).render(response) }
