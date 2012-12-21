@@ -38,6 +38,7 @@ class FastPropertyService implements CacheInitializer {
     def applicationService
     def awsClientService
     Caches caches
+    def configService
     def discoveryService
     def mergedInstanceGroupingService
     def restClientService
@@ -273,18 +274,10 @@ class FastPropertyService implements CacheInitializer {
     }
 
     private String platformServiceHostAndPort(UserContext userContext) {
-        if (grailsApplication.config.server.online) {
-
-            List<ApplicationInstance> instances = discoveryService.getAppInstances(userContext, 'platformservice',
-                    From.AWS)
-            List<ApplicationInstance> upInstances = instances.findAll {
-                it.status == 'UP' && it.instanceId?.startsWith(EntityType.instance.idPrefix)
-            }
-            Collections.shuffle(upInstances)
-            ApplicationInstance instance = upInstances.find { it }
-            if (instance) {
-                return "${instance.hostName}:${instance.port}"
-            }
+        if (configService.online) {
+            String host = configService.getRegionalPlatformServiceServer(userContext.region)
+            String port = configService.platformServicePort
+            return "${host}:${port}"
         }
         null
     }
