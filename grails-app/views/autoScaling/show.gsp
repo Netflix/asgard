@@ -287,7 +287,7 @@ ${a.cause} : ${a.description} (${a.progress}% done) (Status: ${a.statusCode})
                     <g:if test="${group.mostCommonAppVersion}">
                       <th>Package</th>
                       <th>Ver</th>
-                      <th>CL</th>
+                      <th>Commit</th>
                       <th>Build</th>
                     </g:if>
                     <th>ELBs</th>
@@ -308,7 +308,7 @@ ${a.cause} : ${a.description} (${a.progress}% done) (Status: ${a.statusCode})
                       <g:if test="${group.mostCommonAppVersion}">
                         <td class="appVersion">${ins.appVersion?.packageName}</td>
                         <td class="appVersion">${ins.appVersion?.version}</td>
-                        <td class="appVersion">${ins.appVersion?.changelist}</td>
+                        <td class="appVersion">${ins.appVersion?.commit}</td>
                         <td class="appVersion">
                         <g:if test="${ins.appVersion?.buildJobName && buildServer}">
                           <a href="${buildServer}/job/${ins.appVersion.buildJobName}/${ins.appVersion.buildNumber}/"
