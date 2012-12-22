@@ -133,18 +133,24 @@ class InstanceTypeService implements CacheInitializer {
             RegionalInstancePrices reservedPrices = getReservedPrices(region)
             RegionalInstancePrices spotPrices = getSpotPrices(region)
 
-            List<InstanceTypeData> instanceTypes = InstanceType.values().collect { InstanceType instanceType ->
+            Set<InstanceType> awsInstanceTypes = InstanceType.values() as Set
+            List<InstanceTypeData> instanceTypes = awsInstanceTypes.findResults { InstanceType instanceType ->
                 HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == instanceType.toString() }
+                if (!hardwareProfile) {
+                    log.info "Unable to resolve ${instanceType}"
+                    return null
+                }
                 new InstanceTypeData(
-                        hardwareProfile: hardwareProfile,
-                        linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
-                        linuxReservedPrice: reservedPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
-                        linuxSpotPrice: spotPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
-                        windowsOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.WINDOWS),
-                        windowsReservedPrice: reservedPrices.get(instanceType, InstanceProductType.WINDOWS),
-                        windowsSpotPrice: spotPrices.get(instanceType, InstanceProductType.WINDOWS)
+                    hardwareProfile: hardwareProfile,
+                    linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
+                    linuxReservedPrice: reservedPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
+                    linuxSpotPrice: spotPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
+                    windowsOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.WINDOWS),
+                    windowsReservedPrice: reservedPrices.get(instanceType, InstanceProductType.WINDOWS),
+                    windowsSpotPrice: spotPrices.get(instanceType, InstanceProductType.WINDOWS)
                 )
             }
+            instanceTypes.sort { a, b -> a.instanceType <=> b.instanceType }
             // Only include types that have prices listed for this region
             Collection<InstanceTypeData> relevantInstanceTypes = instanceTypes.findAll { it.linuxOnDemandPrice }
             Collection<String> foundInstanceTypeNames = relevantInstanceTypes*.name

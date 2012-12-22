@@ -76,8 +76,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     def awsEc2Service
     def awsLoadBalancerService
     def awsSimpleDbService
-    def configService
     Caches caches
+    def cloudReadyService
+    def configService
     def discoveryService
     def emailerService
     def launchTemplateService
@@ -263,8 +264,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
 
     List<AutoScalingGroup> getAutoScalingGroupsForApp(UserContext userContext, String appName) {
-        def pat = ~/^${appName.toLowerCase()}(?:_\d+)?(?:-.+)?$/
-        getAutoScalingGroups(userContext).findAll { it.autoScalingGroupName ==~ pat }
+        getAutoScalingGroups(userContext).findAll {
+            appName.toLowerCase() == Relationships.appNameFromGroupName(it.autoScalingGroupName)
+        }
     }
 
     AutoScalingGroup getAutoScalingGroup(UserContext userContext, String name, From from = From.AWS) {
@@ -944,7 +946,8 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     CreateAutoScalingGroupResult createLaunchConfigAndAutoScalingGroup(UserContext userContext,
             AutoScalingGroup groupTemplate, LaunchConfiguration launchConfigTemplate,
-            Collection<AutoScalingProcessType> suspendedProcesses, Task existingTask = null) {
+            Collection<AutoScalingProcessType> suspendedProcesses, boolean enableChaosMonkey = false,
+            Task existingTask = null) {
 
         CreateAutoScalingGroupResult result = new CreateAutoScalingGroupResult()
         String groupName = groupTemplate.autoScalingGroupName
@@ -984,6 +987,13 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 catch (AmazonServiceException launchConfigDeleteException) {
                     result.launchConfigDeleteException = launchConfigDeleteException
                 }
+            }
+
+            if (result.autoScalingGroupCreated && enableChaosMonkey) {
+                String cluster = Relationships.clusterFromGroupName(groupTemplate.autoScalingGroupName)
+                task.log("Enabling Chaos Monkey for ${cluster}.")
+                Region region = userContext.region
+                result.cloudReadyUnavailable = !cloudReadyService.enableChaosMonkeyForCluster(region, cluster)
             }
         }, Link.to(EntityType.autoScaling, groupName), existingTask)
 
@@ -1027,6 +1037,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
 }
 
+/**
+ * Records the results of trying to create an Auto Scaling Group.
+ */
 class CreateAutoScalingGroupResult {
     String launchConfigName
     String autoScalingGroupName
@@ -1036,6 +1049,7 @@ class CreateAutoScalingGroupResult {
     AmazonServiceException autoScalingCreateException
     Boolean launchConfigDeleted
     AmazonServiceException launchConfigDeleteException
+    Boolean cloudReadyUnavailable // Just a warning, does not affect success.
 
     String toString() {
         StringBuilder output = new StringBuilder()
@@ -1043,8 +1057,7 @@ class CreateAutoScalingGroupResult {
             output.append("Launch Config '${launchConfigName}' has been created. ")
         }
         if (launchConfigCreateException) {
-            output.append('Could not create Launch Config for new Auto Scaling Group: ' +
-                    launchConfigCreateException.message)
+            output.append("Could not create Launch Config for new Auto Scaling Group: ${launchConfigCreateException}. ")
         }
         if (autoScalingGroupCreated) {
             output.append("Auto Scaling Group '${autoScalingGroupName}' has been created. ")
@@ -1054,8 +1067,10 @@ class CreateAutoScalingGroupResult {
         }
         if (launchConfigDeleted) { output.append("Launch Config '$launchConfigName' has been deleted. ") }
         if (launchConfigDeleteException) {
-            output.append("Failed to delete Launch Config '${launchConfigName}' because: " +
-                    launchConfigDeleteException.message)
+            output.append("Failed to delete Launch Config '${launchConfigName}': ${launchConfigDeleteException}. ")
+        }
+        if (cloudReadyUnavailable) {
+            output.append('Chaos Monkey was not enabled because Cloudready is currently unavailable. ')
         }
         output.toString()
     }

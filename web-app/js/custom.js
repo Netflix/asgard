@@ -764,6 +764,23 @@ jQuery(document).ready(function() {
     };
     setUpVpcRelatedAttributes();
 
+    var setUpClusterChaosMonkeyOptions = function() {
+        var appsWithClusterOptLevel, clusterChaosMonkeyOptions;
+        appsWithClusterOptLevel = [];
+        jQuery('#appsWithClusterOptLevel li').each(function(i, li) {
+            appsWithClusterOptLevel[i] = li.innerText;
+        });
+        clusterChaosMonkeyOptions = jQuery('.clusterChaosMonkeyOptions');
+        jQuery('select[name="appName"]').click(function() {
+            var appName, hasClusterOptLevel;
+            appName = jQuery(this).val();
+            hasClusterOptLevel = jQuery.inArray(appName, appsWithClusterOptLevel) > -1;
+            clusterChaosMonkeyOptions.toggleClass('concealed', !hasClusterOptLevel);
+            jQuery('input[name=appWithClusterOptLevel]').val(hasClusterOptLevel.toString());
+        });
+    };
+    setUpClusterChaosMonkeyOptions();
+
     // Cluster page
     var setUpClusterPage = function() {
         var config, jCreateContainer, jCreateAdvancedTrs;

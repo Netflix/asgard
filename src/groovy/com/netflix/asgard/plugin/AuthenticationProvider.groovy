@@ -33,6 +33,11 @@ interface AuthenticationProvider {
     String loginUrl(HttpServletRequest request)
 
     /**
+     * @return A url to redirect to when the logout link is clicked.
+     */
+    String logoutUrl(HttpServletRequest request)
+
+    /**
      * Build the Asgard login token based on a request sent to the auth/signIn endpoint.
      *
      * @param request The http request sent to the endpoint

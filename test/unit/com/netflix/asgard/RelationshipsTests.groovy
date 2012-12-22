@@ -392,28 +392,28 @@ class RelationshipsTests extends GrailsUnitTestCase {
         AppVersion appVersion = Relationships.dissectAppVersion("helloworld-1.0.0-592112.h154/WE-WAPP-helloworld/154")
         assert "helloworld" == appVersion.packageName
         assert "1.0.0" == appVersion.version
-        assert "592112" == appVersion.changelist
+        assert "592112" == appVersion.commit
         assert "154" == appVersion.buildNumber
         assert "WE-WAPP-helloworld" == appVersion.buildJobName
 
         appVersion = Relationships.dissectAppVersion("helloworld-server-1.0.0-592112.h154/WE-WAPP-helloworld/154")
         assert "helloworld-server" == appVersion.packageName
         assert "1.0.0" == appVersion.version
-        assert "592112" == appVersion.changelist
+        assert "592112" == appVersion.commit
         assert "154" == appVersion.buildNumber
         assert "WE-WAPP-helloworld" == appVersion.buildJobName
 
         appVersion = Relationships.dissectAppVersion("helloworld-1.0.0-592112.h154")
         assert "helloworld" == appVersion.packageName
         assert "1.0.0" == appVersion.version
-        assert "592112" == appVersion.changelist
+        assert "592112" == appVersion.commit
         assert "154" == appVersion.buildNumber
         assertNull appVersion.buildJobName
 
         appVersion = Relationships.dissectAppVersion("helloworld-1.0.0-592112")
         assert "helloworld" == appVersion.packageName
         assert "1.0.0" == appVersion.version
-        assert "592112" == appVersion.changelist
+        assert "592112" == appVersion.commit
         assertNull appVersion.buildNumber
         assertNull appVersion.buildJobName
 

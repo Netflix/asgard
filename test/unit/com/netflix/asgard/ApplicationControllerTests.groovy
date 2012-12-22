@@ -30,6 +30,7 @@ class ApplicationControllerTests {
         controller.applicationService = Mocks.applicationService()
         controller.awsLoadBalancerService = Mocks.awsLoadBalancerService()
         controller.configService = [alertingServiceConfigUrl: 'alertingServiceUrl']
+        controller.cloudReadyService = new CloudReadyService(configService: Mocks.configService())
     }
 
     void testShow() {

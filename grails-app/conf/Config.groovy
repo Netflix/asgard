@@ -147,6 +147,7 @@ cloud {
                             ioPerformance: 'High', memory: '30 GiB',
                             storage: 'EBS storage only')),
     ]
+    spot.infoUrl = 'http://aws.amazon.com/ec2/spot-instances/'
 }
 
 healthCheck {

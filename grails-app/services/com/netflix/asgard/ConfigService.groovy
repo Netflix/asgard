@@ -69,6 +69,17 @@ class ConfigService {
     }
 
     /**
+     * Finds the PlatformService server URL for the specified region, or null if there isn't one
+     *
+     * @param region the region in which to look for a PlatformService URL
+     * @return the PlatformService server URL for the specified region, or null if there isn't one
+     */
+    String getRegionalPlatformServiceServer(Region region) {
+        Map<Region, String> regionsToPlatformServiceServers = grailsApplication.config.platform?.regionsToServers
+        regionsToPlatformServiceServers ? regionsToPlatformServiceServers[region] : null
+    }
+
+    /**
      * Checks whether a Discovery URL is known for a specified region
      *
      * @param region the region in which to check for the existence of a Discovery URL
@@ -356,12 +367,22 @@ class ConfigService {
 
     /**
      * Gets the port number (as a String) used in constructing Eureka URLs. The port varies depending on how Eureka
-     * or is configured.
+     * is configured.
      *
      * @return the port for constructing URLs to make eureka calls
      */
     String getEurekaPort() {
         grailsApplication.config.eureka?.port ?: '80'
+    }
+
+    /**
+     * Gets the port number (as a String) used in constructing PlatformService URLs. The port varies depending on how
+     * PlatformService is configured.
+     *
+     * @return the port for constructing URLs to make PlatformService calls
+     */
+    String getPlatformServicePort() {
+        grailsApplication.config.platform?.port ?: '80'
     }
 
     /**
@@ -439,6 +460,13 @@ class ConfigService {
     }
 
     /**
+     * @return URL to redirect user to on logout to terminate OneLogin session.
+     */
+    String getOneLoginLogoutUrl() {
+        grailsApplication.config.security?.onelogin?.logoutUrl ?: null
+    }
+
+    /**
      * @return Certificate provided by OneLogin used to validate SAML tokens.
      */
     String getOneLoginCertificate() {
@@ -492,5 +520,26 @@ class ConfigService {
      */
     boolean isAuthenticationRequiredForEdit() {
         grailsApplication.config.security?.authenticationRequiredForEdit ?: false
+    }
+
+    /**
+     * @return url with content that people should grok in order to make educated decisions about using Spot Instances
+     */
+    String getSpotUrl() {
+        grailsApplication.config.cloud?.spot?.infoUrl ?: ''
+    }
+
+    /**
+     * @return URL for Cloud Ready REST calls.
+     */
+    String getCloudReadyUrl() {
+        grailsApplication.config.cloud?.cloudReady?.url ?: null
+    }
+
+    /**
+     * @return Regions where Chaos Monkey is indigenous.
+     */
+    Collection<Region> getChaosMonkeyRegions() {
+        grailsApplication.config.cloud?.cloudReady?.chaosMonkey?.regions ?: []
     }
 }
