@@ -279,7 +279,7 @@ ${a.cause} : ${a.description} (${a.progress}% done) (Status: ${a.statusCode})
                 <g:render template="/group/instanceControls"/>
                 <table id="instanceTable" class="sortable list">
                   <tr class="prop">
-                    <th class="sorttable_nosort"><input type="checkbox" id="allInstances"/></th>
+                    <th class="sorttable_nosort"><input class="requireLogin" type="checkbox" id="allInstances"/></th>
                     <th>Instance</th>
                     <th>Zone</th>
                     <th>State</th>
@@ -298,7 +298,7 @@ ${a.cause} : ${a.description} (${a.progress}% done) (Status: ${a.statusCode})
                   </tr>
                   <g:each var="ins" in="${group.instances}" status="i">
                     <tr class="${(i % 2) == 0 ? 'odd' : 'even'} ${ins.appVersion == group.mostCommonAppVersion ? '' : 'inconsistent'}" data-instanceid="${ins.instanceId}">
-                      <td><g:checkBox name="instanceId" value="${ins.instanceId}" checked="0"/></td>
+                      <td><g:checkBox class="requireLogin" name="instanceId" value="${ins.instanceId}" checked="0"/></td>
                       <td class="tiny"><g:linkObject type="instance" name="${ins.instanceId}" /></td>
                       <td><g:availabilityZone value="${ins.availabilityZone}" /></td>
                       <td class="${ins.lifecycleState == 'InService' ? '' : 'emphasized'}">

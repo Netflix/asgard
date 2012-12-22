@@ -34,7 +34,7 @@
           <div class="buttons">
             <h3>ASG Decrement:</h3>
             <g:buttonSubmit class="stop"
-                    onclick="return confirm('Really Terminate instance ${instance.instanceId} and decrement size of auto scaling group ${group.autoScalingGroupName} to ${group.desiredCapacity - 1}?');"
+                    data-warning="Really Terminate instance ${instance.instanceId} and decrement size of auto scaling group ${group.autoScalingGroupName} to ${group.desiredCapacity - 1}?"
                     action="terminateAndShrinkGroup"
                     value="Shrink ASG ${group.autoScalingGroupName} to Size ${group.desiredCapacity - 1} and Terminate Instance"
                     title="Terminate this instance and decrement the size of its auto scaling group." />
@@ -42,18 +42,18 @@
         </g:if>
         <div class="buttons">
           <h3>Operating System:</h3>
-          <g:buttonSubmit class="stop" onclick="return confirm('Really Terminate: ${instance.instanceId}?');"
+          <g:buttonSubmit class="stop" data-warning="Really Terminate: ${instance.instanceId}?"
                   action="terminate" value="Terminate Instance" title="Shut down and delete this instance." />
-          <g:buttonSubmit class="shutdown" onclick="return confirm('Really Reboot: ${instance.instanceId}?');"
+          <g:buttonSubmit class="shutdown" data-warning="Really Reboot: ${instance.instanceId}?"
                   action="reboot" value="Reboot Instance" title="Restart the OS of the instance." />
           <g:link class="cli" action="raw" params="[instanceId: instance.instanceId]" title="Display the operating system console output log.">Console Output (Raw)</g:link>
           <g:link class="userData" action="userDataHtml" params="[id: instance.instanceId]" title="Display the user data executed by the instance on startup.">User Data</g:link>
         </div>
         <div class="buttons">
           <h3>Load Balancing:</h3>
-          <g:buttonSubmit class="removeBalance"
+          <g:buttonSubmit class="requireLogin removeBalance"
                   action="deregister" value="Deregister Instance from LB" title="Remove this instance from the auto scaling group's load balancers." />
-          <g:buttonSubmit class="instanceBalance"
+          <g:buttonSubmit class="requireLogin instanceBalance"
                   action="register" value="Register Instance with ASG's LB" title="Add this instance to the auto scaling group's load balancers." />
           <g:link class="attachElastic" action="associate" params="[instanceId:instance.instanceId]"
                     title="Choose an elastic IP address to use for this instance.">Associate Elastic IP with Instance</g:link>
@@ -62,9 +62,9 @@
           <input type="hidden" name="appName" value="${appName}"/>
           <div class="buttons">
             <h3>Eureka:</h3>
-            <g:buttonSubmit class="outOfService"
+            <g:buttonSubmit class="requireLogin outOfService"
                     action="takeOutOfService" value="Deactivate in Eureka" title="Prevent Eureka from listing this instance for use by other applications." />
-            <g:buttonSubmit class="inService"
+            <g:buttonSubmit class="requireLogin inService"
                     action="putInService" value="Activate in Eureka" title="Allow Eureka to list this instance for use by other applications." />
           </div>
         </g:if>

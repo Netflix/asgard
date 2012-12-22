@@ -44,6 +44,8 @@ class LoadBalancerController {
             delete: 'POST', save: 'POST', update: 'POST', addListener: 'POST', removeListener: 'POST'
     ]
 
+    def static editActions = ['prepareListener']
+
     def index = { redirect(action: 'list', params: params) }
 
     def list = {

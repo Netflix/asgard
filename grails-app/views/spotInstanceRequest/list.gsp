@@ -32,7 +32,7 @@
       <div class="list">
         <div class="buttons">
           <g:buttonSubmit class="stop" value="Cancel Spot Instance Request(s)" action="cancel"
-                  onclick="return confirm('Really cancel spot instance request(s)?');"/>
+                  data-warning="Really cancel spot instance request(s)?"/>
         </div>
         <table class="sortable">
           <thead>
@@ -50,7 +50,7 @@
           <tbody>
           <g:each var="sir" in="${spotInstanceRequests}" status="i">
             <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-              <td><g:checkBox name="selectedSpotInstanceRequests" value="${sir.spotInstanceRequestId}" checked="false"/></td>
+              <td><g:checkBox class="requireLogin" name="selectedSpotInstanceRequests" value="${sir.spotInstanceRequestId}" checked="false"/></td>
               <td><g:linkObject name="${sir.spotInstanceRequestId}" /></td>
               <td>${sir.spotPrice}</td>
               <td>${sir.type}</td>

@@ -27,7 +27,7 @@
         <g:buttonSubmit class="stop terminateMany" title="Terminate the selected instances."
                         controller="instance" action="terminate" value="Terminate Instances"/>
       </div>
-      <div class="buttons">
+      <div class="buttons requireLogin">
         <label>Load Balancing:</label>
         <g:buttonSubmit class="removeBalance" title="Remove the selected instances from the group's load balancers."
                         controller="instance" action="deregister" value="Deregister Instances from ELBs"/>
@@ -35,7 +35,7 @@
                         controller="instance" action="register" value="Register Instances with group's ELBs" />
       </div>
       <g:if test="${discoveryExists}">
-        <div class="buttons">
+        <div class="buttons requireLogin">
           <label>Eureka:</label>
           <g:buttonSubmit class="outOfService" title="Prevent Eureka from listing the selected instances for use by other applications."
                           controller="instance" action="takeOutOfService" value="Deactivate in Eureka"/>
