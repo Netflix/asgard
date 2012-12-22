@@ -77,15 +77,15 @@
               <div class="deleting">${autoScalingGroup.status}</div>
             </g:if>
             <g:else>
-              <div class="buttons">
-                <g:buttonSubmit class="resize requireLogin" action="resize" value="Resize" /> <label for="minAndMaxSize_${autoScalingGroup.autoScalingGroupName}">to</label>
+              <div class="buttons requireLogin">
+                <g:buttonSubmit class="resize" action="resize" value="Resize" /> <label for="minAndMaxSize_${autoScalingGroup.autoScalingGroupName}">to</label>
                 <g:if test="${autoScalingGroup.minSize == autoScalingGroup.maxSize}"  >
-                  <input type="text" size="2" class="groupSize number requireLogin" id="minAndMaxSize_${autoScalingGroup.autoScalingGroupName}" name="minAndMaxSize" value="${autoScalingGroup.maxSize}"/>
+                  <input type="text" size="2" class="groupSize number" id="minAndMaxSize_${autoScalingGroup.autoScalingGroupName}" name="minAndMaxSize" value="${autoScalingGroup.maxSize}"/>
                 </g:if>
                 <g:else>
-                  <input type="text" size="2" class="groupSize number requireLogin" id="minSize_${autoScalingGroup.autoScalingGroupName}" name="minSize" value="${autoScalingGroup.minSize}"/>
+                  <input type="text" size="2" class="groupSize number" id="minSize_${autoScalingGroup.autoScalingGroupName}" name="minSize" value="${autoScalingGroup.minSize}"/>
                   <label for="minSize_${autoScalingGroup.autoScalingGroupName}">min</label> /
-                  <input type="text" size="2" class="groupSize number requireLogin" id="maxSize_${autoScalingGroup.autoScalingGroupName}" name="maxSize" value="${autoScalingGroup.maxSize}"/>
+                  <input type="text" size="2" class="groupSize number" id="maxSize_${autoScalingGroup.autoScalingGroupName}" name="maxSize" value="${autoScalingGroup.maxSize}"/>
                   <label for="maxSize_${autoScalingGroup.autoScalingGroupName}">max</label>
                 </g:else>
                 <div class="batchResizeContainer" id="batchResizeContainer_${autoScalingGroup.autoScalingGroupName}">

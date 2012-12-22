@@ -579,7 +579,7 @@ jQuery(document).ready(function() {
             document.location.href = jQuery('a.login').attr('href');
         }
         return false;
-    }
+    };
 
     var setUpCommonUserInterfaceEnhancements = function() {
 
@@ -589,10 +589,10 @@ jQuery(document).ready(function() {
         // Decorate the menu buttons that have drop down lists. Do the work that CSS3 isn't ready to do yet.
         jQuery('.menuButton').has('ul').addClass('dropdown');
 
-        jQuery('.requireLogin').bind('click keypress', checkLogin);
+        jQuery('.requireLogin, .requireLogin input, .requireLogin button').bind('click keypress', checkLogin);
 
         // Add confirmation to delete buttons, then display the buttons
-        jQuery('button.delete,button.stop,button.warn').bind('click keypress', function() {
+        jQuery('button.delete,button[data-warning]').bind('click keypress', function() {
             if (checkLogin()) {
                 var warning = jQuery(this).data('warning') || 'Are you sure you want to delete this object?';
                 return confirm(warning);

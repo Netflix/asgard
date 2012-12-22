@@ -292,7 +292,7 @@ class ConfigService {
      *          string or a list of strings depending on the plugin.
      */
     Object getBeanNamesForPlugin(String pluginName) {
-        grailsApplication.config.plugin[(pluginName)]
+        grailsApplication.config.plugin[pluginName]
     }
 
     /**
@@ -491,6 +491,6 @@ class ConfigService {
      * @return true if edit links should be hidden for unauthenticated users, false to show edit links to all users
      */
     boolean isAuthenticationRequiredForEdit() {
-        grailsApplication.config.security?.authenticationRequiredForEdit ?: null
+        grailsApplication.config.security?.authenticationRequiredForEdit ?: false
     }
 }
