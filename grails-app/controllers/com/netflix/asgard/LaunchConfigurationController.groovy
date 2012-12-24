@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.netflix.asgard.model.JanitorMode
 import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
@@ -142,28 +143,41 @@ class LaunchConfigurationController {
     }
 
     private String doMassDelete(UserContext userContext, int daysAgo) {
-        Check.atLeast(10, daysAgo, 'daysAgo')
+        Check.atLeast(1, daysAgo, 'daysAgo')
         DateTime cutOffDate = new DateTime().minusDays(daysAgo)
+        boolean deleteUnreferenced = params.deleteUnreferenced ? Boolean.valueOf(params.deleteUnreferenced) : false
+        JanitorMode mode = params.mode ? JanitorMode.valueOf(params.mode) : JanitorMode.EXECUTE
         Collection<AutoScalingGroup> allGroups = awsAutoScalingService.getAutoScalingGroups(userContext)
         Collection<LaunchConfiguration> allConfigs = awsAutoScalingService.getLaunchConfigurations(userContext)
         Collection<LaunchConfiguration> oldUnusedConfigs = allConfigs.findAll { LaunchConfiguration lc ->
             Boolean configIsOld = new DateTime(lc.createdTime.time).isBefore(cutOffDate)
             Boolean configNotInUse = !(allGroups.any { it.launchConfigurationName == lc.launchConfigurationName })
-            configIsOld && configNotInUse
+            (configIsOld && configNotInUse) || (deleteUnreferenced && !autoscalingGroupExists(userContext, lc))
         }
+
         DateTimeFormatter formatter = ISODateTimeFormat.date()
-        String message = "Deleting ${oldUnusedConfigs.size()} unused launch configs from before" +
+
+        String executeMessage = "Deleting ${oldUnusedConfigs.size()} unused launch configs from before" +
                 " ${formatter.print(cutOffDate)} \n"
+        String dryRunMessage = "Dry run mode. If executed, this job would delete ${oldUnusedConfigs.size()} unused" +
+                "launch configs from before ${formatter.print(cutOffDate)} \n"
+        String message = JanitorMode.EXECUTE == mode ? executeMessage : dryRunMessage
         oldUnusedConfigs.sort { it.createdTime }
         oldUnusedConfigs.each { LaunchConfiguration lc ->
             try {
-                awsAutoScalingService.deleteLaunchConfiguration(userContext, lc.launchConfigurationName)
+                if (mode == JanitorMode.EXECUTE) {
+                    awsAutoScalingService.deleteLaunchConfiguration(userContext, lc.launchConfigurationName)
+                }
                 message += "Deleted ${formatter.print(lc.createdTime.time)} ${lc.launchConfigurationName} \n"
             } catch (Exception e) {
                 message += "Could not delete Launch Configuration ${lc.launchConfigurationName}: ${e} \n"
             }
         }
         return message
+    }
+
+    private boolean autoscalingGroupExists(UserContext userContext, LaunchConfiguration lc) {
+        awsAutoScalingService.getAutoScalingGroupForLaunchConfig(userContext, lc.launchConfigurationName)
     }
 
 }

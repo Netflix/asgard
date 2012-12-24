@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard.model
 
+import com.amazonaws.services.ec2.model.InstanceType
+
 /**
  * Hardware specifications and multiple types of pricing data for a type of machine available to use as an EC2 instance.
  */
@@ -62,6 +64,10 @@ final class InstanceTypeData {
      */
     String getName() {
         hardwareProfile.name
+    }
+
+    InstanceType getInstanceType() {
+        InstanceType.fromValue(hardwareProfile.instanceType)
     }
 
     /**

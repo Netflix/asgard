@@ -122,15 +122,16 @@ class ClusterController {
                     Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
                     Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(availabilityZones,
                             Requests.ensureList(params.selectedZones), lastGroup)
-                    Subnets subnets = awsEc2Service.getSubnets(userContext)
                     List<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext).
                             sort { it.loadBalancerName.toLowerCase() }
-                    List<String> selectedLoadBalancers = Requests.ensureList(params.selectedLoadBalancers) ?: lastGroup
-                            .loadBalancerNames
-                    log.debug """ClusterController.show for Cluster '${cluster.name}' Load Balancers from last Group: \
-${lastGroup.loadBalancerNames}"""
+                    Subnets subnets = awsEc2Service.getSubnets(userContext)
                     List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(lastGroup.vpcZoneIdentifier)
                     String subnetPurpose = subnets.coerceLoneOrNoneFromIds(subnetIds)?.purpose
+                    String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
+                    List<String> selectedLoadBalancers = Requests.ensureList(
+                            params["selectedLoadBalancersForVpcId${vpcId}"]) ?: lastGroup.loadBalancerNames
+                    log.debug """ClusterController.show for Cluster '${cluster.name}' Load Balancers from last Group: \
+${lastGroup.loadBalancerNames}"""
                     List<String> subnetPurposes = subnets.getPurposesForZones(availabilityZones*.zoneName,
                             SubnetTarget.EC2).sort()
                     attributes.putAll([
@@ -148,6 +149,7 @@ ${lastGroup.loadBalancerNames}"""
                             subnetPurpose: subnetPurpose ?: null,
                             loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
                             selectedLoadBalancers: selectedLoadBalancers,
+                            spotUrl: configService.spotUrl
                     ])
                     attributes
                 }
@@ -192,7 +194,10 @@ ${lastGroup.loadBalancerNames}"""
             String appName = Relationships.appNameFromGroupName(name)
             List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups)
             List<String> termPolicies = Requests.ensureList(params.terminationPolicy)
-            List<String> loadBalancerNames = Requests.ensureList(params.selectedLoadBalancers)
+            Subnets subnets = awsEc2Service.getSubnets(userContext)
+            String subnetPurpose = params.subnetPurpose
+            String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
+            List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"])
             // Availability zones default to the last group's value since this field is required.
             List<String> selectedZones = Requests.ensureList(params.selectedZones) ?: lastGroup.availabilityZones
             String azRebalance = params.azRebalance
@@ -243,8 +248,6 @@ ${lastGroup.loadBalancerNames}"""
             }
 
             Integer lastGracePeriod = lastGroup.healthCheckGracePeriod
-            Subnets subnets = awsEc2Service.getSubnets(userContext)
-            String subnetPurpose = params.subnetPurpose
             String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForPurposeAndZones(subnetPurpose,
                     selectedZones)
             String iamInstanceProfile = params.iamInstanceProfile ?: lastLaunchConfig.iamInstanceProfile
