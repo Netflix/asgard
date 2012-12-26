@@ -47,7 +47,7 @@
           <tbody>
           <g:each var="s" in="${snapshots}" status="i">
             <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-              <td><g:checkBox name="selectedSnapshots" value="${s.dBSnapshotIdentifier}" checked="0"/></td>
+              <td><g:checkBox class="requireLogin" name="selectedSnapshots" value="${s.dBSnapshotIdentifier}" checked="0"/></td>
               <td><g:linkObject type="dbSnapshot" name="${s.dBSnapshotIdentifier}"/></td>
               <td>${s.dBInstanceIdentifier}</td>
               <td>${s.status}</td>
