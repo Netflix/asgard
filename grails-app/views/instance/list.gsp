@@ -32,7 +32,7 @@
       <g:render template="instances">
         <div class="buttons">
           <g:buttonSubmit class="stop" value="Terminate Instance(s)" action="terminate"
-                          onclick="return confirm('Really terminate instance(s)?');"/>
+                          data-warning="Really terminate instance(s)?"/>
           <g:link class="clean" action="audit">Audit Ungrouped Instances</g:link>
         </div>
       </g:render>

@@ -22,6 +22,7 @@ import com.netflix.asgard.ServiceInitLoggingBeanPostProcessor
 import com.netflix.asgard.SnsTaskFinishedListener
 import com.netflix.asgard.ThreadScheduler
 import com.netflix.asgard.auth.OneLoginAuthenticationProvider
+import com.netflix.asgard.auth.RestrictEditAuthorizationProvider
 import groovy.io.FileType
 
 beans = {
@@ -46,6 +47,10 @@ beans = {
         oneLoginAuthenticationProvider(OneLoginAuthenticationProvider) { bean ->
             bean.lazyInit = true
         }
+    }
+
+    restrictEditAuthorizationProvider(RestrictEditAuthorizationProvider) { bean ->
+        bean.lazyInit = true
     }
 
     //**** Plugin behavior

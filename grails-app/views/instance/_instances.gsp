@@ -41,7 +41,7 @@
     <tbody>
     <g:each var="mi" in="${instanceList}" status="i">
       <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-        <td><g:if test="${mi.instanceId}"><g:checkBox name="selectedInstances" value="${mi.instanceId}" checked="0"/></g:if></td>
+        <td><g:if test="${mi.instanceId}"><g:checkBox name="selectedInstances" value="${mi.instanceId}" checked="0" class="requireLogin"/></g:if></td>
         <g:if test="${discoveryExists}">
           <td class="app"><g:linkObject type="application" name="${mi.appName}"/></td>
         </g:if>

@@ -145,7 +145,8 @@
     window.browserGlobalsFromServer = {
       groupResizeDefaultBatchSize: ${GroupResizeOperation.DEFAULT_BATCH_SIZE},
       params: ${params as JSON},
-      region: '${region.code}'
+      region: '${region.code}',
+      requireLoginForEdit: ${requireLoginForEdit}
     };
   </script>
   <script type="text/javascript" src="${resource(dir: 'js', file: 'jquery.js')}?v=${build}"></script>
