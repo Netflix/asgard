@@ -2,6 +2,10 @@
 
 Asgard is a web-based tool for managing cloud-based applications and infrastructure.
 
+## BUILD STATUS
+
+[![Build Status](https://buildhive.cloudbees.com/job/michaelneale/job/asgard/badge/icon)](https://buildhive.cloudbees.com/job/michaelneale/job/asgard/)
+
 ## DOWNLOAD
 
 Grab the [latest binary release](http://netflix.box.com/asgard)
@@ -15,6 +19,14 @@ Please see the [wiki](https://github.com/Netflix/asgard/wiki).
 ## SUPPORT
 
 [Asgard Google group](http://groups.google.com/group/AsgardUsers).
+
+## DEPLOY
+
+Try it on CloudBees (free): 
+
+[<img src="https://d3ko533tu1ozfq.cloudfront.net/clickstart/deployInstantly_white.png">](https://grandcentral.cloudbees.com/?CB_clickstart=https://raw.github.com/CloudBees-community/asgard-clickstart/master/clickstart.json)
+
+
 
 ## LICENSE
 
