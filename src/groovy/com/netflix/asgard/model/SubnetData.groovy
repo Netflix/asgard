@@ -66,11 +66,11 @@ import org.codehaus.groovy.grails.web.json.JSONElement
                 availableIpAddressCount: subnet.availableIpAddressCount, availabilityZone: subnet.availabilityZone)
     }
 
-    private static String getPurpose(JSONElement json) {
+    static String getPurpose(JSONElement json) {
         json?.purpose
     }
 
-    private static SubnetTarget getTarget(JSONElement json) {
+    static SubnetTarget getTarget(JSONElement json) {
         String targetName = json?.target
         if (!targetName) { return null }
         SubnetTarget.forText(targetName)

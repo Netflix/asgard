@@ -730,7 +730,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         getCountedAppVersions(getInstances(userContext), caches.allImages.by(userContext.region).unmodifiable())
     }
 
-    private Multiset<AppVersion> getCountedAppVersions(Collection<Instance> instances, Map<String, Image> images) {
+    Multiset<AppVersion> getCountedAppVersions(Collection<Instance> instances, Map<String, Image> images) {
         Multiset<AppVersion> appVersions = TreeMultiset.create()
         instances.each { Instance instance ->
             Image image = images.get(instance.imageId)
