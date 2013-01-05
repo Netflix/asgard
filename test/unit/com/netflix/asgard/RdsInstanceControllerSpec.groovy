@@ -58,7 +58,8 @@ class RdsInstanceControllerSpec extends Specification {
     def 'save should return exception message when necessary'() {
         controller.params.putAll(showParams)
         final cmd = new DbCreateCommand(showParams)
-        controller.awsRdsService = { throw new IllegalStateException("Exception Thrown for test.")} as AwsRdsService
+        controller.awsRdsService = Mock( AwsRdsService )
+        controller.awsRdsService._ >> { throw new IllegalStateException("Exception Thrown for test.")}
 
         when:
         controller.save(cmd)
