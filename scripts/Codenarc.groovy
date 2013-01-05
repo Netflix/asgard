@@ -95,7 +95,7 @@ private getBindingValueOrDefault(String varName, Object defaultValue) {
     variables.containsKey(varName) ? getProperty(varName) : defaultValue
 }
 
-private class ReportsDslDelegate {
+class ReportsDslDelegate {
     List reports = []
     def methodMissing(String name, args) {
         println "Adding report ${name}"
