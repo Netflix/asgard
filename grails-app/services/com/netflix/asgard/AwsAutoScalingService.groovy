@@ -880,7 +880,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         configs
     }
 
-    private DescribeLaunchConfigurationsResult retrieveLaunchConfigurations(Region region, String nextToken) {
+    DescribeLaunchConfigurationsResult retrieveLaunchConfigurations(Region region, String nextToken) {
         awsClient.by(region).describeLaunchConfigurations(new DescribeLaunchConfigurationsRequest().withNextToken(nextToken))
     }
 
