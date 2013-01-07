@@ -77,7 +77,11 @@ class OneLoginAuthenticationProvider implements AuthenticationProvider {
             AccountSettings accountSettings = new AccountSettings(certificate: configService.oneLoginCertificate)
 
             samlResponse = new Response(accountSettings)
-            samlResponse.loadXmlFromBase64(samlResponseString)
+            try {
+                samlResponse.loadXmlFromBase64(samlResponseString)
+            } catch (Exception e) {
+                throw new AuthenticationException("Unable to parse response from OneLogin: ${samlResponseString}", e)
+            }
         }
 
         boolean isValid() {
