@@ -325,12 +325,12 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
                         instances: [new Instance(instanceId: 'i-10000001')],
                         launchConfigurationName: 'lc-service1-int-v007'),
                         new LaunchConfiguration(imageId: 'ami-service1'),
-                        new AppVersion(packageName: 'service1', version: '1.0.0', changelist: '592112'), 1),
+                        new AppVersion(packageName: 'service1', version: '1.0.0', commit: '592112'), 1),
                 new StackAsg(new AutoScalingGroup(autoScalingGroupName: 'service5-int-v042',
                         instances: [new Instance(instanceId: 'i-30000001'), new Instance(instanceId: 'i-30000002'),
                         new Instance(instanceId: 'i-30000003')], launchConfigurationName: 'lc-service5-int-v042'),
                         new LaunchConfiguration(imageId: 'ami-service5'),
-                        new AppVersion(packageName: 'service5', version: '1.0.0', changelist: '592112'), 3)
+                        new AppVersion(packageName: 'service5', version: '1.0.0', commit: '592112'), 3)
         ]
     }
 }
