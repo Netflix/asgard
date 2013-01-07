@@ -268,7 +268,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
             0 * checkHostHealth(_)
         }
         awsAutoScalingService = new AwsAutoScalingService(caches: caches, configService: configService,
-                awsEc2Service: awsEc2Service)
+                awsEc2Service: awsEc2Service, threadScheduler: new ThreadScheduler(null))
 
         expect:
         awsAutoScalingService.retrieveInstanceHealthChecks(Region.US_EAST_1) == [

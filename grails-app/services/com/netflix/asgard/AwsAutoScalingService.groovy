@@ -65,6 +65,7 @@ import com.netflix.asgard.push.AsgDeletionMode
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.retriever.AwsResultsRetriever
 import com.netflix.frigga.ami.AppVersion
+import groovyx.gpars.GParsExecutorsPool
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.InitializingBean
@@ -89,6 +90,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     def mergedInstanceService
     def pushService
     def taskService
+    ThreadScheduler threadScheduler
 
     /** The location of the sequence number in SimpleDB */
     final SimpleDbSequenceLocator sequenceLocator = new SimpleDbSequenceLocator(region: Region.defaultRegion(),
@@ -283,9 +285,11 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         Collection<String> instanceIds = asgs*.instances*.instanceId.flatten()
         Collection<ApplicationInstance> instances = caches.allApplicationInstances.by(region).list().
                 findAll { it.instanceId in instanceIds }
-        instances.collect {
-            new InstanceHealth(it.instanceId, awsEc2Service.checkHostHealth(it.healthCheckUrl))
-        }
+        GParsExecutorsPool.withExistingPool(threadScheduler.scheduler) {
+            instances.collectParallel {
+                new InstanceHealth(it.instanceId, awsEc2Service.checkHostHealth(it.healthCheckUrl))
+            }
+        } as Collection<InstanceHealth>
     }
 
     public Collection<AutoScalingGroup> getAutoScalingGroupsInStacks(Region region, Collection<String> stacks) {
