@@ -42,11 +42,7 @@ import spock.lang.Specification
 @SuppressWarnings(["GroovyAssignabilityCheck"])
 class AwsAutoScalingServiceUnitSpec extends Specification {
 
-    final awsAutoScalingService = Mocks.newAwsAutoScalingService()
-
-    def setup() {
-        Mocks.createDynamicMethods() 
-    }
+    AwsAutoScalingService awsAutoScalingService
 
     def 'should update ASG with proper AWS requests'() {
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
@@ -58,7 +54,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
             )
         }
         mockAmazonAutoScalingClient.describePolicies(_) >> {[]}
-
+        awsAutoScalingService = Mocks.newAwsAutoScalingService()
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
 
         //noinspection GroovyAccessibility
@@ -112,6 +108,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
         mockAmazonAutoScalingClient.describeAutoScalingGroups(_) >> {
             new DescribeAutoScalingGroupsResult()
         }
+        awsAutoScalingService = Mocks.newAwsAutoScalingService()
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
 
         final AutoScalingGroup groupTemplate = new AutoScalingGroup().withAutoScalingGroupName('helloworld-example').
@@ -144,6 +141,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
     }
 
     def 'should get scaling policies'() {
+        awsAutoScalingService = Mocks.newAwsAutoScalingService()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
         final AwsCloudWatchService mockAwsCloudWatchService = Mock(AwsCloudWatchService)
