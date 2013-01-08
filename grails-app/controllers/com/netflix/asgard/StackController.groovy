@@ -35,8 +35,7 @@ class StackController {
         Set<String> asgNames = awsAutoScalingService.getAutoScalingGroups(userContext)*.autoScalingGroupName
         Map<String, List<String>> stackToAsgNames = asgNames.groupBy { Relationships.stackNameFromGroupName(it) }
         List<String> allStackNames = stackToAsgNames.keySet().sort() - ['']
-        List<String> significantStackNames = allStackNames
-                .findAll { it in configService.significantStacks && stackToAsgNames[it] }
+        List<String> significantStackNames = allStackNames.findAll { it in configService.significantStacks }
         def details = [
                 allStackNames: allStackNames,
                 significantStackNames: significantStackNames,

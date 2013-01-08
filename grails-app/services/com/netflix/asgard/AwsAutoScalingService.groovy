@@ -144,7 +144,8 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         caches.allScalingPolicies.ensureSetUp({ Region region -> retrieveScalingPolicies(region) })
         caches.allTerminationPolicyTypes.ensureSetUp({ Region region -> retrieveTerminationPolicyTypes() })
         caches.allScheduledActions.ensureSetUp({ Region region -> retrieveScheduledActions(region) })
-        caches.allInstanceHealthChecks.ensureSetUp({ Region region -> retrieveInstanceHealthChecks(region) }, {},
+        caches.allSignificantStackInstanceHealthChecks.ensureSetUp(
+                { Region region -> retrieveInstanceHealthChecks(region) }, {},
                 { Region region ->
                     caches.allApplicationInstances.by(region).filled && caches.allAutoScalingGroups.by(region).filled
                 }
@@ -309,7 +310,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         Collection<AutoScalingGroup> stackAsgs = getAutoScalingGroupsInStacks(userContext.region, [stackName])
         stackAsgs.collect { stackAsg ->
             Collection<String> healthyInstances = stackAsg.instances*.instanceId.findAll {
-                caches.allInstanceHealthChecks.by(userContext.region).get(it)?.isHealthy
+                caches.allSignificantStackInstanceHealthChecks.by(userContext.region).get(it)?.isHealthy
             }
             LaunchConfiguration launchConfig = getLaunchConfiguration(userContext, stackAsg.launchConfigurationName,
                     From.CACHE)

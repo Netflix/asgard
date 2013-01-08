@@ -552,7 +552,7 @@ class ConfigService {
     }
 
     /**
-     * @return Stack names that are revered.
+     * @return For stack names that are revered, we check the health of all the ASG instances.
      */
     Collection<String> getSignificantStacks() {
         grailsApplication.config.cloud?.significantStacks ?: []
