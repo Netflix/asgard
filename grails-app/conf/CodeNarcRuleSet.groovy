@@ -172,9 +172,7 @@ ruleset {
     // rulesets/grails.xml
 //    GrailsDomainHasEquals
 //    GrailsDomainHasToString
-    GrailsPublicControllerMethod {
-        priority = 1
-    }
+//    GrailsPublicControllerMethod
     GrailsServletContextReference
     GrailsSessionReference
 //    GrailsStatelessService
