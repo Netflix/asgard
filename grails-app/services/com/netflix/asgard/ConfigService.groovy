@@ -524,7 +524,7 @@ class ConfigService {
     }
 
     /**
-     * @return url with content that people should grok in order to make educated decisions about using Spot Instances
+     * @return URL with content that people should grok in order to make educated decisions about using Spot Instances
      */
     String getSpotUrl() {
         grailsApplication.config.cloud?.spot?.infoUrl ?: ''
@@ -542,5 +542,19 @@ class ConfigService {
      */
     Collection<Region> getChaosMonkeyRegions() {
         grailsApplication.config.cloud?.cloudReady?.chaosMonkey?.regions ?: []
+    }
+
+    /**
+     * @return Base URL of the build server (Jenkins) for your Applications.
+     */
+    String getBuildServerUrl() {
+        grailsApplication.config.cloud?.buildServer ?: ''
+    }
+
+    /**
+     * @return For stack names that are revered, we check the health of all the ASG instances.
+     */
+    Collection<String> getSignificantStacks() {
+        grailsApplication.config.cloud?.significantStacks ?: []
     }
 }
