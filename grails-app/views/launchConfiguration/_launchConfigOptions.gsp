@@ -81,7 +81,7 @@
       <div>
         <g:radio name="pricing" id="spot" value="${InstancePriceType.SPOT.name()}" checked="${params.pricing == InstancePriceType.SPOT.name()}"/>
         <label for="spot" class="choice">Enable (reduced costs)</label>
-        &nbsp;<a href="${spotUrl}">What's this?</a></td>
+        &nbsp;<a href="${spotUrl}">What's this?</a>
       </div>
     </td>
   </tr>
