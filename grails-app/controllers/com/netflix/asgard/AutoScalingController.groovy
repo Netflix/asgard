@@ -188,7 +188,7 @@ class AutoScalingController {
                     scheduledActions: scheduledActions,
                     activities: activities,
                     app: applicationService.getRegisteredApplication(userContext, appName),
-                    buildServer: grailsApplication.config.cloud.buildServer,
+                    buildServer: configService.buildServerUrl,
                     alarmsByName: alarmsByName,
                     subnetPurpose: subnetPurpose ?: null,
                     vpcZoneIdentifier: group.VPCZoneIdentifier,
