@@ -274,11 +274,8 @@ class FastPropertyService implements CacheInitializer {
     }
 
     private String platformServiceHostAndPort(UserContext userContext) {
-        if (configService.online) {
-            String host = configService.getRegionalPlatformServiceServer(userContext.region)
-            String port = configService.platformServicePort
-            return "${host}:${port}"
-        }
-        null
+        String host = configService.getRegionalPlatformServiceServer(userContext.region)
+        String port = configService.platformServicePort
+        (configService.online && host && port) ? "${host}:${port}" : null
     }
 }
