@@ -49,6 +49,9 @@ class PushController {
         try {
             attrs = pushService.prepareEdit(userContext, name, showAllImages, actionName,
                     Requests.ensureList(params.selectedSecurityGroups))
+            attrs.putAll([
+                    pricing: params.pricing ?: attrs.pricing
+            ])
         } catch (NoSuchObjectException ignored) {
             Requests.renderNotFound('Auto Scaling Group', name, this)
             return

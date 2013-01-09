@@ -75,13 +75,13 @@
     </td>
     <td>
       <div>
-        <g:radio name="pricing" id="onDemand" value="${InstancePriceType.ON_DEMAND.name()}" checked="${!params.pricing || params.pricing == InstancePriceType.ON_DEMAND.name()}"/>
+        <g:radio name="pricing" id="onDemand" value="${InstancePriceType.ON_DEMAND.name()}" checked="${!pricing || pricing == InstancePriceType.ON_DEMAND.name()}"/>
         <label for="onDemand" class="choice">Disable (more reliable)</label>
       </div>
       <div>
-        <g:radio name="pricing" id="spot" value="${InstancePriceType.SPOT.name()}" checked="${params.pricing == InstancePriceType.SPOT.name()}"/>
+        <g:radio name="pricing" id="spot" value="${InstancePriceType.SPOT.name()}" checked="${pricing == InstancePriceType.SPOT.name()}"/>
         <label for="spot" class="choice">Enable (reduced costs)</label>
-        &nbsp;<a href="${spotUrl}">What's this?</a></td>
+        &nbsp;<a href="${spotUrl}">What's this?</a>
       </div>
     </td>
   </tr>
