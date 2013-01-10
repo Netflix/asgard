@@ -67,18 +67,14 @@ class FastPropertySpec extends Specification {
     }
 
     def 'should construct id for valid values'() {
-        FastProperty fastProperty = constructFastProperty('dial', '11', 'test', 'tap', 'eu-west-1', 'spinal',
-                'UK', 'cmccoy', 'asgard', '123')
-
         expect:
-        fastProperty.id == 'dial|tap|test|eu-west-1||spinal|UK'
+        new FastProperty(key: 'dial', env: 'test', appId: 'tap', region: 'eu-west-1', stack: 'spinal', countries: 'UK',
+                serverId: 'server1').id == 'dial|tap|test|eu-west-1|server1|spinal|UK'
     }
 
     def 'should construct id for invalid values'() {
-        FastProperty fastProperty = constructFastProperty('_dial_', '11?', 'test:', '*tap*', 'eu-west-1', '!spinal!',
-                'UK', 'cmccoy', 'asgard', '123')
-
         expect:
-        fastProperty.id == '_dial_|*tap*|test:|eu-west-1||!spinal!|UK'
+        new FastProperty(key: '_dial_', env: 'test:', appId: '*tap*', region: 'eu-west-1', stack: '!spinal!',
+                countries: 'UK').id == '_dial_|*tap*|test:|eu-west-1||!spinal!|UK'
     }
 }
