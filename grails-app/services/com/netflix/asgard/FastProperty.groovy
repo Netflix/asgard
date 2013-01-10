@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.google.common.collect.ImmutableList
+import com.netflix.frigga.NameValidation
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.slurpersupport.GPathResult
@@ -59,5 +60,22 @@ class FastProperty {
 
     String getId() {
         PROPERTIES_THAT_FORM_ID.collect { this[it] ?: '' }.join('|')
+    }
+
+    /**
+     * Ensures the properties that make up an ID are valid.
+     *
+     * @throws IllegalStateException describing invalid properties
+     */
+    void validateId() {
+        Map<String, String> propertiesToValues = PROPERTIES_THAT_FORM_ID.collectEntries { [(it) : this[it]] }
+        Map<String, String> invalidPropertiesToValues = propertiesToValues.
+                findAll { String name, String value -> value && !NameValidation.checkDetail(value) }
+        if (!invalidPropertiesToValues) { return }
+        String invalidValues = invalidPropertiesToValues.
+                collect { String name, String value -> "${name} = '${value}'" }.join(', ')
+        String msg = "Attributes that form a Fast Property ID can only include letters, numbers, dots, underscores, " +
+                "and hyphens. The following values are not allowed: ${invalidValues}"
+        throw new IllegalStateException(msg)
     }
 }

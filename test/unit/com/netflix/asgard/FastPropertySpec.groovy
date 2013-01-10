@@ -77,4 +77,21 @@ class FastPropertySpec extends Specification {
         new FastProperty(key: '_dial_', env: 'test:', appId: '*tap*', region: 'eu-west-1', stack: '!spinal!',
                 countries: 'UK').id == '_dial_|*tap*|test:|eu-west-1||!spinal!|UK'
     }
+
+    def 'should validate for valid values'() {
+        expect:
+        new FastProperty(key: 'dial', env: 'test', appId: 'tap', region: 'eu-west-1', stack: 'spinal',
+                countries: 'UK').validateId()
+    }
+
+    def 'should fail to validate for invalid values'() {
+        when:
+        new FastProperty(key: '_dial_', env: 'test:', appId: '*tap*', region: 'eu-west-1', stack: '!spinal!',
+                countries: 'UK').validateId()
+
+        then:
+        IllegalStateException e = thrown()
+        e.message == "Attributes that form a Fast Property ID can only include letters, numbers, dots, underscores, " +
+                "and hyphens. The following values are not allowed: appId = '*tap*', env = 'test:', stack = '!spinal!'"
+    }
 }
