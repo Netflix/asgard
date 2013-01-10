@@ -39,6 +39,10 @@ class FastProperty {
     String ts
     Date timestamp
 
+    FastProperty() {
+        super()
+    }
+
     private FastProperty(GPathResult xml) {
         ['key', 'value', 'env', 'appId', 'countries', 'serverId', 'updatedBy', 'stack', 'region', 'sourceOfUpdate',
                 'cmcTicket', 'ts'].each {
