@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.google.common.collect.ImmutableList
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.slurpersupport.GPathResult
@@ -24,41 +25,39 @@ import org.springframework.web.util.HtmlUtils
 @ToString
 class FastProperty {
 
-    String id
-    String key
-    String value
-    String env
-    String appId
-    String countries
-    String serverId
-    String updatedBy
-    String stack
-    String region
-    String sourceOfUpdate
-    String cmcTicket
-    String ts
-    Date timestamp
+    String key = ''
+    String value = ''
+    String env = ''
+    String appId = ''
+    String countries = ''
+    String serverId = ''
+    String updatedBy = ''
+    String stack = ''
+    String region = ''
+    String sourceOfUpdate = ''
+    String cmcTicket = ''
+    String ts = ''
+    final Date timestamp
+
+    private static final ImmutableList<String> PROPERTIES_THAT_FORM_ID = ImmutableList.of('key', 'appId', 'env',
+            'region', 'serverId', 'stack', 'countries')
 
     FastProperty() {
-        super()
-    }
-
-    private FastProperty(GPathResult xml) {
-        ['key', 'value', 'env', 'appId', 'countries', 'serverId', 'updatedBy', 'stack', 'region', 'sourceOfUpdate',
-                'cmcTicket', 'ts'].each {
-            String value = xml[it]?.toString()
-            this[it] = value ? HtmlUtils.htmlUnescape(value) : ''
-        }
         this.timestamp = Time.parse(this.ts)?.toDate()
-        this.id = generateId(key, appId, env, region, serverId, stack, countries)
     }
 
     static FastProperty fromXml(GPathResult xml) {
-        xml ? new FastProperty(xml) : null
+        if (!xml) { return null }
+        FastProperty fastProperty = new FastProperty()
+        ['key', 'value', 'env', 'appId', 'countries', 'serverId', 'updatedBy', 'stack', 'region', 'sourceOfUpdate',
+                'cmcTicket', 'ts'].each {
+            String value = xml[it]?.toString()
+            fastProperty[it] = value ? HtmlUtils.htmlUnescape(value) : ''
+        }
+        fastProperty
     }
 
-    private String generateId(String key, String appId, String env, String region, String serverId, String stack,
-                      String countries) {
-        "${key ?: ''}|${appId ?: ''}|${env ?: ''}|${region ?: ''}|${serverId ?: ''}|${stack ?: ''}|${countries ?: ''}"
+    String getId() {
+        PROPERTIES_THAT_FORM_ID.collect { this[it] ?: '' }.join('|')
     }
 }

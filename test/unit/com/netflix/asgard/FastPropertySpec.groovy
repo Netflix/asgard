@@ -46,24 +46,24 @@ class FastPropertySpec extends Specification {
     def 'should construct fast property with all values'() {
         FastProperty actualFastProperty = constructFastProperty('dial', '11', 'test', 'tap', 'eu-west-1', 'spinal',
                 'UK', 'cmccoy', 'asgard', '123')
-        FastProperty expectedFastProperty = new FastProperty(key: 'dial', value: '11', env: 'test', appId: 'tap', region: 'eu-west-1',
-                stack: 'spinal', countries: 'UK', updatedBy: 'cmccoy', sourceOfUpdate: 'asgard', cmcTicket: '123',
-                serverId: '', ts: '', id: 'dial|tap|test|eu-west-1||spinal|UK')
+        FastProperty expectedFastProperty = new FastProperty(key: 'dial', value: '11', env: 'test', appId: 'tap',
+                region: 'eu-west-1', stack: 'spinal', countries: 'UK', updatedBy: 'cmccoy', sourceOfUpdate: 'asgard',
+                cmcTicket: '123')
 
         expect:
         actualFastProperty == expectedFastProperty
-
+        actualFastProperty.id == 'dial|tap|test|eu-west-1||spinal|UK'
     }
 
     def 'should construct fast property missing optional values'() {
         FastProperty actualFastProperty = constructFastProperty('dial', '11', 'test', 'tap', 'eu-west-1', null,
                 null, null, null, null)
-        FastProperty expectedFastProperty = new FastProperty(key: 'dial', value: '11', env: 'test', appId: 'tap', region: 'eu-west-1',
-                stack: '', countries: '', updatedBy: '', sourceOfUpdate: '', cmcTicket: '', serverId: '', ts:  '',
-                id: 'dial|tap|test|eu-west-1|||')
+        FastProperty expectedFastProperty = new FastProperty(key: 'dial', value: '11', env: 'test', appId: 'tap',
+                region: 'eu-west-1')
 
         expect:
         actualFastProperty == expectedFastProperty
+        actualFastProperty.id == 'dial|tap|test|eu-west-1|||'
     }
 
     def 'should construct id for valid values'() {
