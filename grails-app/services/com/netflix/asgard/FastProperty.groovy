@@ -20,6 +20,7 @@ import com.netflix.frigga.NameValidation
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.slurpersupport.GPathResult
+import groovy.xml.MarkupBuilder
 import org.springframework.web.util.HtmlUtils
 
 @EqualsAndHashCode
@@ -77,5 +78,23 @@ class FastProperty {
         String msg = "Attributes that form a Fast Property ID can only include letters, numbers, dots, underscores, " +
                 "and hyphens. The following values are not allowed: ${invalidValues}"
         throw new IllegalStateException(msg)
+    }
+
+    String toXml() {
+        StringWriter writer = new StringWriter()
+        final MarkupBuilder builder = new MarkupBuilder(writer)
+        builder.property {
+            builder.key(key)
+            builder.value(value)
+            builder.env(env)
+            builder.appId(appId)
+            builder.region(region)
+            builder.stack(stack)
+            builder.countries(countries)
+            builder.updatedBy(updatedBy)
+            builder.sourceOfUpdate(sourceOfUpdate)
+            builder.cmcTicket(cmcTicket)
+        }
+        writer.toString()
     }
 }

@@ -94,4 +94,25 @@ class FastPropertySpec extends Specification {
         e.message == "Attributes that form a Fast Property ID can only include letters, numbers, dots, underscores, " +
                 "and hyphens. The following values are not allowed: appId = '*tap*', env = 'test:', stack = '!spinal!'"
     }
+
+    def 'should construct xml with properties used for creation'() {
+        String expectedXml = '''\
+                    <property>
+                      <key>dial</key>
+                      <value>11</value>
+                      <env>test</env>
+                      <appId>tap</appId>
+                      <region>eu-west-1</region>
+                      <stack>spinal</stack>
+                      <countries>UK</countries>
+                      <updatedBy>cmccoy</updatedBy>
+                      <sourceOfUpdate>cmccoy</sourceOfUpdate>
+                      <cmcTicket>123</cmcTicket>
+                    </property>'''.stripIndent()
+
+        expect:
+        new FastProperty(key: 'dial', env: 'test', appId: 'tap', region: 'eu-west-1', stack: 'spinal', countries: 'UK',
+                serverId: 'server1', value: '11', updatedBy: 'cmccoy', sourceOfUpdate: 'cmccoy', cmcTicket: '123').
+                toXml() == expectedXml
+    }
 }
