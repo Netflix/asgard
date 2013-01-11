@@ -45,6 +45,8 @@ class ImageController {
             addTags: 'POST', removeTag: ['POST', 'DELETE'], removeTags: ['POST', 'DELETE'], removeAllTags: 'DELETE',
             massDelete: ['POST', 'DELETE']]
 
+    def static editActions = ['prelaunch']
+
     def index = { redirect(action: 'list', params:params) }
 
     def list = {

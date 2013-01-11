@@ -29,6 +29,8 @@ class PushController {
 
     def static allowedMethods = [startRolling:'POST']
 
+    def static editActions = ['editRolling']
+
     def awsAutoScalingService
     def awsEc2Service
     def applicationService
@@ -47,6 +49,9 @@ class PushController {
         try {
             attrs = pushService.prepareEdit(userContext, name, showAllImages, actionName,
                     Requests.ensureList(params.selectedSecurityGroups))
+            attrs.putAll([
+                    pricing: params.pricing ?: attrs.pricing
+            ])
         } catch (NoSuchObjectException ignored) {
             Requests.renderNotFound('Auto Scaling Group', name, this)
             return

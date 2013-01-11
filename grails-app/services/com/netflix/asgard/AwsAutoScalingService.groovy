@@ -52,15 +52,20 @@ import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.cache.CacheInitializer
+import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.AlarmData
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
+import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SimpleDbSequenceLocator
+import com.netflix.asgard.model.StackAsg
 import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.push.AsgDeletionMode
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.retriever.AwsResultsRetriever
+import com.netflix.frigga.ami.AppVersion
+import groovyx.gpars.GParsExecutorsPool
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.InitializingBean
@@ -85,6 +90,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     def mergedInstanceService
     def pushService
     def taskService
+    ThreadScheduler threadScheduler
 
     /** The location of the sequence number in SimpleDB */
     final SimpleDbSequenceLocator sequenceLocator = new SimpleDbSequenceLocator(region: Region.defaultRegion(),
@@ -138,6 +144,12 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         caches.allScalingPolicies.ensureSetUp({ Region region -> retrieveScalingPolicies(region) })
         caches.allTerminationPolicyTypes.ensureSetUp({ Region region -> retrieveTerminationPolicyTypes() })
         caches.allScheduledActions.ensureSetUp({ Region region -> retrieveScheduledActions(region) })
+        caches.allSignificantStackInstanceHealthChecks.ensureSetUp(
+                { Region region -> retrieveInstanceHealthChecks(region) }, {},
+                { Region region ->
+                    caches.allApplicationInstances.by(region).filled && caches.allAutoScalingGroups.by(region).filled
+                }
+        )
     }
 
     // Clusters
@@ -266,6 +278,45 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     List<AutoScalingGroup> getAutoScalingGroupsForApp(UserContext userContext, String appName) {
         getAutoScalingGroups(userContext).findAll {
             appName.toLowerCase() == Relationships.appNameFromGroupName(it.autoScalingGroupName)
+        }
+    }
+
+    private Collection<InstanceHealth> retrieveInstanceHealthChecks(Region region) {
+        Collection<AutoScalingGroup> asgs = getAutoScalingGroupsInStacks(region, configService.significantStacks)
+        Collection<String> instanceIds = asgs*.instances*.instanceId.flatten()
+        Collection<ApplicationInstance> instances = caches.allApplicationInstances.by(region).list().
+                findAll { it.instanceId in instanceIds }
+        GParsExecutorsPool.withExistingPool(threadScheduler.scheduler) {
+            instances.collectParallel {
+                new InstanceHealth(it.instanceId, awsEc2Service.checkHostHealth(it.healthCheckUrl))
+            }
+        } as Collection<InstanceHealth>
+    }
+
+    public Collection<AutoScalingGroup> getAutoScalingGroupsInStacks(Region region, Collection<String> stacks) {
+        caches.allAutoScalingGroups.by(region).list().findAll {
+            Relationships.stackNameFromGroupName(it.autoScalingGroupName) in stacks
+        }
+    }
+
+    /**
+     * Constructs StackAsgs corresponding to ASGs that belong to a Stack (based on naming convention).
+     *
+     * @param userContext who made the call, why, and in what region
+     * @param stackName to retrieve ASGs for
+     * @return details about the ASGs that are part of the Stack
+     */
+    List<StackAsg> getStack(UserContext userContext, String stackName) {
+        Collection<AutoScalingGroup> stackAsgs = getAutoScalingGroupsInStacks(userContext.region, [stackName])
+        stackAsgs.collect { stackAsg ->
+            Collection<String> healthyInstances = stackAsg.instances*.instanceId.findAll {
+                caches.allSignificantStackInstanceHealthChecks.by(userContext.region).get(it)?.isHealthy
+            }
+            LaunchConfiguration launchConfig = getLaunchConfiguration(userContext, stackAsg.launchConfigurationName,
+                    From.CACHE)
+            Image image = awsEc2Service.getImage(userContext, launchConfig.imageId, From.CACHE)
+            AppVersion appVersion = Relationships.dissectAppVersion(image?.appVersion)
+            new StackAsg(stackAsg, launchConfig, appVersion, healthyInstances.size())
         }
     }
 

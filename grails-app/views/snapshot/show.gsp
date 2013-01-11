@@ -46,9 +46,9 @@
       </g:form>
       <g:form class="validate">
         <div class="buttons">
-          <g:buttonSubmit class="create" action="restore" value="Create Volume From Snapshot"/><br/>
-          Volume Size (in GB): <g:textField name="volumeSize" size="15" placeholder="--ENTER SIZE--" class="required" />
-          Availability Zone: <g:select name="zone" from="${zoneList.zoneName}" />
+          <g:buttonSubmit class="create requireLogin" action="restore" value="Create Volume From Snapshot"/><br/>
+          Volume Size (in GB): <g:textField name="volumeSize" size="15" placeholder="--ENTER SIZE--" class="required requireLogin" />
+          Availability Zone: <g:select name="zone" from="${zoneList.zoneName}" class="requireLogin" />
         </div>
       </g:form>
     </g:if>

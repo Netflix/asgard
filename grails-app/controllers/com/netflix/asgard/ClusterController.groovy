@@ -141,7 +141,7 @@ ${lastGroup.loadBalancerNames}"""
                             nextGroupName: nextGroupName,
                             okayToCreateGroup: okayToCreateGroup,
                             recommendedNextStep: recommendedNextStep,
-                            buildServer: grailsApplication.config.cloud.buildServer,
+                            buildServer: configService.buildServerUrl,
                             vpcZoneIdentifier: lastGroup.vpcZoneIdentifier,
                             zonesGroupedByPurpose: subnets.groupZonesByPurpose(availabilityZones*.zoneName, SubnetTarget.EC2),
                             selectedZones: selectedZones,
@@ -149,7 +149,8 @@ ${lastGroup.loadBalancerNames}"""
                             subnetPurpose: subnetPurpose ?: null,
                             loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
                             selectedLoadBalancers: selectedLoadBalancers,
-                            spotUrl: configService.spotUrl
+                            spotUrl: configService.spotUrl,
+                            pricing: params.pricing ?: attributes.pricing
                     ])
                     attributes
                 }

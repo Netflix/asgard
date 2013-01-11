@@ -32,7 +32,7 @@
       <g:form method="post">
         <input type="hidden" name="id" value="${task.id}"/>
         <div class="buttons" id="taskCancellationForm">
-          <g:buttonSubmit class="stop" onclick="return confirm('Really stop task ${StringEscapeUtils.escapeJavaScript(task.name)} ?');" action="cancel" value="Stop Task"/>
+          <g:buttonSubmit class="stop" data-warning="Really stop task ${StringEscapeUtils.escapeJavaScript(task.name)} ?" action="cancel" value="Stop Task"/>
         </div>
       </g:form>
     </g:if>

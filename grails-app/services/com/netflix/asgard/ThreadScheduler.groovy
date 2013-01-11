@@ -28,7 +28,7 @@ class ThreadScheduler {
 
     private final ConfigService configService
     private final Random random = new Random()
-    private ScheduledExecutorService scheduler
+    final ScheduledExecutorService scheduler
 
     ThreadScheduler(ConfigService configService) {
         this.configService = configService

@@ -571,6 +571,16 @@ jQuery(document).ready(function() {
     };
     setUpValidation();
 
+    var checkLogin = function() {
+        if (!browserGlobalsFromServer.requireLoginForEdit) {
+            return true;
+        }
+        if (confirm('This action requires authentication. Would you like to login now?')) {
+            document.location.href = jQuery('a.login').attr('href');
+        }
+        return false;
+    };
+
     var setUpCommonUserInterfaceEnhancements = function() {
 
         // Don't let any ajax responses use browser cache
@@ -579,10 +589,15 @@ jQuery(document).ready(function() {
         // Decorate the menu buttons that have drop down lists. Do the work that CSS3 isn't ready to do yet.
         jQuery('.menuButton').has('ul').addClass('dropdown');
 
+        jQuery('.requireLogin, .requireLogin input, .requireLogin button').bind('click keypress', checkLogin);
+
         // Add confirmation to delete buttons, then display the buttons
-        jQuery('button.delete').bind('click keypress', function() {
-            var warning = jQuery(this).data('warning') || 'Are you sure you want to delete this object?';
-            return confirm(warning);
+        jQuery('button.delete,button[data-warning]').bind('click keypress', function() {
+            if (checkLogin()) {
+                var warning = jQuery(this).data('warning') || 'Are you sure you want to delete this object?';
+                return confirm(warning);
+            }
+            return false;
         }).show();
 
         // When the user changes the regionSwitcher drop-down, redirect to a similar page for the selected region.
@@ -988,6 +1003,9 @@ jQuery(document).ready(function() {
 
         confirmation = function() {
             var count, suffix, message, safeToProceed;
+            if (!checkLogin()) {
+                return false;
+            }
             count = jInstanceCheckboxes.filter(':checked').size();
             suffix = count === 1 ? '' : 's';
             message = 'Really terminate ' + count + ' selected instance' + suffix + '? This cannot be undone.';

@@ -298,10 +298,13 @@ class ConfigService {
     }
 
     /**
-     * @return Name of the plugins to the implementing beans, ex. [userDataProvider: 'perforceUserDataProvider']
+     * @param The plugin name
+     * @return The bean names used for this plugin implementation, null if none configured. This can be either a single
+     *          string or a list of strings depending on the plugin.
      */
-    Map<String, Object> getPluginNamesToBeanNames() {
-        grailsApplication.config.plugin ?: [:]
+    Object getBeanNamesForPlugin(String pluginName) {
+        Object beanNames = grailsApplication.config.plugin[pluginName]
+        beanNames ? beanNames : null
     }
 
     /**
@@ -514,7 +517,14 @@ class ConfigService {
     }
 
     /**
-     * @return url with content that people should grok in order to make educated decisions about using Spot Instances
+     * @return true if edit links should be hidden for unauthenticated users, false to show edit links to all users
+     */
+    boolean isAuthenticationRequiredForEdit() {
+        grailsApplication.config.security?.authenticationRequiredForEdit ?: false
+    }
+
+    /**
+     * @return URL with content that people should grok in order to make educated decisions about using Spot Instances
      */
     String getSpotUrl() {
         grailsApplication.config.cloud?.spot?.infoUrl ?: ''
@@ -532,5 +542,19 @@ class ConfigService {
      */
     Collection<Region> getChaosMonkeyRegions() {
         grailsApplication.config.cloud?.cloudReady?.chaosMonkey?.regions ?: []
+    }
+
+    /**
+     * @return Base URL of the build server (Jenkins) for your Applications.
+     */
+    String getBuildServerUrl() {
+        grailsApplication.config.cloud?.buildServer ?: ''
+    }
+
+    /**
+     * @return For stack names that are revered, we check the health of all the ASG instances.
+     */
+    Collection<String> getSignificantStacks() {
+        grailsApplication.config.cloud?.significantStacks ?: []
     }
 }

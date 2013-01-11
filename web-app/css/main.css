@@ -94,6 +94,7 @@ input.number                     { width: 36px;  }
 /* NAV ICONS */
 .nav .home                { background-image: url(../images/tango/24/actions/go-home.png);                }
 .nav .applications        { background-image: url(../images/tango/24/mimetypes/package-x-generic.png);    }
+.nav .stacks              { background-image: url(../images/tango/24/tools/stack.png);                    }
 .nav .users               { background-image: url(../images/tango/24/apps/system-users.png);              }
 .nav .fastProperties      { background-image: url(../images/tango/24/categories/lightning.png);           }
 .nav .images              { background-image: url(../images/tango/24/mimetypes/image-x-generic.png);      }
@@ -169,6 +170,11 @@ td.health a            { display: none; height: 16px; width: 16px; }
 td.pass a, td.fail a   { display: block; background: transparent no-repeat; }
 td.pass a              { background-image: url(../images/tango/16/status/weather-clear.png); }
 td.fail a              { background-image: url(../images/tango/16/status/weather-storm.png); }
+div.pass, div.fail, div.incomplete, div.empty   { display: block; background: transparent no-repeat; padding: 2px 2px 2px 35px; }
+div.pass               { background-image: url(../images/tango/24/status/weather-clear.png); }
+div.fail               { background-image: url(../images/tango/24/status/weather-storm.png); }
+div.incomplete         { background-image: url(../images/tango/24/status/weather-few-clouds.png); }
+div.empty              { background-image: url(../images/tango/24/status/weather-clear-night.png); }
 td.lazy img            { display: none; }
 tr.waiting td.lazy img { display: inline; }
 
@@ -338,6 +344,7 @@ button.resize div, a.resize                   { background-image: url(../images/
 
 /* ICONS FOR STANDARD TEXT LINKS */
 a.application         { padding:  2px 2px  2px 26px; background: url(../images/tango/16/mimetypes/package-x-generic.png)         transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
+a.stack               { padding:  2px 2px  2px 26px; background: url(../images/tango/16/tools/stack.png)                         transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.fastProperty        { padding:  2px 2px  2px 26px; background: url(../images/tango/16/categories/lightning.png)                transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.autoScaling         { padding:  2px 2px  2px 26px; background: url(../images/tango/16/status/network-idle.png)                 transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.cluster             { padding:  2px 2px  2px 26px; background: url(../images/tango/16/status/network-cluster.png)              transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }

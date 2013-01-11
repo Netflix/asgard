@@ -42,6 +42,10 @@ class ApplicationInstance {
     String instanceId
     //Boolean isCoordinatingDiscoveryServer  // needed only by Discovery internally
 
+    ApplicationInstance() {
+        super()
+    }
+
     ApplicationInstance(xml) {
         if (xml.hostName) {
             appName = xml.app.toString().toLowerCase()
