@@ -78,7 +78,7 @@
         </shiro:isNotLoggedIn>
       </g:if>
       <div class="search" title="Find entities by name">
-        <form action="/search" method="GET">
+        <form action="/search" method="GET" class="allowEnterKeySubmit">
           %{--<input type="search" results="10" autosave="asgard${env}globalsearch" name="q" placeholder="Global search by names" value="${params.q}">--}%
         </form>
       </div>
