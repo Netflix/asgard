@@ -586,6 +586,12 @@ jQuery(document).ready(function() {
         // Don't let any ajax responses use browser cache
         jQuery.ajaxSetup({ cache: false });
 
+        // Ignore "Enter" key on forms. It's too easy to press enter again by accident after using enter to make a
+        // select2 choice. This usability flaw can cause production outages.
+        jQuery('form').not('.allowEnterKeySubmit').bind('keydown', function(e) {
+            return e.keyCode !== 13;
+        });
+
         // Decorate the menu buttons that have drop down lists. Do the work that CSS3 isn't ready to do yet.
         jQuery('.menuButton').has('ul').addClass('dropdown');
 
