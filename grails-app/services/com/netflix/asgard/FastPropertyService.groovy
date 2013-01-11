@@ -98,6 +98,7 @@ class FastPropertyService implements CacheInitializer {
                 env: grailsApplication.config.cloud.accountName, appId: appId, region: regionCode, stack: stack,
                 countries: countries, updatedBy: updatedBy, sourceOfUpdate: SOURCE_OF_UPDATE,
                 cmcTicket: userContext.ticket)
+        fastProperty.validateId()
         String xmlString = fastProperty.toXml()
         String id = fastProperty.id
 
