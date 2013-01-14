@@ -94,24 +94,12 @@ class FastPropertyService implements CacheInitializer {
             String countries, String updatedBy, Task existingTask = null) {
 
         Check.notEmpty(key, 'fast property key')
-        StringWriter writer = new StringWriter()
-        final MarkupBuilder builder = new MarkupBuilder(writer)
-        builder.property {
-            builder.key(key)
-            builder.value(value)
-            builder.env(grailsApplication.config.cloud.accountName)
-            builder.appId(appId)
-            builder.region(regionCode)
-            builder.stack(stack)
-            builder.countries(countries)
-            builder.updatedBy(updatedBy)
-            builder.sourceOfUpdate(SOURCE_OF_UPDATE)
-            builder.cmcTicket(userContext.ticket)
-        }
-
-        String xmlString = writer.toString()
-        GPathResult xml = XML.parse(xmlString) as GPathResult
-        FastProperty fastProperty = FastProperty.fromXml(xml)
+        FastProperty fastProperty = new FastProperty(key: key, value: value,
+                env: grailsApplication.config.cloud.accountName, appId: appId, region: regionCode, stack: stack,
+                countries: countries, updatedBy: updatedBy, sourceOfUpdate: SOURCE_OF_UPDATE,
+                cmcTicket: userContext.ticket)
+        fastProperty.validateId()
+        String xmlString = fastProperty.toXml()
         String id = fastProperty.id
 
         FastProperty existingProperty = get(userContext, id)
