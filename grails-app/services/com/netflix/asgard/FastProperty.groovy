@@ -39,14 +39,9 @@ class FastProperty {
     String sourceOfUpdate
     String cmcTicket
     String ts
-    final Date timestamp
 
     private static final ImmutableList<String> PROPERTIES_THAT_FORM_ID = ImmutableList.of('key', 'appId', 'env',
             'region', 'serverId', 'stack', 'countries')
-
-    FastProperty() {
-        this.timestamp = Time.parse(this.ts)?.toDate()
-    }
 
     static FastProperty fromXml(GPathResult xml) {
         if (!xml) { return null }
