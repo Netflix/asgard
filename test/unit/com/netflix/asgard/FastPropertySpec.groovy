@@ -96,6 +96,6 @@ class FastPropertySpec extends Specification {
         expect:
         FastProperty.fromXml(XML.parse(xml) as GPathResult) == new FastProperty(key: 'dial', env: 'test', appId: 'tap',
                 region: 'eu-west-1', stack: 'spinal', countries: 'UK', serverId: 'server1', value: '11',
-                updatedBy: 'cmccoy', sourceOfUpdate: 'cmccoy', cmcTicket: '123')
+                updatedBy: 'cmccoy', sourceOfUpdate: 'cmccoy', cmcTicket: '123', ts: '')
     }
 }

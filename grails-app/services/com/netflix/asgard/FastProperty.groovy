@@ -27,18 +27,18 @@ import org.springframework.web.util.HtmlUtils
 @ToString
 class FastProperty {
 
-    String key = ''
-    String value = ''
-    String env = ''
-    String appId = ''
-    String countries = ''
-    String serverId = ''
-    String updatedBy = ''
-    String stack = ''
-    String region = ''
-    String sourceOfUpdate = ''
-    String cmcTicket = ''
-    String ts = ''
+    String key
+    String value
+    String env
+    String appId
+    String countries
+    String serverId
+    String updatedBy
+    String stack
+    String region
+    String sourceOfUpdate
+    String cmcTicket
+    String ts
     final Date timestamp
 
     private static final ImmutableList<String> PROPERTIES_THAT_FORM_ID = ImmutableList.of('key', 'appId', 'env',
