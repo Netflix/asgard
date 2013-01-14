@@ -113,9 +113,9 @@ final class AlarmData {
 
     PutMetricAlarmRequest toPutMetricAlarmRequest(String policyArn = null, String id = null) {
         final List<String> alarmActions = []
+        Collection<String> snsArns = actionArns.findAll { it.startsWith('arn:aws:sns:') } as List
         if (policyArn) {
             alarmActions << policyArn
-            Collection<String> snsArns = actionArns.findAll { it.startsWith('arn:aws:sns:') }
             alarmActions.addAll(snsArns)
         } else {
             alarmActions.addAll(actionArns)
@@ -135,6 +135,8 @@ final class AlarmData {
                 comparisonOperator: comparisonOperator?.name(),
                 statistic: statistic.name(),
                 alarmActions: alarmActions,
+                oKActions: snsArns,
+                insufficientDataActions: snsArns,
                 dimensions: dimensions
         )
     }
