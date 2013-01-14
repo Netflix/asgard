@@ -17,59 +17,20 @@ package com.netflix.asgard
 
 import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
-import groovy.xml.MarkupBuilder
 import spock.lang.Specification
 
 class FastPropertySpec extends Specification {
-
-    private FastProperty constructFastProperty(String key, String value, String env, String appId, String regionCode, String stack, String countries,
-                String updatedBy, String sourceOfUpdate, String cmcTicket) {
-        StringWriter writer = new StringWriter()
-        final MarkupBuilder builder = new MarkupBuilder(writer)
-        builder.property {
-            builder.key(key)
-            builder.value(value)
-            builder.env(env)
-            builder.appId(appId)
-            builder.region(regionCode)
-            builder.stack(stack)
-            builder.countries(countries)
-            builder.updatedBy(updatedBy)
-            builder.sourceOfUpdate(sourceOfUpdate)
-            builder.cmcTicket(cmcTicket)
-        }
-        String xmlString = writer.toString()
-        GPathResult xml = XML.parse(xmlString) as GPathResult
-        FastProperty.fromXml(xml)
-    }
-
-    def 'should construct fast property with all values'() {
-        FastProperty actualFastProperty = constructFastProperty('dial', '11', 'test', 'tap', 'eu-west-1', 'spinal',
-                'UK', 'cmccoy', 'asgard', '123')
-        FastProperty expectedFastProperty = new FastProperty(key: 'dial', value: '11', env: 'test', appId: 'tap',
-                region: 'eu-west-1', stack: 'spinal', countries: 'UK', updatedBy: 'cmccoy', sourceOfUpdate: 'asgard',
-                cmcTicket: '123')
-
-        expect:
-        actualFastProperty == expectedFastProperty
-        actualFastProperty.id == 'dial|tap|test|eu-west-1||spinal|UK'
-    }
-
-    def 'should construct fast property missing optional values'() {
-        FastProperty actualFastProperty = constructFastProperty('dial', '11', 'test', 'tap', 'eu-west-1', null,
-                null, null, null, null)
-        FastProperty expectedFastProperty = new FastProperty(key: 'dial', value: '11', env: 'test', appId: 'tap',
-                region: 'eu-west-1')
-
-        expect:
-        actualFastProperty == expectedFastProperty
-        actualFastProperty.id == 'dial|tap|test|eu-west-1|||'
-    }
 
     def 'should construct id for valid values'() {
         expect:
         new FastProperty(key: 'dial', env: 'test', appId: 'tap', region: 'eu-west-1', stack: 'spinal', countries: 'UK',
                 serverId: 'server1').id == 'dial|tap|test|eu-west-1|server1|spinal|UK'
+    }
+
+    def 'should construct id missing optional values'() {
+        expect:
+        new FastProperty(key: 'dial', value: '11', env: 'test', appId: 'tap', region: 'eu-west-1').
+                id == 'dial|tap|test|eu-west-1|||'
     }
 
     def 'should construct id for invalid values'() {
@@ -114,5 +75,27 @@ class FastPropertySpec extends Specification {
         new FastProperty(key: 'dial', env: 'test', appId: 'tap', region: 'eu-west-1', stack: 'spinal', countries: 'UK',
                 serverId: 'server1', value: '11', updatedBy: 'cmccoy', sourceOfUpdate: 'cmccoy', cmcTicket: '123').
                 toXml() == expectedXml
+    }
+
+    def 'should construct fast property from XML'() {
+        String xml = '''\
+                    <property>
+                      <key>dial</key>
+                      <value>11</value>
+                      <env>test</env>
+                      <appId>tap</appId>
+                      <region>eu-west-1</region>
+                      <stack>spinal</stack>
+                      <countries>UK</countries>
+                      <updatedBy>cmccoy</updatedBy>
+                      <sourceOfUpdate>cmccoy</sourceOfUpdate>
+                      <cmcTicket>123</cmcTicket>
+                      <serverId>server1</serverId>
+                    </property>'''.stripIndent()
+
+        expect:
+        FastProperty.fromXml(XML.parse(xml) as GPathResult) == new FastProperty(key: 'dial', env: 'test', appId: 'tap',
+                region: 'eu-west-1', stack: 'spinal', countries: 'UK', serverId: 'server1', value: '11',
+                updatedBy: 'cmccoy', sourceOfUpdate: 'cmccoy', cmcTicket: '123')
     }
 }
