@@ -59,6 +59,11 @@ class FastProperty {
         fastProperty
     }
 
+    /**
+     * Generates the id based on current field values.
+     *
+     * @return id of a fast property with these field values
+     */
     String getId() {
         PROPERTIES_THAT_FORM_ID.collect { this[it] ?: '' }.join('|')
     }
