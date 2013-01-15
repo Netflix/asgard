@@ -6,6 +6,7 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingGroupMixin
+import com.netflix.asgard.model.GroupedInstance
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.SubnetData
 import com.netflix.asgard.model.SubnetTarget
@@ -260,4 +261,31 @@ class ClusterControllerSpec extends Specification {
         }
     }
 
+    private GroupedInstance instanceWithId(String id) {
+        new GroupedInstance(id, null, null, null, null, null, null, null, null, null, null, null, null)
+    }
+
+    def 'should return an instance in the cluster'() {
+        Cluster cluster = Mock(Cluster) {
+            getInstances() >> ['i-00000001', 'i-00000002'].collect { instanceWithId(it) }
+        }
+        MergedInstanceService mergedInstanceService = Mock(MergedInstanceService) {
+            getMergedInstancesByIds(_, ['i-00000001']) >> [
+                    new MergedInstance(instanceId: 'i-00000001', status: 'DOWN')
+            ]
+        }
+        controller.mergedInstanceService = mergedInstanceService
+
+        expect:
+        controller.findAnyInstance(new UserContext(region: Region.US_EAST_1), cluster).instanceId == 'i-00000001'
+    }
+
+    def 'should return null when there are not any instances in the cluster'() {
+        Cluster cluster = Mock(Cluster) {
+            getInstances() >> []
+        }
+
+        expect:
+        controller.findAnyInstance(new UserContext(region: Region.US_EAST_1), cluster) == null
+    }
 }
