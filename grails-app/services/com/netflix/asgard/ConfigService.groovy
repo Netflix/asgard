@@ -298,6 +298,13 @@ class ConfigService {
     }
 
     /**
+     * @return list of security groups to not create AMIs in. Defaults to empty list
+     */
+    String getSecurityGroupBlacklist() {
+        grailsApplication.config.cloud?.securityGroupBlacklist ?: []
+    }
+
+    /**
      * @param The plugin name
      * @return The bean names used for this plugin implementation, null if none configured. This can be either a single
      *          string or a list of strings depending on the plugin.
