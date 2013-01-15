@@ -265,13 +265,30 @@ class ClusterControllerSpec extends Specification {
         new GroupedInstance(id, null, null, null, null, null, null, null, null, null, null, null, null)
     }
 
-    def 'should return an instance in the cluster'() {
+    def 'should return an instance in the cluster, preferring UP'() {
         Cluster cluster = Mock(Cluster) {
             getInstances() >> ['i-00000001', 'i-00000002'].collect { instanceWithId(it) }
         }
         MergedInstanceService mergedInstanceService = Mock(MergedInstanceService) {
-            getMergedInstancesByIds(_, ['i-00000001']) >> [
-                    new MergedInstance(instanceId: 'i-00000001', status: 'DOWN')
+            getMergedInstancesByIds(_, ['i-00000001', 'i-00000002']) >> [
+                    new MergedInstance(instanceId: 'i-00000001', status: 'DOWN'),
+                    new MergedInstance(instanceId: 'i-00000002', status: 'UP')
+            ]
+        }
+        controller.mergedInstanceService = mergedInstanceService
+
+        expect:
+        controller.findAnyInstance(new UserContext(region: Region.US_EAST_1), cluster).instanceId == 'i-00000002'
+    }
+
+    def 'should return an instance in the cluster, even when all are DOWN'() {
+        Cluster cluster = Mock(Cluster) {
+            getInstances() >> ['i-00000001', 'i-00000002'].collect { instanceWithId(it) }
+        }
+        MergedInstanceService mergedInstanceService = Mock(MergedInstanceService) {
+            getMergedInstancesByIds(_, ['i-00000001', 'i-00000002']) >> [
+                    new MergedInstance(instanceId: 'i-00000001', status: 'DOWN'),
+                    new MergedInstance(instanceId: 'i-00000002', status: 'DOWN')
             ]
         }
         controller.mergedInstanceService = mergedInstanceService

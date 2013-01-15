@@ -22,7 +22,6 @@ import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
-import com.netflix.asgard.model.GroupedInstance
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SubnetTarget
@@ -357,9 +356,11 @@ Group: ${loadBalancerNames}"""
     }
 
     private MergedInstance findAnyInstance(UserContext userContext, Cluster cluster) {
-        List<GroupedInstance> instances = cluster?.instances
-        String instanceId = instances?.size() >= 1 ? instances[0].instanceId : null
-        instanceId ? mergedInstanceService.getMergedInstancesByIds(userContext, [instanceId])[0] : null
+        List<String> instanceIds = cluster?.instances*.instanceId
+        if (!instanceIds) { return null }
+        List<MergedInstance> mergedInstances = mergedInstanceService.getMergedInstancesByIds(userContext, instanceIds)
+        List<MergedInstance> upMergedInstances = mergedInstances.findAll { it.status == 'UP' }
+        upMergedInstances ? upMergedInstances[0] : mergedInstances[0]
     }
 
     private void redirectToTask(String taskId) {
