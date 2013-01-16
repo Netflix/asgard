@@ -399,11 +399,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     Boolean isSecurityGroupEditable(String name) {
-        if (configService.securityGroupBlacklist.contains(name)) {
-            return false
-        } else {
-            return true
-        }
+        !configService.securityGroupBlacklist.contains(name)
     }
 
     private List<SecurityGroup> retrieveSecurityGroups(Region region) {
