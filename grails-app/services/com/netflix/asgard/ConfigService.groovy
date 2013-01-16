@@ -300,8 +300,14 @@ class ConfigService {
     /**
      * @return list of security groups to not create AMIs in. Defaults to empty list
      */
-    String getSecurityGroupBlacklist() {
-        grailsApplication.config.cloud?.securityGroupBlacklist ?: []
+    List<String> getSecurityGroupBlacklist() {
+        if (grailsApplication.config.cloud?.securityGroupBlacklist != [:]) {
+            println grailsApplication.config.cloud?.securityGroupBlacklist
+            return grailsApplication.config.cloud?.securityGroupBlacklist
+        } else {
+            println 'null'
+	    return ['default']
+        }
     }
 
     /**
