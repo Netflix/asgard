@@ -302,10 +302,8 @@ class ConfigService {
      */
     List<String> getSecurityGroupBlacklist() {
         if (grailsApplication.config.cloud?.securityGroupBlacklist != [:]) {
-            println grailsApplication.config.cloud?.securityGroupBlacklist
             return grailsApplication.config.cloud?.securityGroupBlacklist
         } else {
-            println 'null'
 	    return ['default']
         }
     }
