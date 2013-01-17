@@ -203,10 +203,10 @@ class AlarmDataSpec extends Specification {
         'scale-up-alarm-fantasticService-v003-AvailabilityService_completedTasks-73' == alarm.alarmName
         '' == alarm.alarmDescription
         alarm.actionsEnabled
-        [] == alarm.OKActions
+        ['arn:aws:sns:us-east-1:149000000000:nccp-wii-auto-scale-alert-topic'] == alarm.OKActions
         ['arn:aws:sns:us-east-1:149000000000:nccp-wii-auto-scale-alert-topic',
                 'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'] as Set == alarm.alarmActions as Set
-        [] == alarm.insufficientDataActions
+        ['arn:aws:sns:us-east-1:149000000000:nccp-wii-auto-scale-alert-topic'] == alarm.insufficientDataActions
         'AvailabilityService_completedTasks' == alarm.metricName
         'NFLX/Epic' == alarm.namespace
         'Minimum' == alarm.statistic
