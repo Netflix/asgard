@@ -358,7 +358,10 @@ Group: ${loadBalancerNames}"""
     private MergedInstance findAnyInstance(UserContext userContext, Cluster cluster) {
         List<String> instanceIds = cluster?.instances*.instanceId
         if (!instanceIds) { return null }
-        List<MergedInstance> mergedInstances = mergedInstanceService.getMergedInstancesByIds(userContext, instanceIds)
+        List<String> runningInstanceIds = awsEc2Service.getInstancesByIds(userContext, instanceIds).
+                findAll { it.state.name == 'running'}*.instanceId
+        List<MergedInstance> mergedInstances = mergedInstanceService.
+                getMergedInstancesByIds(userContext, runningInstanceIds)
         List<MergedInstance> upMergedInstances = mergedInstances.findAll { it.status == 'UP' }
         upMergedInstances ? upMergedInstances[0] : mergedInstances[0]
     }

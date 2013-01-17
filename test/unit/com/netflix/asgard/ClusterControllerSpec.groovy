@@ -3,6 +3,8 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.ec2.model.Instance as Ec2Instance
+import com.amazonaws.services.ec2.model.InstanceState
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingGroupMixin
@@ -265,36 +267,50 @@ class ClusterControllerSpec extends Specification {
         new GroupedInstance(id, null, null, null, null, null, null, null, null, null, null, null, null)
     }
 
-    def 'should return an instance in the cluster, preferring UP'() {
+    def 'should return a running instance in the cluster, preferably UP'() {
         Cluster cluster = Mock(Cluster) {
-            getInstances() >> ['i-00000001', 'i-00000002'].collect { instanceWithId(it) }
+            getInstances() >> ['i-00000001', 'i-00000002', 'i-00000003'].collect { instanceWithId(it) }
         }
         MergedInstanceService mergedInstanceService = Mock(MergedInstanceService) {
-            getMergedInstancesByIds(_, ['i-00000001', 'i-00000002']) >> [
-                    new MergedInstance(instanceId: 'i-00000001', status: 'DOWN'),
-                    new MergedInstance(instanceId: 'i-00000002', status: 'UP')
+            1 * getMergedInstancesByIds(_, ['i-00000002', 'i-00000003']) >> [
+                    new MergedInstance(instanceId: 'i-00000002', status: 'DOWN'),
+                    new MergedInstance(instanceId: 'i-00000003', status: 'UP'),
             ]
         }
         controller.mergedInstanceService = mergedInstanceService
+        AwsEc2Service awsEc2Service = Mock(AwsEc2Service) {
+            1 * getInstancesByIds(_, ['i-00000001', 'i-00000002', 'i-00000003']) >> [
+                    new Ec2Instance(instanceId: 'i-00000001', state: new InstanceState(name: 'stopping')),
+                    new Ec2Instance(instanceId: 'i-00000002', state: new InstanceState(name: 'running')),
+                    new Ec2Instance(instanceId: 'i-00000003', state: new InstanceState(name: 'running'))
+            ]
+        }
+        controller.awsEc2Service = awsEc2Service
 
         expect:
-        controller.findAnyInstance(new UserContext(region: Region.US_EAST_1), cluster).instanceId == 'i-00000002'
+        controller.findAnyInstance(new UserContext(region: Region.US_EAST_1), cluster).instanceId == 'i-00000003'
     }
 
-    def 'should return an instance in the cluster, even when all are DOWN'() {
+    def 'should return a DOWN instances as last resort'() {
         Cluster cluster = Mock(Cluster) {
             getInstances() >> ['i-00000001', 'i-00000002'].collect { instanceWithId(it) }
         }
         MergedInstanceService mergedInstanceService = Mock(MergedInstanceService) {
-            getMergedInstancesByIds(_, ['i-00000001', 'i-00000002']) >> [
-                    new MergedInstance(instanceId: 'i-00000001', status: 'DOWN'),
+            1 * getMergedInstancesByIds(_, ['i-00000002']) >> [
                     new MergedInstance(instanceId: 'i-00000002', status: 'DOWN')
             ]
         }
         controller.mergedInstanceService = mergedInstanceService
+        AwsEc2Service awsEc2Service = Mock(AwsEc2Service) {
+            1 * getInstancesByIds(_, ['i-00000001', 'i-00000002']) >> [
+                    new Ec2Instance(instanceId: 'i-00000001', state: new InstanceState(name: 'stopping')),
+                    new Ec2Instance(instanceId: 'i-00000002', state: new InstanceState(name: 'running'))
+            ]
+        }
+        controller.awsEc2Service = awsEc2Service
 
         expect:
-        controller.findAnyInstance(new UserContext(region: Region.US_EAST_1), cluster).instanceId == 'i-00000001'
+        controller.findAnyInstance(new UserContext(region: Region.US_EAST_1), cluster).instanceId == 'i-00000002'
     }
 
     def 'should return null when there are not any instances in the cluster'() {
