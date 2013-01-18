@@ -342,7 +342,8 @@ Group: ${loadBalancerNames}"""
         String name = params.id
         String field = params.field
         Cluster cluster = awsAutoScalingService.getCluster(userContext, name)
-        MergedInstance mergedInstance = findAnyInstance(userContext, cluster)
+        List<String> instanceIds = cluster?.instances*.instanceId
+        MergedInstance mergedInstance = mergedInstanceService.findHealthyInstance(userContext, instanceIds)
         String result = mergedInstance?.getFieldValue(field)
         if (!result) {
             response.status = 400
@@ -353,17 +354,6 @@ Group: ${loadBalancerNames}"""
             else { result = "'$field' not found. Valid fields: ${mergedInstance.listFieldNames()}" }
         }
         render result
-    }
-
-    private MergedInstance findAnyInstance(UserContext userContext, Cluster cluster) {
-        List<String> instanceIds = cluster?.instances*.instanceId
-        if (!instanceIds) { return null }
-        List<String> runningInstanceIds = awsEc2Service.getInstancesByIds(userContext, instanceIds).
-                findAll { it.state.name == 'running'}*.instanceId
-        List<MergedInstance> mergedInstances = mergedInstanceService.
-                getMergedInstancesByIds(userContext, runningInstanceIds)
-        List<MergedInstance> upMergedInstances = mergedInstances.findAll { it.status == 'UP' }
-        upMergedInstances ? upMergedInstances[0] : mergedInstances[0]
     }
 
     private void redirectToTask(String taskId) {
