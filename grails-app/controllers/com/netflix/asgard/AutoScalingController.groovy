@@ -500,17 +500,19 @@ class AutoScalingController {
         UserContext userContext = UserContext.of(request)
         String name = params.name ?: params.id
         String field = params.field
+        if (!name || !field) {
+            response.status = 400
+            if (!name) { render 'name is a required parameter' }
+            if (!field) { render 'field is a required parameter' }
+            return
+        }
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, name)
-        List instances = group?.instances
-        String instanceId = instances?.size() >= 1 ? instances[0].instanceId : null
-        MergedInstance mergedInstance = instanceId ?
-                mergedInstanceService.getMergedInstancesByIds(userContext, [instanceId])[0] : null
+        List<String> instanceIds = group?.instances*.instanceId
+        MergedInstance mergedInstance = mergedInstanceService.findHealthyInstance(userContext, instanceIds)
         String result = mergedInstance?.getFieldValue(field)
         if (!result) {
-            response.status = 400
-            if (!name) { result = 'name is a required parameter'}
-            else if (!field) { result = 'field is a required parameter'}
-            else if (!group) { result = "No auto scaling group found with name '$name'"}
+            response.status = 404
+            if (!group) { result = "No auto scaling group found with name '$name'"}
             else if (!mergedInstance) { result = "No instances found for auto scaling group '$name'"}
             else { result = "'$field' not found. Valid fields: ${mergedInstance.listFieldNames()}" }
         }

@@ -22,7 +22,6 @@ import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
-import com.netflix.asgard.model.GroupedInstance
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SubnetTarget
@@ -342,17 +341,19 @@ Group: ${loadBalancerNames}"""
         UserContext userContext = UserContext.of(request)
         String name = params.id
         String field = params.field
+        if (!name || !field) {
+            response.status = 400
+            if (!name) { render 'name is a required parameter' }
+            if (!field) { render 'field is a required parameter' }
+            return
+        }
         Cluster cluster = awsAutoScalingService.getCluster(userContext, name)
-        List<GroupedInstance> instances = cluster?.instances
-        String instanceId = instances?.size() >= 1 ? instances[0].instanceId : null
-        MergedInstance mergedInstance = instanceId ?
-                mergedInstanceService.getMergedInstancesByIds(userContext, [instanceId])[0] : null
+        List<String> instanceIds = cluster?.instances*.instanceId
+        MergedInstance mergedInstance = mergedInstanceService.findHealthyInstance(userContext, instanceIds)
         String result = mergedInstance?.getFieldValue(field)
         if (!result) {
-            response.status = 400
-            if (!name) { result = 'name is a required parameter'}
-            else if (!field) { result = 'field is a required parameter'}
-            else if (!cluster) { result = "No cluster found with name '$name'"}
+            response.status = 404
+            if (!cluster) { result = "No cluster found with name '$name'"}
             else if (!mergedInstance) { result = "No instances found for cluster '$name'"}
             else { result = "'$field' not found. Valid fields: ${mergedInstance.listFieldNames()}" }
         }
