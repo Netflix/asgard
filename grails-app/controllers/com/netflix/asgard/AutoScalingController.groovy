@@ -501,10 +501,8 @@ class AutoScalingController {
         String name = params.name ?: params.id
         String field = params.field
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, name)
-        List instances = group?.instances
-        String instanceId = instances?.size() >= 1 ? instances[0].instanceId : null
-        MergedInstance mergedInstance = instanceId ?
-                mergedInstanceService.getMergedInstancesByIds(userContext, [instanceId])[0] : null
+        List<String> instanceIds = group?.instances*.instanceId
+        MergedInstance mergedInstance = mergedInstanceService.findHealthyInstance(userContext, instanceIds)
         String result = mergedInstance?.getFieldValue(field)
         if (!result) {
             response.status = 400
