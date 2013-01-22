@@ -44,11 +44,11 @@ class ApiTokenSpec extends Specification {
         tokens[0] == 'TestScript'
         ApiToken.TOKEN_DATE_FORMAT.parseDateTime(tokens[1]) == new DateTime().plusDays(30).withMillisOfDay(0)
         tokens[2] == 'testUser@netflix.com'
-        tokens[3] ==~ /[a-zA-Z0-9\+\/]{8}/
+        tokens[3] ==~ /[a-zA-Z0-9\%]{8,24}/
         tokens[4] == 'testDL@netflix.com'
 
         when:
-        ApiToken parsedToken = ApiToken.fromApiTokenString(tokenString)
+        ApiToken parsedToken = ApiToken.fromApiTokenString(URLDecoder.decode(tokenString))
 
         then:
         parsedToken.isValid('key')
@@ -66,10 +66,10 @@ class ApiTokenSpec extends Specification {
         tokens[0] == 'TestScript'
         ApiToken.TOKEN_DATE_FORMAT.parseDateTime(tokens[1]) == new DateTime().plusDays(30).withMillisOfDay(0)
         tokens[2] == 'testUser@netflix.com'
-        tokens[3] ==~ /[a-zA-Z0-9\+\/]{8}/
+        tokens[3] ==~ /[a-zA-Z0-9\%]{8,24}/
 
         when:
-        ApiToken parsedToken = ApiToken.fromApiTokenString(tokenString)
+        ApiToken parsedToken = ApiToken.fromApiTokenString(URLDecoder.decode(tokenString))
 
         then:
         parsedToken.isValid('key')
@@ -79,7 +79,7 @@ class ApiTokenSpec extends Specification {
         String semiEternalToken = 'TestScript:2833-12-20:testUser@netflix.com:xh20q18Y:testDL@netflix.com'
 
         when:
-        ApiToken parsedToken = ApiToken.fromApiTokenString(semiEternalToken)
+        ApiToken parsedToken = ApiToken.fromApiTokenString(URLDecoder.decode(semiEternalToken))
 
         then:
         parsedToken.isValid('key')
