@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.ApplicationInstance
+import java.rmi.server.ServerNotActiveException
 import groovy.util.slurpersupport.GPathResult
 import org.joda.time.Duration
 
@@ -45,7 +46,7 @@ class DiscoveryService implements CacheInitializer {
     final Duration timeToWaitAfterDiscoveryChange = Duration.standardSeconds(90)
 
     private String chooseHealthyDiscoveryServer(String hostName) {
-        if (grailsApplication.config.server.online) {
+        if (hostName && grailsApplication.config.server.online) {
             String port = configService.eurekaPort
             String context = configService.eurekaUrlContext
             // Pick the first Discovery server that is healthy.
@@ -62,6 +63,8 @@ class DiscoveryService implements CacheInitializer {
                     return address.canonicalHostName
                 }
             }
+            throw new ServerNotActiveException("No healthy servers found for '${hostName}' host name. " +
+                    "${addresses.size()} unhealty addresses found. ${addresses*.canonicalHostName}")
         }
         null
     }
