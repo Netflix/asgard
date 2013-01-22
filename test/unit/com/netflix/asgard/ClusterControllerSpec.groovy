@@ -259,5 +259,4 @@ class ClusterControllerSpec extends Specification {
             }
         }
     }
-
 }

@@ -45,4 +45,20 @@ class MergedInstanceService {
         }
         instances
     }
+
+    /**
+     * Returns a single healthy (running in AWS and UP in Eureka) instance from the specified instanceIds.
+     *
+     * @param userContext who, where, why
+     * @param instanceIds that we will search for health
+     * @return a healthy instance or null if none are found
+     */
+    MergedInstance findHealthyInstance(UserContext userContext, List<String> instanceIds) {
+        if (!instanceIds) { return null }
+        List<String> runningInstanceIds = awsEc2Service.getInstancesByIds(userContext, instanceIds).
+                findAll { it.state.name == 'running'}*.instanceId
+        List<MergedInstance> mergedInstances = getMergedInstancesByIds(userContext, runningInstanceIds)
+        List<MergedInstance> upMergedInstances = mergedInstances.findAll { it.status == 'UP' }
+        upMergedInstances ? upMergedInstances[0] : mergedInstances[0]
+    }
 }
