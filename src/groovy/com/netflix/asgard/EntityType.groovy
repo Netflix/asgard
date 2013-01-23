@@ -69,7 +69,8 @@ import java.lang.reflect.Modifier
     static final EntityType<DBSnapshot> dbSnapshot = create('Database Snapshot', { it.DBSnapshotIdentifier })
     static final EntityType<String> domain = create('SimpleDB Domain', { it }, '',
             'Show metadata about this SimpleDB domain')
-    static final EntityType<FastProperty> fastProperty = create('Fast Property', { it.id })
+    static final EntityType<FastProperty> fastProperty = create('Fast Property', { it.id }, '', '',
+            { Map attrs, String objectId -> attrs.params = [name: objectId] })
     static final EntityType<HardwareProfile> hardwareProfile = create('Hardware Profile',
             { it.instanceType.toString() })
     static final EntityType<Image> image = create('Image', { it.imageId })
@@ -99,20 +100,21 @@ import java.lang.reflect.Modifier
     static final EntityType<Volume> volume = create('Volume', { it.volumeId }, 'vol-')
     static final EntityType<Vpc> vpc = create('VPC', { it.vpcId }, 'vpc-')
 
-    /*
-     * These two convenience constructors are explicit because of an IntelliJ bug that cannot handle the generics on a
-     * method with optional parameters
+
+    /**
+     * Create an EntityType with specific attributes
+     *
+     * @param displayName wording used to describe this type of object to the user
+     * @param keyer used to generate a String that will be used to cache this type of object
+     * @param idPrefix used to identify AWS object types in the ID
+     * @param linkPurpose reason the link exists
+     * @param entitySpecificLinkGeneration link generation attribute modification specific to this type of object
+     * @return constructed EntityType
      */
-    static <T> EntityType<T> create(String displayName, Closure keyer) {
-        create(displayName, keyer, '')
-    }
-
-    static <T> EntityType<T> create(String displayName, Closure keyer, String idPrefix) {
-        create(displayName, keyer, idPrefix, '')
-    }
-
-    static <T> EntityType<T> create(String displayName, Closure keyer, String idPrefix, String linkPurpose) {
-        new EntityType<T>(displayName, keyer, idPrefix, linkPurpose ?: "Show details of this ${displayName}")
+    static <T> EntityType<T> create(String displayName, Closure<String> keyer, String idPrefix = '', String linkPurpose = '',
+            Closure entitySpecificLinkGeneration = { Map attrs, String objectId ->  }) {
+        new EntityType<T>(displayName, keyer, idPrefix, linkPurpose ?: "Show details of this ${displayName}",
+                entitySpecificLinkGeneration)
     }
 
     private static final Collection<EntityType> allEntityTypes
@@ -150,9 +152,10 @@ import java.lang.reflect.Modifier
     }
 
     String displayName
-    Closure keyer
+    Closure<String> keyer
     String idPrefix
     String linkPurpose
+    Closure entitySpecificLinkGeneration
 
     /**
      * The unique String key for the value object.
