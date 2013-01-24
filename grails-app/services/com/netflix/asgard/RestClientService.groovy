@@ -61,13 +61,17 @@ class RestClientService implements InitializingBean {
         connectionManager.defaultMaxPerRoute = configService.httpConnPoolMaxForRoute
     }
 
-    GPathResult getAsXml(String uri, Integer timeoutMillis = 10000) {
+    GPathResult getAsXml(String uri, Integer timeoutMillis = 10000, boolean swallowException = true) {
         try {
             String content = get(uri, 'application/xml; charset=UTF-8', timeoutMillis)
             return content ? XML.parse(content) as GPathResult : null
         } catch (Exception e) {
             log.error "GET from ${uri} failed: ${e}"
-            return null
+            if (swallowException) {
+                return null
+            } else {
+                throw e
+            }
         }
     }
 
