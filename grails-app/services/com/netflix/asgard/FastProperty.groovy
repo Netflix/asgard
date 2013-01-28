@@ -19,7 +19,6 @@ import com.google.common.collect.ImmutableList
 import com.netflix.frigga.NameValidation
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import groovy.util.slurpersupport.GPathResult
 import groovy.xml.MarkupBuilder
 import org.springframework.web.util.HtmlUtils
 
@@ -43,7 +42,7 @@ class FastProperty {
     private static final ImmutableList<String> PROPERTIES_THAT_FORM_ID = ImmutableList.of('key', 'appId', 'env',
             'region', 'serverId', 'stack', 'countries')
 
-    static FastProperty fromXml(GPathResult xml) {
+    static FastProperty fromXml(xml) {
         if (!xml) { return null }
         FastProperty fastProperty = new FastProperty()
         ['key', 'value', 'env', 'appId', 'countries', 'serverId', 'updatedBy', 'stack', 'region', 'sourceOfUpdate',
