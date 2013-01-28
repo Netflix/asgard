@@ -28,7 +28,7 @@ class FastPropertyServiceSpec extends Specification {
 
         then:
         1 * restClientService.getAsXml("http://platformservice.us-east-1.company.net:7001/platformservice/REST/v1/\
-props/property/test+invalid+%2B%21%25%2F%2C%5B%5D%3A%5C%5E%24%7C*%28%29")
+props/property/getPropertyById?id=test%20invalid%20%2B!%25/,%5B%5D:%5C%5E\$%7C*()")
     }
 
     def 'should delete Fast Property'() {
@@ -38,7 +38,7 @@ props/property/test+invalid+%2B%21%25%2F%2C%5B%5D%3A%5C%5E%24%7C*%28%29")
         service.deleteFastProperty(userContext, 'test invalid +!%/,[]:\\^$|*()', 'cmccoy', 'us-west-1')
 
         then:
-        1 * restClientService.delete("http://platformservice.us-east-1.company.net:7001/platformservice/REST/v1/\
-props/property/test+invalid+%2B%21%25%2F%2C%5B%5D%3A%5C%5E%24%7C*%28%29?source=asgard&updatedBy=cmccoy&cmcTicket=")
+        1 * restClientService.getAsXml("http://platformservice.us-east-1.company.net:7001/platformservice/REST/v1/\
+props/property/removePropertyById?id=test%20invalid%20%2B!%25/,%5B%5D:%5C%5E\$%7C*()&source=asgard&updatedBy=cmccoy&cmcTicket=")
     }
 }

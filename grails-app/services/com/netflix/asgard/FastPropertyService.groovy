@@ -25,12 +25,15 @@ import org.apache.commons.collections.Bag
 import org.apache.commons.collections.bag.HashBag
 import org.apache.http.HttpException
 import org.apache.http.HttpStatus
+import org.springframework.web.util.UriComponentsBuilder
 
 class FastPropertyService implements CacheInitializer {
 
     static transactional = false
 
     private static final String SOURCE_OF_UPDATE = 'asgard'
+
+    private final String fastPropertyPath = 'platformservice/REST/v1/props'
 
     def grailsApplication
     def applicationService
@@ -78,10 +81,16 @@ class FastPropertyService implements CacheInitializer {
         getAll(userContext).findAll { it.appId == name }
     }
 
+    private UriComponentsBuilder fastPropertyBaseUriBuilder(userContext) {
+        String hostAndPort = platformServiceHostAndPort(userContext)
+        String url = "http://${hostAndPort}/${fastPropertyPath}" as String
+        UriComponentsBuilder.fromHttpUrl(url)
+    }
+
     FastProperty get(UserContext userContext, String fastPropertyId) {
         if (!fastPropertyId) { return null }
-        String hostAndPort = platformServiceHostAndPort(userContext)
-        String url = "http://${hostAndPort}/platformservice/REST/v1/props/property/${URLEncoder.encode(fastPropertyId)}"
+        String url = fastPropertyBaseUriBuilder(userContext).pathSegment('property').pathSegment('getPropertyById').
+                queryParam('id', fastPropertyId).build().encode().toUriString()
         def fastPropertyXml = restClientService.getAsXml(url)
         FastProperty fastProperty = FastProperty.fromXml(fastPropertyXml)
         caches.allFastProperties.by(userContext.region).put(fastPropertyId, fastProperty)
@@ -199,13 +208,12 @@ class FastPropertyService implements CacheInitializer {
                             "Unable to find working platformservice instance in ${regionsChecked}")
                 }
 
-                String uriBase = "http://${hostAndPort}/platformservice/REST/v1/props/property/${URLEncoder.encode(id)}"
-                String encodedUpdatedBy = URLEncoder.encode(updatedBy)
-                String encodedCmcTicket = URLEncoder.encode(userContext.ticket ?: '')
-                String params = "source=${SOURCE_OF_UPDATE}&updatedBy=${encodedUpdatedBy}&cmcTicket=${encodedCmcTicket}"
-                String uriPath = "${uriBase}?${params}"
+                String uriPath = fastPropertyBaseUriBuilder(userContext).pathSegment('property').
+                        pathSegment('removePropertyById').queryParam('id', id).queryParam('source', SOURCE_OF_UPDATE).
+                        queryParam('updatedBy', updatedBy).queryParam('cmcTicket', userContext.ticket ?: '').
+                        build().encode().toUriString()
                 task.log("Deleting data at ${uriPath}")
-                restClientService.delete(uriPath)
+                restClientService.getAsXml(uriPath)
 
                 // Wait for platformservice instances to propagate the change so get calls fail
                 while (get(userContextThatDelivered, id)) {
