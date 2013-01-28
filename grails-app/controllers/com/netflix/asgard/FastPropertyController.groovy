@@ -44,7 +44,7 @@ class FastPropertyController {
     }
 
     def show = {
-        String id = params.id
+        String id = params.id ?: params.name
         UserContext userContext = UserContext.of(request)
         FastProperty fastProperty = fastPropertyService.get(userContext, id)
         if (!fastProperty) {
