@@ -16,8 +16,6 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.cache.CacheInitializer
-import com.netflix.asgard.model.ApplicationInstance
-import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
 import groovy.xml.MarkupBuilder
 import java.rmi.ServerException
@@ -53,7 +51,7 @@ class FastPropertyService implements CacheInitializer {
         String hostAndPort = platformServiceHostAndPort(userContext)
         if (hostAndPort) {
             String url = "http://${hostAndPort}/platformservice/REST/v1/props/allprops"
-            final GPathResult fastPropertiesXml = restClientService.getAsXml(url)
+            def fastPropertiesXml = restClientService.getAsXml(url)
             if (fastPropertiesXml && fastPropertiesXml.properties) {
                 return fastPropertiesXml.properties.property.collect { GPathResult fastPropertyData ->
                     FastProperty.fromXml(fastPropertyData)
@@ -84,7 +82,7 @@ class FastPropertyService implements CacheInitializer {
         if (!fastPropertyId) { return null }
         String hostAndPort = platformServiceHostAndPort(userContext)
         String url = "http://${hostAndPort}/platformservice/REST/v1/props/property/${URLEncoder.encode(fastPropertyId)}"
-        final GPathResult fastPropertyXml = restClientService.getAsXml(url)
+        def fastPropertyXml = restClientService.getAsXml(url)
         FastProperty fastProperty = FastProperty.fromXml(fastPropertyXml)
         caches.allFastProperties.by(userContext.region).put(fastPropertyId, fastProperty)
         fastProperty
