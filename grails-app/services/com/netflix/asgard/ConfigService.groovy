@@ -557,4 +557,11 @@ class ConfigService {
     Collection<String> getSignificantStacks() {
         grailsApplication.config.cloud?.significantStacks ?: []
     }
+
+    /**
+     * @return Regions other than the standard AWS ones (a cloud-like data center for example).
+     */
+    Map<String, String> getSpecialCaseRegions() {
+        grailsApplication.config.cloud?.specialCaseRegions ?: [:]
+    }
 }
