@@ -97,9 +97,8 @@ class FastPropertyService implements CacheInitializer {
         fastProperty
     }
 
-    void create(UserContext userContext, String key, String value, String appId, String regionCode, String stack,
-            String countries, String updatedBy, Task existingTask = null) {
-
+    FastProperty create(UserContext userContext, String key, String value, String appId, String regionCode,
+            String stack, String countries, String updatedBy, Task existingTask = null) {
         Check.notEmpty(key, 'fast property key')
         FastProperty fastProperty = new FastProperty(key: key, value: value,
                 env: grailsApplication.config.cloud.accountName, appId: appId, region: regionCode, stack: stack,
@@ -143,6 +142,7 @@ class FastPropertyService implements CacheInitializer {
             // Refresh cache
             get(userContextThatDelivered, id)
         }, Link.to(EntityType.fastProperty, id), existingTask)
+        fastProperty
     }
 
     void updateFastProperty(UserContext userContext, String id, String value, String updatedBy,

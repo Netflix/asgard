@@ -88,9 +88,10 @@ class FastPropertyController {
             final String countries = params.countries?.trim()?.decodeHTML()
             final String updatedBy = params.updatedBy?.trim()?.decodeHTML()
 
-            fastPropertyService.create(userContext, property, value, appId, region, stack, countries, updatedBy)
+            FastProperty fastProperty = fastPropertyService.create(userContext, property, value, appId, region, stack,
+                    countries, updatedBy)
             flash.message = "Fast Property '${property}' has been created. The change may take a while to propagate."
-            redirect(action: 'list')
+            redirect(action: 'show', id: fastProperty.id)
         } catch (Exception e) {
             flash.message = e.message ?: e.cause?.message
             chain(action: 'create', params: Requests.cap(params))
