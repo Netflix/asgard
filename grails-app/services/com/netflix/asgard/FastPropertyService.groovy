@@ -142,7 +142,7 @@ class FastPropertyService implements CacheInitializer {
             // Refresh cache
             get(userContextThatDelivered, id)
         }, Link.to(EntityType.fastProperty, id), existingTask)
-        return fastProperty
+        fastProperty
     }
 
     void updateFastProperty(UserContext userContext, String id, String value, String updatedBy,
