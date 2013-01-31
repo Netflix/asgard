@@ -22,8 +22,7 @@ import grails.converters.XML
 @ContextParam('region')
 class FastPropertyController {
 
-    def grailsApplication
-
+    def configService
     def fastPropertyService
 
     def index = { redirect(action: 'list', params: params) }
@@ -63,7 +62,7 @@ class FastPropertyController {
         final UserContext userContext = UserContext.of(request)
         List<String> appNames = fastPropertyService.collectFastPropertyAppNames(userContext)
         Collection regionOptions = Region.values()
-        regionOptions.addAll(grailsApplication.config.cloud.specialCaseRegions)
+        regionOptions.addAll(configService.specialCaseRegions)
 
         Map result = [
                 'appNames': appNames,
