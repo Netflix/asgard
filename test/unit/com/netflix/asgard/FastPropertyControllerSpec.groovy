@@ -110,4 +110,25 @@ class FastPropertyControllerSpec extends Specification {
         1 * controller.fastPropertyService.create(!null, 'property', 'value', 'app-id', 'region', 'stack', 'countries',
                 'user')
     }
+
+    def 'save should validate with empty value'() {
+        controller.params.with {
+            key = ' property '
+            value = ''
+            appId = 'app-id'
+            fastPropertyRegion = 'region'
+            stack = 'stack'
+            countries = 'countries'
+            updatedBy = 'user'
+        }
+
+        controller.fastPropertyService = Mock(FastPropertyService)
+
+        when:
+        controller.save()
+
+        then:
+        1 * controller.fastPropertyService.create(!null, 'property', '', 'app-id', 'region', 'stack', 'countries',
+                'user')
+    }
 }
