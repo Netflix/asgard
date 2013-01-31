@@ -23,32 +23,34 @@ import spock.lang.Specification
 @TestFor(FastPropertyController)
 class FastPropertyControllerSpec extends Specification {
 
-    void setup() {
-        TestUtils.setUpMockRequest()
-        controller.fastPropertyService = Mocks.fastPropertyService()
-    }
-
     GPathResult mockXmlSingle(String key) {
-        new XmlSlurper().parseText("""<property>
-  <propertyId>${key}|junit|test||||</propertyId>
-  <key>${key}</key>
-  <value>123</value>
-  <env>test</env>
-  <appId>junit</appId>
-  <countries></countries>
-  <serverId></serverId>
-  <updatedBy>junit</updatedBy>
-  <stack></stack>
-  <region></region>
-  <sourceOfUpdate>junit</sourceOfUpdate>
-  <cmcTicket></cmcTicket>
-  <ts>2011-09-27T23:00:10.650Z</ts>
-</property>""")
+        new XmlSlurper().parseText("""\
+            <property>
+              <propertyId>${key}|junit|test||||</propertyId>
+              <key>${key}</key>
+              <value>123</value>
+              <env>test</env>
+              <appId>junit</appId>
+              <countries></countries>
+              <serverId></serverId>
+              <updatedBy>junit</updatedBy>
+              <stack></stack>
+              <region></region>
+              <sourceOfUpdate>junit</sourceOfUpdate>
+              <cmcTicket></cmcTicket>
+              <ts>2011-09-27T23:00:10.650Z</ts>
+            </property>""".stripIndent() as String
+        )
     }
 
     def 'list should sort by key'() {
         given:
-        controller.fastPropertyService = Mocks.fastPropertyService()
+        controller.fastPropertyService = Mock(FastPropertyService) {
+            getAll(_) >> [
+                    new FastProperty(key: 'greeting.language'),
+                    new FastProperty(key: 'netflix.epic.plugin.limits.maxInstance')
+            ]
+        }
 
         when:
         final Map actual = controller.list()
@@ -74,44 +76,56 @@ class FastPropertyControllerSpec extends Specification {
     }
 
     def 'create should return list of appNames and regionOptions' () {
-        given:
-        final List<String> expectedAppNames = ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot',
-                'videometadata']
-        final List expectedRegionOptions = (Region.values() as List) +
-                [code: 'us-nflx-1', description: 'us-nflx-1 (Netflix Data Center)']
-
+        Map specialCaseRegion = [code: 'us-nflx-1', description: 'us-nflx-1 (Netflix Data Center)']
         controller.fastPropertyService = Mocks.fastPropertyService()
-        controller.grailsApplication = Mocks.grailsApplication()
+        controller.configService = Mock(ConfigService) {
+            getSpecialCaseRegions() >> specialCaseRegion
+        }
 
         when:
-        final Map actual = controller.create()
+        Map result = controller.create()
 
         then:
-        actual.appNames == expectedAppNames
-        actual.regionOptions == expectedRegionOptions
+        result.appNames == ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot', 'videometadata']
+        result.regionOptions == (Region.values() as List) + specialCaseRegion
     }
 
-//    def 'save should call platform-service REST API'() {
-//        given:
-//        FastPropertyController.metaClass.getParams = {
-//            [
-//                    key: ' property ',
-//                    value: ' value ',
-//                    appId: 'app-id',
-//                    fastPropertyRegion: 'region',
-//                    stack: 'stack',
-//                    countries: 'countries',
-//                    updatedBy: 'user'
-//            ]
-//        }
-//
-//        controller.fastPropertyService = Mock(FastPropertyService)
-//
-//        when:
-//        controller.save()
-//
-//        then:
-//        1 * controller.fastPropertyService.create(!null, 'property', 'value', 'app-id', 'region', 'stack', 'countries',
-//                'user')
-//    }
+    def 'save should call platform-service REST API'() {
+        controller.params.with {
+            key = ' property '
+            value = ' value '
+            appId = 'app-id'
+            fastPropertyRegion = 'region'
+            stack = 'stack'
+            countries = 'countries'
+            updatedBy = 'user'
+        }
+
+        controller.fastPropertyService = Mock(FastPropertyService)
+
+        when:
+        controller.save()
+
+        then:
+        1 * controller.fastPropertyService.create(!null, 'property', 'value', 'app-id', 'region', 'stack', 'countries',
+                'user')
+    }
+
+    def 'save should fail validation with empty value'() {
+        controller.params.with {
+            key = ' property '
+            value = ''
+            appId = 'app-id'
+            fastPropertyRegion = 'region'
+            stack = 'stack'
+            countries = 'countries'
+            updatedBy = 'user'
+        }
+
+        when:
+        controller.save()
+
+        then:
+        controller.flash.message == 'A Fast Property value is required.'
+    }
 }
