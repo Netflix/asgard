@@ -197,7 +197,8 @@ ${lastGroup.loadBalancerNames}"""
             Subnets subnets = awsEc2Service.getSubnets(userContext)
             String subnetPurpose = params.subnetPurpose
             String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
-            List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"])
+            List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"] ?:
+                    params["selectedLoadBalancers"])
             // Availability zones default to the last group's value since this field is required.
             List<String> selectedZones = Requests.ensureList(params.selectedZones) ?: lastGroup.availabilityZones
             String azRebalance = params.azRebalance
