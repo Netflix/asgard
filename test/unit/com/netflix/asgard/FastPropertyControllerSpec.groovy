@@ -111,7 +111,7 @@ class FastPropertyControllerSpec extends Specification {
                 'user')
     }
 
-    def 'save should validate with empty value'() {
+    def 'save should fail validation with empty value'() {
         controller.params.with {
             key = ' property '
             value = ''
@@ -122,13 +122,10 @@ class FastPropertyControllerSpec extends Specification {
             updatedBy = 'user'
         }
 
-        controller.fastPropertyService = Mock(FastPropertyService)
-
         when:
         controller.save()
 
         then:
-        1 * controller.fastPropertyService.create(!null, 'property', '', 'app-id', 'region', 'stack', 'countries',
-                'user')
+        controller.flash.message == 'A Fast Property value is required.'
     }
 }

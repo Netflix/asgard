@@ -86,6 +86,9 @@ class FastPropertyController {
             final String stack = params.stack?.trim()?.decodeHTML()
             final String countries = params.countries?.trim()?.decodeHTML()
             final String updatedBy = params.updatedBy?.trim()?.decodeHTML()
+            if (!value) {
+                throw new IllegalArgumentException('A Fast Property value is required.')
+            }
 
             FastProperty fastProperty = fastPropertyService.create(userContext, property, value, appId, region, stack,
                     countries, updatedBy)
