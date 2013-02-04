@@ -71,14 +71,15 @@ class FastPropertyService implements CacheInitializer {
     }
 
     /**
-     * Finds all fast properties associated with the supplied application name, based on the region in the user context.
+     * Finds all fast properties associated with the supplied application name (case insensitive), based on the region
+     * in the user context.
      *
      * @param userContext who, where, why
      * @param name the application name
      * @return list of fast properties associated with the application
      */
     List<FastProperty> getFastPropertiesByAppName(UserContext userContext, String name) {
-        getAll(userContext).findAll { it.appId == name }
+        getAll(userContext).findAll { name.compareToIgnoreCase(it.appId) }
     }
 
     private UriComponentsBuilder fastPropertyBaseUriBuilder(userContext) {
