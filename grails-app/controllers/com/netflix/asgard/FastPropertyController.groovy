@@ -22,17 +22,36 @@ import grails.converters.XML
 @ContextParam('region')
 class FastPropertyController {
 
+    /**
+     * The special marker for looking for fast properties that do not have an application.
+     */
+    private final String NO_APP_ID = '_noapp'
+
     def configService
     def fastPropertyService
 
     def index = { redirect(action: 'list', params: params) }
 
+    def apps = {
+        UserContext userContext = UserContext.of(request)
+        List<FastProperty> allProperties = fastPropertyService.getAll(userContext)
+        List<String> appNames = allProperties.findResults { it.appId ? it.appId?.toLowerCase() : null }.unique().sort()
+        Map result = [appNames: appNames, noAppId: NO_APP_ID]
+        withFormat {
+            html { result }
+            xml { new XML(result).render(response) }
+            json { new JSON(result).render(response) }
+        }
+    }
+
     def list = {
         UserContext userContext = UserContext.of(request)
-        Set<String> appNames = Requests.ensureList(params.id).collect { it.split(',') }.flatten() as Set<String>
-        List<FastProperty> fastProperties = fastPropertyService.getAll(userContext).sort { it.key }
+        Collection<String> appNames = Requests.ensureList(params.id).collect { it.split(',') }.flatten()
+        appNames = appNames.findResults { it.toLowerCase() }.unique()
+        List<FastProperty> fastProperties = fastPropertyService.getAll(userContext)
         if (appNames) {
-            fastProperties = fastProperties.findAll { it.appId in appNames }
+            Boolean noApp = appNames.contains(NO_APP_ID)
+            fastProperties = fastProperties.findAll { it.appId?.toLowerCase() in appNames || (noApp && !it.appId) }
         }
         Map result = [fastProperties: fastProperties.sort { it?.key?.toString()?.toLowerCase() }]
         withFormat {
