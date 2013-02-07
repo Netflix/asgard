@@ -24,6 +24,9 @@ import com.netflix.asgard.model.MonitorBucketType
  */
 class AppRegistration {
 
+    static final List<String> ASGARD_ATTRIBUTES = ['monitorBucketType', 'type', 'description', 'owner', 'email',
+            'createTs', 'updateTs']
+
     String name
     String type
     String description
@@ -32,12 +35,17 @@ class AppRegistration {
     MonitorBucketType monitorBucketType
     Date createTime
     Date updateTime
+    Map<String, String> additionalAttributes
 
     static AppRegistration from(Item item) {
         if (item) {
             String bucketTypeString = item.getAttribute('monitorBucketType')?.value
             MonitorBucketType bucketType = MonitorBucketType.byName(bucketTypeString)
             bucketType = bucketType ?: MonitorBucketType.getDefaultForOldApps()
+            Map<String, String> additionalAttributes = item.attributes
+                    .findAll { !ASGARD_ATTRIBUTES.contains(it.name) }
+                    .collectEntries { [it.name, it.value] }
+
             return new AppRegistration(
                 name: item.name.toLowerCase(),
                 type: item.getAttribute('type')?.value,
@@ -46,7 +54,8 @@ class AppRegistration {
                 email: item.getAttribute('email')?.value,
                 monitorBucketType: bucketType,
                 createTime: asDate(item.getAttribute('createTs')?.value),
-                updateTime: asDate(item.getAttribute('updateTs')?.value)
+                updateTime: asDate(item.getAttribute('updateTs')?.value),
+                additionalAttributes: additionalAttributes
             )
         }
         null
