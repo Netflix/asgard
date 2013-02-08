@@ -47,12 +47,13 @@ class FastProperty {
     String ami
     String zone
     String ttl
+    String constraints
 
     private static final ImmutableList<String> ATTRIBUTES_THAT_FORM_ID = ImmutableList.of('key', 'appId', 'env',
             'region', 'serverId', 'stack', 'countries', 'asg', 'cluster', 'ami', 'zone')
 
     private static final ImmutableList<String> ADVANCED_ATTRIBUTES = ImmutableList.of('ttl', 'serverId', 'asg',
-            'cluster', 'ami', 'countries', 'zone')
+            'cluster', 'ami', 'countries', 'zone', 'constraints')
 
     private static final ImmutableMap<String, String> ATTRIBUTE_TO_XML_NAME = ImmutableMap.copyOf((getMetaClass().
             properties*.name - ['SOURCE_OF_UPDATE', 'metaClass', 'class']).sort().collectEntries { [it, it] } +

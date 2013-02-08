@@ -95,13 +95,14 @@ class FastPropertySpec extends Specification {
                       <stack>spinal</stack>
                       <updatedBy>cmccoy</updatedBy>
                       <value>11</value>
+                      <constraints>{length: {min: 2, max: 10}}</constraints>
                     </property>'''.stripIndent()
 
         expect:
         FastProperty.fromXml(XML.parse(xml) as GPathResult) == new FastProperty(key: 'dial', env: 'test', appId: 'tap',
                 region: 'eu-west-1', stack: 'spinal', countries: 'UK', serverId: 'server1', value: '11',
                 updatedBy: 'cmccoy', sourceOfUpdate: 'cmccoy', cmcTicket: '123', ts: '', id: 'id', ami: '', asg: '',
-                cluster: '', ttl: '', zone: '')
+                cluster: '', ttl: '', zone: '', constraints: '{length: {min: 2, max: 10}}')
     }
 
     def 'should determine if fast property has advanced attributes'() {

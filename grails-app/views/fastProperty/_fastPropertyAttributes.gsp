@@ -21,6 +21,12 @@
     <td class="value">${fastProperty.ttl}&nbsp;seconds</td>
   </tr>
 </g:if>
+<g:if test="${fastProperty.constraints}">
+  <tr class="prop">
+    <td class="name">Constraints:</td>
+    <td class="value">${fastProperty.constraints}</td>
+  </tr>
+</g:if>
 <tr class="prop">
   <td class="name">Timestamp:</td>
   <td class="value">${fastProperty.ts}</td>

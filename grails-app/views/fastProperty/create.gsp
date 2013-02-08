@@ -70,6 +70,14 @@
             <g:textField id="ttl" name="ttl" value="${params.ttl}"/>
           </td>
         </tr>
+        <tr class="prop advanced">
+          <td class="name">
+            <label for="constraints">Constraints:</label>
+          </td>
+          <td class="value">
+            <g:textField id="constraints" name="constraints" value="${params.constraints}"/>
+          </td>
+        </tr>
         <tr>
           <td colspan="2">
             <h2>Scoping (highest priority first):</h2>

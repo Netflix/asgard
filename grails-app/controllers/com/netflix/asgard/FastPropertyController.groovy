@@ -123,6 +123,7 @@ class FastPropertyController {
                     ami: params.ami,
                     zone: params.zone,
                     ttl: params.ttl,
+                    constraints: params.constraints,
                     sourceOfUpdate: FastProperty.SOURCE_OF_UPDATE,
                     cmcTicket: userContext.ticket
             )
