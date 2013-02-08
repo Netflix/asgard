@@ -165,10 +165,11 @@ propagate."
         try {
             fastPropertyService.updateFastProperty(userContext, id, value, updatedBy)
             flash.message = "Fast Property '${id}' has been updated. The change may take a while to propagate."
+            redirect(action: 'show', id: id)
         } catch (Exception e) {
             flash.message = "Unable to update Fast Property '${id}': ${e}"
+            redirect(action: 'edit', id: id)
         }
-        redirect(action: 'show', id: id)
     }
 
     def delete = {
