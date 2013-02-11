@@ -67,6 +67,7 @@ class FastPropertyControllerSpec extends Specification {
                 fastProperty: FastProperty.fromXml(mockXmlSingle('1'))
         ]
         controller.fastPropertyService = Mock(FastPropertyService)
+        controller.configService = Mock(ConfigService)
         controller.params.id = 'hello'
 
         when:
