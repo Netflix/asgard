@@ -62,6 +62,11 @@
             <span class="toggle fakeLink" id="showAdvancedOptionsToCreateFastProperty">Advanced Options</span>
           </td>
         </tr>
+        <g:if test="${fastPropertyInfoUrl}">
+          <tr>
+            <td colspan="2"><a href="${fastPropertyInfoUrl}">Fast Property Documentation</a></td>
+          </tr>
+        </g:if>
         <tr class="prop advanced">
           <td class="name">
             <label for="ttl">TTL:</label>

@@ -15,6 +15,11 @@
     limitations under the License.
 
 --%>
+<g:if test="${fastPropertyInfoUrl}">
+  <tr>
+    <td colspan="2"><a href="${fastPropertyInfoUrl}">Fast Property Documentation</a></td>
+  </tr>
+</g:if>
 <g:if test="${fastProperty.ttl}">
   <tr class="prop">
     <td class="name">TTL:</td>

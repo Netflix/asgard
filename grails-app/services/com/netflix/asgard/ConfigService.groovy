@@ -531,6 +531,13 @@ class ConfigService {
     }
 
     /**
+     * @return URL with info about configuring Fast Properties
+     */
+    String getFastPropertyInfoUrl() {
+        grailsApplication.config.platform?.fastPropertyInfoUrl ?: ''
+    }
+
+    /**
      * @return URL for Cloud Ready REST calls.
      */
     String getCloudReadyUrl() {

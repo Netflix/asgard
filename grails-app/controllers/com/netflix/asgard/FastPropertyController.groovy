@@ -71,7 +71,10 @@ class FastPropertyController {
             Requests.renderNotFound('Fast Property', id, this)
             return
         }
-        Map details = [fastProperty: fastProperty]
+        Map details = [
+                fastPropertyInfoUrl: configService.fastPropertyInfoUrl,
+                fastProperty: fastProperty
+        ]
         withFormat {
             html { return details }
             xml { new XML(details).render(response) }
@@ -95,6 +98,7 @@ class FastPropertyController {
                 clusterNames: clusterNames,
                 zoneNames: zoneNames,
                 images: awsEc2Service.getAccountImages(userContext).sort { it.imageLocation.toLowerCase() },
+                fastPropertyInfoUrl: configService.fastPropertyInfoUrl
         ]
 
         withFormat {
@@ -149,6 +153,7 @@ propagate."
         }
         Map details = [
                 updatedBy: params.updatedBy ?: userContext.username ?: fastProperty.updatedBy,
+                fastPropertyInfoUrl: configService.fastPropertyInfoUrl,
                 fastProperty: fastProperty
         ]
         withFormat {
