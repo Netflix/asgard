@@ -101,7 +101,7 @@ ${groupTemplate.loadBalancerNames} and result ${result}"""
                 awsAutoScalingService.createScheduledActions(options.common.userContext, options.scheduledActions, task)
 
                 // If the user wanted any instances then start a resize operation.
-                if (options.minSize > 0) {
+                if (options.minSize > 0 || options.desiredCapacity > 0) {
                     GroupResizeOperation operation = new GroupResizeOperation(userContext: options.common.userContext,
                             autoScalingGroupName: options.common.groupName,
                             eventualMin: options.minSize, newMin: options.minSize,
