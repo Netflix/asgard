@@ -105,7 +105,11 @@
         </g:if>
         <tr class="prop">
           <td class="name">Block Device Mappings:</td>
-          <td class="value">${image.blockDeviceMappings}</td>
+          <td class="value">
+            <g:each var="blockDeviceMapping" in="${image.blockDeviceMappings?.sort { it.deviceName }}">
+              <div>${blockDeviceMapping}</div>
+            </g:each>
+          </td>
         </tr>
         <g:render template="/common/showTags" model="[entity: image]"/>
         <tr class="prop">
