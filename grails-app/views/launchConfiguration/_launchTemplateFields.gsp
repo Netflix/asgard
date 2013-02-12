@@ -59,7 +59,11 @@
 <g:if test="${launchTemplate.blockDeviceMappings}">
   <tr class="prop">
     <td class="name">Block Device Mappings:</td>
-    <td class="value">${launchTemplate.blockDeviceMappings}</td>
+    <td class="value">
+      <g:each var="blockDeviceMapping" in="${launchTemplate.blockDeviceMappings?.sort { it.deviceName }}">
+        <div>${blockDeviceMapping}</div>
+      </g:each>
+    </td>
   </tr>
 </g:if>
 <g:if test="${launchTemplate.iamInstanceProfile}">
