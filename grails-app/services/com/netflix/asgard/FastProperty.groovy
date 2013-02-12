@@ -55,9 +55,11 @@ class FastProperty {
     private static final ImmutableList<String> ADVANCED_ATTRIBUTES = ImmutableList.of('ttl', 'serverId', 'asg',
             'cluster', 'ami', 'countries', 'zone', 'constraints')
 
-    private static final ImmutableMap<String, String> ATTRIBUTE_TO_XML_NAME = ImmutableMap.copyOf((getMetaClass().
-            properties*.name - ['SOURCE_OF_UPDATE', 'metaClass', 'class']).sort().collectEntries { [it, it] } +
-            ['id': 'propertyId'])
+    private static final ImmutableList<String> ALL_ATTRIBUTES = ImmutableList.copyOf((getMetaClass().
+            properties*.name - ['SOURCE_OF_UPDATE', 'metaClass', 'class']).sort())
+
+    private static final ImmutableMap<String, String> ATTRIBUTE_TO_XML_NAME = ImmutableMap.copyOf(ALL_ATTRIBUTES.
+            collectEntries { [it, it] } + ['id': 'propertyId'])
 
     static FastProperty fromXml(xml) {
         if (!xml) { return null }
