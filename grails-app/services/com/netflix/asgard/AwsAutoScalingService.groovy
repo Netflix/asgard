@@ -37,6 +37,7 @@ import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult
 import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsRequest
 import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsResult
+import com.amazonaws.services.autoscaling.model.Ebs
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.PutScalingPolicyRequest
@@ -1061,6 +1062,12 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             Check.notNull(keyName, LaunchConfiguration, "keyName")
             Check.notNull(instanceType, LaunchConfiguration, "instanceType")
             String encodedUserData = Ensure.encoded(userData)
+            if (instanceType.startsWith('m3.')) {
+                blockDeviceMappings = blockDeviceMappings ?: []
+                (1..4).inject(blockDeviceMappings) { mappings, i ->
+                    mappings << new BlockDeviceMapping(deviceName: "/dev/sdb${i}", ebs: new Ebs(volumeSize: 125))
+                }
+            }
             def request = new CreateLaunchConfigurationRequest()
                     .withLaunchConfigurationName(name)
                     .withImageId(imageId).withKeyName(keyName).withSecurityGroups(securityGroups)
