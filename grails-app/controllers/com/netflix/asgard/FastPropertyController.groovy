@@ -27,6 +27,8 @@ class FastPropertyController {
      */
     private final String NO_APP_ID = '_noapp'
 
+    def awsAutoScalingService
+    def awsEc2Service
     def configService
     def fastPropertyService
 
@@ -69,7 +71,10 @@ class FastPropertyController {
             Requests.renderNotFound('Fast Property', id, this)
             return
         }
-        Map details = [fastProperty: fastProperty]
+        Map details = [
+                fastPropertyInfoUrl: configService.fastPropertyInfoUrl,
+                fastProperty: fastProperty
+        ]
         withFormat {
             html { return details }
             xml { new XML(details).render(response) }
@@ -82,10 +87,18 @@ class FastPropertyController {
         List<String> appNames = fastPropertyService.collectFastPropertyAppNames(userContext)
         Collection regionOptions = Region.values()
         regionOptions.addAll(configService.specialCaseRegions)
-
+        List<String> asgNames = awsAutoScalingService.getAutoScalingGroups(userContext)*.autoScalingGroupName.sort()
+        List<String> clusterNames = awsAutoScalingService.getClusters(userContext)*.name.sort()
+        List<String> zoneNames = awsEc2Service.getAvailabilityZones(userContext)*.zoneName.sort()
         Map result = [
-                'appNames': appNames,
-                'regionOptions': regionOptions
+                updatedBy: params.updatedBy ?: userContext.username,
+                appNames: appNames,
+                regionOptions: regionOptions,
+                asgNames: asgNames,
+                clusterNames: clusterNames,
+                zoneNames: zoneNames,
+                images: awsEc2Service.getAccountImages(userContext).sort { it.imageLocation.toLowerCase() },
+                fastPropertyInfoUrl: configService.fastPropertyInfoUrl
         ]
 
         withFormat {
@@ -97,24 +110,35 @@ class FastPropertyController {
 
     def save = {
         UserContext userContext = UserContext.of(request)
+        FastProperty fastProperty = null
         try {
-            final String property = params.key.trim()
-            final String value = params.value?.trim()?.decodeHTML() ?: ''
-            final String appId = params.appId
-            final String region = params.fastPropertyRegion
-            final String stack = params.stack?.trim()?.decodeHTML()
-            final String countries = params.countries?.trim()?.decodeHTML()
-            final String updatedBy = params.updatedBy?.trim()?.decodeHTML()
-            if (!value) {
-                throw new IllegalArgumentException('A Fast Property value is required.')
-            }
-
-            FastProperty fastProperty = fastPropertyService.create(userContext, property, value, appId, region, stack,
-                    countries, updatedBy)
-            flash.message = "Fast Property '${property}' has been created. The change may take a while to propagate."
+            fastProperty = new FastProperty(
+                    key: params.key.trim(),
+                    value: params.value?.trim()?.decodeHTML(),
+                    env: configService.getAccountName(),
+                    appId: params.appId,
+                    region: params.fastPropertyRegion,
+                    stack: params.stack?.trim()?.decodeHTML(),
+                    countries: params.countries?.trim()?.decodeHTML(),
+                    updatedBy: params.updatedBy?.trim()?.decodeHTML(),
+                    serverId: params.serverId?.trim(),
+                    asg: params.asg,
+                    cluster: params.cluster,
+                    ami: params.ami,
+                    zone: params.zone,
+                    ttl: params.ttl,
+                    constraints: params.constraints,
+                    sourceOfUpdate: FastProperty.SOURCE_OF_UPDATE,
+                    cmcTicket: userContext.ticket
+            )
+            fastProperty.validate()
+            fastProperty = fastPropertyService.create(userContext, fastProperty)
+            flash.message = "Fast Property '${fastProperty.key}' has been created. The change may take a while to \
+propagate."
             redirect(action: 'show', id: fastProperty.id)
         } catch (Exception e) {
             flash.message = e.message ?: e.cause?.message
+            params.hasAdvancedAttributes = fastProperty?.hasAdvancedAttributes() ? 'true' : ''
             chain(action: 'create', params: Requests.cap(params))
         }
     }
@@ -127,7 +151,11 @@ class FastPropertyController {
             Requests.renderNotFound('Fast Property', id, this)
             return
         }
-        Map details = [fastProperty: fastProperty]
+        Map details = [
+                updatedBy: params.updatedBy ?: userContext.username ?: fastProperty.updatedBy,
+                fastPropertyInfoUrl: configService.fastPropertyInfoUrl,
+                fastProperty: fastProperty
+        ]
         withFormat {
             html { return details }
             xml { new XML(details).render(response) }
@@ -143,10 +171,11 @@ class FastPropertyController {
         try {
             fastPropertyService.updateFastProperty(userContext, id, value, updatedBy)
             flash.message = "Fast Property '${id}' has been updated. The change may take a while to propagate."
+            redirect(action: 'show', id: id)
         } catch (Exception e) {
             flash.message = "Unable to update Fast Property '${id}': ${e}"
+            redirect(action: 'edit', id: id)
         }
-        redirect(action: 'show', id: id)
     }
 
     def delete = {
