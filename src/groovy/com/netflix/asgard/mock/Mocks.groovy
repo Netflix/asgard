@@ -488,6 +488,7 @@ class Mocks {
             applicationService = applicationService()
             awsEc2Service = awsEc2Service()
             awsLoadBalancerService = awsLoadBalancerService()
+            configService = configService()
             discoveryService = discoveryService()
             mergedInstanceService = mergedInstanceService()
             taskService = taskService()

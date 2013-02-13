@@ -564,4 +564,34 @@ class ConfigService {
     Map<String, String> getSpecialCaseRegions() {
         grailsApplication.config.cloud?.specialCaseRegions ?: [:]
     }
+
+    /**
+     * @return A Closure that determines if EBS volumes are needed for launch configurations based on instance type.
+     */
+    Closure<Boolean> getInstanceTypeNeedsEbsVolumes() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.instanceTypeNeeds ?: { String instanceType ->
+            instanceType.startsWith('m3.')
+        }
+    }
+
+    /**
+     * @return The number of EBS volumes added to launch configurations for specific instance types.
+     */
+    int getCountOfEbsVolumesAddedToLaunchConfigs() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.count ?: 4
+    }
+
+    /**
+     * @return The size of EBS volumes added to launch configurations for specific instance types.
+     */
+    int getSizeOfEbsVolumesAddedToLaunchConfigs() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.size ?: 125
+    }
+
+    /**
+     * @return The prefix of the device name for EBS volumes added to launch configurations for specific instance types.
+     */
+    String getPrefixOfEbsVolumesAddedToLaunchConfigs() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.prefix ?: 'sdb'
+    }
 }
