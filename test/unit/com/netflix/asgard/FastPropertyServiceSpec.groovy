@@ -14,8 +14,9 @@ class FastPropertyServiceSpec extends Specification {
         isOnline() >> true
     }
     RestClientService restClientService = Mock(RestClientService)
+    CachedMap fastPropertiesCachedMap = Mock(CachedMap)
     Caches caches = new Caches(new MockCachedMapBuilder([
-            (EntityType.fastProperty): Mock(CachedMap),
+            (EntityType.fastProperty): fastPropertiesCachedMap,
     ]))
     TaskService taskService = new TaskService() {
         def runTask(UserContext userContext, String name, Closure work, Link link = null, Task existingTask = null) {
@@ -42,5 +43,15 @@ class FastPropertyServiceSpec extends Specification {
         then:
         1 * restClientService.getAsXml("${baseUrl}removePropertyById?id=${encodedInvalidId}\
 &source=asgard&updatedBy=cmccoy&cmcTicket=")
+    }
+
+    def 'should collect fast property app names'() {
+        fastPropertiesCachedMap.list() >> ['API', 'API', 'GPS'].collect { new FastProperty(appId: it) }
+        service.applicationService = Mock(ApplicationService) {
+            getRegisteredApplications(_) >> ['api', 'helloworld'].collect { new AppRegistration(name: it)}
+        }
+
+        expect:
+        service.collectFastPropertyAppNames(userContext) == ['API', 'helloworld']
     }
 }

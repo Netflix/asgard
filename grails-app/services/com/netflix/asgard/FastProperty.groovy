@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.google.common.collect.ImmutableList
+import com.google.common.collect.ImmutableMap
 import com.netflix.frigga.NameValidation
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -26,6 +27,9 @@ import org.springframework.web.util.HtmlUtils
 @ToString
 class FastProperty {
 
+    static final String SOURCE_OF_UPDATE = 'asgard'
+
+    String id
     String key
     String value
     String env
@@ -38,37 +42,44 @@ class FastProperty {
     String sourceOfUpdate
     String cmcTicket
     String ts
+    String asg
+    String cluster
+    String ami
+    String zone
+    String ttl
+    String constraints
 
-    private static final ImmutableList<String> PROPERTIES_THAT_FORM_ID = ImmutableList.of('key', 'appId', 'env',
-            'region', 'serverId', 'stack', 'countries')
+    private static final ImmutableList<String> ATTRIBUTES_THAT_FORM_ID = ImmutableList.of('key', 'appId', 'env',
+            'region', 'serverId', 'stack', 'countries', 'asg', 'cluster', 'ami', 'zone')
+
+    private static final ImmutableList<String> ADVANCED_ATTRIBUTES = ImmutableList.of('ttl', 'serverId', 'asg',
+            'cluster', 'ami', 'countries', 'zone', 'constraints')
+
+    private static final ImmutableList<String> ALL_ATTRIBUTES = ImmutableList.copyOf((getMetaClass().
+            properties*.name - ['SOURCE_OF_UPDATE', 'metaClass', 'class']).sort())
+
+    private static final ImmutableMap<String, String> ATTRIBUTE_TO_XML_NAME = ImmutableMap.copyOf(ALL_ATTRIBUTES.
+            collectEntries { [it, it] } + ['id': 'propertyId'])
 
     static FastProperty fromXml(xml) {
         if (!xml) { return null }
         FastProperty fastProperty = new FastProperty()
-        ['key', 'value', 'env', 'appId', 'countries', 'serverId', 'updatedBy', 'stack', 'region', 'sourceOfUpdate',
-                'cmcTicket', 'ts'].each {
-            String value = xml[it]?.toString()
-            fastProperty[it] = value ? HtmlUtils.htmlUnescape(value) : ''
+        ATTRIBUTE_TO_XML_NAME.each { String attributeName, xmlName ->
+            String value = xml[xmlName]?.toString()
+            fastProperty[attributeName] = value ? HtmlUtils.htmlUnescape(value) : ''
         }
         fastProperty
     }
 
     /**
-     * Generates the id based on current field values.
-     *
-     * @return id of a fast property with these field values
-     */
-    String getId() {
-        PROPERTIES_THAT_FORM_ID.collect { this[it] ?: '' }.join('|')
-    }
-
-    /**
-     * Ensures the properties that make up an ID are valid.
+     * Ensures all attributes are valid.
      *
      * @throws IllegalStateException describing invalid properties
      */
-    void validateId() {
-        Map<String, String> propertiesToValues = PROPERTIES_THAT_FORM_ID.collectEntries { [(it) : this[it]] }
+    void validate() {
+        if (!key) { throw new IllegalStateException('A Fast Property key is required.') }
+        if (!value) { throw new IllegalStateException('A Fast Property value is required.') }
+        Map<String, String> propertiesToValues = ATTRIBUTES_THAT_FORM_ID.collectEntries { [(it) : this[it]] }
         Map<String, String> invalidPropertiesToValues = propertiesToValues.
                 findAll { String name, String value -> value && !NameValidation.checkDetail(value) }
         if (!invalidPropertiesToValues) { return }
@@ -83,17 +94,17 @@ class FastProperty {
         StringWriter writer = new StringWriter()
         final MarkupBuilder builder = new MarkupBuilder(writer)
         builder.property {
-            builder.key(key)
-            builder.value(value)
-            builder.env(env)
-            builder.appId(appId)
-            builder.region(region)
-            builder.stack(stack)
-            builder.countries(countries)
-            builder.updatedBy(updatedBy)
-            builder.sourceOfUpdate(sourceOfUpdate)
-            builder.cmcTicket(cmcTicket)
+            ATTRIBUTE_TO_XML_NAME.each { String attributeName, xmlName ->
+                String value = this[attributeName]
+                if (value) {
+                    builder."${xmlName}"(value)
+                }
+            }
         }
         writer.toString()
+    }
+
+    boolean hasAdvancedAttributes() {
+        ADVANCED_ATTRIBUTES.find { this[it] }
     }
 }

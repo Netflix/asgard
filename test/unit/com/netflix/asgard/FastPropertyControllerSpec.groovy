@@ -15,7 +15,9 @@
  */
 package com.netflix.asgard
 
-import com.netflix.asgard.mock.Mocks
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.ec2.model.AvailabilityZone
+import com.amazonaws.services.ec2.model.Image
 import grails.test.mixin.TestFor
 import groovy.util.slurpersupport.GPathResult
 import spock.lang.Specification
@@ -65,6 +67,7 @@ class FastPropertyControllerSpec extends Specification {
                 fastProperty: FastProperty.fromXml(mockXmlSingle('1'))
         ]
         controller.fastPropertyService = Mock(FastPropertyService)
+        controller.configService = Mock(ConfigService)
         controller.params.id = 'hello'
 
         when:
@@ -77,38 +80,65 @@ class FastPropertyControllerSpec extends Specification {
 
     def 'create should return list of appNames and regionOptions' () {
         Map specialCaseRegion = [code: 'us-nflx-1', description: 'us-nflx-1 (Netflix Data Center)']
-        controller.fastPropertyService = Mocks.fastPropertyService()
+        controller.fastPropertyService = Mock(FastPropertyService) {
+            collectFastPropertyAppNames(_) >> ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot']
+        }
         controller.configService = Mock(ConfigService) {
             getSpecialCaseRegions() >> specialCaseRegion
+        }
+        controller.with {
+            awsAutoScalingService = Mock(AwsAutoScalingService) {
+                getAutoScalingGroups(_) >> ['helloworld-v001', 'helloworld-v002'].
+                        collect { new AutoScalingGroup(autoScalingGroupName: it) }
+                getClusters(_) >> []
+            }
+            awsEc2Service = Mock(AwsEc2Service) {
+                getAvailabilityZones(_) >> ['us-east-1', 'us-west-1'].collect { new AvailabilityZone(zoneName: it) }
+                getAccountImages(_) >> [new Image(imageLocation: 'here')]
+            }
         }
 
         when:
         Map result = controller.create()
 
         then:
-        result.appNames == ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot', 'videometadata']
+        result.appNames == ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot']
         result.regionOptions == (Region.values() as List) + specialCaseRegion
+        result.asgNames == ['helloworld-v001', 'helloworld-v002']
+        result.clusterNames == []
+        result.zoneNames == ['us-east-1', 'us-west-1']
+        result.images == [new Image(imageLocation: 'here')]
     }
 
     def 'save should call platform-service REST API'() {
         controller.params.with {
-            key = ' property '
+            key = ' key '
             value = ' value '
             appId = 'app-id'
             fastPropertyRegion = 'region'
             stack = 'stack'
             countries = 'countries'
             updatedBy = 'user'
+            serverId = 'serverId'
+            asg = 'asg'
+            cluster = 'cluster'
+            ami = 'ami'
+            zone = 'zone'
+            ttl = 'ttl'
         }
 
         controller.fastPropertyService = Mock(FastPropertyService)
+        controller.configService = Mock(ConfigService) {
+            1 * getAccountName()
+        }
 
         when:
         controller.save()
 
         then:
-        1 * controller.fastPropertyService.create(!null, 'property', 'value', 'app-id', 'region', 'stack', 'countries',
-                'user')
+        1 * controller.fastPropertyService.create(!null, new FastProperty(key: 'key', value: 'value', appId: 'app-id',
+                region: 'region', stack: 'stack', countries: 'countries', updatedBy: 'user', sourceOfUpdate: 'asgard',
+                serverId: 'serverId', asg: 'asg', cluster: 'cluster', ami: 'ami', zone: 'zone', ttl: 'ttl'))
     }
 
     def 'save should fail validation with empty value'() {
@@ -120,6 +150,9 @@ class FastPropertyControllerSpec extends Specification {
             stack = 'stack'
             countries = 'countries'
             updatedBy = 'user'
+        }
+        controller.configService = Mock(ConfigService) {
+            1 * getAccountName()
         }
 
         when:
