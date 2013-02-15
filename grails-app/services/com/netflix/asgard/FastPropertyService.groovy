@@ -23,7 +23,6 @@ import java.rmi.ServerException
 import java.rmi.server.ServerNotActiveException
 import org.apache.commons.collections.Bag
 import org.apache.commons.collections.bag.HashBag
-import org.apache.http.HttpException
 import org.apache.http.HttpStatus
 import org.springframework.web.util.UriComponentsBuilder
 
@@ -121,7 +120,7 @@ class FastPropertyService implements CacheInitializer {
             RestResponse restResponse = restClientService.postAsXml(uriPath, fastProperty.toXml())
             if (restResponse.statusCode != HttpStatus.SC_OK) {
                 String errorMsg = XML.parse(restResponse.content).errorMsg
-                throw new HttpException("Failed to create Fast Property. ${errorMsg}")
+                throw new ValidationException("Failed to create Fast Property. ${errorMsg}")
             }
             fastProperty = FastProperty.fromXml(XML.parse(restResponse.content) as GPathResult)
             // Refresh cache
@@ -157,7 +156,7 @@ class FastPropertyService implements CacheInitializer {
                 RestResponse restResponse = restClientService.postAsXml(uriPath, xmlString)
                 if (restResponse.statusCode != HttpStatus.SC_OK) {
                     String errorMsg = XML.parse(restResponse.content).errorMsg
-                    throw new HttpException("Failed to update Fast Property. ${errorMsg}")
+                    throw new ValidationException("Failed to update Fast Property. ${errorMsg}")
                 }
                 // Refresh cache
                 get(userContext, id)
