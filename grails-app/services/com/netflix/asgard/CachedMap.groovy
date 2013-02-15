@@ -253,7 +253,7 @@ class CachedMap<T> implements Fillable {
     void putAllAndRemoveMissing(Collection<String> names, Collection<T> values) {
 
         // Things that exist
-        Map<String, T> namesToValues = values.inject([:]) { Map map, T value -> map << [(entityType.key(value)): value] } as Map
+        Map<String, T> namesToValues = values.collectEntries { [entityType.key(it), it] }
         putAll(namesToValues)
 
         // Thing that don't exist
