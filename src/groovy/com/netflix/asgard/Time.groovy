@@ -81,5 +81,3 @@ class Time {
 
     static String nowReadable() { format(now()) }
 }
-
-class CancelledException extends RuntimeException {}
