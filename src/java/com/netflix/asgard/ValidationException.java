@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2013 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard;
 
 /**
- * Exception that occurs when a service that Asgard depends on cannot be reached.
+ * Exception to throw when a service rejects a set of inputs due to violation of business rules.
  */
-class ServiceUnavailableException extends Exception {
+public class ValidationException extends RuntimeException implements NonAlertable {
 
-    final String serviceName
-
-    ServiceUnavailableException(String serviceName, String msg = null, Throwable throwable = null) {
-        super(msg ?: "${serviceName} could not be contacted.", throwable)
-        this.serviceName = serviceName
+    /**
+     * Constructor with error message.
+     *
+     * @param message the message to show the user who violated a rule
+     */
+    public ValidationException(String message) {
+        super(message);
     }
 }
