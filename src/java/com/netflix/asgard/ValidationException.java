@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2013 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard;
 
-class ValidationException extends RuntimeException implements NonAlertable {
+/**
+ * Exception to throw when a service rejects a set of inputs due to violation of business rules.
+ */
+public class ValidationException extends RuntimeException implements NonAlertable {
 
-    ValidationException(String s) {
-        super(s)
+    /**
+     * Constructor with error message.
+     *
+     * @param message the message to show the user who violated a rule
+     */
+    public ValidationException(String message) {
+        super(message);
     }
 }
