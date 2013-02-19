@@ -124,7 +124,7 @@ class FastPropertyControllerSpec extends Specification {
             cluster = 'cluster'
             ami = 'ami'
             zone = 'zone'
-            ttl = 'ttl'
+            ttl = '3'
         }
 
         controller.fastPropertyService = Mock(FastPropertyService)
@@ -138,7 +138,7 @@ class FastPropertyControllerSpec extends Specification {
         then:
         1 * controller.fastPropertyService.create(!null, new FastProperty(key: 'key', value: 'value', appId: 'app-id',
                 region: 'region', stack: 'stack', countries: 'countries', updatedBy: 'user', sourceOfUpdate: 'asgard',
-                serverId: 'serverId', asg: 'asg', cluster: 'cluster', ami: 'ami', zone: 'zone', ttl: 'ttl'))
+                serverId: 'serverId', asg: 'asg', cluster: 'cluster', ami: 'ami', zone: 'zone', ttl: '3'))
     }
 
     def 'save should fail validation with empty value'() {

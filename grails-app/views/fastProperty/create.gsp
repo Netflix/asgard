@@ -73,6 +73,7 @@
           </td>
           <td class="value">
             <g:textField id="ttl" name="ttl" value="${params.ttl}"/>
+            <g:select name="ttlUnit" value="${params.ttlUnit ?: 'Days'}" from="${ttlUnits}" />
           </td>
         </tr>
         <tr class="prop advanced">

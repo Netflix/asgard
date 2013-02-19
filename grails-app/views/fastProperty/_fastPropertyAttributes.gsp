@@ -20,10 +20,14 @@
     <td colspan="2"><a href="${fastPropertyInfoUrl}">Fast Property Documentation</a></td>
   </tr>
 </g:if>
+<tr class="prop">
+  <td class="name">Timestamp:</td>
+  <td class="value">${fastProperty.timestamp}</td>
+</tr>
 <g:if test="${fastProperty.ttl}">
   <tr class="prop">
-    <td class="name">TTL:</td>
-    <td class="value">${fastProperty.ttl}&nbsp;seconds</td>
+    <td class="name">Expires:</td>
+    <td class="value">${fastProperty.expires}</td>
   </tr>
 </g:if>
 <g:if test="${fastProperty.constraints}">
@@ -32,10 +36,6 @@
     <td class="value">${fastProperty.constraints}</td>
   </tr>
 </g:if>
-<tr class="prop">
-  <td class="name">Timestamp:</td>
-  <td class="value">${fastProperty.ts}</td>
-</tr>
 <g:if test="${fastProperty.cmcTicket}">
   <tr class="prop">
     <td class="name">${ticketLabel.encodeAsHTML()}:</td>

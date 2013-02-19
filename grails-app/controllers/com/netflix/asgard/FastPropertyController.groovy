@@ -98,6 +98,7 @@ class FastPropertyController {
                 clusterNames: clusterNames,
                 zoneNames: zoneNames,
                 images: awsEc2Service.getAccountImages(userContext).sort { it.imageLocation.toLowerCase() },
+                ttlUnits: FastProperty.TTL_UNITS,
                 fastPropertyInfoUrl: configService.fastPropertyInfoUrl
         ]
 
@@ -126,11 +127,19 @@ class FastPropertyController {
                     cluster: params.cluster,
                     ami: params.ami,
                     zone: params.zone,
-                    ttl: params.ttl,
                     constraints: params.constraints,
                     sourceOfUpdate: FastProperty.SOURCE_OF_UPDATE,
                     cmcTicket: userContext.ticket
             )
+            if (params.ttl) {
+                int ttl
+                try {
+                    ttl = params.ttl as Integer
+                } catch(NumberFormatException e) {
+                    throw new IllegalArgumentException("TTL must be a number.")
+                }
+                fastProperty.setTtlInUnits(ttl, params.ttlUnit)
+            }
             fastProperty.validate()
             fastProperty = fastPropertyService.create(userContext, fastProperty)
             flash.message = "Fast Property '${fastProperty.key}' has been created. The change may take a while to \
