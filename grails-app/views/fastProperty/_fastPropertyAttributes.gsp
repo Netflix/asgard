@@ -66,6 +66,12 @@
     <td class="value"><g:linkObject type="autoScaling" name="${fastProperty.asg}">${fastProperty.asg}</g:linkObject></td>
   </tr>
 </g:if>
+<g:if test="${fastProperty.ami}">
+  <tr class="prop">
+    <td class="name">AMI:</td>
+    <td class="value"><g:linkObject type="image" name="${fastProperty.ami}">${fastProperty.ami}</g:linkObject></td>
+  </tr>
+</g:if>
 <g:if test="${fastProperty.cluster}">
   <tr class="prop">
     <td class="name">Cluster:</td>
@@ -76,12 +82,6 @@
   <tr class="prop">
     <td class="name">Application:</td>
     <td class="value"><g:linkObject type="application" name="${fastProperty.appId?.toLowerCase()}">${fastProperty.appId}</g:linkObject></td>
-  </tr>
-</g:if>
-<g:if test="${fastProperty.ami}">
-  <tr class="prop">
-    <td class="name">AMI:</td>
-    <td class="value"><g:linkObject type="image" name="${fastProperty.ami}">${fastProperty.ami}</g:linkObject></td>
   </tr>
 </g:if>
 <tr class="prop">
