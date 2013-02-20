@@ -34,6 +34,8 @@ class FastProperty {
     static final String SOURCE_OF_UPDATE = 'asgard'
     static final ImmutableList<String> TTL_UNITS = ImmutableList.of('Weeks', 'Days', 'Hours', 'Minutes', 'Seconds')
 
+    private static final DateTimeFormatter tsFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+
     String id
     String key
     String value
@@ -129,8 +131,7 @@ class FastProperty {
      * Converts ts to a DateTime.
      */
     DateTime getTimestamp() {
-        DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        dateFormat.parseDateTime(ts)
+        tsFormatter.parseDateTime(ts)
     }
 
     /**
