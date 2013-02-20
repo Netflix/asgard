@@ -126,14 +126,16 @@ class FastPropertyControllerSpec extends Specification {
             zone = 'zone'
             ttl = '3'
         }
-
+        FastPropertySaveCommand cmd = new FastPropertySaveCommand(ttl: 3)
+        cmd.validate()
         controller.fastPropertyService = Mock(FastPropertyService)
         controller.configService = Mock(ConfigService) {
             1 * getAccountName()
         }
 
         when:
-        controller.save()
+        !cmd.hasErrors()
+        controller.save(cmd)
 
         then:
         1 * controller.fastPropertyService.create(!null, new FastProperty(key: 'key', value: 'value', appId: 'app-id',

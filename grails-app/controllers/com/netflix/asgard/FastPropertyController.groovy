@@ -109,7 +109,11 @@ class FastPropertyController {
         }
     }
 
-    def save = {
+    def save = { FastPropertySaveCommand cmd ->
+        if (cmd.hasErrors()) {
+            chain(action: 'create', model: [cmd:cmd], params: params)
+            return
+        }
         UserContext userContext = UserContext.of(request)
         FastProperty fastProperty = null
         try {
@@ -131,14 +135,8 @@ class FastPropertyController {
                     sourceOfUpdate: FastProperty.SOURCE_OF_UPDATE,
                     cmcTicket: userContext.ticket
             )
-            if (params.ttl) {
-                int ttl
-                try {
-                    ttl = params.ttl as Integer
-                } catch(NumberFormatException e) {
-                    throw new IllegalArgumentException("TTL must be a number.")
-                }
-                fastProperty.setTtlInUnits(ttl, params.ttlUnit)
+            if (cmd.ttl) {
+                fastProperty.setTtlInUnits(cmd.ttl, params.ttlUnit)
             }
             fastProperty.validate()
             fastProperty = fastPropertyService.create(userContext, fastProperty)
@@ -198,4 +196,8 @@ propagate."
     }
 
     def result = { render view: '/common/result' }
+}
+
+class FastPropertySaveCommand {
+    Integer ttl
 }
