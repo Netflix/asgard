@@ -17,7 +17,9 @@ package com.netflix.asgard
 
 import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
+import org.joda.time.DateTime
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class FastPropertySpec extends Specification {
 
@@ -113,5 +115,57 @@ class FastPropertySpec extends Specification {
                 region: 'eu-west-1', ttl: '999').hasAdvancedAttributes()
         new FastProperty(key: 'dial', value: '11', updatedBy: 'cmccoy', stack: 'spinal', appId: 'tap',
                 region: 'eu-west-1', asg: 'asg').hasAdvancedAttributes()
+    }
+
+    def 'should calculate expiration'() {
+        DateTime expectedDateTime = new DateTime().withDate(2013, 01, 18).withTime(01, 16, 25, 771)
+
+        expect:
+        new FastProperty(ts: '2013-01-18T00:59:46.771Z', ttl: '999').expires == expectedDateTime
+    }
+
+    def 'should not calculate without ttl'() {
+        expect:
+        new FastProperty(ts: '2013-01-18T00:59:46.771Z').expires == null
+    }
+
+    @Unroll("should set ttl in seconds when to unit of measure is #unitOfMeasure")
+    def 'should set ttl according to unit of measure'() {
+        FastProperty fastProperty = new FastProperty()
+
+        when:
+        fastProperty.setTtlInUnits(3, unitOfMeasure)
+
+        then:
+        fastProperty.ttl == ttl
+
+        where:
+        unitOfMeasure   | ttl
+        'Seconds'       | '3'
+        'Minutes'       | '180'
+        'Hours'         | '10800'
+        'Days'          | '259200'
+        'Weeks'         | '1814400'
+    }
+
+    def 'should fail to set ttl with invalid unit of measure'() {
+        FastProperty fastProperty = new FastProperty()
+
+        when:
+        fastProperty.setTtlInUnits(3, 'DogYears')
+
+        then:
+        thrown(IllegalArgumentException)
+
+    }
+
+    def 'should default to seconds when setting ttl without a unit of measure'() {
+        FastProperty fastProperty = new FastProperty()
+
+        when:
+        fastProperty.setTtlInUnits(3, null)
+
+        then:
+        fastProperty.ttl == '3'
     }
 }

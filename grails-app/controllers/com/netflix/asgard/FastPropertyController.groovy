@@ -98,6 +98,7 @@ class FastPropertyController {
                 clusterNames: clusterNames,
                 zoneNames: zoneNames,
                 images: awsEc2Service.getAccountImages(userContext).sort { it.imageLocation.toLowerCase() },
+                ttlUnits: FastProperty.TTL_UNITS,
                 fastPropertyInfoUrl: configService.fastPropertyInfoUrl
         ]
 
@@ -108,7 +109,11 @@ class FastPropertyController {
         }
     }
 
-    def save = {
+    def save = { FastPropertySaveCommand cmd ->
+        if (cmd.hasErrors()) {
+            chain(action: 'create', model: [cmd:cmd], params: params)
+            return
+        }
         UserContext userContext = UserContext.of(request)
         FastProperty fastProperty = null
         try {
@@ -126,11 +131,13 @@ class FastPropertyController {
                     cluster: params.cluster,
                     ami: params.ami,
                     zone: params.zone,
-                    ttl: params.ttl,
                     constraints: params.constraints,
                     sourceOfUpdate: FastProperty.SOURCE_OF_UPDATE,
                     cmcTicket: userContext.ticket
             )
+            if (cmd.ttl) {
+                fastProperty.setTtlInUnits(cmd.ttl, params.ttlUnit)
+            }
             fastProperty.validate()
             fastProperty = fastPropertyService.create(userContext, fastProperty)
             flash.message = "Fast Property '${fastProperty.key}' has been created. The change may take a while to \
@@ -189,4 +196,8 @@ propagate."
     }
 
     def result = { render view: '/common/result' }
+}
+
+class FastPropertySaveCommand {
+    Integer ttl
 }
