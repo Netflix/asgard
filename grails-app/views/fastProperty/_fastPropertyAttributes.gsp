@@ -20,10 +20,14 @@
     <td colspan="2"><a href="${fastPropertyInfoUrl}">Fast Property Documentation</a></td>
   </tr>
 </g:if>
+<tr class="prop">
+  <td class="name">Timestamp:</td>
+  <td class="value">${fastProperty.timestamp}</td>
+</tr>
 <g:if test="${fastProperty.ttl}">
   <tr class="prop">
-    <td class="name">TTL:</td>
-    <td class="value">${fastProperty.ttl}&nbsp;seconds</td>
+    <td class="name">Expires:</td>
+    <td class="value">${fastProperty.expires}</td>
   </tr>
 </g:if>
 <g:if test="${fastProperty.constraints}">
@@ -32,10 +36,6 @@
     <td class="value">${fastProperty.constraints}</td>
   </tr>
 </g:if>
-<tr class="prop">
-  <td class="name">Timestamp:</td>
-  <td class="value">${fastProperty.ts}</td>
-</tr>
 <g:if test="${fastProperty.cmcTicket}">
   <tr class="prop">
     <td class="name">${ticketLabel.encodeAsHTML()}:</td>
@@ -66,6 +66,12 @@
     <td class="value"><g:linkObject type="autoScaling" name="${fastProperty.asg}">${fastProperty.asg}</g:linkObject></td>
   </tr>
 </g:if>
+<g:if test="${fastProperty.ami}">
+  <tr class="prop">
+    <td class="name">AMI:</td>
+    <td class="value"><g:linkObject type="image" name="${fastProperty.ami}">${fastProperty.ami}</g:linkObject></td>
+  </tr>
+</g:if>
 <g:if test="${fastProperty.cluster}">
   <tr class="prop">
     <td class="name">Cluster:</td>
@@ -76,12 +82,6 @@
   <tr class="prop">
     <td class="name">Application:</td>
     <td class="value"><g:linkObject type="application" name="${fastProperty.appId?.toLowerCase()}">${fastProperty.appId}</g:linkObject></td>
-  </tr>
-</g:if>
-<g:if test="${fastProperty.ami}">
-  <tr class="prop">
-    <td class="name">AMI:</td>
-    <td class="value"><g:linkObject type="image" name="${fastProperty.ami}">${fastProperty.ami}</g:linkObject></td>
   </tr>
 </g:if>
 <tr class="prop">

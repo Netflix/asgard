@@ -73,6 +73,7 @@
           </td>
           <td class="value">
             <g:textField id="ttl" name="ttl" value="${params.ttl}"/>
+            <g:select name="ttlUnit" value="${params.ttlUnit ?: 'Days'}" from="${ttlUnits}" />
           </td>
         </tr>
         <tr class="prop advanced">
@@ -107,6 +108,15 @@
         </tr>
         <tr class="prop advanced">
           <td class="name">
+            <label for="ami">AMI:</label>
+          </td>
+          <td class="value">
+            <g:select name="ami" noSelection="['':'Default (all AMIs)']" value="${params.ami}" from="${images}"
+                      optionKey="imageId" optionValue="imageLocation" class="allowEmptySelect" />
+          </td>
+        </tr>
+        <tr class="prop advanced">
+          <td class="name">
             <label for="cluster">Cluster:</label>
           </td>
           <td class="value">
@@ -122,15 +132,6 @@
             <g:select title="The application that this property is used for"
                       name="appId" noSelection="['':'Default (all apps)']" value="${params.appId}" from="${appNames}"
                       class="allowEmptySelect" />
-          </td>
-        </tr>
-        <tr class="prop advanced">
-          <td class="name">
-            <label for="ami">AMI:</label>
-          </td>
-          <td class="value">
-            <g:select name="ami" noSelection="['':'Default (all AMIs)']" value="${params.ami}" from="${images}"
-                      optionKey="imageId" optionValue="imageLocation" class="allowEmptySelect" />
           </td>
         </tr>
         <tr class="prop advanced">
