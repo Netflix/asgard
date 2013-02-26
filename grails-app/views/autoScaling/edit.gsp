@@ -88,7 +88,7 @@
               <input type="radio" name="addToLoadBalancer" value="enabled" id="addToLoadBalancerEnabled" ${addToLoadBalancerSuspended ?  '' : 'checked="checked"'}>
               <label for="addToLoadBalancerEnabled" class="choice">Allow Group to Add Instances to ELB</label><br/>
               <input type="radio" name="addToLoadBalancer" value="disabled" id="addToLoadBalancerDisabled" ${addToLoadBalancerSuspended ? 'checked="checked"' : ''}>
-              <label for="addToLoadBalancerDisabled" class="choice">Disable Instance Additions to ELB</label>
+              <label for="addToLoadBalancerDisabled" class="choice">Disable Instance Additions to ELB (disables all instances in Discovery)</label>
             </td>
           </tr>
           </tbody>
