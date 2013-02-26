@@ -1,3 +1,6 @@
+import com.netflix.asgard.FastProperty
+import grails.converters.JSON
+
 /*
  * Copyright 2012 Netflix, Inc.
  *
@@ -23,6 +26,10 @@ class BootStrap {
     def init = { servletContext ->
         if (configService.appConfigured) { // Only start warming the caches if Asgard has been configured
             initService.initializeApplication()
+        }
+
+        JSON.registerObjectMarshaller(FastProperty) {
+            it.properties.subMap(FastProperty.ALL_ATTRIBUTES)
         }
     }
 }
