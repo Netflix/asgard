@@ -183,7 +183,8 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
                                     evaluationPeriods: 1,
                                     threshold: 78,
                                     actionArns: [],
-                                    autoScalingGroupName: 'hw_v046'
+                                    autoScalingGroupName: 'hw_v046',
+                                    dimensions: [AutoScalingGroupName: 'hw_v046']
                             )
                     ]),
             new ScalingPolicyData(policyName: 'scale-down-hw_v046-15-300', autoScalingGroupName: 'hw_v046',
@@ -198,7 +199,8 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
                                     evaluationPeriods: 1,
                                     threshold: 22,
                                     actionArns: [],
-                                    autoScalingGroupName: 'hw_v046'
+                                    autoScalingGroupName: 'hw_v046',
+                                    dimensions: [AutoScalingGroupName: 'hw_v046']
                             ),
                             new AlarmData(
                                     alarmName: 'alarm3',
@@ -210,7 +212,8 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
                                     evaluationPeriods: 1,
                                     threshold: 23,
                                     actionArns: [],
-                                    autoScalingGroupName: 'hw_v046'
+                                    autoScalingGroupName: 'hw_v046',
+                                    dimensions: [AutoScalingGroupName: 'hw_v046']
                             )
                     ]),
         ] as Set

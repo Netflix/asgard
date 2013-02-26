@@ -132,7 +132,8 @@ class ScalingPolicyDataSpec extends Specification {
                                     'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
                             autoScalingGroupName: 'spectacular-Encoder-v031',
                             policyNames: ['scale-down-realtimerouter-10-600'],
-                            topicNames: ['sE-auto-scale-alert-topic']
+                            topicNames: ['sE-auto-scale-alert-topic'],
+                            dimensions: [AutoScalingGroupName: 'spectacular-Encoder-v031']
                     ),
                     new AlarmData(
                             alarmName: 'super-scale-downin-alarm-spectacular-Encoder-v031-AmountOfStuff-67',
@@ -147,7 +148,8 @@ class ScalingPolicyDataSpec extends Specification {
                                     'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
                             autoScalingGroupName: 'spectacular-Encoder-v031',
                             policyNames: ['scale-down-realtimerouter-10-600'],
-                            topicNames: ['sE-auto-scale-alert-topic']
+                            topicNames: ['sE-auto-scale-alert-topic'],
+                            dimensions: [AutoScalingGroupName: 'spectacular-Encoder-v031']
                     )
             ]
         ) == scalingPolicyForAlarmAndPolicy

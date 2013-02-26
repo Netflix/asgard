@@ -155,7 +155,6 @@ class ScalingPolicyController {
                 evaluationPeriods: cmd.evaluationPeriods,
                 threshold: cmd.threshold,
                 actionArns: snsArns,
-                autoScalingGroupName: cmd.group,
             )
             final ScalingPolicyData scalingPolicyData = new ScalingPolicyData(
                 autoScalingGroupName: cmd.group,

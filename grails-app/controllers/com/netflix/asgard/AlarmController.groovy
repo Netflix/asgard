@@ -152,7 +152,6 @@ class AlarmController {
                     evaluationPeriods: cmd.evaluationPeriods,
                     threshold: cmd.threshold,
                     actionArns: snsArns,
-                    autoScalingGroupName: policy?.autoScalingGroupName
                 )
             try {
                 String alarmName = awsCloudWatchService.createAlarm(userContext, alarm, policy.policyARN)
