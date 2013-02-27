@@ -264,6 +264,7 @@ Group: ${lastGroup.loadBalancerNames}"""
                 vpcZoneIdentifier = vpcZoneIdentifier ?: subnets.constructNewVpcZoneIdentifierForZones(lastGroup.vpcZoneIdentifier,
                         selectedZones)
             }
+            boolean ebsOptimized = params.ebsOptimized as boolean ?: lastLaunchConfig.ebsOptimized
             log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers for next \
 Group: ${loadBalancerNames}"""
             GroupCreateOptions options = new GroupCreateOptions(
@@ -296,7 +297,8 @@ Group: ${loadBalancerNames}"""
                     scalingPolicies: newScalingPolicies,
                     scheduledActions: newScheduledActions,
                     vpcZoneIdentifier: vpcZoneIdentifier,
-                    spotPrice: spotPrice
+                    spotPrice: spotPrice,
+                    ebsOptimized: ebsOptimized
             )
             def operation = pushService.startGroupCreate(options)
             flash.message = "${operation.task.name} has been started."

@@ -121,7 +121,8 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
                 withAvailabilityZones([]).withLoadBalancerNames([]).
                 withMaxSize(0).withMinSize(0).withDefaultCooldown(0)
         final LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId('ami-deadbeef').
-                withInstanceType('m1.small').withKeyName('keyName').withSecurityGroups([]).withUserData('')
+                withInstanceType('m1.small').withKeyName('keyName').withSecurityGroups([]).withUserData('').
+                withEbsOptimized(false)
 
         when:
         final CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
