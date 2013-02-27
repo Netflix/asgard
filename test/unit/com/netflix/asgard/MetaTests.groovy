@@ -45,7 +45,9 @@ class MetaTests extends GroovyTestCase {
 
     void testPretty() {
         assert 'Auto Scaling Group' == Meta.pretty(AutoScalingGroup)
-        assert '{MaxSize: 5, }' == Meta.pretty(new AutoScalingGroup().withMaxSize(5))
+        assert "{MaxSize: 5, AvailabilityZones: [], LoadBalancerNames: [], Instances: [], SuspendedProcesses: [], \
+EnabledMetrics: [], Tags: [], TerminationPolicies: [], }".stripIndent() == Meta.
+                pretty(new AutoScalingGroup().withMaxSize(5))
         assert 'null' == Meta.pretty(null)
     }
 
