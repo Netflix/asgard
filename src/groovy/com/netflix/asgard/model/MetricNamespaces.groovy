@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableMap
  */
 class MetricNamespaces {
 
-    private final static ImmutableMap<String, MetricNamespace> AWS_NAMESPACES = ImmutableMap.copyOf([
+    private final static ImmutableMap<String, MetricNamespace> AWS_NAMESPACES_BY_NAME = ImmutableMap.copyOf([
             MetricNamespace.of('AWS/Billing', [
                     'EstimatedCharges'
             ], [
@@ -225,7 +225,7 @@ class MetricNamespaces {
             ])
     ].collectEntries { [it.namespace, it] })
 
-    private final ImmutableMap<String, MetricNamespace> namespaces
+    private final ImmutableMap<String, MetricNamespace> allNamespacesByName
 
     MetricNamespaces(Map<String, Collection<String>> customNamespacesToDimensions = [:],
                      Collection<MetricId> allCustomMetricIds = []) {
@@ -234,7 +234,7 @@ class MetricNamespaces {
             List<String> metricNames = namespacesToMetricIds[it].collect { it.metricName }
             MetricNamespace.of(it, metricNames, customNamespacesToDimensions[it])
         } ?: []
-        namespaces = ImmutableMap.copyOf(AWS_NAMESPACES + customMetricNamespace.collectEntries { [ it.namespace, it] })
+        allNamespacesByName = ImmutableMap.copyOf(AWS_NAMESPACES_BY_NAME + customMetricNamespace.collectEntries { [ it.namespace, it] })
     }
 
     /**
@@ -243,7 +243,7 @@ class MetricNamespaces {
      * @return metrics
      */
     Set<MetricId> getAllMetricIds() {
-        namespaces.values().collect { namespace ->
+        allNamespacesByName.values().collect { namespace ->
             namespace.metrics.collect { MetricId.from(namespace.namespace, it) }
         }.flatten() as Set
     }
@@ -255,6 +255,6 @@ class MetricNamespaces {
      * @return dimension names
      */
     List<String> getDimensionsForNamespace(String namespace) {
-        namespaces[namespace]?.dimensions?.sort()
+        allNamespacesByName[namespace]?.dimensions?.sort()
     }
 }
