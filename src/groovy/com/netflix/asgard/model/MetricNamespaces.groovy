@@ -18,7 +18,10 @@ package com.netflix.asgard.model
 import com.google.common.collect.ImmutableMap
 
 /**
- * Metrics and dimensions for namespaces according to AWS documentation.
+ * This class makes Cloudwatch metrics and dimensions available by their namespace. It handles known AWS metrics as
+ * well as your own custom metrics supplied on initialization.
+ * The relationships between AWS Cloudwatch metrics, dimensions and namespaces was created according to the AWS
+ * documentation referenced below.
  * http://docs.amazonwebservices.com/AmazonCloudWatch/latest/DeveloperGuide/CW_Support_For_AWS.html
  */
 class MetricNamespaces {
