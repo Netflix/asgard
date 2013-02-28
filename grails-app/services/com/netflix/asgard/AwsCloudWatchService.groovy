@@ -183,15 +183,28 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
         allMetrics
     }
 
-    Map<String, ?> prepareForAlarmCreation(UserContext userContext, String autoScalingGroupName,
-            Map<String, String> params, AlarmData alarmData = null) {
+    private MetricNamespaces getMetricNamespaces() {
+        new MetricNamespaces(configService.customMetricNamespacesToDimensions(), caches.allCustomMetrics.list())
+    }
+
+    /**
+     * Gets the dimensions available for a metric namespace.
+     *
+     * @param namespace
+     * @return dimension names
+     */
+    List<String> getDimensionsForNamespace(String namespace) {
+        getMetricNamespaces().getDimensionsForNamespace(namespace)
+    }
+
+    Map<String, ?> prepareForAlarmCreation(UserContext userContext, Map<String, String> params,
+            AlarmData alarmData = null) {
         Collection<String> topicNames = awsSnsService.getTopics(userContext)*.name.sort()
         String description = params.description ?: alarmData?.description
         String statistic = params.statistic ?: alarmData?.statistic ?: AlarmData.Statistic.default.name()
         boolean useExistingMetric = !params.namespace && !params.metric
         String existingMetric = params.existingMetric
-        MetricNamespaces namespaces = new MetricNamespaces(configService.customMetricNamespacesToDimensions(),
-                caches.allCustomMetrics.list())
+        MetricNamespaces namespaces = getMetricNamespaces()
         Set<MetricId> metrics = namespaces.allMetricIds
         MetricId currentMetric = null
         if (alarmData) {
@@ -201,6 +214,7 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
         }
         List<MetricId> sortedMetrics = metrics?.sort()
         String namespace = params.namespace ?: alarmData?.namespace ?: configService.defaultMetricNamespace
+        List<String> dimensions = namespaces.getDimensionsForNamespace(namespace)
         String metric = params.metric ?: alarmData?.metricName
         String comparisonOperator = params.comparisonOperator ?: alarmData?.comparisonOperator
         String threshold = params.threshold ?: alarmData?.threshold
@@ -213,6 +227,7 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
                 statistic: statistic, useExistingMetric: useExistingMetric, existingMetric: existingMetric,
                 namespace: namespace, metric: metric, comparisonOperator: comparisonOperator,
                 threshold: threshold, period: period, evaluationPeriods: evaluationPeriods, topic: topic,
+                dimensions: dimensions, dimensionValues: alarmData?.dimensions
         ]
     }
 }
