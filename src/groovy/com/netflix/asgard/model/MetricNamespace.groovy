@@ -19,12 +19,27 @@ import com.google.common.collect.ImmutableSet
 import groovy.transform.Canonical
 
 /**
- * Holds CloudWatch metrics and dimensions for a namespace.
+ * Holds AWS CloudWatch metrics and dimensions for a namespace.
+ * http://docs.amazonwebservices.com/AmazonCloudWatch/latest/DeveloperGuide/CW_Support_For_AWS.html
+ *
+ * @see com.netflix.asgard.model.MetricNamespaces
  */
 @Canonical
 class MetricNamespace {
+
+    /**
+     * Name of the AWS Cloudwatch namespace.
+     */
     final String namespace
+
+    /**
+     * Names of AWS Cloudwatch metrics contained in this namespace.
+     */
     final ImmutableSet<String> metrics
+
+    /**
+     * Names of AWS Cloudwatch dimensions available to metrics in this namespace.
+     */
     final ImmutableSet<String> dimensions
 
     static MetricNamespace of(String namespace, Collection<String> metrics, Collection<String> dimensions) {
