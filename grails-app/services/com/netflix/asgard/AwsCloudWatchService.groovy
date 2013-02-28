@@ -61,23 +61,30 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
 
     void initializeCaches() {
         caches.allAlarms.ensureSetUp({ Region region -> retrieveAlarms(region) })
-        caches.allCustomMetrics.ensureSetUp({
-            AwsResultsRetriever retriever = new AwsResultsRetriever<Metric, ListMetricsRequest, ListMetricsResult>() {
-                ListMetricsResult makeRequest(Region region, ListMetricsRequest request) {
-                    awsClient.by(region).listMetrics(request)
-                }
-                List<Metric> accessResult(ListMetricsResult result) {
-                    result.metrics
-                }
+        caches.allCustomMetrics.ensureSetUp({ retrieveCustomMetrics() })
+    }
+
+    private List<MetricId> retrieveCustomMetrics() {
+        AwsResultsRetriever retriever = new AwsResultsRetriever<Metric, ListMetricsRequest, ListMetricsResult>() {
+            ListMetricsResult makeRequest(Region region, ListMetricsRequest request) {
+                awsClient.by(region).listMetrics(request)
             }
-            List<Metric> allMetrics = []
-            configService.customMetricNamespacesToDimensions().keySet().each { String namespace ->
-                Region.values().each { Region region ->
-                    allMetrics = retriever.retrieve(region, new ListMetricsRequest(namespace: namespace))
-                }
+            List<Metric> accessResult(ListMetricsResult result) {
+                result.metrics
             }
-            allMetrics.collect { MetricId.fromMetric(it) }
-        })
+        }
+        retrieveCustomMetrics(retriever)
+    }
+
+    private List<MetricId> retrieveCustomMetrics(AwsResultsRetriever retriever,
+            Collection<Region> regions = Region.values()) {
+        List<Metric> allMetrics = []
+        configService.customMetricNamespacesToDimensions().keySet().each { String namespace ->
+            regions.each { Region region ->
+                allMetrics = retriever.retrieve(region, new ListMetricsRequest(namespace: namespace))
+            }
+        }
+        allMetrics.collect { MetricId.fromMetric(it) }
     }
 
     private List<MetricAlarm> retrieveAlarms(Region region) {
