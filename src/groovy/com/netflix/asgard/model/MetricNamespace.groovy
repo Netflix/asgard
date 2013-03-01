@@ -45,4 +45,11 @@ class MetricNamespace {
     static MetricNamespace of(String namespace, Collection<String> metrics, Collection<String> dimensions) {
         new MetricNamespace(namespace, ImmutableSet.copyOf(metrics), ImmutableSet.copyOf(dimensions))
     }
+
+    /**
+     * @returns this namespaces metrics as MetricIds with namespace populated
+     */
+    Set<MetricId> getMetricIds() {
+        metrics.collect { MetricId.from(namespace, it) }
+    }
 }

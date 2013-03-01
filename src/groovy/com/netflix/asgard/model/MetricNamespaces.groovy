@@ -250,9 +250,9 @@ class MetricNamespaces {
      * @return metrics
      */
     Set<MetricId> getAllMetricIds() {
-        allNamespacesByName.values().collect { namespace ->
-            namespace.metrics.collect { MetricId.from(namespace.namespace, it) }
-        }.flatten() as Set
+        allNamespacesByName.values().collectMany { namespace ->
+            namespace.getMetricIds()
+        } as Set
     }
 
     /**
