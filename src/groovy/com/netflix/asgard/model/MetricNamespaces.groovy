@@ -227,6 +227,13 @@ class MetricNamespaces {
 
     private final ImmutableMap<String, MetricNamespace> allNamespacesByName
 
+
+    /**
+     * Construct MetricNamespaces with specified custom namespace metrics and dimensions.
+     *
+     * @param customNamespacesToDimensions describe dimensions available to each custom namespace
+     * @param allCustomMetricIds specify all custom metrics across namespaces
+     */
     MetricNamespaces(Map<String, Collection<String>> customNamespacesToDimensions = [:],
                      Collection<MetricId> allCustomMetricIds = []) {
         Map<String, List<MetricId>> namespacesToMetricIds = allCustomMetricIds?.groupBy { it.namespace }
