@@ -42,17 +42,17 @@
           </td>
           <td class="value">${alarmName}</td>
         </tr>
+        <g:render template="alarmOptions"/>
+        <tr>
+          <td colspan="2">
+            <a href="http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/CW_Support_For_AWS.html">Metric and Dimension Documentation</a>
+          </td>
+        </tr>
         <tr class="prop">
           <td class="name">Metric:</td>
           <input type="hidden" name="namespace" value="${currentMetric.namespace}"/>
           <input type="hidden" name="metric" value="${currentMetric.metricName}"/>
           <td class="value">${currentMetric.displayText}</td>
-        </tr>
-        <g:render template="alarmOptions"/>
-        <tr>
-          <td colspan="2">
-            <h2>Dimensions</h2>
-          </td>
         </tr>
         <g:each var="dimension" in="${dimensions}">
           <tr class="prop">
