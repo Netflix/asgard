@@ -28,17 +28,19 @@ import groovy.transform.Canonical
 class MetricNamespace {
 
     /**
-     * Name of the AWS Cloudwatch namespace.
+     * The AWS Cloudwatch namespace. It is the name of a service that metrics apply to.
      */
     final String namespace
 
     /**
-     * Names of AWS Cloudwatch metrics contained in this namespace.
+     * Names of AWS Cloudwatch metrics contained in this namespace. Metrics are monitoring data points provided by a
+     * service.
      */
     final ImmutableSet<String> metrics
 
     /**
-     * Names of AWS Cloudwatch dimensions available to metrics in this namespace.
+     * Names of AWS Cloudwatch dimensions available to metrics in this namespace. Dimensions filter the metric data to
+     * a specified subset of resources.
      */
     final ImmutableSet<String> dimensions
 
