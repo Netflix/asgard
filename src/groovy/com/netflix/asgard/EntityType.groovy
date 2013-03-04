@@ -43,6 +43,7 @@ import com.netflix.asgard.model.ApplicationMetrics
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.InstanceTypeData
+import com.netflix.asgard.model.MetricId
 import com.netflix.asgard.model.SimpleQueue
 import com.netflix.asgard.model.StackAsg
 import com.netflix.asgard.model.TopicData
@@ -57,7 +58,7 @@ import java.lang.reflect.Modifier
     static final EntityType<MetricAlarm> alarm = create('Metric Alarm', { it.alarmName })
     static final EntityType<AppRegistration> application = create('Application', { it.name })
     static final EntityType<ApplicationInstance> applicationInstance = create('App Instance', { it.hostName })
-    static final EntityType<ApplicationMetrics> applicationMetric = create('Application Metric', { it.application })
+    static final EntityType<MetricId> metric = create('Metric', { it.displayText })
     static final EntityType<AutoScalingGroup> autoScaling = create('Auto Scaling Group',
             { it.autoScalingGroupName })
     static final EntityType<AvailabilityZone> availabilityZone = create('Availability Zone', { it.zoneName })

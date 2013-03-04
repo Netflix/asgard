@@ -19,6 +19,7 @@ import com.amazonaws.services.cloudwatch.model.Dimension
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest
 import com.google.common.collect.Lists
+import com.google.common.collect.Maps
 import com.netflix.asgard.Check
 import com.netflix.asgard.Relationships
 import groovy.transform.Immutable
@@ -54,15 +55,14 @@ final class AlarmData {
     Integer evaluationPeriods = 1
     Double threshold = 0
     Set<String> actionArns = []
-    String autoScalingGroupName
     List<String> policyNames = []
     List<String> topicNames = []
+    Map<String, String> dimensions = [:]
 
     static AlarmData fromMetricAlarm(MetricAlarm metricAlarm, String newTopicArn = null) {
         Check.notNull(metricAlarm, MetricAlarm)
         ComparisonOperator comparison = Enum.valueOf(AlarmData.ComparisonOperator, metricAlarm.comparisonOperator)
         Statistic statistic = Enum.valueOf(AlarmData.Statistic, metricAlarm.statistic)
-        String autoScalingGroupName = metricAlarm.dimensions.find { it.name == DIMENSION_NAME_FOR_ASG }?.value
         String policyIndicator = ':policyName/'
         List<String> policyArns = metricAlarm.alarmActions.findAll { it.indexOf(policyIndicator) > 0 }
         List<String> policyNames = policyArns.collect {
@@ -90,10 +90,34 @@ final class AlarmData {
                 evaluationPeriods: metricAlarm.evaluationPeriods,
                 threshold: metricAlarm.threshold,
                 actionArns: actionArns,
-                autoScalingGroupName: autoScalingGroupName,
                 policyNames: policyNames,
-                topicNames: topicNames
+                topicNames: topicNames,
+                dimensions: metricAlarm.dimensions.collectEntries { [it.name, it.value] }
          )
+    }
+
+    /**
+     * @return ASG name if a corresponding dimension is present.
+     */
+    String getAutoScalingGroupName() {
+        dimensions[DIMENSION_NAME_FOR_ASG]
+    }
+
+    /**
+     * Dimensions for a given ASG name.
+     *
+     * @param asgName specified ASG name
+     * @param applicableDimensionNames defines which dimensions are valid
+     * @param existingDimensions optionally will be copied and the copy will be modified with the specified ASG name
+     * @return new dimensions properly updated based on a new ASG name
+     */
+    static Map<String, String> dimensionsForAsgName(String asgName, Collection<String> applicableDimensionNames,
+            Map<String, String> existingDimensions = [:]) {
+        Map<String, String> dimensions = Maps.newHashMap(existingDimensions)
+        if (AlarmData.DIMENSION_NAME_FOR_ASG in applicableDimensionNames) {
+            dimensions[AlarmData.DIMENSION_NAME_FOR_ASG] = asgName
+        }
+        dimensions
     }
 
     AlarmData copyForAsg(String newAutoScalingGroupName) {
@@ -107,7 +131,7 @@ final class AlarmData {
                 evaluationPeriods: evaluationPeriods,
                 threshold: threshold,
                 actionArns: actionArns,
-                autoScalingGroupName: newAutoScalingGroupName
+                dimensions: dimensionsForAsgName(newAutoScalingGroupName, dimensions.keySet(), dimensions)
          )
     }
 
@@ -120,8 +144,6 @@ final class AlarmData {
         } else {
             alarmActions.addAll(actionArns)
         }
-        final List<Dimension> dimensions = [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG,
-                value: autoScalingGroupName)]
         String alarmName = id ? Relationships.buildAlarmName(autoScalingGroupName, id) : this.alarmName
         new PutMetricAlarmRequest(
                 alarmName: alarmName,
@@ -137,7 +159,7 @@ final class AlarmData {
                 alarmActions: alarmActions,
                 oKActions: snsArns,
                 insufficientDataActions: snsArns,
-                dimensions: dimensions
+                dimensions: dimensions.collect { key, value -> new Dimension(name: key, value: value) }
         )
     }
 

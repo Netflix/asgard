@@ -544,6 +544,7 @@ class Mocks {
         newAwsCloudWatchService.with {
             awsClientService = awsClientService()
             caches = caches()
+            configService = configService()
             taskService = taskService()
             afterPropertiesSet()
             initializeCaches()

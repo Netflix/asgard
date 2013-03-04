@@ -68,7 +68,7 @@ class ScalingPolicyController {
             [
                     adjustmentTypes: AdjustmentType.values(), group: groupName, adjustmentType: adjustmentType,
                     adjustment: adjustment, minAdjustmentStep: minAdjustmentStep, cooldown: cooldown
-            ] << awsCloudWatchService.prepareForAlarmCreation(UserContext.of(request), groupName, params)
+            ] << awsCloudWatchService.prepareForAlarmCreation(UserContext.of(request), params)
         } else {
             flash.message = "Group '${groupName}' does not exist."
             redirect(action: 'result')
@@ -146,6 +146,8 @@ class ScalingPolicyController {
             }
             if (topic?.arn) { snsArns << topic.arn }
 
+            Map<String, String> dimensions = AlarmData.dimensionsForAsgName(cmd.group, awsCloudWatchService.
+                    getDimensionsForNamespace(metricId.namespace))
             alarms << new AlarmData(
                 comparisonOperator: comparisonOperator,
                 metricName: metricId.metricName,
@@ -155,7 +157,7 @@ class ScalingPolicyController {
                 evaluationPeriods: cmd.evaluationPeriods,
                 threshold: cmd.threshold,
                 actionArns: snsArns,
-                autoScalingGroupName: cmd.group,
+                dimensions: dimensions
             )
             final ScalingPolicyData scalingPolicyData = new ScalingPolicyData(
                 autoScalingGroupName: cmd.group,
