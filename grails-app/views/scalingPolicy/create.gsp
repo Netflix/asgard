@@ -49,6 +49,7 @@
             <h2>Alarm</h2>
           </td>
         </tr>
+        <g:render template="/alarm/metricSelection"/>
         <g:render template="/alarm/alarmOptions"/>
         </tbody>
       </table>

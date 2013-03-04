@@ -29,7 +29,6 @@
     <g:select name="statistic" value="${statistic}" from="${statistics}"/>
   </td>
 </tr>
-<g:render template="/alarm/metricSelection"/>
 <tr class="prop" title="The Comparison Operator relates the Metric to the Threshold." >
   <td class="name">
     <label for="comparisonOperator">Comparison<br/>Operator:</label>

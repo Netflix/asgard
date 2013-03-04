@@ -28,8 +28,8 @@ import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest
 import com.amazonaws.services.cloudwatch.model.SetAlarmStateRequest
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.AlarmData
-import com.netflix.asgard.model.ApplicationMetrics
 import com.netflix.asgard.model.MetricId
+import com.netflix.asgard.model.MetricNamespaces
 import com.netflix.asgard.model.SimpleDbSequenceLocator
 import com.netflix.asgard.retriever.AwsResultsRetriever
 import org.springframework.beans.factory.InitializingBean
@@ -61,10 +61,30 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
 
     void initializeCaches() {
         caches.allAlarms.ensureSetUp({ Region region -> retrieveAlarms(region) })
-        caches.allApplicationMetrics.ensureSetUp({
-            List<Metric> allMetrics = getMetricsAppliedToGroups()
-            ApplicationMetrics.load(allMetrics)
-        })
+        caches.allCustomMetrics.ensureSetUp({ retrieveCustomMetrics() })
+    }
+
+    private List<MetricId> retrieveCustomMetrics() {
+        AwsResultsRetriever retriever = new AwsResultsRetriever<Metric, ListMetricsRequest, ListMetricsResult>() {
+            ListMetricsResult makeRequest(Region region, ListMetricsRequest request) {
+                awsClient.by(region).listMetrics(request)
+            }
+            List<Metric> accessResult(ListMetricsResult result) {
+                result.metrics
+            }
+        }
+        retrieveCustomMetrics(retriever)
+    }
+
+    private List<MetricId> retrieveCustomMetrics(AwsResultsRetriever retriever,
+            Collection<Region> regions = Region.values()) {
+        List<Metric> allMetrics = []
+        configService.customMetricNamespacesToDimensions().keySet().each { String namespace ->
+            regions.each { Region region ->
+                allMetrics = retriever.retrieve(region, new ListMetricsRequest(namespace: namespace))
+            }
+        }
+        allMetrics.collect { MetricId.fromMetric(it) }
     }
 
     private List<MetricAlarm> retrieveAlarms(Region region) {
@@ -170,19 +190,29 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
         allMetrics
     }
 
-    Set<MetricId> getMetricsForApplication(String applicationName) {
-        caches.allApplicationMetrics.get(applicationName)?.metrics ?: [] as Set
+    private MetricNamespaces getMetricNamespaces() {
+        new MetricNamespaces(configService.customMetricNamespacesToDimensions(), caches.allCustomMetrics.list())
     }
 
-    Map<String, ?> prepareForAlarmCreation(UserContext userContext, String autoScalingGroupName,
-            Map<String, String> params, AlarmData alarmData = null) {
+    /**
+     * Gets the dimensions available for a metric namespace.
+     *
+     * @param namespace
+     * @return dimension names
+     */
+    List<String> getDimensionsForNamespace(String namespace) {
+        getMetricNamespaces().getDimensionsForNamespace(namespace)
+    }
+
+    Map<String, ?> prepareForAlarmCreation(UserContext userContext, Map<String, String> params,
+            AlarmData alarmData = null) {
         Collection<String> topicNames = awsSnsService.getTopics(userContext)*.name.sort()
         String description = params.description ?: alarmData?.description
         String statistic = params.statistic ?: alarmData?.statistic ?: AlarmData.Statistic.default.name()
         boolean useExistingMetric = !params.namespace && !params.metric
         String existingMetric = params.existingMetric
-        String applicationName = Relationships.appNameFromGroupName(autoScalingGroupName)
-        Set<MetricId> metrics = getMetricsForApplication(applicationName)
+        MetricNamespaces namespaces = getMetricNamespaces()
+        Set<MetricId> metrics = namespaces.allMetricIds
         MetricId currentMetric = null
         if (alarmData) {
             currentMetric = new MetricId(namespace: alarmData.namespace, metricName: alarmData.metricName)
@@ -191,6 +221,7 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
         }
         List<MetricId> sortedMetrics = metrics?.sort()
         String namespace = params.namespace ?: alarmData?.namespace ?: configService.defaultMetricNamespace
+        List<String> dimensions = namespaces.getDimensionsForNamespace(namespace)
         String metric = params.metric ?: alarmData?.metricName
         String comparisonOperator = params.comparisonOperator ?: alarmData?.comparisonOperator
         String threshold = params.threshold ?: alarmData?.threshold
@@ -203,6 +234,7 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
                 statistic: statistic, useExistingMetric: useExistingMetric, existingMetric: existingMetric,
                 namespace: namespace, metric: metric, comparisonOperator: comparisonOperator,
                 threshold: threshold, period: period, evaluationPeriods: evaluationPeriods, topic: topic,
+                dimensions: dimensions, dimensionValues: alarmData?.dimensions
         ]
     }
 }

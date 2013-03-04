@@ -16,12 +16,13 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
+import com.amazonaws.services.cloudwatch.model.Dimension
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.netflix.asgard.model.AlarmData
-import com.netflix.asgard.model.MetricId
-import com.netflix.asgard.model.TopicData
 import com.netflix.asgard.model.AlarmData.ComparisonOperator
 import com.netflix.asgard.model.AlarmData.Statistic
+import com.netflix.asgard.model.MetricId
+import com.netflix.asgard.model.TopicData
 import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
@@ -58,7 +59,7 @@ class AlarmController {
             redirect(action: 'result')
             return
         }
-        awsCloudWatchService.prepareForAlarmCreation(userContext, policy.autoScalingGroupName, params) <<
+        awsCloudWatchService.prepareForAlarmCreation(userContext, params) <<
                 [ policy: policyName ]
     }
 
@@ -92,7 +93,7 @@ class AlarmController {
             return
         }
         AlarmData alarmData = AlarmData.fromMetricAlarm(alarm)
-        awsCloudWatchService.prepareForAlarmCreation(userContext, alarmData.autoScalingGroupName, params, alarmData) <<
+        awsCloudWatchService.prepareForAlarmCreation(userContext, params, alarmData) <<
                 [ policy: params.policy, alarmName: alarmName ]
     }
 
@@ -142,6 +143,8 @@ class AlarmController {
                     throw new IllegalStateException("Scaling Policy '${cmd.policy}' does not exist.")
             }
 
+            Map<String, String> dimensions = AlarmData.dimensionsForAsgName(policy?.autoScalingGroupName,
+                    awsCloudWatchService.getDimensionsForNamespace(metricId.namespace))
             final alarm = new AlarmData(
                     description: cmd.description,
                     comparisonOperator: comparisonOperator,
@@ -152,7 +155,7 @@ class AlarmController {
                     evaluationPeriods: cmd.evaluationPeriods,
                     threshold: cmd.threshold,
                     actionArns: snsArns,
-                    autoScalingGroupName: policy?.autoScalingGroupName
+                    dimensions: dimensions
                 )
             try {
                 String alarmName = awsCloudWatchService.createAlarm(userContext, alarm, policy.policyARN)
@@ -182,6 +185,13 @@ class AlarmController {
                 period = cmd.period
                 evaluationPeriods = cmd.evaluationPeriods
                 threshold = cmd.threshold
+            }
+            alarm.dimensions = []
+            awsCloudWatchService.getDimensionsForNamespace(metricId.namespace).each {
+                String value = params[it]
+                if (value) {
+                    alarm.dimensions << new Dimension(name: it, value: params[it])
+                }
             }
             // The topic is optional, but if it is specified then it should exist.
             TopicData topic = awsSnsService.getTopic(userContext, cmd.topic)

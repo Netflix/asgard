@@ -26,10 +26,8 @@ import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model.DeleteAlarmsRequest
 import com.amazonaws.services.cloudwatch.model.DescribeAlarmsResult
-import com.amazonaws.services.cloudwatch.model.Dimension
 import com.amazonaws.services.cloudwatch.model.PutMetricAlarmRequest
 import com.netflix.asgard.mock.Mocks
-import com.netflix.asgard.model.AlarmData
 import com.netflix.asgard.model.TopicData
 import grails.test.MockUtils
 import grails.test.mixin.TestFor
@@ -62,6 +60,7 @@ class ScalingPolicyControllerSpec extends Specification {
         mockAwsSimpleDbService.incrementAndGetSequenceNumber(_, _) >> { 1 }
 
         controller.awsAutoScalingService = awsAutoScalingService
+        controller.awsCloudWatchService = awsCloudWatchService
 
         final awsSnsService = Mock(AwsSnsService)
         controller.awsSnsService = awsSnsService
@@ -74,7 +73,7 @@ class ScalingPolicyControllerSpec extends Specification {
             cooldown = 500
             comparisonOperator = 'GreaterThanThreshold'
             metric = 'flux_capacitor'
-            namespace = 'star_trek/back_to_the_future'
+            namespace = 'back_to_the_future'
             statistic = 'Average'
             period = 700
             evaluationPeriods = 5
@@ -105,40 +104,22 @@ class ScalingPolicyControllerSpec extends Specification {
         }
         0 * mockAmazonAutoScalingClient.putScalingPolicy(_)
 
-        1 * mockAmazonCloudWatchClient.putMetricAlarm(_) >> {
-            final PutMetricAlarmRequest actual = it[0]
-            final PutMetricAlarmRequest expected = new PutMetricAlarmRequest(
-                alarmName: 'nflx_newton_client-v003-1',
+        1 * mockAmazonCloudWatchClient.putMetricAlarm(new PutMetricAlarmRequest(
+                alarmName: 'alarm-1',
                 alarmDescription: '',
                 actionsEnabled: true,
+                oKActions: ['arn:aws:sns:blah'],
                 alarmActions: ['arn:blah', 'arn:aws:sns:blah'],
+                insufficientDataActions: ['arn:aws:sns:blah'],
                 metricName: 'flux_capacitor',
-                namespace: 'star_trek/back_to_the_future',
+                namespace: 'back_to_the_future',
                 statistic: 'Average',
-                dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG, value: 'nflx_newton_client-v003')],
+                dimensions: [],
                 period: 700,
                 evaluationPeriods: 5,
                 threshold: 80.0,
                 comparisonOperator: 'GreaterThanThreshold'
-            )
-
-            //   assert it[0] == expected
-            // This would be a nice way to compare, but it fails. Since Amazon did not provide equality in their API,
-            // we use mixins to implement equality using reflection and straight Java (via Apache).
-            // In this case, PutMetricAlarmRequest contains Dimension references. Both those classes use Groovy mixins
-            // to add Java equals methods. The PutMetricAlarmRequest mixin-based equals method ignores the Dimension
-            // mixin-based equals method.
-            // Perhaps we need a Groovy implementation of reflection equals rather than Apache's java implementation?
-            // Instead we compare field by field so that the mixins will work as intended. We are basically flattening
-            // out the comparison because nested mixins don't work in this case.
-            [
-                'alarmName', 'alarmDescription', 'actionsEnabled', 'alarmActions', 'metricName', 'namespace',
-                'statistic', 'dimensions', 'period', 'evaluationPeriods', 'threshold', 'comparisonOperator',
-            ].each {
-                assert actual[it] == expected[it]
-            }
-        }
-        0 * mockAmazonCloudWatchClient.putMetricAlarm(_)
+        ))
     }
 
     def 'save should fail without required values'() {

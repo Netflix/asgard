@@ -39,6 +39,13 @@ class ConfigService {
     }
 
     /**
+     * @return custom (non AWS) metric namespaces mapped to the dimensions they support
+     */
+    Map<String, Collection<String>> customMetricNamespacesToDimensions() {
+        grailsApplication.config.cloud?.customMetricNamespacesToDimensions ?: [:]
+    }
+
+    /**
      * Gets the Amazon Web Services account number for the current environment. This must be the first account number
      * string in the awsAccounts list in Config.groovy.
      *
