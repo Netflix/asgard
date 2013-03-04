@@ -62,6 +62,7 @@
         <input type="text" name="ticket" placeholder="${ticketLabel}" id="ticketNumber" title="${fullTicketLabel} number" class="${ticketRequired ? 'required' : 'optional'}"/>
       </div>
       <g:if test="${authenticationEnabled}">
+        <g:set var='targetUri' value="${request.requestURL + (request.queryString ? '?' + request.queryString : '')}"/>
         <shiro:isLoggedIn>
           <div class="authentication">
             Logged in as <shiro:principal/>
@@ -69,12 +70,12 @@
               <g:if test="${apiTokenEnabled}">
                 <li><g:link controller="apiToken" action="create">Generate API Token</g:link></li>
               </g:if>
-              <li><g:link controller="auth" action="signOut" params="${[targetUri: request.requestURL.encodeAsHTML()]}">Logout</g:link></li>
+              <li><g:link controller="auth" action="signOut" params="${[targetUri: targetUri]}">Logout</g:link></li>
             </ul>
           </div>
         </shiro:isLoggedIn>
         <shiro:isNotLoggedIn>
-          <g:link controller="auth" action="login" class="login" params="${[targetUri: request.requestURL.encodeAsHTML()]}">Login</g:link> 
+          <g:link controller="auth" action="login" class="login" params="${[targetUri: targetUri]}">Login</g:link>
         </shiro:isNotLoggedIn>
       </g:if>
       <div class="search" title="Find entities by name">
