@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.model
 
+import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 
 /**
@@ -26,7 +27,7 @@ import com.google.common.collect.ImmutableMap
  */
 class MetricNamespaces {
 
-    private final static ImmutableMap<String, MetricNamespace> AWS_NAMESPACES_BY_NAME = ImmutableMap.copyOf([
+    private static final ImmutableList<MetricNamespace> AWS_NAMESPACES = ImmutableList.of(
             MetricNamespace.of('AWS/Billing', [
                     'EstimatedCharges'
             ], [
@@ -223,7 +224,10 @@ class MetricNamespaces {
                     'LoadBalancerName',
                     'AvailabilityZone'
             ])
-    ].collectEntries { [it.namespace, it] })
+    )
+
+    private static final ImmutableMap<String, MetricNamespace> AWS_NAMESPACES_BY_NAME = ImmutableMap.
+            copyOf(AWS_NAMESPACES.collectEntries { [it.namespace, it] })
 
     private final ImmutableMap<String, MetricNamespace> allNamespacesByName
 
