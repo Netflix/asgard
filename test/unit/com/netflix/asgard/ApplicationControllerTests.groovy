@@ -24,6 +24,7 @@ class ApplicationControllerTests {
 
     @Before
     void setUp() {
+        Mocks.createDynamicMethods()
         TestUtils.setUpMockRequest()
         controller.awsEc2Service = Mocks.awsEc2Service()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
