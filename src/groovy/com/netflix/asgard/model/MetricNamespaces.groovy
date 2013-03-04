@@ -249,9 +249,7 @@ class MetricNamespaces {
     }
 
     /**
-     * Gets all metrics across all namespaces.
-     *
-     * @return metrics
+     * @return all metrics across all namespaces
      */
     Set<MetricId> getAllMetricIds() {
         allNamespacesByName.values().collectMany { namespace ->
