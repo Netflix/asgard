@@ -6,7 +6,7 @@ import com.netflix.asgard.model.MetricId
 import com.netflix.asgard.retriever.AwsResultsRetriever
 import spock.lang.Specification
 
-class AwsCloudWatchServiceSpec extends Specification {
+class AwsCloudWatchServiceUnitSpec extends Specification {
 
     def 'should retreive custom metrics'() {
         AwsCloudWatchService service = new AwsCloudWatchService()
