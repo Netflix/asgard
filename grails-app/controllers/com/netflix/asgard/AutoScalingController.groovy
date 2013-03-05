@@ -334,7 +334,7 @@ class AutoScalingController {
             String kernelId = params.kernelId ?: null
             String ramdiskId = params.ramdiskId ?: null
             String iamInstanceProfile = params.iamInstanceProfile ?: configService.defaultIamRole
-            boolean ebsOptimized = params.ebsOptimized as boolean
+            boolean ebsOptimized = params.ebsOptimized?.toBoolean()
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(imageId).
                     withKernelId(kernelId).withInstanceType(instanceType).withKeyName(keyName).withRamdiskId(ramdiskId).
                     withSecurityGroups(securityGroups).withIamInstanceProfile(iamInstanceProfile).

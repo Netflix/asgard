@@ -284,6 +284,6 @@ class AutoScalingControllerSpec extends Specification {
         null                | false
         ''                  | false
         'true'              | true
-        'false'             | true
+        'false'             | false
     }
 }
