@@ -51,6 +51,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
     AwsAutoScalingService awsAutoScalingService
 
     def 'should update ASG with proper AWS requests'() {
+        Mocks.createDynamicMethods()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         mockAmazonAutoScalingClient.describeAutoScalingGroups(_ as DescribeAutoScalingGroupsRequest) >> {
             List<SuspendedProcess> suspendedProcesses = AutoScalingProcessType.with { [AZRebalance, AddToLoadBalancer] }
@@ -107,6 +108,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
     }
 
     def 'should create launch config and ASG'() {
+        Mocks.createDynamicMethods()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         mockAmazonAutoScalingClient.describeLaunchConfigurations(_) >> {
             new DescribeLaunchConfigurationsResult()
@@ -148,6 +150,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
     }
 
     def 'should get scaling policies'() {
+        Mocks.createDynamicMethods()
         awsAutoScalingService = Mocks.newAwsAutoScalingService()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
