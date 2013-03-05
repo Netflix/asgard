@@ -257,6 +257,8 @@ ${lastGroup.loadBalancerNames}"""
 ${loadBalancerNames}"""
             log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers from last \
 Group: ${lastGroup.loadBalancerNames}"""
+            boolean ebsOptimized = params.containsKey('ebsOptimized') ? params.ebsOptimized?.toBoolean() :
+                lastLaunchConfig.ebsOptimized
             if (params.noOptionalDefaults != 'true') {
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
@@ -264,7 +266,6 @@ Group: ${lastGroup.loadBalancerNames}"""
                 vpcZoneIdentifier = vpcZoneIdentifier ?: subnets.constructNewVpcZoneIdentifierForZones(lastGroup.vpcZoneIdentifier,
                         selectedZones)
             }
-            boolean ebsOptimized = params.ebsOptimized as boolean ?: lastLaunchConfig.ebsOptimized
             log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers for next \
 Group: ${loadBalancerNames}"""
             GroupCreateOptions options = new GroupCreateOptions(
