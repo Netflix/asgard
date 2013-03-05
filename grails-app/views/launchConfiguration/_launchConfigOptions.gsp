@@ -28,7 +28,8 @@
       <label for="imageId">AMI Image ID:</label>
     </td>
     <td>
-      <select id="imageId" name="imageId">
+      <select id="imageId" name="imageId" data-placeholder="-Image Id-">
+        <option value=""></option>
         <g:each var="im" in="${images}">
           <option value="${im.imageId}" ${params.imageId == im.imageId || im.imageId == image ? "selected" : ""}>${im.imageLocation} | ${im.imageId}</option>
         </g:each>
