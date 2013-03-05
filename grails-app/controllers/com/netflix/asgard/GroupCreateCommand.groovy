@@ -29,6 +29,7 @@ import grails.validation.Validateable
     String detail
     String chaosMonkey
     String region
+    String imageId
     boolean requestedFromGui
     boolean appWithClusterOptLevel
 
@@ -96,5 +97,6 @@ import grails.validation.Validateable
             }
         })
 
+        imageId(nullable: false, blank: false)
     }
 }
