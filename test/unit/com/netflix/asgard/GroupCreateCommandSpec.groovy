@@ -61,6 +61,7 @@ class GroupCreateCommandSpec extends Specification {
     def 'should validate with an error when total name is too long'() {
         cmd.appName = 'videometadata'
         cmd.stack = 'navigator'
+        cmd.imageId = 'imageId'
         cmd.detail = 'integration-240-usa-iphone-ipad-ios5-even-numbered-days-except-weekends-and-excluding-' +
                 'when-the-moon-is-full'
 
