@@ -54,7 +54,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         domainName = configService.applicationsDomain
 
         // Applications are stored only in the default region, so no multi region support needed here.
-        simpleDbClient = awsClientService.create(AmazonSimpleDB)
+        simpleDbClient = simpleDbClient ?: awsClientService.create(AmazonSimpleDB)
     }
 
     void initializeCaches() {
