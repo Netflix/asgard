@@ -15,7 +15,9 @@
  */
 package com.netflix.asgard
 
-import com.netflix.asgard.mock.Mocks
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.ec2.model.AvailabilityZone
+import com.amazonaws.services.ec2.model.Image
 import grails.test.mixin.TestFor
 import groovy.util.slurpersupport.GPathResult
 import spock.lang.Specification
@@ -23,32 +25,34 @@ import spock.lang.Specification
 @TestFor(FastPropertyController)
 class FastPropertyControllerSpec extends Specification {
 
-    void setup() {
-        TestUtils.setUpMockRequest()
-        controller.fastPropertyService = Mocks.fastPropertyService()
-    }
-
     GPathResult mockXmlSingle(String key) {
-        new XmlSlurper().parseText("""<property>
-  <propertyId>${key}|junit|test||||</propertyId>
-  <key>${key}</key>
-  <value>123</value>
-  <env>test</env>
-  <appId>junit</appId>
-  <countries></countries>
-  <serverId></serverId>
-  <updatedBy>junit</updatedBy>
-  <stack></stack>
-  <region></region>
-  <sourceOfUpdate>junit</sourceOfUpdate>
-  <cmcTicket></cmcTicket>
-  <ts>2011-09-27T23:00:10.650Z</ts>
-</property>""")
+        new XmlSlurper().parseText("""\
+            <property>
+              <propertyId>${key}|junit|test||||</propertyId>
+              <key>${key}</key>
+              <value>123</value>
+              <env>test</env>
+              <appId>junit</appId>
+              <countries></countries>
+              <serverId></serverId>
+              <updatedBy>junit</updatedBy>
+              <stack></stack>
+              <region></region>
+              <sourceOfUpdate>junit</sourceOfUpdate>
+              <cmcTicket></cmcTicket>
+              <ts>2011-09-27T23:00:10.650Z</ts>
+            </property>""".stripIndent() as String
+        )
     }
 
     def 'list should sort by key'() {
         given:
-        controller.fastPropertyService = Mocks.fastPropertyService()
+        controller.fastPropertyService = Mock(FastPropertyService) {
+            getAll(_) >> [
+                    new FastProperty(key: 'greeting.language'),
+                    new FastProperty(key: 'netflix.epic.plugin.limits.maxInstance')
+            ]
+        }
 
         when:
         final Map actual = controller.list()
@@ -63,6 +67,7 @@ class FastPropertyControllerSpec extends Specification {
                 fastProperty: FastProperty.fromXml(mockXmlSingle('1'))
         ]
         controller.fastPropertyService = Mock(FastPropertyService)
+        controller.configService = Mock(ConfigService)
         controller.params.id = 'hello'
 
         when:
@@ -74,44 +79,88 @@ class FastPropertyControllerSpec extends Specification {
     }
 
     def 'create should return list of appNames and regionOptions' () {
-        given:
-        final List<String> expectedAppNames = ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot',
-                'videometadata']
-        final List expectedRegionOptions = (Region.values() as List) +
-                [code: 'us-nflx-1', description: 'us-nflx-1 (Netflix Data Center)']
-
-        controller.fastPropertyService = Mocks.fastPropertyService()
-        controller.grailsApplication = Mocks.grailsApplication()
+        Map specialCaseRegion = [code: 'us-nflx-1', description: 'us-nflx-1 (Netflix Data Center)']
+        controller.fastPropertyService = Mock(FastPropertyService) {
+            collectFastPropertyAppNames(_) >> ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot']
+        }
+        controller.configService = Mock(ConfigService) {
+            getSpecialCaseRegions() >> specialCaseRegion
+        }
+        controller.with {
+            awsAutoScalingService = Mock(AwsAutoScalingService) {
+                getAutoScalingGroups(_) >> ['helloworld-v001', 'helloworld-v002'].
+                        collect { new AutoScalingGroup(autoScalingGroupName: it) }
+                getClusters(_) >> []
+            }
+            awsEc2Service = Mock(AwsEc2Service) {
+                getAvailabilityZones(_) >> ['us-east-1', 'us-west-1'].collect { new AvailabilityZone(zoneName: it) }
+                getAccountImages(_) >> [new Image(imageLocation: 'here')]
+            }
+        }
 
         when:
-        final Map actual = controller.create()
+        Map result = controller.create()
 
         then:
-        actual.appNames == expectedAppNames
-        actual.regionOptions == expectedRegionOptions
+        result.appNames == ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot']
+        result.regionOptions == (Region.values() as List) + specialCaseRegion
+        result.asgNames == ['helloworld-v001', 'helloworld-v002']
+        result.clusterNames == []
+        result.zoneNames == ['us-east-1', 'us-west-1']
+        result.images == [new Image(imageLocation: 'here')]
     }
 
-//    def 'save should call platform-service REST API'() {
-//        given:
-//        FastPropertyController.metaClass.getParams = {
-//            [
-//                    key: ' property ',
-//                    value: ' value ',
-//                    appId: 'app-id',
-//                    fastPropertyRegion: 'region',
-//                    stack: 'stack',
-//                    countries: 'countries',
-//                    updatedBy: 'user'
-//            ]
-//        }
-//
-//        controller.fastPropertyService = Mock(FastPropertyService)
-//
-//        when:
-//        controller.save()
-//
-//        then:
-//        1 * controller.fastPropertyService.create(!null, 'property', 'value', 'app-id', 'region', 'stack', 'countries',
-//                'user')
-//    }
+    def 'save should call platform-service REST API'() {
+        controller.params.with {
+            key = ' key '
+            value = ' value '
+            appId = 'app-id'
+            fastPropertyRegion = 'region'
+            stack = 'stack'
+            countries = 'countries'
+            updatedBy = 'user'
+            serverId = 'serverId'
+            asg = 'asg'
+            cluster = 'cluster'
+            ami = 'ami'
+            zone = 'zone'
+            ttl = '3'
+        }
+        FastPropertySaveCommand cmd = new FastPropertySaveCommand(ttl: 3)
+        cmd.validate()
+        controller.fastPropertyService = Mock(FastPropertyService)
+        controller.configService = Mock(ConfigService) {
+            1 * getAccountName()
+        }
+
+        when:
+        !cmd.hasErrors()
+        controller.save(cmd)
+
+        then:
+        1 * controller.fastPropertyService.create(!null, new FastProperty(key: 'key', value: 'value', appId: 'app-id',
+                region: 'region', stack: 'stack', countries: 'countries', updatedBy: 'user', sourceOfUpdate: 'asgard',
+                serverId: 'serverId', asg: 'asg', cluster: 'cluster', ami: 'ami', zone: 'zone', ttl: '3'))
+    }
+
+    def 'save should fail validation with empty value'() {
+        controller.params.with {
+            key = ' property '
+            value = ''
+            appId = 'app-id'
+            fastPropertyRegion = 'region'
+            stack = 'stack'
+            countries = 'countries'
+            updatedBy = 'user'
+        }
+        controller.configService = Mock(ConfigService) {
+            1 * getAccountName()
+        }
+
+        when:
+        controller.save()
+
+        then:
+        controller.flash.message == 'A Fast Property value is required.'
+    }
 }

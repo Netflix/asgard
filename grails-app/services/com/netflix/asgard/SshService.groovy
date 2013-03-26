@@ -52,12 +52,17 @@ class SshService {
             waitForChannelClosed(channel)
             exitStatus = channel.exitStatus
             result = IOUtils.readLines(exitStatus == 0 ? stdout : stderr).join('\n')
+        } catch (Exception e) {
+            log.error "Error using ssh to connect to ${server}"
         } finally {
             channel?.disconnect()
             session?.disconnect()
         }
         if (exitStatus != 0) {
+            log.error "ssh call exited unexpectedly, result was ${result}"
             throw new JSchException(result)
+        } else {
+            log.debug "ssh to ${server} successful"
         }
         return result
     }

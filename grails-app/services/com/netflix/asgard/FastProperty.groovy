@@ -15,14 +15,26 @@
  */
 package com.netflix.asgard
 
+import com.google.common.collect.ImmutableList
+import com.google.common.collect.ImmutableMap
+import com.netflix.frigga.NameValidation
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import groovy.util.slurpersupport.GPathResult
+import groovy.xml.MarkupBuilder
+import org.joda.time.DateTime
+import org.joda.time.Period
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 import org.springframework.web.util.HtmlUtils
 
 @EqualsAndHashCode
 @ToString
 class FastProperty {
+
+    static final String SOURCE_OF_UPDATE = 'asgard'
+    static final ImmutableList<String> TTL_UNITS = ImmutableList.of('Weeks', 'Days', 'Hours', 'Minutes', 'Seconds')
+
+    private static final DateTimeFormatter tsFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 
     String id
     String key
@@ -37,24 +49,114 @@ class FastProperty {
     String sourceOfUpdate
     String cmcTicket
     String ts
-    Date timestamp
+    String asg
+    String cluster
+    String ami
+    String zone
+    String ttl
+    String constraints
 
-    private FastProperty(GPathResult xml) {
-        ['key', 'value', 'env', 'appId', 'countries', 'serverId', 'updatedBy', 'stack', 'region', 'sourceOfUpdate',
-                'cmcTicket', 'ts'].each {
-            String value = xml[it]?.toString()
-            this[it] = value ? HtmlUtils.htmlUnescape(value) : ''
+    private static final ImmutableList<String> ATTRIBUTES_THAT_FORM_ID = ImmutableList.of('key', 'appId', 'env',
+            'region', 'serverId', 'stack', 'countries', 'asg', 'cluster', 'ami', 'zone')
+
+    private static final ImmutableList<String> ADVANCED_ATTRIBUTES = ImmutableList.of('ttl', 'serverId', 'asg',
+            'cluster', 'ami', 'countries', 'zone', 'constraints')
+
+    public static final ImmutableList<String> ALL_ATTRIBUTES = ImmutableList.copyOf((getMetaClass().
+            properties*.name - ['SOURCE_OF_UPDATE', 'metaClass', 'class', 'TTL_UNITS', 'timestamp', 'expires']).sort())
+
+    private static final ImmutableMap<String, String> ATTRIBUTE_TO_XML_NAME = ImmutableMap.copyOf(ALL_ATTRIBUTES.
+            collectEntries { [it, it] } + ['id': 'propertyId'])
+
+    /**
+     * Constructs FastProperty from an XML representation.
+     */
+    static FastProperty fromXml(xml) {
+        if (!xml) { return null }
+        FastProperty fastProperty = new FastProperty()
+        ATTRIBUTE_TO_XML_NAME.each { String attributeName, xmlName ->
+            String value = xml[xmlName]?.toString()
+            fastProperty[attributeName] = value ? HtmlUtils.htmlUnescape(value) : ''
         }
-        this.timestamp = Time.parse(this.ts)?.toDate()
-        this.id = generateId(key, appId, env, region, serverId, stack, countries)
+        fastProperty
     }
 
-    static FastProperty fromXml(GPathResult xml) {
-        xml ? new FastProperty(xml) : null
+    /**
+     * Ensures all attributes are valid.
+     *
+     * @throws IllegalStateException describing invalid properties
+     */
+    void validate() {
+        if (!key) { throw new IllegalStateException('A Fast Property key is required.') }
+        if (!value) { throw new IllegalStateException('A Fast Property value is required.') }
+        if (!ttl && (serverId || asg || ami)) {
+            throw new IllegalStateException('A TTL must be specified when transient scoping dimensions are used.')
+        }
+        Map<String, String> propertiesToValues = ATTRIBUTES_THAT_FORM_ID.collectEntries { [(it) : this[it]] }
+        Map<String, String> invalidPropertiesToValues = propertiesToValues.
+                findAll { String name, String value -> value && !NameValidation.checkDetail(value) }
+        if (!invalidPropertiesToValues) { return }
+        String invalidValues = invalidPropertiesToValues.
+                collect { String name, String value -> "${name} = '${value}'" }.join(', ')
+        String msg = "Attributes that form a Fast Property ID can only include letters, numbers, dots, underscores, " +
+                "and hyphens. The following values are not allowed: ${invalidValues}"
+        throw new IllegalStateException(msg)
     }
 
-    private String generateId(String key, String appId, String env, String region, String serverId, String stack,
-                      String countries) {
-        "${key ?: ''}|${appId ?: ''}|${env ?: ''}|${region ?: ''}|${serverId ?: ''}|${stack ?: ''}|${countries ?: ''}"
+    /**
+     * Constructs an XML representation from this FastProperty.
+     */
+    String toXml() {
+        StringWriter writer = new StringWriter()
+        final MarkupBuilder builder = new MarkupBuilder(writer)
+        builder.property {
+            ATTRIBUTE_TO_XML_NAME.each { String attributeName, xmlName ->
+                String value = this[attributeName]
+                if (value) {
+                    builder."${xmlName}"(value)
+                }
+            }
+        }
+        writer.toString()
+    }
+
+    /**
+     * Determines if FastProperty has more than just the basic attributes.
+     */
+    boolean hasAdvancedAttributes() {
+        ADVANCED_ATTRIBUTES.find { this[it] }
+    }
+
+    /**
+     * Converts ts to a DateTime.
+     */
+    DateTime getTimestamp() {
+        tsFormatter.parseDateTime(ts)
+    }
+
+    /**
+     * Calculates expiration time if there is a ttl.
+     */
+    DateTime getExpires() {
+        if (!ttl) { return null }
+        timestamp.plusSeconds(ttl as Integer)
+    }
+
+    /**
+     * Set the ttl in seconds converted from a specified unit of measure. Seconds is assumed if no unit is provided.
+     *
+     * @param ttlInUnits amount of time
+     * @param unitOfMeasurement unit of measurement for the ttlInUnits
+     */
+    void setTtlInUnits(int ttlInUnits, String unitOfMeasurement) {
+        if (!unitOfMeasurement) {
+            ttl = ttlInUnits
+            return
+        }
+        if (!(unitOfMeasurement in TTL_UNITS)) {
+            throw new IllegalArgumentException("TTL Unit must be one of these: ${TTL_UNITS}")
+        }
+        Period period = new Period()."with${unitOfMeasurement}"(ttlInUnits)
+        ttl = period.toStandardSeconds().seconds
     }
 }

@@ -51,6 +51,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
     AwsAutoScalingService awsAutoScalingService
 
     def 'should update ASG with proper AWS requests'() {
+        Mocks.createDynamicMethods()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         mockAmazonAutoScalingClient.describeAutoScalingGroups(_ as DescribeAutoScalingGroupsRequest) >> {
             List<SuspendedProcess> suspendedProcesses = AutoScalingProcessType.with { [AZRebalance, AddToLoadBalancer] }
@@ -107,6 +108,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
     }
 
     def 'should create launch config and ASG'() {
+        Mocks.createDynamicMethods()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         mockAmazonAutoScalingClient.describeLaunchConfigurations(_) >> {
             new DescribeLaunchConfigurationsResult()
@@ -121,7 +123,8 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
                 withAvailabilityZones([]).withLoadBalancerNames([]).
                 withMaxSize(0).withMinSize(0).withDefaultCooldown(0)
         final LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId('ami-deadbeef').
-                withInstanceType('m1.small').withKeyName('keyName').withSecurityGroups([]).withUserData('')
+                withInstanceType('m1.small').withKeyName('keyName').withSecurityGroups([]).withUserData('').
+                withEbsOptimized(false)
 
         when:
         final CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
@@ -147,6 +150,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
     }
 
     def 'should get scaling policies'() {
+        Mocks.createDynamicMethods()
         awsAutoScalingService = Mocks.newAwsAutoScalingService()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
@@ -182,7 +186,8 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
                                     evaluationPeriods: 1,
                                     threshold: 78,
                                     actionArns: [],
-                                    autoScalingGroupName: 'hw_v046'
+                                    autoScalingGroupName: 'hw_v046',
+                                    dimensions: [AutoScalingGroupName: 'hw_v046']
                             )
                     ]),
             new ScalingPolicyData(policyName: 'scale-down-hw_v046-15-300', autoScalingGroupName: 'hw_v046',
@@ -197,7 +202,8 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
                                     evaluationPeriods: 1,
                                     threshold: 22,
                                     actionArns: [],
-                                    autoScalingGroupName: 'hw_v046'
+                                    autoScalingGroupName: 'hw_v046',
+                                    dimensions: [AutoScalingGroupName: 'hw_v046']
                             ),
                             new AlarmData(
                                     alarmName: 'alarm3',
@@ -209,7 +215,8 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
                                     evaluationPeriods: 1,
                                     threshold: 23,
                                     actionArns: [],
-                                    autoScalingGroupName: 'hw_v046'
+                                    autoScalingGroupName: 'hw_v046',
+                                    dimensions: [AutoScalingGroupName: 'hw_v046']
                             )
                     ]),
         ] as Set

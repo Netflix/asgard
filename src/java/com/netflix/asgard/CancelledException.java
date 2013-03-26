@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2013 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard;
 
 /**
- * Exception that occurs when a service that Asgard depends on cannot be reached.
+ * Exception thrown as a mechanism to interrupt a sleeping thread during a long running in-memory task.
  */
-class ServiceUnavailableException extends Exception {
-
-    final String serviceName
-
-    ServiceUnavailableException(String serviceName, String msg = null, Throwable throwable = null) {
-        super(msg ?: "${serviceName} could not be contacted.", throwable)
-        this.serviceName = serviceName
-    }
-}
+public class CancelledException extends RuntimeException {}

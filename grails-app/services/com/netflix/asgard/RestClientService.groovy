@@ -61,13 +61,17 @@ class RestClientService implements InitializingBean {
         connectionManager.defaultMaxPerRoute = configService.httpConnPoolMaxForRoute
     }
 
-    GPathResult getAsXml(String uri, Integer timeoutMillis = 10000) {
+    def getAsXml(String uri, Integer timeoutMillis = 10000, boolean swallowException = true) {
         try {
             String content = get(uri, 'application/xml; charset=UTF-8', timeoutMillis)
             return content ? XML.parse(content) as GPathResult : null
         } catch (Exception e) {
             log.error "GET from ${uri} failed: ${e}"
-            return null
+            if (swallowException) {
+                return null
+            } else {
+                throw e
+            }
         }
     }
 
@@ -159,27 +163,33 @@ class RestClientService implements InitializingBean {
     /**
      * @param uriPath the remote destination
      * @param xml the XML string to pass in the post body, excluding the xml header line
-     * @return int the HTTP response code
+     * @return post response
      */
-    int postAsXml(String uriPath, String xml) {
+    RestResponse postAsXml(String uriPath, String xml) {
         StringEntity entity = new StringEntity(
                 '<?xml version="1.0" encoding="UTF-8" ?>' + xml, "application/xml", "UTF-8")
-
         HttpPost httpPost = new HttpPost(uriPath)
         httpPost.setEntity(entity)
-
-        executePost(httpPost)
+        RestResponse restResponse = null
+        executeAndProcessResponse(httpPost) {
+            logErrors(httpPost, it)
+            restResponse = new RestResponse(it.statusLine.statusCode, it.entity.content.getText())
+        }
+        restResponse
     }
 
     private int executePost(HttpPost httpPost) {
         executeAndProcessResponse(httpPost) { HttpResponse httpResponse ->
-            int statusCode = readStatusCode(httpResponse)
-            if (statusCode >= 300) {
-                log.error("POST to ${httpPost.URI.path} failed: ${statusCode} " +
-                        "${httpResponse.statusLine.reasonPhrase}. Content: ${httpPost.entity}")
-            }
-            statusCode
+            logErrors(httpPost, httpResponse)
+            readStatusCode(httpResponse)
         } as int
+    }
+
+    private logErrors(HttpPost httpPost, HttpResponse httpResponse) {
+        if (readStatusCode(httpResponse) >= 300) {
+            log.error("POST to ${httpPost.URI.path} failed: ${readStatusCode(httpResponse)} " +
+                    "${httpResponse.statusLine.reasonPhrase}. Content: ${httpPost.entity}")
+        }
     }
 
     int put(String uri) {

@@ -53,6 +53,9 @@ class MergedInstance {
     Instance ec2Instance
     ApplicationInstance appInstance
 
+    MergedInstance() {
+    }
+
     MergedInstance(Instance ec2Instance, ApplicationInstance appInstance) {
         this.ec2Instance = ec2Instance
         this.appInstance = appInstance

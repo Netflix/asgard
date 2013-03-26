@@ -22,7 +22,6 @@ import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
-import com.netflix.asgard.model.GroupedInstance
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SubnetTarget
@@ -198,7 +197,8 @@ ${lastGroup.loadBalancerNames}"""
             Subnets subnets = awsEc2Service.getSubnets(userContext)
             String subnetPurpose = params.subnetPurpose
             String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
-            List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"])
+            List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"] ?:
+                    params["selectedLoadBalancers"])
             // Availability zones default to the last group's value since this field is required.
             List<String> selectedZones = Requests.ensureList(params.selectedZones) ?: lastGroup.availabilityZones
             String azRebalance = params.azRebalance
@@ -257,6 +257,8 @@ ${lastGroup.loadBalancerNames}"""
 ${loadBalancerNames}"""
             log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers from last \
 Group: ${lastGroup.loadBalancerNames}"""
+            boolean ebsOptimized = params.containsKey('ebsOptimized') ? params.ebsOptimized?.toBoolean() :
+                lastLaunchConfig.ebsOptimized
             if (params.noOptionalDefaults != 'true') {
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
@@ -296,7 +298,8 @@ Group: ${loadBalancerNames}"""
                     scalingPolicies: newScalingPolicies,
                     scheduledActions: newScheduledActions,
                     vpcZoneIdentifier: vpcZoneIdentifier,
-                    spotPrice: spotPrice
+                    spotPrice: spotPrice,
+                    ebsOptimized: ebsOptimized
             )
             def operation = pushService.startGroupCreate(options)
             flash.message = "${operation.task.name} has been started."
@@ -342,17 +345,19 @@ Group: ${loadBalancerNames}"""
         UserContext userContext = UserContext.of(request)
         String name = params.id
         String field = params.field
+        if (!name || !field) {
+            response.status = 400
+            if (!name) { render 'name is a required parameter' }
+            if (!field) { render 'field is a required parameter' }
+            return
+        }
         Cluster cluster = awsAutoScalingService.getCluster(userContext, name)
-        List<GroupedInstance> instances = cluster?.instances
-        String instanceId = instances?.size() >= 1 ? instances[0].instanceId : null
-        MergedInstance mergedInstance = instanceId ?
-                mergedInstanceService.getMergedInstancesByIds(userContext, [instanceId])[0] : null
+        List<String> instanceIds = cluster?.instances*.instanceId
+        MergedInstance mergedInstance = mergedInstanceService.findHealthyInstance(userContext, instanceIds)
         String result = mergedInstance?.getFieldValue(field)
         if (!result) {
-            response.status = 400
-            if (!name) { result = 'name is a required parameter'}
-            else if (!field) { result = 'field is a required parameter'}
-            else if (!cluster) { result = "No cluster found with name '$name'"}
+            response.status = 404
+            if (!cluster) { result = "No cluster found with name '$name'"}
             else if (!mergedInstance) { result = "No instances found for cluster '$name'"}
             else { result = "'$field' not found. Valid fields: ${mergedInstance.listFieldNames()}" }
         }

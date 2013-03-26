@@ -75,6 +75,10 @@ class AwsClientService implements InitializingBean {
 
     public <T> T create(Class<T> interfaceType) {
         Class implementationType = interfaceSimpleNamesToAwsClientClasses[interfaceType.simpleName]
+        createImpl(implementationType)
+    }
+
+    public <T> T createImpl(Class<T> implementationType) {
         implementationType.newInstance(secretService.awsCredentials, clientConfiguration) as T
     }
 

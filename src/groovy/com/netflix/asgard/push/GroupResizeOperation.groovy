@@ -252,7 +252,7 @@ class GroupResizeOperation extends AbstractPushOperation {
         // Update the caches for instances
         group?.instances?.collect { it.instanceId }?.each { String id ->
             awsEc2Service.getInstance(userContext, id)
-            discoveryService.getAppInstance(userContext, appName, id)
+            discoveryService.getAppInstance(userContext, id)
             Time.sleepCancellably(discoveryService.MILLIS_DELAY_BETWEEN_DISCOVERY_CALLS)
         }
         // Update the caches for ASG and cluster
@@ -295,7 +295,7 @@ class GroupResizeOperation extends AbstractPushOperation {
                 return responseCode != 200
             }
             // Still waiting for Discovery?
-            boolean missingInDiscovery = !discoveryService.getAppInstance(userContext, appName, id)
+            boolean missingInDiscovery = !discoveryService.getAppInstance(userContext, id)
             Time.sleepCancellably(discoveryService.MILLIS_DELAY_BETWEEN_DISCOVERY_CALLS)
             missingInDiscovery
         }
@@ -332,7 +332,7 @@ class GroupResizeOperation extends AbstractPushOperation {
     private String getHealthCheckUrl(String id) {
         String healthCheckUrl = instanceIdsToHealthCheckUrls[id]
         if (!healthCheckUrl) {
-            healthCheckUrl = discoveryService.getAppInstance(userContext, appName, id)?.healthCheckUrl
+            healthCheckUrl = discoveryService.getAppInstance(userContext, id)?.healthCheckUrl
             if (healthCheckUrl) {
                 instanceIdsToHealthCheckUrls.put(id, healthCheckUrl)
             }

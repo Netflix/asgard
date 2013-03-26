@@ -30,6 +30,7 @@ class SecurityCreateCommandTests {
     void setUp() {
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(SecurityCreateCommand)
+        Mocks.createDynamicMethods()
         appService = Mocks.applicationService()
     }
 

@@ -36,7 +36,6 @@ class AlarmControllerSpec extends Specification {
     void setup() {
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(AlarmValidationCommand)
-        controller.awsCloudWatchService = Mocks.awsCloudWatchService()
     }
 
     def 'show should display alarm'() {
@@ -56,6 +55,7 @@ class AlarmControllerSpec extends Specification {
     }
 
     def 'show should not display nonexistent alarm'() {
+        controller.awsCloudWatchService = Mocks.awsCloudWatchService()
         controller.params.id = 'doesntexist'
 
         when:
@@ -86,8 +86,8 @@ class AlarmControllerSpec extends Specification {
         final createCommand = new AlarmValidationCommand()
         createCommand.with {
             comparisonOperator = 'GreaterThanThreshold'
-            metric = 'flux_capacitor'
-            namespace = 'star_trek/back_to_the_future'
+            metric = 'importantSomethingsPerWhatever'
+            namespace = 'AWS/SQS'
             statistic = 'Average'
             period = 700
             evaluationPeriods = 5
@@ -101,7 +101,7 @@ class AlarmControllerSpec extends Specification {
         controller.save(createCommand)
 
         then:
-        '/alarm/show/nflx_newton_client-v003-1' == response.redirectedUrl
+        '/alarm/show/alarm-1' == response.redirectedUrl
 
         1 * awsSnsService.getTopic(_, 'api-prodConformity-Report') >> {
             new TopicData('arn:aws:sns:blah')
@@ -113,31 +113,67 @@ class AlarmControllerSpec extends Specification {
         }
         0 * awsAutoScalingService.getScalingPolicy(_, _)
 
-        1 * mockAmazonCloudWatchClient.putMetricAlarm(_) >> {
-            final PutMetricAlarmRequest actual = it[0]
-            final PutMetricAlarmRequest expected = new PutMetricAlarmRequest(
-                alarmName: 'nflx_newton_client-v003-1',
+        1 * mockAmazonCloudWatchClient.putMetricAlarm(new PutMetricAlarmRequest(
+                alarmName: 'alarm-1',
                 alarmDescription: '',
                 actionsEnabled: true,
+                oKActions: ['arn:aws:sns:blah'],
                 alarmActions: ['arn:aws:autoscaling:policyArn', 'arn:aws:sns:blah'],
-                metricName: 'flux_capacitor',
-                namespace: 'star_trek/back_to_the_future',
+                insufficientDataActions: ['arn:aws:sns:blah'],
+                metricName: 'importantSomethingsPerWhatever',
+                namespace: 'AWS/SQS',
                 statistic: 'Average',
-                dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG, value: 'nflx_newton_client-v003')],
+                dimensions: [],
                 period: 700,
                 evaluationPeriods: 5,
                 threshold: 80.0,
                 comparisonOperator: 'GreaterThanThreshold'
-            )
+        ))
+    }
 
-            [
-                'alarmName', 'alarmDescription', 'actionsEnabled', 'alarmActions', 'metricName', 'namespace',
-                'statistic', 'dimensions', 'period', 'evaluationPeriods', 'threshold', 'comparisonOperator',
-            ].each {
-                assert actual[it] == expected[it]
-            }
+    def 'update should modify alarm dimensions'() {
+        controller.awsCloudWatchService = Mock(AwsCloudWatchService) {
+            1 * getAlarm(_, 'alarm-1') >> new MetricAlarm(namespace: 'AWS/SQS',
+                    metricName: 'stuff')
+            1 * updateAlarm(_, new AlarmData(alarmName: 'alarm-1', description: '',
+                    comparisonOperator: AlarmData.ComparisonOperator.GreaterThanThreshold,
+                    metricName: 'importantSomethingsPerWhatever', namespace: 'AWS/SQS',
+                    statistic: AlarmData.Statistic.Average, period: 700, evaluationPeriods: 5, threshold: 80,
+                    actionArns: ['arn:aws:sns:blah'], policyNames: [], topicNames: ['blah'],
+                    dimensions: [QueueName: 'fillItUp']))
+            1 * getDimensionsForNamespace('AWS/SQS') >> ['QueueName']
         }
-        0 * mockAmazonCloudWatchClient.putMetricAlarm(_)
+        controller.awsSnsService = Mock(AwsSnsService)
+
+        final createCommand = new AlarmValidationCommand()
+        createCommand.with {
+            alarmName = 'alarm-1'
+            comparisonOperator = 'GreaterThanThreshold'
+            metric = 'importantSomethingsPerWhatever'
+            namespace = 'AWS/SQS'
+            statistic = 'Average'
+            period = 700
+            evaluationPeriods = 5
+            threshold = 80
+            topic = 'api-prodConformity-Report'
+            policy = 'nflx_newton_client-v003-17'
+        }
+        createCommand.validate()
+        controller.params.with {
+            QueueName = 'fillItUp'
+            AutoScalingGroupName = 'asgName'
+        }
+
+        when:
+        controller.update(createCommand)
+
+        then:
+        '/alarm/show/alarm-1' == response.redirectedUrl
+
+        1 * controller.awsSnsService.getTopic(_, 'api-prodConformity-Report') >> {
+            new TopicData('arn:aws:sns:blah')
+        }
+
     }
 
     def 'save should fail without required values'() {

@@ -17,21 +17,28 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.Alarm
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
+import com.netflix.asgard.model.Subnets
 import grails.test.mixin.TestFor
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @TestFor(AutoScalingController)
 class AutoScalingControllerSpec extends Specification {
 
     void setup() {
-        Mocks.createDynamicMethods()
         TestUtils.setUpMockRequest()
+        controller.cloudReadyService = Mock(CloudReadyService)
+    }
+
+    void setupMocks() {
+        Mocks.createDynamicMethods()
         controller.grailsApplication = Mocks.grailsApplication()
         controller.applicationService = Mocks.applicationService()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
@@ -41,10 +48,10 @@ class AutoScalingControllerSpec extends Specification {
         controller.configService = Mocks.configService()
         controller.instanceTypeService = Mocks.instanceTypeService()
         controller.stackService = Mocks.stackService()
-        controller.cloudReadyService = Mock(CloudReadyService)
     }
 
     def 'show should return ASG info'() {
+        setupMocks()
         controller.params.name = 'helloworld-example-v015'
 
         when:
@@ -61,6 +68,7 @@ class AutoScalingControllerSpec extends Specification {
      }
 
     def 'show should return Alarm info'() {
+        setupMocks()
         controller.params.name = 'helloworld-example-v015'
         AwsAutoScalingService mockAwsAutoScalingService = Mock(AwsAutoScalingService)
         controller.awsAutoScalingService = mockAwsAutoScalingService
@@ -91,6 +99,7 @@ class AutoScalingControllerSpec extends Specification {
     }
 
     def 'show should indicate nonexistent ASG'() {
+        setupMocks()
         controller.params.name = 'doesntexist'
 
         when:
@@ -102,6 +111,7 @@ class AutoScalingControllerSpec extends Specification {
     }
 
     def 'show should indicate nonexistent ASG if invalid characters are used'() {
+        setupMocks()
         controller.params.name = 'nccp-moviecontrol%27'
 
         when:
@@ -201,6 +211,8 @@ class AutoScalingControllerSpec extends Specification {
     }
 
     void "create should populate model"() {
+        setupMocks()
+
         when:
         def attrs = controller.create()
 
@@ -223,6 +235,8 @@ class AutoScalingControllerSpec extends Specification {
     }
 
     def "create should handle invalid inputs"() {
+        setupMocks()
+
         controller.params.with {
             min = ''
             desiredCapacity = ''
@@ -240,5 +254,36 @@ class AutoScalingControllerSpec extends Specification {
         attrs.group.maxSize == null
         attrs.group.defaultCooldown == null
         attrs.group.healthCheckGracePeriod == null
+    }
+
+    @Unroll("save should create ebs optimized #ebsOptimizedValue launch config for param #ebsOptimizedParam")
+    def 'save should create ebs optimized launch config'() {
+        controller.configService = Mock(ConfigService)
+        controller.awsAutoScalingService = Mock(AwsAutoScalingService)
+        controller.awsEc2Service = Mock(AwsEc2Service) {
+            getSubnets(_) >> new Subnets([])
+        }
+        GroupCreateCommand cmd = new GroupCreateCommand()
+        controller.params.with {
+            appName = 'helloworld'
+            ebsOptimized = ebsOptimizedParam
+        }
+        LaunchConfiguration expectedLaunchConfiguration = new LaunchConfiguration().
+                withEbsOptimized(ebsOptimizedValue)
+
+        when:
+        controller.save(cmd)
+
+        then:
+        1 * controller.awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(_, _, expectedLaunchConfiguration,
+                _, _) >> new CreateAutoScalingGroupResult()
+        0 * controller.awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(_, _, _, _, _)
+
+        where:
+        ebsOptimizedParam   | ebsOptimizedValue
+        null                | false
+        ''                  | false
+        'true'              | true
+        'false'             | false
     }
 }

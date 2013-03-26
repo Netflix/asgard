@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.ApplicationInstance
+import java.rmi.server.ServerNotActiveException
 import groovy.util.slurpersupport.GPathResult
 import org.joda.time.Duration
 
@@ -44,32 +45,9 @@ class DiscoveryService implements CacheInitializer {
      */
     final Duration timeToWaitAfterDiscoveryChange = Duration.standardSeconds(90)
 
-    private String chooseHealthyDiscoveryServer(String hostName) {
-        if (grailsApplication.config.server.online) {
-            String port = configService.eurekaPort
-            String context = configService.eurekaUrlContext
-            // Pick the first Discovery server that is healthy.
-            InetAddress[] addresses = []
-            try {
-                addresses = InetAddress.getAllByName(hostName)
-            } catch (UnknownHostException uhe) {
-                emailerService.sendExceptionEmail("Unknown host ${hostName}", uhe)
-            }
-            for (InetAddress address in addresses) {
-                // Check health of Discovery host
-                String healthcheckUrl = "http://${address.canonicalHostName}:${port}/${context}/healthcheck"
-                if (restClientService.getResponseCode(healthcheckUrl) == 200) {
-                    return address.canonicalHostName
-                }
-            }
-        }
-        null
-    }
-
     String findBaseUrl(Region region, Boolean dynamic) {
         String hostName = configService.getRegionalDiscoveryServer(region)
-        String serverName = dynamic ? chooseHealthyDiscoveryServer(hostName) : hostName
-        serverName ? "http://${serverName}:${configService.eurekaPort}/${configService.eurekaUrlContext}" : null
+        hostName ? "http://${hostName}:${configService.eurekaPort}/${configService.eurekaUrlContext}" : null
     }
 
     String findBaseApiUrl(Region region, Boolean dynamic = true) {
@@ -112,6 +90,7 @@ class DiscoveryService implements CacheInitializer {
                 xml = restClientService.getAsXml(url, 30 * 1000)
             } catch (Exception e) {
                 handleConnectionError(e, region, url)
+                throw e
             }
             xml?.application?.each {
                 instances += extractApplicationInstances(it)
@@ -139,9 +118,10 @@ class DiscoveryService implements CacheInitializer {
             GPathResult xml = null
             String url = "$baseUrl/apps/${appName.toUpperCase()}"
             try {
-                xml = restClientService.getAsXml(url)
+                xml = restClientService.getAsXml(url, 10000, false)
             } catch (Exception e) {
                 handleConnectionError(e, userContext.region, url)
+                throw e
             }
             if (xml) {
                 instances = xml.instance.collect { new ApplicationInstance(it) }

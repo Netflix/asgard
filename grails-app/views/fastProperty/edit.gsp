@@ -33,14 +33,6 @@
         <table>
           <tbody>
           <tr class="prop">
-            <td class="name">Application:</td>
-            <td class="value">${fastProperty.appId ?: 'Default (all apps)'}</td>
-          </tr>
-          <tr class="prop">
-            <td class="name">Environment:</td>
-            <td class="value">${fastProperty.env}</td>
-          </tr>
-          <tr class="prop">
             <td class="name">Key:</td>
             <td class="value">${fastProperty.key}</td>
           </tr>
@@ -50,28 +42,9 @@
           </tr>
           <tr class="prop">
             <td class="name"><label for="updatedBy">Updated By:</label></td>
-            <td class="value"><g:textField id="updatedBy" name="updatedBy" value="${fastProperty.updatedBy}" class="required"/></td>
+            <td class="value"><g:textField id="updatedBy" name="updatedBy" value="${updatedBy}" class="required"/></td>
           </tr>
-        <tr class="prop">
-          <td class="name">Region:</td>
-          <td class="value">${fastProperty.region}</td>
-        </tr>
-        <tr class="prop">
-          <td class="name">Stack:</td>
-          <td class="value">${fastProperty.stack?.encodeAsHTML()}</td>
-        </tr>
-        <tr class="prop">
-          <td class="name">Countries:</td>
-          <td class="value">${fastProperty.countries?.encodeAsHTML()}</td>
-        </tr>
-        <tr class="prop">
-          <td class="name">${ticketLabel.encodeAsHTML()}:</td>
-          <td class="value">${fastProperty.cmcTicket?.encodeAsHTML()}</td>
-        </tr>
-        <tr class="prop">
-          <td class="name">ID:</td>
-          <td class="value">${fastProperty.id}</td>
-        </tr>
+          <g:render template="fastPropertyAttributes" />
         </table>
       </div>
       <div class="buttons">

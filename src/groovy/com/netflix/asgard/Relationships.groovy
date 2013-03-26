@@ -205,9 +205,8 @@ class Relationships {
     }
 
     static String buildAlarmName(String autoScalingGroupName, String id) {
-        Check.notEmpty(autoScalingGroupName)
         Check.notEmpty(id)
-        [autoScalingGroupName, id].join('-')
+        [autoScalingGroupName ?: 'alarm', id].join('-')
     }
 
     static String packageFromAppVersion(String appVersion) {

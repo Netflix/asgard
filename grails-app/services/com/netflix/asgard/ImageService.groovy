@@ -265,7 +265,7 @@ class ImageService implements BackgroundProcessInitializer {
         Collection<Image> testImages = awsEc2Service.getAccountImages(UserContext.auto(region))
 
         String url = "${promotionTargetServer}/${region.code}/image/list.xml"
-        GPathResult prodImagesXml = restClientService.getAsXml(url)
+        def prodImagesXml = restClientService.getAsXml(url)
         if (prodImagesXml == null) {
             log.info 'Promotion target server unresponsive, continuing to attempt replication.'
             return

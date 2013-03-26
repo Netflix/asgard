@@ -42,6 +42,7 @@
           </td>
           <td class="value"><g:linkObject type="scalingPolicy" name="${policy}"/></td>
         </tr>
+        <g:render template="/alarm/metricSelection"/>
         <g:render template="alarmOptions"/>
         </tbody>
       </table>

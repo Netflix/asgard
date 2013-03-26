@@ -838,6 +838,18 @@ jQuery(document).ready(function() {
     };
     setUpClusterPage();
 
+    var setUpFastPropertyCreatePage = function() {
+        var jCreateContainer, jCreateAdvancedTrs;
+        jCreateContainer = jQuery('.fastPropertyAttributes');
+        jCreateAdvancedTrs = jCreateContainer.find('.advanced');
+        jQuery('#showAdvancedOptionsToCreateFastProperty').click(function() {
+            jCreateContainer.toggleClass('hideAdvancedItems');
+            enableSelect2ForVisible();
+            jCreateAdvancedTrs.find(':visible').yellowFade();
+        });
+    };
+    setUpFastPropertyCreatePage();
+
     // Task page
     var setUpTaskPage = function() {
         var autoScroller;

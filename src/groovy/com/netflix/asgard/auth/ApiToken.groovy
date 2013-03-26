@@ -133,7 +133,7 @@ class ApiToken implements AuthenticationToken {
      * @return String representation of this token. Token can be reconstructed using {@link fromApiTokenString(String)}
      */
     String getTokenString() {
-        List<String> components = [purpose, TOKEN_DATE_FORMAT.print(expires), username, hash]
+        List<String> components = [purpose, TOKEN_DATE_FORMAT.print(expires), username, URLEncoder.encode(hash)]
         if (username != email) {
             components << email
         }

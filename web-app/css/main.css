@@ -448,6 +448,8 @@ td.checkbox          { text-align: center; }
 .groupReplacingPush .filter                      { width: 60px;      }
 .groupReplacingPush .name                        { white-space: normal; min-width: 86px; }
 
+#showAdvancedOptionsToCreateFastProperty   { margin-left: 230px; }
+
                    span.toggle       { background: url(../images/tango/16/actions/list-remove.png) transparent no-repeat 0 50%; padding: 0 2px 0 17px; line-height: 16px; }
 .hideAdvancedItems span.toggle       { background-image: url(../images/tango/16/actions/list-add.png); }
 .hideAdvancedItems .advancedItems,

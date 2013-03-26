@@ -305,7 +305,8 @@ class AutoScalingController {
             Integer healthCheckGracePeriod = params.healthCheckGracePeriod as Integer
             List<String> terminationPolicies = Requests.ensureList(params.terminationPolicy)
             List<String> availabilityZones = Requests.ensureList(params.selectedZones)
-            List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"])
+            List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"] ?:
+                    params["selectedLoadBalancers"])
             AutoScalingGroup groupTemplate = new AutoScalingGroup().withAutoScalingGroupName(groupName).
                     withAvailabilityZones(availabilityZones).withLoadBalancerNames(loadBalancerNames).
                     withMinSize(minSize.toInteger()).withDesiredCapacity(desiredCapacity.toInteger()).
@@ -333,9 +334,11 @@ class AutoScalingController {
             String kernelId = params.kernelId ?: null
             String ramdiskId = params.ramdiskId ?: null
             String iamInstanceProfile = params.iamInstanceProfile ?: configService.defaultIamRole
+            boolean ebsOptimized = params.ebsOptimized?.toBoolean()
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(imageId).
                     withKernelId(kernelId).withInstanceType(instanceType).withKeyName(keyName).withRamdiskId(ramdiskId).
-                    withSecurityGroups(securityGroups).withIamInstanceProfile(iamInstanceProfile)
+                    withSecurityGroups(securityGroups).withIamInstanceProfile(iamInstanceProfile).
+                    withEbsOptimized(ebsOptimized)
             if (params.pricing == InstancePriceType.SPOT.name()) {
                 launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instanceType)
             }
@@ -500,17 +503,19 @@ class AutoScalingController {
         UserContext userContext = UserContext.of(request)
         String name = params.name ?: params.id
         String field = params.field
+        if (!name || !field) {
+            response.status = 400
+            if (!name) { render 'name is a required parameter' }
+            if (!field) { render 'field is a required parameter' }
+            return
+        }
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, name)
-        List instances = group?.instances
-        String instanceId = instances?.size() >= 1 ? instances[0].instanceId : null
-        MergedInstance mergedInstance = instanceId ?
-                mergedInstanceService.getMergedInstancesByIds(userContext, [instanceId])[0] : null
+        List<String> instanceIds = group?.instances*.instanceId
+        MergedInstance mergedInstance = mergedInstanceService.findHealthyInstance(userContext, instanceIds)
         String result = mergedInstance?.getFieldValue(field)
         if (!result) {
-            response.status = 400
-            if (!name) { result = 'name is a required parameter'}
-            else if (!field) { result = 'field is a required parameter'}
-            else if (!group) { result = "No auto scaling group found with name '$name'"}
+            response.status = 404
+            if (!group) { result = "No auto scaling group found with name '$name'"}
             else if (!mergedInstance) { result = "No instances found for auto scaling group '$name'"}
             else { result = "'$field' not found. Valid fields: ${mergedInstance.listFieldNames()}" }
         }

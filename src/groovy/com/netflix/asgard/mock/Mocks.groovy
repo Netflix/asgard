@@ -211,6 +211,7 @@ class Mocks {
             applicationService.grailsApplication = grailsApplication()
             applicationService.configService = configService()
             applicationService.awsClientService = awsClientService()
+            applicationService.simpleDbClient = applicationService.awsClientService.createImpl(MockAmazonSimpleDBClient)
 
             List<String> names =
                     ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot', 'videometadata'].asImmutable()
@@ -488,6 +489,7 @@ class Mocks {
             applicationService = applicationService()
             awsEc2Service = awsEc2Service()
             awsLoadBalancerService = awsLoadBalancerService()
+            configService = configService()
             discoveryService = discoveryService()
             mergedInstanceService = mergedInstanceService()
             taskService = taskService()
@@ -543,6 +545,7 @@ class Mocks {
         newAwsCloudWatchService.with {
             awsClientService = awsClientService()
             caches = caches()
+            configService = configService()
             taskService = taskService()
             afterPropertiesSet()
             initializeCaches()

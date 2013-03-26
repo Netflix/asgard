@@ -16,23 +16,21 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.cache.CacheInitializer
-import com.netflix.asgard.model.ApplicationInstance
 import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
 import groovy.xml.MarkupBuilder
 import java.rmi.ServerException
 import java.rmi.server.ServerNotActiveException
-import javax.naming.NameAlreadyBoundException
 import org.apache.commons.collections.Bag
 import org.apache.commons.collections.bag.HashBag
-import org.apache.http.HttpException
 import org.apache.http.HttpStatus
+import org.springframework.web.util.UriComponentsBuilder
 
 class FastPropertyService implements CacheInitializer {
 
     static transactional = false
 
-    private static final String SOURCE_OF_UPDATE = 'asgard'
+    private final String fastPropertyPath = 'platformservice/REST/v1/props'
 
     def grailsApplication
     def applicationService
@@ -53,7 +51,7 @@ class FastPropertyService implements CacheInitializer {
         String hostAndPort = platformServiceHostAndPort(userContext)
         if (hostAndPort) {
             String url = "http://${hostAndPort}/platformservice/REST/v1/props/allprops"
-            final GPathResult fastPropertiesXml = restClientService.getAsXml(url)
+            def fastPropertiesXml = restClientService.getAsXml(url)
             if (fastPropertiesXml && fastPropertiesXml.properties) {
                 return fastPropertiesXml.properties.property.collect { GPathResult fastPropertyData ->
                     FastProperty.fromXml(fastPropertyData)
@@ -70,59 +68,38 @@ class FastPropertyService implements CacheInitializer {
     }
 
     /**
-     * Finds all fast properties associated with the supplied application name, based on the region in the user context.
+     * Finds all fast properties associated with the supplied application name (case insensitive), based on the region
+     * in the user context.
      *
      * @param userContext who, where, why
      * @param name the application name
      * @return list of fast properties associated with the application
      */
     List<FastProperty> getFastPropertiesByAppName(UserContext userContext, String name) {
-        getAll(userContext).findAll { it.appId == name }
+        getAll(userContext).findAll { name.equalsIgnoreCase(it.appId) }
+    }
+
+    private UriComponentsBuilder fastPropertyBaseUriBuilder(userContext) {
+        String hostAndPort = platformServiceHostAndPort(userContext)
+        String url = "http://${hostAndPort}/${fastPropertyPath}" as String
+        UriComponentsBuilder.fromHttpUrl(url)
     }
 
     FastProperty get(UserContext userContext, String fastPropertyId) {
         if (!fastPropertyId) { return null }
-        String hostAndPort = platformServiceHostAndPort(userContext)
-        String url = "http://${hostAndPort}/platformservice/REST/v1/props/property/${URLEncoder.encode(fastPropertyId)}"
-        final GPathResult fastPropertyXml = restClientService.getAsXml(url)
+        String url = fastPropertyBaseUriBuilder(userContext).pathSegment('property').pathSegment('getPropertyById').
+                queryParam('id', fastPropertyId).build().encode().toUriString()
+        def fastPropertyXml = restClientService.getAsXml(url)
         FastProperty fastProperty = FastProperty.fromXml(fastPropertyXml)
         caches.allFastProperties.by(userContext.region).put(fastPropertyId, fastProperty)
         fastProperty
     }
 
-    void create(UserContext userContext, String key, String value, String appId, String regionCode, String stack,
-            String countries, String updatedBy, Task existingTask = null) {
-
-        Check.notEmpty(key, 'fast property key')
-        StringWriter writer = new StringWriter()
-        final MarkupBuilder builder = new MarkupBuilder(writer)
-        builder.property {
-            builder.key(key)
-            builder.value(value)
-            builder.env(grailsApplication.config.cloud.accountName)
-            builder.appId(appId)
-            builder.region(regionCode)
-            builder.stack(stack)
-            builder.countries(countries)
-            builder.updatedBy(updatedBy)
-            builder.sourceOfUpdate(SOURCE_OF_UPDATE)
-            builder.cmcTicket(userContext.ticket)
-        }
-
-        String xmlString = writer.toString()
-        GPathResult xml = XML.parse(xmlString) as GPathResult
-        FastProperty fastProperty = FastProperty.fromXml(xml)
-        String id = fastProperty.id
-
-        FastProperty existingProperty = get(userContext, id)
-        if (existingProperty) {
-            throw new NameAlreadyBoundException("The fast property '${id}' already exists")
-        }
-
-        taskService.runTask(userContext, "Create Fast Property '${id}'", { Task task ->
+    FastProperty create(UserContext userContext, FastProperty fastProperty, Task existingTask = null) {
+        taskService.runTask(userContext, "Create Fast Property '${fastProperty.key}'", { Task task ->
 
             // If a region is specified then try to target a platformservice instance in that region.
-            Region region = Region.withCode(regionCode)
+            Region region = Region.withCode(fastProperty.region)
             UserContext userContextToFindPlatformService = region ? userContext.withRegion(region) : userContext
             UserContext userContextThatDelivered = userContext
 
@@ -140,14 +117,16 @@ class FastPropertyService implements CacheInitializer {
             }
             String uriPath = "http://${hostAndPort}/platformservice/REST/v1/props/property"
             task.log("Sending data to ${uriPath}")
-            Integer result = restClientService.postAsXml(uriPath, xmlString)
-            if (result != HttpStatus.SC_OK) {
-                throw new HttpException("Failed to create Fast Property '${id}'. ${uriPath} responded with ${result}")
+            RestResponse restResponse = restClientService.postAsXml(uriPath, fastProperty.toXml())
+            if (restResponse.statusCode != HttpStatus.SC_OK) {
+                String errorMsg = XML.parse(restResponse.content).errorMsg
+                throw new ValidationException("Failed to create Fast Property. ${errorMsg}")
             }
-
+            fastProperty = FastProperty.fromXml(XML.parse(restResponse.content) as GPathResult)
             // Refresh cache
-            get(userContextThatDelivered, id)
-        }, Link.to(EntityType.fastProperty, id), existingTask)
+            get(userContextThatDelivered, fastProperty.id)
+        }, Link.to(EntityType.fastProperty, fastProperty.id), existingTask)
+        fastProperty
     }
 
     void updateFastProperty(UserContext userContext, String id, String value, String updatedBy,
@@ -162,7 +141,7 @@ class FastPropertyService implements CacheInitializer {
                     builder.propertyId(id)
                     builder.value(value)
                     builder.updatedBy(updatedBy)
-                    builder.sourceOfUpdate(SOURCE_OF_UPDATE)
+                    builder.sourceOfUpdate(FastProperty.SOURCE_OF_UPDATE)
                     builder.cmcTicket(userContext.ticket)
                 }
                 String xmlString = writer.toString()
@@ -174,11 +153,11 @@ class FastPropertyService implements CacheInitializer {
                 }
                 String uriPath = "http://${hostAndPort}/platformservice/REST/v1/props/property"
                 task.log("Sending data to ${uriPath}")
-                Integer result = restClientService.postAsXml(uriPath, xmlString)
-                if (result != HttpStatus.SC_OK) {
-                    throw new HttpException("Failed to create Fast Property '${id}'. ${uriPath} responded with ${result}")
+                RestResponse restResponse = restClientService.postAsXml(uriPath, xmlString)
+                if (restResponse.statusCode != HttpStatus.SC_OK) {
+                    String errorMsg = XML.parse(restResponse.content).errorMsg
+                    throw new ValidationException("Failed to update Fast Property. ${errorMsg}")
                 }
-
                 // Refresh cache
                 get(userContext, id)
             }, Link.to(EntityType.fastProperty, id), existingTask)
@@ -213,13 +192,13 @@ class FastPropertyService implements CacheInitializer {
                             "Unable to find working platformservice instance in ${regionsChecked}")
                 }
 
-                String uriBase = "http://${hostAndPort}/platformservice/REST/v1/props/property/${URLEncoder.encode(id)}"
-                String encodedUpdatedBy = URLEncoder.encode(updatedBy)
-                String encodedCmcTicket = URLEncoder.encode(userContext.ticket ?: '')
-                String params = "source=${SOURCE_OF_UPDATE}&updatedBy=${encodedUpdatedBy}&cmcTicket=${encodedCmcTicket}"
-                String uriPath = "${uriBase}?${params}"
+                String uriPath = fastPropertyBaseUriBuilder(userContext).pathSegment('property').
+                        pathSegment('removePropertyById').queryParam('id', id).
+                        queryParam('source', FastProperty.SOURCE_OF_UPDATE).
+                        queryParam('updatedBy', updatedBy).queryParam('cmcTicket', userContext.ticket ?: '').
+                        build().encode().toUriString()
                 task.log("Deleting data at ${uriPath}")
-                restClientService.delete(uriPath)
+                restClientService.getAsXml(uriPath)
 
                 // Wait for platformservice instances to propagate the change so get calls fail
                 while (get(userContextThatDelivered, id)) {
