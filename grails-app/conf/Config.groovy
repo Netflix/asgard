@@ -148,6 +148,8 @@ cloud {
                             storage: 'EBS storage only')),
     ]
     spot.infoUrl = 'http://aws.amazon.com/ec2/spot-instances/'
+
+    securityGroupBlacklist = ['default']
 }
 
 healthCheck {
