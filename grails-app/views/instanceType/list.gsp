@@ -50,7 +50,7 @@
             <td>${instanceType.name}</td>
             <td class="description">${instanceType.hardwareProfile?.description}</td>
             <td>${instanceType.hardwareProfile?.memory}</td>
-            <td>${instanceType.hardwareProfile?.storage}</td>
+            <td class="storage">${instanceType.hardwareProfile?.storage}</td>
             <td class="cpu">${instanceType.hardwareProfile?.cpuSummary}<br/>${instanceType.hardwareProfile?.cpuDetail}</td>
             <td class="architecture">${instanceType.hardwareProfile?.architecture}</td>
             <td class="ioPerformance">${instanceType.hardwareProfile?.ioPerformance}</td>
