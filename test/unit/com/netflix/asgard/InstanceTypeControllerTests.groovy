@@ -32,9 +32,9 @@ class InstanceTypeControllerTests {
     void testList() {
         def attrs = controller.list()
         List<InstanceTypeData> types = attrs.instanceTypes
-        assert 15 == types.size()
-        assert 't1.micro' == types[0].name
-        InstanceTypeData m1Small = types[1]
+        assert 17 == types.size()
+        assert 't1.micro' == types[2].name
+        InstanceTypeData m1Small = types[3]
         assert 'M1 Small' == m1Small.hardwareProfile.description
         assert '3.75 GiB' == types.find { it.name == 'm1.medium'}.hardwareProfile.memory
         assert '68.4 GiB' == types.find { it.name == 'm2.4xlarge' }.hardwareProfile.memory
