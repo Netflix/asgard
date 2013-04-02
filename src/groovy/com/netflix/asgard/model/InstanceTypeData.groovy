@@ -66,6 +66,10 @@ final class InstanceTypeData {
         hardwareProfile.name
     }
 
+    /**
+     * @deprecated Prove this method is not used. Then delete it. Some new instance types are absent from the enum.
+     */
+    @Deprecated
     InstanceType getInstanceType() {
         InstanceType.fromValue(hardwareProfile.instanceType)
     }
