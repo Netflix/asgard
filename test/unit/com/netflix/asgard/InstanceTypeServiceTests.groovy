@@ -111,9 +111,9 @@ class InstanceTypeServiceTests extends GroovyTestCase {
     void testFindRelevantInstanceTypesFor64BitImage() {
         InstanceTypeService instanceTypeService = Mocks.instanceTypeService()
         Image image = new Image(architecture: 'x86_64')
-        List<String> expected64BitInstanceTypes = ['t1.micro', 'm1.small', 'm1.medium', 'c1.medium', 'm1.large',
-                'm2.xlarge', 'm1.xlarge', 'c1.xlarge', 'm2.2xlarge', 'cc1.4xlarge', 'm2.4xlarge', 'cg1.4xlarge',
-                'cc2.8xlarge', 'hi1.4xlarge', 'huge.mainframe']
+        List<String> expected64BitInstanceTypes = ['m3.xlarge', 'm3.2xlarge', 't1.micro', 'm1.small', 'm1.medium',
+                'c1.medium', 'm1.large', 'm2.xlarge', 'm1.xlarge', 'c1.xlarge', 'm2.2xlarge', 'cc1.4xlarge',
+                'm2.4xlarge', 'cg1.4xlarge', 'cc2.8xlarge', 'hi1.4xlarge', 'huge.mainframe']
 
         assertEquals(expected64BitInstanceTypes,
                 instanceTypeService.findRelevantInstanceTypesForImage(Mocks.userContext(), image)*.name)

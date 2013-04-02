@@ -18,8 +18,8 @@ package com.netflix.asgard.model
 class InstanceTypeDataTests extends GroovyTestCase {
 
     void testGetMonthlyLinuxOnDemandPrice() {
-        InstanceTypeData instanceType = new InstanceTypeData(linuxOnDemandPrice: 0.10)
-        assert '$72.00' == instanceType.monthlyLinuxOnDemandPrice
+        assert '$72.00' == new InstanceTypeData(linuxOnDemandPrice: 0.10).monthlyLinuxOnDemandPrice
+        assert '$274.39' == new InstanceTypeData(linuxOnDemandPrice: 0.3811).monthlyLinuxOnDemandPrice
     }
 
     void testGetMonthlyLinuxOnDemandPriceNull() {
