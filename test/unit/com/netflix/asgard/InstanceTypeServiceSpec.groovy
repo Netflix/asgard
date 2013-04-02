@@ -44,7 +44,7 @@ class InstanceTypeServiceSpec extends Specification {
     }
 
     @SuppressWarnings("GroovyAccessibility")
-    def 'instance types should include unique combo of public and custom instance types'() {
+    def 'instance types should include ordered combo of public and custom instance types'() {
 
         List<InstanceProductType> products = InstanceProductType.valuesForOnDemandAndReserved()
         Table<InstanceType, InstanceProductType, BigDecimal> pricesByHardwareAndProduct =
@@ -64,7 +64,7 @@ class InstanceTypeServiceSpec extends Specification {
         ]
         mockConfigService.getCustomInstanceTypes() >> [
                 new InstanceTypeData(linuxOnDemandPrice: 3.10, hardwareProfile:
-                        new HardwareProfile(instanceType: 'hi1.4xlarge', description: 'SSD')),
+                        new HardwareProfile(instanceType: 'superduper.4xlarge', description: 'SSD')),
                 new InstanceTypeData(linuxOnDemandPrice: 1.00, hardwareProfile:
                         new HardwareProfile(instanceType: 'm1.medium', description: 'Custom medium description')),
         ]
@@ -73,8 +73,12 @@ class InstanceTypeServiceSpec extends Specification {
         List<InstanceTypeData> instanceTypes = instanceTypeService.buildInstanceTypes(Region.defaultRegion())
 
         then:
-        ['m1.small', 'm1.medium', 'm1.large', 'hi1.4xlarge'] == instanceTypes*.name
-        ['Small instance', 'Medium instance', 'Large instance', 'SSD'] == instanceTypes*.hardwareProfile*.description
-        [0.05, 0.23, 0.68, 3.10] == instanceTypes*.linuxOnDemandPrice
+        ['c1.medium', 'c1.xlarge', 'cc1.4xlarge', 'cc2.8xlarge', 'cg1.4xlarge', 'hi1.4xlarge', 'm1.xlarge',
+                'm2.2xlarge', 'm2.4xlarge', 'm2.xlarge', 'm3.2xlarge', 'm3.xlarge', 't1.micro', 'm1.small', 'm1.medium',
+                'm1.large', 'superduper.4xlarge'] == instanceTypes*.name
+        [null, null, null, null, null, null, null, null, null, null, null, null, null, 'Small instance',
+                'Medium instance', 'Large instance', 'SSD'] == instanceTypes*.hardwareProfile*.description
+        [null, null, null, null, null, null, null, null, null, null, null, null, null, 0.05, 0.23, 0.68, 3.10
+                ] == instanceTypes*.linuxOnDemandPrice
     }
 }

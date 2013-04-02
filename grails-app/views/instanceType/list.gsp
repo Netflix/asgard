@@ -50,16 +50,16 @@
             <td>${instanceType.name}</td>
             <td class="description">${instanceType.hardwareProfile?.description}</td>
             <td>${instanceType.hardwareProfile?.memory}</td>
-            <td>${instanceType.hardwareProfile?.storage}</td>
+            <td class="storage">${instanceType.hardwareProfile?.storage}</td>
             <td class="cpu">${instanceType.hardwareProfile?.cpuSummary}<br/>${instanceType.hardwareProfile?.cpuDetail}</td>
             <td class="architecture">${instanceType.hardwareProfile?.architecture}</td>
             <td class="ioPerformance">${instanceType.hardwareProfile?.ioPerformance}</td>
-            <td>${instanceType.linuxOnDemandPrice ? '$' + instanceType.linuxOnDemandPrice : ''}</td>
-            <td>${instanceType.linuxReservedPrice ? '$' + instanceType.linuxReservedPrice : ''}</td>
-            <td>${instanceType.linuxSpotPrice ? '$' + instanceType.linuxSpotPrice : ''}</td>
-            <td>${instanceType.windowsOnDemandPrice ? '$' + instanceType.windowsOnDemandPrice : ''}</td>
-            <td>${instanceType.windowsReservedPrice ? '$' + instanceType.windowsReservedPrice : ''}</td>
-            <td>${instanceType.windowsSpotPrice ? '$' + instanceType.windowsSpotPrice : ''}</td>
+            <td><g:formatNumber number="${instanceType.linuxOnDemandPrice}" type="currency" currencyCode="USD" /></td>
+            <td><g:formatNumber number="${instanceType.linuxReservedPrice}" type="currency" currencyCode="USD" /></td>
+            <td><g:formatNumber number="${instanceType.linuxSpotPrice}" type="currency" currencyCode="USD" /></td>
+            <td><g:formatNumber number="${instanceType.windowsOnDemandPrice}" type="currency" currencyCode="USD" /></td>
+            <td><g:formatNumber number="${instanceType.windowsReservedPrice}" type="currency" currencyCode="USD" /></td>
+            <td><g:formatNumber number="${instanceType.windowsSpotPrice}" type="currency" currencyCode="USD" /></td>
           </tr>
         </g:each>
       </table>

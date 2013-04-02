@@ -219,6 +219,7 @@ th.desc a                   { background-image: url(../images/skin/sorted_desc.g
 .list td.propKey a          { max-width: 260px; word-wrap: break-word; }
 .list td.availabilityZone   {                                          white-space: nowrap; }
 .list td.description        { max-width:  76px;                        }
+.list td.storage            { max-width: 130px;                        }
 .list td.cpu                { max-width: 130px;                        }
 .list td.architecture       { max-width:  34px;                        }
 .list td.ioPerformance      { max-width:  56px;                        }

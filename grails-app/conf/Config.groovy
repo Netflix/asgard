@@ -132,7 +132,7 @@ cloud {
 
     throttleMillis = 400
 
-    // TODO: Delete these instance type hacks as soon as m3.xlarge, m3.2xlarge are in the AWS Java SDK enum instead
+    // TODO: Delete these instance type hacks when they are in the AWS Java SDK enum instead
     customInstanceTypes = [
             new InstanceTypeData(linuxOnDemandPrice: 0.580, hardwareProfile:
                     new HardwareProfile(instanceType: 'm3.xlarge', architecture: '64-bit',
@@ -146,6 +146,12 @@ cloud {
                             description: 'M3 Double Extra Large Instance',
                             ioPerformance: 'High', memory: '30 GiB',
                             storage: 'EBS storage only')),
+            new InstanceTypeData(linuxOnDemandPrice: 3.50, hardwareProfile:
+                    new HardwareProfile(instanceType: 'cr1.8xlarge', architecture: '64-bit',
+                            cpu: '88 EC2 Compute Units (2 x Intel Xeon E5-2670, eight-core)',
+                            description: 'Cluster High Memory',
+                            ioPerformance: '10 Gbps Ethernet', memory: '244 GiB',
+                            storage: '240 GiB instance 64-bit storage (2 x 120 GiB SSD)')),
     ]
     spot.infoUrl = 'http://aws.amazon.com/ec2/spot-instances/'
 }
