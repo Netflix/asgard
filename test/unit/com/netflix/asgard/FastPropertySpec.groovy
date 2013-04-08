@@ -118,7 +118,7 @@ class FastPropertySpec extends Specification {
     }
 
     def 'should calculate expiration'() {
-        DateTime expectedDateTime = new DateTime().withDate(2013, 01, 18).withTime(01, 16, 25, 771)
+        DateTime expectedDateTime = new DateTime().withDate(2013, 01, 17).withTime(17, 16, 25, 771)
 
         expect:
         new FastProperty(ts: '2013-01-18T00:59:46.771Z', ttl: '999').expires == expectedDateTime
