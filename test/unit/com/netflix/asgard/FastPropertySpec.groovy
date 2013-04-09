@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
+import org.joda.time.DateTime
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -118,7 +119,7 @@ class FastPropertySpec extends Specification {
 
     def 'should calculate expiration'() {
         expect:
-        new FastProperty(ts: '2013-01-18T00:59:46.771Z', ttl: '999').expires
+        new FastProperty(ts: '2013-01-18T00:59:46.771Z', ttl: '999').expires == new DateTime('2013-01-18T01:16:25.771Z')
     }
 
     def 'should not calculate without ttl'() {
