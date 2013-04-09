@@ -261,7 +261,7 @@ class ConfigService {
      * @return the number of days to retain Amazon Simple Workflow closed executions
      */
     Integer getWorkflowExecutionRetentionPeriodInDays() {
-        grailsApplication.config?.workflow?.workflowExecutionRetentionPeriodInDays ?: 90
+        grailsApplication.config?.workflow?.workflowExecutionRetentionPeriodInDays ?: 3
     }
 
     /**

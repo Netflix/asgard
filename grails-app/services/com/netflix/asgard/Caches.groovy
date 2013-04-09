@@ -134,12 +134,12 @@ class Caches {
         allScheduledActions = cachedMapBuilder.of(EntityType.scheduledAction, 120).buildMultiRegionCachedMap()
         allSignificantStackInstanceHealthChecks = cachedMapBuilder.of(EntityType.instanceHealth, 300).
                 buildMultiRegionCachedMap()
-        allActivityTypes = cachedMapBuilder.of(EntityType.activityType, 3600).buildCachedMap()
-        allOpenWorkflowExecutions = cachedMapBuilder.of(EntityType.workflowExecution, 3600).buildCachedMap()
-        allClosedWorkflowExecutions = cachedMapBuilder.of(EntityType.workflowExecution, 3600).buildCachedMap()
+        allActivityTypes = cachedMapBuilder.of(EntityType.activityType, 120).buildCachedMap()
+        allOpenWorkflowExecutions = cachedMapBuilder.of(EntityType.workflowExecution, 30).buildCachedMap()
+        allClosedWorkflowExecutions = cachedMapBuilder.of(EntityType.workflowExecution, 30).buildCachedMap()
         allApplications = cachedMapBuilder.of(EntityType.application, 120).buildCachedMap()
         allCustomMetrics = cachedMapBuilder.of(EntityType.metric, 120).buildCachedMap()
-        allWorkflowTypes = cachedMapBuilder.of(EntityType.workflowType, 3600).buildCachedMap()
+        allWorkflowTypes = cachedMapBuilder.of(EntityType.workflowType, 120).buildCachedMap()
         allWorkflowDomains = cachedMapBuilder.of(EntityType.workflowDomain, 3600).buildCachedMap()
 
         // Use one thread for all instance type and pricing caches. None of these need updating more than once an hour.

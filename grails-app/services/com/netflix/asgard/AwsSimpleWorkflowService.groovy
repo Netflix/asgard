@@ -23,6 +23,9 @@ import com.amazonaws.services.simpleworkflow.model.DescribeDomainRequest
 import com.amazonaws.services.simpleworkflow.model.DomainInfo
 import com.amazonaws.services.simpleworkflow.model.DomainInfos
 import com.amazonaws.services.simpleworkflow.model.ExecutionTimeFilter
+import com.amazonaws.services.simpleworkflow.model.GetWorkflowExecutionHistoryRequest
+import com.amazonaws.services.simpleworkflow.model.History
+import com.amazonaws.services.simpleworkflow.model.HistoryEvent
 import com.amazonaws.services.simpleworkflow.model.ListActivityTypesRequest
 import com.amazonaws.services.simpleworkflow.model.ListClosedWorkflowExecutionsRequest
 import com.amazonaws.services.simpleworkflow.model.ListDomainsRequest
@@ -30,6 +33,7 @@ import com.amazonaws.services.simpleworkflow.model.ListOpenWorkflowExecutionsReq
 import com.amazonaws.services.simpleworkflow.model.ListWorkflowTypesRequest
 import com.amazonaws.services.simpleworkflow.model.RegisterDomainRequest
 import com.amazonaws.services.simpleworkflow.model.UnknownResourceException
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfos
 import com.amazonaws.services.simpleworkflow.model.WorkflowType
@@ -66,11 +70,12 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
      * Set up relevant cache objects to begin retrieving data.
      */
     void initializeCaches() {
-        caches.allActivityTypes.ensureSetUp({ retrieveActivityTypes() })
-        caches.allOpenWorkflowExecutions.ensureSetUp({ retrieveOpenWorkflowExecutions() })
-        caches.allClosedWorkflowExecutions.ensureSetUp({ retrieveClosedWorkflowExecutions() })
+        caches.allWorkflowDomains.ensureSetUp({ retrieveDomains() }, {
+            caches.allOpenWorkflowExecutions.ensureSetUp({ retrieveOpenWorkflowExecutions() })
+            caches.allClosedWorkflowExecutions.ensureSetUp({ retrieveClosedWorkflowExecutions() })
+        })
         caches.allWorkflowTypes.ensureSetUp({ retrieveWorkflowTypes() })
-        caches.allWorkflowDomains.ensureSetUp({ retrieveDomains() })
+        caches.allActivityTypes.ensureSetUp({ retrieveActivityTypes() })
     }
 
     // Activity types
@@ -153,7 +158,6 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     }
 
     // Open workflow executions
-
     private List<WorkflowExecutionInfo> retrieveOpenWorkflowExecutions() {
         String domain = configService.simpleWorkflowDomain
         ensureDomainExists(domain)
@@ -193,8 +197,8 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
      * @param userContext who, where, why
      * @return cached open workflow executions
      */
-    Collection<WorkflowExecutionInfo> getOpenWorkflowExecutions(UserContext userContext) {
-        caches.allOpenWorkflowExecutions.list()
+    Collection<WorkflowExecutionInfo> getOpenWorkflowExecutions() {
+        caches.allOpenWorkflowExecutions.list().findAll { it.tagList }
     }
 
     // Closed workflow executions
@@ -238,8 +242,8 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
      * @param userContext who, where, why
      * @return cached closed workflow executions
      */
-    Collection<WorkflowExecutionInfo> getClosedWorkflowExecutions(UserContext userContext) {
-        caches.allClosedWorkflowExecutions.list()
+    Collection<WorkflowExecutionInfo> getClosedWorkflowExecutions() {
+        caches.allClosedWorkflowExecutions.list().findAll { it.tagList }
     }
 
     // Workflow Domains
@@ -337,4 +341,34 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         }
         domain
     }
+
+    private AwsResultsRetriever executionHistoryRetriever = new AwsResultsRetriever<HistoryEvent,
+            GetWorkflowExecutionHistoryRequest, History>() {
+        protected History makeRequest(Region region, GetWorkflowExecutionHistoryRequest request) {
+            simpleWorkflowClient.getWorkflowExecutionHistory(request)
+        }
+        protected List<HistoryEvent> accessResult(History result) {
+            result.events
+        }
+        protected void setNextToken(GetWorkflowExecutionHistoryRequest request, String nextToken) {
+            request.withNextPageToken(nextToken)
+        }
+        protected String getNextToken(History result) {
+            result.nextPageToken
+        }
+    }
+
+    /**
+     * Gets the execution history for specific workflow run.
+     * @param workflowId user defined identifier associated with the workflow execution
+     * @return execution history
+     */
+    List<HistoryEvent> getExecutionHistory(WorkflowExecution workflowExecution) {
+        if (!workflowExecution) { return null }
+        String domain = configService.simpleWorkflowDomain
+        GetWorkflowExecutionHistoryRequest request = new GetWorkflowExecutionHistoryRequest(domain: domain,
+                execution: workflowExecution)
+        simpleWorkflowClient.getWorkflowExecutionHistory(request).events
+    }
+
 }

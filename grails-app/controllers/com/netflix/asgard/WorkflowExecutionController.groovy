@@ -15,7 +15,13 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.simpleworkflow.model.HistoryEvent
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
+import com.netflix.asgard.flow.EventAttributes
+import com.netflix.asgard.flow.HistoryAnalyzer
+import com.netflix.asgard.flow.WorkflowTags
+import com.netflix.asgard.model.SwfWorkflowTags
 import grails.converters.JSON
 import grails.converters.XML
 
@@ -26,11 +32,10 @@ class WorkflowExecutionController {
     def index = { redirect(action: 'list', params: params) }
 
     def list = {
-        UserContext userContext = UserContext.of(request)
         List<WorkflowExecutionInfo> closedExecutions =
-            awsSimpleWorkflowService.getClosedWorkflowExecutions(userContext).sort { it.closeTimestamp }
+            awsSimpleWorkflowService.closedWorkflowExecutions.sort { it.closeTimestamp }.reverse()
         List<WorkflowExecutionInfo> openExecutions =
-            awsSimpleWorkflowService.getOpenWorkflowExecutions(userContext).sort { it.startTimestamp }
+            awsSimpleWorkflowService.openWorkflowExecutions.sort { it.startTimestamp }.reverse()
         Map result = [
                 closedWorkflowExecutions: closedExecutions,
                 openWorkflowExecutions: openExecutions
@@ -41,4 +46,32 @@ class WorkflowExecutionController {
             json { new JSON(result).render(response) }
         }
     }
+
+    def show = {
+        String runId = params.runId
+        String workflowId = params.workflowId
+        WorkflowExecution workflowExecution = new WorkflowExecution(workflowId: workflowId, runId: runId)
+        List<HistoryEvent> events = awsSimpleWorkflowService.getExecutionHistory(workflowExecution)
+        List<EventAttributes> eventAttributes = events.collect { new EventAttributes(it) }
+        HistoryAnalyzer historyAnalyzer = HistoryAnalyzer.of(events)
+        WorkflowTags tags = new SwfWorkflowTags().withTags(historyAnalyzer.tags)
+        Map result = [
+                events: events,
+                filteredEvents: eventAttributes,
+                historyAnalyzer: historyAnalyzer,
+                swfWorkflowId: workflowId,
+                swfRunId: runId,
+                workflowDescription: tags.constructTags()
+        ]
+        if (!events) {
+            Requests.renderNotFound('Workflow History', workflowExecution.toString(), this)
+        } else {
+            withFormat {
+                html { result }
+                xml { new XML(result).render(response) }
+                json { new JSON(result).render(response) }
+            }
+        }
+    }
+
 }

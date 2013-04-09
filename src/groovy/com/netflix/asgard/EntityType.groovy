@@ -59,7 +59,7 @@ import java.lang.reflect.Modifier
 
     // By convention, entity names match corresponding controller names.
     static final EntityType<ActivityTypeInfo> activityType = create('Activity Type',
-            { "${it.activityType.name}-${it.activityType.version}" })
+            { "${it.activityType.name}-${it.activityType.version}" as String })
     static final EntityType<MetricAlarm> alarm = create('Metric Alarm', { it.alarmName })
     static final EntityType<AppRegistration> application = create('Application', { it.name })
     static final EntityType<ApplicationInstance> applicationInstance = create('App Instance', { it.hostName })

@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.simpleworkflow.model.ActivityTypeDetail
 import com.amazonaws.services.simpleworkflow.model.ActivityTypeInfo
 import grails.converters.JSON
 import grails.converters.XML
@@ -32,6 +33,15 @@ class ActivityTypeController {
             html { [activityTypeInfos: activityTypeInfos] }
             xml { new XML(activityTypeInfos).render(response) }
             json { new JSON(activityTypeInfos).render(response) }
+        }
+    }
+
+    def show(String name, String version) {
+        ActivityTypeDetail activityType = awsSimpleWorkflowService.getActivityTypeDetail(name, version)
+        withFormat {
+            html { return [activityType: activityType] }
+            xml { new XML(activityType).render(response) }
+            json { new JSON(activityType).render(response) }
         }
     }
 

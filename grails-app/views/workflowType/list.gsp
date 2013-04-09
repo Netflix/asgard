@@ -32,41 +32,17 @@
     <table class="sortable">
       <thead>
       <tr>
-        <th>ID</th>
         <th>Name</th>
-        <th>Workflow Type</th>
         <th>Version</th>
-        <th>Start Timestamp</th>
-        <th>Close Timestamp</th>
-        <th>Execution Status</th>
-        <th>Close Status</th>
-        <th>Parent ID</th>
-        <th>Parent Name</th>
-        <th>Tags</th>
-        <th>Canceled</th>
+        <th>Status</th>
       </tr>
       </thead>
       <tbody>
       <g:each var="workflowTypeInfo" in="${workflowTypeInfos}" status="i">
         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-          <td><g:linkObject type="execution" name="${workflowTypeInfo.runId}"/></td>
-          %{--<td>${workflowTypeInfo.execution.workflowId}</td>--}%
-          %{--<td>${workflowTypeInfo.workflowType.name}</td>--}%
-          %{--<td>${workflowTypeInfo.workflowType.version}</td>--}%
-          %{--<td><g:formatDate date="${workflowTypeInfo.startTimestamp}"/></td>--}%
-          %{--<td><g:formatDate date="${workflowTypeInfo.closeTimestamp}"/></td>--}%
-          %{--<td>${workflowTypeInfo.executionStatus}</td>--}%
-          %{--<td>${workflowTypeInfo.closeStatus}</td>--}%
-          %{--<td><g:linkObject type="execution" name="${workflowTypeInfo.parent?.runId}"/></td>--}%
-          %{--<td>${workflowTypeInfo.parent?.workflowId}</td>--}%
-          %{--<td>${workflowTypeInfo.tags}--}%
-            %{--<g:if test="${workflowTypeInfo.tags}">--}%
-              %{--<g:each var="tag" in="${workflowTypeInfo.tagList}">--}%
-                %{--${tag}<br/>--}%
-              %{--</g:each>--}%
-            %{--</g:if>--}%
-          %{--</td>--}%
-          %{--<td>${workflowTypeInfo.cancelRequested}</td>--}%
+          <td><g:link action="show" params="${[name: workflowTypeInfo.workflowType.name, version: workflowTypeInfo.workflowType.version]}">${workflowTypeInfo.workflowType.name}</g:link></td>
+          <td>${workflowTypeInfo.workflowType.version}</td>
+          <td>${workflowTypeInfo.status}</td>
         </tr>
       </g:each>
       </tbody>

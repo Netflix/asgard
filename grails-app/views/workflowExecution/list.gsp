@@ -27,7 +27,7 @@
     <div class="message">${flash.message}</div>
   </g:if>
   <g:render template="sublist" model="[classification: 'Open', executions: openWorkflowExecutions]" />
-  <g:render template="sublist" model="[classification: 'Completed', executions: completedWorkflowExecutions]" />
+  <g:render template="sublist" model="[classification: 'Closed', executions: closedWorkflowExecutions]" />
 </div>
 </body>
 </html>

@@ -34,7 +34,6 @@
       <table class="sortable">
         <thead>
         <tr>
-          <th>Type</th>
           <th>Name</th>
           <th>Version</th>
           <th>Status</th>
@@ -46,11 +45,10 @@
         <tbody>
         <g:each var="activityTypeInfo" in="${activityTypeInfos}" status="i">
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-            <td><g:linkObject type="activityType" name="${EntityType.activityType.key(activityTypeInfo as ActivityTypeInfo)}"/></td>
-            <td>${activityTypeInfo.activityType.name}</td>
+            <td><g:link action="show" params="${[name: activityTypeInfo.activityType.name, version: activityTypeInfo.activityType.version]}">${activityTypeInfo.activityType.name}</g:link></td>
             <td>${activityTypeInfo.activityType.version}</td>
-            <td>activityTypeInfo.status</td>
-            <td>activityTypeInfo.description</td>
+            <td>${activityTypeInfo.status}</td>
+            <td>${activityTypeInfo.description}</td>
             <td><g:formatDate date="${activityTypeInfo.creationDate}"/></td>
             <td><g:formatDate date="${activityTypeInfo.deprecationDate}"/></td>
           </tr>

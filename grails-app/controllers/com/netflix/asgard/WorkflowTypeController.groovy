@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.simpleworkflow.model.WorkflowTypeDetail
 import com.amazonaws.services.simpleworkflow.model.WorkflowTypeInfo
 import grails.converters.JSON
 import grails.converters.XML
@@ -33,6 +34,15 @@ class WorkflowTypeController {
             html { [workflowTypeInfos: workflowTypes] }
             xml { new XML(workflowTypes).render(response) }
             json { new JSON(workflowTypes).render(response) }
+        }
+    }
+
+    def show(String name, String version) {
+        WorkflowTypeDetail workflowType = awsSimpleWorkflowService.getWorkflowTypeDetail(name, version)
+        withFormat {
+            html { return [workflowType: workflowType] }
+            xml { new XML(workflowType).render(response) }
+            json { new JSON(workflowType).render(response) }
         }
     }
 }

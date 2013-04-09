@@ -21,41 +21,27 @@
   <table class="sortable">
     <thead>
     <tr>
-      <th>ID</th>
-      <th>Name</th>
+      <th>Run ID</th>
       <th>Workflow Type</th>
       <th>Version</th>
       <th>Start Timestamp</th>
       <th>Close Timestamp</th>
-      <th>Execution Status</th>
       <th>Close Status</th>
-      <th>Parent ID</th>
-      <th>Parent Name</th>
-      <th>Tags</th>
       <th>Canceled</th>
+      <th>Tags</th>
     </tr>
     </thead>
     <tbody>
     <g:each var="executionInfo" in="${executions}" status="i">
       <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-        <td><g:linkObject type="execution" name="${executionInfo.execution.runId}"/></td>
-        <td>${executionInfo.execution.workflowId}</td>
+        <td><g:linkObject type="workflowExecution" params="[runId: executionInfo.execution.runId, workflowId: executionInfo.execution.workflowId]" name="${executionInfo.execution.runId[0..6]}..."/></td>
         <td>${executionInfo.workflowType.name}</td>
         <td>${executionInfo.workflowType.version}</td>
         <td><g:formatDate date="${executionInfo.startTimestamp}"/></td>
         <td><g:formatDate date="${executionInfo.closeTimestamp}"/></td>
-        <td>${executionInfo.executionStatus}</td>
         <td>${executionInfo.closeStatus}</td>
-        <td><g:linkObject type="execution" name="${executionInfo.parent?.runId}"/></td>
-        <td>${executionInfo.parent?.workflowId}</td>
-        <td>${executionInfo.tags}
-          <g:if test="${executionInfo.tags}">
-            <g:each var="tag" in="${executionInfo.tagList}">
-              ${tag}<br/>
-            </g:each>
-          </g:if>
-        </td>
         <td>${executionInfo.cancelRequested}</td>
+        <td>${executionInfo.tagList}</td>
       </tr>
     </g:each>
     </tbody>
