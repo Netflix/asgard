@@ -15,10 +15,8 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.InstanceType
 import com.google.common.collect.ArrayTable
-import com.google.common.collect.ImmutableMap
 import com.google.common.collect.Table
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.mock.Mocks
