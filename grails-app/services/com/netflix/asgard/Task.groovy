@@ -42,6 +42,7 @@ class Task {
         def updateTimeString = updateTime.format("yyyy-MM-dd_HH:mm:ss")
         log << updateTimeString + ' ' + op
         logger.info "${updateTimeString} ${id}: {Ticket: ${userContext?.ticket?.trim()}} " +
+                "{User: ${userContext?.username}} " +
                 "{Client: ${userContext?.clientHostName} ${userContext?.clientIpAddress}} " +
                 "{Region: ${userContext?.region}} [${name}] ${operation}"
     }
@@ -52,7 +53,8 @@ class Task {
     }
 
     String getSummary() {
-        "Asgard task ${status} in ${env} ${userContext?.region} by ${userContext?.clientHostName}: ${name}"
+        "Asgard task ${status} in ${env} ${userContext?.region} by " +
+                "${userContext?.username ?: userContext?.clientHostName}: ${name}"
     }
 
     String getLogAsString() {
