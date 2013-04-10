@@ -454,7 +454,7 @@ td.checkbox          { text-align: center; }
                    span.toggle       { background: url(../images/tango/16/actions/list-remove.png) transparent no-repeat 0 50%; padding: 0 2px 0 17px; line-height: 16px; }
 .hideAdvancedItems span.toggle       { background-image: url(../images/tango/16/actions/list-add.png); }
 .hideAdvancedItems .advancedItems,
-.hideAdvancedItems tr.advanced td    { display: none; }
+.hideAdvancedItems tr.advanced       { display: none; }
 
 div.grippie { background: #EEEEEE url(../images/grippie.png) no-repeat scroll center 2px; border: 1px solid #DDDDDD; border-top-width: 0; cursor: s-resize; height: 9px; overflow: hidden; }
 .resizable-textarea textarea { display: block; margin-bottom: 0; width: 95%; height: 20%; }

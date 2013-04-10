@@ -40,7 +40,7 @@
       </g:if>
     </td>
   </tr>
-  <tr class="prop">
+  <tr class="prop advanced">
     <td class="name">
       <label for="instanceType"><g:link controller="instanceType" action="list">Instance Type:</g:link></label>
     </td>
