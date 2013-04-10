@@ -147,9 +147,7 @@ class ImageController {
     def prelaunch = {
         UserContext userContext = UserContext.of(request)
         String imageId = EntityType.image.ensurePrefix(params.id)
-        Image image = awsEc2Service.getImage(userContext, imageId)
-        Collection<InstanceTypeData> instanceTypes =
-                instanceTypeService.findRelevantInstanceTypesForImage(userContext, image)
+        Collection<InstanceTypeData> instanceTypes = instanceTypeService.getInstanceTypes(userContext)
         [
                  'imageId' : imageId,
                  'instanceType' : '',
