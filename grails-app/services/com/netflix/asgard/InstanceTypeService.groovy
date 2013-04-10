@@ -47,7 +47,6 @@ class InstanceTypeService implements CacheInitializer {
 
     final BigDecimal lowPrioritySpotPriceFactor = 1.0
     final BigDecimal highPrioritySpotPriceFactor = 1.04
-    final Map<String, String> imageArchToInstanceTypeArch = ImmutableMap.copyOf([x86_64: '64-bit', i386: '32-bit'])
 
     def grailsApplication
     def awsEc2Service
@@ -80,12 +79,6 @@ class InstanceTypeService implements CacheInitializer {
     BigDecimal calculateUrgentLinuxSpotBid(UserContext userContext, String instanceTypeName) {
         InstanceTypeData instanceType = getInstanceType(userContext, instanceTypeName)
         instanceType.linuxOnDemandPrice * highPrioritySpotPriceFactor
-    }
-
-    Collection<InstanceTypeData> findRelevantInstanceTypesForImage(UserContext userContext, Image image) {
-        Collection<InstanceTypeData> instanceTypes = getInstanceTypes(userContext)
-        String instanceTypeArch = imageArchToInstanceTypeArch[image.architecture]
-        instanceTypes.findAll { it.hardwareProfile.architecture.contains(instanceTypeArch) }
     }
 
     InstanceTypeData getInstanceType(UserContext userContext, String instanceTypeName) {
