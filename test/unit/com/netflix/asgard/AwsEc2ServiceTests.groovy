@@ -45,7 +45,7 @@ class AwsEc2ServiceTests extends GrailsUnitTestCase {
     }
 
     void testIsSecurityGroupEditable() {
-        AwsEc2Service awsEc2Service = new AwsEc2Service()
+        AwsEc2Service awsEc2Service = Mocks.awsEc2Service()
         assert awsEc2Service.isSecurityGroupEditable("nf-infrastructure")
         assert awsEc2Service.isSecurityGroupEditable("nf-datacenter")
         assert !awsEc2Service.isSecurityGroupEditable("default")

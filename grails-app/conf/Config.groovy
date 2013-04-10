@@ -154,6 +154,8 @@ cloud {
                             storage: '240 GiB instance 64-bit storage (2 x 120 GiB SSD)')),
     ]
     spot.infoUrl = 'http://aws.amazon.com/ec2/spot-instances/'
+
+    securityGroupBlacklist = ['default']
 }
 
 healthCheck {
