@@ -44,18 +44,7 @@
             <td class="name">Image ID:</td>
             <td>${imageId}</td>
           </tr>
-          <tr class="prop">
-            <td class="name">
-              <label for="instanceType"><g:link controller="instanceType" action="list">Instance Type:</g:link></label>
-            </td>
-            <td class="value">
-              <select id="instanceType" name="instanceType">
-                <g:each var="t" in="${instanceTypes}">
-                  <option ${t.name == instanceType ? 'selected' : ''} value="${t.name}">${t.name} ${t.monthlyLinuxOnDemandPrice}/mo</option>
-                </g:each>
-              </select>
-            </td>
-          </tr>
+          <g:render template="/launchConfiguration/instanceTypeSelect"/>
           <tr class="prop">
             <td class="name">
               <label for="zone">Availablity Zone:</label>
