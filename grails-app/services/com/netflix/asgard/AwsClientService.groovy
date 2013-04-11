@@ -45,13 +45,14 @@ class AwsClientService implements InitializingBean {
 
     def grailsApplication
     def secretService
+    def serverService
     def configService
 
     /**
      * Interface names mapped to ClientTypes wrapper objects. For each interface name, a real and fake concrete class
      * type should be provided.
      */
-    private Map<String, Class> interfaceSimpleNamesToAwsClientClasses 
+    private Map<String, Class> interfaceSimpleNamesToAwsClientClasses
 
     private ClientConfiguration clientConfiguration
 
@@ -71,6 +72,7 @@ class AwsClientService implements InitializingBean {
         clientConfiguration = new ClientConfiguration()
         clientConfiguration.proxyHost = configService.proxyHost
         clientConfiguration.proxyPort = configService.proxyPort
+        clientConfiguration.userAgent = 'asgard-' + serverService.version
     }
 
     public <T> T create(Class<T> interfaceType) {
