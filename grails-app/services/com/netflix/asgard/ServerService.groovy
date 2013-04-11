@@ -265,6 +265,15 @@ class ServerService implements InitializingBean {
         Hours.hoursBetween(serverStartupTime, new DateTime()).hours
     }
 
+    /**
+     * Gets the Asgard version number.
+     *
+     * @return the version of Asgard that is currently running
+     */
+    String getVersion() {
+        grailsApplication.metadata['app.version']
+    }
+
     private String determineActiveServerName(Environment env) {
         restClientService.getAsText("http://${env.canonicalDnsName}${serverSuffix}/server", 1000)
     }
