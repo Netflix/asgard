@@ -329,7 +329,7 @@ class ConfigService {
     }
 
     /**
-     * @return Maximum time in miliseconds for threads to wait for a connection from the http connection pool
+     * @return Maximum time in milliseconds for threads to wait for a connection from the http connection pool
      */
     long getHttpConnPoolTimeout() {
         grailsApplication.config.httpConnPool?.timeout ?: 50 * 1000

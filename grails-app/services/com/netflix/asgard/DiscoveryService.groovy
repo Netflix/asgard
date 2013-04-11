@@ -17,7 +17,6 @@ package com.netflix.asgard
 
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.ApplicationInstance
-import java.rmi.server.ServerNotActiveException
 import groovy.util.slurpersupport.GPathResult
 import org.joda.time.Duration
 
@@ -84,7 +83,7 @@ class DiscoveryService implements CacheInitializer {
         List instances = []
         String baseApiUrl = findBaseApiUrl(region)
         if (baseApiUrl) {
-            def xml = null
+            def xml
             String url = "$baseApiUrl/apps"
             try {
                 xml = restClientService.getAsXml(url, 30 * 1000)
@@ -100,6 +99,7 @@ class DiscoveryService implements CacheInitializer {
     }
 
     private Collection<ApplicationInstance> extractApplicationInstances(GPathResult xml) {
+        //noinspection GroovyAccessibility
         xml?.name ? xml.instance?.collect { new ApplicationInstance(it) } : []
     }
 
@@ -115,7 +115,7 @@ class DiscoveryService implements CacheInitializer {
         List<ApplicationInstance> instances = []
         String baseUrl = findBaseApiUrl(userContext.region)
         if (baseUrl) {
-            GPathResult xml = null
+            GPathResult xml
             String url = "$baseUrl/apps/${appName.toUpperCase()}"
             try {
                 xml = restClientService.getAsXml(url, 10000, false)

@@ -39,7 +39,6 @@ import com.amazonaws.services.rds.model.DBSnapshot
 import com.google.common.collect.ImmutableBiMap
 import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.model.ApplicationInstance
-import com.netflix.asgard.model.ApplicationMetrics
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.InstanceTypeData
