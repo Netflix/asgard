@@ -45,6 +45,7 @@ class AwsClientService implements InitializingBean {
 
     def grailsApplication
     def secretService
+    def serverService
     def configService
 
     /**
@@ -71,6 +72,7 @@ class AwsClientService implements InitializingBean {
         clientConfiguration = new ClientConfiguration()
         clientConfiguration.proxyHost = configService.proxyHost
         clientConfiguration.proxyPort = configService.proxyPort
+        clientConfiguration.userAgent = 'asgard-' + serverService.version
     }
 
     public <T> T create(Class<T> interfaceType) {
