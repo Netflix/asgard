@@ -44,13 +44,13 @@ class DiscoveryService implements CacheInitializer {
      */
     final Duration timeToWaitAfterDiscoveryChange = Duration.standardSeconds(90)
 
-    String findBaseUrl(Region region, Boolean dynamic) {
+    String findBaseUrl(Region region) {
         String hostName = configService.getRegionalDiscoveryServer(region)
         hostName ? "http://${hostName}:${configService.eurekaPort}/${configService.eurekaUrlContext}" : null
     }
 
-    String findBaseApiUrl(Region region, Boolean dynamic = true) {
-        String baseUrl = findBaseUrl(region, dynamic)
+    String findBaseApiUrl(Region region) {
+        String baseUrl = findBaseUrl(region)
         baseUrl ? "$baseUrl/v2" : null
     }
 
