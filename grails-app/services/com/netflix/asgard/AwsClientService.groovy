@@ -51,7 +51,7 @@ class AwsClientService implements InitializingBean {
      * Interface names mapped to ClientTypes wrapper objects. For each interface name, a real and fake concrete class
      * type should be provided.
      */
-    private Map<String, Class> interfaceSimpleNamesToAwsClientClasses 
+    private Map<String, Class> interfaceSimpleNamesToAwsClientClasses
 
     private ClientConfiguration clientConfiguration
 
