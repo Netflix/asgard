@@ -51,6 +51,7 @@ import com.netflix.asgard.PushService
 import com.netflix.asgard.Region
 import com.netflix.asgard.RestClientService
 import com.netflix.asgard.SecretService
+import com.netflix.asgard.ServerService
 import com.netflix.asgard.SimpleDbDomainService
 import com.netflix.asgard.StackService
 import com.netflix.asgard.Task
@@ -177,7 +178,8 @@ class Mocks {
                             ],
                             server: [:],
                             thread: [useJitter: false]
-                    ]
+                    ],
+                    metadata: [:]
             ]
         }
         grailsApplication
@@ -335,6 +337,7 @@ class Mocks {
             awsClientService.grailsApplication = grailsApplication()
             awsClientService.secretService = new SecretService()
             awsClientService.configService = configService()
+            awsClientService.serverService = serverService()
             awsClientService.afterPropertiesSet()
         }
         awsClientService
@@ -586,6 +589,15 @@ class Mocks {
             configService.grailsApplication = grailsApplication()
         }
         configService
+    }
+
+    private static ServerService serverService
+    static ServerService serverService() {
+        if (serverService == null) {
+            serverService = new ServerService()
+            serverService.grailsApplication = grailsApplication()
+        }
+        serverService
     }
 
     private static AwsSqsService awsSqsService
