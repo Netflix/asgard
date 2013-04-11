@@ -42,4 +42,16 @@ class TaskTests extends GroovyTestCase {
         task = new Task(startTime: new Date(1290239315666), updateTime: new Date(1290329325555), status: "completed")
         assert "1d 1h 9s" == task.durationString
     }
+
+    void testGetSummary() {
+        assert new Task(name: 'Create ASG helloworld-v001', env: 'prod',
+                status: 'completed', userContext: new UserContext(region: Region.US_WEST_2, username: 'hsimpson',
+                clientHostName: 'laptop-hsimpson')).summary ==
+                'Asgard task completed in prod us-west-2 by hsimpson: Create ASG helloworld-v001'
+
+        assert new Task(name: 'Create ASG helloworld-v001', env: 'prod',
+                status: 'completed', userContext: new UserContext(region: Region.US_WEST_2, username: null,
+                clientHostName: 'laptop-hsimpson')).summary ==
+                'Asgard task completed in prod us-west-2 by laptop-hsimpson: Create ASG helloworld-v001'
+    }
 }
