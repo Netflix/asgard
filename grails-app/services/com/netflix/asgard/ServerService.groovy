@@ -184,7 +184,7 @@ class ServerService implements InitializingBean {
         restClientService.getResponseCode("http://${server.name}${serverSuffix}/healthcheck") == 200
     }
 
-    private static String nowYearMonthDayHour() {
+    private String nowYearMonthDayHour() {
         YEAR_MONTH_DAY_HR.print(new DateTime())
     }
 
