@@ -16,7 +16,7 @@
 
 --%>
 <%@ page import="com.netflix.asgard.Requests" %>
-<tr class="prop">
+<tr class="prop advanced">
   <td class="name">
     <label>Load Balancers<br/>(cannot be added<br/>or removed later):</label>
   </td>
