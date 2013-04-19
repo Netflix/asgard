@@ -329,6 +329,13 @@ class ConfigService {
     }
 
     /**
+     * @return maximum time in milliseconds for remote REST calls to wait before timing out
+     */
+    int getRestClientTimeoutMillis() {
+        grailsApplication.config.rest?.timeoutMillis ?: 2 * 1000
+    }
+
+    /**
      * @return Maximum time in milliseconds for threads to wait for a connection from the http connection pool
      */
     long getHttpConnPoolTimeout() {
