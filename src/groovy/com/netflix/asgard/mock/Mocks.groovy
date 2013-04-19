@@ -37,7 +37,9 @@ import com.netflix.asgard.Caches
 import com.netflix.asgard.ConfigService
 import com.netflix.asgard.DefaultUserDataProvider
 import com.netflix.asgard.DiscoveryService
+import com.netflix.asgard.DnsService
 import com.netflix.asgard.EmailerService
+import com.netflix.asgard.EurekaAddressCollectorService
 import com.netflix.asgard.FastPropertyService
 import com.netflix.asgard.FlagService
 import com.netflix.asgard.InstanceTypeService
@@ -232,6 +234,31 @@ class Mocks {
         mergedInstanceGroupingService
     }
 
+    private static DnsService dnsService
+    static DnsService dnsService() {
+        if (dnsService == null) {
+            MockUtils.mockLogging(DnsService, false)
+            dnsService = new DnsService() {
+                Collection<String> getCanonicalHostNamesForDnsName(String hostName) { ['localhost'] }
+            }
+        }
+        dnsService
+    }
+
+    private static EurekaAddressCollectorService eurekaAddressCollectorService
+    static EurekaAddressCollectorService eurekaAddressCollectorService() {
+        if (eurekaAddressCollectorService == null) {
+            MockUtils.mockLogging(EurekaAddressCollectorService, false)
+            eurekaAddressCollectorService = new EurekaAddressCollectorService()
+            eurekaAddressCollectorService.caches = caches()
+            eurekaAddressCollectorService.configService = configService()
+            eurekaAddressCollectorService.restClientService = restClientService()
+            eurekaAddressCollectorService.dnsService = dnsService()
+            eurekaAddressCollectorService.initializeCaches()
+        }
+        eurekaAddressCollectorService
+    }
+
     private static DiscoveryService discoveryService
     static DiscoveryService discoveryService() {
         if (discoveryService == null) {
@@ -239,6 +266,7 @@ class Mocks {
             discoveryService = new DiscoveryService()
             discoveryService.grailsApplication = grailsApplication()
             discoveryService.caches = caches()
+            discoveryService.eurekaAddressCollectorService = eurekaAddressCollectorService()
             discoveryService.configService = configService()
             discoveryService.taskService = taskService()
             discoveryService.metaClass.getAppInstancesByIds = { UserContext userContext, List<String> instanceIds -> [] }

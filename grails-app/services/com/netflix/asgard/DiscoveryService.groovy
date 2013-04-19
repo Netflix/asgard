@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.google.common.collect.Lists
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.ApplicationInstance
 import groovy.util.slurpersupport.GPathResult
@@ -28,6 +29,7 @@ class DiscoveryService implements CacheInitializer {
     Caches caches
     def configService
     def emailerService
+    def eurekaAddressCollectorService
     def restClientService
     def taskService
 
@@ -35,7 +37,9 @@ class DiscoveryService implements CacheInitializer {
     final Integer MILLIS_DELAY_BETWEEN_DISCOVERY_CALLS = 700
 
     void initializeCaches() {
-        caches.allApplicationInstances.ensureSetUp({ Region region -> retrieveInstances(region) })
+        caches.allApplicationInstances.ensureSetUp({ Region region -> retrieveInstances(region) }, {},
+                { Region region -> caches.allEurekaAddresses.by(region).filled }
+        )
     }
 
     /**
@@ -44,8 +48,17 @@ class DiscoveryService implements CacheInitializer {
      */
     final Duration timeToWaitAfterDiscoveryChange = Duration.standardSeconds(90)
 
+    /**
+     * Cached addresses were the best choices when the Eureka address cache loaded recently. Find one that is currently
+     * healthy, if possible. Then create a base URL for that
+     *
+     * @param region the region for which to look for Eureka nodes
+     * @return the base URL of a healthy Eureka node
+     */
     String findBaseUrl(Region region) {
-        String hostName = configService.getRegionalDiscoveryServer(region)
+        List<String> eurekaAddresses = Lists.newArrayList(caches.allEurekaAddresses.by(region).list())
+        Collections.shuffle(eurekaAddresses)
+        String hostName = eurekaAddressCollectorService.chooseBestEurekaNode(eurekaAddresses)
         hostName ? "http://${hostName}:${configService.eurekaPort}/${configService.eurekaUrlContext}" : null
     }
 

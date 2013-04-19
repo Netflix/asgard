@@ -65,6 +65,26 @@ class ConfigService {
     }
 
     /**
+     * Gets the maximum number of times to perform a DNS lookup without receiving a new result. This is useful to tune
+     * when there is a service dependency like Eureka that may have DNS configuration only returning one random IP
+     * address for each individual DNS lookup. Depending on the number of expected IP addresses, some Asgard
+     * installations may be better off with a higher or lower number of DNS attempts before giving up and accepting
+     * the currently gathered set of IP addresses.
+     *
+     * @return the maximum number of times to perform a DNS lookup without receiving a new result
+     */
+    Integer getMaxConsecutiveDnsLookupsWithoutNewResult() {
+        grailsApplication.config.dns?.maxConsecutiveDnsLookupsWithoutNewResult ?: 10
+    }
+
+    /**
+     * @return number of milliseconds to wait between DNS calls
+     */
+    int getDnsThrottleMillis() {
+        grailsApplication.config.dns?.throttleMillis ?: 50
+    }
+
+    /**
      * Finds the Discovery server URL for the specified region, or null if there isn't one
      *
      * @param region the region in which to look for a Discovery URL
