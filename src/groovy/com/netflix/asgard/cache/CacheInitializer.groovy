@@ -15,6 +15,12 @@
  */
 package com.netflix.asgard.cache
 
+/**
+ * Characteristic of Spring-managed beans (usually Grails services) that are responsible for initializing one or more
+ * in-memory caches.
+ *
+ * @see com.netflix.asgard.InitService for implications
+ */
 interface CacheInitializer {
 
     void initializeCaches()

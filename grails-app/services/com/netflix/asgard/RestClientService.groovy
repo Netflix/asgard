@@ -50,6 +50,13 @@ class RestClientService implements InitializingBean {
     final ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager()
     final HttpClient httpClient = new DefaultHttpClient(connectionManager)
 
+    // If the AWS Java SDK upgrades to httpclient 4.2.* then we can set up the client with retries like this.
+    /*
+    final PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager()
+    final HttpClient baseClient = new DefaultHttpClient(connectionManager)
+    final HttpClient httpClient = new AutoRetryHttpClient(baseClient, new DefaultServiceUnavailableRetryStrategy())
+    */
+
     public void afterPropertiesSet() throws Exception {
         if (configService.proxyHost) {
             final HttpHost proxy = new HttpHost(configService.proxyHost, configService.proxyPort, 'http')
