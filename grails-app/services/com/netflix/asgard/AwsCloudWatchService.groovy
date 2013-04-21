@@ -54,7 +54,7 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
     void afterPropertiesSet() {
         awsClient = new MultiRegionAwsClient<AmazonCloudWatch>( { Region region ->
             AmazonCloudWatch client = awsClientService.create(AmazonCloudWatch)
-            client.setEndpoint("monitoring.${region}.amazonaws.com")
+            client.setEndpoint("http://eucalyptus:8773/services/CloudWatch")
             client
         })
     }
@@ -100,7 +100,7 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
         final List<MetricAlarm> alarms = result.metricAlarms
 
         // Fix cache to update found alarms and remove missing alarms
-        caches.allAlarms.by(userContext.region).putAllAndRemoveMissing(alarmNames, alarms)
+        //caches.allAlarms.by(userContext.region).putAllAndRemoveMissing(alarmNames, alarms)
 
         alarms
     }

@@ -60,13 +60,12 @@ class AwsClientService implements InitializingBean {
                 AmazonAutoScaling: concrete(AmazonAutoScalingClient, MockAmazonAutoScalingClient),
                 AmazonCloudWatch: concrete(AmazonCloudWatchClient, MockAmazonCloudWatchClient),
                 AmazonEC2: concrete(AmazonEC2Client, MockAmazonEC2Client),
-                AmazonElasticLoadBalancing: concrete(AmazonElasticLoadBalancingClient,
-                        MockAmazonElasticLoadBalancingClient),
-                AmazonRDS: concrete(AmazonRDSClient, MockAmazonRDSClient),
+                AmazonElasticLoadBalancing: concrete(AmazonElasticLoadBalancingClient,MockAmazonElasticLoadBalancingClient),
+                AmazonRDS: concrete(/*AmazonRDSClient*/MockAmazonRDSClient, MockAmazonRDSClient),
                 AmazonS3: concrete(AmazonS3Client, MockAmazonS3Client),
-                AmazonSimpleDB: concrete(AmazonSimpleDBClient, MockAmazonSimpleDBClient),
-                AmazonSNS: concrete(AmazonSNSClient, MockAmazonSnsClient),
-                AmazonSQS: concrete(AmazonSQSClient, MockAmazonSqsClient)
+                AmazonSimpleDB: concrete(/*AmazonSimpleDBClient*/MockAmazonSimpleDBClient, MockAmazonSimpleDBClient),
+                AmazonSNS: concrete(/*AmazonSNSClient*/MockAmazonSnsClient, MockAmazonSnsClient),
+                AmazonSQS: concrete(/*AmazonSQSClient*/MockAmazonSqsClient, MockAmazonSqsClient)
         ]
         clientConfiguration = new ClientConfiguration()
         clientConfiguration.proxyHost = configService.proxyHost

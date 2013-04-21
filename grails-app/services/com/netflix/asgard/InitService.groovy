@@ -78,6 +78,7 @@ class InitService implements ApplicationContextAware {
      */
     boolean cachesFilled() {
         Collection<Fillable> fillableCaches = caches.properties*.value.findAll { it instanceof Fillable }
-        !fillableCaches.find { !it.filled }
+        !fillableCaches.findAll { !it.filled; }.each{ println it.name }
+        !fillableCaches.find { !it.filled; }
     }
 }
