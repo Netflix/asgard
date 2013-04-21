@@ -121,7 +121,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     void afterPropertiesSet() {
         awsClient = awsClient ?: new MultiRegionAwsClient<AmazonEC2>({ Region region ->
             AmazonEC2 client = awsClientService.create(AmazonEC2)
-            client.setEndpoint("http://10.111.1.67:8773/services/Eucalyptus/")
+            client.setEndpoint("http://eucalyptus:8773/services/Eucalyptus/")
             client
         })
         accounts = configService.awsAccounts

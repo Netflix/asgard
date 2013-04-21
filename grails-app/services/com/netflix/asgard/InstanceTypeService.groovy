@@ -257,7 +257,7 @@ class InstanceTypeService implements CacheInitializer {
                       storage: '10 GB of instance storage')
 
         } else {
-            throw new Exception("Unexpected format of HTML on ${instanceTypesUrl}")
+//            throw new Exception("Unexpected format of HTML on ${instanceTypesUrl}")
         }
         hardwareProfiles
     }

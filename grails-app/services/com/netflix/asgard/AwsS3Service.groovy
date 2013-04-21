@@ -37,7 +37,7 @@ class AwsS3Service implements InitializingBean {
             AmazonS3 client = awsClientService.create(AmazonS3)
             // Unconventional S3 endpoints. http://docs.amazonwebservices.com/general/latest/gr/index.html?rande.html
 //            if (region != Region.US_EAST_1) { client.setEndpoint("s3-${region}.amazonaws.com") }
-            client.setEndpoint( "http://10.111.1.67:8773/services/Walrus" )
+            client.setEndpoint( "http://eucalyptus:8773/services/Walrus" )
             client
         })
     }

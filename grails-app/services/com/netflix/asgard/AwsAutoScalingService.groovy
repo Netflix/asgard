@@ -121,7 +121,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     void afterPropertiesSet() {
         awsClient = new MultiRegionAwsClient<AmazonAutoScaling>({ Region region ->
             AmazonAutoScaling client = awsClientService.create(AmazonAutoScaling)
-            client.setEndpoint("http://10.111.1.67:8773/services/AutoScaling")
+            client.setEndpoint("http://eucalyptus:8773/services/AutoScaling")
             client
         })
     }
