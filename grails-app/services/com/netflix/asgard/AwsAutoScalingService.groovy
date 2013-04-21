@@ -132,12 +132,11 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         caches.allClusters.ensureSetUp(
                 { Region region -> buildClusters(region, caches.allAutoScalingGroups.by(region).list()) }, {},
                 { Region region ->
-//                    boolean awaitingLoadBalancers = caches.allLoadBalancers.by(region).isDoingFirstFill()
+                    boolean awaitingLoadBalancers = caches.allLoadBalancers.by(region).isDoingFirstFill()
                     boolean awaitingAppInstances = caches.allApplicationInstances.by(region).isDoingFirstFill()
                     boolean awaitingImages = caches.allImages.by(region).isDoingFirstFill()
                     boolean awaitingEc2Instances = caches.allInstances.by(region).isDoingFirstFill()
-                    !awaitingAppInstances && !awaitingImages && !awaitingEc2Instances
-//                    !awaitingLoadBalancers && !awaitingAppInstances && !awaitingImages && !awaitingEc2Instances
+                    !awaitingLoadBalancers && !awaitingAppInstances && !awaitingImages && !awaitingEc2Instances
                 }
         )
         caches.allAutoScalingGroups.ensureSetUp({ Region region -> retrieveAutoScalingGroups(region) },
@@ -146,12 +145,12 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         caches.allScalingPolicies.ensureSetUp({ Region region -> retrieveScalingPolicies(region) })
         caches.allTerminationPolicyTypes.ensureSetUp({ Region region -> retrieveTerminationPolicyTypes() })
         caches.allScheduledActions.ensureSetUp({ Region region -> retrieveScheduledActions(region) })
-//        caches.allSignificantStackInstanceHealthChecks.ensureSetUp(
-//                { Region region -> retrieveInstanceHealthChecks(region) }, {},
-//                { Region region ->
-//                    caches.allApplicationInstances.by(region).filled && caches.allAutoScalingGroups.by(region).filled
-//                }
-//        )
+        caches.allSignificantStackInstanceHealthChecks.ensureSetUp(
+                { Region region -> retrieveInstanceHealthChecks(region) }, {},
+                { Region region ->
+                    caches.allApplicationInstances.by(region).filled && caches.allAutoScalingGroups.by(region).filled
+                }
+        )
     }
 
     // Clusters
