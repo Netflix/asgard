@@ -133,10 +133,10 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 { Region region -> buildClusters(region, caches.allAutoScalingGroups.by(region).list()) }, {},
                 { Region region ->
 //                    boolean awaitingLoadBalancers = caches.allLoadBalancers.by(region).isDoingFirstFill()
-//                    boolean awaitingAppInstances = caches.allApplicationInstances.by(region).isDoingFirstFill()
+                    boolean awaitingAppInstances = caches.allApplicationInstances.by(region).isDoingFirstFill()
                     boolean awaitingImages = caches.allImages.by(region).isDoingFirstFill()
                     boolean awaitingEc2Instances = caches.allInstances.by(region).isDoingFirstFill()
-                    !awaitingImages && !awaitingEc2Instances
+                    !awaitingAppInstances && !awaitingImages && !awaitingEc2Instances
 //                    !awaitingLoadBalancers && !awaitingAppInstances && !awaitingImages && !awaitingEc2Instances
                 }
         )
