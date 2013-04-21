@@ -132,7 +132,7 @@ cloud {
 
     throttleMillis = 400
 
-    // TODO: Delete these instance type hacks as soon as m3.xlarge, m3.2xlarge are in the AWS Java SDK enum instead
+    // TODO: Delete these instance type hacks when they are in the AWS Java SDK enum instead
     customInstanceTypes = [
             new InstanceTypeData(linuxOnDemandPrice: 0.1, hardwareProfile:
                     new HardwareProfile(instanceType: 'm1.small', architecture: '64-bit',

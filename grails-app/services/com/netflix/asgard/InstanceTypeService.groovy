@@ -15,10 +15,8 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.InstanceType
 import com.google.common.collect.ArrayTable
-import com.google.common.collect.ImmutableMap
 import com.google.common.collect.Table
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.mock.Mocks
@@ -47,7 +45,6 @@ class InstanceTypeService implements CacheInitializer {
 
     final BigDecimal lowPrioritySpotPriceFactor = 1.0
     final BigDecimal highPrioritySpotPriceFactor = 1.04
-    final Map<String, String> imageArchToInstanceTypeArch = ImmutableMap.copyOf([x86_64: '64-bit', i386: '32-bit'])
 
     def grailsApplication
     def awsEc2Service
@@ -80,12 +77,6 @@ class InstanceTypeService implements CacheInitializer {
     BigDecimal calculateUrgentLinuxSpotBid(UserContext userContext, String instanceTypeName) {
         InstanceTypeData instanceType = getInstanceType(userContext, instanceTypeName)
         instanceType.linuxOnDemandPrice * highPrioritySpotPriceFactor
-    }
-
-    Collection<InstanceTypeData> findRelevantInstanceTypesForImage(UserContext userContext, Image image) {
-        Collection<InstanceTypeData> instanceTypes = getInstanceTypes(userContext)
-        String instanceTypeArch = imageArchToInstanceTypeArch[image.architecture]
-        instanceTypes.findAll { it.hardwareProfile.architecture.contains(instanceTypeArch) }
     }
 
     InstanceTypeData getInstanceType(UserContext userContext, String instanceTypeName) {
@@ -127,45 +118,59 @@ class InstanceTypeService implements CacheInitializer {
     }
 
     private List<InstanceTypeData> buildInstanceTypes(Region region) {
+
+        Map<String, InstanceTypeData> namesToInstanceTypeDatas = [:]
+        Set<InstanceType> enumInstanceTypes = InstanceType.values() as Set
+
+        // Compile standard instance types, first without optional hardware and pricing metadata.
+        for (InstanceType instanceType in enumInstanceTypes) {
+            String name = instanceType.toString()
+            namesToInstanceTypeDatas[name] = new InstanceTypeData(
+                    hardwareProfile: new HardwareProfile(instanceType: name)
+            )
+        }
+
+        // Add any custom instance types that are still missing from the InstanceType enum.
+        Collection<InstanceTypeData> customInstanceTypes = configService.customInstanceTypes
+        for (InstanceTypeData customInstanceTypeData in customInstanceTypes) {
+            String name = customInstanceTypeData.name
+            namesToInstanceTypeDatas[name] = customInstanceTypeData
+        }
+
+        // If hardware metadata is available, replace bare-bones objects in map of namesToInstanceTypeDatas.
         try {
             Collection<HardwareProfile> hardwareProfiles = getHardwareProfiles()
             RegionalInstancePrices onDemandPrices = getOnDemandPrices(region)
             RegionalInstancePrices reservedPrices = getReservedPrices(region)
             RegionalInstancePrices spotPrices = getSpotPrices(region)
 
-            Set<InstanceType> awsInstanceTypes = InstanceType.values().findAll{ it.name().startsWith("m") } as Set
-            awsInstanceTypes.each{ println it } 
-            List<InstanceTypeData> instanceTypes = awsInstanceTypes.findResults { InstanceType instanceType ->
-                HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == instanceType.toString() }
-                if (!hardwareProfile) {
+            for (InstanceType instanceType in enumInstanceTypes) {
+                String name = instanceType.toString()
+                HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == name }
+                if (hardwareProfile) {
+                    InstanceTypeData instanceTypeData = new InstanceTypeData(
+                            hardwareProfile: hardwareProfile,
+                            linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
+                            linuxReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.LINUX_UNIX),
+                            linuxSpotPrice: spotPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
+                            windowsOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.WINDOWS),
+                            windowsReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.WINDOWS),
+                            windowsSpotPrice: spotPrices.get(instanceType, InstanceProductType.WINDOWS)
+                    )
+                    namesToInstanceTypeDatas[name] = instanceTypeData
+                } else {
                     log.info "Unable to resolve ${instanceType}"
-                    return null
                 }
-                new InstanceTypeData(
-                        hardwareProfile: hardwareProfile,
-                        linuxOnDemandPrice: onDemandPrices?.get(instanceType, InstanceProductType.LINUX_UNIX),
-                        linuxReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.LINUX_UNIX),
-                        linuxSpotPrice: spotPrices?.get(instanceType, InstanceProductType.LINUX_UNIX),
-                        windowsOnDemandPrice: onDemandPrices?.get(instanceType, InstanceProductType.WINDOWS),
-                        windowsReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.WINDOWS),
-                        windowsSpotPrice: spotPrices?.get(instanceType, InstanceProductType.WINDOWS)
-                )
             }
-            instanceTypes.sort { a, b -> a.instanceType <=> b.instanceType }
-            // Only include types that have prices listed for this region
-            Collection<InstanceTypeData> relevantInstanceTypes = instanceTypes.findAll { it.linuxOnDemandPrice }
-            Collection<String> foundInstanceTypeNames = relevantInstanceTypes*.name
-
-            // Add any custom instance types that are still missing from the InstanceType enum.
-            List<InstanceTypeData> customInstanceTypes = configService.customInstanceTypes.findAll {
-                !(it.name in foundInstanceTypeNames)
-            }
-            return relevantInstanceTypes + customInstanceTypes
         } catch (Exception e) {
             log.error(e)
             emailerService.sendExceptionEmail('Error parsing Amazon instance data', e)
-            return []
         }
+
+        // Sort based on Linux price if possible. Otherwise sort by name.
+        List<InstanceTypeData> instanceTypeDatas = namesToInstanceTypeDatas.values() as List
+        instanceTypeDatas.sort { a, b -> a.name <=> b.name }
+        instanceTypeDatas.sort { a, b -> a.linuxOnDemandPrice <=> b.linuxOnDemandPrice }
     }
 
     private Document fetchLocalInstanceTypesDocument() {

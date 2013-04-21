@@ -15,9 +15,10 @@
  */
 package com.netflix.asgard
 
-class ValidationException extends RuntimeException implements NonAlertable {
+import groovy.transform.Canonical
 
-    ValidationException(String s) {
-        super(s)
-    }
+@Canonical
+class RestResponse {
+    final int statusCode
+    final String content
 }

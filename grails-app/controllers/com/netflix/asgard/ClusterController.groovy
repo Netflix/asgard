@@ -257,6 +257,8 @@ ${lastGroup.loadBalancerNames}"""
 ${loadBalancerNames}"""
             log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers from last \
 Group: ${lastGroup.loadBalancerNames}"""
+            boolean ebsOptimized = params.containsKey('ebsOptimized') ? params.ebsOptimized?.toBoolean() :
+                lastLaunchConfig.ebsOptimized
             if (params.noOptionalDefaults != 'true') {
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
@@ -296,7 +298,8 @@ Group: ${loadBalancerNames}"""
                     scalingPolicies: newScalingPolicies,
                     scheduledActions: newScheduledActions,
                     vpcZoneIdentifier: vpcZoneIdentifier,
-                    spotPrice: spotPrice
+                    spotPrice: spotPrice,
+                    ebsOptimized: ebsOptimized
             )
             def operation = pushService.startGroupCreate(options)
             flash.message = "${operation.task.name} has been started."

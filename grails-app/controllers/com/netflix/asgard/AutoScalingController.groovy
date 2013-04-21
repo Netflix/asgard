@@ -334,9 +334,11 @@ class AutoScalingController {
             String kernelId = params.kernelId ?: null
             String ramdiskId = params.ramdiskId ?: null
             String iamInstanceProfile = params.iamInstanceProfile ?: configService.defaultIamRole
+            boolean ebsOptimized = params.ebsOptimized?.toBoolean()
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(imageId).
                     withKernelId(kernelId).withInstanceType(instanceType).withKeyName(keyName).withRamdiskId(ramdiskId).
-                    withSecurityGroups(securityGroups).withIamInstanceProfile(iamInstanceProfile)
+                    withSecurityGroups(securityGroups).withIamInstanceProfile(iamInstanceProfile).
+                    withEbsOptimized(ebsOptimized)
             if (params.pricing == InstancePriceType.SPOT.name()) {
                 launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instanceType)
             }

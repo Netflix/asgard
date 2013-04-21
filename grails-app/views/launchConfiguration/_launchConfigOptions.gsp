@@ -28,7 +28,8 @@
       <label for="imageId">AMI Image ID:</label>
     </td>
     <td>
-      <select id="imageId" name="imageId">
+      <select id="imageId" name="imageId" data-placeholder="-Image Id-">
+        <option value=""></option>
         <g:each var="im" in="${images}">
           <option value="${im.imageId}" ${params.imageId == im.imageId || im.imageId == image ? "selected" : ""}>${im.imageLocation} | ${im.imageId}</option>
         </g:each>
@@ -39,18 +40,7 @@
       </g:if>
     </td>
   </tr>
-  <tr class="prop">
-    <td class="name">
-      <label for="instanceType"><g:link controller="instanceType" action="list">Instance Type:</g:link></label>
-    </td>
-    <td>
-      <select id="instanceType" name="instanceType">
-        <g:each var="t" in="${instanceTypes}">
-          <option value="${t.name}" ${t.name == params.instanceType || t.name == instanceType ? 'selected' : ''}>${t.name} ${t.monthlyLinuxOnDemandPrice ? t.monthlyLinuxOnDemandPrice + '/mo' : ''}</option>
-        </g:each>
-      </select>
-    </td>
-  </tr>
+  <g:render template="/launchConfiguration/instanceTypeSelect" model="[rowClass: 'advanced']"/>
   <tr class="prop advanced">
     <td class="name">
       <label for="keyName">SSH Key:</label>

@@ -1,8 +1,5 @@
-import com.netflix.asgard.FastProperty
-import grails.converters.JSON
-
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2013 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +13,19 @@ import grails.converters.JSON
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class BootStrap {
+package com.netflix.asgard;
 
-    def cacheLoadStartService
-    def configService
-    def initService
-    def monkeyPatcherService
+/**
+ * Exception to throw when a service rejects a set of inputs due to violation of business rules.
+ */
+public class ValidationException extends RuntimeException implements NonAlertable {
 
-    def init = { servletContext ->
-        if (configService.appConfigured) { // Only start warming the caches if Asgard has been configured
-            initService.initializeApplication()
-        }
-
-        JSON.registerObjectMarshaller(FastProperty) {
-            it.properties.subMap(FastProperty.ALL_ATTRIBUTES)
-        }
+    /**
+     * Constructor with error message.
+     *
+     * @param message the message to show the user who violated a rule
+     */
+    public ValidationException(String message) {
+        super(message);
     }
 }

@@ -37,10 +37,10 @@ import com.amazonaws.services.rds.model.DBInstance
 import com.amazonaws.services.rds.model.DBSecurityGroup
 import com.amazonaws.services.rds.model.DBSnapshot
 import com.netflix.asgard.model.ApplicationInstance
-import com.netflix.asgard.model.ApplicationMetrics
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.InstanceTypeData
+import com.netflix.asgard.model.MetricId
 import com.netflix.asgard.model.MultiRegionInstancePrices
 import com.netflix.asgard.model.SimpleQueue
 import com.netflix.asgard.model.TopicData
@@ -53,7 +53,7 @@ import com.netflix.asgard.push.Cluster
 class Caches {
 
     final CachedMap<AppRegistration> allApplications
-    final CachedMap<ApplicationMetrics> allApplicationMetrics
+    final CachedMap<MetricId> allCustomMetrics
     final CachedMap<HardwareProfile> allHardwareProfiles
     final CachedMap<String> allTerminationPolicyTypes
 
@@ -124,7 +124,7 @@ class Caches {
         allSignificantStackInstanceHealthChecks = cachedMapBuilder.of(EntityType.instanceHealth, 300).
                 buildMultiRegionCachedMap()
         allApplications = cachedMapBuilder.of(EntityType.application, 120).buildCachedMap()
-        allApplicationMetrics = cachedMapBuilder.of(EntityType.applicationMetric, 120).buildCachedMap()
+        allCustomMetrics = cachedMapBuilder.of(EntityType.metric, 120).buildCachedMap()
 
         // Use one thread for all instance type and pricing caches. None of these need updating more than once an hour.
         allHardwareProfiles = cachedMapBuilder.of(EntityType.hardwareProfile, 3600).buildCachedMap()

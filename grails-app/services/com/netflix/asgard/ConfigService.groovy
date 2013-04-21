@@ -39,6 +39,13 @@ class ConfigService {
     }
 
     /**
+     * @return custom (non AWS) metric namespaces mapped to the dimensions they support
+     */
+    Map<String, Collection<String>> customMetricNamespacesToDimensions() {
+        grailsApplication.config.cloud?.customMetricNamespacesToDimensions ?: [:]
+    }
+
+    /**
      * Gets the Amazon Web Services account number for the current environment. This must be the first account number
      * string in the awsAccounts list in Config.groovy.
      *
@@ -531,6 +538,13 @@ class ConfigService {
     }
 
     /**
+     * @return URL with info about configuring Fast Properties
+     */
+    String getFastPropertyInfoUrl() {
+        grailsApplication.config.platform?.fastPropertyInfoUrl ?: ''
+    }
+
+    /**
      * @return URL for Cloud Ready REST calls.
      */
     String getCloudReadyUrl() {
@@ -563,5 +577,35 @@ class ConfigService {
      */
     Map<String, String> getSpecialCaseRegions() {
         grailsApplication.config.cloud?.specialCaseRegions ?: [:]
+    }
+
+    /**
+     * @return A Closure that determines if EBS volumes are needed for launch configurations based on instance type.
+     */
+    Closure<Boolean> getInstanceTypeNeedsEbsVolumes() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.instanceTypeNeeds ?: { String instanceType ->
+            instanceType.startsWith('m3.')
+        }
+    }
+
+    /**
+     * @return The number of EBS volumes added to launch configurations for specific instance types.
+     */
+    int getCountOfEbsVolumesAddedToLaunchConfigs() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.count ?: 4
+    }
+
+    /**
+     * @return The size of EBS volumes added to launch configurations for specific instance types.
+     */
+    int getSizeOfEbsVolumesAddedToLaunchConfigs() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.size ?: 125
+    }
+
+    /**
+     * @return The prefix of the device name for EBS volumes added to launch configurations for specific instance types.
+     */
+    String getPrefixOfEbsVolumesAddedToLaunchConfigs() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.prefix ?: 'sdb'
     }
 }

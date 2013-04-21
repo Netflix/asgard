@@ -134,7 +134,7 @@ class ApplicationController {
                     groups.collect { Relationships.clusterFromGroupName(it.autoScalingGroupName) }.unique()
             request.alertingServiceConfigUrl = configService.alertingServiceConfigUrl
             SecurityGroup appSecurityGroup = awsEc2Service.getSecurityGroup(userContext, name)
-            boolean isChaosMonkeyActive = cloudReadyService.isChaosMonkeyActive()
+            boolean isChaosMonkeyActive = cloudReadyService.isChaosMonkeyActive(userContext.region)
             def details = [
                     app: app,
                     strictName: Relationships.checkStrictName(app.name),
