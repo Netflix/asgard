@@ -58,9 +58,7 @@ class AwsClientService implements InitializingBean {
 
     void afterPropertiesSet() {
         interfaceSimpleNamesToAwsClientClasses = [
-//                AmazonAutoScaling: concrete(/*AmazonAutoScalingClient*/MockAmazonAutoScalingClient, MockAmazonAutoScalingClient),
                 AmazonAutoScaling: concrete(AmazonAutoScalingClient, MockAmazonAutoScalingClient),
-//                AmazonCloudWatch: concrete(/*AmazonCloudWatchClient*/MockAmazonCloudWatchClient, MockAmazonCloudWatchClient),
                 AmazonCloudWatch: concrete(AmazonCloudWatchClient, MockAmazonCloudWatchClient),
                 AmazonEC2: concrete(AmazonEC2Client, MockAmazonEC2Client),
 //                AmazonElasticLoadBalancing: concrete(/*AmazonElasticLoadBalancingClient*/MockAmazonElasticLoadBalancingClient,MockAmazonElasticLoadBalancingClient),

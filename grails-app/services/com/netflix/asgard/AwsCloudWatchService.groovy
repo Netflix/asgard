@@ -120,7 +120,7 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
         final List<MetricAlarm> alarms = result.metricAlarms
 
         // Fix cache to update found alarms and remove missing alarms
-        //caches.allAlarms.by(userContext.region).putAllAndRemoveMissing(alarmNames, alarms)
+        caches.allAlarms.by(userContext.region).putAllAndRemoveMissing(alarmNames, alarms)
 
         alarms
     }
