@@ -121,7 +121,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     void afterPropertiesSet() {
         awsClient = awsClient ?: new MultiRegionAwsClient<AmazonEC2>({ Region region ->
             AmazonEC2 client = awsClientService.create(AmazonEC2)
-            client.setEndpoint("ec2.${region}.amazonaws.com")
+            client.setEndpoint("http://10.111.1.67:8773/services/Eucalyptus/")
             client
         })
         accounts = configService.awsAccounts
@@ -187,7 +187,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     private Collection<Subnet> retrieveSubnets(Region region) {
-        awsClient.by(region).describeSubnets().subnets
+//        awsClient.by(region).describeSubnets().subnets
     }
 
     /**
@@ -201,7 +201,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     private Collection<Vpc> retrieveVpcs(Region region) {
-        awsClient.by(region).describeVpcs().vpcs
+//        awsClient.by(region).describeVpcs().vpcs
     }
 
     /**
@@ -638,13 +638,13 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     // TODO: Delete this method after rewriting AwsResultsRetrieverSpec unit test to use some other use case
     DescribeSpotPriceHistoryResult describeSpotPriceHistory(Region region,
             DescribeSpotPriceHistoryRequest describeSpotPriceHistoryRequest) {
-        awsClient.by(region).describeSpotPriceHistory(describeSpotPriceHistoryRequest)
+//        awsClient.by(region).describeSpotPriceHistory(describeSpotPriceHistoryRequest)
     }
 
     // Spot Instance Requests
 
     List<SpotInstanceRequest> retrieveSpotInstanceRequests(Region region) {
-        awsClient.by(region).describeSpotInstanceRequests().spotInstanceRequests
+//        awsClient.by(region).describeSpotInstanceRequests().spotInstanceRequests
     }
 
     DescribeSpotInstanceRequestsResult describeSpotInstanceRequests(UserContext userContext,
@@ -873,7 +873,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     // Reservations
 
     private List<ReservedInstances> retrieveReservations(Region region) {
-        awsClient.by(region).describeReservedInstances().reservedInstances
+//        awsClient.by(region).describeReservedInstances().reservedInstances
     }
 
     /**

@@ -20,53 +20,58 @@ package com.netflix.asgard
  */
 enum Region {
 
+    EUCALYPTUS('PARTI',
+            'eucalyptus',
+            'eucalyptus.png',
+            'Santa Barbara'
+    ),
     US_EAST_1('us-east-1',
             'us-east',
             'us-east-1.png',
             'Virginia'
     ),
-
-    US_WEST_1('us-west-1',
-            'us-west',
-            'us-west-1.png',
-            'California'
-    ),
-
-    US_WEST_2('us-west-2',
-            'us-west-2',
-            'us-west-2.png',
-            'Oregon'
-    ),
-
-    EU_WEST_1('eu-west-1',
-            'eu-ireland',
-            'eu-west-1.png',
-            'Ireland'
-    ),
-
-    AP_NORTHEAST_1('ap-northeast-1',
-            'apac-tokyo',
-            'ap-northeast-1.png',
-            'Tokyo'
-    ),
-
-    AP_SOUTHEAST_1('ap-southeast-1',
-            'apac-sin',
-            'ap-southeast-1.png',
-            'Singapore'
-    ),
-
-    AP_SOUTHEAST_2('ap-southeast-2',
-            'apac-syd',
-            'ap-southeast-2.png',
-            'Sydney'
-    ),
-
-    SA_EAST_1('sa-east-1',
-            'sa-east-1',
-            'sa-east-1.png',
-            'Sao Paulo'
-    )
+//
+//    US_WEST_1('us-west-1',
+//            'us-west',
+//            'us-west-1.png',
+//            'California'
+//    ),
+//
+//    US_WEST_2('us-west-2',
+//            'us-west-2',
+//            'us-west-2.png',
+//            'Oregon'
+//    ),
+//
+//    EU_WEST_1('eu-west-1',
+//            'eu-ireland',
+//            'eu-west-1.png',
+//            'Ireland'
+//    ),
+//
+//    AP_NORTHEAST_1('ap-northeast-1',
+//            'apac-tokyo',
+//            'ap-northeast-1.png',
+//            'Tokyo'
+//    ),
+//
+//    AP_SOUTHEAST_1('ap-southeast-1',
+//            'apac-sin',
+//            'ap-southeast-1.png',
+//            'Singapore'
+//    ),
+//
+//    AP_SOUTHEAST_2('ap-southeast-2',
+//            'apac-syd',
+//            'ap-southeast-2.png',
+//            'Sydney'
+//    ),
+//
+//    SA_EAST_1('sa-east-1',
+//            'sa-east-1',
+//            'sa-east-1.png',
+//            'Sao Paulo'
+//    )
 
     String code
     String pricingJsonCode
@@ -116,7 +121,7 @@ enum Region {
         }
         []
     }
-    static Region defaultRegion() { Region.US_EAST_1 }
+    static Region defaultRegion() { Region.EUCALYPTUS }
 
     String getDescription() { "$code ($location)" }
 

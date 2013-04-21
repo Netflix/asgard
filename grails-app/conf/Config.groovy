@@ -32,7 +32,7 @@ log4j = {
     }
 
     root {
-        info 'asgardrolling'
+        debug 'asgardrolling'
     }
 
     // Set level for all application artifacts
@@ -68,7 +68,7 @@ log4j = {
         development {
             console name: 'stdout', layout: pattern(conversionPattern: '[%d{ISO8601}] %c{4}    %m%n')
             root {
-                info 'stdout'
+                debug 'stdout'
             }
         }
     }
@@ -134,20 +134,44 @@ cloud {
 
     // TODO: Delete these instance type hacks as soon as m3.xlarge, m3.2xlarge are in the AWS Java SDK enum instead
     customInstanceTypes = [
-            new InstanceTypeData(linuxOnDemandPrice: 0.580, hardwareProfile:
-                    new HardwareProfile(instanceType: 'm3.xlarge', architecture: '64-bit',
-                            cpu: '13 EC2 Compute Units (4 virtual cores with 3.25 EC2 Compute Units each)',
-                            description: 'M3 Extra Large Instance',
-                            ioPerformance: 'Moderate', memory: '15 GiB',
-                            storage: 'EBS storage only')),
-            new InstanceTypeData(linuxOnDemandPrice: 1.160, hardwareProfile:
-                    new HardwareProfile(instanceType: 'm3.2xlarge', architecture: '64-bit',
-                            cpu: '26 EC2 Compute Units (8 virtual cores with 3.25 EC2 Compute Units each)',
-                            description: 'M3 Double Extra Large Instance',
-                            ioPerformance: 'High', memory: '30 GiB',
-                            storage: 'EBS storage only')),
+            new InstanceTypeData(linuxOnDemandPrice: 0.1, hardwareProfile:
+                    new HardwareProfile(instanceType: 'm1.small', architecture: '64-bit',
+                            cpu: '1 EC2 Compute Units (1 virtual cores with 1 EC2 Compute Units each)',
+                            description: 'M1 Small Instance',
+                            ioPerformance: 'Poor', memory: '0.25 GiB',
+                            storage: '5 GB of instance storage')),
+            new InstanceTypeData(linuxOnDemandPrice: 0.2, hardwareProfile:
+                    new HardwareProfile(instanceType: 'm1.medium', architecture: '64-bit',
+                            cpu: '1 EC2 Compute Units (1 virtual cores with 1 EC2 Compute Units each)',
+                            description: 'M1 Medium Instance',
+                            ioPerformance: 'Poor', memory: '0.5 GiB',
+                            storage: '10 GB of instance storage')),
+            new InstanceTypeData(linuxOnDemandPrice: 0.3, hardwareProfile:
+                    new HardwareProfile(instanceType: 'm1.large', architecture: '64-bit',
+                            cpu: '2 EC2 Compute Units (2 virtual cores with 1 EC2 Compute Units each)',
+                            description: 'M1 Large Instance',
+                            ioPerformance: 'Poor', memory: '0.5 GiB',
+                            storage: '10 GB of instance storage')),
+            new InstanceTypeData(linuxOnDemandPrice: 0.5, hardwareProfile:
+                    new HardwareProfile(instanceType: 'm1.xlarge', architecture: '64-bit',
+                            cpu: '2 EC2 Compute Units (2 virtual cores with 1 EC2 Compute Units each)',
+                            description: 'M1 Xtra-Large Instance',
+                            ioPerformance: 'Poor', memory: '1 GiB',
+                            storage: '10 GB of instance storage')),
+//            new InstanceTypeData(linuxOnDemandPrice: 0.580, hardwareProfile:
+//                    new HardwareProfile(instanceType: 'm3.xlarge', architecture: '64-bit',
+//                            cpu: '13 EC2 Compute Units (4 virtual cores with 3.25 EC2 Compute Units each)',
+//                            description: 'M3 Extra Large Instance',
+//                            ioPerformance: 'Moderate', memory: '15 GiB',
+//                            storage: 'EBS storage only')),
+//            new InstanceTypeData(linuxOnDemandPrice: 1.160, hardwareProfile:
+//                    new HardwareProfile(instanceType: 'm3.2xlarge', architecture: '64-bit',
+//                            cpu: '26 EC2 Compute Units (8 virtual cores with 3.25 EC2 Compute Units each)',
+//                            description: 'M3 Double Extra Large Instance',
+//                            ioPerformance: 'High', memory: '30 GiB',
+//                            storage: 'EBS storage only')),
     ]
-    spot.infoUrl = 'http://aws.amazon.com/ec2/spot-instances/'
+//    spot.infoUrl = 'http://aws.amazon.com/ec2/spot-instances/'
 }
 
 healthCheck {

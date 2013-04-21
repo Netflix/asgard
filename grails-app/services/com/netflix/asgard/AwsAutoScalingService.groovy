@@ -121,7 +121,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     void afterPropertiesSet() {
         awsClient = new MultiRegionAwsClient<AmazonAutoScaling>({ Region region ->
             AmazonAutoScaling client = awsClientService.create(AmazonAutoScaling)
-            client.setEndpoint("autoscaling.${region}.amazonaws.com")
+            client.setEndpoint("http://10.111.1.67:8773/services/AutoScaling")
             client
         })
     }
@@ -130,26 +130,26 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         // Cluster cache has no timer. It gets triggered by the Auto Scaling Group cache callback closure.
         caches.allClusters.ensureSetUp(
                 { Region region -> buildClusters(region, caches.allAutoScalingGroups.by(region).list()) }, {},
-                { Region region ->
-                    boolean awaitingLoadBalancers = caches.allLoadBalancers.by(region).isDoingFirstFill()
-                    boolean awaitingAppInstances = caches.allApplicationInstances.by(region).isDoingFirstFill()
-                    boolean awaitingImages = caches.allImages.by(region).isDoingFirstFill()
-                    boolean awaitingEc2Instances = caches.allInstances.by(region).isDoingFirstFill()
-                    !awaitingLoadBalancers && !awaitingAppInstances && !awaitingImages && !awaitingEc2Instances
-                }
+//                { Region region ->
+//                    boolean awaitingLoadBalancers = caches.allLoadBalancers.by(region).isDoingFirstFill()
+//                    boolean awaitingAppInstances = caches.allApplicationInstances.by(region).isDoingFirstFill()
+//                    boolean awaitingImages = caches.allImages.by(region).isDoingFirstFill()
+//                    boolean awaitingEc2Instances = caches.allInstances.by(region).isDoingFirstFill()
+//                    !awaitingLoadBalancers && !awaitingAppInstances && !awaitingImages && !awaitingEc2Instances
+//                }
         )
         caches.allAutoScalingGroups.ensureSetUp({ Region region -> retrieveAutoScalingGroups(region) },
                 { Region region -> caches.allClusters.by(region).fill() })
         caches.allLaunchConfigurations.ensureSetUp({ Region region -> retrieveLaunchConfigurations(region) })
         caches.allScalingPolicies.ensureSetUp({ Region region -> retrieveScalingPolicies(region) })
         caches.allTerminationPolicyTypes.ensureSetUp({ Region region -> retrieveTerminationPolicyTypes() })
-        caches.allScheduledActions.ensureSetUp({ Region region -> retrieveScheduledActions(region) })
-        caches.allSignificantStackInstanceHealthChecks.ensureSetUp(
-                { Region region -> retrieveInstanceHealthChecks(region) }, {},
-                { Region region ->
-                    caches.allApplicationInstances.by(region).filled && caches.allAutoScalingGroups.by(region).filled
-                }
-        )
+//        caches.allScheduledActions.ensureSetUp({ Region region -> retrieveScheduledActions(region) })
+//        caches.allSignificantStackInstanceHealthChecks.ensureSetUp(
+//                { Region region -> retrieveInstanceHealthChecks(region) }, {},
+//                { Region region ->
+//                    caches.allApplicationInstances.by(region).filled && caches.allAutoScalingGroups.by(region).filled
+//                }
+//        )
     }
 
     // Clusters

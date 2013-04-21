@@ -93,7 +93,7 @@ class InstanceTypeService implements CacheInitializer {
     }
 
     Collection<InstanceTypeData> getInstanceTypes(UserContext userContext) {
-        caches.allInstanceTypes.by(userContext.region).list().sort { it.linuxOnDemandPrice }
+        caches.allInstanceTypes.by(userContext.region).list() as List//.sort { it.linuxOnDemandPrice }
     }
 
     private Document fetchInstanceTypesDocument() {
@@ -133,7 +133,8 @@ class InstanceTypeService implements CacheInitializer {
             RegionalInstancePrices reservedPrices = getReservedPrices(region)
             RegionalInstancePrices spotPrices = getSpotPrices(region)
 
-            Set<InstanceType> awsInstanceTypes = InstanceType.values() as Set
+            Set<InstanceType> awsInstanceTypes = InstanceType.values().findAll{ it.name().startsWith("m") } as Set
+            awsInstanceTypes.each{ println it } 
             List<InstanceTypeData> instanceTypes = awsInstanceTypes.findResults { InstanceType instanceType ->
                 HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == instanceType.toString() }
                 if (!hardwareProfile) {
@@ -142,12 +143,12 @@ class InstanceTypeService implements CacheInitializer {
                 }
                 new InstanceTypeData(
                         hardwareProfile: hardwareProfile,
-                        linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
+                        linuxOnDemandPrice: onDemandPrices?.get(instanceType, InstanceProductType.LINUX_UNIX),
                         linuxReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.LINUX_UNIX),
-                        linuxSpotPrice: spotPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
-                        windowsOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.WINDOWS),
+                        linuxSpotPrice: spotPrices?.get(instanceType, InstanceProductType.LINUX_UNIX),
+                        windowsOnDemandPrice: onDemandPrices?.get(instanceType, InstanceProductType.WINDOWS),
                         windowsReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.WINDOWS),
-                        windowsSpotPrice: spotPrices.get(instanceType, InstanceProductType.WINDOWS)
+                        windowsSpotPrice: spotPrices?.get(instanceType, InstanceProductType.WINDOWS)
                 )
             }
             instanceTypes.sort { a, b -> a.instanceType <=> b.instanceType }
@@ -234,6 +235,27 @@ class InstanceTypeService implements CacheInitializer {
                     hardwareProfiles << hardwareProfile
                 }
             }
+            hardwareProfiles << new HardwareProfile(instanceType: 'm1.small', architecture: '64-bit',
+                      cpu: '1 EC2 Compute Units (1 virtual cores with 1 EC2 Compute Units each)',
+                      description: 'M1 Small Instance',
+                      ioPerformance: 'Poor', memory: '0.25 GiB',
+                      storage: '5 GB of instance storage')
+            hardwareProfiles << new HardwareProfile(instanceType: 'm1.medium', architecture: '64-bit',
+                      cpu: '1 EC2 Compute Units (1 virtual cores with 1 EC2 Compute Units each)',
+                      description: 'M1 Medium Instance',
+                      ioPerformance: 'Poor', memory: '0.5 GiB',
+                      storage: '10 GB of instance storage')
+            hardwareProfiles << new HardwareProfile(instanceType: 'm1.large', architecture: '64-bit',
+                      cpu: '2 EC2 Compute Units (2 virtual cores with 1 EC2 Compute Units each)',
+                      description: 'M1 Large Instance',
+                      ioPerformance: 'Poor', memory: '0.5 GiB',
+                      storage: '10 GB of instance storage')
+            hardwareProfiles << new HardwareProfile(instanceType: 'm1.xlarge', architecture: '64-bit',
+                      cpu: '2 EC2 Compute Units (2 virtual cores with 1 EC2 Compute Units each)',
+                      description: 'M1 Xtra-Large Instance',
+                      ioPerformance: 'Poor', memory: '1 GiB',
+                      storage: '10 GB of instance storage')
+
         } else {
             throw new Exception("Unexpected format of HTML on ${instanceTypesUrl}")
         }

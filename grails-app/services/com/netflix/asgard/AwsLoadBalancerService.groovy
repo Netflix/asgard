@@ -59,7 +59,7 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
     void afterPropertiesSet() {
         awsClient = awsClient ?: new MultiRegionAwsClient<AmazonElasticLoadBalancing>( { Region region ->
             AmazonElasticLoadBalancing client = awsClientService.create(AmazonElasticLoadBalancing)
-            client.setEndpoint("elasticloadbalancing.${region}.amazonaws.com")
+            client.setEndpoint("http://10.111.1.67:8773/services/LoadBalancing")
             client
         })
     }

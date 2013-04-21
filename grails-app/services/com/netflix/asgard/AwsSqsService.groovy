@@ -58,9 +58,9 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
         try {
             return awsClient.by(region).listQueues(new ListQueuesRequest()).queueUrls.collect { new SimpleQueue(it) }
         } catch (AmazonServiceException ase) {
-            if (ase.errorCode != 'OptInRequired') { // Ignore if SQS is disabled for this account
-                throw ase
-            }
+//            if (ase.errorCode != 'OptInRequired') { // Ignore if SQS is disabled for this account
+//                throw ase
+//            }
             return []
         }
     }
