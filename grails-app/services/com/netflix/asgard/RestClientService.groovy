@@ -220,4 +220,40 @@ class RestClientService implements InitializingBean {
     Closure readStatusCode = { HttpResponse httpResponse ->
         httpResponse.statusLine.statusCode
     }
+
+    /**
+     * Checks an HTTP response code to see if it means "OK".
+     *
+     * @param responseCode the HTTP response code to check
+     * @return true if the code is 200 (OK)
+     */
+    Boolean checkOkayResponseCode(Integer responseCode) {
+        responseCode == 200
+    }
+
+    /**
+     * Checks the HTTP response code for a URL to see if it's 200 (OK), trying up to three times to see if the URL is
+     * generally OK or not.
+     *
+     * @param url the URL to call
+     * @return the response code returned at least once from the URL
+     */
+    Integer getRepeatedResponseCode(String url) {
+        Integer responseCode = getResponseCode(url)
+        if (checkOkayResponseCode(responseCode)) {
+            return responseCode
+        }
+        // First try failed but that might have been a network fluke.
+        // If the next two staggered attempts pass, then assume the host is healthy.
+        Time.sleepCancellably 2000
+        responseCode = getResponseCode(url)
+        if (checkOkayResponseCode(responseCode)) {
+            // First try failed, second try passed. Use the tie-breaker as the final answer.
+            Time.sleepCancellably 2000
+            return getResponseCode(url)
+        }
+        // First two tries both failed. Give up and return the latest failure code.
+        return responseCode
+    }
+
 }

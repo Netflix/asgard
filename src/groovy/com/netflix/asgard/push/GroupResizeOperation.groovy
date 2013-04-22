@@ -50,6 +50,7 @@ class GroupResizeOperation extends AbstractPushOperation {
     def awsEc2Service
     def discoveryService
     def flagService
+    def restClientService
 
     UserContext userContext
     String autoScalingGroupName
@@ -291,7 +292,7 @@ class GroupResizeOperation extends AbstractPushOperation {
         instanceIds.findAll { String id ->
             String healthCheckUrl = getHealthCheckUrl(id)
             if (healthCheckUrl) {
-                Integer responseCode = awsEc2Service.getRepeatedResponseCode(healthCheckUrl)
+                Integer responseCode = restClientService.getRepeatedResponseCode(healthCheckUrl)
                 return responseCode != 200
             }
             // Still waiting for Discovery?
