@@ -119,10 +119,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     private static final int TAG_IMAGE_CHUNK_SIZE = 250
 
     void afterPropertiesSet() {
-        awsClient = awsClient ?: new MultiRegionAwsClient<AmazonEC2>({ Region region ->
-            AmazonEC2 client = awsClientService.create(AmazonEC2)
-            client.setEndpoint("http://eucalyptus:8773/services/Eucalyptus/")
-            client
+        awsClient = new MultiRegionAwsClient<AmazonEC2>({ Region region ->
+            awsClientService.create(AmazonEC2,region)
         })
         accounts = configService.awsAccounts
     }
@@ -161,7 +159,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     // Images
 
     private List<Image> retrieveImages(Region region) {
-        List<String> owners = configService.publicResourceAccounts + configService.awsAccounts
+        List<String> owners = configService.publicResourceAccounts + configService.getAwsAccounts(region)
         DescribeImagesRequest request = new DescribeImagesRequest().withOwners(owners)
         AmazonEC2 awsClientForRegion = awsClient.by(region)
         List<Image> images = awsClientForRegion.describeImages(request).getImages()
@@ -187,7 +185,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     private Collection<Subnet> retrieveSubnets(Region region) {
-//        awsClient.by(region).describeSubnets().subnets
+        awsClient.by(region).describeSubnets().subnets
     }
 
     /**
@@ -201,7 +199,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     private Collection<Vpc> retrieveVpcs(Region region) {
-//        awsClient.by(region).describeVpcs().vpcs
+        awsClient.by(region).describeVpcs().vpcs
     }
 
     /**
@@ -638,13 +636,13 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     // TODO: Delete this method after rewriting AwsResultsRetrieverSpec unit test to use some other use case
     DescribeSpotPriceHistoryResult describeSpotPriceHistory(Region region,
             DescribeSpotPriceHistoryRequest describeSpotPriceHistoryRequest) {
-//        awsClient.by(region).describeSpotPriceHistory(describeSpotPriceHistoryRequest)
+        awsClient.by(region).describeSpotPriceHistory(describeSpotPriceHistoryRequest)
     }
 
     // Spot Instance Requests
 
     List<SpotInstanceRequest> retrieveSpotInstanceRequests(Region region) {
-//        awsClient.by(region).describeSpotInstanceRequests().spotInstanceRequests
+        awsClient.by(region).describeSpotInstanceRequests().spotInstanceRequests
     }
 
     DescribeSpotInstanceRequestsResult describeSpotInstanceRequests(UserContext userContext,
@@ -873,7 +871,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     // Reservations
 
     private List<ReservedInstances> retrieveReservations(Region region) {
-//        awsClient.by(region).describeReservedInstances().reservedInstances
+        awsClient.by(region).describeReservedInstances().reservedInstances
     }
 
     /**

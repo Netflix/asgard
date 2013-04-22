@@ -42,9 +42,7 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
         accountNumber = grailsApplication.config.grails.awsAccounts[0]
 
         awsClient = new MultiRegionAwsClient<AmazonSQS>( { Region region ->
-            AmazonSQS client = awsClientService.create(AmazonSQS)
-            client.setEndpoint("sqs.${region}.amazonaws.com")
-            client
+            awsClientService.create(AmazonSQS,region)
         })
     }
 

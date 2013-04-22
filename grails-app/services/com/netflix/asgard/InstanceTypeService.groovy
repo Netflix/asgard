@@ -84,7 +84,7 @@ class InstanceTypeService implements CacheInitializer {
     }
 
     Collection<InstanceTypeData> getInstanceTypes(UserContext userContext) {
-        caches.allInstanceTypes.by(userContext.region).list() as List//.sort { it.linuxOnDemandPrice }
+        caches.allInstanceTypes.by(userContext.region).list().sort { it.linuxOnDemandPrice }
     }
 
     private Document fetchInstanceTypesDocument() {
@@ -240,27 +240,6 @@ class InstanceTypeService implements CacheInitializer {
                     hardwareProfiles << hardwareProfile
                 }
             }
-            hardwareProfiles << new HardwareProfile(instanceType: 'm1.small', architecture: '64-bit',
-                      cpu: '1 EC2 Compute Units (1 virtual cores with 1 EC2 Compute Units each)',
-                      description: 'M1 Small Instance',
-                      ioPerformance: 'Poor', memory: '0.25 GiB',
-                      storage: '5 GB of instance storage')
-            hardwareProfiles << new HardwareProfile(instanceType: 'm1.medium', architecture: '64-bit',
-                      cpu: '1 EC2 Compute Units (1 virtual cores with 1 EC2 Compute Units each)',
-                      description: 'M1 Medium Instance',
-                      ioPerformance: 'Poor', memory: '0.5 GiB',
-                      storage: '10 GB of instance storage')
-            hardwareProfiles << new HardwareProfile(instanceType: 'm1.large', architecture: '64-bit',
-                      cpu: '2 EC2 Compute Units (2 virtual cores with 1 EC2 Compute Units each)',
-                      description: 'M1 Large Instance',
-                      ioPerformance: 'Poor', memory: '0.5 GiB',
-                      storage: '10 GB of instance storage')
-            hardwareProfiles << new HardwareProfile(instanceType: 'm1.xlarge', architecture: '64-bit',
-                      cpu: '2 EC2 Compute Units (2 virtual cores with 1 EC2 Compute Units each)',
-                      description: 'M1 Xtra-Large Instance',
-                      ioPerformance: 'Poor', memory: '1 GiB',
-                      storage: '10 GB of instance storage')
-
         } else {
 //            throw new Exception("Unexpected format of HTML on ${instanceTypesUrl}")
         }

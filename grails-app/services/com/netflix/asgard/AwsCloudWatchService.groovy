@@ -53,9 +53,7 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
 
     void afterPropertiesSet() {
         awsClient = new MultiRegionAwsClient<AmazonCloudWatch>( { Region region ->
-            AmazonCloudWatch client = awsClientService.create(AmazonCloudWatch)
-            client.setEndpoint("http://eucalyptus:8773/services/CloudWatch")
-            client
+            awsClientService.create(AmazonCloudWatch,region)
         })
     }
 

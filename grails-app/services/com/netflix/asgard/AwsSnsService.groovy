@@ -39,7 +39,6 @@ class AwsSnsService implements CacheInitializer, InitializingBean {
 
     static transactional = false
 
-    private String accountNumber
     MultiRegionAwsClient<AmazonSNS> awsClient
     def grailsApplication
     def awsClientService
@@ -67,12 +66,8 @@ class AwsSnsService implements CacheInitializer, InitializingBean {
     }
 
     void afterPropertiesSet() {
-        accountNumber = configService.awsAccountNumber
-
         awsClient = awsClient ?: new MultiRegionAwsClient<AmazonSNS>( { Region region ->
-            AmazonSNS client = awsClientService.create(AmazonSNS)
-            client.setEndpoint("sns.${region}.amazonaws.com")
-            client
+            awsClientService.create(AmazonSNS,region)
         })
     }
 
@@ -98,7 +93,7 @@ class AwsSnsService implements CacheInitializer, InitializingBean {
             return caches.allTopics.by(region).get(topicName)
         }
         TopicData existingTopic = caches.allTopics.by(region).get(topicName)
-        TopicData topic = existingTopic ?: new TopicData(region, accountNumber, topicName)
+        TopicData topic = existingTopic ?: new TopicData(region, configService.awsAccountNumber, topicName)
         String arn = topic.arn
         try {
             GetTopicAttributesRequest attributesRequest = new GetTopicAttributesRequest(arn)

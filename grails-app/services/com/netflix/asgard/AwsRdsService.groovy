@@ -70,9 +70,7 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
 
     void afterPropertiesSet() {
         awsClient = new MultiRegionAwsClient<AmazonRDS>( { Region region ->
-            AmazonRDS client = awsClientService.create(AmazonRDS)
-            client.setEndpoint("rds.${region}.amazonaws.com")
-            client
+            awsClientService.create(AmazonRDS,region)
         })
         accounts = configService.awsAccounts
     }

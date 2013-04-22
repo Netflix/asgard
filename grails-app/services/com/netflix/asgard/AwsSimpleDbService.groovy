@@ -43,10 +43,7 @@ class AwsSimpleDbService implements InitializingBean {
 
     void afterPropertiesSet() {
         awsClient = new MultiRegionAwsClient<AmazonSimpleDB>( { Region region ->
-            AmazonSimpleDB client = awsClientService.create(AmazonSimpleDB)
-            // Unconventional SDB endpoints. http://docs.amazonwebservices.com/general/latest/gr/index.html?rande.html
-            if (region != Region.US_EAST_1) { client.setEndpoint("sdb.${region}.amazonaws.com") }
-            client
+            awsClientService.create(AmazonSimpleDB,region)
         })
     }
 

@@ -51,8 +51,8 @@ class ConfigService {
      *
      * @return the AWS account number for the current environment
      */
-    String getAwsAccountNumber() {
-        grailsApplication.config.grails?.awsAccounts[0]
+    String getAwsAccountNumber(Region region=Region.US_EAST_1) {
+        grailsApplication.config.grails?."${region.provider()}"?.awsAccounts[0]
     }
 
     /**
@@ -60,8 +60,8 @@ class ConfigService {
      *
      * @return Map <String, String> account numbers to account names
      */
-    Map<String, String> getAwsAccountNames() {
-        grailsApplication.config.grails?.awsAccountNames ?: [:]
+    Map<String, String> getAwsAccountNames(Region region=Region.US_EAST_1) {
+        grailsApplication.config.grails?."${region.provider()}"?.awsAccountNames ?: [:]
     }
 
     /**
@@ -193,8 +193,8 @@ class ConfigService {
      *
      * @return list of relevant AWS account numbers, starting with the current account of the current environment
      */
-    List<String> getAwsAccounts() {
-        grailsApplication.config.grails?.awsAccounts ?: []
+    List<String> getAwsAccounts(Region region=Region.US_EAST_1) {
+        grailsApplication.config.grails?."${region.provider}"?.awsAccounts ?: []
     }
 
     /**
@@ -239,20 +239,20 @@ class ConfigService {
         grailsApplication.config.server.online
     }
 
-    String getAccessId() {
-        grailsApplication.config.secret?.accessId ?: null
+    String getAccessId(Region region=Region.US_EAST_1) {
+        grailsApplication.config.secret?."${region.provider}"?.accessId ?: null
     }
 
-    String getSecretKey() {
-        grailsApplication.config.secret?.secretKey ?: null
+    String getSecretKey(Region region=Region.US_EAST_1) {
+        grailsApplication.config.secret?."${region.provider}"?.secretKey ?: null
     }
 
-    String getAccessIdFileName() {
-        grailsApplication.config.secret?.accessIdFileName ?: null
+    String getAccessIdFileName(Region region=Region.US_EAST_1) {
+        grailsApplication.config.secret?."${region.provider}"?.accessIdFileName ?: null
     }
 
-    String getSecretKeyFileName() {
-        grailsApplication.config.secret?.secretKeyFileName ?: null
+    String getSecretKeyFileName(Region region=Region.US_EAST_1) {
+        grailsApplication.config.secret?."${region.provider}"?.secretKeyFileName ?: null
     }
 
     String getLoadBalancerUsernameFile() {

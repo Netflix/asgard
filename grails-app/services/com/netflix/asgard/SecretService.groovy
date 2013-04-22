@@ -24,7 +24,7 @@ class SecretService implements InitializingBean {
     def configService
     def sshService
 
-    BasicAWSCredentials awsCredentials
+    Map<Region,BasicAWSCredentials> awsCredentials = [:]
     String loadBalancerUserName
     String loadBalancerPassword
 
@@ -37,9 +37,11 @@ class SecretService implements InitializingBean {
 
     void afterPropertiesSet() {
         if (configService.online) {
-            String awsAccessId = configService.accessId ?: fetch(configService.accessIdFileName)
-            String awsSecretKey = configService.secretKey ?: fetch(configService.secretKeyFileName)
-            awsCredentials = new BasicAWSCredentials(awsAccessId, awsSecretKey)
+            Region.values().each { Region region ->
+              String awsAccessId = configService.getAccessId(region) ?: fetch(configService.getAccessIdFileName(region))
+              String awsSecretKey = configService.getSecretKey(region) ?: fetch(configService.getSecretKeyFileName(region))
+              awsCredentials[region] = new BasicAWSCredentials(awsAccessId, awsSecretKey)
+            }
             if (configService.loadBalancerUsernameFile && configService.loadBalancerPasswordFile) {
                 loadBalancerUserName = fetchRemote(configService.loadBalancerUsernameFile)
                 loadBalancerPassword = fetchRemote(configService.loadBalancerPasswordFile)

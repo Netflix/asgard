@@ -121,9 +121,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     void afterPropertiesSet() {
         awsClient = new MultiRegionAwsClient<AmazonAutoScaling>({ Region region ->
-            AmazonAutoScaling client = awsClientService.create(AmazonAutoScaling)
-            client.setEndpoint("http://eucalyptus:8773/services/AutoScaling")
-            client
+            awsClientService.create(AmazonAutoScaling,region)
         })
     }
 
@@ -145,13 +143,12 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         caches.allScalingPolicies.ensureSetUp({ Region region -> retrieveScalingPolicies(region) })
         caches.allTerminationPolicyTypes.ensureSetUp({ Region region -> retrieveTerminationPolicyTypes() })
         caches.allScheduledActions.ensureSetUp({ Region region -> retrieveScheduledActions(region) })
-//GRZE: this depends on meaningful add definitions...
-//        caches.allSignificantStackInstanceHealthChecks.ensureSetUp(
-//                { Region region -> retrieveInstanceHealthChecks(region) }, {},
-//                { Region region ->
-//                    caches.allApplicationInstances.by(region).filled && caches.allAutoScalingGroups.by(region).filled
-//                }
-//        )
+        caches.allSignificantStackInstanceHealthChecks.ensureSetUp(
+                { Region region -> retrieveInstanceHealthChecks(region) }, {},
+                { Region region ->
+                    caches.allApplicationInstances.by(region).filled && caches.allAutoScalingGroups.by(region).filled
+                }
+        )
     }
 
     // Clusters
