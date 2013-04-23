@@ -152,6 +152,8 @@ grails.project.dependency.resolution = {
         compile ':shiro:1.1.4'
         compile ":standalone:1.1.1"
 
+        runtime ":cors:1.0.4"
+
         test ':spock:0.7'
 
         test ':code-coverage:1.2.5'
