@@ -156,6 +156,8 @@ cloud {
     spot.infoUrl = 'http://aws.amazon.com/ec2/spot-instances/'
 }
 
+cors.allow.origin.regex = '$.^' // disable CORS support by default
+
 healthCheck {
     minimumCounts {
         allAutoScalingGroups = 0
