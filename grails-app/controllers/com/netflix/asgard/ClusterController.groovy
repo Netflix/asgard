@@ -212,12 +212,6 @@ ${lastGroup.loadBalancerNames}"""
             Integer maxSize = maxSizeParam ? maxSizeParam as Integer : lastGroup.maxSize
             InitialTraffic initialTraffic = params.trafficAllowed ? InitialTraffic.ALLOWED : InitialTraffic.PREVENTED
             boolean checkHealth = params.containsKey('checkHealth')
-            boolean discoveryExists = configService.doesRegionalDiscoveryExist(userContext.region)
-            if (discoveryExists && initialTraffic == InitialTraffic.PREVENTED && !checkHealth) {
-                flash.message = "Due to a Eureka limitation, you must enable traffic and/or wait for health checks"
-                redirect(action: 'show', params: [id: name])
-                return
-            }
             String instanceType = params.instanceType ?: lastLaunchConfig.instanceType
             String spotPrice = null
             if (!params.pricing) {
