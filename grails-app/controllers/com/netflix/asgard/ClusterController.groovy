@@ -212,7 +212,6 @@ ${lastGroup.loadBalancerNames}"""
             Integer maxSize = maxSizeParam ? maxSizeParam as Integer : lastGroup.maxSize
             InitialTraffic initialTraffic = params.trafficAllowed ? InitialTraffic.ALLOWED : InitialTraffic.PREVENTED
             boolean checkHealth = params.containsKey('checkHealth')
-            boolean discoveryExists = configService.doesRegionalDiscoveryExist(userContext.region)
             String instanceType = params.instanceType ?: lastLaunchConfig.instanceType
             String spotPrice = null
             if (!params.pricing) {
