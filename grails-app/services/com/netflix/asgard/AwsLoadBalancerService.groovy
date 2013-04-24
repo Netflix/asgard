@@ -252,7 +252,7 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
     }
 
     void removeLoadBalancer(UserContext userContext, String name) {
-        taskService.runTask(userContext, "RemoveLoad Balancer ${name}", { task ->
+        taskService.runTask(userContext, "Remove Load Balancer ${name}", { task ->
             def request = new DeleteLoadBalancerRequest()
                     .withLoadBalancerName(name)
             awsClient.by(userContext.region).deleteLoadBalancer(request)  // no result
