@@ -127,7 +127,7 @@ grails.project.dependency.resolution = {
                 'com.perforce:p4java:2010.1.269249',
 
                 // Rules for AWS named objects.
-                'com.netflix.frigga:frigga:0.4',
+                'com.netflix.frigga:frigga:0.6',
 
                 // Groovy concurrency framework.
                 'org.codehaus.gpars:gpars:1.0.0'
