@@ -49,7 +49,7 @@ class GroupDeleteOperation extends AbstractPushOperation {
         String groupName = autoScalingGroup.autoScalingGroupName
         Names names = Relationships.dissectCompoundName(groupName)
         String clusterName = names.cluster
-        task = taskService.startTask(userContext, "Deleting ${groupName}", { Task task ->
+        task = taskService.startTask(userContext, "Force Delete Auto Scaling Group '${groupName}'", { Task task ->
             // Store the new Task object in the operation for more logging later
             thisOperation.task = task
             String appName = names.app
