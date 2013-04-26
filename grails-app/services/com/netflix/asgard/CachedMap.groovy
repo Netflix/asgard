@@ -21,6 +21,7 @@ import com.netflix.asgard.cache.Action
 import com.netflix.asgard.cache.Fillable
 import com.netflix.asgard.cache.JournalRecord
 import java.util.concurrent.ConcurrentMap
+import java.util.concurrent.Semaphore
 import org.apache.commons.logging.LogFactory
 import org.joda.time.DateTime
 
@@ -76,6 +77,14 @@ class CachedMap<T> implements Fillable {
      *          is okay to fill this cache
      */
     private Closure readinessChecker
+
+    /**
+     * The lock for a thread to obtain when attempting to fill the cache. It's undesirable for multiple threads to fill
+     * the cache at the same time. Even though the ConcurrentMap could handle it, there are cases where many user
+     * threads could trigger cache fill events, which often involve large calls to external systems. By keeping the
+     * number of concurrent fill executions to a minimum, we avoid unnecessary extra calls to fetch data sets.
+     */
+    private final Semaphore permitToFillCache = new Semaphore(1)
 
     /**
      * The underlying in-memory cache.
@@ -162,59 +171,83 @@ class CachedMap<T> implements Fillable {
         if (doingFirstFill && !readinessChecker()) {
             return
         }
-
-        DateTime dataPullStartTime = new DateTime()
-        Set<String> cachedKeys = new HashSet<String>(map.keySet())
-        Map<String, T> datasource = new HashMap<String, T>()
-        Collection<T> items = retriever()
-        items.each { val -> datasource.put(entityType.key(val), val) }
-
-        Set<String> datasourceKeys = datasource.keySet()
-        Set<String> deleteCandidates = Sets.difference(cachedKeys, datasourceKeys).immutableCopy()
-        Set<String> addCandidates = Sets.difference(datasourceKeys, cachedKeys).immutableCopy()
-        Set<String> updateCandidates = cachedKeys.intersect(datasourceKeys)
-
-        // If the cache has an object that is missing from the datasource and the object was created before this fill
-        // operation started then delete the object from the cache.
-        deleteCandidates.each { String key ->
-            JournalRecord record = journal.remove(key)
-            Boolean createdRecently = record?.action == Action.CREATE && record.timestamp.isAfter(dataPullStartTime)
-            if (!createdRecently) {
-                map.remove(key)
+        // Try to obtain the fill lock for this cached map. If another thread is already holding the lock, then let that
+        // other thread do the work. No need to fill a second time right afterward. However, this thread needs to wait
+        // until the fill process has completed in the other thread before returning. If a user action caused this fill
+        // thread to run, then the cache refresh needs to complete before continuing with that user thread. For
+        // instance, if a call to Eureka fails, we refresh the Eureka address cache and then retry the failed call.
+        boolean obtainedPermitForFilling = permitToFillCache.tryAcquire()
+        afterAttemptedFillPermitAcquisition()
+        if (!obtainedPermitForFilling) {
+            // Some other thread must be doing the filling. This thread should wait until the fill has finished.
+            while (permitToFillCache.availablePermits() < 1) {
+                Time.sleepCancellably(1)
             }
+            return
         }
 
-        // If the datasource has an object that is missing from the cache then add the object to the cache, unless the
-        // object was deleted by a user since fetching the new data.
-        addCandidates.each { String key ->
-            JournalRecord record = journal.remove(key)
-            Boolean deletedRecently = record?.action == Action.DELETE && record.timestamp.isAfter(dataPullStartTime)
-            if (!deletedRecently) {
-                map.putIfAbsent(key, datasource.get(key))
-            }
-        }
+        try {
+            DateTime dataPullStartTime = new DateTime()
+            Set<String> cachedKeys = new HashSet<String>(map.keySet())
+            Map<String, T> datasource = new HashMap<String, T>()
+            Collection<T> items = retriever()
+            items.each { val -> datasource.put(entityType.key(val), val) }
 
-        // For each object that was in both the cache and the datasource, update the cache unless a user changed the
-        // object since fetching the new data. If a user changed the object in any way then assume the cached version
-        // is already correct and the datasource version is stale.
-        updateCandidates.each { String key ->
-            JournalRecord record = journal.remove(key)
-            Boolean updatedRecently = record?.timestamp?.isAfter(dataPullStartTime)
-            if (!updatedRecently) {
-                map.put(key, datasource.get(key))
-            }
-        }
+            Set<String> datasourceKeys = datasource.keySet()
+            Set<String> deleteCandidates = Sets.difference(cachedKeys, datasourceKeys).immutableCopy()
+            Set<String> addCandidates = Sets.difference(datasourceKeys, cachedKeys).immutableCopy()
+            Set<String> updateCandidates = cachedKeys.intersect(datasourceKeys)
 
-        active = false
-        if (doingFirstFill) {
-            if (map.size() >= 20) {
-                log.info String.format("Cached %5d '%s'", map.size(), name)
+            // If the cache has an object that is missing from the datasource and the object was created before this
+            // fill operation started then delete the object from the cache.
+            for (String key in deleteCandidates) {
+                JournalRecord record = journal.remove(key)
+                Boolean createdRecently = record?.action == Action.CREATE && record.timestamp.isAfter(dataPullStartTime)
+                if (!createdRecently) {
+                    map.remove(key)
+                }
             }
-            doingFirstFill = false
-        }
 
-        lastFillTime = new DateTime()
+            // If the datasource has an object that is missing from the cache then add the object to the cache, unless
+            // the object was deleted by a user since fetching the new data.
+            for (String key in addCandidates) {
+                JournalRecord record = journal.remove(key)
+                Boolean deletedRecently = record?.action == Action.DELETE && record.timestamp.isAfter(dataPullStartTime)
+                if (!deletedRecently) {
+                    map.putIfAbsent(key, datasource.get(key))
+                }
+            }
+
+            // For each object that was in both the cache and the datasource, update the cache unless a user changed the
+            // object since fetching the new data. If a user changed the object in any way then assume the cached
+            // version is already correct and the datasource version is stale.
+            for (String key in updateCandidates) {
+                JournalRecord record = journal.remove(key)
+                Boolean updatedRecently = record?.timestamp?.isAfter(dataPullStartTime)
+                if (!updatedRecently) {
+                    map.put(key, datasource.get(key))
+                }
+            }
+
+            active = false
+            if (doingFirstFill) {
+                if (map.size() >= 20) {
+                    log.info String.format("Cached %5d '%s'", map.size(), name)
+                }
+                doingFirstFill = false
+            }
+
+            lastFillTime = new DateTime()
+        } finally {
+            permitToFillCache.release()
+        }
     }
+
+    /**
+     * Extension hook for CachedMap subclasses to override in order to add behavior after trying to acquire the fill
+     * permit for the current thread. Useful for unit testing multithreaded behavior.
+     */
+    protected void afterAttemptedFillPermitAcquisition() { }
 
     boolean isFilled() {
         !doingFirstFill
