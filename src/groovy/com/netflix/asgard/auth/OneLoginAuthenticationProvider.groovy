@@ -24,6 +24,7 @@ import com.onelogin.saml.Response
 import javax.servlet.http.HttpServletRequest
 import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.authc.AuthenticationInfo
+import org.apache.shiro.authc.RememberMeAuthenticationToken
 import org.apache.shiro.authc.SimpleAuthenticationInfo
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -67,7 +68,7 @@ class OneLoginAuthenticationProvider implements AuthenticationProvider {
         new SimpleAuthenticationInfo(samlToken.principal, samlToken.credentials, 'AsgardRealm')
     }
 
-    class SamlToken implements AsgardToken {
+    class SamlToken implements AsgardToken, RememberMeAuthenticationToken {
 
         String samlResponseString
         Response samlResponse
@@ -86,6 +87,10 @@ class OneLoginAuthenticationProvider implements AuthenticationProvider {
 
         boolean isValid() {
             samlResponse.valid
+        }
+
+        boolean isRememberMe() {
+            true
         }
 
         Object getCredentials() {
