@@ -53,9 +53,7 @@ class OneLoginAuthenticationProvider implements AuthenticationProvider {
     }
 
     AsgardToken tokenFromRequest(HttpServletRequest request) {
-        AsgardToken token = new SamlToken(request.getParameter('SAMLResponse'))
-        token.rememberMe = true
-        token
+        new SamlToken(request.getParameter('SAMLResponse'))
     }
 
     AuthenticationInfo authenticate(AsgardToken authToken) {
@@ -72,7 +70,6 @@ class OneLoginAuthenticationProvider implements AuthenticationProvider {
 
     class SamlToken implements AsgardToken, RememberMeAuthenticationToken {
 
-        boolean rememberMe
         String samlResponseString
         Response samlResponse
 
@@ -90,6 +87,10 @@ class OneLoginAuthenticationProvider implements AuthenticationProvider {
 
         boolean isValid() {
             samlResponse.valid
+        }
+
+        boolean isRememberMe() {
+            true
         }
 
         Object getCredentials() {
