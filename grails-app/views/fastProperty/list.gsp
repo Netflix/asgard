@@ -45,9 +45,7 @@
           <th class="sorttable_alpha">Source</th>
           <th>Region</th>
           <th>Application</th>
-          <th class="sorttable_alpha">Stack</th>
-          <th class="sorttable_alpha">Countries</th>
-          <th class="sorttable_alpha">${ticketLabel.encodeAsHTML()}</th>
+          <th>Additional Scope</th>
         </tr>
         </thead>
         <tbody>
@@ -61,9 +59,16 @@
             <td class="sourceOfUpdate">${fastProperty?.sourceOfUpdate?.encodeAsHTML()}</td>
             <td class="region">${fastProperty?.region}</td>
             <td class="app"><g:linkObject type="application" name="${fastProperty?.appId?.toLowerCase()}">${fastProperty?.appId}</g:linkObject></td>
-            <td class="var">${fastProperty?.stack?.encodeAsHTML()}</td>
-            <td class="var">${fastProperty?.countries?.encodeAsHTML()}</td>
-            <td class="var">${fastProperty?.cmcTicket?.encodeAsHTML()}</td>
+            <td class="var">
+                <g:writeScope 
+                        cluster="${fastProperty?.cluster}" 
+                        asg="${fastProperty?.asg}" 
+                        zone="${fastProperty?.zone}" 
+                        ttl="${fastProperty?.ttl}" 
+                        instanceId="${fastProperty?.serverId}" 
+                        ami="${fastProperty?.ami}"/>
+            </td>
+
           </tr>
         </g:each>
         </tbody>
