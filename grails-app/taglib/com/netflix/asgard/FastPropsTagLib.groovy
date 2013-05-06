@@ -15,8 +15,23 @@
  */
 package com.netflix.asgard
 
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
+import org.joda.time.format.DateTimeFormatter
+
 class FastPropsTagLib {
 
+    /**
+     * Builds additional scope attributes inline table for a fastProperty
+     *
+     * @attr instanceId ServerId corresponding to the current fastProperty's scope
+     * @attr asg Auto Scaling Group corresponding to the current fastProperty's scope
+     * @attr ami AMI corresponding to the current fastProperty's scope
+     * @attr cluster Cluster corresponding to the current fastProperty's scope
+     * @attr countries Countries corresponding to the current fastProperty's scope
+     * @attr stack Stack corresponding to the current fastProperty's scope
+     * @attr zone Zone corresponding to the current fastProperty's scope
+     */
     def writeScope = { attrs ->
         def instanceId = attrs.instanceId ? attrs.remove('instanceId') : null
         def asg = attrs.asg ? attrs.remove('asg') : null
@@ -25,9 +40,8 @@ class FastPropsTagLib {
         def countries = attrs.countries ? attrs.remove('countries') : null
         def stack = attrs.stack ? attrs.remove('stack') : null
         def zone = attrs.zone ? attrs.remove('zone') : null
-        def ttl = attrs.ttl ? attrs.remove('ttl') : null
 
-        if (instanceId || asg || ami || cluster || countries || stack || zone || ttl) {
+        if (instanceId || asg || ami || cluster || countries || stack || zone) {
             out << '<table class="scopeAttribs">'
 
             // in the order or priority
@@ -59,10 +73,27 @@ class FastPropsTagLib {
                 out << "<tr><td>Zone</td><td>${zone?.encodeAsHTML()}</td></tr>"
             }
 
-            if (ttl) {
-                out << "<tr><td>TTL</td><td>${ttl?.encodeAsHTML()}</td></tr>"
-            }
             out << '</table>'
+        }
+    }
+
+    /**
+     * Calculates and prints expiration timestamp for a fastProperty
+     * The output format is an ISOi-8601. It does not include seconds, msecs or explicit 
+     * timezone information.
+     *
+     * @attr ttl TTL in seconds as stored for a fastProperty
+     * @attr ts Last update/created timestamp in ISO-8601 format for a fastProperty
+     */
+    def writeExpiration = { attrs ->
+        def ttl = attrs.ttl ? attrs.remove('ttl') : null
+        def creationTimeStamp = attrs.ts ? attrs.remove('ts') : null
+        if (ttl && creationTimeStamp) {
+            def dateTimeFormatter = ISODateTimeFormat.dateTimeParser()
+            def outputFormatter = ISODateTimeFormat.dateHourMinute()
+            def createdTime = dateTimeFormatter.parseDateTime(creationTimeStamp)
+            def expTime = createdTime.plusSeconds(ttl?.toInteger())
+            out << outputFormatter.print(expTime)
         }
     }
 
