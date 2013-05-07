@@ -67,48 +67,30 @@ class DiscoveryService implements CacheInitializer {
         baseUrl ? "$baseUrl/v2" : null
     }
 
-    private void handleConnectionError(Exception e, Region region, String url) {
-        log.warn(e)
-        String discoveryHostName = configService.getRegionalDiscoveryServer(region)
-        String msg
-        try {
-            InetAddress address = InetAddress.getByName(discoveryHostName)
-            InetAddress[] addresses = InetAddress.getAllByName(discoveryHostName)
-            msg = "Can't connect to Eureka $region at $url using ${address.hostAddress} " +
-                    "IP address. Found ${addresses.size()} address${addresses.size() == 1 ? '' : 'es'} for " +
-                    "$discoveryHostName: "
-            addresses.each { InetAddress addr ->
-                msg += "{ ${addr.hostAddress} ${addr.canonicalHostName} } "
-            }
-        } catch (UnknownHostException uhe) {
-            msg = "Unknown host ${discoveryHostName}: ${uhe}"
-            log.warn(uhe)
-        } catch (Exception errorLookingUpDiscovery) {
-            msg = "Error looking up Eureka: ${errorLookingUpDiscovery}"
-            log.warn(errorLookingUpDiscovery)
-        }
-        emailerService.sendExceptionEmail(msg, e)
+    private void handleEurekaConnectionError(Exception e, Region region) {
+        log.warn("Refreshing Eureka addresses after failure to connect to Eureka in ${region}: ${e}")
+        eurekaAddressCollectorService.fillCache(region)
     }
 
     // Discovery methods
 
     private List<ApplicationInstance> retrieveInstances(Region region) {
-        List instances = []
-        String baseApiUrl = findBaseApiUrl(region)
-        if (baseApiUrl) {
-            def xml
-            String url = "$baseApiUrl/apps"
-            try {
-                xml = restClientService.getAsXml(url, 30 * 1000)
-            } catch (Exception e) {
-                handleConnectionError(e, region, url)
-                throw e
-            }
-            xml?.application?.each {
-                instances += extractApplicationInstances(it)
-            }
-        }
-        instances
+        new Retriable<List<ApplicationInstance>>(
+                work: {
+                    List instances = []
+                    String baseApiUrl = findBaseApiUrl(region)
+                    if (baseApiUrl) {
+                        def xml = restClientService.getAsXml("$baseApiUrl/apps", 30 * 1000)
+                        xml?.application?.each {
+                            instances += extractApplicationInstances(it)
+                        }
+                    }
+                    instances
+                },
+                handleException: { Exception e, int numberOfFailedAttemptsSoFar ->
+                    handleEurekaConnectionError(e, region)
+                }
+        ).performWithRetries()
     }
 
     private Collection<ApplicationInstance> extractApplicationInstances(GPathResult xml) {
@@ -132,46 +114,52 @@ class DiscoveryService implements CacheInitializer {
 
     /** Retrieves a single application instance object with a given app and host name. */
     ApplicationInstance getAppInstance(UserContext userContext, String appName, String hostName) {
-        //long start = System.currentTimeMillis()
-        ApplicationInstance appInst = null
-        String baseUrl = findBaseApiUrl(userContext.region)
-        if (baseUrl) {
-            def xml = null
-            String url = "$baseUrl/apps/${appName.toUpperCase()}/${hostName}"
-            try {
-                xml = restClientService.getAsXml(url)
-            } catch (Exception e) {
-                handleConnectionError(e, userContext.region, url)
-            }
-            if (xml) {
-                appInst = new ApplicationInstance(xml)
-            }
-            if (appInst) {
-                caches.allApplicationInstances.by(userContext.region).put(appInst.hostName, appInst)
-            }
-        }
-        appInst
+        Region region = userContext.region
+        new Retriable<ApplicationInstance>(
+                work: {
+                    ApplicationInstance appInst = null
+                    String baseUrl = findBaseApiUrl(region)
+                    if (baseUrl) {
+                        String url = "$baseUrl/apps/${appName.toUpperCase()}/${hostName}"
+                        log.debug(url)
+                        def xml = restClientService.getAsXml(url)
+                        if (xml) {
+                            appInst = new ApplicationInstance(xml)
+                        }
+                        if (appInst) {
+                            caches.allApplicationInstances.by(userContext.region).put(appInst.hostName, appInst)
+                        }
+                    }
+                    appInst
+                },
+                handleException: { Exception e, int numberOfFailedAttemptsSoFar ->
+                    handleEurekaConnectionError(e, region)
+                }
+        ).performWithRetries()
     }
 
     /** Retrieves & returns the application instance object with a given ec2 instanceId. */
     ApplicationInstance getAppInstance(UserContext userContext, String instanceId) {
-        //long start = System.currentTimeMillis()
-        ApplicationInstance appInst = null
-        String baseUrl = findBaseApiUrl(userContext.region)
-        if (baseUrl) {
-            def xml = null
-            String url = "$baseUrl/instances/${instanceId}"
-            try {
-                xml = restClientService.getAsXml(url)
-            } catch (Exception e) {
-                handleConnectionError(e, userContext.region, url)
-            }
-            appInst = xml ? new ApplicationInstance(xml) : null
-            if (appInst) {
-                caches.allApplicationInstances.by(userContext.region).put(appInst.hostName, appInst)
-            }
-        }
-        appInst
+        Region region = userContext.region
+        new Retriable<ApplicationInstance>(
+                work: {
+                    ApplicationInstance appInst = null
+                    String baseUrl = findBaseApiUrl(region)
+                    if (baseUrl) {
+                        String url = "$baseUrl/instances/${instanceId}"
+                        log.debug(url)
+                        def xml = restClientService.getAsXml(url)
+                        appInst = xml ? new ApplicationInstance(xml) : null
+                        if (appInst) {
+                            caches.allApplicationInstances.by(userContext.region).put(appInst.hostName, appInst)
+                        }
+                    }
+                    appInst
+                },
+                handleException: { Exception e, int numberOfFailedAttemptsSoFar ->
+                    handleEurekaConnectionError(e, region)
+                }
+        ).performWithRetries()
     }
 
     /** Disables one or more application instances with a given app and host names by setting status to OUT_OF_SERVICE */
@@ -198,11 +186,19 @@ class DiscoveryService implements CacheInitializer {
     }
 
     private void changeAppInstanceStatus(UserContext userContext, String appName, String hostName, String status) {
-        String baseUrl = findBaseApiUrl(userContext.region)
-        if (baseUrl) {
-            String url = "$baseUrl/apps/${appName.toUpperCase()}/${hostName}/status?value=${status}"
-            log.debug(url)
-            restClientService.put(url)
-        }
+        Region region = userContext.region
+        new Retriable<ApplicationInstance>(
+                work: {
+                    String baseUrl = findBaseApiUrl(region)
+                    if (baseUrl) {
+                        String url = "$baseUrl/apps/${appName.toUpperCase()}/${hostName}/status?value=${status}"
+                        log.debug("PUT ${url}")
+                        restClientService.put(url)
+                    }
+                },
+                handleException: { Exception e, int numberOfFailedAttemptsSoFar ->
+                    handleEurekaConnectionError(e, region)
+                }
+        ).performWithRetries()
     }
 }

@@ -33,6 +33,24 @@ class EurekaAddressCollectorService implements CacheInitializer {
         caches.allEurekaAddresses.ensureSetUp({ Region region -> lookUpBestEurekaAddresses(region) })
     }
 
+    /**
+     * Invokes the cache-filling process for a specific region on demand, for times when the current cached set of
+     * Eureka addresses in that region seems to be having problems.
+     *
+     * @param region the region whose cached Eureka addresses should be replaced
+     */
+    void fillCache(Region region) {
+        caches.allEurekaAddresses.by(region).fill()
+    }
+
+    /**
+     * Looks up all the Eureka addresses for the current region from DNS, then determines the best current nodes to use,
+     * preferring healthy nodes if present, or responsive nodes if none are healthy, or all nodes if none are
+     * responsive.
+     *
+     * @param region the cloud region for which to find Eureka nodes
+     * @return set of the current best unique addresses for Eureka nodes
+     */
     Collection<String> lookUpBestEurekaAddresses(Region region) {
         chooseBestEurekaNodes(lookUpEurekaAddresses(region))
     }
