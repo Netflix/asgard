@@ -39,9 +39,6 @@
         <tr>
           <th class="sorttable_alpha">Property</th>
           <th class="sorttable_alpha">Value</th>
-          <th>Timestamp</th>
-          <th class="sorttable_alpha">Updated By</th>
-          <th class="sorttable_alpha">Source</th>
           <th>Application</th>
           <th>Env</th>
           <th>Region</th>
@@ -54,9 +51,6 @@
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
             <td class="propKey"><g:linkObject type="fastProperty" name="${fastProperty?.id}">${fastProperty?.key}</g:linkObject></td>
             <td class="propValue">${fastProperty?.value?.encodeAsHTML()}</td>
-            <td>${fastProperty?.ts}</td>
-            <td class="updatedBy">${fastProperty?.updatedBy?.encodeAsHTML()}</td>
-            <td class="sourceOfUpdate">${fastProperty?.sourceOfUpdate?.encodeAsHTML()}</td>
             <td class="app"><g:linkObject type="application" name="${fastProperty?.appId?.toLowerCase()}">${fastProperty?.appId}</g:linkObject></td>
             <td>${fastProperty?.env}</td>
             <td class="region">${fastProperty?.region}</td>
