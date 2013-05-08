@@ -1261,7 +1261,7 @@ jQuery(document).ready(function() {
 
         setUpTableFilters = function() {
             var firstTable, jFirstInput;
-            jQuery('.list table').each(function() {
+            jQuery('.list table.sortable').each(function() {
                 var i,
                     rows = this.rows,
                     cellCount = 0,
