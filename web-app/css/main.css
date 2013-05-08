@@ -232,8 +232,6 @@ th.desc a                   { background-image: url(../images/skin/sorted_desc.g
 .list .fastProperties .updatedBy      { max-width:  80px; word-wrap: break-word; }
 .list .fastProperties .sourceOfUpdate { max-width:  50px; word-wrap: break-word; }
 .list .fastProperties table.scopeAttribs td { border-bottom: 1px dotted #DDD; }
-.list .fastProperties table.scopeAttribs tr.odd { background: inherit; }
-.list .fastProperties table.scopeAttribs tr.even { background: inherit; }
 
 .list td:first-of-type:last-of-type { min-width: 500px; } /* filter might wrap without this */
 

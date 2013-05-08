@@ -61,15 +61,15 @@
             <td>${fastProperty?.env}</td>
             <td class="region">${fastProperty?.region}</td>
             <td>
-                <g:writeScope 
-                        cluster="${fastProperty?.cluster}" 
-                        asg="${fastProperty?.asg}" 
-                        zone="${fastProperty?.zone}" 
-                        instanceId="${fastProperty?.serverId}" 
-                        ami="${fastProperty?.ami}"/>
+              <g:writeScope 
+                cluster="${fastProperty?.cluster}" 
+                asg="${fastProperty?.asg}" 
+                zone="${fastProperty?.zone}" 
+                instanceId="${fastProperty?.serverId}" 
+                ami="${fastProperty?.ami}"/>
             </td>
             <td>
-                <g:writeExpiration ttl="${fastProperty?.ttl}" ts="${fastProperty?.ts}" />
+              <g:writeExpiration ttl="${fastProperty?.ttl}" ts="${fastProperty?.ts}" />
             </td>
           </tr>
         </g:each>

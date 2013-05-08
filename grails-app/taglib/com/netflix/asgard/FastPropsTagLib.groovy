@@ -19,6 +19,12 @@ import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
+/**
+ * Tag library class for fast properties views
+ * Implements custom tags to
+ *    1. builds additional scope inline table
+ *    2. calculates and prints expiration timestamp for a fast property
+ */
 class FastPropsTagLib {
 
     /**
