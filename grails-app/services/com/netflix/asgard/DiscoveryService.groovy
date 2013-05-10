@@ -108,32 +108,8 @@ class DiscoveryService implements CacheInitializer {
     }
 
     /** Retrieves a list of 0 or more application instance objects that optionally match an app name. */
-    List<ApplicationInstance> getAppInstances(UserContext userContext, String appName, From from = From.CACHE) {
-        if (from == From.CACHE) {
-            return getAppInstances(userContext).findAll { it.appName == appName }
-        }
-        List<ApplicationInstance> instances = []
-        String baseUrl = findBaseApiUrl(userContext.region)
-        if (baseUrl) {
-            GPathResult xml
-            String url = "$baseUrl/apps/${appName.toUpperCase()}"
-            try {
-                xml = restClientService.getAsXml(url, 10000, false)
-            } catch (Exception e) {
-                handleConnectionError(e, userContext.region, url)
-                throw e
-            }
-            if (xml) {
-                instances = xml.instance.collect { new ApplicationInstance(it) }
-                Map<String, ApplicationInstance> forCache = mapIdsToAppInstances(instances)
-                caches.allApplicationInstances.by(userContext.region)?.putAll(forCache)
-            }
-        }
-        instances
-    }
-
-    private Map<String, ApplicationInstance> mapIdsToAppInstances(Collection<ApplicationInstance> instances) {
-        instances.inject([:]) { Map map, ApplicationInstance instance -> map << [(instance.hostName): instance] } as Map
+    List<ApplicationInstance> getAppInstances(UserContext userContext, String appName) {
+        getAppInstances(userContext).findAll { it.appName == appName }
     }
 
     /** Retrieves a list of 0 or more application instance objects that have an instance id from the specified list. */
