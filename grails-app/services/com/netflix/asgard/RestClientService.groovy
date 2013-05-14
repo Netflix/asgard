@@ -210,7 +210,8 @@ class RestClientService implements InitializingBean {
     Integer getResponseCode(String url) {
         Integer statusCode = null
         try {
-            statusCode = executeAndProcessResponse(getWithTimeout(url, 2000), readStatusCode) as Integer
+            int timeoutMillis = configService.restClientTimeoutMillis
+            statusCode = executeAndProcessResponse(getWithTimeout(url, timeoutMillis), readStatusCode) as Integer
         } catch (Exception ignored) {
             // Ignore and return null
         }
@@ -245,11 +246,12 @@ class RestClientService implements InitializingBean {
         }
         // First try failed but that might have been a network fluke.
         // If the next two staggered attempts pass, then assume the host is healthy.
-        Time.sleepCancellably 2000
+        int timeoutMillis = configService.restClientTimeoutMillis
+        Time.sleepCancellably timeoutMillis
         responseCode = getResponseCode(url)
         if (checkOkayResponseCode(responseCode)) {
             // First try failed, second try passed. Use the tie-breaker as the final answer.
-            Time.sleepCancellably 2000
+            Time.sleepCancellably timeoutMillis
             return getResponseCode(url)
         }
         // First two tries both failed. Give up and return the latest failure code.
