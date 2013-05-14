@@ -56,6 +56,16 @@ class EurekaAddressCollectorService implements CacheInitializer {
     }
 
     /**
+     * Gets the canonical server name for Eureka in the specified region.
+     *
+     * @param region the cloud region for which to find Eureka nodes
+     * @return the canonical server name for Eureka in the specified region, or null if none is configured
+     */
+    String getEurekaCanonicalServerName(Region region) {
+        configService.getRegionalDiscoveryServer(region)
+    }
+
+    /**
      * Repeatedly looks up the addresses for the Eureka nodes for the specified region. Assumes DNS is configured to
      * return only a random subset of suitable Eureka nodes on each call.
      *
@@ -63,7 +73,7 @@ class EurekaAddressCollectorService implements CacheInitializer {
      * @return set of unique addresses for Eureka nodes
      */
     Collection<String> lookUpEurekaAddresses(Region region) {
-        String hostName = configService.getRegionalDiscoveryServer(region)
+        String hostName = getEurekaCanonicalServerName(region)
         if (!hostName) {
             return []
         }

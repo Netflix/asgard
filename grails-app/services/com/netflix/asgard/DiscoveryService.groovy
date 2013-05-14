@@ -49,22 +49,75 @@ class DiscoveryService implements CacheInitializer {
     final Duration timeToWaitAfterDiscoveryChange = Duration.standardSeconds(90)
 
     /**
-     * Cached addresses were the best choices when the Eureka address cache loaded recently. Find one that is currently
-     * healthy, if possible. Then create a base URL for that
+     * Constructs a base URL for reaching Eureka at its URL context.
      *
-     * @param region the region for which to look for Eureka nodes
-     * @return the base URL of a healthy Eureka node
+     * @param hostName the IP address or DNS name of Eureka
+     * @return the root URL for all calls to Eureka
      */
-    String findBaseUrl(Region region) {
-        List<String> eurekaAddresses = Lists.newArrayList(caches.allEurekaAddresses.by(region).list())
-        Collections.shuffle(eurekaAddresses)
-        String hostName = eurekaAddressCollectorService.chooseBestEurekaNode(eurekaAddresses)
+    private String constructBaseUrl(String hostName) {
         hostName ? "http://${hostName}:${configService.eurekaPort}/${configService.eurekaUrlContext}" : null
     }
 
-    String findBaseApiUrl(Region region) {
-        String baseUrl = findBaseUrl(region)
-        baseUrl ? "$baseUrl/v2" : null
+    /**
+     * Constructs a base URL for reaching Eureka's API at its URL context.
+     *
+     * @param hostName the IP address or DNS name of Eureka
+     * @return the common root URL for all API calls to Eureka
+     */
+    private String constructBaseApiUrl(String hostName) {
+        hostName ? "${constructBaseUrl(hostName)}/v2" : null
+    }
+
+    /**
+     * Gets the base API for Eureka, containing the CName configured for Eureka in the specified region.
+     *
+     * @param region the region for which to get a Eureka CName
+     * @return the Eureka base URL with the region's Eureka CName, or null if none is configured
+     */
+    String findCanonicalBaseUrl(Region region) {
+        String cname = configService.getRegionalDiscoveryServer(region)
+        cname ? constructBaseUrl(cname) : null
+    }
+
+    /**
+     * Gets the base API URL for Eureka, containing the CName configured for Eureka in the specified region.
+     *
+     * @param region the region for which to get a Eureka CName
+     * @return the Eureka base API URL with the region's Eureka CName, or null if none is configured
+     */
+    String findCanonicalBaseApiUrl(Region region) {
+        String cname = configService.getRegionalDiscoveryServer(region)
+        cname ? constructBaseApiUrl(cname) : null
+    }
+
+    /**
+     * Cached addresses were the best choices when the Eureka address cache loaded recently. Find a good address,
+     * preferably a healthy one or at least a responsive one, if possible. Then create a base URL for that node.
+     *
+     * @param region the region for which to look for Eureka nodes
+     * @return the base URL of one of the healthiest Eureka nodes
+     */
+    String findSpecificBaseUrl(Region region) {
+        String hostName = findSpecificHostName(region)
+        constructBaseUrl(hostName)
+    }
+
+    /**
+     * Cached addresses were the best choices when the Eureka address cache loaded recently. Find a good address,
+     * preferably a healthy one or at least a responsive one, if possible. Then create a base API URL for that node.
+     *
+     * @param region the region for which to look for Eureka nodes
+     * @return the base API URL of one of the healthiest Eureka nodes
+     */
+    String findSpecificBaseApiUrl(Region region) {
+        String hostName = findSpecificHostName(region)
+        constructBaseApiUrl(hostName)
+    }
+
+    private String findSpecificHostName(Region region) {
+        List<String> eurekaAddresses = Lists.newArrayList(caches.allEurekaAddresses.by(region).list())
+        Collections.shuffle(eurekaAddresses)
+        eurekaAddressCollectorService.chooseBestEurekaNode(eurekaAddresses)
     }
 
     private void handleEurekaConnectionError(Exception e, Region region) {
@@ -78,7 +131,7 @@ class DiscoveryService implements CacheInitializer {
         new Retriable<List<ApplicationInstance>>(
                 work: {
                     List instances = []
-                    String baseApiUrl = findBaseApiUrl(region)
+                    String baseApiUrl = findSpecificBaseApiUrl(region)
                     if (baseApiUrl) {
                         def xml = restClientService.getAsXml("$baseApiUrl/apps", 30 * 1000)
                         xml?.application?.each {
@@ -118,7 +171,7 @@ class DiscoveryService implements CacheInitializer {
         new Retriable<ApplicationInstance>(
                 work: {
                     ApplicationInstance appInst = null
-                    String baseUrl = findBaseApiUrl(region)
+                    String baseUrl = findSpecificBaseApiUrl(region)
                     if (baseUrl) {
                         String url = "$baseUrl/apps/${appName.toUpperCase()}/${hostName}"
                         log.debug(url)
@@ -144,7 +197,7 @@ class DiscoveryService implements CacheInitializer {
         new Retriable<ApplicationInstance>(
                 work: {
                     ApplicationInstance appInst = null
-                    String baseUrl = findBaseApiUrl(region)
+                    String baseUrl = findSpecificBaseApiUrl(region)
                     if (baseUrl) {
                         String url = "$baseUrl/instances/${instanceId}"
                         log.debug(url)
@@ -189,7 +242,7 @@ class DiscoveryService implements CacheInitializer {
         Region region = userContext.region
         new Retriable<ApplicationInstance>(
                 work: {
-                    String baseUrl = findBaseApiUrl(region)
+                    String baseUrl = findSpecificBaseApiUrl(region)
                     if (baseUrl) {
                         String url = "$baseUrl/apps/${appName.toUpperCase()}/${hostName}/status?value=${status}"
                         log.debug("PUT ${url}")
