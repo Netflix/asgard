@@ -84,25 +84,7 @@ class InstanceTypeService implements CacheInitializer {
     }
 
     Collection<InstanceTypeData> getInstanceTypes(UserContext userContext) {
-        [
-                'm3.xlarge',
-                'm3.2xlarge',
-                'cc1.4xlarge',
-                't1.micro',
-                'm1.small',
-                'm1.medium',
-                'c1.medium',
-                'm1.large',
-                'm2.xlarge',
-                'm1.xlarge',
-                'c1.xlarge',
-                'm2.2xlarge',
-                'm2.4xlarge',
-                'cg1.4xlarge',
-                'cc2.8xlarge',
-                'hi1.4xlarge',
-                'cr1.8xlarge'
-        ].collect { new InstanceTypeData(hardwareProfile: new HardwareProfile(instanceType: it)) }
+        caches.allInstanceTypes.by(userContext.region).list().sort { it.linuxOnDemandPrice }
     }
 
     private Document fetchInstanceTypesDocument() {
