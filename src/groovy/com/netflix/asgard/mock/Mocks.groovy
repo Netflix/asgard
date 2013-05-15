@@ -59,7 +59,6 @@ import com.netflix.asgard.TaskService
 import com.netflix.asgard.ThreadScheduler
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.cache.Fillable
-import com.netflix.asgard.format.JsonpStripper
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.plugin.UserDataProvider
@@ -69,53 +68,14 @@ import grails.test.MockUtils
 import groovy.util.slurpersupport.GPathResult
 import javax.servlet.http.HttpServletRequest
 import org.codehaus.groovy.grails.web.json.JSONArray
-import org.codehaus.groovy.grails.web.json.JSONElement
 import org.joda.time.format.ISODateTimeFormat
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import org.springframework.mock.web.MockHttpServletRequest
 
 class Mocks {
 
-    private static Map<String, JSONElement> fileNamesToJsonDocuments = [:]
-    private static Map<String, Document> fileNamesToHtmlDocuments = [:]
     static final String TEST_AWS_ACCOUNT_ID = '179000000000'
     static final String PROD_AWS_ACCOUNT_ID = '149000000000'
     static final String SEG_AWS_ACCOUNT_ID = '119000000000'
-
-    private static InputStream getFileAsStream(String fileName) {
-        Mocks.class.classLoader.getResourceAsStream("com/netflix/asgard/mock/${fileName}")
-    }
-
-    static Document parseHtmlFile(String fileName) {
-        if (fileNamesToHtmlDocuments[fileName] == null) {
-            InputStream stream = getFileAsStream(fileName)
-            if (!stream) {
-                throw new IllegalStateException("Unable to read file ${fileName}.")
-            }
-            Document document = Jsoup.parse(stream, 'UTF-8', '/')
-            fileNamesToHtmlDocuments[fileName] = document
-        }
-        fileNamesToHtmlDocuments[fileName]
-    }
-
-    static JSONElement parseJsonFile(String fileName) {
-        if (fileNamesToJsonDocuments[fileName] == null) {
-            InputStream stream = getFileAsStream(fileName)
-            if (!stream) {
-                throw new IllegalStateException("""Unable to read file ${fileName}.
-  If you are running tests in IntelliJ you must add "js" and "json" as file extensions for the compiler.
-  Open Preferences, click Compiler, add json and txt to Resource Patterns:
-  '?*.properties;?*.xml;?*.gif;?*.png;?*.jpeg;?*.jpg;?*.html;?*.dtd;?*.tld;?*.ftl;?*.txt;?*.json;?*.js'""")
-            }
-
-            // Get the content as a string instead of a stream. Strip padding off JSONP if present.
-            String content = new JsonpStripper(stream.getText()).stripPadding()
-            JSONElement data = JSON.parse(content)
-            fileNamesToJsonDocuments[fileName] = data
-        }
-        fileNamesToJsonDocuments[fileName]
-    }
 
     static JSONArray parseJsonString(String jsonData) {
         JSON.parse(jsonData) as JSONArray

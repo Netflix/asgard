@@ -95,7 +95,7 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
     }
 
     private List<LaunchConfiguration> loadMockLaunchConfigs() {
-        JSONArray jsonArray = Mocks.parseJsonFile('mockLaunchConfigs.json') as JSONArray
+        JSONArray jsonArray = MockFileUtils.parseJsonFile('mockLaunchConfigs.json') as JSONArray
         jsonArray.collect {
             new LaunchConfiguration().withLaunchConfigurationName(it.launchConfigurationName).
                     withImageId(it.imageId).withKeyName(it.keyName).
