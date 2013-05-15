@@ -19,7 +19,7 @@ import com.amazonaws.services.ec2.model.InstanceType
 import com.google.common.collect.ArrayTable
 import com.google.common.collect.Table
 import com.netflix.asgard.cache.CacheInitializer
-import com.netflix.asgard.mock.Mocks
+import com.netflix.asgard.mock.MockFileUtils
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.InstanceProductType
@@ -98,7 +98,7 @@ class InstanceTypeService implements CacheInitializer {
     private JSONElement fetchPricingJsonData(InstancePriceType instancePriceType) {
         Boolean online = grailsApplication.config.server.online
         String pricingJsonUrl = instancePriceType.url
-        online ? restClientService.getAsJson(pricingJsonUrl) : Mocks.parseJsonFile(instancePriceType.dataSourceFileName)
+        online ? restClientService.getAsJson(pricingJsonUrl) : MockFileUtils.parseJsonFile(instancePriceType.dataSourceFileName)
     }
 
     private Collection<HardwareProfile> getHardwareProfiles() {
@@ -174,7 +174,7 @@ class InstanceTypeService implements CacheInitializer {
     }
 
     private Document fetchLocalInstanceTypesDocument() {
-        Mocks.parseHtmlFile('instance-types.html')
+        MockFileUtils.parseHtmlFile('instance-types.html')
     }
 
     private List<HardwareProfile> retrieveHardwareProfiles() {
