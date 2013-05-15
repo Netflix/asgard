@@ -60,6 +60,8 @@
                 asg="${fastProperty?.asg}" 
                 zone="${fastProperty?.zone}" 
                 instanceId="${fastProperty?.serverId}" 
+                countries="${fastProperty?.countries}" 
+                stack="${fastProperty?.stack}" 
                 ami="${fastProperty?.ami}"/>
             </td>
             <td>
