@@ -19,7 +19,7 @@ import com.amazonaws.services.ec2.model.InstanceType
 import com.google.common.collect.ArrayTable
 import com.google.common.collect.Table
 import com.netflix.asgard.cache.CacheInitializer
-import com.netflix.asgard.mock.Mocks
+import com.netflix.asgard.mock.MockFileUtils
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.InstanceProductType
@@ -84,25 +84,7 @@ class InstanceTypeService implements CacheInitializer {
     }
 
     Collection<InstanceTypeData> getInstanceTypes(UserContext userContext) {
-        [
-                'm3.xlarge',
-                'm3.2xlarge',
-                'cc1.4xlarge',
-                't1.micro',
-                'm1.small',
-                'm1.medium',
-                'c1.medium',
-                'm1.large',
-                'm2.xlarge',
-                'm1.xlarge',
-                'c1.xlarge',
-                'm2.2xlarge',
-                'm2.4xlarge',
-                'cg1.4xlarge',
-                'cc2.8xlarge',
-                'hi1.4xlarge',
-                'cr1.8xlarge'
-        ].collect { new InstanceTypeData(hardwareProfile: new HardwareProfile(instanceType: it)) }
+        caches.allInstanceTypes.by(userContext.region).list().sort { it.linuxOnDemandPrice }
     }
 
     private Document fetchInstanceTypesDocument() {
@@ -116,7 +98,7 @@ class InstanceTypeService implements CacheInitializer {
     private JSONElement fetchPricingJsonData(InstancePriceType instancePriceType) {
         Boolean online = grailsApplication.config.server.online
         String pricingJsonUrl = instancePriceType.url
-        online ? restClientService.getAsJson(pricingJsonUrl) : Mocks.parseJsonFile(instancePriceType.dataSourceFileName)
+        online ? restClientService.getAsJson(pricingJsonUrl) : MockFileUtils.parseJsonFile(instancePriceType.dataSourceFileName)
     }
 
     private Collection<HardwareProfile> getHardwareProfiles() {
@@ -192,7 +174,7 @@ class InstanceTypeService implements CacheInitializer {
     }
 
     private Document fetchLocalInstanceTypesDocument() {
-        Mocks.parseHtmlFile('instance-types.html')
+        MockFileUtils.parseHtmlFile('instance-types.html')
     }
 
     private List<HardwareProfile> retrieveHardwareProfiles() {
