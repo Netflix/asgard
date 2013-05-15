@@ -42,6 +42,7 @@
           <th>Application</th>
           <th>Env</th>
           <th>Region</th>
+          <th class="sorttable_alpha">Stack</th>
           <th>Additional Scope</th>
           <th>Expiration</th>
         </tr>
@@ -54,12 +55,14 @@
             <td class="app"><g:linkObject type="application" name="${fastProperty?.appId?.toLowerCase()}">${fastProperty?.appId}</g:linkObject></td>
             <td>${fastProperty?.env}</td>
             <td class="region">${fastProperty?.region}</td>
+            <td class="var">${fastProperty?.stack?.encodeAsHTML()}</td>
             <td>
               <g:writeScope 
                 cluster="${fastProperty?.cluster}" 
                 asg="${fastProperty?.asg}" 
                 zone="${fastProperty?.zone}" 
                 instanceId="${fastProperty?.serverId}" 
+                countries="${fastProperty?.countries}" 
                 ami="${fastProperty?.ami}"/>
             </td>
             <td>
