@@ -1,3 +1,36 @@
+1.1.2
+
+Features
+- Allow red black with no traffic and no Eureka health checks
+- Use asgard user agent in AWS calls
+- Add ap-southeast-2 AWS region
+- Disable form submit on keyboard enter key to avoid bad ASG config creation
+- Added EBS optimized to rest API for create ASG and next ASG
+- Alarm dimensions other than ASG, such as Queue Name
+- Enable CORS on Asgard JSON endpoints
+- Prevent Firefox use until deployment GUI behavior on Firefox can be fixed
+- Stack list and detail screens
+
+Bug Fixes
+- Fixes for running in Java 7
+- More accurate http codes returned for anyInstance actions
+- Remove dependency on brittle remote HTML parsing for hardware profiles
+
+
+1.1.1
+
+Features
+- Ability to log out of OneLogin-based auth session
+- Restrict GUI-based updates when using OneLogin auth
+- Spot pricing for Auto Scaling Groups
+- Show flags in region images
+- cluster/anyInstance and autoScaling/anyInstance prefer to return a running instance
+
+Bug Fixes
+- Fix sporadic bug in ELB selects on Firefox page refresh
+- Make select2 render consistently
+
+
 1.1
 
 Features
@@ -33,5 +66,4 @@ Bug fixes
 - Next ASG in Cluster should allow empty lists in REST API
 - Rolling push should respect original SSH Keypair choice
 - Universally public EBS snapshots should not be in cache
-
 
