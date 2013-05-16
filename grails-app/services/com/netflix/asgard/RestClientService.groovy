@@ -19,11 +19,11 @@ import com.netflix.asgard.format.JsonpStripper
 import grails.converters.JSON
 import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
+import java.security.Security
 import java.util.concurrent.TimeUnit
 import org.apache.http.HttpEntity
 import org.apache.http.HttpHost
 import org.apache.http.HttpResponse
-import org.apache.http.client.HttpClient
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
@@ -34,11 +34,13 @@ import org.apache.http.conn.params.ConnManagerPNames
 import org.apache.http.conn.params.ConnRoutePNames
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.DefaultHttpClient
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.params.HttpConnectionParams
 import org.apache.http.util.EntityUtils
 import org.springframework.beans.factory.InitializingBean
+import sun.net.InetAddressCachePolicy
 
 class RestClientService implements InitializingBean {
 
@@ -48,14 +50,8 @@ class RestClientService implements InitializingBean {
 
     // Change to PoolingClientConnectionManager after upgrade to http-client 4.2.
     final ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager()
-    final HttpClient httpClient = new DefaultHttpClient(connectionManager)
+    final DefaultHttpClient httpClient = new DefaultHttpClient(connectionManager)
 
-    // If the AWS Java SDK upgrades to httpclient 4.2.* then we can set up the client with retries like this.
-    /*
-    final PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager()
-    final HttpClient baseClient = new DefaultHttpClient(connectionManager)
-    final HttpClient httpClient = new AutoRetryHttpClient(baseClient, new DefaultServiceUnavailableRetryStrategy())
-    */
 
     public void afterPropertiesSet() throws Exception {
         if (configService.proxyHost) {
@@ -64,8 +60,29 @@ class RestClientService implements InitializingBean {
         }
         // Switch to ClientPNames.CONN_MANAGER_TIMEOUT when upgrading http-client 4.2
         httpClient.params.setLongParameter(ConnManagerPNames.TIMEOUT, configService.httpConnPoolTimeout)
+
+        // This retry handler only retries in a few specific failure cases, but it's better than nothing.
+        httpClient.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(3, true))
+        // If the AWS Java SDK upgrades to httpclient 4.2.* then here's the new way to set up the client with retries.
+        /*
+        PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager()
+        HttpClient baseClient = new DefaultHttpClient(connectionManager)
+        HttpClient httpClient = new AutoRetryHttpClient(baseClient, new DefaultServiceUnavailableRetryStrategy())
+        */
+
+        avoidLongCachingOfDnsResults()
         connectionManager.maxTotal = configService.httpConnPoolMaxSize
         connectionManager.defaultMaxPerRoute = configService.httpConnPoolMaxForRoute
+    }
+
+    /**
+     * We often operate in an environment where we expect resolution of DNS names for remote dependencies to change
+     * frequently, so it's best to tell the JVM to avoid caching DNS results internally.
+     */
+    private avoidLongCachingOfDnsResults() {
+        //noinspection GroovyAccessibility
+        InetAddressCachePolicy.cachePolicy = InetAddressCachePolicy.NEVER // Groovy doesn't care about privates
+        Security.setProperty('networkaddress.cache.ttl', '0')
     }
 
     def getAsXml(String uri, Integer timeoutMillis = 10000, boolean swallowException = true) {
