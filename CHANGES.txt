@@ -5,7 +5,6 @@ Features
 - Use asgard user agent in AWS calls
 - Add ap-southeast-2 AWS region
 - Disable form submit on keyboard enter key to avoid bad ASG config creation
-- Parameterized EBS volume additions to launch configs
 - Added EBS optimized to rest API for create ASG and next ASG
 - Alarm dimensions other than ASG, such as Queue Name
 - Enable CORS on Asgard JSON endpoints
