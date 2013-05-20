@@ -27,7 +27,6 @@ import com.netflix.asgard.model.InstanceTypeData
 import groovy.transform.Immutable
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONElement
-import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
@@ -40,7 +39,6 @@ class InstanceTypeService implements CacheInitializer {
 
     static transactional = false
 
-    final String instanceTypesUrl = 'http://aws.amazon.com/ec2/instance-types/'
     final Map<JsonTypeSizeCombo, InstanceType> typeSizeCodesToInstanceTypes = buildTypeSizeCodesToInstanceTypes()
 
     final BigDecimal lowPrioritySpotPriceFactor = 1.0
@@ -85,14 +83,6 @@ class InstanceTypeService implements CacheInitializer {
 
     Collection<InstanceTypeData> getInstanceTypes(UserContext userContext) {
         caches.allInstanceTypes.by(userContext.region).list().sort { it.linuxOnDemandPrice }
-    }
-
-    private Document fetchInstanceTypesDocument() {
-        if (configService.online) {
-            Jsoup.parse(restClientService.getAsText(instanceTypesUrl))
-        } else {
-            fetchLocalInstanceTypesDocument()
-        }
     }
 
     private JSONElement fetchPricingJsonData(InstancePriceType instancePriceType) {
@@ -178,15 +168,6 @@ class InstanceTypeService implements CacheInitializer {
     }
 
     private List<HardwareProfile> retrieveHardwareProfiles() {
-
-        // http://imediava.wordpress.com/2011/09/24/web-scraping-with-groovy-3-of-3/
-        try {
-            return parseHardwareProfilesDocument(fetchInstanceTypesDocument())
-        } catch (Exception e) {
-            String msg = "Using old hardware profiles document because of an unexpected format at ${instanceTypesUrl}"
-            log.error msg
-            emailerService.sendExceptionEmail(msg, e)
-        }
         parseHardwareProfilesDocument(fetchLocalInstanceTypesDocument())
     }
 
@@ -241,7 +222,7 @@ class InstanceTypeService implements CacheInitializer {
                 }
             }
         } else {
-            throw new Exception("Unexpected format of HTML on ${instanceTypesUrl}")
+            throw new Exception("Unexpected format of HTML in instance-types.html")
         }
         hardwareProfiles
     }
