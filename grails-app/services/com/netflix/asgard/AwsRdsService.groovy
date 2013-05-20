@@ -301,9 +301,17 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
             return caches.allDBSnapshots.by(userContext.region).get(dbSnapshotId)
         }
         DescribeDBSnapshotsRequest request = new DescribeDBSnapshotsRequest().withDBSnapshotIdentifier(dbSnapshotId)
-        DescribeDBSnapshotsResult result = awsClient.by(userContext.region).describeDBSnapshots(request)
-        DBSnapshot snapshot = Check.loneOrNone(result.getDBSnapshots(), DBSnapshot)
-        caches.allDBSnapshots.by(userContext.region).put(snapshot.getDBSnapshotIdentifier(), snapshot)
+        DBSnapshot snapshot = null
+        try {
+            DescribeDBSnapshotsResult result = awsClient.by(userContext.region).describeDBSnapshots(request)
+            snapshot = Check.loneOrNone(result.getDBSnapshots(), DBSnapshot)
+        } catch (AmazonServiceException ase) {
+            // Check for the specific code the RDS service uses when an object does not exist.
+            if (ase.errorCode != 'DBSnapshotNotFound') {
+                throw ase
+            }
+        }
+        caches.allDBSnapshots.by(userContext.region).put(dbSnapshotId, snapshot)
         snapshot
     }
 
