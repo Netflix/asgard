@@ -181,7 +181,7 @@ class ServerService implements InitializingBean {
 
     private Boolean checkHealth(Server server) {
         assert server.name in allServerNames
-        restClientService.getResponseCode("http://${server.name}${serverSuffix}/healthcheck") == 200
+        restClientService.getResponseCode("http://${server.name}${serverSuffix}/healthcheck/caches") == 200
     }
 
     private String nowYearMonthDayHour() {
