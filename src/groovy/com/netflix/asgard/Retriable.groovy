@@ -25,12 +25,6 @@ import groovy.transform.Canonical
 @Canonical class Retriable<T> {
 
     /**
-     * Make the Canonical annotation default unspecified values to their specified default values.
-     */
-    @SuppressWarnings("GroovyUnusedDeclaration")
-    private static autoDefaults = true
-
-    /**
      * The time in milliseconds to wait after the first failed attempt. This is also the base factor for subsequent
      * retry delay lengths when using exponential backoff.
      */
