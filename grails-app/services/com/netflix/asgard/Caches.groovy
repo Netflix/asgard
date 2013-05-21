@@ -66,6 +66,7 @@ class Caches {
     final MultiRegionCachedMap<DBSecurityGroup> allDBSecurityGroups
     final MultiRegionCachedMap<DBSnapshot> allDBSnapshots
     final MultiRegionCachedMap<String> allDomains
+    final MultiRegionCachedMap<String> allEurekaAddresses
     final MultiRegionCachedMap<FastProperty> allFastProperties
     final MultiRegionCachedMap<Image> allImages
     final MultiRegionCachedMap<Instance> allInstances
@@ -111,6 +112,7 @@ class Caches {
         allSnapshots = cachedMapBuilder.of(EntityType.snapshot, 300).buildMultiRegionCachedMap()
         allVolumes = cachedMapBuilder.of(EntityType.volume, 300).buildMultiRegionCachedMap()
         allDomains = cachedMapBuilder.of(EntityType.domain, 120).buildMultiRegionCachedMap()
+        allEurekaAddresses = cachedMapBuilder.of(EntityType.eurekaAddress, 120).buildMultiRegionCachedMap()
         allTopics = cachedMapBuilder.of(EntityType.topic, 120).buildMultiRegionCachedMap()
         allQueues = cachedMapBuilder.of(EntityType.queue, 120).buildMultiRegionCachedMap()
         allAlarms = cachedMapBuilder.of(EntityType.alarm, 120).buildMultiRegionCachedMap()

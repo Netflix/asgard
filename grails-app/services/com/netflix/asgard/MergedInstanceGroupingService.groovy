@@ -68,7 +68,7 @@ class MergedInstanceGroupingService {
      * Returns the merged instances for a given application.
      */
     private List<MergedInstance> getMergedInstancesForApp(UserContext userContext, String appName) {
-        Collection<ApplicationInstance> discList = discoveryService.getAppInstances(userContext, appName, From.CACHE)
+        Collection<ApplicationInstance> discList = discoveryService.getAppInstances(userContext, appName)
 
         List<MergedInstance> instances = discList.collect { appInst ->
             Instance ec2Inst = null

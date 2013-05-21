@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 Netflix, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.netflix.asgard
 
 import com.google.common.collect.ImmutableMap
@@ -5,7 +20,7 @@ import com.google.common.collect.ImmutableMap
  * This class makes it easier to mock Caches for testing. You are responsible for initializing the CachedMaps, and the
  * setup enforced by the application is sidestepped. Usage is the same as CachedMapBuilder.
  *
- * @see         CachedMapBuilder
+ * @see CachedMapBuilder
  */
 class MockCachedMapBuilder<T> extends CachedMapBuilder<T> {
     final ImmutableMap<EntityType, CachedMap> entityTypeToCacheMap
@@ -14,7 +29,7 @@ class MockCachedMapBuilder<T> extends CachedMapBuilder<T> {
     /**
      * Used to create a CachedMapBuilder where you have control over the initialization of the CachedMaps.
      *
-     * @param  entityTypeToCacheMap is a map of fully initialized or mocked CachedMaps keyed by entityType
+     * @param entityTypeToCacheMap is a map of fully initialized or mocked CachedMaps keyed by entityType
      */
     MockCachedMapBuilder(Map<EntityType, CachedMap> entityTypeToCacheMap) {
         this(entityTypeToCacheMap, null)

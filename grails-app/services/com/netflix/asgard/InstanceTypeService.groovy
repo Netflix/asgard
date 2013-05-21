@@ -19,7 +19,7 @@ import com.amazonaws.services.ec2.model.InstanceType
 import com.google.common.collect.ArrayTable
 import com.google.common.collect.Table
 import com.netflix.asgard.cache.CacheInitializer
-import com.netflix.asgard.mock.Mocks
+import com.netflix.asgard.mock.MockFileUtils
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.InstanceProductType
@@ -27,7 +27,6 @@ import com.netflix.asgard.model.InstanceTypeData
 import groovy.transform.Immutable
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONElement
-import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
@@ -40,7 +39,6 @@ class InstanceTypeService implements CacheInitializer {
 
     static transactional = false
 
-    final String instanceTypesUrl = 'http://aws.amazon.com/ec2/instance-types/'
     final Map<JsonTypeSizeCombo, InstanceType> typeSizeCodesToInstanceTypes = buildTypeSizeCodesToInstanceTypes()
 
     final BigDecimal lowPrioritySpotPriceFactor = 1.0
@@ -87,18 +85,10 @@ class InstanceTypeService implements CacheInitializer {
         caches.allInstanceTypes.by(userContext.region).list().sort { it.linuxOnDemandPrice }
     }
 
-    private Document fetchInstanceTypesDocument() {
-        if (configService.online) {
-            Jsoup.parse(restClientService.getAsText(instanceTypesUrl))
-        } else {
-            fetchLocalInstanceTypesDocument()
-        }
-    }
-
     private JSONElement fetchPricingJsonData(InstancePriceType instancePriceType) {
         Boolean online = grailsApplication.config.server.online
         String pricingJsonUrl = instancePriceType.url
-        online ? restClientService.getAsJson(pricingJsonUrl) : Mocks.parseJsonFile(instancePriceType.dataSourceFileName)
+        online ? restClientService.getAsJson(pricingJsonUrl) : MockFileUtils.parseJsonFile(instancePriceType.dataSourceFileName)
     }
 
     private Collection<HardwareProfile> getHardwareProfiles() {
@@ -174,19 +164,10 @@ class InstanceTypeService implements CacheInitializer {
     }
 
     private Document fetchLocalInstanceTypesDocument() {
-        Mocks.parseHtmlFile('instance-types.html')
+        MockFileUtils.parseHtmlFile('instance-types.html')
     }
 
     private List<HardwareProfile> retrieveHardwareProfiles() {
-
-        // http://imediava.wordpress.com/2011/09/24/web-scraping-with-groovy-3-of-3/
-        try {
-            return parseHardwareProfilesDocument(fetchInstanceTypesDocument())
-        } catch (Exception e) {
-            String msg = "Using old hardware profiles document because of an unexpected format at ${instanceTypesUrl}"
-            log.error msg
-            emailerService.sendExceptionEmail(msg, e)
-        }
         parseHardwareProfilesDocument(fetchLocalInstanceTypesDocument())
     }
 
@@ -241,7 +222,7 @@ class InstanceTypeService implements CacheInitializer {
                 }
             }
         } else {
-            throw new Exception("Unexpected format of HTML on ${instanceTypesUrl}")
+            throw new Exception("Unexpected format of HTML in instance-types.html")
         }
         hardwareProfiles
     }
