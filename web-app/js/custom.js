@@ -1308,7 +1308,7 @@ jQuery(document).ready(function() {
         };
 
         convertSelects = function() {
-            jQuery('select:visible:not(#regionSwitcher)').each(function() {
+            jQuery('select:visible:not(.noSelect2)').each(function() {
                 var selectElement = jQuery(this);
                 var options = {
                     width: (selectElement.outerWidth() + 10) + 'px',
