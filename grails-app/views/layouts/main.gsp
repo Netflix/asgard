@@ -53,7 +53,7 @@
     <g:if test="${!pageProperty(name: 'meta.hideNav')}">
       <div class="region">
         <form action="/" method="GET">
-          <g:select title="Switch to a different Amazon region" name="region" id="regionSwitcher"
+          <g:select title="Switch to a different Amazon region" name="region" class="noSelect2" id="regionSwitcher"
                     value="${region.code}" from="${regions}" optionKey="code" optionValue="description"/><br/>
           <img src="${resource(dir: 'images/worldmap', file: region.mapImageFileName)}" title="${region.description} is your current region"/>
         </form>
