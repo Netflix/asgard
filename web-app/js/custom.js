@@ -1318,7 +1318,7 @@ jQuery(document).ready(function() {
                     options['minimumResultsForSearch'] = config.minOptionCountForSearch;
                 }
                 if (config.maxOptionsForRequiredSearch && this.options.length > config.maxOptionsForRequiredSearch) {
-                    options['minimumInputLength'] = 3;
+                    options['minimumInputLength'] = 2;
                 }
                 selectElement.select2(options);
                 // Hack so select2 selects the first item when it's a blank value
