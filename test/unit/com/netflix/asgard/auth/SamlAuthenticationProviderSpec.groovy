@@ -15,15 +15,15 @@
  */
 package com.netflix.asgard.auth
 
-import com.netflix.asgard.auth.OneLoginAuthenticationProvider.SamlToken
+import com.netflix.asgard.auth.SamlAuthenticationProvider.SamlToken
 import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.authc.AuthenticationInfo
 import org.apache.shiro.authc.SimpleAuthenticationInfo
 import spock.lang.Specification
 
-class OneLoginAuthenticationProviderSpec extends Specification {
+class SamlAuthenticationProviderSpec extends Specification {
 
-    OneLoginAuthenticationProvider provider = new OneLoginAuthenticationProvider()
+    SamlAuthenticationProvider provider = new SamlAuthenticationProvider()
     SamlToken samlToken = Mock(SamlToken)
 
     def 'should throw AuthenticationException when token is null'() {
