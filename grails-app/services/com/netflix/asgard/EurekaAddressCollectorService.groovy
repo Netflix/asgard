@@ -144,7 +144,7 @@ class EurekaAddressCollectorService implements CacheInitializer {
         if (!allAddresses) {
             return null
         }
-        ArrayList<String> addressesCopy = Lists.newArrayList(allAddresses)
+        List<String> addressesCopy = Lists.newArrayList(allAddresses)
         // Eureka is designed to run with very few nodes, so shuffling is a reasonable way to randomize and iterate.
         Collections.shuffle(addressesCopy)
         List<String> unhealthyButResponsiveAddresses = []

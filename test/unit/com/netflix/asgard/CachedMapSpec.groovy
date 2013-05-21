@@ -39,8 +39,7 @@ class CachedMapSpec extends Specification {
         userThread = new Thread(runnableFillProcess, 'user')
     }
 
-    def '''if a thread tries to fill a CachedMap while another thread is already doing the fill, the second thread
-should wait for the first thread to finish, and should not fill a second time'''() {
+    def 'second thread should wait for the first thread to finish filling, and should not fill a second time'() {
 
         CountDownLatch backgroundIsRetrieving = new CountDownLatch(1)
         CountDownLatch userThreadHasTriedPermitAcquisition = new CountDownLatch(1)
@@ -86,8 +85,7 @@ should wait for the first thread to finish, and should not fill a second time'''
         2 == permitAcquisitionAttemptCount
     }
 
-    def '''if a user thread starts to fill a cache after a background thread has finished filling the cache, the user
-thread's result should override the older result'''() {
+    def 'if user thread starts fill after background thread finishes, user result should override older result'() {
 
         Closure retriever = {
             List<String> stooges = stoogesCastListsOverTime[retrievalCallCount]

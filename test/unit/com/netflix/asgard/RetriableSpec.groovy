@@ -23,7 +23,7 @@ class RetriableSpec extends Specification {
     @Unroll("exponential backoff base multiplier #baseMultiplier results in delays #delays")
     def 'test delays'() {
 
-        NoSleepRetriable retriable = new NoSleepRetriable(maxRetries: 5, work: { throw new Exception() },
+        NoSleepRetriable retriable = new NoSleepRetriable(maxRetries: 5, work: { throw new IOException() },
                 exponentialBackoffBaseMultiplier: baseMultiplier)
 
         when:
@@ -44,7 +44,7 @@ class RetriableSpec extends Specification {
 
     def 'exponential backoff delay should never exceed maximum'() {
 
-        NoSleepRetriable retriable = new NoSleepRetriable(maxRetries: 13, work: { throw new Exception() },
+        NoSleepRetriable retriable = new NoSleepRetriable(maxRetries: 13, work: { throw new IOException() },
                 exponentialBackoffBaseMultiplier: 3)
 
         when:
@@ -87,7 +87,7 @@ class RetriableSpec extends Specification {
         Closure handleException = { Exception e, int numberOfFailedAttemptsSoFar ->
             thrownExceptionIndices << numberOfFailedAttemptsSoFar
         }
-        Retriable retriable = new NoSleepRetriable(work: { throw new Exception() }, handleException: handleException)
+        Retriable retriable = new NoSleepRetriable(work: { throw new IOException() }, handleException: handleException)
 
         when:
         retriable.performWithRetries()
@@ -102,7 +102,7 @@ class RetriableSpec extends Specification {
         int attempts = 0
         Retriable retriable = new NoSleepRetriable(maxRetries: 5, work: {
             attempts++
-            throw new Exception('No soup for you')
+            throw new IOException('No soup for you')
         })
 
         when:

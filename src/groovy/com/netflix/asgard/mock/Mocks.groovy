@@ -84,7 +84,7 @@ class Mocks {
     }
 
     static String jsonNullable(def jsonValue) {
-        jsonValue?.toString() != 'null' ? jsonValue.toString() : null
+        jsonValue?.toString() == 'null' ? null : jsonValue?.toString()
     }
 
     /**

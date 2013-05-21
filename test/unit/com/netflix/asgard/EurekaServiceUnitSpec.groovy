@@ -164,7 +164,7 @@ class EurekaServiceUnitSpec extends Specification {
         2 * restClientService.getAsXml(_, _) >> {
             if (firstCall) {
                 firstCall = false
-                throw new Exception("Can't reach Eureka server")
+                throw new IOException("Can't reach Eureka server")
             }
             XML.parse(APP_INSTANCES_LIST_XML)
         }
@@ -185,7 +185,7 @@ class EurekaServiceUnitSpec extends Specification {
         2 * restClientService.getAsXml(_) >> {
             if (firstCall) {
                 firstCall = false
-                throw new Exception("Can't reach Eureka server")
+                throw new IOException("Can't reach Eureka server")
             }
             XML.parse(APP_INSTANCE_XML)
         }
@@ -206,7 +206,7 @@ class EurekaServiceUnitSpec extends Specification {
         2 * restClientService.getAsXml(_) >> {
             if (firstCall) {
                 firstCall = false
-                throw new Exception("Can't reach Eureka server")
+                throw new IOException("Can't reach Eureka server")
             }
             XML.parse(APP_INSTANCE_XML)
         }
@@ -228,7 +228,7 @@ class EurekaServiceUnitSpec extends Specification {
         2 * restClientService.put(_) >> {
             if (firstCall) {
                 firstCall = false
-                throw new Exception("Can't reach Eureka server")
+                throw new IOException("Can't reach Eureka server")
             }
             instanceIsEnabledInEureka = false
             200
@@ -251,7 +251,7 @@ class EurekaServiceUnitSpec extends Specification {
         2 * restClientService.put(_) >> {
             if (firstCall) {
                 firstCall = false
-                throw new Exception("Can't reach Eureka server")
+                throw new IOException("Can't reach Eureka server")
             }
             instanceIsEnabledInEureka = true
             200
