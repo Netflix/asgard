@@ -1,8 +1,11 @@
 package com.onelogin;
 
+/**
+ * POJO representing a (OneLogin) SAML IdP account. Contains the IdP certificate and the IdP sso login URL.
+ */
 public class AccountSettings {
 	private String certificate;
-	private String idp_sso_target_url;
+	private String idpSsoTargetUrl;
 	
 	public String getCertificate() {
 		return certificate;
@@ -10,10 +13,10 @@ public class AccountSettings {
 	public void setCertificate(String certificate) {
 		this.certificate = certificate;
 	}
-	public String getIdp_sso_target_url() {
-		return idp_sso_target_url;
+	public String getIdpSsoTargetUrl() {
+		return idpSsoTargetUrl;
 	}
-	public void setIdpSsoTargetUrl(String idp_sso_target_url) {
-		this.idp_sso_target_url = idp_sso_target_url;
+	public void setIdpSsoTargetUrl(String idpSsoTargetUrl) {
+		this.idpSsoTargetUrl = idpSsoTargetUrl;
 	}
 }

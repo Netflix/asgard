@@ -1,5 +1,8 @@
 package com.onelogin;
 
+/**
+ * POJO representing a (OneLogin) SAML SP application. Contains the SP post-back URL and the issuer string for the SP.
+ */
 public class AppSettings {
 	private String assertionConsumerServiceUrl;
 	private String issuer;
@@ -16,5 +19,4 @@ public class AppSettings {
 	public void setIssuer(String issuer) {
 		this.issuer = issuer;
 	}
-
 }
