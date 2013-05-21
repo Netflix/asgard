@@ -23,10 +23,10 @@ class HomeController {
 
     def index = {
         Region region = request.region
-        String discoveryBaseApiUrl = discoveryService.findBaseApiUrl(region, false)
+        String discoveryBaseApiUrl = discoveryService.findCanonicalBaseApiUrl(region)
         [
             'externalLinks' : configService.getExternalLinks(),
-            'discoveryUrl': discoveryService.findBaseUrl(region, false),
+            'discoveryUrl': discoveryService.findCanonicalBaseUrl(region),
             'discoveryApiUrl': discoveryBaseApiUrl ? "${discoveryBaseApiUrl}/apps" : null
         ]
     }

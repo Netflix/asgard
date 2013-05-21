@@ -79,6 +79,6 @@ class MonkeyPatcherTests {
         image.tags = [new Tag('expiration_time', 'the future')]
         assert !image.keepForever
         image.tags = [new Tag('expiration_time', 'never')]
-        assert image.keepForever == true
+        assert image.keepForever
     }
 }

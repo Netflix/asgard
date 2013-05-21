@@ -43,6 +43,7 @@ class RollingPushOperation extends AbstractPushOperation {
     def configService
     def discoveryService
     def launchTemplateService
+    def restClientService
     private List<Slot> relaunchSlots = []
     List<String> loadBalancerNames = []
     private final RollingPushOptions options
@@ -266,7 +267,7 @@ class RollingPushOperation extends AbstractPushOperation {
             case InstanceState.registered:
                 // If there's a health check URL then check it before preparing for final wait
                 if (instanceInfo.healthCheckUrl) {
-                    Integer responseCode = awsEc2Service.getRepeatedResponseCode(instanceInfo.healthCheckUrl)
+                    Integer responseCode = restClientService.getRepeatedResponseCode(instanceInfo.healthCheckUrl)
                     String message = "Health check response code is ${responseCode} for application ${options.appName} on instance ${instanceInfo.id}"
                     if (responseCode >= 400 ) {
                         fail("${reportSummary()} ${message}. Push was aborted because ${instanceInfo.healthCheckUrl} " +

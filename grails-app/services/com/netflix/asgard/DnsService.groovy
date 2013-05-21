@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2013 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.cache
+package com.netflix.asgard
 
 /**
- * Characteristic of Spring-managed beans (usually Grails services) that are responsible for initializing one or more
- * in-memory caches.
- *
- * @see com.netflix.asgard.InitService for implications
+ * Abstraction layer for making DNS lookups.
  */
-interface CacheInitializer {
+class DnsService {
 
-    void initializeCaches()
-
+    /**
+     * Performs a single, simple DNS lookup of the "canonical host names" for a DNS entry. The results are usually
+     * IP addresses.
+     *
+     * @param hostName the server name
+     * @return the canonical host names, which are usually IP addresses
+     */
+    Collection<String> getCanonicalHostNamesForDnsName(String hostName) {
+        InetAddress.getAllByName(hostName)*.canonicalHostName
+    }
 }
