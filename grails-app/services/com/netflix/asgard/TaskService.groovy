@@ -45,8 +45,8 @@ class TaskService {
     final SimpleDbSequenceLocator sequenceLocator = new SimpleDbSequenceLocator(region: Region.defaultRegion(),
             domainName: 'CLOUD_TASK_SEQUENCE', itemName: 'task_id', attributeName: 'value')
 
-    private ConcurrentLinkedQueue<Task> running = new ConcurrentLinkedQueue<Task>()
-    private ConcurrentLinkedQueue<Task> completed = new ConcurrentLinkedQueue<Task>()
+    private Queue<Task> running = new ConcurrentLinkedQueue<Task>()
+    private Queue<Task> completed = new ConcurrentLinkedQueue<Task>()
 
     Task startTask(UserContext userContext, String name, Closure work, Link link = null) {
         Task task = newTask(userContext, name, link)

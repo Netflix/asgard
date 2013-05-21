@@ -65,6 +65,26 @@ class ConfigService {
     }
 
     /**
+     * Gets the maximum number of times to perform a DNS lookup without receiving a new result. This is useful to tune
+     * when there is a service dependency like Eureka that may have DNS configuration only returning one random IP
+     * address for each individual DNS lookup. Depending on the number of expected IP addresses, some Asgard
+     * installations may be better off with a higher or lower number of DNS attempts before giving up and accepting
+     * the currently gathered set of IP addresses.
+     *
+     * @return the maximum number of times to perform a DNS lookup without receiving a new result
+     */
+    Integer getMaxConsecutiveDnsLookupsWithoutNewResult() {
+        grailsApplication.config.dns?.maxConsecutiveDnsLookupsWithoutNewResult ?: 10
+    }
+
+    /**
+     * @return number of milliseconds to wait between DNS calls
+     */
+    int getDnsThrottleMillis() {
+        grailsApplication.config.dns?.throttleMillis ?: 50
+    }
+
+    /**
      * Finds the Discovery server URL for the specified region, or null if there isn't one
      *
      * @param region the region in which to look for a Discovery URL
@@ -305,9 +325,9 @@ class ConfigService {
     }
 
     /**
-     * @param The plugin name
-     * @return The bean names used for this plugin implementation, null if none configured. This can be either a single
-     *          string or a list of strings depending on the plugin.
+     * @param the plugin name
+     * @return the bean names used for this plugin implementation, null if none configured. This can be either a single
+     *          string or a list of strings depending on the plugin
      */
     Object getBeanNamesForPlugin(String pluginName) {
         Object beanNames = grailsApplication.config.plugin[pluginName]
@@ -329,21 +349,28 @@ class ConfigService {
     }
 
     /**
-     * @return Maximum time in miliseconds for threads to wait for a connection from the http connection pool
+     * @return maximum time in milliseconds for remote REST calls to wait before timing out
+     */
+    int getRestClientTimeoutMillis() {
+        grailsApplication.config.rest?.timeoutMillis ?: 2 * 1000
+    }
+
+    /**
+     * @return maximum time in milliseconds for threads to wait for a connection from the http connection pool
      */
     long getHttpConnPoolTimeout() {
         grailsApplication.config.httpConnPool?.timeout ?: 50 * 1000
     }
 
     /**
-     * @return Maximum size of the http connection pool
+     * @return maximum size of the http connection pool
      */
     int getHttpConnPoolMaxSize() {
         grailsApplication.config.httpConnPool?.maxSize ?: 50
     }
 
     /**
-     * @return Maximum number of connections in the connection pool per host.
+     * @return maximum number of connections in the connection pool per host
      */
     int getHttpConnPoolMaxForRoute() {
         grailsApplication.config.httpConnPool?.maxSize ?: 5
@@ -394,14 +421,14 @@ class ConfigService {
     }
 
     /**
-     * @return Default Security Groups.
+     * @return the names of the security groups that should be applied to all non-VPC deployments
      */
     List<String> getDefaultSecurityGroups() {
         grailsApplication.config.cloud?.defaultSecurityGroups ?: []
     }
 
     /**
-     * @return Default VPC Security Groups.
+     * @return the names of the security groups that should be applied to all VPC deployments
      */
     List<String> getDefaultVpcSecurityGroupNames() {
         grailsApplication.config.cloud?.defaultVpcSecurityGroupNames ?: []
@@ -433,77 +460,77 @@ class ConfigService {
     }
 
     /**
-     * @return File name containing a list of keys to use for hashing api keys.
+     * @return file name containing a list of keys to use for hashing api keys
      */
     String getApiEncryptionKeyFileName() {
         grailsApplication.config.secret?.apiEncryptionKeyFileName ?: null
     }
 
     /**
-     * @return Number of days a newly generated api key will be active for
+     * @return number of days a newly generated api key will be active for
      */
     int getApiTokenExpirationDays() {
         grailsApplication.config.security?.apiToken?.expirationDays ?: 90
     }
 
     /**
-     * @return Number of days before API key expiration to send an email warning
+     * @return number of days before API key expiration to send an email warning
      */
     int getApiTokenExpiryWarningThresholdDays() {
         grailsApplication.config.security?.apiToken?.expiryWarningThresholdDays ?: 7
     }
 
     /**
-     * @return Minutes between sending warnings about a specific API key expiring.
+     * @return number of minutes between sending warnings about a specific API key expiring
      */
     int getApiTokenExpiryWarningIntervalMinutes() {
         grailsApplication.config.security?.apiToken?.expiryWarningIntervalMinutes ?: 360
     }
 
     /**
-     * @return Application specific URL from OneLogin to redirect SSO requests to.
+     * @return application specific URL from OneLogin to redirect Single Sign-On (SSO) requests to
      */
     String getOneLoginUrl() {
         grailsApplication.config.security?.onelogin?.url ?: null
     }
 
     /**
-     * @return URL to redirect user to on logout to terminate OneLogin session.
+     * @return URL to redirect user to on logout to terminate OneLogin session
      */
     String getOneLoginLogoutUrl() {
         grailsApplication.config.security?.onelogin?.logoutUrl ?: null
     }
 
     /**
-     * @return Certificate provided by OneLogin used to validate SAML tokens.
+     * @return Certificate provided by OneLogin used to validate SAML tokens
      */
     String getOneLoginCertificate() {
         grailsApplication.config.security?.onelogin?.certificate ?: null
     }
 
     /**
-     * @return Common suffix to truncate off usernames returned by OneLogin. For example '@netflix.com'.
+     * @return common suffix to truncate off usernames returned by OneLogin. For example '@netflix.com'
      */
     String getOneLoginUsernameSuffix() {
         grailsApplication.config.security?.onelogin?.usernameSuffix ?: null
     }
 
     /**
-     * @return Details of server configurations.
+     * @return details of server configurations.
      */
     List<Environment> getServerEnvironments() {
         grailsApplication.config.server?.environments ?: []
     }
 
     /**
-     * @return Identifying name for servers that service this AWS account.
+     * @return identifying name for servers that service this AWS account
      */
     String getCanonicalServerName() {
         Environment currentEnvironment = serverEnvironments.find { it.name == accountName }
         currentEnvironment?.canonicalDnsName ?: "asgard ${accountName}"
     }
     /**
-     * @return subnet purposes that should have an internal scheme for ELBs.
+     * @return subnet purposes that should have an internal scheme for ELBs
      */
     List<String> getInternalSubnetPurposes() {
         grailsApplication.config.cloud?.internalSubnetPurposes ?: ['internal']
@@ -517,7 +544,7 @@ class ConfigService {
     }
 
     /**
-     * @return The AWS Identity and Access Management (IAM) role that will be used by default. http://aws.amazon.com/iam
+     * @return the AWS Identity and Access Management (IAM) role that will be used by default. http://aws.amazon.com/iam
      */
     String getDefaultIamRole() {
         grailsApplication.config.cloud?.defaultIamRole ?: null
@@ -545,28 +572,28 @@ class ConfigService {
     }
 
     /**
-     * @return URL for Cloud Ready REST calls.
+     * @return URL for Cloud Ready REST calls
      */
     String getCloudReadyUrl() {
         grailsApplication.config.cloud?.cloudReady?.url ?: null
     }
 
     /**
-     * @return Regions where Chaos Monkey is indigenous.
+     * @return Regions where Chaos Monkey is indigenous
      */
     Collection<Region> getChaosMonkeyRegions() {
         grailsApplication.config.cloud?.cloudReady?.chaosMonkey?.regions ?: []
     }
 
     /**
-     * @return Base URL of the build server (Jenkins) for your Applications.
+     * @return base URL of the build server (Jenkins) where applications get built
      */
     String getBuildServerUrl() {
         grailsApplication.config.cloud?.buildServer ?: ''
     }
 
     /**
-     * @return For stack names that are revered, we check the health of all the ASG instances.
+     * @return for stack names that are revered, we check the health of all the ASG instances
      */
     Collection<String> getSignificantStacks() {
         grailsApplication.config.cloud?.significantStacks ?: []
@@ -580,7 +607,7 @@ class ConfigService {
     }
 
     /**
-     * @return A Closure that determines if EBS volumes are needed for launch configurations based on instance type.
+     * @return a Closure that determines if EBS volumes are needed for launch configurations based on instance type
      */
     Closure<Boolean> getInstanceTypeNeedsEbsVolumes() {
         grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.instanceTypeNeeds ?: { String instanceType ->
@@ -589,7 +616,7 @@ class ConfigService {
     }
 
     /**
-     * @return The size of EBS volumes added to launch configurations for specific instance types.
+     * @return the size of EBS volumes added to launch configurations for specific instance types
      */
     int getSizeOfEbsVolumesAddedToLaunchConfigs() {
         grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.size ?: 250

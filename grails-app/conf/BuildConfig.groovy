@@ -88,7 +88,9 @@ grails.project.dependency.resolution = {
         }
 
         compile(
-                // Transitive dependencies of aws-java-sdk, but also used directly
+                // Transitive dependencies of aws-java-sdk, but also used directly.
+                // It would be great if we could upgrade httpcore and httpclient, but we can't until the AWS Java SDK
+                // upgrades its dependencies. If we simply upgrade these, then some Amazon calls fail.
                 'org.apache.httpcomponents:httpcore:4.1',
                 'org.apache.httpcomponents:httpclient:4.1.1',
 

@@ -39,7 +39,6 @@ import com.amazonaws.services.rds.model.DBSnapshot
 import com.google.common.collect.ImmutableBiMap
 import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.model.ApplicationInstance
-import com.netflix.asgard.model.ApplicationMetrics
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.InstanceTypeData
@@ -70,6 +69,7 @@ import java.lang.reflect.Modifier
     static final EntityType<DBSnapshot> dbSnapshot = create('Database Snapshot', { it.DBSnapshotIdentifier })
     static final EntityType<String> domain = create('SimpleDB Domain', { it }, '',
             'Show metadata about this SimpleDB domain')
+    static final EntityType<String> eurekaAddress = create('Eureka Address', { it })
     static final EntityType<FastProperty> fastProperty = create('Fast Property', { it.id }, '', '',
             { Map attrs, String objectId -> attrs.params = [name: objectId] })
     static final EntityType<HardwareProfile> hardwareProfile = create('Hardware Profile',

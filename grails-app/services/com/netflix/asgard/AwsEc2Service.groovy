@@ -797,30 +797,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         userData ? new String(Base64.decodeBase64(userData.bytes)) : null
     }
 
-    Integer getRepeatedResponseCode(String url) {
-        Integer responseCode = restClientService.getResponseCode(url)
-        if (checkOkayResponseCode(responseCode)) {
-            return responseCode
-        }
-        // First try failed but that might have been a network fluke.
-        // If the next two staggered attempts pass, then assume the host is healthy.
-        Time.sleepCancellably 2000
-        responseCode = restClientService.getResponseCode(url)
-        if (checkOkayResponseCode(responseCode)) {
-            // First try failed, second try passed. Use the tie-breaker as the final answer.
-            Time.sleepCancellably 2000
-            return restClientService.getResponseCode(url)
-        }
-        // First two tries both failed. Give up and return the latest failure code.
-        return responseCode
-    }
-
     Boolean checkHostHealth(String url) {
-        checkOkayResponseCode(getRepeatedResponseCode(url))
-    }
-
-    private Boolean checkOkayResponseCode(Integer responseCode) {
-        responseCode == 200
+        Integer responseCode = restClientService.getRepeatedResponseCode(url)
+        restClientService.checkOkayResponseCode(responseCode)
     }
 
     List<InstanceStateChange> terminateInstances(UserContext userContext, Collection<String> instanceIds,
