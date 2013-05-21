@@ -120,7 +120,7 @@ class DiscoveryService implements CacheInitializer {
         eurekaAddressCollectorService.chooseBestEurekaNode(eurekaAddresses)
     }
 
-    private void handleEurekaConnectionError(Exception e, Region region) {
+    private Closure handleEurekaConnectionErrorInRegion = { Region region, Exception e, int failedAttemptsSoFar ->
         log.warn("Refreshing Eureka addresses after failure to connect to Eureka in ${region}: ${e}")
         eurekaAddressCollectorService.fillCache(region)
     }
@@ -140,9 +140,7 @@ class DiscoveryService implements CacheInitializer {
                     }
                     instances
                 },
-                handleException: { Exception e, int numberOfFailedAttemptsSoFar ->
-                    handleEurekaConnectionError(e, region)
-                }
+                handleException: handleEurekaConnectionErrorInRegion.curry(region)
         ).performWithRetries()
     }
 
@@ -185,9 +183,7 @@ class DiscoveryService implements CacheInitializer {
                     }
                     appInst
                 },
-                handleException: { Exception e, int numberOfFailedAttemptsSoFar ->
-                    handleEurekaConnectionError(e, region)
-                }
+                handleException: handleEurekaConnectionErrorInRegion.curry(region)
         ).performWithRetries()
     }
 
@@ -209,9 +205,7 @@ class DiscoveryService implements CacheInitializer {
                     }
                     appInst
                 },
-                handleException: { Exception e, int numberOfFailedAttemptsSoFar ->
-                    handleEurekaConnectionError(e, region)
-                }
+                handleException: handleEurekaConnectionErrorInRegion.curry(region)
         ).performWithRetries()
     }
 
@@ -249,9 +243,7 @@ class DiscoveryService implements CacheInitializer {
                         restClientService.put(url)
                     }
                 },
-                handleException: { Exception e, int numberOfFailedAttemptsSoFar ->
-                    handleEurekaConnectionError(e, region)
-                }
+                handleException: handleEurekaConnectionErrorInRegion.curry(region)
         ).performWithRetries()
     }
 }
