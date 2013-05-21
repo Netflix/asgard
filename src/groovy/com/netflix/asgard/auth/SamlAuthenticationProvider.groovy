@@ -21,6 +21,9 @@ import com.onelogin.AccountSettings
 import com.onelogin.AppSettings
 import com.onelogin.saml.AuthRequest
 import com.onelogin.saml.Response
+import org.apache.commons.lang.WordUtils
+import org.springframework.beans.factory.InitializingBean
+
 import javax.servlet.http.HttpServletRequest
 import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.authc.AuthenticationInfo
@@ -29,33 +32,44 @@ import org.apache.shiro.authc.SimpleAuthenticationInfo
 import org.springframework.beans.factory.annotation.Autowired
 
 /**
- * Example of building an AuthenticationProvider for SSO using OneLogin.
+ * Example of building an AuthenticationProvider for SSO using a SAML 2 IdP.
  */
-class OneLoginAuthenticationProvider implements AuthenticationProvider {
+class SamlAuthenticationProvider implements AuthenticationProvider, InitializingBean {
 
     @Autowired
     ConfigService configService
+    AccountSettings accountSettings
 
-    String loginUrl(HttpServletRequest request) {
-        String oneloginUrl = configService.oneLoginUrl
-        AppSettings appSettings = new AppSettings(issuer: oneloginUrl)
-
-        // The SAML Response will be posted to this URL.
-        URL url = new URL(request.scheme, request.serverName, request.serverPort, '/auth/signIn')
-        appSettings.setAssertionConsumerServiceUrl(url as String)
-
-        AccountSettings accSettings = new AccountSettings(idpSsoTargetUrl: oneloginUrl)
-
-        AuthRequest authReq = new AuthRequest(appSettings, accSettings)
-        String samlRequest = AuthRequest.getRidOfCRLF(URLEncoder.encode(authReq.getRequest(AuthRequest.base64),
-                'UTF-8'))
-        "${accSettings.idp_sso_target_url}?SAMLRequest=${samlRequest}"
+    @Override
+    void afterPropertiesSet() {
+        accountSettings = new AccountSettings(
+                certificate: configService.samlCertificate,
+                idpSsoTargetUrl: configService.samlLoginUrl)
     }
 
+    @Override
+    String loginUrl(HttpServletRequest request) {
+        // The SAML issuer URL.
+        String samlIssuer = configService.samlIssuer
+
+        // The SAML IdP Response will be posted back to us at this URL.
+        URL postBackUrl = new URL(request.scheme, request.serverName, request.serverPort, '/auth/signIn')
+
+        // The app settings are about this SP app.
+        AppSettings appSettings = new AppSettings(issuer: samlIssuer, assertionConsumerServiceUrl: postBackUrl as String)
+
+        AuthRequest authReq = new AuthRequest(appSettings, accountSettings)
+        String samlRequest = authReq.getRequestEncoded(AuthRequest.base64 | AuthRequest.url)
+
+        "${accountSettings.idpSsoTargetUrl}?SAMLRequest=${samlRequest}"
+    }
+
+    @Override
     AsgardToken tokenFromRequest(HttpServletRequest request) {
         new SamlToken(request.getParameter('SAMLResponse'))
     }
 
+    @Override
     AuthenticationInfo authenticate(AsgardToken authToken) {
         SamlToken samlToken = (SamlToken) authToken
         if (samlToken == null) {
@@ -74,37 +88,39 @@ class OneLoginAuthenticationProvider implements AuthenticationProvider {
         Response samlResponse
 
         SamlToken(String samlResponseString) {
-            this.samlResponseString = samlResponse
-            AccountSettings accountSettings = new AccountSettings(certificate: configService.oneLoginCertificate)
-
-            samlResponse = new Response(accountSettings)
+            this.samlResponseString = samlResponseString
+            this.samlResponse = new Response(accountSettings)
             try {
                 samlResponse.loadXmlFromBase64(samlResponseString)
             } catch (Exception e) {
-                throw new AuthenticationException("Unable to parse response from OneLogin: ${samlResponseString}", e)
+                throw new AuthenticationException("Unable to parse response from IdP: ${samlResponseString}", e)
             }
         }
 
+        @Override
         boolean isValid() {
             samlResponse.valid
         }
 
+        @Override
         boolean isRememberMe() {
             true
         }
 
+        @Override
         Object getCredentials() {
             samlResponseString
         }
 
+        @Override
         Object getPrincipal() {
-            String suffix = configService.oneLoginUsernameSuffix
+            String suffix = configService.samlUsernameSuffix
             suffix ? samlResponse.nameId.replaceAll("${suffix}\$", '') : samlResponse.nameId
         }
     }
 
     @Override
-    public String logoutUrl(HttpServletRequest request) {
-        configService.oneLoginLogoutUrl
+    String logoutUrl(HttpServletRequest request) {
+        configService.samlLogoutUrl
     }
 }
