@@ -34,7 +34,11 @@ class CachedMapSpec extends Specification {
     void setup() {
         retrievalCallCount = 0
         permitAcquisitionAttemptCount = 0
-        Runnable runnableFillProcess = new Runnable() { void run() { cachedMap.fill() } }
+        Runnable runnableFillProcess = new Runnable() {
+            void run() {
+                cachedMap.fill()
+            }
+        }
         backgroundThread = new Thread(runnableFillProcess, 'background')
         userThread = new Thread(runnableFillProcess, 'user')
     }
