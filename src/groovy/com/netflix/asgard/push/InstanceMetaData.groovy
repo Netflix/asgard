@@ -37,7 +37,9 @@ class InstanceMetaData {
 
     def getId() { instance?.instanceId }
 
-    Duration getTimeSinceChange() { new Duration(lastChange, new DateTime()) }
+    Duration getTimeSinceChange() {
+        new Duration(lastChange, new DateTime())
+    }
 
     Boolean isItTimeForPeriodicLogging() {
         Duration timeSinceLastLog = new Interval(lastPeriodicLogTime, new DateTime()).toDuration()

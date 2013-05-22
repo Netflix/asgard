@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import java.security.SecureRandom
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ThreadFactory
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeUnit
 class ThreadScheduler {
 
     private final ConfigService configService
-    private final Random random = new Random()
+    private final Random random = new SecureRandom()
     final ScheduledExecutorService scheduler
 
     ThreadScheduler(ConfigService configService) {

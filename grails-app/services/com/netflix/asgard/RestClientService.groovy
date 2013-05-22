@@ -162,7 +162,7 @@ class RestClientService implements InitializingBean {
             // Ensure the connection gets released to the manager.
             EntityUtils.consume(httpResponse.entity)
             return retVal
-        } catch (Throwable e) {
+        } catch (Exception e) {
             request.abort()
             throw e
         } finally {

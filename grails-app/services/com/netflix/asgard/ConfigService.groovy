@@ -331,7 +331,7 @@ class ConfigService {
      */
     Object getBeanNamesForPlugin(String pluginName) {
         Object beanNames = grailsApplication.config.plugin[pluginName]
-        beanNames ? beanNames : null
+        beanNames ?: null
     }
 
     /**

@@ -15,7 +15,6 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.InstanceType
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.InstanceProductType

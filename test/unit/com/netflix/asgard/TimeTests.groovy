@@ -60,8 +60,8 @@ class TimeTests extends GroovyTestCase {
         // Hour should be different between time zones
         assert nowString[11..12] != nowUtcString[11..12]
 
-        DateTimeFormatter parser = ISODateTimeFormat.dateTime();
-        DateTime nowUtcBackToLocal = parser.parseDateTime(nowUtcString).toDateTime(pacificTime);
+        DateTimeFormatter parser = ISODateTimeFormat.dateTime()
+        DateTime nowUtcBackToLocal = parser.parseDateTime(nowUtcString).toDateTime(pacificTime)
         String nowUtcBackToLocalString = nowUtcBackToLocal.toString()
 
         // Year, month, day, hour should be equal between the local date string and the utc date converted back to local
