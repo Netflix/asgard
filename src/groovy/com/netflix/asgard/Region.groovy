@@ -118,7 +118,9 @@ enum Region {
     }
     static Region defaultRegion() { Region.US_EAST_1 }
 
-    String getDescription() { "$code ($location)" }
+    String getDescription() {
+        "$code ($location)"
+    }
 
     String toString() { code }
 }

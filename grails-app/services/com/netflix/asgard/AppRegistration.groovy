@@ -61,7 +61,9 @@ class AppRegistration {
         null
     }
 
-    static asDate(timeStamp) { timeStamp ? new Date(Long.parseLong(timeStamp)) : null }
+    static asDate(timeStamp) {
+        timeStamp ? new Date(Long.parseLong(timeStamp)) : null
+    }
 
     int hashCode() {
         Objects.hashCode(name, type, description, owner, email, monitorBucketType, createTime, updateTime)

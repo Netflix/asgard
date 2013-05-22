@@ -35,9 +35,9 @@ class GroupedInstanceState {
         if (obj == null) { return false }
         if (obj.is(this)) { return true }
         if (obj.getClass() != getClass()) {
-            return false;
+            return false
         }
-        GroupedInstanceState that = (GroupedInstanceState) obj;
+        GroupedInstanceState that = (GroupedInstanceState) obj
         new EqualsBuilder().
                 append(lifecycleState, that.lifecycleState).
                 append(loadBalancers, that.loadBalancers).
@@ -45,7 +45,7 @@ class GroupedInstanceState {
                 append(buildNumber, that.buildNumber).
                 append(imageId, that.imageId).
                 append(discoveryStatus, that.discoveryStatus).
-                isEquals();
+                isEquals()
     }
 
     int hashCode() {

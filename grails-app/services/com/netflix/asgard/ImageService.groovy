@@ -356,7 +356,8 @@ class ImageService implements BackgroundProcessInitializer {
             log.debug "Calling ${url} with params ${query} for tag replication."
             int responseCode = restClientService.post(url, query)
             if (responseCode >= 300) {
-                throw new Exception("Call to ${url} with params ${query} returned status code ${responseCode}")
+                String msg = "Call to ${url} with params ${query} returned status code ${responseCode}"
+                throw new ServerNotActiveException(msg)
             }
         } catch (Exception e) {
             // Let the thread continue even if promotion target server returns an error

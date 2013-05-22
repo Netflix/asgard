@@ -221,8 +221,6 @@ class InstanceTypeService implements CacheInitializer {
                     hardwareProfiles << hardwareProfile
                 }
             }
-        } else {
-            throw new Exception("Unexpected format of HTML in instance-types.html")
         }
         hardwareProfiles
     }

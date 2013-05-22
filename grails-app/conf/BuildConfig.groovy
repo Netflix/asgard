@@ -120,7 +120,7 @@ grails.project.dependency.resolution = {
                 'org.jsoup:jsoup:1.6.1',
 
                 // Static analysis for Groovy code.
-                'org.codenarc:CodeNarc:0.17',
+                'org.codenarc:CodeNarc:0.18.1',
 
                 // This fixes ivy resolution issues we had with our transitive dependency on 1.4.
                 'commons-codec:commons-codec:1.5',
