@@ -798,8 +798,11 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     Boolean checkHostHealth(String url) {
-        Integer responseCode = restClientService.getRepeatedResponseCode(url)
-        restClientService.checkOkayResponseCode(responseCode)
+        if (configService.isOnline()) {
+            Integer responseCode = restClientService.getRepeatedResponseCode(url)
+            return restClientService.checkOkayResponseCode(responseCode)
+        }
+        true
     }
 
     List<InstanceStateChange> terminateInstances(UserContext userContext, Collection<String> instanceIds,
