@@ -1064,9 +1064,12 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             String encodedUserData = Ensure.encoded(userData)
             if (configService.instanceTypeNeedsEbsVolumes(instanceType)) {
                 blockDeviceMappings = blockDeviceMappings ?: []
-                blockDeviceMappings << new BlockDeviceMapping(
-                        deviceName: "${configService.ebsVolumeDeviceNameForLaunchConfigs}",
-                        ebs: new Ebs(volumeSize: configService.sizeOfEbsVolumesAddedToLaunchConfigs))
+                List<String> deviceNames = configService.ebsVolumeDeviceNamesForLaunchConfigs
+                for (deviceName in deviceNames) {
+                    blockDeviceMappings << new BlockDeviceMapping(
+                            deviceName: deviceName,
+                            ebs: new Ebs(volumeSize: configService.sizeOfEbsVolumesAddedToLaunchConfigs))
+                }
             }
             def request = new CreateLaunchConfigurationRequest()
                     .withLaunchConfigurationName(name)
