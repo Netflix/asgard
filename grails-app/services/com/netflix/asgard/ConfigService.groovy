@@ -619,13 +619,13 @@ class ConfigService {
      * @return the size of EBS volumes added to launch configurations for specific instance types
      */
     int getSizeOfEbsVolumesAddedToLaunchConfigs() {
-        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.size ?: 250
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.size ?: 125
     }
 
     /**
      * @return device name for the single EBS volume added to launch configurations for specific instance types
      */
-    String getEbsVolumeDeviceNameForLaunchConfigs() {
-        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.deviceName ?: '/dev/sdb'
+    List<String> getEbsVolumeDeviceNamesForLaunchConfigs() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.deviceNames ?: ['/dev/sdb', '/dev/sdc']
     }
 }
