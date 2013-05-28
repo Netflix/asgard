@@ -49,6 +49,7 @@ import com.amazonaws.services.elasticloadbalancing.model.InstanceState
 import com.amazonaws.services.elasticloadbalancing.model.Listener
 import com.amazonaws.services.elasticloadbalancing.model.ListenerDescription
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.amazonaws.services.elasticloadbalancing.model.Policies
 import com.amazonaws.services.elasticloadbalancing.model.RegisterInstancesWithLoadBalancerRequest
 import com.amazonaws.services.elasticloadbalancing.model.RegisterInstancesWithLoadBalancerResult
 import com.amazonaws.services.elasticloadbalancing.model.SetLoadBalancerListenerSSLCertificateRequest
@@ -87,7 +88,11 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
                                 withProtocol(listenerDesc.listener.protocol).
                                 withSSLCertificateId(Mocks.jsonNullable(listenerDesc.listener.SSLCertificateId))
                         )
-            })
+            }).
+            withPolicies(new Policies().
+                    withAppCookieStickinessPolicies(it.policies.appCookieStickinessPolicies as List).
+                    withLBCookieStickinessPolicies(it.policies.LBCookieStickinessPolicies as List).
+                    withOtherPolicies(it.policies.otherPolicies as List))
         }
     }
 

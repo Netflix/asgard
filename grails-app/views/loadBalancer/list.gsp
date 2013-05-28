@@ -38,6 +38,7 @@
           <th>Name</th>
           <th>DNS</th>
           <th>Av Zones</th>
+          <th>Policies</th>
           <th>Listeners</th>
           <th>Health Check</th>
           <th>Instances</th>
@@ -54,6 +55,12 @@
                 <div><g:availabilityZone value="${zone}"/></div>
               </g:each>
             </td>
+            <td class="lbPolicies">
+              <ul>
+                <g:each var="policy" in="${lb.policies.otherPolicies}">
+                  <li>${policy}</li>
+                </g:each>
+              </ul>
             <td>
               <g:each var="ld" in="${lb.listenerDescriptions}">
                 ${ld.listener.protocol}:${ld.listener.loadBalancerPort} => ${ld.listener.instancePort}<br>
