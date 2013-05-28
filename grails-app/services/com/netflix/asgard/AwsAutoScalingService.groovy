@@ -1020,7 +1020,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 createLaunchConfiguration(userContext, launchConfigName, launchConfigTemplate.imageId,
                         launchConfigTemplate.keyName, securityGroups, userData,
                         launchConfigTemplate.instanceType, launchConfigTemplate.kernelId,
-                        launchConfigTemplate.ramdiskId, launchConfigTemplate.iamInstanceProfile, null,
+                        launchConfigTemplate.ramdiskId, launchConfigTemplate.iamInstanceProfile,
                         launchConfigTemplate.spotPrice, launchConfigTemplate.ebsOptimized, task)
                 result.launchConfigCreated = true
             } catch (AmazonServiceException launchConfigCreateException) {
@@ -1054,7 +1054,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     void createLaunchConfiguration(UserContext userContext, String name, String imageId, String keyName,
             Collection<String> securityGroups, String userData, String instanceType, String kernelId, String ramdiskId,
-            String iamInstanceProfile, Collection<BlockDeviceMapping> blockDeviceMappings, String spotPrice,
+            String iamInstanceProfile, String spotPrice,
             boolean ebsOptimized = false, Task existingTask = null) {
         taskService.runTask(userContext, "Create Launch Configuration '${name}' with image '${imageId}'", { Task task ->
             Check.notNull(name, LaunchConfiguration, "name")
@@ -1062,8 +1062,8 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             Check.notNull(keyName, LaunchConfiguration, "keyName")
             Check.notNull(instanceType, LaunchConfiguration, "instanceType")
             String encodedUserData = Ensure.encoded(userData)
+            List<BlockDeviceMapping> blockDeviceMappings = []
             if (configService.instanceTypeNeedsEbsVolumes(instanceType)) {
-                blockDeviceMappings = blockDeviceMappings ?: []
                 List<String> deviceNames = configService.ebsVolumeDeviceNamesForLaunchConfigs
                 for (deviceName in deviceNames) {
                     blockDeviceMappings << new BlockDeviceMapping(
