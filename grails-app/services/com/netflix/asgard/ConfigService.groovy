@@ -91,8 +91,11 @@ class ConfigService {
      * @return the Discovery server URL for the specified region, or null if there isn't one
      */
     String getRegionalDiscoveryServer(Region region) {
-        Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.eureka?.regionsToServers
-        regionsToDiscoveryServers ? regionsToDiscoveryServers[region] : null
+        if (isOnline()) {
+            Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.eureka?.regionsToServers
+            return regionsToDiscoveryServers ? regionsToDiscoveryServers[region] : null
+        }
+        null
     }
 
     /**
@@ -102,8 +105,11 @@ class ConfigService {
      * @return the PlatformService server URL for the specified region, or null if there isn't one
      */
     String getRegionalPlatformServiceServer(Region region) {
-        Map<Region, String> regionsToPlatformServiceServers = grailsApplication.config.platform?.regionsToServers
-        regionsToPlatformServiceServers ? regionsToPlatformServiceServers[region] : null
+        if (isOnline()) {
+            Map<Region, String> regionsToPlatformServiceServers = grailsApplication.config.platform?.regionsToServers
+            regionsToPlatformServiceServers ? regionsToPlatformServiceServers[region] : null
+        }
+        null
     }
 
     /**
@@ -183,11 +189,10 @@ class ConfigService {
      *         to reduce the number of large, simultaneous data retrieval calls to cloud APIs
      */
     boolean getUseJitter() {
-        Boolean result = grailsApplication.config.thread?.useJitter
-        if (result == null) {
-            return true
+        if (isOnline()) {
+            return grailsApplication.config.thread?.useJitter
         }
-        result
+        false
     }
 
     /**

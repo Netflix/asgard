@@ -218,11 +218,14 @@ th.desc a                   { background-image: url(../images/skin/sorted_desc.g
 .list td.ami a              { max-width: 200px; word-wrap: break-word; }
 .list td.propKey a          { max-width: 260px; word-wrap: break-word; }
 .list td.availabilityZone   {                                          white-space: nowrap; }
+.list td.lbPolicies         { max-width: 182px;                        }
 .list td.description        { max-width:  76px;                        }
 .list td.storage            { max-width: 130px;                        }
 .list td.cpu                { max-width: 130px;                        }
 .list td.architecture       { max-width:  34px;                        }
 .list td.ioPerformance      { max-width:  56px;                        }
+.list .lbPolicies ul        { padding-left: 0; list-style-type: none;  }
+.list .lbPolicies li        { padding-left: 10px; text-indent: -10px;  } /* Hanging indent */
 .list .activities td.details          { max-width: 300px;                        }
 .list .fastProperties .var            { max-width:  60px; word-wrap: break-word; white-space: normal; }
 .list .fastProperties .propKey        { max-width: 400px; word-wrap: break-word; }
