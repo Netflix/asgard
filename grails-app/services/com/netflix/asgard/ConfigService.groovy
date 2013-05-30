@@ -107,7 +107,7 @@ class ConfigService {
     String getRegionalPlatformServiceServer(Region region) {
         if (isOnline()) {
             Map<Region, String> regionsToPlatformServiceServers = grailsApplication.config.platform?.regionsToServers
-            regionsToPlatformServiceServers ? regionsToPlatformServiceServers[region] : null
+            return regionsToPlatformServiceServers ? regionsToPlatformServiceServers[region] : null
         }
         null
     }
