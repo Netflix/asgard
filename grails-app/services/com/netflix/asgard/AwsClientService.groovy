@@ -21,6 +21,7 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient
 import com.amazonaws.services.ec2.AmazonEC2Client
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient
 import com.amazonaws.services.rds.AmazonRDSClient
+import com.amazonaws.services.route53.AmazonRoute53Client
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.simpledb.AmazonSimpleDBClient
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient
@@ -31,6 +32,7 @@ import com.netflix.asgard.mock.MockAmazonCloudWatchClient
 import com.netflix.asgard.mock.MockAmazonEC2Client
 import com.netflix.asgard.mock.MockAmazonElasticLoadBalancingClient
 import com.netflix.asgard.mock.MockAmazonRDSClient
+import com.netflix.asgard.mock.MockAmazonRoute53Client
 import com.netflix.asgard.mock.MockAmazonS3Client
 import com.netflix.asgard.mock.MockAmazonSimpleDBClient
 import com.netflix.asgard.mock.MockAmazonSimpleWorkflowClient
@@ -66,6 +68,7 @@ class AwsClientService implements InitializingBean {
                 AmazonElasticLoadBalancing: concrete(AmazonElasticLoadBalancingClient,
                         MockAmazonElasticLoadBalancingClient),
                 AmazonRDS: concrete(AmazonRDSClient, MockAmazonRDSClient),
+                AmazonRoute53: concrete(AmazonRoute53Client, MockAmazonRoute53Client),
                 AmazonS3: concrete(AmazonS3Client, MockAmazonS3Client),
                 AmazonSimpleDB: concrete(AmazonSimpleDBClient, MockAmazonSimpleDBClient),
                 AmazonSimpleWorkflow: concrete(AmazonSimpleWorkflowClient, MockAmazonSimpleWorkflowClient),

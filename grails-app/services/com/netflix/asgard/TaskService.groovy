@@ -34,8 +34,8 @@ class TaskService {
 
     static transactional = false
     private static final Collection<String> NON_ALERTABLE_ERROR_CODES = ['DBInstanceAlreadyExists',
-            'DuplicateLoadBalancerName', 'InvalidDBInstanceState', 'InvalidDBSnapshotState', 'InvalidGroup.Duplicate',
-            'InvalidGroup.InUse', 'InvalidParameterValue', 'ValidationError']
+            'DuplicateLoadBalancerName', 'InvalidChangeBatch', 'InvalidDBInstanceState', 'InvalidDBSnapshotState',
+            'InvalidGroup.Duplicate', 'InvalidGroup.InUse', 'InvalidInput',  'InvalidParameterValue', 'ValidationError']
 
     Caches caches
     def awsSimpleWorkflowService
