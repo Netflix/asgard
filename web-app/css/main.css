@@ -209,6 +209,7 @@ th.desc a                   { background-image: url(../images/skin/sorted_desc.g
 .list td.truncate           { max-width: 200px; overflow: hidden; }
 .list td.app a              { max-width: 122px; word-wrap: break-word; }
 .list td.email              { max-width: 150px; word-wrap: break-word; }
+.list td.owner              { max-width: 150px; word-wrap: break-word; }
 .list td.serviceKey         { max-width:  60px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
 .list td.variables          { max-width: 100px; word-wrap: break-word; }
 .list td.autoScaling a      { max-width: 130px; word-wrap: break-word; }
