@@ -38,7 +38,6 @@
           <th>Name</th>
           <th>ASGs</th>
           <th>Instances</th>
-          <th>Type</th>
           <th>Description</th>
           <th>Email</th>
           <th>Owner</th>
@@ -52,7 +51,6 @@
             <td><g:linkObject type="application" name="${app.name}"/></td>
             <td><g:link class="autoScaling" controller="autoScaling" action="list" id="${app.name}">${groupCountsPerAppName.getCount(app.name)}</g:link></td>
             <td><g:link class="instance" controller="instance" action="list" id="${app.name}">${instanceCountsPerAppName.getCount(app.name)}</g:link></td>
-            <td>${app.type}</td>
             <td>${app.description}</td>
             <td>${app.email}</td>
             <td>${app.owner}</td>
