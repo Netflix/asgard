@@ -850,6 +850,19 @@ jQuery(document).ready(function() {
     };
     setUpFastPropertyCreatePage();
 
+    // RDS create page
+    var setUpRDSCreatePage = function() {
+        jQuery('#multiAZ').change(function() {
+            if (this.checked) {
+                jQuery('#availabilityZone').select2('disable', false);
+                jQuery('#availabilityZone').select2('val', "-Zone-");
+            } else {
+                jQuery('#availabilityZone').select2('enable');
+            }
+        });
+    };
+    setUpRDSCreatePage();
+
     // Task page
     var setUpTaskPage = function() {
         var autoScroller;
