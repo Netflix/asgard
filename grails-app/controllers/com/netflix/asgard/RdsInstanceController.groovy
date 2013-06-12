@@ -209,7 +209,6 @@ class DbCreateCommand {
         masterUsername(nullable: false, blank: false, size: 1..16, matches: '[a-zA-Z0-9]{1,16}')
         masterUserPassword(nullable: false, blank: false, size: 4..16, matches: '[a-zA-Z0-9]{4,16}')
         port(nullable: false)
-        multiAZ(nullable: false)
         preferredBackupWindow(blank: true, matches: '(20|21|22|23|[01]\\d|\\d)(([:][0-5]\\d){1,2})-(20|21|22|23|[01]\\d|\\d)(([:][0-5]\\d){1,2})')
         // Did not check for 2 hour min, clash with maintenance, or that backup period specified
 
