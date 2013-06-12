@@ -451,28 +451,11 @@ class AutoScalingController {
         UserContext userContext = UserContext.of(request)
         String name = params.name
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, name)
-        Boolean showGroupNext = false
-        Boolean showTask = false
         if (!group) {
             flash.message = "Auto Scaling Group '${name}' not found."
         } else {
-            if (group?.instances?.size() <= 0) {
-                try {
-                    GroupDeleteOperation operation = pushService.startGroupDelete(userContext, group)
-                    showTask = true
-                    redirect(controller: 'task', action: 'show', params: [id: operation.taskId])
-                } catch (Exception e) {
-                    flash.message = "Could not delete Auto Scaling Group: ${e}"
-                    showGroupNext = true
-                }
-            } else {
-                flash.message = "You cannot delete an auto scaling group that still has instances. " +
-                        "Set the min and max to 0, wait for the instances to disappear, then try deleting again."
-                showGroupNext = true
-            }
-        }
-        if (!showTask) {
-            showGroupNext ? redirect(action: 'show', params: [id: name]) : redirect(action: 'list')
+            GroupDeleteOperation operation = pushService.startGroupDelete(userContext, group)
+            redirect(controller: 'task', action: 'show', params: [id: operation.taskId])
         }
     }
 
