@@ -56,7 +56,7 @@ jQuery.fn.extend({
     // Prevent double submission of forms
     // http://stackoverflow.com/questions/2830542/prevent-double-submission-of-forms-in-jquery
     preventDoubleSubmission: function() {
-        jQuery(this).bind('submit', function(e){
+        jQuery(this).bind('submit', function(e) {
             var jForm = jQuery(this);
             if (jForm.data('submitted') === true) {
                 // Previously submitted - don't submit again
