@@ -272,8 +272,9 @@ class GroupResizeOperation extends AbstractPushOperation {
         while (!idsOfInstancesThatAreNotYetHealthy.empty) {
             if (hasTooMuchTimePassedSinceBatchStart()) {
                 Integer unhealthyCount = idsOfInstancesThatAreNotYetHealthy.size()
+                String regardingUpStatus = initialTraffic == InitialTraffic.ALLOWED ? ' with status "UP"' : ''
                 throw new PushException("Timeout waiting ${Time.format(calculateMaxTimePerBatch())} " +
-                        "for instances to register with Eureka and pass a health check. " +
+                        "for instances to register with Eureka${regardingUpStatus} and pass a health check. " +
                         "Expected ${newMin} discoverable, healthy instance${newMin == 1 ? '' : 's'}, but " +
                         "auto scaling group '${autoScalingGroupName}' still has ${unhealthyCount} " +
                         "undiscoverable or unhealthy instance${unhealthyCount == 1 ? '': 's'} " +
@@ -290,6 +291,13 @@ class GroupResizeOperation extends AbstractPushOperation {
 
     private Collection<String> findInstancesNotYetHealthy(Collection<String> instanceIds) {
         instanceIds.findAll { String id ->
+
+            // If traffic is allowed, then any instance that is not "UP" in Eureka should be considered unhealthy
+            if (initialTraffic == InitialTraffic.ALLOWED &&
+                    discoveryService.getAppInstance(userContext, id)?.status != 'UP') {
+                return true
+            }
+
             String healthCheckUrl = getHealthCheckUrl(id)
             if (healthCheckUrl) {
                 Integer responseCode = restClientService.getRepeatedResponseCode(healthCheckUrl)
