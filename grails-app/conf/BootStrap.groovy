@@ -1,6 +1,3 @@
-import com.netflix.asgard.FastProperty
-import grails.converters.JSON
-
 /*
  * Copyright 2012 Netflix, Inc.
  *
@@ -16,12 +13,13 @@ import grails.converters.JSON
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.netflix.asgard.FastProperty
+import grails.converters.JSON
+
 class BootStrap {
 
-    def cacheLoadStartService
     def configService
     def initService
-    def monkeyPatcherService
 
     def init = { servletContext ->
         if (configService.appConfigured) { // Only start warming the caches if Asgard has been configured
