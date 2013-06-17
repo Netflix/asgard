@@ -76,7 +76,6 @@ class RdsInstanceController {
             'selectedSecurityGroups': Requests.ensureList(params.selectedSecurityGroups),
             'subnetPurpose': params.subnetPurpose ?: null,
             'subnetPurposes': subnets.getPurposesForZones(awsEc2Service.getAvailabilityZones(userContext)*.zoneName, SubnetTarget.ELB).sort(),
-            'subnets': subnets,
             'vpcId': purposeToVpcId[params.subnetPurpose],
             'zoneList':awsEc2Service.getAvailabilityZones(userContext)
         ]
@@ -90,9 +89,9 @@ class RdsInstanceController {
         } else {
             try {
                 boolean multiAZ = "on".equals(params.multiAZ)
-                def subnets = awsEc2Service.getSubnets(userContext)
-                def selectedSecurityGroups = (params.selectedSecurityGroups instanceof String) ? [params.selectedSecurityGroups] : params.selectedSecurityGroups as List
-                def selectedDBSecurityGroups = (params.selectedDBSecurityGroups instanceof String) ? [params.selectedDBSecurityGroups] : params.selectedDBSecurityGroups as List
+                Subnets subnets = awsEc2Service.getSubnets(userContext)
+                List<String> selectedSecurityGroups = Requests.ensureList(params.selectedSecurityGroups)
+                List<String> selectedDBSecurityGroups = Requests.ensureList(params.selectedDBSecurityGroups)
                 if (!selectedDBSecurityGroups && !params.subnetPurpose) {
                     selectedDBSecurityGroups = ["default"]
                 }

@@ -91,14 +91,6 @@ class RdsInstanceControllerSpec extends Specification {
         def cmd = new DbCreateCommand(showMultiAZParams)
 
         when:
-        cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        cmd.errors.errorCount == 1
-        cmd.errors.fieldError.field == "availabilityZone"
-
-        when:
         controller.save(cmd)
 
         then:
@@ -107,14 +99,6 @@ class RdsInstanceControllerSpec extends Specification {
 
     def 'save should return exception when VPC and DB security groups specified'() {
         def cmd = new DbCreateCommand(showVPCParams)
-
-        when:
-        cmd.validate()
-
-        then:
-        cmd.hasErrors()
-        cmd.errors.errorCount == 1
-        cmd.errors.fieldError.field == "selectedDBSecurityGroups"
 
         when:
         controller.save(cmd)

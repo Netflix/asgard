@@ -33,6 +33,7 @@ import com.amazonaws.services.rds.model.DescribeDBSecurityGroupsRequest
 import com.amazonaws.services.rds.model.DescribeDBSnapshotsRequest
 import com.amazonaws.services.rds.model.DescribeDBSnapshotsResult
 import com.amazonaws.services.rds.model.DescribeDBSubnetGroupsRequest
+import com.amazonaws.services.rds.model.DescribeDBSubnetGroupsResult
 import com.amazonaws.services.rds.model.ModifyDBInstanceRequest
 import com.amazonaws.services.rds.model.RestoreDBInstanceFromDBSnapshotRequest
 import com.amazonaws.services.rds.model.RevokeDBSecurityGroupIngressRequest
@@ -124,7 +125,7 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
         if (port) {request.setPort(port)}
         taskService.runTask(userContext, "Creating DB instance '${templateDbInstance.DBInstanceIdentifier}'", { task ->
             if (subnetPurpose) {
-                def dbSubnetGroups
+                DescribeDBSubnetGroupsResult dbSubnetGroups
                 try {
                     DescribeDBSubnetGroupsRequest subnetExistsRequest = new DescribeDBSubnetGroupsRequest()
                         .withDBSubnetGroupName(templateDbInstance.DBSubnetGroup.DBSubnetGroupName)
@@ -134,7 +135,7 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
                 }
 
                 if (!dbSubnetGroups) {
-                    final CreateDBSubnetGroupRequest subnetRequest = new CreateDBSubnetGroupRequest()
+                    CreateDBSubnetGroupRequest subnetRequest = new CreateDBSubnetGroupRequest()
                         .withDBSubnetGroupName(templateDbInstance.DBSubnetGroup.DBSubnetGroupName)
                         .withDBSubnetGroupDescription(templateDbInstance.DBSubnetGroup.DBSubnetGroupDescription)
                         .withSubnetIds(templateDbInstance.DBSubnetGroup.subnets.collect { it.subnetId })
@@ -144,7 +145,7 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
                 request.DBSubnetGroupName = templateDbInstance.DBSubnetGroup.DBSubnetGroupName
                 request.vpcSecurityGroupIds = templateDbInstance.vpcSecurityGroups
             }
-            final DBInstance createdInstance = awsClient.by(userContext.region).createDBInstance(request)
+            DBInstance createdInstance = awsClient.by(userContext.region).createDBInstance(request)
             caches.allDBInstances.by(userContext.region).put(createdInstance.getDBInstanceIdentifier(), createdInstance)
         }, Link.to(EntityType.rdsInstance, templateDbInstance.DBInstanceIdentifier))
         getDBInstance(userContext, templateDbInstance.DBInstanceIdentifier)
