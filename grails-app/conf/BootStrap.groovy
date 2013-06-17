@@ -18,8 +18,14 @@ import grails.converters.JSON
 
 class BootStrap {
 
+    /** This "unused" variable needs to be declared here in order to get the referenced service initialized early. */
+    def cacheLoadStartService
+
     def configService
     def initService
+
+    /** This "unused" variable needs to be declared here in order to get the referenced service initialized early. */
+    def monkeyPatcherService
 
     def init = { servletContext ->
         if (configService.appConfigured) { // Only start warming the caches if Asgard has been configured
