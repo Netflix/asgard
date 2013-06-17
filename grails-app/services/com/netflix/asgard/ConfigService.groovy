@@ -27,6 +27,7 @@ class ConfigService {
     static transactional = false
 
     def grailsApplication
+    def flagService
 
     /**
      * Gets the most commonly used namespace for Amazon CloudWatch metrics used for auto scaling policies. If not
@@ -559,6 +560,9 @@ class ConfigService {
      * @return true if edit links should be hidden for unauthenticated users, false to show edit links to all users
      */
     boolean isAuthenticationRequiredForEdit() {
+        if (flagService.isOn(Flag.SUSPEND_AUTHENTICATION_REQUIREMENT)) {
+            return false
+        }
         grailsApplication.config.security?.authenticationRequiredForEdit ?: false
     }
 
