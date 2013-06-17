@@ -51,6 +51,22 @@ class RdsInstanceControllerSpec extends Specification {
         selectedDBSecurityGroups: "testsecgroup",
     ]
 
+    final showVPCParams = [
+        allocatedStorage: 5,
+        availabilityZone: "us-east-1a",
+        backupRetentionPeriod: 0,
+        dBInstanceClass: "dbClass",
+        dBInstanceIdentifier: "testDB",
+        dBName: "DBname",
+        masterUsername: "testname",
+        masterUserPassword: "testpassword",
+        port: 3306,
+        preferredBackupWindow: "",
+        preferredMaintenanceWindow: "",
+        selectedDBSecurityGroups: "testsecgroup",
+        subnetPurpose: "internal",
+    ]
+
     void setup() {
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(DbCreateCommand)
@@ -81,6 +97,24 @@ class RdsInstanceControllerSpec extends Specification {
         cmd.hasErrors()
         cmd.errors.errorCount == 1
         cmd.errors.fieldError.field == "availabilityZone"
+
+        when:
+        controller.save(cmd)
+
+        then:
+        '/rdsInstance/create' == response.redirectUrl
+    }
+
+    def 'save should return exception when VPC and DB security groups specified'() {
+        def cmd = new DbCreateCommand(showVPCParams)
+
+        when:
+        cmd.validate()
+
+        then:
+        cmd.hasErrors()
+        cmd.errors.errorCount == 1
+        cmd.errors.fieldError.field == "selectedDBSecurityGroups"
 
         when:
         controller.save(cmd)

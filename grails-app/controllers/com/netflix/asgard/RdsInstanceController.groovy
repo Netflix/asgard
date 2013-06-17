@@ -15,9 +15,13 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.rds.model.DBInstance
 import com.amazonaws.services.rds.model.DBSnapshot
+import com.amazonaws.services.rds.model.DBSubnetGroup
 import com.netflix.asgard.AwsRdsService.Engine
+import com.netflix.asgard.model.SubnetTarget
+import com.netflix.asgard.model.Subnets
 import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
@@ -56,11 +60,24 @@ class RdsInstanceController {
 
     def create = {
         UserContext userContext = UserContext.of(request)
+        List<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
+            it.groupName?.toLowerCase()
+        }
+        Map<Object, List<SecurityGroup>> securityGroupsGroupedByVpcId = effectiveGroups.groupBy { it.vpcId }
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
         [
             'allDBSecurityGroups' : awsRdsService.getDBSecurityGroups(userContext),
             'allDBInstanceClasses' : AwsRdsService.getDBInstanceClasses(),
             'allDbInstanceEngines' : Engine.values()*.awsValue,
             'allLicenseModels' : AwsRdsService.getLicenseModels(),
+            'purposeToVpcId': purposeToVpcId,
+            'securityGroupsGroupedByVpcId': securityGroupsGroupedByVpcId,
+            'selectedSecurityGroups': Requests.ensureList(params.selectedSecurityGroups),
+            'subnetPurpose': params.subnetPurpose ?: null,
+            'subnetPurposes': subnets.getPurposesForZones(awsEc2Service.getAvailabilityZones(userContext)*.zoneName, SubnetTarget.ELB).sort(),
+            'subnets': subnets,
+            'vpcId': purposeToVpcId[params.subnetPurpose],
             'zoneList':awsEc2Service.getAvailabilityZones(userContext)
         ]
     }
@@ -73,16 +90,26 @@ class RdsInstanceController {
         } else {
             try {
                 boolean multiAZ = "on".equals(params.multiAZ)
+                def subnets = awsEc2Service.getSubnets(userContext)
+                def selectedSecurityGroups = (params.selectedSecurityGroups instanceof String) ? [params.selectedSecurityGroups] : params.selectedSecurityGroups as List
                 def selectedDBSecurityGroups = (params.selectedDBSecurityGroups instanceof String) ? [params.selectedDBSecurityGroups] : params.selectedDBSecurityGroups as List
-                if (!selectedDBSecurityGroups) selectedDBSecurityGroups = ["default"]
-                //awsRdsService.createDBSecurityGroup(params.name, params.description)
+                if (!selectedDBSecurityGroups && !params.subnetPurpose) {
+                    selectedDBSecurityGroups = ["default"]
+                }
+
+                final DBSubnetGroup dbSubnetGroup = new DBSubnetGroup()
+                    .withDBSubnetGroupName(params.dBName)
+                    .withDBSubnetGroupDescription(params.dBName)
+                    .withSubnets(subnets.allSubnets)
+                    .withVpcId(subnets.mapPurposeToVpcId()[params.subnetPurpose])
 
                 final DBInstance dbInstance = new DBInstance()
                     .withAllocatedStorage(params.allocatedStorage as Integer)
                     .withBackupRetentionPeriod(params.backupRetentionPeriod as Integer)
-                    .withDBInstanceClass(params.dBInstanceClass,)
+                    .withDBInstanceClass(params.dBInstanceClass)
                     .withDBInstanceIdentifier(params.dBInstanceIdentifier)
                     .withDBName(params.dBName)
+                    .withDBSubnetGroup(dbSubnetGroup)
                     .withEngine(params.engine)
                     .withDBSecurityGroups(selectedDBSecurityGroups)
                     .withMasterUsername(params.masterUsername)
@@ -90,12 +117,13 @@ class RdsInstanceController {
                     .withPreferredBackupWindow(params.preferredBackupWindow)
                     .withPreferredMaintenanceWindow(params.preferredMaintenanceWindow)
                     .withLicenseModel(params.licenseModel)
+                    .withVpcSecurityGroups(selectedSecurityGroups)
 
                 if (!multiAZ) {
                     dbInstance.availabilityZone = params.availabilityZone
                 }
 
-                awsRdsService.createDBInstance(userContext, dbInstance, params.masterUserPassword, params.port as Integer)
+                awsRdsService.createDBInstance(userContext, dbInstance, params.masterUserPassword, params.port as Integer, params.subnetPurpose ?: null)
                 flash.message = "DB Instance '${params.dBInstanceIdentifier}' has been created."
                 redirect(action: 'show', params: [id: params.dBInstanceIdentifier])
             } catch (Exception e) {
@@ -150,7 +178,15 @@ class RdsInstanceController {
         if (!dbInstance) {
             Requests.renderNotFound('DB Instance', dbInstanceId, this)
         } else {
-            def details = ['dbInstance':dbInstance, 'snapshots' : snapshots]
+            List<String> subnetIds = dbInstance.DBSubnetGroup?.subnets?.collect { it.subnetIdentifier } ?: []
+
+            def details = [
+                'dbInstance': dbInstance,
+                'snapshots': snapshots,
+                'vpcId': awsEc2Service.getSubnets(userContext).coerceLoneOrNoneFromIds(subnetIds)?.vpcId ?: '',
+                'subnets': subnetIds,
+                'vpcSecurityGroupsIds': dbInstance.vpcSecurityGroups.collect { it.vpcSecurityGroupId }
+            ]
             withFormat {
                 html { return details }
                 xml { new XML(details).render(response) }
@@ -183,11 +219,13 @@ class DbCreateCommand {
     String dBInstanceClass // Valid values: db.m1.small | db.m1.large | db.m1.xlarge | db.m2.2xlarge | db.m2.4xlarge
     String dBInstanceIdentifier // Constraints: Must contain from 1 to 63 alphanumeric characters or hyphens. First character must be a letter. Cannot end with a hyphen or contain two consecutive hyphens.
     String dBName // Cannot be empty. Must contain 1 to 64 alphanumeric characters. Cannot be a word reserved by the specified database engine.
+    Collection<String> selectedSecurityGroups // At least one
     Collection<String> selectedDBSecurityGroups // At least one
     String masterUsername // Must be an alphanumeric string containing from 1 to 16 characters.
     String masterUserPassword // Must contain 4 to 16 alphanumeric characters.
     Integer port
     String multiAZ
+    String subnetPurpose
     String preferredBackupWindow // Constraints: Must be in the format hh24:mi-hh24:mi.
     // Times should be 24-hour Universal Time Coordinated (UTC).
     // Must not conflict with the --preferred-maintenance-window.
@@ -205,7 +243,29 @@ class DbCreateCommand {
         dBInstanceClass(nullable: false, blank: false)
         dBInstanceIdentifier(nullable: false, blank: false, size: 1..63, matches: '[a-zA-Z]{1}[a-zA-Z0-9-]*[^-]$') // This match does not check the double-hyphen
         dBName(nullable: false, blank: false, size: 1..64, matches: '[a-zA-Z0-9]{1,64}')
-        selectedDBSecurityGroups(nullable: false, minSize: 1)
+        selectedSecurityGroups(validator: {
+            value, object ->
+                if (object.subnetPurpose) {
+                    if (!value && !object.selectedDBSecurityGroups) {
+                        'dbCreateCommand.selectedSecurityGroups.minSize.error'
+                    }
+                } else {
+                    if (value) {
+                        'dbCreateCommand.selectedSecurityGroups.vpc.error'
+                    }
+                }
+            })
+        selectedDBSecurityGroups(validator: {
+            value, object ->
+                if (object.subnetPurpose) {
+                    if (!value && !object.selectedSecurityGroups) {
+                        'dbCreateCommand.selectedDBSecurityGroups.minSize.error'
+                    }
+                    if (value && object) {
+                        'dbCreateCommand.selectedDBSecurityGroups.vpc.error'
+                    }
+                }
+            })
         masterUsername(nullable: false, blank: false, size: 1..16, matches: '[a-zA-Z0-9]{1,16}')
         masterUserPassword(nullable: false, blank: false, size: 4..16, matches: '[a-zA-Z0-9]{4,16}')
         port(nullable: false)

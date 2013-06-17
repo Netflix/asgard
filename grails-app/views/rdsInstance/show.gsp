@@ -98,6 +98,14 @@
           <td class="value">${dbInstance.engineVersion}</td>
         </tr>
         <tr class="prop">
+          <td class="name">VPC:</td>
+          <td class="value">${vpcId}</td>
+        </tr>
+        <tr class="prop">
+          <td class="name">Subnets:</td>
+          <td class="value">${subnets}</td>
+        </tr>
+        <tr class="prop">
           <td class="name" title="Creation Date">DB Create Date:</td>
           <td class="value"><g:formatDate date="${dbInstance.instanceCreateTime}"/></td>
         </tr>
@@ -132,6 +140,10 @@
               </g:each>
             </table>
           </td>
+        </tr>
+        <tr class="prop">
+          <td class="name">VPC Security Groups:</td>
+          <td class="value">${vpcSecurityGroupsIds}</td>
         </tr>
         <tr class="prop">
           <td class="name">DB Snapshots:</td>

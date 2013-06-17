@@ -93,7 +93,9 @@
             <td class="name" title="Multiple AZ"><label for="multiAZ">${params.multiAZ}  Multiple AZ:</label></td>
             <td class="value"><g:checkBox name="multiAZ" value="on" checked="${'on' == params.multiAZ }"/></td>
           </tr>
-          <tr class="prop">
+          <g:render template="/common/vpcSelection" model="[awsAction: 'Create', awsObject: 'RDS']"/>
+          <g:render template="/common/securityGroupSelection" />
+          <tr class="prop" name="dbSecurityGroups">
             <td class="name">DB Security Groups:</td>
             <td class="value">
               <table>
