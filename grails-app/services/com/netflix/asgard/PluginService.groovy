@@ -31,6 +31,7 @@ class PluginService implements ApplicationContextAware {
 
     ApplicationContext applicationContext
     ConfigService configService
+    FlagService flagService
 
     UserDataProvider getUserDataProvider() {
         String beanName = configService.getBeanNamesForPlugin(USER_DATA_PROVIDER) ?: 'defaultUserDataProvider'
@@ -46,6 +47,9 @@ class PluginService implements ApplicationContextAware {
      * @return The configured {@link AuthenticationProvider} Spring bean, null if one isn't configured.
      */
     AuthenticationProvider getAuthenticationProvider() {
+        if (flagService.isOn(Flag.SUSPEND_AUTHENTICATION_REQUIREMENT)) {
+            return null
+        }
         String beanName = configService.getBeanNamesForPlugin(AUTHENTICATION_PROVIDER)
         if (beanName) {
             return applicationContext.getBean(beanName) as AuthenticationProvider
@@ -56,6 +60,9 @@ class PluginService implements ApplicationContextAware {
      * @return A list of configured {@link AuthorizationProvider} Spring beans, empty list if none configured.
      */
     Collection<AuthorizationProvider> getAuthorizationProviders() {
+        if (flagService.isOn(Flag.SUSPEND_AUTHENTICATION_REQUIREMENT)) {
+            return []
+        }
         List<String> beanNames = configService.getBeanNamesForPlugin(AUTHORIZATION_PROVIDERS) ?: []
         beanNames.collect { applicationContext.getBean(it) as AuthorizationProvider }
     }

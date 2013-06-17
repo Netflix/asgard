@@ -17,7 +17,8 @@ package com.netflix.asgard
 
 enum Flag {
     SHORT_MAX_TIME_PER_BATCH,
-    SHORT_WAIT_FOR_EXTERNAL_MONITORING_SYSTEMS
+    SHORT_WAIT_FOR_EXTERNAL_MONITORING_SYSTEMS,
+    SUSPEND_AUTHENTICATION_REQUIREMENT
 
     static List<String> names() {
         Flag.values().collect { it.name() }

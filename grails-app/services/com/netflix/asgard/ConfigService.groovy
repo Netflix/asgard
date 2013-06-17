@@ -27,6 +27,7 @@ class ConfigService {
     static transactional = false
 
     def grailsApplication
+    def flagService
 
     /**
      * Gets the most commonly used namespace for Amazon CloudWatch metrics used for auto scaling policies. If not
@@ -559,6 +560,9 @@ class ConfigService {
      * @return true if edit links should be hidden for unauthenticated users, false to show edit links to all users
      */
     boolean isAuthenticationRequiredForEdit() {
+        if (flagService.isOn(Flag.SUSPEND_AUTHENTICATION_REQUIREMENT)) {
+            return false
+        }
         grailsApplication.config.security?.authenticationRequiredForEdit ?: false
     }
 
@@ -628,7 +632,7 @@ class ConfigService {
     }
 
     /**
-     * @return device name for the single EBS volume added to launch configurations for specific instance types
+     * @return device names for the EBS volumes added to launch configurations for specific instance types
      */
     List<String> getEbsVolumeDeviceNamesForLaunchConfigs() {
         grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.deviceNames ?: ['/dev/sdb', '/dev/sdc']
