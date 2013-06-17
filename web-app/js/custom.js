@@ -53,24 +53,6 @@ jQuery.fn.extend({
         });
     },
 
-    // Prevent double submission of forms
-    // http://stackoverflow.com/questions/2830542/prevent-double-submission-of-forms-in-jquery
-    preventDoubleSubmission: function() {
-        jQuery(this).bind('submit', function(e) {
-            var jForm = jQuery(this);
-            if (jForm.data('submitted') === true) {
-                // Previously submitted - don't submit again
-                e.preventDefault();
-            } else {
-                // Mark it so that the next submit can be ignored
-                jForm.data('submitted', true);
-            }
-        });
-
-        // Keep chainability
-        return this;
-    },
-
     // Changes the background to yellow then fades it away to nothing
     yellowFade: function(millis) {
         jQuery(this).effect("highlight", {}, millis || 1500);
@@ -609,9 +591,6 @@ jQuery(document).ready(function() {
         jQuery('form').not('.allowEnterKeySubmit').bind('keydown', function(e) {
             return e.keyCode !== 13;
         });
-
-        // Prevent accidental double form submission
-        jQuery('form:not(.js-allow-double-submission)').preventDoubleSubmission();
 
         // Decorate the menu buttons that have drop down lists. Do the work that CSS3 isn't ready to do yet.
         jQuery('.menuButton').has('ul').addClass('dropdown');
