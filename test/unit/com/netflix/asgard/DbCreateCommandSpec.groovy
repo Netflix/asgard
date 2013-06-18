@@ -23,49 +23,104 @@ import spock.lang.Unroll
 @TestMixin(ControllerUnitTestMixin)
 class DbCreateCommandSpec extends Specification {
 
-    DbCreateCommand cmd
+    final createCommandParams = [
+        allocatedStorage: 5,
+        backupRetentionPeriod: 0,
+        dBInstanceClass: 'dbClass',
+        dBInstanceIdentifier: 'testDB',
+        dBName: 'DBname',
+        masterUsername: 'testname',
+        masterUserPassword: 'testpassword',
+        port: 3306,
+        preferredBackupWindow: '',
+        preferredMaintenanceWindow: ''
+    ]
 
     void setup() {
         mockForConstraintsTests(DbCreateCommand)
         cmd = new DbCreateCommand()
     }
 
-    @Unroll("""should validate input to create RDS databases""")
-    def 'RDS database constraints'() {
-        cmd.allocatedStorage = 5
-        cmd.backupRetentionPeriod = 0
-        cmd.dBInstanceClass = "dbClass"
-        cmd.dBInstanceIdentifier = "testDB"
-        cmd.dBName = "DBname"
-        cmd.masterUsername = "testname"
-        cmd.masterUserPassword = "testpassword"
-        cmd.port = 3306
-        cmd.preferredBackupWindow = ""
-        cmd.preferredMaintenanceWindow = ""
-        cmd.availabilityZone = availabilityZone
-        cmd.multiAZ = multiAZ
-        cmd.selectedSecurityGroups = selectedSecurityGroups
-        cmd.selectedDBSecurityGroups = selectedDBSecurityGroups
-        cmd.subnetPurpose = subnetPurpose
+    @Unroll("""should validate input to create an RDS database
+               with error code #errorAvailabilityZone
+               when availability zone is #availabilityZone and multi availability zone is #multiAZ""")
+    def 'RDS database constraints for availability zones'() {
+        DbCreateCommand cmd = new DbCreateCommand(createCommandParams).with {
+            it.availabilityZone = availabilityZone
+            it.multiAZ = multiAZ
+        }
 
         when:
         cmd.validate()
 
         then:
         cmd.errors.availabilityZone == errorAvailabilityZone
+
+        where:
+        availabilityZone | multiAZ | errorAvailabilityZone
+        ''               | ''      | 'dbCreateCommand.multiaz.availabilityzones.error'
+        ''               | 'on'    | null
+        'us-east-1a'     | ''      | null
+        'us-east-1a'     | 'on'    | 'dbCreateCommand.multiaz.availabilityzones.error'
+    }
+
+    @Unroll("""should validate input to create RDS databases
+               with error code #errorSelectedSecurityGroups
+               when the selected security groups are #selectedSecurityGroups and
+                    the selected DB security groups #selectedDBSecurityGroups and
+                    the subnet purpose is #subnetPurpose""")
+    def 'RDS database constraints for selected security groups'() {
+        DbCreateCommand cmd = new DbCreateCommand(createCommandParams).with {
+            it.subnetPurpose = subnetPurpose
+            it.selectedSecurityGroups = selectedSecurityGroups
+            it.selectedDBSecurityGroups = selectedDBSecurityGroups
+        }
+
+        when:
+        cmd.validate()
+
+        then:
         cmd.errors.selectedSecurityGroups == errorSelectedSecurityGroups
+
+        where:
+        subnetPurpose | selectedSecurityGroups | selectedDBSecurityGroups | errorSelectedSecurityGroups
+        ''            | null                   | null                     | null
+        ''            | null                   | ['dbsecgroup']           | null
+        ''            | ['secgroup']           | null                     | 'dbCreateCommand.selectedSecurityGroups.vpc.error'
+        ''            | ['secgroup']           | ['dbsecgroup']           | 'dbCreateCommand.selectedSecurityGroups.vpc.error'
+        'internal'    | null                   | null                     | 'dbCreateCommand.selectedSecurityGroups.minSize.error'
+        'internal'    | null                   | ['dbsecgroup']           | null
+        'internal'    | ['secgroup']           | null                     | null
+        'internal'    | ['secgroup']           | ['dbsecgroup']           | null
+    }
+
+    @Unroll("""should validate input to create RDS databases
+               with error code #errorSelectedDBSecurityGroups
+               when the selected security groups are #selectedSecurityGroups and
+                    the selected DB security groups #selectedDBSecurityGroups and
+                    the subnet purpose is #subnetPurpose""")
+    def 'RDS database constraints for selected DB security groups'() {
+        DbCreateCommand cmd = new DbCreateCommand(createCommandParams).with {
+            it.subnetPurpose = subnetPurpose
+            it.selectedSecurityGroups = selectedSecurityGroups
+            it.selectedDBSecurityGroups = selectedDBSecurityGroups
+        }
+
+        when:
+        cmd.validate()
+
+        then:
         cmd.errors.selectedDBSecurityGroups == errorSelectedDBSecurityGroups
 
         where:
-        availabilityZone | multiAZ | subnetPurpose | selectedSecurityGroups | selectedDBSecurityGroups | errorAvailabilityZone                             | errorSelectedSecurityGroups                            | errorSelectedDBSecurityGroups
-        "us-east-1a"     | ""      | ""            | null                   | null                     | null                                              | null                                                   | null
-        ""               | "on"    | ""            | null                   | null                     | null                                              | null                                                   | null
-        "us-east-1a"     | "on"    | ""            | null                   | null                     | 'dbCreateCommand.multiaz.availabilityzones.error' | null                                                   | null
-        ""               | ""      | ""            | null                   | null                     | 'dbCreateCommand.multiaz.availabilityzones.error' | null                                                   | null
-        "us-east-1a"     | ""      | "internal"    | null                   | null                     | null                                              | 'dbCreateCommand.selectedSecurityGroups.minSize.error' | null
-        "us-east-1a"     | ""      | ""            | ["secgroup"]           | null                     | null                                              | 'dbCreateCommand.selectedSecurityGroups.vpc.error'     | null
-        "us-east-1a"     | "on"    | ""            | ["secgroup"]           | null                     | 'dbCreateCommand.multiaz.availabilityzones.error' | 'dbCreateCommand.selectedSecurityGroups.vpc.error'     | null
-        "us-east-1a"     | ""      | "internal"    | ["secgroup"]           | ["dbsecgroup"]           | null                                              | null                                                   | 'dbCreateCommand.selectedDBSecurityGroups.vpc.error'
-        "us-east-1a"     | "on"    | "internal"    | ["secgroup"]           | ["dbsecgroup"]           | 'dbCreateCommand.multiaz.availabilityzones.error' | null                                                   | 'dbCreateCommand.selectedDBSecurityGroups.vpc.error'
+        subnetPurpose | selectedSecurityGroups | selectedDBSecurityGroups | errorSelectedDBSecurityGroups
+        ''            | null                   | null                     | null
+        ''            | null                   | ['dbsecgroup']           | null
+        ''            | ['secgroup']           | null                     | null
+        ''            | ['secgroup']           | ['dbsecgroup']           | null
+        'internal'    | null                   | null                     | 'dbCreateCommand.selectedSecurityGroups.minSize.error'
+        'internal'    | null                   | ['dbsecgroup']           | null
+        'internal'    | ['secgroup']           | null                     | null
+        'internal'    | ['secgroup']           | ['dbsecgroup']           | 'dbCreateCommand.selectedSecurityGroups.vpc.error'
     }
 }
