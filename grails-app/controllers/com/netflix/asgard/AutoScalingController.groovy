@@ -387,6 +387,7 @@ class AutoScalingController {
                 addToLoadBalancerSuspended: group?.isProcessSuspended(AutoScalingProcessType.AddToLoadBalancer),
                 manualStaticSizingNeeded: manualStaticSizingNeeded,
                 vpcZoneIdentifier: group.VPCZoneIdentifier,
+				tags: group.tags,
         ]
     }
 
@@ -429,6 +430,16 @@ class AutoScalingController {
                 resumeProcesses << processType
             }
         }
+			//TODO: Get Tag values from POST, rip and replace,
+			//build a delete list, everything else is create/update
+			//iterate both lists, make separate calls
+			params.tags.value.each { key, value ->
+				println "Key: ${key} Value: ${value}"
+			}
+			
+//			params.tags.value.delete { key, value ->
+//				println "Key: ${key} Value: ${value}"
+//			}
         final AutoScalingGroupData autoScalingGroupData = AutoScalingGroupData.forUpdate(
                 name, lcName, minSize, desiredCapacity, maxSize, defaultCooldown, healthCheckType,
                 healthCheckGracePeriod, terminationPolicies, availabilityZones
