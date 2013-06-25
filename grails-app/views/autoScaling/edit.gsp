@@ -91,6 +91,31 @@
               <label for="addToLoadBalancerDisabled" class="choice">Disable Instance Additions to ELB (disables all instances in Discovery)</label>
             </td>
           </tr>
+          
+          <tr class="prop">
+          	<td class="name">Tags:</td>
+          	<td>
+          	<g:if test="${tags }">
+          	<div class="list">
+          	<table class="sortable subitems">
+          	<thead>
+          	<tr>
+          		<th>Key</th>
+          		<th>Value</th>
+          	</tr>
+          	</thead>
+		      <g:each var="tag" in="${tags}" status="i">
+		        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+		          <td>${tag.key }</td>
+		          <td><input type="text" id="tags.value.${tag.key}" name="tags.value.${tag.key}" value="${tag.value}"/></td>
+		        </tr>
+		      	</g:each>
+		      	</table>
+		      	</div>
+		      </g:if>
+		      </td>
+          </tr>
+          
           </tbody>
         </table>
       </div>
