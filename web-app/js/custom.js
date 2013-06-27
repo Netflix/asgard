@@ -65,8 +65,17 @@ jQuery.fn.extend({
         var jForm = jQuery(this);
         if (arguments.length) {
             // Set the data value to a boolean based on the truthiness of the argument, probably to true.
-            var bool = value ? true : false;
+            var buttons, bool = value ? true : false;
             jForm.data('submitted', bool);
+
+            buttons = jForm.find('button,input[type=submit]');
+            if (bool) {
+                // Visually indicate that all the submit buttons are now off limits.
+                buttons.addClass('submitted');
+            } else {
+                buttons.removeClass('submitted');
+            }
+
             return this; // Allow chaining when calling method as a mutator.
         }
         // No arguments, so treat this call as a getter.
