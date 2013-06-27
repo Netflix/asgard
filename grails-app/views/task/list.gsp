@@ -54,7 +54,7 @@
           <g:each var="rti" status="i" in="${runningTaskList}">
             <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
               <td><g:radio name="id" value="${rti.id}"/></td>
-              <td><g:link class="task" action="show" params="[id:rti.id]"
+              <td><g:link class="task" action="show" params="[id:rti.id, runId: rti.runId, workflowId: rti.workflowId]"
                       title="Show details of this task">${rti.name}</g:link></td>
               <td>${rti.userContext?.region}</td>
               <td><g:formatDate date="${rti.startTime}"/></td>
@@ -101,7 +101,7 @@
         <g:each var="cti" status="i" in="${completedTaskList}">
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
             <td><g:radio name="id" value="${cti.id}"/></td>
-            <td><g:link class="task" action="show" params="[id:cti.id]"
+            <td><g:link class="task" action="show" params="[id:cti.id, runId: cti.runId, workflowId: cti.workflowId]"
                     title="Show details of this task">${cti.name}</g:link></td>
             <td>${cti.userContext?.region}</td>
             <td><g:formatDate date="${cti.startTime}"/></td>

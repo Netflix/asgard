@@ -84,7 +84,8 @@ class TaskService {
         } catch (CancelledException ignored) {
             // Thrown if task is cancelled while sleeping. Not an error.
         } catch (Exception e) {
-            if (task.status != 'failed') { // Tasks can be nested. We only want to capture the failure once.
+            if (task.status != 'failed' && task.name) {
+                // Tasks can be nested. We only want to capture the failure once. We ignore anonymous tasks.
                 exception(task, e)
             }
             throw e
