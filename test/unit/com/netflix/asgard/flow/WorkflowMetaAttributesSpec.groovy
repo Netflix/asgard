@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2013 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard.flow
+import com.amazonaws.services.simpleworkflow.model.WorkflowType
+import com.netflix.asgard.flow.example.HelloWorldWorkflow
+import spock.lang.Specification
 
-import groovy.transform.Immutable
-import org.codehaus.jackson.annotate.JsonCreator
-import org.codehaus.jackson.annotate.JsonProperty
+class WorkflowMetaAttributesSpec extends Specification {
 
-@Immutable final class Link {
-    EntityType type
-    String id
+    def 'should get WorkflowType for class'() {
+        WorkflowMetaAttributes workflowMetaAttributes = new WorkflowMetaAttributes(HelloWorldWorkflow)
 
-    @JsonCreator
-    static Link to(@JsonProperty('type') EntityType type, @JsonProperty('id') String id) {
-        new Link(type: type, id: id)
+        expect:
+        workflowMetaAttributes.workflowType == new WorkflowType(name: 'HelloWorldWorkflow.helloWorld', version: '1.0')
     }
+
 }

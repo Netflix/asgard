@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2013 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard.flow
 
-import groovy.transform.Immutable
-import org.codehaus.jackson.annotate.JsonCreator
-import org.codehaus.jackson.annotate.JsonProperty
+/**
+ * A place to put templates for creating workflow descriptions based on the arguments to the workflow execution.
+ */
+abstract class WorkflowDescriptionTemplate {
 
-@Immutable final class Link {
-    EntityType type
-    String id
+    String description
 
-    @JsonCreator
-    static Link to(@JsonProperty('type') EntityType type, @JsonProperty('id') String id) {
-        new Link(type: type, id: id)
+    /**
+     * A common method for workflows that one doesn't need to implement when creating a description.
+     */
+    List<String> getLogHistory() {
+        return null
     }
 }

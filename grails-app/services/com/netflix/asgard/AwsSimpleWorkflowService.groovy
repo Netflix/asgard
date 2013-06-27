@@ -17,9 +17,14 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow
+import com.amazonaws.services.simpleworkflow.model.ActivityType
+import com.amazonaws.services.simpleworkflow.model.ActivityTypeDetail
 import com.amazonaws.services.simpleworkflow.model.ActivityTypeInfo
 import com.amazonaws.services.simpleworkflow.model.ActivityTypeInfos
+import com.amazonaws.services.simpleworkflow.model.DescribeActivityTypeRequest
 import com.amazonaws.services.simpleworkflow.model.DescribeDomainRequest
+import com.amazonaws.services.simpleworkflow.model.DescribeWorkflowExecutionRequest
+import com.amazonaws.services.simpleworkflow.model.DescribeWorkflowTypeRequest
 import com.amazonaws.services.simpleworkflow.model.DomainInfo
 import com.amazonaws.services.simpleworkflow.model.DomainInfos
 import com.amazonaws.services.simpleworkflow.model.ExecutionTimeFilter
@@ -34,9 +39,11 @@ import com.amazonaws.services.simpleworkflow.model.ListWorkflowTypesRequest
 import com.amazonaws.services.simpleworkflow.model.RegisterDomainRequest
 import com.amazonaws.services.simpleworkflow.model.UnknownResourceException
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionDetail
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfos
 import com.amazonaws.services.simpleworkflow.model.WorkflowType
+import com.amazonaws.services.simpleworkflow.model.WorkflowTypeDetail
 import com.amazonaws.services.simpleworkflow.model.WorkflowTypeInfo
 import com.amazonaws.services.simpleworkflow.model.WorkflowTypeInfos
 import com.netflix.asgard.cache.CacheInitializer
@@ -117,6 +124,13 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         caches.allActivityTypes.list()
     }
 
+    ActivityTypeDetail getActivityTypeDetail(String name, String version) {
+        String domain = configService.simpleWorkflowDomain
+        ActivityType activityType = new ActivityType(name: name, version: version)
+        simpleWorkflowClient.describeActivityType(new DescribeActivityTypeRequest(domain: domain,
+                activityType: activityType))
+    }
+
     // Workflow types
 
     private List<WorkflowType> retrieveWorkflowTypes() {
@@ -155,6 +169,13 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
      */
     Collection<WorkflowTypeInfo> getWorkflowTypes(UserContext userContext) {
         caches.allWorkflowTypes.list()
+    }
+
+    WorkflowTypeDetail getWorkflowTypeDetail(String name, String version) {
+        String domain = configService.simpleWorkflowDomain
+        WorkflowType workflowType = new WorkflowType(name: name, version: version)
+        simpleWorkflowClient.describeWorkflowType(new DescribeWorkflowTypeRequest(domain: domain,
+                workflowType: workflowType))
     }
 
     // Open workflow executions
@@ -366,9 +387,29 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     List<HistoryEvent> getExecutionHistory(WorkflowExecution workflowExecution) {
         if (!workflowExecution) { return null }
         String domain = configService.simpleWorkflowDomain
-        GetWorkflowExecutionHistoryRequest request = new GetWorkflowExecutionHistoryRequest(domain: domain,
-                execution: workflowExecution)
-        simpleWorkflowClient.getWorkflowExecutionHistory(request).events
+        def retriever = new AwsResultsRetriever<HistoryEvent, GetWorkflowExecutionHistoryRequest, History>() {
+            @Override
+            protected History makeRequest(Region region, GetWorkflowExecutionHistoryRequest request) {
+                simpleWorkflowClient.getWorkflowExecutionHistory(request)
+            }
+            @Override
+            protected List<HistoryEvent> accessResult(History result) {
+                result.events
+            }
+            protected void setNextToken(GetWorkflowExecutionHistoryRequest request, String nextToken) {
+                request.withNextPageToken(nextToken)
+            }
+            protected String getNextToken(History result) {
+                result.nextPageToken
+            }
+        }
+        retriever.retrieve(null, new GetWorkflowExecutionHistoryRequest(domain: domain, execution: workflowExecution))
+    }
+
+    WorkflowExecutionDetail getWorkflowExecutionDetail(WorkflowExecution execution) {
+        String domain = configService.simpleWorkflowDomain
+        simpleWorkflowClient.describeWorkflowExecution(new DescribeWorkflowExecutionRequest(domain: domain,
+                execution: execution))
     }
 
 }

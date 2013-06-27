@@ -54,7 +54,11 @@ import com.netflix.asgard.push.Cluster
 import groovy.transform.Immutable
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
+import org.codehaus.jackson.annotate.JsonAutoDetect
+import org.codehaus.jackson.annotate.JsonCreator
+import org.codehaus.jackson.annotate.JsonProperty
 
+@JsonAutoDetect(getterVisibility=JsonAutoDetect.Visibility.NONE)
 @Immutable class EntityType<T> {
 
     // By convention, entity names match corresponding controller names.
@@ -109,7 +113,7 @@ import java.lang.reflect.Modifier
     static final EntityType<WorkflowExecutionInfo> workflowExecution = create('Workflow Execution',
             { it.execution.runId })
     static final EntityType<WorkflowTypeInfo> workflowType = create('Workflow Type',
-            { "${it.workflowType.name}-${it.workflowType.version}" })
+            { "${it.workflowType.name}-${it.workflowType.version}" as String })
     static final EntityType<DomainInfo> workflowDomain = create('Workflow Domain', { it.name })
 
 
@@ -151,7 +155,8 @@ import java.lang.reflect.Modifier
         allEntityTypes
     }
 
-    static EntityType fromName(String name) {
+    @JsonCreator
+    static EntityType fromName(@JsonProperty('name') String name) {
         nameToEntityType.get(name)
     }
 
@@ -179,6 +184,7 @@ import java.lang.reflect.Modifier
         keyer(entity)
     }
 
+    @JsonProperty
     String name() {
         EntityType.nameOf(this)
     }

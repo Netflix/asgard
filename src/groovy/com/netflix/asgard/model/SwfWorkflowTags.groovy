@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2013 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard.model
 
-import groovy.transform.Immutable
-import org.codehaus.jackson.annotate.JsonCreator
-import org.codehaus.jackson.annotate.JsonProperty
+import com.netflix.asgard.Link
+import com.netflix.asgard.UserContext
+import com.netflix.asgard.flow.WorkflowTags
+import groovy.transform.Canonical
 
-@Immutable final class Link {
-    EntityType type
-    String id
-
-    @JsonCreator
-    static Link to(@JsonProperty('type') EntityType type, @JsonProperty('id') String id) {
-        new Link(type: type, id: id)
-    }
+/**
+ * Asgard specific tags for an SWF workflow.
+ */
+@Canonical
+class SwfWorkflowTags extends WorkflowTags {
+    Link link
+    UserContext user
 }
