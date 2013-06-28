@@ -20,7 +20,7 @@ class InitFilters {
     def configService
 
     def filters = {
-        all(controller: '(init|server)', invert: true) {
+        all(controller: '(init|server|firefox)', invert: true) {
             before = {
                 if (!configService.appConfigured) {
                     redirect(controller: 'init')
