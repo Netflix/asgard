@@ -1,3 +1,20 @@
+1.2
+
+Features
+- Choose healthiest Eureka nodes, and retry calls
+- Expose ELB "other" policies, read-only for now
+
+Infrastructure
+- Upgrade to CodeNarc 0.18.1
+
+Bug Fixes
+- 404 Not Found response for non-existent DBSnapshot
+- Allow two-letter app names in select2 drop-downs
+- Rolling Push should retain block device mappings
+- Fail scale-up operation if traffic allowed and status not UP
+- New install should show correct warning in Firefox for now
+
+
 1.1.2
 
 Features
