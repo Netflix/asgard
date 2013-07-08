@@ -112,8 +112,6 @@ class SwfWorkflowTagsSpec extends Specification {
     def 'should quietly handle unserializable data'() {
         workflowTags.withTags(['', '', null ])
 
-        println workflowTags.desc
-
         expect:
         workflowTags.constructTags() == []
         workflowTags.desc == null

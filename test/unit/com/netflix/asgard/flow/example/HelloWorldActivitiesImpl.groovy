@@ -31,7 +31,7 @@ class HelloWorldActivitiesImpl implements HelloWorldActivities {
     Activity activity = new SwfActivity()
 
 	void printHello(String name) {
-		println name
+//		println name
 	}
 
 	String getHello() {
@@ -50,7 +50,7 @@ class HelloWorldActivitiesImpl implements HelloWorldActivities {
         activity.recordHeartbeat "Taking nap for ${seconds} seconds..."
         (0..seconds).each {
             sleep(1000)
-            println "@@ Waited ${it} of ${seconds} seconds..."
+//            println "@@ Waited ${it} of ${seconds} seconds..."
             activity.recordHeartbeat "Waited ${it} of ${seconds} seconds..."
         }
         activity.recordHeartbeat "Done. Waited for ${seconds} seconds."

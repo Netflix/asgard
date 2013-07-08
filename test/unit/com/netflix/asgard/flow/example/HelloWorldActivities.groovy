@@ -21,8 +21,8 @@ import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrati
  * Contract of the hello world activities
  */
 @Activities(version = "1.0")
-@ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30l,
-        defaultTaskStartToCloseTimeoutSeconds = 10l)
+@ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30L,
+        defaultTaskStartToCloseTimeoutSeconds = 10L)
 interface HelloWorldActivities {
 
     void printHello(String name)

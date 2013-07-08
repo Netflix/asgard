@@ -385,7 +385,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
      * @return execution history
      */
     List<HistoryEvent> getExecutionHistory(WorkflowExecution workflowExecution) {
-        if (!workflowExecution) { return null }
+        if (!workflowExecution) { return [] }
         String domain = configService.simpleWorkflowDomain
         def retriever = new AwsResultsRetriever<HistoryEvent, GetWorkflowExecutionHistoryRequest, History>() {
             @Override

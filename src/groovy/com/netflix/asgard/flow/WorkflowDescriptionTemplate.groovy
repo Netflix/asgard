@@ -26,6 +26,6 @@ abstract class WorkflowDescriptionTemplate {
      * A common method for workflows that one doesn't need to implement when creating a description.
      */
     List<String> getLogHistory() {
-        return null
+        return []
     }
 }
