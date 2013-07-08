@@ -32,7 +32,7 @@ abstract class Workflow<A> {
      *
      * @param message to log
      */
-    void log(String message) {
+    void status(String message) {
         if (message) {
             logHistory << message
         }

@@ -28,15 +28,15 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
     Workflow<HelloWorldActivities> workflow = SwfWorkflow.of(HelloWorldActivities)
 
     void helloWorld(String name) {
-        log 'starting task'
+        status 'starting task'
 
         // Calling activities and waiting for promises.
         Promise<String> hello = promiseFor(activities.getHello())
-        log 'here1'
+        status 'here1'
         Promise<String> doneMsg = waitFor(hello) {
-            log 'hello received1'
+            status 'hello received1'
             activities.printHello("${hello.get()} There ${name}" as String)
-            log 'hello received2'
+            status 'hello received2'
             promiseFor('Done printing HW')
         }
 
@@ -48,9 +48,9 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
 
     void useInjectedService() {
         Promise<Collection<String>> clusterNames = promiseFor(activities.getClusterNames())
-        log 'pre clusterNames received'
+        status 'pre clusterNames received'
         waitFor(clusterNames) {
-            log 'clusterNames received'
+            status 'clusterNames received'
             activities.printHello(clusterNames.get().join(', '))
             promiseFor(true)
         }
@@ -67,7 +67,7 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
             activities.printHello("doCatch ${e}" as String)
             Promise.asPromise(false)
         } withFinally {
-            log 'retry done'
+            status 'retry done'
             activities.printHello('doFinally')
         }
     }
@@ -85,7 +85,7 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
             Promise.asPromise(false)
         }
         waitFor(anyPromises(nap.result, timer(2l))) {
-            log 'nap finished'
+            status 'nap finished'
             if (!nap.result.isReady()) {
                 nap.cancel(null)
             }
