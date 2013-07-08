@@ -25,7 +25,7 @@ import com.netflix.asgard.flow.WorkflowClientExternalToWorkflowInterfaceAdapter
 import com.netflix.asgard.flow.example.HelloWorldWorkflow
 import spock.lang.Specification
 
-class FlowServiceSpec extends Specification {
+class FlowServiceUnitSpec extends Specification {
 
     FlowService flowService = new FlowService()
 
