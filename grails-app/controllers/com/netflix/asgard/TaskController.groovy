@@ -42,8 +42,8 @@ class TaskController {
         Collection<Task> runningTasks = taskService.getRunning() + openExecutions.collect { Task.fromSwf(it) }
         Collection<Task> completedTasks = taskService.getCompleted() + closedExecutions.collect { Task.fromSwf(it) }
 
-        Collection<Task> running = (runningTasks).sort { it.startTime }.reverse()
-        Collection<Task> completed = (completedTasks).sort { it.updateTime }.reverse()
+        List<Task> running = runningTasks.sort { it.startTime }.reverse()
+        List<Task> completed = completedTasks.sort { it.updateTime }.reverse().take(100)
 
         String query = params.query ?: params.id
         if (query) {
