@@ -68,13 +68,9 @@ jQuery.fn.extend({
             var buttons, bool = value ? true : false;
             jForm.data('submitted', bool);
 
+            // Visually indicate that all the submit buttons are now off limits.
             buttons = jForm.find('button,input[type=submit]');
-            if (bool) {
-                // Visually indicate that all the submit buttons are now off limits.
-                buttons.addClass('submitted');
-            } else {
-                buttons.removeClass('submitted');
-            }
+            buttons.toggleClass('submitted', bool);
 
             return this; // Allow chaining when calling method as a mutator.
         }
