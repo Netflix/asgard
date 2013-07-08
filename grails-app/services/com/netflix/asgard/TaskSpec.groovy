@@ -31,17 +31,16 @@ class TaskSpec extends Specification {
 
     def 'should populate Task from SWF workflow'() {
         when:
-        Task actualTask = Task.fromSwf(new WorkflowExecutionDetail(executionInfo: new WorkflowExecutionInfo(
+        WorkflowExecutionInfo executionInfo = new WorkflowExecutionInfo(
                 execution: new WorkflowExecution(runId: 'abc', workflowId: 'def'),
                 tagList: [
-                        '{"desc":"Give it away, give it away, give it away now!"}',
+                        '{"desc":"Give it away give it away give it away give it away now"}',
                         '{"user":{"region":"US_WEST_2","internalAutomation":true}}',
                         '{"link":{"type":{"name":"cluster"},"id":"123"}}'
                 ],
                 startTimestamp: new Date(1372230630000)
-            ),
-            latestActivityTaskTimestamp: new Date(1372230634000)
-        ), [
+        )
+        List<HistoryEvent> history = [
                 [new Date(1372230631000), message1],
                 [new Date(1372230632000), message2],
                 [new Date(1372230633000), message3],
@@ -49,12 +48,15 @@ class TaskSpec extends Specification {
             new HistoryEvent(eventTimestamp: it[0],
                     decisionTaskCompletedEventAttributes: new DecisionTaskCompletedEventAttributes(
                             executionContext: wrapMessages(it[1])))
-        })
+        }
+        Task actualTask = Task.fromSwf(new WorkflowExecutionDetail(executionInfo: executionInfo,
+            latestActivityTaskTimestamp: new Date(1372230634000)
+        ), history)
 
         then:
         actualTask.runId == 'abc'
         actualTask.workflowId == 'def'
-        actualTask.name == 'Give it away, give it away, give it away now!'
+        actualTask.name == 'Give it away give it away give it away give it away now'
         actualTask.userContext == UserContext.auto(Region.US_WEST_2)
         actualTask.status == 'running'
         actualTask.startTime == new Date(1372230630000)
@@ -66,6 +68,7 @@ class TaskSpec extends Specification {
         ]
         actualTask.operation == 'finished'
         actualTask.objectId == '123'
-        actualTask.objectType.name() == 'cluster' // making an EntityType from the tags makes the closures unequal
+        // Cannot simply compare two Tasks because making an EntityType from the tags makes the closures unequal
+        actualTask.objectType.name() == EntityType.cluster.name()
     }
 }

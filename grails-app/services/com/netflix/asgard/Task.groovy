@@ -53,7 +53,7 @@ class Task {
                 startTime: executionInfo.startTimestamp, updateTime: executionInfo.closeTimestamp)
         if (swfWorkflowTags.link) {
             EntityType entityType = EntityType.fromName(swfWorkflowTags.link.type?.name())
-            task.with{
+            task.with {
                 objectType = entityType
                 objectId = swfWorkflowTags.link.id
             }
@@ -102,8 +102,8 @@ class Task {
     }
 
     Boolean isDone() {
-         'completed'.equalsIgnoreCase(status) || 'failed'.equalsIgnoreCase(status) || 'TIMED_OUT'.
-                 equalsIgnoreCase(status)
+        'completed'.equalsIgnoreCase(status) || 'failed'.equalsIgnoreCase(status) || 'TIMED_OUT'.
+                equalsIgnoreCase(status)
     }
 
     /**
