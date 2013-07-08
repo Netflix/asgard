@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.mock
 
+import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient
 import com.amazonaws.services.simpleworkflow.model.ActivityTypeInfos
@@ -32,6 +33,10 @@ class MockAmazonSimpleWorkflowClient extends AmazonSimpleWorkflowClient {
 
     MockAmazonSimpleWorkflowClient(BasicAWSCredentials awsCredentials) {
         super(awsCredentials)
+    }
+
+    MockAmazonSimpleWorkflowClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
+        this(awsCredentials)
     }
 
     /**
