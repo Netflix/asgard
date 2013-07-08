@@ -17,9 +17,6 @@ package com.netflix.asgard.flow
 
 import com.amazonaws.services.simpleworkflow.flow.DecisionContext
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClock
-import com.amazonaws.services.simpleworkflow.flow.core.AsyncContextBase
-import com.amazonaws.services.simpleworkflow.flow.core.AsyncParentContext
-import com.amazonaws.services.simpleworkflow.flow.core.Functor
 import com.amazonaws.services.simpleworkflow.flow.core.Promise
 import com.amazonaws.services.simpleworkflow.flow.core.Settable
 import com.amazonaws.services.simpleworkflow.flow.worker.CurrentDecisionContext
@@ -36,7 +33,6 @@ class SwfWorkflowSpec extends Specification {
     }
 
     def 'waitFor should construct valid Functor'() {
-        AsyncContextBase.currentContext.set(Mock(AsyncParentContext))
         boolean workWasDone = false
 
         when:
@@ -46,16 +42,7 @@ class SwfWorkflowSpec extends Specification {
         }
 
         then:
-        result instanceof Functor
-        !workWasDone
-        !result.ready
-
-        when:
-        result.doExecute()
-
-        then:
-        workWasDone
-        !result.ready
+        thrown(IllegalStateException)
     }
 
     def 'should result wrap with Promise and only one promise'() {
@@ -66,12 +53,12 @@ class SwfWorkflowSpec extends Specification {
     }
 
     def 'doTry should construct valid TryCatchFinally'() {
-        AsyncContextBase.currentContext.set(Mock(AsyncParentContext))
         boolean workWasDone = false
         boolean catchWasDone = false
         Throwable caught = null
         boolean finallyWasDone = false
 
+        when:
         DoTry<String> doTry = workflow.doTry {
             workWasDone = true
             Settable<String> notReady = new Settable('tried')
@@ -84,33 +71,9 @@ class SwfWorkflowSpec extends Specification {
         } withFinally {
             finallyWasDone = true
         }
-        SwfDoTry swfDoTry = (SwfDoTry) doTry
-
-        when:
-        swfDoTry.doTry()
 
         then:
-        workWasDone
-        !catchWasDone
-        !caught
-        !finallyWasDone
-        !doTry.result.ready
-
-        when:
-        swfDoTry.doCatch(new IllegalStateException('Uh oh! (but not really)'))
-
-        then:
-        catchWasDone
-        caught instanceof IllegalStateException
-        caught.message == 'Uh oh! (but not really)'
-        !finallyWasDone
-        doTry.result.get() == 'caught'
-
-        when:
-        swfDoTry.doFinally()
-
-        then:
-        finallyWasDone
+        thrown(IllegalStateException)
     }
 
     def 'should start timer'() {
@@ -128,7 +91,6 @@ class SwfWorkflowSpec extends Specification {
     }
 
     def 'should retry'() {
-        AsyncContextBase.currentContext.set(Mock(AsyncParentContext))
         CurrentDecisionContext.CURRENT.set(Mock(DecisionContext))
         WorkflowClock workflowClock = Mock(WorkflowClock)
         ((SwfWorkflow) workflow).overrideDecisionContext = Mock(DecisionContext) {
@@ -141,6 +103,6 @@ class SwfWorkflowSpec extends Specification {
         }
 
         then:
-        true
+        thrown(IllegalStateException)
     }
 }
