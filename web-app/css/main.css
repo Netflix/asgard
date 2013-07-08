@@ -347,6 +347,12 @@ button.resize div, a.resize                   { background-image: url(../images/
 .subitems .buttons button.delete div          { background-image:  url(../images/tango/16/places/user-trash.png);             }
 .subitems .buttons button.terminateMany       { display: none; } /* Hide dangerous button until JavaScript validation is ready */
 
+/* After a successful form submission, submit buttons are non-functional while form submission occurs, so make them look disabled */
+div.buttons button.submitted div, div.buttons button.submitted:active div, div.buttons button.submitted:hover div {
+    cursor: default; color: #666; background-color: #dddddd !important; background-image: url(../images/spinner.gif) !important;
+    border-color: #DDD #BBB #BBB #DDD;
+}
+
 /* ICONS FOR STANDARD TEXT LINKS */
 a.application         { padding:  2px 2px  2px 26px; background: url(../images/tango/16/mimetypes/package-x-generic.png)         transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.stack               { padding:  2px 2px  2px 26px; background: url(../images/tango/16/tools/stack.png)                         transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
