@@ -44,6 +44,11 @@ class Task {
     String objectId
     List<String> log = new CopyOnWriteArrayList<String>()
 
+    /**
+     * Constructs a task based on the SWF workflow execution
+     * @param executionInfo information about a workflow execution
+     * @return task without log
+     */
     static Task fromSwf(WorkflowExecutionInfo executionInfo) {
         SwfWorkflowTags swfWorkflowTags = new SwfWorkflowTags()
         swfWorkflowTags.withTags(executionInfo.tagList)
@@ -61,6 +66,12 @@ class Task {
         task
     }
 
+    /**
+     * Constructs a task based on the SWF workflow execution and history
+     * @param workflowExecutionDetail details about a workflow execution
+     * @param events of the workflow
+     * @return task with log
+     */
     static Task fromSwf(WorkflowExecutionDetail workflowExecutionDetail, List<HistoryEvent> events = []) {
         WorkflowExecutionInfo executionInfo = workflowExecutionDetail.executionInfo
         Task task = fromSwf(executionInfo)

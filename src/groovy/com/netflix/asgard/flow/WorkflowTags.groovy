@@ -31,6 +31,9 @@ class WorkflowTags {
 
     static List<String> propertyNamesToIgnore = ['class', 'metaClass', 'propertyNamesToIgnore']
 
+    /**
+     * @return a textual description of the workflow
+     */
     String desc
 
     /**

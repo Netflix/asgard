@@ -124,6 +124,13 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         caches.allActivityTypes.list()
     }
 
+    /**
+     * Gets detailed information about an activity type from AWS.
+     *
+     * @param name of the Activity Type
+     * @param version of the Activity Type
+     * @return activity type details
+     */
     ActivityTypeDetail getActivityTypeDetail(String name, String version) {
         String domain = configService.simpleWorkflowDomain
         ActivityType activityType = new ActivityType(name: name, version: version)
@@ -171,6 +178,13 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         caches.allWorkflowTypes.list()
     }
 
+    /**
+     * Gets detailed information about a workflow type from AWS.
+     *
+     * @param name of the Workflow Type
+     * @param version of the Workflow Type
+     * @return workflow type details
+     */
     WorkflowTypeDetail getWorkflowTypeDetail(String name, String version) {
         String domain = configService.simpleWorkflowDomain
         WorkflowType workflowType = new WorkflowType(name: name, version: version)
@@ -381,6 +395,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
 
     /**
      * Gets the execution history for specific workflow run.
+     *
      * @param workflowId user defined identifier associated with the workflow execution
      * @return execution history
      */
@@ -406,6 +421,12 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         retriever.retrieve(null, new GetWorkflowExecutionHistoryRequest(domain: domain, execution: workflowExecution))
     }
 
+    /**
+     * Gets details about a workflow execution from AWS.
+     *
+     * @param execution workflow execution reference
+     * @return workflow execution details
+     */
     WorkflowExecutionDetail getWorkflowExecutionDetail(WorkflowExecution execution) {
         String domain = configService.simpleWorkflowDomain
         simpleWorkflowClient.describeWorkflowExecution(new DescribeWorkflowExecutionRequest(domain: domain,

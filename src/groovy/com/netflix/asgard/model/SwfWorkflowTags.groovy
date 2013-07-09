@@ -25,6 +25,14 @@ import groovy.transform.Canonical
  */
 @Canonical
 class SwfWorkflowTags extends WorkflowTags {
+
+    /**
+     * @return a link that corresponds to the workflow for use in constructing an Asgard Task
+     */
     Link link
+
+    /**
+     * @return a UserContext that corresponds to the workflow for use in constructing an Asgard Task
+     */
     UserContext user
 }
