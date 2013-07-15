@@ -26,6 +26,7 @@ import com.amazonaws.services.simpleworkflow.model.ListClosedWorkflowExecutionsR
 import com.amazonaws.services.simpleworkflow.model.ListDomainsRequest
 import com.amazonaws.services.simpleworkflow.model.ListOpenWorkflowExecutionsRequest
 import com.amazonaws.services.simpleworkflow.model.ListWorkflowTypesRequest
+import com.amazonaws.services.simpleworkflow.model.RegisterDomainRequest
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfos
 import com.amazonaws.services.simpleworkflow.model.WorkflowTypeInfos
 
@@ -61,8 +62,17 @@ class MockAmazonSimpleWorkflowClient extends AmazonSimpleWorkflowClient {
      */
     @Override
     DomainInfos listDomains(ListDomainsRequest listDomainsRequest) {
-        DomainInfo domainInfo = new DomainInfo(name: 'asgard', description: 'Autobots roll out', status: 'REGISTERED')
+        String domainName = "asgard_${System.getProperty('user.name')}"
+        DomainInfo domainInfo = new DomainInfo(name: domainName, description: 'Autobots roll out', status: 'REGISTERED')
         new DomainInfos().withDomainInfos(domainInfo)
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    void registerDomain(RegisterDomainRequest registerDomainRequest) {
+        // do nothing
     }
 
     /**
