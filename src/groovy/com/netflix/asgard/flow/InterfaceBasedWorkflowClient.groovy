@@ -25,6 +25,8 @@ import com.amazonaws.services.simpleworkflow.model.WorkflowType
 
 /**
  * The SWF Flow way to create WorkflowClientExternalToWorkflowInterfaceAdapters.
+ *
+ * @param < T > Type of SWF workflow (the java interface with AWS annotations that the workflow implements)
  * @see WorkflowClientExternalToWorkflowInterfaceAdapter
  */
 class InterfaceBasedWorkflowClient<T> extends WorkflowClientExternalBase {

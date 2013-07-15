@@ -39,11 +39,12 @@ class ReflectionHelper {
             if (method.name != name || method.parameterTypes.size() != args.size()) { return false }
             int index = 0
             Class argType
-            Object parameterOfMethodThatDoesNotMethodSignature = args.find { arg ->
-                argType = method.parameterTypes[index++]
+            Object parameterOfMethodThatDoesNotMatchMethodSignature = args.find { arg ->
+                argType = method.parameterTypes[index]
+                index++
                 !Primitives.wrap(argType).isAssignableFrom(arg.getClass())
             }
-            parameterOfMethodThatDoesNotMethodSignature == null
+            parameterOfMethodThatDoesNotMatchMethodSignature == null
         }
     }
 
@@ -73,7 +74,7 @@ class ReflectionHelper {
     }
 
     /**
-     * Find an annotation on the classes methods.
+     * Find an annotation on the class's methods.
      *
      * @param annotationType the type of annotation to look for
      * @param method the method to find the annotation on

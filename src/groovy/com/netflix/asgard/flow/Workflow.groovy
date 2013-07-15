@@ -110,7 +110,7 @@ abstract class Workflow<A> {
     /**
      * Provides retry handling for the work.
      *
-     * @param retryPolicy allows you to describe to way retries are performed
+     * @param retryPolicy allows you to describe the way retries are performed
      * @param work to do
      * @return a promised result of the work
      */

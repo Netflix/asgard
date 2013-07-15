@@ -18,6 +18,9 @@ package com.netflix.asgard.flow
 import com.amazonaws.services.simpleworkflow.flow.core.Promise
 import com.amazonaws.services.simpleworkflow.flow.core.Settable
 
+/**
+ * Local implementation sufficient to run unit tests without a real SWF dependency.
+ */
 class LocalDoTry implements DoTry {
 
     Exception error
@@ -29,24 +32,26 @@ class LocalDoTry implements DoTry {
         try {
             result.set(tryBlock())
         } catch (Exception e) {
-            if (e) {
-                error = e
-            }
+            error = e
         }
     }
 
     @Override
-    DoTry withCatch(Closure block) {
+    DoTry withCatch(Closure doCatchBlock) {
         errorWasCaught = true
         if (error) {
-            block(error)
+            try {
+                doCatchBlock(error)
+            } catch (Exception e) {
+                error = e
+            }
         }
         this
     }
 
     @Override
-    DoTry withFinally(Closure block) {
-        block()
+    DoTry withFinally(Closure doFinallyBlock) {
+        doFinallyBlock()
         if (!errorWasCaught) {
             throw error
         }

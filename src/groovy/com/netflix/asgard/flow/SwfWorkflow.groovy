@@ -28,6 +28,9 @@ import com.amazonaws.services.simpleworkflow.flow.interceptors.ExponentialRetryP
 import com.amazonaws.services.simpleworkflow.flow.interceptors.RetryPolicy
 import groovy.transform.Canonical
 
+/**
+ * SWF specific implementation.
+ */
 @Canonical
 class SwfWorkflow<A> extends Workflow<A> {
 
@@ -94,7 +97,7 @@ class SwfWorkflow<A> extends Workflow<A> {
     }
 
     @Override
-    <T> Promise<T>  retry(Closure<? extends Promise<T>> work) {
-        retry(new ExponentialRetryPolicy(1l), work)
+    <T> Promise<T> retry(Closure<? extends Promise<T>> work) {
+        retry(new ExponentialRetryPolicy(1L), work)
     }
 }

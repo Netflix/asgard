@@ -49,7 +49,8 @@ class HistoryAnalyzer {
                     // The message list should accumulate and only get larger. If that didn't happen then the workflow
                     // is likely nondeterministic for some reason.
                     oldMessageCount = 0
-                    list = []
+                    String msg = '-- Log Restarted (typically due to a nondeterministic workflow).'
+                    list << new LogMessage(timestamp: event.eventTimestamp, text: msg)
                 }
                 List<String> newMessages = messages.subList(oldMessageCount, messages.size())
                 oldMessageCount = messages.size()
@@ -73,7 +74,7 @@ class HistoryAnalyzer {
      * @param event to get the elapsed time for
      * @return the number of seconds from the start of the workflow until this event occurred
      */
-    long getElapsedTime(HistoryEvent event) {
+    long getElapsedSeconds(HistoryEvent event) {
         (event.eventTimestamp.time - events[0].eventTimestamp.time)/1000
     }
 }

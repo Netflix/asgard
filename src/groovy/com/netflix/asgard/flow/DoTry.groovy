@@ -19,6 +19,15 @@ import com.amazonaws.services.simpleworkflow.flow.core.Promise
 
 /**
  * Used for specifying exception handling logic in an SWF workflow which can be distributed between multiple servers.
+ * <code>
+ * doTry {
+ *     // try logic
+ * } withCatch { Throwable e ->
+ *     // catch logic
+ * } withFinally {
+ *     // finally logic
+ * }
+ * </code>
  */
 interface DoTry<T> {
 
@@ -31,7 +40,7 @@ interface DoTry<T> {
     DoTry<T> withCatch(Closure<? extends Promise<T>> block)
 
     /**
-     * Provide logic guaranteed to be perform once the work is done (even in the case of an exception).
+     * Provide logic guaranteed to be performed once the work is done (even in the case of an exception).
      *
      * @param block executed for finally should take not arguments
      * @return this object with finally logic implemented

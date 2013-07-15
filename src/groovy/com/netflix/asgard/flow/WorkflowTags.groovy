@@ -31,14 +31,14 @@ class WorkflowTags {
 
     static List<String> propertyNamesToIgnore = ['class', 'metaClass', 'propertyNamesToIgnore']
 
-    /** a textual description of the workflow */
+    /** A textual description of the workflow */
     String desc
 
     /**
-     * Populate this objects directly from the SWF workflow tags.
+     * Populate this object directly from the SWF workflow tags.
      *
      * @param tags of an SWF workflow
-     * @return this class with properties set based on the tags
+     * @return this object with properties set based on the tags
      */
     WorkflowTags withTags(List<String> tags) {
         if (tags == null) { return this }
@@ -58,14 +58,14 @@ class WorkflowTags {
         try {
             valueString = jsonParser.parse(json ?: '""')?."${key}"
         } catch (Exception ignore) {
-            // this is not the property we are looking for, no reason to fail
+            // This is not the property we are looking for, no reason to fail
         }
         if (valueString) {
             Class type = hasProperty(key)?.type
             try {
                 def value = valueString
                 if (type != String) {
-                    value = dataConverter.fromData(value ?: '', type)
+                    value = dataConverter.fromData(valueString, type)
                 }
                 this."${key}" = value
             } catch (DataConverterException ignore) {

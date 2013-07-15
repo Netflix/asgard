@@ -46,6 +46,7 @@ class Task {
 
     /**
      * Constructs a task based on the SWF workflow execution
+     *
      * @param executionInfo information about a workflow execution
      * @return task without log
      */
@@ -68,6 +69,7 @@ class Task {
 
     /**
      * Constructs a task based on the SWF workflow execution and history
+     *
      * @param workflowExecutionDetail details about a workflow execution
      * @param events of the workflow
      * @return task with log

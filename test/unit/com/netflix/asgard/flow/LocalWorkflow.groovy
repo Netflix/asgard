@@ -20,6 +20,9 @@ import com.amazonaws.services.simpleworkflow.flow.core.Settable
 import com.amazonaws.services.simpleworkflow.flow.interceptors.RetryPolicy
 import groovy.transform.Canonical
 
+/**
+ * Local implementation sufficient to run unit tests without a real SWF dependency.
+ */
 @Canonical
 class LocalWorkflow<A> extends Workflow<A> {
 

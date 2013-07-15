@@ -48,6 +48,18 @@ class HistoryAnalyzerSpec extends Specification {
 
         then:
         historyAnalyzer.logMessages == [
+                [0, "starting task"],
+                [0, "here1"],
+                [0, "here2"],
+                [0, "pre clusterNames received"],
+                [0, "here3"],
+                [0, "here4"],
+                [0, "here5"],
+                [4, "hello received1"],
+                [4, "hello received2"],
+                [4, "clusterNames received"],
+                [4, "nap finished"],
+                [9, '-- Log Restarted (typically due to a nondeterministic workflow).'],
                 [9, "starting task"],
                 [9, "here1"],
                 [9, "here2"],
@@ -149,9 +161,9 @@ class HistoryAnalyzerSpec extends Specification {
                 activityTaskCompletedEvent, decisionTaskCompletedEvent])
 
         expect:
-        historyAnalyzer.getElapsedTime(workflowExecutionStartedEvent) == 0
-        historyAnalyzer.getElapsedTime(activityTaskCompletedEvent) == 3
-        historyAnalyzer.getElapsedTime(decisionTaskCompletedEvent) == 7
+        historyAnalyzer.getElapsedSeconds(workflowExecutionStartedEvent) == 0
+        historyAnalyzer.getElapsedSeconds(activityTaskCompletedEvent) == 3
+        historyAnalyzer.getElapsedSeconds(decisionTaskCompletedEvent) == 7
     }
 
     def 'should return the workflow description'() {

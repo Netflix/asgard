@@ -94,8 +94,8 @@ class WorkflowTagsSpec extends Specification {
     }
 
     def 'should use last tag'() {
-        workflowTags.withTags(['{"desc":"this will be overritten"}'])
-        workflowTags.withTags(['{"desc":"overritten as well"}', '{"desc":"this one will win"}'])
+        workflowTags.withTags(['{"desc":"this will be overwritten"}'])
+        workflowTags.withTags(['{"desc":"overwritten as well"}', '{"desc":"this one will win"}'])
 
         expect:
         workflowTags.desc == 'this one will win'

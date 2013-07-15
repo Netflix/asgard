@@ -19,18 +19,24 @@ import com.amazonaws.services.simpleworkflow.flow.ActivityExecutionContextProvid
 import com.amazonaws.services.simpleworkflow.flow.ActivityExecutionContextProviderImpl
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 
+/**
+ * SWF specific implementation.
+ */
 class SwfActivity implements Activity {
 
-    ActivityExecutionContextProvider provider = new ActivityExecutionContextProviderImpl()
+    private ActivityExecutionContextProvider provider = new ActivityExecutionContextProviderImpl()
 
+    @Override
     void recordHeartbeat(String message) {
         provider.activityExecutionContext.recordActivityHeartbeat(message)
     }
 
+    @Override
     String getTaskToken() {
         provider.activityExecutionContext.taskToken
     }
 
+    @Override
     WorkflowExecution getWorkflowExecution() {
         provider.activityExecutionContext.workflowExecution
     }

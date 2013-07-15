@@ -32,7 +32,7 @@ class SwfWorkflowTagsSpec extends Specification {
     SwfWorkflowTags workflowTags = new SwfWorkflowTags()
 
     def 'should construct swf tags'() {
-        workflowTags.with{
+        workflowTags.with {
             desc = 'doing a thing'
             user = UserContext.of('jira-123', 'rtargaryen', "King's Landing", '1.2.3.4', Region.EU_WEST_1, true)
             link = Link.to(EntityType.cluster, 'house-targaryen')
@@ -67,7 +67,7 @@ class SwfWorkflowTagsSpec extends Specification {
                 '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
         ]
         workflowTags.withTags(originalTags)
-        workflowTags.with{
+        workflowTags.with {
             desc = 'doing a different thing'
             user = UserContext.of('jira-456', 'rtargaryen', "King's Landing", '1.2.3.4', Region.EU_WEST_1, true)
             link = Link.to(EntityType.cluster, 'hizzouse-targaryen')

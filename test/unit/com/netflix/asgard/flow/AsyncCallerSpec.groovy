@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package com.netflix.asgard.flow
+
 import com.amazonaws.services.simpleworkflow.flow.DynamicActivitiesClient
 import com.amazonaws.services.simpleworkflow.model.ActivityType
 import com.netflix.asgard.flow.example.HelloWorldActivities
@@ -30,7 +31,7 @@ class AsyncCallerSpec extends Specification {
         def activities = AsyncCaller.of(HelloWorldActivities, mockDynamicActivitiesClientFactory)
 
         when:
-        null == activities.printHello('hi')
+        activities.printHello('hi')
 
         then:
         1 * mockDynamicActivitiesClient.scheduleActivity(new ActivityType(name: 'HelloWorldActivities.printHello',

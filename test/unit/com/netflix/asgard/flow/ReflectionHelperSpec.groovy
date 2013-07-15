@@ -33,6 +33,18 @@ class ReflectionHelperSpec extends Specification {
         !reflectionHelper.findMethodForNameAndArgs('helloWorld', [0])
     }
 
+    class DoSomethinger {
+        void doSomething(String s, Integer i) {}
+    }
+
+    def 'should match parameter order' () {
+        ReflectionHelper reflectionHelper = new ReflectionHelper(DoSomethinger)
+
+        expect:
+        reflectionHelper.findMethodForNameAndArgs('doSomething', ['test', 1])
+        !reflectionHelper.findMethodForNameAndArgs('doSomething', [1, 'test'])
+    }
+
     def 'should fail if method does not exist'() {
         when:
         reflectionHelper.findMethodForNameAndArgsOrFail('yoWorld', [''])

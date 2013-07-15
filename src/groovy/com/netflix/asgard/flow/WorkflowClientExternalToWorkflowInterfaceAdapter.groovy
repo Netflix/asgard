@@ -24,8 +24,10 @@ import java.lang.reflect.Method
 
 /**
  * In the eternal words of Yoda, "This is where the magic happens!"
- * You can use this to create something that looks like your AWS SWF Flow workflow interface that you can actually
- * use to execute workflows and get the execution state.
+ * Looks like your AWS SWF Flow workflow interface (after a cast) and can actually be used to execute workflows
+ * and get the execution state.
+ *
+ * @see InterfaceBasedWorkflowClient
  */
 @Canonical
 class WorkflowClientExternalToWorkflowInterfaceAdapter {

@@ -20,13 +20,16 @@ import com.amazonaws.services.simpleworkflow.flow.core.Settable
 import com.amazonaws.services.simpleworkflow.flow.core.TryCatchFinally
 import com.google.common.collect.ImmutableSet
 
+/**
+ * SWF specific implementation.
+ */
 class SwfDoTry<T> extends TryCatchFinally implements DoTry<T> {
 
-    final ImmutableSet<Promise<?>> promises
-    final Closure tryBlock
-    Closure catchBlock
-    Closure finallyBlock
+    private final ImmutableSet<Promise<?>> promises
+    private final Closure tryBlock
 
+    private Closure catchBlock
+    private finallyBlock
     private Settable result = new Settable()
 
     private SwfDoTry(Collection<Promise<?>> promises, Closure tryBlock, Closure catchBlock, Closure finallyBlock) {
@@ -37,10 +40,23 @@ class SwfDoTry<T> extends TryCatchFinally implements DoTry<T> {
         this.finallyBlock = finallyBlock
     }
 
+    /**
+     * Construct a DoTry for the try logic.
+     *
+     * @param promises that must be ready before the try logic will execute
+     * @param tryBlock logic to be preformed
+     * @return constructed DoTry
+     */
     static DoTry<T> execute(Collection<Promise<?>> promises, Closure<? extends Promise<T>> tryBlock) {
         new SwfDoTry(promises, tryBlock, { Throwable e -> throw e }, {})
     }
 
+    /**
+     * Construct a DoTry for the try logic.
+     *
+     * @param tryBlock logic to be preformed
+     * @return constructed DoTry
+     */
     static DoTry<T> execute(Closure<? extends Promise<T>> tryBlock) {
         execute([], tryBlock)
     }
@@ -57,6 +73,7 @@ class SwfDoTry<T> extends TryCatchFinally implements DoTry<T> {
         this
     }
 
+    @Override
     Promise<T> getResult() {
         result
     }

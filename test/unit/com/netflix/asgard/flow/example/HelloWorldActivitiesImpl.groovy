@@ -30,13 +30,13 @@ class HelloWorldActivitiesImpl implements HelloWorldActivities {
     @Delegate
     Activity activity = new SwfActivity()
 
-	void printHello(String name) {
-//		println name
-	}
+    void printHello(String name) {
+//      println name
+    }
 
-	String getHello() {
-		'Hello'
-	}
+    String getHello() {
+        'Hello'
+    }
 
     Collection<String> getClusterNames() {
         awsAutoScalingService.getClusters(new UserContext(region: Region.US_WEST_1))*.name

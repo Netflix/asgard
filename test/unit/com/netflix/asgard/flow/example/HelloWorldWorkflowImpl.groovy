@@ -19,6 +19,7 @@ import com.amazonaws.services.simpleworkflow.flow.interceptors.ExponentialRetryP
 import com.netflix.asgard.flow.DoTry
 import com.netflix.asgard.flow.SwfWorkflow
 import com.netflix.asgard.flow.Workflow
+
 /**
  * Implementation of the hello world workflow
  */
@@ -43,7 +44,6 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
         useInjectedService()
         demonstrateRetryLogic()
         cancelTryBlockOnceTimerFires(doneMsg)
-
     }
 
     void useInjectedService() {
@@ -74,7 +74,7 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
 
     void cancelTryBlockOnceTimerFires(Promise<String> doneMsg) {
         DoTry<Boolean> nap = doTry(doneMsg) {
-            Promise<Boolean> result = promiseFor(activities.takeNap(3l))
+            Promise<Boolean> result = promiseFor(activities.takeNap(3L))
             waitFor(result) {
                 activities.printHello('woke up on my own')
                 Promise.Void()
@@ -84,7 +84,7 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
             activities.printHello("nap cancelled ${e}" as String)
             Promise.asPromise(false)
         }
-        waitFor(anyPromises(nap.result, timer(2l))) {
+        waitFor(anyPromises(nap.result, timer(2L))) {
             status 'nap finished'
             if (!nap.result.isReady()) {
                 nap.cancel(null)
@@ -92,7 +92,6 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
             activities.printHello('Awake now!')
             promiseFor(true)
         }
-
     }
 
 }

@@ -61,7 +61,7 @@
         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
           <td>${eventAttributes.event.eventId}</td>
           <td>${eventAttributes.scheduledEventId}</td>
-          <td>+${historyAnalyzer.getElapsedTime(eventAttributes.event)}s</td>
+          <td>+${historyAnalyzer.getElapsedSeconds(eventAttributes.event)}s</td>
           <td>${eventAttributes.event.eventType}</td>
           <td>${eventAttributes.workflowType?.version}${eventAttributes.activityType?.version}</td>
           <td>${eventAttributes.workflowType?.name}${eventAttributes.activityType?.name}</td>
