@@ -24,7 +24,7 @@ class ObjectLinkTagLib extends ApplicationTagLib {
         if (!objectId) { return }
         String objectType = attrs.remove('type')
         EntityType type = objectType ? EntityType.fromName(objectType) : EntityType.fromId(objectId)
-        type.entitySpecificLinkGeneration(attrs, objectId)
+        type?.entitySpecificLinkGeneration(attrs, objectId)
         attrs['class'] = type.name()
         attrs.controller = type.name()
         attrs.action = attrs.action ?: 'show'
