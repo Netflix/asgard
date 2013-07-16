@@ -20,6 +20,7 @@ import com.amazonaws.services.simpleworkflow.model.HistoryEvent
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionDetail
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
+import com.netflix.asgard.flow.LogMessage
 import spock.lang.Specification
 
 class TaskSpec extends Specification {
@@ -62,9 +63,9 @@ class TaskSpec extends Specification {
         actualTask.startTime == new Date(1372230630000)
         actualTask.updateTime == new Date(1372230634000)
         actualTask.log == [
-                '2013-06-26_00:10:31 starting task',
-                '2013-06-26_00:10:32 doing task',
-                '2013-06-26_00:10:33 finished'
+                new LogMessage(new Date(1372230631000), 'starting task').toString(),
+                new LogMessage(new Date(1372230632000), 'doing task').toString(),
+                new LogMessage(new Date(1372230633000), 'finished').toString()
         ]
         actualTask.operation == 'finished'
         actualTask.objectId == '123'
