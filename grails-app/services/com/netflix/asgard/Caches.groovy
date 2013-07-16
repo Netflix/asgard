@@ -36,6 +36,10 @@ import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import com.amazonaws.services.rds.model.DBInstance
 import com.amazonaws.services.rds.model.DBSecurityGroup
 import com.amazonaws.services.rds.model.DBSnapshot
+import com.amazonaws.services.simpleworkflow.model.ActivityTypeInfo
+import com.amazonaws.services.simpleworkflow.model.DomainInfo
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
+import com.amazonaws.services.simpleworkflow.model.WorkflowTypeInfo
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstanceHealth
@@ -52,10 +56,15 @@ import com.netflix.asgard.push.Cluster
  */
 class Caches {
 
+    final CachedMap<ActivityTypeInfo> allActivityTypes
+    final CachedMap<WorkflowExecutionInfo> allClosedWorkflowExecutions
+    final CachedMap<WorkflowExecutionInfo> allOpenWorkflowExecutions
     final CachedMap<AppRegistration> allApplications
     final CachedMap<MetricId> allCustomMetrics
     final CachedMap<HardwareProfile> allHardwareProfiles
     final CachedMap<String> allTerminationPolicyTypes
+    final CachedMap<WorkflowTypeInfo> allWorkflowTypes
+    final CachedMap<DomainInfo> allWorkflowDomains
 
     final MultiRegionCachedMap<MetricAlarm> allAlarms
     final MultiRegionCachedMap<ApplicationInstance> allApplicationInstances
@@ -125,8 +134,13 @@ class Caches {
         allScheduledActions = cachedMapBuilder.of(EntityType.scheduledAction, 120).buildMultiRegionCachedMap()
         allSignificantStackInstanceHealthChecks = cachedMapBuilder.of(EntityType.instanceHealth, 300).
                 buildMultiRegionCachedMap()
+        allActivityTypes = cachedMapBuilder.of(EntityType.activityType, 120).buildCachedMap()
+        allOpenWorkflowExecutions = cachedMapBuilder.of(EntityType.workflowExecution, 30).buildCachedMap()
+        allClosedWorkflowExecutions = cachedMapBuilder.of(EntityType.workflowExecution, 30).buildCachedMap()
         allApplications = cachedMapBuilder.of(EntityType.application, 120).buildCachedMap()
         allCustomMetrics = cachedMapBuilder.of(EntityType.metric, 120).buildCachedMap()
+        allWorkflowTypes = cachedMapBuilder.of(EntityType.workflowType, 120).buildCachedMap()
+        allWorkflowDomains = cachedMapBuilder.of(EntityType.workflowDomain, 3600).buildCachedMap()
 
         // Use one thread for all instance type and pricing caches. None of these need updating more than once an hour.
         allHardwareProfiles = cachedMapBuilder.of(EntityType.hardwareProfile, 3600).buildCachedMap()

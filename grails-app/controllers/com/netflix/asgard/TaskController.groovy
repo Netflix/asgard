@@ -15,11 +15,19 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.simpleworkflow.flow.WorkflowClientExternal
+import com.amazonaws.services.simpleworkflow.model.ChildPolicy
+import com.amazonaws.services.simpleworkflow.model.HistoryEvent
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionDetail
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
 import grails.converters.JSON
 import grails.converters.XML
 
 class TaskController {
 
+    AwsSimpleWorkflowService awsSimpleWorkflowService
+    FlowService flowService
     def taskService
 
     // the delete, save and update actions only accept POST requests
@@ -28,8 +36,14 @@ class TaskController {
     def index = { redirect(action: 'list', params:params) }
 
     def list = {
-        Collection<Task> running = taskService.getRunning().reverse()
-        Collection<Task> completed = taskService.getCompleted().reverse()
+        Collection<WorkflowExecutionInfo> openExecutions = awsSimpleWorkflowService.openWorkflowExecutions
+        Collection<WorkflowExecutionInfo> closedExecutions = awsSimpleWorkflowService.closedWorkflowExecutions
+
+        Collection<Task> runningTasks = taskService.getRunning() + openExecutions.collect { Task.fromSwf(it) }
+        Collection<Task> completedTasks = taskService.getCompleted() + closedExecutions.collect { Task.fromSwf(it) }
+
+        List<Task> running = runningTasks.sort { it.startTime }.reverse()
+        List<Task> completed = completedTasks.sort { it.updateTime }.reverse().take(100)
 
         String query = params.query ?: params.id
         if (query) {
@@ -47,8 +61,20 @@ class TaskController {
     }
 
     def show = {
-        String id = params.id
-        Task task = taskService.getTaskById(id)
+        Task task
+        if (params.id) {
+            String id = params.id
+            task = taskService.getTaskById(id)
+        } else {
+            String runId = params.runId
+            String workflowId = params.workflowId
+            WorkflowExecution workflowExecution = new WorkflowExecution(runId: runId, workflowId: workflowId)
+            WorkflowExecutionDetail workflowExecutionDetail = awsSimpleWorkflowService.
+                    getWorkflowExecutionDetail(workflowExecution)
+            List<HistoryEvent> events = awsSimpleWorkflowService.getExecutionHistory(workflowExecution)
+            task = Task.fromSwf(workflowExecutionDetail, events)
+        }
+        String updateTime = task.updateTime ? Time.format(task.updateTime) : ''
         if (!task) {
             Requests.renderNotFound('Task', id, this)
             return
@@ -58,11 +84,11 @@ class TaskController {
                 xml { new XML(task).render(response) }
                 json {
                     def simpleTask = [
-                            log:task.log,
+                            log: task.log,
                             status: task.status,
                             operation: task.operation,
                             durationString: task.durationString,
-                            updateTime: Time.format(task.updateTime)
+                            updateTime: updateTime
                     ]
                     render(simpleTask as JSON)
                 }
@@ -71,21 +97,34 @@ class TaskController {
     }
 
     def cancel = {
-        String id = params.id
-        UserContext userContext = UserContext.of(request)
-        Task task = taskService.getTaskById(id)
-        if (!task) {
-            Requests.renderNotFound('Task', "${id}", this)
-            return
+        Task task = null
+        if (params.id) {
+            String id = params.id
+            UserContext userContext = UserContext.of(request)
+            task = taskService.getTaskById(id)
+            if (!task) {
+                Requests.renderNotFound('Task', "${id}", this)
+                return
+            } else {
+                taskService.cancelTask(userContext, task)
+                flash.message = "Task '${id}:${task.name}' canceled."
+            }
+            if (task.objectId && task.objectType) {
+                redirect(controller: task.objectType.name(), action: 'show', params: [id: task.objectId])
+            } else {
+                redirect(action: 'list')
+            }
         } else {
-            taskService.cancelTask(userContext, task)
-            flash.message = "Task '${id}:${task.name}' canceled."
-        }
-
-        if (task.objectId && task.objectType) {
-            redirect(controller: task.objectType.name(), action: 'show', params: [id: task.objectId])
-        } else {
-            redirect(action: 'list')
+            String runId = params.runId
+            String workflowId = params.workflowId
+            WorkflowExecution workflowExecution = new WorkflowExecution(runId: runId, workflowId: workflowId)
+            WorkflowExecutionDetail workflowExecutionDetail = awsSimpleWorkflowService.
+                    getWorkflowExecutionDetail(workflowExecution)
+            task = Task.fromSwf(workflowExecutionDetail)
+            WorkflowClientExternal client = flowService.getWorkflowClient(workflowExecution)
+            client.terminateWorkflowExecution('Canceled by user.', task.toString(), ChildPolicy.TERMINATE)
+            flash.message = "Task '${task.name}' canceled."
+            redirect(action: 'show', params: [runId: runId, workflowId: workflowId])
         }
     }
 

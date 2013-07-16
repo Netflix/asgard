@@ -15,10 +15,19 @@
     limitations under the License.
 
 --%>
-<g:if test="${task.objectType && task.objectId}">
-  <tr class="prop">
-    <td class="name">Return to<br/>${task.objectType.displayName}:</td>
-    <td class="value"><g:linkObject region="${task.userContext?.region?.code}"
-                                    type="${task.objectType.name()}" name="${task.objectId}" /></td>
-  </tr>
-</g:if>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="layout" content="main"/>
+  <title>Workflow Executions</title>
+</head>
+<body>
+<div class="body">
+  <g:if test="${flash.message}">
+    <div class="message">${flash.message}</div>
+  </g:if>
+  <g:render template="sublist" model="[classification: 'Open', executions: openWorkflowExecutions]" />
+  <g:render template="sublist" model="[classification: 'Closed', executions: closedWorkflowExecutions]" />
+</div>
+</body>
+</html>

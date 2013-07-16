@@ -125,7 +125,6 @@ class CachedMap<T> implements Fillable {
     /**
      * Initializes cache if not already done.
      *
-     * @param keyer a closure containing the algorithm for extracting the map key from a T object
      * @param retriever a closure containing the algorithm for creating a new collection of T objects
      * @param callback an optional closure to execute after this cache has been filled, useful for starting another
      *          cache's refresh process
