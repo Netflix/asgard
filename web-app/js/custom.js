@@ -53,50 +53,6 @@ jQuery.fn.extend({
         });
     },
 
-    /**
-     * If called with a value, this sets the form's metadata with a boolean flag for the submitted state, for use by
-     * other functions that need to determine if the form has been "successfully" submitted after client-side
-     * validation.
-     *
-     * If called without a value, this function returns a boolean representing whether or not the form's metadata has
-     * been marked as having been "successfully" submitted already.
-     */
-    submitted: function(value) {
-        var jForm = jQuery(this);
-        if (arguments.length) {
-            // Set the data value to a boolean based on the truthiness of the argument, probably to true.
-            var buttons, isSubmitted = value ? true : false;
-            jForm.data('submitted', isSubmitted);
-
-            // Visually indicate that all the submit buttons are now off limits.
-            buttons = jForm.find('button,input[type=submit]');
-            buttons.toggleClass('submitted', isSubmitted);
-
-            return this; // Allow chaining when calling method as a mutator.
-        }
-        // No arguments, so treat this call as a getter.
-        return jForm.data('submitted') === true;
-    },
-
-    // Prevent double submission of forms
-    // http://stackoverflow.com/questions/2830542/prevent-double-submission-of-forms-in-jquery
-    preventDoubleSubmission: function() {
-        jQuery(this).bind('submit', function(e) {
-            var jForm = jQuery(this);
-            var usesClientSideValidation = jForm.hasClass('validate');
-            if (jForm.submitted()) {
-                // Previously submitted in a valid way, so don't submit again
-                e.preventDefault();
-            } else if (!usesClientSideValidation) {
-                // Mark the form so that the next submit can be ignored
-                jForm.submitted(true);
-            }
-        });
-
-        // Keep chainability
-        return this;
-    },
-
     // Changes the background to yellow then fades it away to nothing
     yellowFade: function(millis) {
         jQuery(this).effect("highlight", {}, millis || 1500);
@@ -610,20 +566,6 @@ jQuery(document).ready(function() {
                 afterBootWait: requiredDigits,
                 blueOutMinutes: digitsOnly,
                 '.number': digitsOnly
-            },
-            submitHandler: function(form) {
-
-                var alreadySubmitted, jForm = jQuery(form);
-                alreadySubmitted = jForm.submitted();
-
-                // Mark the form so that the next submit can be ignored.
-                jForm.submitted(true);
-
-                // Call the native submit method on the form DOM element, not on the jQuery wrapper which would cause
-                // a recursive loop.
-                if (!alreadySubmitted) {
-                    form.submit();
-                }
             }
         });
     };
@@ -641,19 +583,14 @@ jQuery(document).ready(function() {
 
     var setUpCommonUserInterfaceEnhancements = function() {
 
-        var forms = jQuery('form');
-
         // Don't let any ajax responses use browser cache
         jQuery.ajaxSetup({ cache: false });
 
         // Ignore "Enter" key on forms. It's too easy to press enter again by accident after using enter to make a
         // select2 choice. This usability flaw can cause production outages.
-        forms.not('.allowEnterKeySubmit').bind('keydown', function(e) {
+        jQuery('form').not('.allowEnterKeySubmit').bind('keydown', function(e) {
             return e.keyCode !== 13;
         });
-
-        // Prevent accidental double form submission
-        forms.preventDoubleSubmission();
 
         // Decorate the menu buttons that have drop down lists. Do the work that CSS3 isn't ready to do yet.
         jQuery('.menuButton').has('ul').addClass('dropdown');
