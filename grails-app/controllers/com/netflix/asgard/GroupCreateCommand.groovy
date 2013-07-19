@@ -27,6 +27,7 @@ import grails.validation.Validateable
     String stack
     String newStack
     String detail
+    String devPhase
     String chaosMonkey
     String region
     String imageId
@@ -34,6 +35,15 @@ import grails.validation.Validateable
     boolean appWithClusterOptLevel
 
     static constraints = {
+
+        devPhase(nullable: true, validator: { value, command ->
+            if (value && !Relationships.checkName(value)) {
+                return "devPhase.illegalChar"
+            }
+            if (Relationships.usesReservedFormat(value)) {
+                return "name.usesReservedFormat"
+            }
+        })
 
         appName(nullable: false, blank: false, validator: { value, command ->
             if (!Relationships.checkName(value)) {
