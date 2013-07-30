@@ -7,6 +7,7 @@ import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactoryImpl
 import com.amazonaws.services.simpleworkflow.flow.StartWorkflowOptions
+import com.amazonaws.services.simpleworkflow.flow.WorkerBase
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClientExternalBase
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClientFactoryExternalBase
@@ -43,18 +44,27 @@ class FlowService implements InitializingBean {
     /* The AWS SWF domain that will be used in this service for polling and scheduling workflows */
     private String domain
 
+    /* The AWS SWF domain that will be used in this service for polling and scheduling workflows */
+    String taskList
+
     void afterPropertiesSet() {
         domain = configService.simpleWorkflowDomain
+        taskList = domain
         simpleWorkflow = awsClientService.create(AmazonSimpleWorkflow)
         activityImplementations.each { Spring.autowire(it) }
-        workflowWorker = new WorkflowWorker(simpleWorkflow, domain, domain)
+        workflowWorker = new WorkflowWorker(simpleWorkflow, domain, taskList)
         workflowWorker.setWorkflowImplementationTypes(workflowImplementationTypes)
         workflowWorker.start()
-        log.info('Workflow Host Service Started...')
-        activityWorker = activityWorker ?: new ActivityWorker(simpleWorkflow, domain, domain)
+        log.info(workerStartMessage('Workflow', workflowWorker))
+        activityWorker = activityWorker ?: new ActivityWorker(simpleWorkflow, domain, taskList)
         activityWorker.addActivitiesImplementations(activityImplementations)
         activityWorker.start()
-        log.info("Activity Worker Started for Task List: ${activityWorker.getTaskListToPoll()}")
+        log.info(workerStartMessage('Activity', activityWorker))
+    }
+
+    private String workerStartMessage(String workerType, WorkerBase workerBase) {
+        "${workerType} worker started on '${workerBase.identity}' for Domain: '${workerBase.domain}' and Task List: \
+'${workerBase.getTaskListToPoll()}'."
     }
 
     /**

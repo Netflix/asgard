@@ -96,8 +96,4 @@ class SwfWorkflow<A> extends Workflow<A> {
         result
     }
 
-    @Override
-    <T> Promise<T> retry(Closure<? extends Promise<T>> work) {
-        retry(new ExponentialRetryPolicy(1L), work)
-    }
 }

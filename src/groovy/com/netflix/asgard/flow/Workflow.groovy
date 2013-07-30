@@ -18,7 +18,9 @@ package com.netflix.asgard.flow
 import com.amazonaws.services.simpleworkflow.flow.core.AndPromise
 import com.amazonaws.services.simpleworkflow.flow.core.OrPromise
 import com.amazonaws.services.simpleworkflow.flow.core.Promise
+import com.amazonaws.services.simpleworkflow.flow.interceptors.ExponentialRetryPolicy
 import com.amazonaws.services.simpleworkflow.flow.interceptors.RetryPolicy
+import java.util.concurrent.CancellationException
 
 /**
  * Common behavior for an SWF workflow. This enables implementations that are not tied to SWF.
@@ -108,6 +110,23 @@ abstract class Workflow<A> {
     abstract Promise<Void> timer(long delaySeconds)
 
     /**
+     * Start a timer that can be canceled. Useful for unnecessary timers that are keeping a workflow from ending.
+     *
+     * @param delaySeconds to wait
+     * @return a DoTry whose result will be ready when the timer is done
+     */
+    DoTry<Void> cancelableTimer(long delaySeconds) {
+        doTry() {
+            timer(delaySeconds)
+        } withCatch { Throwable t ->
+            if (t instanceof CancellationException) {
+                return Promise.Void()
+            }
+            throw t
+        }
+    }
+
+    /**
      * Provides retry handling for the work.
      *
      * @param retryPolicy allows you to describe the way retries are performed
@@ -122,5 +141,8 @@ abstract class Workflow<A> {
      * @param work to do
      * @return a promised result of the work
      */
-    abstract <T> Promise<T> retry(Closure<? extends Promise<T>> work)
+    @Override
+    <T> Promise<T> retry(Closure<? extends Promise<T>> work) {
+        retry(new ExponentialRetryPolicy(1L), work)
+    }
 }

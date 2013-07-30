@@ -34,15 +34,13 @@
         <input type="hidden" name="runId" value="${task.runId}"/>
         <input type="hidden" name="workflowId" value="${task.workflowId}"/>
         <div class="buttons" id="taskCancellationForm">
+          <g:buttonSubmit class="stop" data-warning="Really stop task ${StringEscapeUtils.escapeJavaScript(task.name)} ?" action="cancel" value="Stop Task"/>
           <g:if test="${params.taskToken}">
-            <g:link class="deploy" controller="cluster" action="proceedWithDeployment"
+            <g:link class="proceed" controller="cluster" action="proceedWithDeployment"
                     params="[taskToken: params.taskToken, proceed: true, runId: task.runId, workflowId: task.workflowId]">Proceed With Deployment</g:link>
-            <g:link class="deploy" controller="cluster" action="proceedWithDeployment"
-                    params="[taskToken: params.taskToken, proceed: false, runId: task.runId, workflowId: task.workflowId]">Stop Deployment</g:link>
+            <g:link class="cease" controller="cluster" action="proceedWithDeployment"
+                    params="[taskToken: params.taskToken, proceed: false, runId: task.runId, workflowId: task.workflowId]">Rollback Deployment</g:link>
           </g:if>
-          <g:else>
-            <g:buttonSubmit class="stop" data-warning="Really stop task ${StringEscapeUtils.escapeJavaScript(task.name)} ?" action="cancel" value="Stop Task"/>
-          </g:else>
         </div>
       </g:form>
     </g:if>

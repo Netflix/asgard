@@ -35,7 +35,7 @@ class HelloWorldWorkflowSpec extends Specification {
             1 * printHello('Hi There Spock Test')
             1 * printHello('cluster1, cluster2')
             1 * getClusterNames() >> ['cluster1', 'cluster2']
-            1 * throwException() >> { throw new IllegalStateException('uh oh') }
+            3 * throwException() >> { throw new IllegalStateException('uh oh') }
             1 * printHello('doCatch java.lang.IllegalStateException: uh oh')
             1 * printHello('doFinally')
             1 * takeNap(3L)

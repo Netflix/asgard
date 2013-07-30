@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.flow
 
+import com.amazonaws.services.simpleworkflow.flow.common.FlowDefaults
 import com.amazonaws.services.simpleworkflow.flow.core.Promise
 import com.amazonaws.services.simpleworkflow.flow.core.Settable
 import com.amazonaws.services.simpleworkflow.flow.interceptors.RetryPolicy
@@ -42,14 +43,17 @@ class LocalWorkflow<A> extends Workflow<A> {
     @Override
     <T> Promise<T> waitFor(Promise<?> promise, Closure<? extends Promise<T>> work) {
         if (promise.isReady()) {
-            work()
+            return work()
         }
         new Settable()
     }
 
     @Override
     <T> DoTry<T> doTry(Promise promise, Closure<? extends Promise<T>> work) {
-        new LocalDoTry(work)
+        if (promise.isReady()) {
+            return new LocalDoTry(work)
+        }
+        new LocalDoTry({ Promise.Void() })
     }
 
     @Override
@@ -64,11 +68,26 @@ class LocalWorkflow<A> extends Workflow<A> {
 
     @Override
     <T> Promise<T> retry(RetryPolicy retryPolicy, Closure<? extends Promise<T>> work) {
-        work()
+        int maximumAttempts = FlowDefaults.EXPONENTIAL_RETRY_MAXIMUM_ATTEMPTS
+        if (retryPolicy.respondsTo('getMaximumAttempts')) {
+            maximumAttempts = retryPolicy.maximumAttempts
+        }
+        recursingRetry(retryPolicy, work, null, maximumAttempts, 1)
     }
 
-    @Override
-    <T> Promise<T> retry(Closure<? extends Promise<T>> work) {
-        work()
+    private <T> Promise<T> recursingRetry(RetryPolicy retryPolicy, Closure<? extends Promise<T>> work, Throwable t1,
+            int maximumAttempts, int attemptCount) {
+        if (maximumAttempts > 0 && attemptCount > maximumAttempts) {
+            throw t1
+        }
+        if (!t1 || retryPolicy.isRetryable(t1)) {
+            try {
+                return work()
+            } catch(Throwable t2) {
+                recursingRetry(retryPolicy, work, t2, maximumAttempts, attemptCount + 1)
+            }
+        } else {
+            throw t1
+        }
     }
 }
