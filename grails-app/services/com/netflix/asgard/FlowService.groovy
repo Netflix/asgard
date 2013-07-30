@@ -17,6 +17,7 @@ import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowType
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
+import com.netflix.asgard.flow.GlobalWorkflowAttributes
 import com.netflix.asgard.flow.InterfaceBasedWorkflowClient
 import com.netflix.asgard.flow.WorkflowDescriptionTemplate
 import com.netflix.asgard.flow.WorkflowMetaAttributes
@@ -49,7 +50,8 @@ class FlowService implements InitializingBean {
 
     void afterPropertiesSet() {
         domain = configService.simpleWorkflowDomain
-        taskList = domain
+        taskList = configService.simpleWorkflowTaskList
+        GlobalWorkflowAttributes.taskList = taskList
         simpleWorkflow = awsClientService.create(AmazonSimpleWorkflow)
         activityImplementations.each { Spring.autowire(it) }
         workflowWorker = new WorkflowWorker(simpleWorkflow, domain, taskList)
@@ -91,7 +93,8 @@ class FlowService implements InitializingBean {
         SwfWorkflowTags workflowTags = new SwfWorkflowTags()
         workflowTags.user = userContext
         workflowTags.link = link
-        factory.startWorkflowOptions = new StartWorkflowOptions(tagList: workflowTags.constructTags())
+        factory.startWorkflowOptions = new StartWorkflowOptions(tagList: workflowTags.constructTags(),
+                taskList: taskList)
         factory.client
     }
 

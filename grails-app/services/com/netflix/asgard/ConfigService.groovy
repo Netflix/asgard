@@ -258,6 +258,13 @@ class ConfigService {
     }
 
     /**
+     * @return the name of the Amazon Simple Workflow task list that should be used for automation
+     */
+    String getSimpleWorkflowTaskList() {
+        grailsApplication.config?.workflow?.taskList ?: 'primary'
+    }
+
+    /**
      * @return the number of days to retain Amazon Simple Workflow closed executions
      */
     Integer getWorkflowExecutionRetentionPeriodInDays() {
