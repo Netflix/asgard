@@ -81,7 +81,6 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should execute full deployment'() {
-
         DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward', delayDuration: 10,
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,

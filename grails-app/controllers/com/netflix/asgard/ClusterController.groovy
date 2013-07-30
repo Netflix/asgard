@@ -185,7 +185,6 @@ ${lastGroup.loadBalancerNames}"""
     def result = { render view: '/common/result' }
 
     def proceedWithDeployment(String taskToken, String runId, String workflowId, String proceed) {
-        println params
         boolean shouldProceed = proceed == 'true'
         ManualActivityCompletionClient manualActivityCompletionClient = flowService.
                 getManualActivityCompletionClient(taskToken)
