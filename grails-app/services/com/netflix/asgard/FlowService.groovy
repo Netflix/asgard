@@ -41,10 +41,14 @@ class FlowService implements InitializingBean {
     WorkflowWorker workflowWorker
     ActivityWorker activityWorker
 
+    // For every workflow the following data structures should be populated.
+    /* Declare workflow implementations. */
     final ImmutableSet<Class<?>> workflowImplementationTypes = ImmutableSet.of(DeploymentWorkflowImpl)
+    /* Declare workflow description templates. */
     final ImmutableMap<Class<?>, WorkflowDescriptionTemplate> workflowToDescriptionTemplate = ImmutableMap.copyOf([
             (DeploymentWorkflow): new DeploymentWorkflowDescriptionTemplate()
     ] as Map)
+    /* Declare workflow activity implementations. */
     final ImmutableSet<Object> activityImplementations = ImmutableSet.of(new DeploymentActivitiesImpl())
 
     /* The AWS SWF domain that will be used in this service for polling and scheduling workflows */
