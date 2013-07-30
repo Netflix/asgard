@@ -44,7 +44,7 @@
           </tr>
           <tr class="prop">
             <td class="name">
-              <label for="launchConfiguration">Launch Configuration:</label>
+              <label for="launchConfiguration">Launch<br/>Configuration:</label>
             </td>
             <td class="value">
               <select id="launchConfiguration" name="launchConfiguration" data-defaultfilter="${group.autoScalingGroupName}">
@@ -60,7 +60,7 @@
           <g:render template="autoScalingOptions"/>
           <tr class="prop advanced">
             <td class="name">
-              Launching instances:
+              Launching<br/>instances:
             </td>
             <td>
               <input type="radio" name="launch" value="enabled" id="launchingEnabled" ${launchSuspended ?  '' : 'checked="checked"'}>
@@ -71,7 +71,7 @@
           </tr>
           <tr class="prop advanced">
             <td class="name">
-              Terminating instances:
+              Terminating<br/>instances:
             </td>
             <td>
               <input type="radio" name="terminate" value="enabled" id="terminatingEnabled" ${terminateSuspended ?  '' : 'checked="checked"'}>
@@ -82,7 +82,7 @@
           </tr>
           <tr class="prop advanced">
             <td class="name">
-              Adding instances to ELBs:
+              Adding<br/>instances<br/>to ELBs:
             </td>
             <td>
               <input type="radio" name="addToLoadBalancer" value="enabled" id="addToLoadBalancerEnabled" ${addToLoadBalancerSuspended ?  '' : 'checked="checked"'}>

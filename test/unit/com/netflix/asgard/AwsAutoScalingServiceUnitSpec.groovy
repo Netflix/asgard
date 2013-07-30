@@ -22,10 +22,12 @@ import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult
 import com.amazonaws.services.autoscaling.model.DescribeLaunchConfigurationsResult
 import com.amazonaws.services.autoscaling.model.DescribePoliciesResult
+import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsResult
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
+import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest
 import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
@@ -44,6 +46,7 @@ import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.StackAsg
 import com.netflix.frigga.ami.AppVersion
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @SuppressWarnings(["GroovyAssignabilityCheck"])
 class AwsAutoScalingServiceUnitSpec extends Specification {
@@ -148,6 +151,47 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
         })
         0 * mockAmazonAutoScalingClient.suspendProcesses(_)
     }
+
+    @Unroll("""it is #result that a group should be manually sized if it has scaling policies #policyNames and \
+scheduled actions #scheduleNames and suspended processes #processNames""")
+    def 'should determine whether or not a group needs to be manually sized'() {
+        given:
+        Mocks.createDynamicMethods()
+        awsAutoScalingService = new AwsAutoScalingService()
+        AmazonAutoScaling mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
+        awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
+
+        when:
+        mockAmazonAutoScalingClient.describePolicies(_) >> {
+            new DescribePoliciesResult(scalingPolicies: policyNames.collect { new ScalingPolicy(policyName: it) })
+        }
+        mockAmazonAutoScalingClient.describeScheduledActions(_) >> {
+            new DescribeScheduledActionsResult(scheduledUpdateGroupActions: scheduleNames.collect {
+                new ScheduledUpdateGroupAction(scheduledActionName: it)
+            })
+        }
+        AutoScalingGroup group = new AutoScalingGroup(autoScalingGroupName: 'hi', suspendedProcesses:
+                processNames.collect { new SuspendedProcess(processName: it) })
+
+        then:
+        awsAutoScalingService.shouldGroupBeManuallySized(UserContext.auto(Region.US_WEST_2), group) == result
+
+        where:
+        result | policyNames      | scheduleNames | processNames
+        true   | []               | []            | []
+        true   | []               | []            | ['Launch']
+        true   | []               | []            | ['Terminate']
+        true   | []               | []            | ['AlarmNotifications']
+        true   | []               | []            | ['Launch', 'Terminate', 'AlarmNotifications']
+        false  | ['hi-1', 'hi-2'] | ['hi-8']      | []
+        false  | ['hi-1', 'hi-2'] | []            | []
+        false  | []               | ['hi-8']      | []
+        false  | ['hi-1', 'hi-2'] | ['hi-8']      | ['Launch']
+        false  | ['hi-1', 'hi-2'] | ['hi-8']      | ['Terminate']
+        true   | ['hi-1', 'hi-2'] | ['hi-8']      | ['AlarmNotifications']
+        true   | ['hi-1', 'hi-2'] | ['hi-8']      | ['Launch', 'Terminate', 'AlarmNotifications']
+    }
+
 
     def 'should get scaling policies'() {
         Mocks.createDynamicMethods()

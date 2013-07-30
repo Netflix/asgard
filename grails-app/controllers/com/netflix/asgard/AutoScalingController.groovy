@@ -297,10 +297,11 @@ class AutoScalingController {
             String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
 
             // Auto Scaling Group
-            def minSize = params.min ?: 0
-            def desiredCapacity = params.desiredCapacity ?: 0
-            def maxSize = params.max ?: 0
-            def defaultCooldown = params.defaultCooldown ?: 10
+            Integer minSize = (params.min ?: 0) as Integer
+            Integer desiredCapacity = (params.desiredCapacity ?: 0) as Integer
+            Integer maxSize = (params.max ?: 0) as Integer
+            desiredCapacity = Ensure.bounded(minSize, desiredCapacity, maxSize)
+            Integer defaultCooldown = (params.defaultCooldown ?: 10) as Integer
             String healthCheckType = AutoScalingGroupHealthCheckType.ensureValidType(params.healthCheckType)
             Integer healthCheckGracePeriod = params.healthCheckGracePeriod as Integer
             List<String> terminationPolicies = Requests.ensureList(params.terminationPolicy)
@@ -309,8 +310,8 @@ class AutoScalingController {
                     params["selectedLoadBalancers"])
             AutoScalingGroup groupTemplate = new AutoScalingGroup().withAutoScalingGroupName(groupName).
                     withAvailabilityZones(availabilityZones).withLoadBalancerNames(loadBalancerNames).
-                    withMinSize(minSize.toInteger()).withDesiredCapacity(desiredCapacity.toInteger()).
-                    withMaxSize(maxSize.toInteger()).withDefaultCooldown(defaultCooldown.toInteger()).
+                    withMinSize(minSize).withDesiredCapacity(desiredCapacity).
+                    withMaxSize(maxSize).withDefaultCooldown(defaultCooldown).
                     withHealthCheckType(healthCheckType).withHealthCheckGracePeriod(healthCheckGracePeriod).
                     withTerminationPolicies(terminationPolicies)
 
@@ -366,6 +367,10 @@ class AutoScalingController {
         List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)
         String subnetPurpose = awsEc2Service.getSubnets(userContext).coerceLoneOrNoneFromIds(subnetIds)?.purpose
         Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
+        boolean launchSuspended = group?.isProcessSuspended(AutoScalingProcessType.Launch)
+        boolean terminateSuspended = group?.isProcessSuspended(AutoScalingProcessType.Terminate)
+        boolean alarmNotesSuspended = group?.isProcessSuspended(AutoScalingProcessType.AlarmNotifications)
+        boolean manualStaticSizingNeeded = awsAutoScalingService.shouldGroupBeManuallySized(userContext, group)
         return [
                 group: group,
                 loadBalancers: awsLoadBalancerService.getLoadBalancers(userContext),
@@ -376,9 +381,11 @@ class AutoScalingController {
                 subnetPurpose: params.subnetPurpose ?: subnetPurpose,
                 zonesGroupedByPurpose: subnets.groupZonesByPurpose(availabilityZones*.zoneName, SubnetTarget.EC2),
                 selectedZones: Requests.ensureList(params.selectedZones) ?: group?.availabilityZones,
-                launchSuspended: group?.isProcessSuspended(AutoScalingProcessType.Launch),
-                terminateSuspended: group?.isProcessSuspended(AutoScalingProcessType.Terminate),
+                launchSuspended: launchSuspended,
+                terminateSuspended: terminateSuspended,
+                alarmNotificationsSuspended: alarmNotesSuspended,
                 addToLoadBalancerSuspended: group?.isProcessSuspended(AutoScalingProcessType.AddToLoadBalancer),
+                manualStaticSizingNeeded: manualStaticSizingNeeded,
                 vpcZoneIdentifier: group.VPCZoneIdentifier,
         ]
     }
@@ -404,43 +411,35 @@ class AutoScalingController {
         Integer desiredCapacity = (params.desiredCapacity ?: 0) as Integer
         Integer maxSize = (params.max ?: 0) as Integer
         def nextAction = 'show'
-
-        if (minSize > desiredCapacity) {
-            flash.message = "Error: Minimum size ${minSize} is lower than desired capacity ${desiredCapacity}"
-            nextAction = 'edit'
-        } else if (desiredCapacity > maxSize) {
-            flash.message = "Error: Desired capacity ${desiredCapacity} is lower than max size ${maxSize}"
-            nextAction = 'edit'
-        } else {
-            AutoScalingGroup asg = awsAutoScalingService.getAutoScalingGroup(userContext, name)
-            String lcName = params.launchConfiguration
-            Integer defaultCooldown = (params.defaultCooldown ?: 10) as Integer
-            String healthCheckType = AutoScalingGroupHealthCheckType.ensureValidType(params.healthCheckType)
-            Integer healthCheckGracePeriod = params.healthCheckGracePeriod as Integer
-            List<String> terminationPolicies = Requests.ensureList(params.terminationPolicy) ?: asg.terminationPolicies
-            List<String> availabilityZones = Requests.ensureList(params.selectedZones)
-            Collection<AutoScalingProcessType> suspendProcesses = Sets.newHashSet()
-            Collection<AutoScalingProcessType> resumeProcesses = Sets.newHashSet()
-            processes.each { String paramName, AutoScalingProcessType processType ->
-                if (params[paramName] in ['disabled']) {
-                    suspendProcesses << processType
-                }
-                if (params[paramName] in ['enabled']) {
-                    resumeProcesses << processType
-                }
+        desiredCapacity = Ensure.bounded(minSize, desiredCapacity, maxSize)
+        AutoScalingGroup asg = awsAutoScalingService.getAutoScalingGroup(userContext, name)
+        String lcName = params.launchConfiguration
+        Integer defaultCooldown = (params.defaultCooldown ?: 10) as Integer
+        String healthCheckType = AutoScalingGroupHealthCheckType.ensureValidType(params.healthCheckType)
+        Integer healthCheckGracePeriod = params.healthCheckGracePeriod as Integer
+        List<String> terminationPolicies = Requests.ensureList(params.terminationPolicy) ?: asg.terminationPolicies
+        List<String> availabilityZones = Requests.ensureList(params.selectedZones)
+        Collection<AutoScalingProcessType> suspendProcesses = Sets.newHashSet()
+        Collection<AutoScalingProcessType> resumeProcesses = Sets.newHashSet()
+        processes.each { String paramName, AutoScalingProcessType processType ->
+            if (params[paramName] in ['disabled']) {
+                suspendProcesses << processType
             }
-            final AutoScalingGroupData autoScalingGroupData = AutoScalingGroupData.forUpdate(
-                    name, lcName, minSize, desiredCapacity, maxSize, defaultCooldown, healthCheckType,
-                    healthCheckGracePeriod, terminationPolicies, availabilityZones
-            )
-            try {
-                awsAutoScalingService.updateAutoScalingGroup(userContext, autoScalingGroupData, suspendProcesses,
-                        resumeProcesses)
-                flash.message = "AutoScaling Group '${name}' has been updated."
-            } catch (Exception e) {
-                flash.message = "Could not update AutoScaling Group: ${e}"
-                nextAction = 'edit'
+            if (params[paramName] in ['enabled']) {
+                resumeProcesses << processType
             }
+        }
+        final AutoScalingGroupData autoScalingGroupData = AutoScalingGroupData.forUpdate(
+                name, lcName, minSize, desiredCapacity, maxSize, defaultCooldown, healthCheckType,
+                healthCheckGracePeriod, terminationPolicies, availabilityZones
+        )
+        try {
+            awsAutoScalingService.updateAutoScalingGroup(userContext, autoScalingGroupData, suspendProcesses,
+                    resumeProcesses)
+            flash.message = "AutoScaling Group '${name}' has been updated."
+        } catch (Exception e) {
+            flash.message = "Could not update AutoScaling Group: ${e}"
+            nextAction = 'edit'
         }
         redirect(action: nextAction, params: [id: name])
     }

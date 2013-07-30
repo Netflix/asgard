@@ -34,6 +34,7 @@ enum AutoScalingProcessType {
     Launch('new instance launching'),
     Terminate('instance termination'),
     AZRebalance('availability zone rebalancing'),
+    AlarmNotifications('automatic alarm-based scaling'),
     AddToLoadBalancer('adding instances to ELB')
 
     final String resumeMessage
