@@ -18,6 +18,10 @@ import com.amazonaws.services.simpleworkflow.model.WorkflowType
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.flow.GlobalWorkflowAttributes
+import com.netflix.asgard.deployment.DeploymentActivitiesImpl
+import com.netflix.asgard.deployment.DeploymentWorkflow
+import com.netflix.asgard.deployment.DeploymentWorkflowDescriptionTemplate
+import com.netflix.asgard.deployment.DeploymentWorkflowImpl
 import com.netflix.asgard.flow.InterfaceBasedWorkflowClient
 import com.netflix.asgard.flow.WorkflowDescriptionTemplate
 import com.netflix.asgard.flow.WorkflowMetaAttributes
@@ -37,10 +41,11 @@ class FlowService implements InitializingBean {
     WorkflowWorker workflowWorker
     ActivityWorker activityWorker
 
-    final ImmutableSet<Class<?>> workflowImplementationTypes = ImmutableSet.of()
-    final ImmutableMap<Class<?>, WorkflowDescriptionTemplate> workflowToDescriptionTemplate = ImmutableMap.
-            copyOf([:] as Map)
-    final ImmutableSet<Object> activityImplementations = ImmutableSet.of()
+    final ImmutableSet<Class<?>> workflowImplementationTypes = ImmutableSet.of(DeploymentWorkflowImpl)
+    final ImmutableMap<Class<?>, WorkflowDescriptionTemplate> workflowToDescriptionTemplate = ImmutableMap.copyOf([
+            (DeploymentWorkflow): new DeploymentWorkflowDescriptionTemplate()
+    ] as Map)
+    final ImmutableSet<Object> activityImplementations = ImmutableSet.of(new DeploymentActivitiesImpl())
 
     /* The AWS SWF domain that will be used in this service for polling and scheduling workflows */
     private String domain

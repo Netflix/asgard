@@ -29,6 +29,13 @@
       <g:if test="${flash.message}">
         <div class="message">${flash.message}</div>
       </g:if>
+      <g:if test="${params.autoDeploy}">
+        <div class="buttons">
+          <g:link class="deploy" action="prepareDeployment"
+                  params="[id: cluster.name, useDeploymentOptions: true]">Prepare Automated Deployment</g:link>
+          <g:link class="create" action="prepareDeployment" params="[id: cluster.name]">Create Next Group '${nextGroupName}'</g:link>
+        </div>
+      </g:if>
       <p>
         Recommended next step: <br/>
         <em>${recommendedNextStep}</em>

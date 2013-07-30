@@ -40,6 +40,7 @@ import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsResult
 import com.amazonaws.services.autoscaling.model.Ebs
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.autoscaling.model.LifecycleState
 import com.amazonaws.services.autoscaling.model.PutScalingPolicyRequest
 import com.amazonaws.services.autoscaling.model.PutScalingPolicyResult
 import com.amazonaws.services.autoscaling.model.PutScheduledUpdateGroupActionRequest
@@ -53,10 +54,11 @@ import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.cache.CacheInitializer
-import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.AlarmData
+import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
+import com.netflix.asgard.model.EurekaStatus
 import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SimpleDbSequenceLocator
@@ -465,6 +467,29 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         awsClient.by(userContext.region).describePolicies(request).scalingPolicies
     }
 
+    /**
+     * Copy scheduled actions for use in another ASG (like the next ASG in a Cluster).
+     *
+     * @param userContext who made the call, why, and in what region
+     * @param newAsgName name of the new ASG
+     * @param sourceScheduledActions original scheduled actions
+     * @return copies of the original scheduled actions with an updated ASG name
+     */
+    List<ScheduledUpdateGroupAction> copyScheduledActionsForNewAsg(UserContext userContext, String newAsgName,
+            List<ScheduledUpdateGroupAction> sourceScheduledActions) {
+        List<String> ignoredScheduledActionProperties = ['startTime', 'time', 'autoScalingGroupName',
+                'scheduledActionName', 'scheduledActionARN']
+        sourceScheduledActions.collect {
+            ScheduledUpdateGroupAction newScheduledAction = BeanState.ofSourceBean(it).
+                    ignoreProperties(ignoredScheduledActionProperties).injectState(new ScheduledUpdateGroupAction())
+            newScheduledAction.with {
+                autoScalingGroupName = newAsgName
+                scheduledActionName = Relationships.buildScalingPolicyName(newAsgName, nextPolicyId(userContext))
+            }
+            newScheduledAction
+        }
+    }
+
     List<ScalingPolicyData> getScalingPolicyDatas(UserContext userContext, String autoScalingGroupName) {
         if (!autoScalingGroupName) { return [] }
         final List<ScalingPolicy> scalingPolicies = getScalingPoliciesForGroup(userContext, autoScalingGroupName)
@@ -665,7 +690,17 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         }
     }
 
-    private AutoScalingGroup createAutoScalingGroup(UserContext userContext, AutoScalingGroup groupTemplate,
+    /**
+     * Create an ASG.
+     *
+     * @param userContext who made the call, why, and in what region
+     * @param groupTemplate ASG attributes for the new ASG
+     * @param launchConfigName for new ASG
+     * @param suspendedProcesses to suspend on the new ASG
+     * @param existingTask
+     * @return created ASG
+     */
+    AutoScalingGroup createAutoScalingGroup(UserContext userContext, AutoScalingGroup groupTemplate,
             String launchConfigName, Collection<AutoScalingProcessType> suspendedProcesses,
             Task existingTask = null) {
         String name = groupTemplate.autoScalingGroupName
@@ -689,19 +724,87 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         getAutoScalingGroup(userContext, name)
     }
 
+    /**
+     * Resize an ASG.
+     *
+     * @param userContext who made the call, why, and in what region
+     * @param asgName name of the ASG
+     * @param minSize value to update ASG with
+     * @param desiredCapacity value to update ASG with
+     * @param maxSize value to update ASG with
+     * @return updated ASG
+     */
+    AutoScalingGroup resizeAutoScalingGroup(UserContext userContext, String asgName, Integer minSize,
+            Integer desiredCapacity, Integer maxSize) {
+        Check.notNull(asgName, String)
+
+        AutoScalingGroup group = getAutoScalingGroup(userContext, asgName)
+        if (!group.getVPCZoneIdentifier()) {
+            group.withVPCZoneIdentifier(null)
+        }
+
+        UpdateAutoScalingGroupRequest request = BeanState.ofSourceBean(group).injectState(
+                new UpdateAutoScalingGroupRequest())
+        if (minSize != null) { request.minSize = minSize }
+        if (maxSize != null) { request.maxSize = maxSize }
+        if (desiredCapacity != null) { request.desiredCapacity = desiredCapacity }
+        awsClient.by(userContext.region).updateAutoScalingGroup(request)
+
+        // Refresh auto scaling group and cluster cache
+        group = getAutoScalingGroup(userContext, asgName)
+        getCluster(userContext, asgName)
+        group
+    }
+
+    /**
+     * Analyze an ASG and determine if it is healthy.
+     *
+     * @param userContext who made the call, why, and in what region
+     * @param asgName name of the ASG
+     * @param expectedInstanceCount number of instances that are expected
+     * @return a String describing why the ASG is unhealthy or null if it is healthy
+     */
+    String reasonAsgIsUnhealthy(UserContext userContext, String asgName, int expectedInstanceCount) {
+        if (expectedInstanceCount == 0) {
+            return null
+        }
+        AutoScalingGroup asg = getAutoScalingGroup(userContext, asgName)
+        if (!asg) {
+            throw new IllegalStateException("ASG '${asgName}' does not exist.")
+        }
+        if (asg.instances.size() < expectedInstanceCount) {
+            return "Instance count is ${asg.instances.size()}. Waiting for ${expectedInstanceCount}."
+        }
+        if (asg.instances.find { it.lifecycleState != LifecycleState.InService.name() }) {
+            return "Waiting for instances to be in service."
+        }
+        List<ApplicationInstance> applicationInstances = discoveryService.getAppInstancesByIds(userContext,
+                asg.instances*.instanceId)
+        if (applicationInstances.size() < expectedInstanceCount) {
+            return "Waiting for Eureka data about instances."
+        }
+        if (applicationInstances.find { it.status != EurekaStatus.UP.name() }) {
+            return "Waiting for all instances to be available in Eureka."
+        }
+        if (!awsEc2Service.checkHostsHealth(applicationInstances*.healthCheckUrl)) {
+            return "Waiting for all instances to pass health checks."
+        }
+        null
+    }
+
     AutoScalingGroup updateAutoScalingGroup(UserContext userContext, AutoScalingGroupData autoScalingGroupData,
-                Collection<AutoScalingProcessType> suspendProcessTypes = [],
-                Collection<AutoScalingProcessType> resumeProcessTypes = [], existingTask = null) {
+            Collection<AutoScalingProcessType> suspendProcessTypes = [],
+            Collection<AutoScalingProcessType> resumeProcessTypes = [], existingTask = null) {
         [
-            'autoScalingGroupName',
-            'launchConfigurationName',
-            'minSize',
-            'desiredCapacity',
-            'maxSize',
-            'defaultCooldown',
-            'healthCheckType',
-            'healthCheckGracePeriod',
-            'availabilityZones',
+                'autoScalingGroupName',
+                'launchConfigurationName',
+                'minSize',
+                'desiredCapacity',
+                'maxSize',
+                'defaultCooldown',
+                'healthCheckType',
+                'healthCheckGracePeriod',
+                'availabilityZones',
         ].each {
             Check.notNull(autoScalingGroupData."${it}", AutoScalingGroup, it)
         }
@@ -1012,7 +1115,8 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             AutoScalingGroup groupForUserData = new AutoScalingGroup().
                     withAutoScalingGroupName(groupTemplate.autoScalingGroupName).
                     withLaunchConfigurationName(launchConfigName)
-            String userData = launchTemplateService.buildUserData(userContext, groupForUserData)
+            String userData = launchTemplateService.buildUserData(userContext, groupForUserData.autoScalingGroupName,
+                    groupForUserData.launchConfigurationName)
             result.launchConfigName = launchConfigName
             result.autoScalingGroupName = groupName
 
@@ -1050,6 +1154,20 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         }, Link.to(EntityType.autoScaling, groupName), existingTask)
 
         result
+    }
+
+    /**
+     * Create launch configuration.
+     *
+     * @param userContext who made the call, why, and in what region
+     * @param launchConfiguration to create
+     */
+    void createLaunchConfiguration(UserContext userContext, LaunchConfiguration launchConfiguration) {
+        createLaunchConfiguration(userContext, launchConfiguration.launchConfigurationName,
+                launchConfiguration.imageId, launchConfiguration.keyName, launchConfiguration.securityGroups,
+                launchConfiguration.userData, launchConfiguration.instanceType, launchConfiguration.kernelId,
+                launchConfiguration.ramdiskId, launchConfiguration.iamInstanceProfile,
+                launchConfiguration.spotPrice, launchConfiguration.ebsOptimized, new Task())
     }
 
     void createLaunchConfiguration(UserContext userContext, String name, String imageId, String keyName,

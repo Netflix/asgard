@@ -25,6 +25,8 @@ class DiscoveryService implements CacheInitializer {
 
     static transactional = false
 
+    static SECONDS_TO_WAIT_AFTER_EUREKA_CHANGE = 90
+
     def grailsApplication  // injected after construction
     Caches caches
     def configService
@@ -46,7 +48,7 @@ class DiscoveryService implements CacheInitializer {
      * Allow 30 seconds for client to update its server cache from Discovery, another 30 seconds for the platform jar's
      * cache to expire, and another 30 seconds for GC pauses and unpleasant surprises. Total: 90 seconds.
      */
-    final Duration timeToWaitAfterDiscoveryChange = Duration.standardSeconds(90)
+    final Duration timeToWaitAfterDiscoveryChange = Duration.standardSeconds(SECONDS_TO_WAIT_AFTER_EUREKA_CHANGE)
 
     /**
      * Constructs a base URL for reaching Eureka at its URL context.
