@@ -20,7 +20,7 @@ import groovy.transform.Canonical
 /**
  * Attributes of the deployment process itself.
  */
-@Canonical class DeploymentOptions {
+@Canonical class DeploymentWorkflowOptions {
 
     /** name of the cluster where the deployment is taking place */
     String clusterName

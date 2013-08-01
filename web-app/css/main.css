@@ -457,8 +457,8 @@ td.checkbox          { text-align: center; }
 .groupReplacingPush .filter                      { width: 60px;      }
 .groupReplacingPush .name                        { white-space: normal; min-width: 86px; }
 
-.groupReplacingPush li.deploymentOptions         { max-width: 500px }
-.groupReplacingPush li.deploymentOptions .name   { min-width: 280px; }
+.groupReplacingPush li.deploymentWorkflowOptions         { max-width: 500px }
+.groupReplacingPush li.deploymentWorkflowOptions .name   { min-width: 280px; }
 
 #showAdvancedOptionsToCreateFastProperty   { margin-left: 230px; }
 

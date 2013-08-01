@@ -37,16 +37,16 @@
   <g:form action="deploy" method="post" class="validate">
     <div class="dialog">
     <ul class="groupReplacingPush">
-    <g:if test="${deploymentOptions}">
-      <li class="deploymentOptions clusterAsgForm">
+    <g:if test="${deploymentWorkflowOptions}">
+      <li class="deploymentWorkflowOptions clusterAsgForm">
         <h2>Deployment Options:</h2>
-      <table class="deploymentOptions">
+      <table class="deploymentWorkflowOptions">
         <tr class="prop">
           <td class="name">
             <label for="notificationDestination">Notifications will be sent to:</label>
           </td>
           <td class="value">
-            <g:textField class="required" name="notificationDestination" value="${deploymentOptions.notificationDestination}"/>
+            <g:textField class="required" name="notificationDestination" value="${deploymentWorkflowOptions.notificationDestination}"/>
           </td>
         </tr>
         <tr class="prop numbers">
@@ -54,7 +54,7 @@
             <label for="delayDuration">Delay before deploying:</label>
           </td>
           <td class="value">
-            <g:textField class="required" name="delayDuration" value="${deploymentOptions.delayDuration}"/>&nbsp;minutes
+            <g:textField class="required" name="delayDuration" value="${deploymentWorkflowOptions.delayDuration}"/>&nbsp;minutes
           </td>
         </tr>
         <tr>
@@ -64,22 +64,22 @@
           <td>Run canary</td>
           <td>
             <div>
-              <g:radio name="doCanary" value="No" checked="${!deploymentOptions.doCanary}"/>
+              <g:radio name="doCanary" value="No" checked="${!deploymentWorkflowOptions.doCanary}"/>
               <label class="choice">Skip canary</label>
             </div>
             <div>
-              <g:radio name="doCanary" value="Yes" checked="${deploymentOptions.doCanary}"/>
+              <g:radio name="doCanary" value="Yes" checked="${deploymentWorkflowOptions.doCanary}"/>
               <label class="choice">Canary before full capacity</label>
             </div>
           </td>
         </tr>
-        <tbody class="canaryOptions numbers ${deploymentOptions.doCanary ? '' : 'concealed'}">
+        <tbody class="canaryOptions numbers ${deploymentWorkflowOptions.doCanary ? '' : 'concealed'}">
           <tr class="prop">
             <td class="name">
               <label for="canaryCapacity">Instance count:</label>
             </td>
             <td class="value">
-              <g:textField class="required" name="canaryCapacity" value="${deploymentOptions.canaryCapacity}"/>
+              <g:textField class="required" name="canaryCapacity" value="${deploymentWorkflowOptions.canaryCapacity}"/>
             </td>
           </tr>
           <tr class="prop">
@@ -87,7 +87,7 @@
               <label for="canaryStartUpTimeout">Start up timeout:</label>
             </td>
             <td class="value">
-              <g:textField class="required" name="canaryStartUpTimeout" value="${deploymentOptions.canaryStartUpTimeout}"/>&nbsp;minutes
+              <g:textField class="required" name="canaryStartUpTimeout" value="${deploymentWorkflowOptions.canaryStartUpTimeout}"/>&nbsp;minutes
             </td>
           </tr>
           <tr class="prop">
@@ -95,7 +95,7 @@
               <label for="canaryAssessmentDuration">Assessment duration:</label>
             </td>
             <td class="value">
-              <g:textField class="required" name="canaryAssessmentDuration" value="${deploymentOptions.canaryAssessmentDuration}"/>&nbsp;minutes
+              <g:textField class="required" name="canaryAssessmentDuration" value="${deploymentWorkflowOptions.canaryAssessmentDuration}"/>&nbsp;minutes
             </td>
           </tr>
           <tr class="prop">
@@ -104,15 +104,15 @@
             </td>
             <td>
               <div>
-                <g:radio name="scaleUp" value="Yes" checked="${deploymentOptions.scaleUp == ProceedPreference.Yes}"/>
+                <g:radio name="scaleUp" value="Yes" checked="${deploymentWorkflowOptions.scaleUp == ProceedPreference.Yes}"/>
                 <label class="choice">Yes</label>
               </div>
               <div>
-                <g:radio name="scaleUp" value="No" checked="${deploymentOptions.scaleUp == ProceedPreference.No}"/>
+                <g:radio name="scaleUp" value="No" checked="${deploymentWorkflowOptions.scaleUp == ProceedPreference.No}"/>
                 <label class="choice">No</label>
               </div>
               <div>
-                <g:radio name="scaleUp" value="Ask" checked="${!deploymentOptions.scaleUp || deploymentOptions.scaleUp == ProceedPreference.Ask}"/>
+                <g:radio name="scaleUp" value="Ask" checked="${!deploymentWorkflowOptions.scaleUp || deploymentWorkflowOptions.scaleUp == ProceedPreference.Ask}"/>
                 <label class="choice">Ask</label>
               </div>
             </td>
@@ -127,7 +127,7 @@
             <label for="desiredCapacityStartUpTimeout">Start up timeout:</label>
           </td>
           <td class="value">
-            <g:textField class="required" name="desiredCapacityStartUpTimeout" value="${deploymentOptions.desiredCapacityStartUpTimeout}"/>&nbsp;minutes
+            <g:textField class="required" name="desiredCapacityStartUpTimeout" value="${deploymentWorkflowOptions.desiredCapacityStartUpTimeout}"/>&nbsp;minutes
           </td>
         </tr>
         <tr class="prop">
@@ -135,7 +135,7 @@
             <label for="desiredCapacityAssessmentDuration">Assessment duration:</label>
           </td>
           <td class="value">
-            <g:textField class="required" name="desiredCapacityAssessmentDuration" value="${deploymentOptions.desiredCapacityAssessmentDuration}"/>&nbsp;minutes
+            <g:textField class="required" name="desiredCapacityAssessmentDuration" value="${deploymentWorkflowOptions.desiredCapacityAssessmentDuration}"/>&nbsp;minutes
           </td>
         </tr>
         <tr>
@@ -147,26 +147,26 @@
           </td>
           <td>
             <div>
-              <g:radio name="disablePreviousAsg" value="Yes" checked="${deploymentOptions.disablePreviousAsg == ProceedPreference.Yes}"/>
+              <g:radio name="disablePreviousAsg" value="Yes" checked="${deploymentWorkflowOptions.disablePreviousAsg == ProceedPreference.Yes}"/>
               <label class="choice">Yes</label>
             </div>
             <div>
-              <g:radio name="disablePreviousAsg" value="No" checked="${deploymentOptions.disablePreviousAsg == ProceedPreference.No}"/>
+              <g:radio name="disablePreviousAsg" value="No" checked="${deploymentWorkflowOptions.disablePreviousAsg == ProceedPreference.No}"/>
               <label class="choice">No</label>
             </div>
             <div>
-              <g:radio name="disablePreviousAsg" value="Ask" checked="${!deploymentOptions.disablePreviousAsg || deploymentOptions.disablePreviousAsg == ProceedPreference.Ask}"/>
+              <g:radio name="disablePreviousAsg" value="Ask" checked="${!deploymentWorkflowOptions.disablePreviousAsg || deploymentWorkflowOptions.disablePreviousAsg == ProceedPreference.Ask}"/>
               <label class="choice">Ask</label>
             </div>
           </td>
         </tr>
-        <tbody class="fullTrafficOptions numbers ${deploymentOptions.disablePreviousAsg == ProceedPreference.No ? 'concealed' : ''}">
+        <tbody class="fullTrafficOptions numbers ${deploymentWorkflowOptions.disablePreviousAsg == ProceedPreference.No ? 'concealed' : ''}">
         <tr class="prop">
           <td class="name">
             <label for="fullTrafficAssessmentDuration">Full traffic assessment duration:</label>
           </td>
           <td class="value">
-            <g:textField class="required" name="fullTrafficAssessmentDuration" value="${deploymentOptions.fullTrafficAssessmentDuration}"/>&nbsp;minutes
+            <g:textField class="required" name="fullTrafficAssessmentDuration" value="${deploymentWorkflowOptions.fullTrafficAssessmentDuration}"/>&nbsp;minutes
           </td>
         </tr>
         <tr class="prop">
@@ -175,15 +175,15 @@
           </td>
           <td>
             <div>
-              <g:radio name="deletePreviousAsg" value="Yes" checked="${deploymentOptions.deletePreviousAsg == ProceedPreference.Yes}"/>
+              <g:radio name="deletePreviousAsg" value="Yes" checked="${deploymentWorkflowOptions.deletePreviousAsg == ProceedPreference.Yes}"/>
               <label class="choice">Yes</label>
             </div>
             <div>
-              <g:radio name="deletePreviousAsg" value="No" checked="${deploymentOptions.deletePreviousAsg == ProceedPreference.No}"/>
+              <g:radio name="deletePreviousAsg" value="No" checked="${deploymentWorkflowOptions.deletePreviousAsg == ProceedPreference.No}"/>
               <label class="choice">No</label>
             </div>
             <div>
-              <g:radio name="deletePreviousAsg" value="Ask" checked="${!deploymentOptions.deletePreviousAsg || deploymentOptions.deletePreviousAsg == ProceedPreference.Ask}"/>
+              <g:radio name="deletePreviousAsg" value="Ask" checked="${!deploymentWorkflowOptions.deletePreviousAsg || deploymentWorkflowOptions.deletePreviousAsg == ProceedPreference.Ask}"/>
               <label class="choice">Ask</label>
             </div>
           </td>
@@ -209,7 +209,7 @@
             <g:render template="/autoScaling/autoScalingOptions" />
             <g:render template="/loadBalancer/selection"/>
             <g:render template="/launchConfiguration/launchConfigOptions" />
-            <g:if test="${!deploymentOptions}">
+            <g:if test="${!deploymentWorkflowOptions}">
               <g:render template="/push/startupOptions" />
               <tr class="advanced">
                 <td>

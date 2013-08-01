@@ -23,7 +23,7 @@ import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.netflix.asgard.deployment.AutoScalingGroupOptions
-import com.netflix.asgard.deployment.DeploymentOptions
+import com.netflix.asgard.deployment.DeploymentWorkflowOptions
 import com.netflix.asgard.deployment.DeploymentWorkflow
 import com.netflix.asgard.deployment.LaunchConfigurationOptions
 import com.netflix.asgard.deployment.ProceedPreference
@@ -199,35 +199,64 @@ ${lastGroup.loadBalancerNames}"""
             manualActivityCompletionClient.complete(shouldProceed)
             flash.message = "Automated deployment will ${shouldProceed ? '' : 'not '} proceed."
         } catch (Exception e) {
-            flash.message = "${e.message}"
+            flash.message = "Deployment failed: ${e.message}"
         }
         redirect([controller: 'task', action: 'show', params: [runId: runId, workflowId: workflowId]])
     }
 
-    def prepareDeployment(String id, boolean useDeploymentOptions) {
+    def prepareDeployment(String id) {
         UserContext userContext = UserContext.of(request)
         Cluster cluster = awsAutoScalingService.getCluster(userContext, id)
+        Map<String, Object> attributes = commonNextAsgPreparation(userContext, cluster)
+        String appName = Relationships.appNameFromGroupName(cluster.name)
+        String email = applicationService.getEmailFromApp(userContext, appName)
+        ProceedPreference scaleUp = params.scaleUp ? ProceedPreference.valueOf(params.scaleUp) : ProceedPreference.Ask
+        ProceedPreference disablePreviousAsg = params.disablePreviousAsg ? ProceedPreference.
+                valueOf(params.disablePreviousAsg) : ProceedPreference.Ask
+        ProceedPreference deletePreviousAsg = params.deletePreviousAsg ? ProceedPreference.
+                valueOf(params.deletePreviousAsg) : ProceedPreference.Ask
+        attributes?.putAll([
+                deploymentWorkflowOptions: new DeploymentWorkflowOptions(
+                        notificationDestination: params.notificationDestination ?: email,
+                        delayDuration: params.delayDuration ?: 0,
+                        doCanary: ProceedPreference.Yes.name().equalsIgnoreCase(params.doCanary),
+                        canaryCapacity: params.canaryCount ?: 1,
+                        canaryStartUpTimeout: params.canaryStartupLimit ?: 30,
+                        canaryAssessmentDuration: params.canaryAssessmentDuration ?: 60,
+                        scaleUp: scaleUp,
+                        desiredCapacityStartUpTimeout: params.desiredCapacityStartupLimit ?: 40,
+                        desiredCapacityAssessmentDuration : params.desiredCapacityAssessmentDuration ?: 120,
+                        disablePreviousAsg: disablePreviousAsg,
+                        fullTrafficAssessmentDuration : params.fullTrafficAssessmentDuration ?: 240,
+                        deletePreviousAsg: deletePreviousAsg
+                )
+        ])
+        attributes
+    }
 
+    def prepareNextAsg(String id) {
+        UserContext userContext = UserContext.of(request)
+        Cluster cluster = awsAutoScalingService.getCluster(userContext, id)
+        Map<String, Object> attributes = commonNextAsgPreparation(userContext, cluster)
+        render([view: 'prepareDeployment', model: attributes])
+    }
+
+    private Map<String, Object> commonNextAsgPreparation(UserContext userContext, Cluster cluster) {
         if (!cluster) {
             flash.message = "No auto scaling groups exist with cluster name ${cluster.name}"
             redirect(action: 'result')
-            return
+            return null
         }
-
         Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
         if (!okayToCreateGroup) {
-            flash.message = "Cluster '${cluster.name}' is already contains too many ASGs."
+            flash.message = "Cluster '${cluster.name}' already contains too many ASGs."
             redirect([action: 'show', params: [id: cluster.name]])
-            return
+            return null
         }
-
-        String appName = Relationships.appNameFromGroupName(cluster.name)
-        String email = applicationService.getEmailFromApp(userContext, appName)
-
         AutoScalingGroupData lastGroup = cluster.last()
         String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
         boolean showAllImages = params.allImages ? true : false
-        Map attributes = pushService.prepareEdit(userContext, lastGroup.autoScalingGroupName, showAllImages,
+        Map<String, Object> attributes = pushService.prepareEdit(userContext, lastGroup.autoScalingGroupName, showAllImages,
                 actionName, Requests.ensureList(params.selectedSecurityGroups))
         Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
         Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(availabilityZones,
@@ -242,24 +271,6 @@ ${lastGroup.loadBalancerNames}"""
                 params["selectedLoadBalancersForVpcId${vpcId}"]) ?: lastGroup.loadBalancerNames
         List<String> subnetPurposes = subnets.getPurposesForZones(availabilityZones*.zoneName,
                 SubnetTarget.EC2).sort()
-        if (useDeploymentOptions) {
-            attributes.putAll([
-                    deploymentOptions: new DeploymentOptions(
-                            notificationDestination: params.notificationDestination ?: email,
-                            delayDuration: params.delayDuration ?: 0,
-                            doCanary: params.doCanary == 'Yes',
-                            canaryCapacity: params.canaryCount ?: 1,
-                            canaryStartUpTimeout: params.canaryStartupLimit ?: 30,
-                            canaryAssessmentDuration: params.canaryAssessmentDuration ?: 60,
-                            scaleUp: ProceedPreference.valueOf(params.scaleUp ?: 'Ask'),
-                            desiredCapacityStartUpTimeout: params.desiredCapacityStartupLimit ?: 40,
-                            desiredCapacityAssessmentDuration : params.desiredCapacityAssessmentDuration ?: 120,
-                            disablePreviousAsg: ProceedPreference.valueOf(params.disablePreviousAsg ?: 'Ask'),
-                            fullTrafficAssessmentDuration : params.fullTrafficAssessmentDuration ?: 240,
-                            deletePreviousAsg: ProceedPreference.valueOf(params.disablePreviousAsg ?: 'Ask')
-                    )
-            ])
-        }
         attributes.putAll([
                 clusterName: cluster.name,
                 group: lastGroup,
@@ -281,7 +292,7 @@ ${lastGroup.loadBalancerNames}"""
             chain(action: 'prepareDeployment', model: [cmd:cmd], params: params)
             return
         }
-        DeploymentOptions deploymentOptions = new DeploymentOptions()
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions()
         bindData(deploymentOptions, params)
         deploymentOptions.clusterName = cmd.clusterName
         deploymentOptions.subnetPurpose = params.subnetPurpose

@@ -81,7 +81,8 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should execute full deployment'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward', delayDuration: 10,
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(
+                clusterName: 'the_seaward', delayDuration: 10,
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
                 canaryCapacity: 1, canaryStartUpTimeout: 30, canaryAssessmentDuration: 60,
@@ -119,7 +120,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should execute deployment without canary or delay'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
                 desiredCapacityStartUpTimeout: 40, desiredCapacityAssessmentDuration: 120,
@@ -153,7 +154,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should execute canary without scaling up'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
@@ -180,7 +181,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should display error and rollback deployment if there is an error checking health'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
@@ -214,7 +215,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should retry health check if not ready yet.'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
@@ -244,7 +245,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should rollback and notify if health check fails at the end of an assessment period set to auto proceed.'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
@@ -284,7 +285,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should rollback for canary start up time out'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
@@ -313,7 +314,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should rollback for desired capacity start up time out'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com', desiredCapacityStartUpTimeout: 40,
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, scaleUp: ProceedPreference.Yes)
@@ -340,7 +341,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should rollback for canary decision to not proceed'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
@@ -371,7 +372,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should continue deployment for canary decision to proceed'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
@@ -404,7 +405,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should rollback deployment for full capacity decision to not proceed'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
@@ -438,7 +439,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should continue with full capacity decision to proceed'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
@@ -475,7 +476,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should not delete previous ASG if specified not to'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
@@ -507,7 +508,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should rollback deployment for full traffic decision to not proceed'() {
-        DeploymentOptions deploymentOptions = new DeploymentOptions(clusterName: 'the_seaward',
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,

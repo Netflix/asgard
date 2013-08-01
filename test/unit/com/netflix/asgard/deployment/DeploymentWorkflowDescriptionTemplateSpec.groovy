@@ -23,7 +23,7 @@ class DeploymentWorkflowDescriptionTemplateSpec extends Specification {
         DeploymentWorkflowDescriptionTemplate  descriptionTemplate = new DeploymentWorkflowDescriptionTemplate()
 
         when:
-        descriptionTemplate.deploy(null, new DeploymentOptions(clusterName: 'the_seaward'), null, null)
+        descriptionTemplate.deploy(null, new DeploymentWorkflowOptions(clusterName: 'the_seaward'), null, null)
 
         then:
         "Deploying new ASG to cluster 'the_seaward'" == descriptionTemplate.description

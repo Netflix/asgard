@@ -36,7 +36,7 @@ interface DeploymentWorkflow {
      * @param asgOverrides specify changes to the template auto scaling group
      */
     @Execute(version = "1.2")
-    void deploy(UserContext userContext, DeploymentOptions deploymentOptions,
+    void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
                 LaunchConfigurationOptions lcOverrides, AutoScalingGroupOptions asgOverrides)
 
     /**

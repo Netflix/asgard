@@ -36,7 +36,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
 
     Closure<Integer> minutesToSeconds = { it * 60 }
 
-    void deploy(UserContext userContext, DeploymentOptions deploymentOptions, LaunchConfigurationOptions lcOverrides,
+    void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions, LaunchConfigurationOptions lcOverrides,
                 AutoScalingGroupOptions asgOverrides) {
         if (deploymentOptions.delayDuration) {
             status "Waiting ${unit(deploymentOptions.delayDuration, 'minute')} before starting deployment."

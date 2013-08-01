@@ -23,7 +23,7 @@ import com.netflix.asgard.flow.WorkflowDescriptionTemplate
 class DeploymentWorkflowDescriptionTemplate extends WorkflowDescriptionTemplate implements DeploymentWorkflow {
 
     @Override
-    void deploy(UserContext userContext, DeploymentOptions deploymentOptions,
+    void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
                 LaunchConfigurationOptions lcOverrides, AutoScalingGroupOptions asgOverrides) {
         description = "Deploying new ASG to cluster '${deploymentOptions.clusterName}'"
     }

@@ -787,7 +787,7 @@ jQuery(document).ready(function() {
     };
     setUpClusterChaosMonkeyOptions();
 
-    var setUpDeploymentOptions = function() {
+    var setUpDeploymentWorkflowOptions = function() {
         jQuery("input[name='doCanary']").click(function() {
             var doCanary;
             doCanary = jQuery(this).val() == "Yes";
@@ -799,7 +799,7 @@ jQuery(document).ready(function() {
             jQuery("tbody.fullTrafficOptions").toggleClass("concealed", disablePreviousAsg);
         });
     };
-    setUpDeploymentOptions();
+    setUpDeploymentWorkflowOptions();
 
     // Cluster page
     var setUpClusterPage = function() {
