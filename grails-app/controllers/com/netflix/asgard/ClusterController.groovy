@@ -49,15 +49,15 @@ import grails.converters.XML
 class ClusterController {
 
     def static allowedMethods = [createNextGroup: 'POST', resize: 'POST', delete: 'POST', activate: 'POST',
-            deactivate: 'POST', deploy: 'POST']
+            deactivate: 'POST', deploy: 'POST', proceedWithDeployment: 'POST', rollbackDeployment: 'POST']
 
     def grailsApplication
-    ApplicationService applicationService
+    def applicationService
     def awsAutoScalingService
     def awsEc2Service
     def awsLoadBalancerService
     def configService
-    FlowService flowService
+    def flowService
     def mergedInstanceService
     def pushService
     def spotInstanceRequestService
@@ -184,8 +184,15 @@ ${lastGroup.loadBalancerNames}"""
 
     def result = { render view: '/common/result' }
 
-    def proceedWithDeployment(String taskToken, String runId, String workflowId, String proceed) {
-        boolean shouldProceed = proceed == 'true'
+    def proceedWithDeployment(String taskToken, String runId, String workflowId) {
+        completeDeployment(taskToken, runId, workflowId, true)
+    }
+
+    def rollbackDeployment(String taskToken, String runId, String workflowId) {
+        completeDeployment(taskToken, runId, workflowId, false)
+    }
+
+    private void completeDeployment(String taskToken, String runId, String workflowId, boolean shouldProceed) {
         ManualActivityCompletionClient manualActivityCompletionClient = flowService.
                 getManualActivityCompletionClient(taskToken)
         try {

@@ -23,7 +23,7 @@ import com.amazonaws.services.simpleworkflow.flow.core.Settable
  */
 class LocalDoTry implements DoTry {
 
-    Exception error
+    private Exception error
 
     private Promise result = new Settable()
 

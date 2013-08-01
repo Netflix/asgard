@@ -72,11 +72,11 @@ class LocalWorkflow<A> extends Workflow<A> {
         if (retryPolicy.respondsTo('getMaximumAttempts')) {
             maximumAttempts = retryPolicy.maximumAttempts
         }
-        recursingRetry(retryPolicy, work, null, maximumAttempts, 1)
+        recursingRetry(retryPolicy, work, maximumAttempts, 1)
     }
 
-    private <T> Promise<T> recursingRetry(RetryPolicy retryPolicy, Closure<? extends Promise<T>> work, Throwable t1,
-            int maximumAttempts, int attemptCount) {
+    private <T> Promise<T> recursingRetry(RetryPolicy retryPolicy, Closure<? extends Promise<T>> work,
+            int maximumAttempts, int attemptCount, Throwable t1 = null) {
         if (maximumAttempts > 0 && attemptCount > maximumAttempts) {
             throw t1
         }
@@ -84,7 +84,7 @@ class LocalWorkflow<A> extends Workflow<A> {
             try {
                 return work()
             } catch(Throwable t2) {
-                recursingRetry(retryPolicy, work, t2, maximumAttempts, attemptCount + 1)
+                recursingRetry(retryPolicy, work, maximumAttempts, attemptCount + 1, t2)
             }
         } else {
             throw t1

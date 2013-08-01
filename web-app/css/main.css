@@ -329,8 +329,8 @@ button.resize div, a.resize                   { background-image: url(../images/
 .buttons button.save div                      { background-image: url(../images/tango/24/actions/document-save.png);                             }
 .buttons button.deploy div                    { background-image: url(../images/tango/24/tools/deploy.png);                                      }
 .buttons a.deploy                             { background-image: url(../images/tango/24/tools/deploy.png);                                      }
-.buttons a.proceed                            { background-image: url(../images/tango/24/actions/media-playback-start.png);                      }
-.buttons a.cease                              { background-image: url(../images/tango/24/actions/media-playback-stop.png);                       }
+.buttons button.proceed div                   { background-image: url(../images/tango/24/actions/media-playback-start.png);                      }
+.buttons button.rollback div                  { background-image: url(../images/tango/24/actions/media-playback-stop.png);                       }
 .buttons button.schedule div                  { background-image: url(../images/tango/24/actions/appointment-new.png);                           }
 .buttons button.outOfService div              { background-image: url(../images/tango/24/status/weather-clear-night.png);                        }
 .buttons button.inService div                 { background-image: url(../images/tango/24/status/weather-clear.png);                              }

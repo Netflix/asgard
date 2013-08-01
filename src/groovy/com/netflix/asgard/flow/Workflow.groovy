@@ -110,12 +110,12 @@ abstract class Workflow<A> {
     abstract Promise<Void> timer(long delaySeconds)
 
     /**
-     * Start a timer that can be canceled. Useful for unnecessary timers that are keeping a workflow from ending.
+     * Start a timer that can be cancelled. Useful for unnecessary timers that are keeping a workflow from ending.
      *
      * @param delaySeconds to wait
      * @return a DoTry whose result will be ready when the timer is done
      */
-    DoTry<Void> cancelableTimer(long delaySeconds) {
+    DoTry<Void> cancellableTimer(long delaySeconds) {
         doTry() {
             timer(delaySeconds)
         } withCatch { Throwable t ->

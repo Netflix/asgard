@@ -29,20 +29,23 @@
       <div class="message">${flash.message}</div>
     </g:if>
     <g:if test="${!task.isDone()}">
-      <g:form method="post">
-        <input type="hidden" name="id" value="${task.id}"/>
-        <input type="hidden" name="runId" value="${task.runId}"/>
-        <input type="hidden" name="workflowId" value="${task.workflowId}"/>
-        <div class="buttons" id="taskCancellationForm">
+      <div class="buttons" id="taskCancellationForm">
+        <g:form method="post">
+          <input type="hidden" name="id" value="${task.id}"/>
+          <input type="hidden" name="runId" value="${task.runId}"/>
+          <input type="hidden" name="workflowId" value="${task.workflowId}"/>
           <g:buttonSubmit class="stop" data-warning="Really stop task ${StringEscapeUtils.escapeJavaScript(task.name)} ?" action="cancel" value="Stop Task"/>
-          <g:if test="${params.taskToken}">
-            <g:link class="proceed" controller="cluster" action="proceedWithDeployment"
-                    params="[taskToken: params.taskToken, proceed: true, runId: task.runId, workflowId: task.workflowId]">Proceed With Deployment</g:link>
-            <g:link class="cease" controller="cluster" action="proceedWithDeployment"
-                    params="[taskToken: params.taskToken, proceed: false, runId: task.runId, workflowId: task.workflowId]">Rollback Deployment</g:link>
-          </g:if>
-        </div>
-      </g:form>
+        </g:form>
+        <g:if test="${params.taskToken}">
+          <g:form method="post" controller="cluster">
+            <input type="hidden" name="runId" value="${task.runId}"/>
+            <input type="hidden" name="workflowId" value="${task.workflowId}"/>
+            <input type="hidden" name="taskToken" value="${params.taskToken}"/>
+            <g:buttonSubmit class="proceed" action="proceedWithDeployment" value="Proceed With Deployment"/>
+            <g:buttonSubmit class="rollback" action="rollbackDeployment" value="Rollback Deployment"/>
+          </g:form>
+        </g:if>
+      </div>
     </g:if>
     <div class="task">
       <table>

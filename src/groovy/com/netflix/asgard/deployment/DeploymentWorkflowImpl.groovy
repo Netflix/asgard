@@ -151,7 +151,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
 
         DoTry<String> repeatingHealthCheck = checkAsgHealth(userContext, nextAsgName, capacity,
                 new ExponentialRetryPolicy(180L).withMaximumRetryIntervalSeconds(60L))
-        DoTry<Void> healthCheckTimeout = cancelableTimer(minutesToSeconds(startupLimit))
+        DoTry<Void> healthCheckTimeout = cancellableTimer(minutesToSeconds(startupLimit))
         status "Waiting up to ${unit(startupLimit, 'minute')} for ${unit(capacity, 'instance')}."
         waitFor(anyPromises(repeatingHealthCheck.result, healthCheckTimeout.result)) {
             if (repeatingHealthCheck.result.isReady()) {
