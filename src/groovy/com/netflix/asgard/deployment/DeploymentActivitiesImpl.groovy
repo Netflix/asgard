@@ -96,7 +96,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
                 launchConfiguration.securityGroups, asgDeploymentNames.nextVpcZoneIdentifier, userContext.region)
         launchConfiguration.securityGroups = securityGroups
         launchConfiguration.userData = launchTemplateService.buildUserData(userContext,
-                asgDeploymentNames.nextAsgName, asgDeploymentNames.nextAsgName)
+                asgDeploymentNames.nextAsgName, asgDeploymentNames.nextLaunchConfigName)
         launchConfiguration.iamInstanceProfile = launchConfiguration.iamInstanceProfile ?: configService.defaultIamRole
         if (instancePriceType == InstancePriceType.SPOT ||
                 (!instancePriceType && templateLaunchConfiguration.spotPrice)) {
