@@ -53,6 +53,7 @@ import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.AlarmData
 import com.netflix.asgard.model.ApplicationInstance
@@ -76,6 +77,9 @@ import org.springframework.beans.factory.InitializingBean
 class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     static transactional = false
+
+    private static final ImmutableSet<String> ignoredScheduledActionProperties = ImmutableSet.of('startTime', 'time',
+            'autoScalingGroupName', 'scheduledActionName', 'scheduledActionARN')
 
     def grailsApplication  // injected after construction
     def applicationService
@@ -477,8 +481,6 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
      */
     List<ScheduledUpdateGroupAction> copyScheduledActionsForNewAsg(UserContext userContext, String newAsgName,
             List<ScheduledUpdateGroupAction> sourceScheduledActions) {
-        List<String> ignoredScheduledActionProperties = ['startTime', 'time', 'autoScalingGroupName',
-                'scheduledActionName', 'scheduledActionARN']
         sourceScheduledActions.collect {
             ScheduledUpdateGroupAction newScheduledAction = BeanState.ofSourceBean(it).
                     ignoreProperties(ignoredScheduledActionProperties).injectState(new ScheduledUpdateGroupAction())
@@ -776,18 +778,18 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             return "Instance count is ${asg.instances.size()}. Waiting for ${expectedInstanceCount}."
         }
         if (asg.instances.find { it.lifecycleState != LifecycleState.InService.name() }) {
-            return "Waiting for instances to be in service."
+            return 'Waiting for instances to be in service.'
         }
         List<ApplicationInstance> applicationInstances = discoveryService.getAppInstancesByIds(userContext,
                 asg.instances*.instanceId)
         if (applicationInstances.size() < expectedInstanceCount) {
-            return "Waiting for Eureka data about instances."
+            return 'Waiting for Eureka data about instances.'
         }
         if (applicationInstances.find { it.status != EurekaStatus.UP.name() }) {
-            return "Waiting for all instances to be available in Eureka."
+            return 'Waiting for all instances to be available in Eureka.'
         }
         if (!awsEc2Service.checkHostsHealth(applicationInstances*.healthCheckUrl)) {
-            return "Waiting for all instances to pass health checks."
+            return 'Waiting for all instances to pass health checks.'
         }
         null
     }

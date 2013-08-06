@@ -82,12 +82,12 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should execute full deployment'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(
-                clusterName: 'the_seaward', delayDuration: 10,
+                clusterName: 'the_seaward', delayDurationMinutes: 10,
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
-                canaryCapacity: 1, canaryStartUpTimeout: 30, canaryAssessmentDuration: 60,
-                desiredCapacityStartUpTimeout: 40, desiredCapacityAssessmentDuration: 120,
-                fullTrafficAssessmentDuration: 240, scaleUp: ProceedPreference.Yes,
+                canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
+                desiredCapacityStartUpTimeoutMinutes: 40, desiredCapacityAssessmentDurationMinutes: 120,
+                fullTrafficAssessmentDurationMinutes: 240, scaleUp: ProceedPreference.Yes,
                 disablePreviousAsg: ProceedPreference.Yes, deletePreviousAsg: ProceedPreference.Yes)
 
         when:
@@ -123,8 +123,8 @@ class DeploymentWorkflowSpec extends Specification {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
-                desiredCapacityStartUpTimeout: 40, desiredCapacityAssessmentDuration: 120,
-                fullTrafficAssessmentDuration: 240, scaleUp: ProceedPreference.Yes,
+                desiredCapacityStartUpTimeoutMinutes: 40, desiredCapacityAssessmentDurationMinutes: 120,
+                fullTrafficAssessmentDurationMinutes: 240, scaleUp: ProceedPreference.Yes,
                 disablePreviousAsg: ProceedPreference.Yes, deletePreviousAsg: ProceedPreference.Yes)
 
         when:
@@ -158,7 +158,7 @@ class DeploymentWorkflowSpec extends Specification {
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
-                canaryCapacity: 1, canaryStartUpTimeout: 30, canaryAssessmentDuration: 60,
+                canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 scaleUp: ProceedPreference.No)
 
         when:
@@ -185,7 +185,7 @@ class DeploymentWorkflowSpec extends Specification {
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
-                canaryCapacity: 1, canaryStartUpTimeout: 30, canaryAssessmentDuration: 60,
+                canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 scaleUp: ProceedPreference.No)
 
         when:
@@ -220,7 +220,7 @@ class DeploymentWorkflowSpec extends Specification {
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.No,
-                desiredCapacityStartUpTimeout: 40)
+                desiredCapacityStartUpTimeoutMinutes: 40)
 
         when:
         workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
@@ -249,7 +249,7 @@ class DeploymentWorkflowSpec extends Specification {
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
-                canaryCapacity: 1, canaryStartUpTimeout: 30, canaryAssessmentDuration: 60,
+                canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 scaleUp: ProceedPreference.Yes)
 
         when:
@@ -289,7 +289,7 @@ class DeploymentWorkflowSpec extends Specification {
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
-                canaryCapacity: 1, canaryStartUpTimeout: 30, canaryAssessmentDuration: 60,
+                canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 scaleUp: ProceedPreference.No)
 
         when:
@@ -315,7 +315,7 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should rollback for desired capacity start up time out'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com', desiredCapacityStartUpTimeout: 40,
+                notificationDestination: 'gob@bluth.com', desiredCapacityStartUpTimeoutMinutes: 40,
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, scaleUp: ProceedPreference.Yes)
 
@@ -345,7 +345,7 @@ class DeploymentWorkflowSpec extends Specification {
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
-                canaryCapacity: 1, canaryStartUpTimeout: 30, canaryAssessmentDuration: 60,
+                canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 scaleUp: ProceedPreference.Ask)
 
         when:
@@ -376,8 +376,8 @@ class DeploymentWorkflowSpec extends Specification {
                 notificationDestination: 'gob@bluth.com',
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
-                canaryCapacity: 1, canaryStartUpTimeout: 30, canaryAssessmentDuration: 60,
-                desiredCapacityStartUpTimeout: 40,
+                canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
+                desiredCapacityStartUpTimeoutMinutes: 40,
                 scaleUp: ProceedPreference.Ask, disablePreviousAsg: ProceedPreference.No)
 
         when:
@@ -410,7 +410,7 @@ class DeploymentWorkflowSpec extends Specification {
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Ask,
-                deletePreviousAsg: ProceedPreference.Yes, desiredCapacityStartUpTimeout: 40, )
+                deletePreviousAsg: ProceedPreference.Yes, desiredCapacityStartUpTimeoutMinutes: 40, )
 
         when:
         workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
@@ -444,7 +444,7 @@ class DeploymentWorkflowSpec extends Specification {
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Ask,
-                deletePreviousAsg: ProceedPreference.Yes, desiredCapacityStartUpTimeout: 40, )
+                deletePreviousAsg: ProceedPreference.Yes, desiredCapacityStartUpTimeoutMinutes: 40, )
 
         when:
         workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
@@ -481,7 +481,7 @@ class DeploymentWorkflowSpec extends Specification {
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Yes,
-                deletePreviousAsg: ProceedPreference.No, desiredCapacityStartUpTimeout: 40, )
+                deletePreviousAsg: ProceedPreference.No, desiredCapacityStartUpTimeoutMinutes: 40, )
 
         when:
         workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
@@ -513,7 +513,7 @@ class DeploymentWorkflowSpec extends Specification {
                 subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
                 instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Yes,
-                deletePreviousAsg: ProceedPreference.Ask, desiredCapacityStartUpTimeout: 40, )
+                deletePreviousAsg: ProceedPreference.Ask, desiredCapacityStartUpTimeoutMinutes: 40, )
 
         when:
         workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)

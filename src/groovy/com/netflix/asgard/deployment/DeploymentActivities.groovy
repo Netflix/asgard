@@ -1,16 +1,17 @@
 /*
- * Copyright 2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2013 Netflix, Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://aws.amazon.com/apache2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.netflix.asgard.deployment
 
@@ -18,6 +19,7 @@ import com.amazonaws.services.simpleworkflow.flow.annotations.Activities
 import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrationOptions
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.InstancePriceType
+
 /**
  * Method contracts and annotations used for the automatic deployment SWF workflow actions.
  */
@@ -27,7 +29,7 @@ import com.netflix.asgard.model.InstancePriceType
 interface DeploymentActivities {
 
     /**
-     * Construct names and identification for the previous and next ASGs involved when creating a new ASG for a cluster.
+     * Constructs names and identification for previous and next ASGs involved when creating a new ASG for a cluster.
      *
      * @param userContext who, where, why
      * @param clusterName where the deployment is taking place
@@ -39,7 +41,7 @@ interface DeploymentActivities {
             List<String> newZones)
 
     /**
-     * Create the launch configuration for the next ASG in the cluster.
+     * Creates the launch configuration for the next ASG in the cluster.
      *
      * @param userContext who, where, why
      * @param asgDeploymentNames identification for the previous and next ASGs
@@ -51,7 +53,7 @@ interface DeploymentActivities {
             LaunchConfigurationOptions overrides, InstancePriceType instancePriceType)
 
     /**
-     * Create the next ASG in the cluster.
+     * Creates the next ASG in the cluster.
      *
      * @param userContext who, where, why
      * @param asgDeploymentNames identification for the previous and next ASGs
@@ -64,7 +66,7 @@ interface DeploymentActivities {
             AutoScalingGroupOptions overrides, Boolean initialTrafficPrevented, Boolean azRebalanceSuspended)
 
     /**
-     * Copy scaling policies from the previous ASG to the next ASG.
+     * Copies scaling policies from the previous ASG to the next ASG.
      *
      * @param userContext who, where, why
      * @param asgDeploymentNames identification for the previous and next ASGs
@@ -73,7 +75,7 @@ interface DeploymentActivities {
     Integer copyScalingPolicies(UserContext userContext, AsgDeploymentNames asgDeploymentNames)
 
     /**
-     * Copy scheduled actions from the previous ASG to the next ASG.
+     * Copies scheduled actions from the previous ASG to the next ASG.
      *
      * @param userContext who, where, why
      * @param asgDeploymentNames identification for the previous and next ASGs
@@ -82,18 +84,18 @@ interface DeploymentActivities {
     Integer copyScheduledActions(UserContext userContext, AsgDeploymentNames asgDeploymentNames)
 
     /**
-     * Change the instance count and bounds for an ASG.
+     * Changes the instance count and bounds for an ASG.
      *
      * @param userContext who, where, why
      * @param asgName of the ASG to modify
      * @param min number of instances allowed
      * @param desired number of instances allowed
-     * @param max number of instances allowed
+     * @param max number of instances
      */
     void resizeAsg(UserContext userContext, String asgName, int min, int desired, int max)
 
     /**
-     * Enable an ASG.
+     * Enables scaling behavior for the ASG and traffic to its instances.
      *
      * @param userContext who, where, why
      * @param asgName of the ASG to modify
@@ -101,7 +103,7 @@ interface DeploymentActivities {
     void enableAsg(UserContext userContext, String asgName)
 
     /**
-     * Disable an ASG.
+     * Disables scaling behavior for the ASG and traffic to its instances.
      *
      * @param userContext who, where, why
      * @param asgName of the ASG to modify
@@ -109,7 +111,7 @@ interface DeploymentActivities {
     void disableAsg(UserContext userContext, String asgName)
 
     /**
-     * Delete an ASG.
+     * Deletes an ASG.
      *
      * @param userContext who, where, why
      * @param asgName of the ASG to modify
@@ -128,7 +130,7 @@ interface DeploymentActivities {
     String reasonAsgIsUnhealthy(UserContext userContext, String asgName, int expectedInstances)
 
     /**
-     * Ask if the deployment should proceed and wait for a reply.
+     * Asks if the deployment should proceed and wait for a reply.
      *
      * @param notificationDestination where deployment notifications will be sent
      * @param asgName of the ASG to modify
@@ -142,7 +144,7 @@ interface DeploymentActivities {
             String reasonAsgIsUnhealthy)
 
     /**
-     * Send a notification about the status of the deployment.
+     * Sends a notification about the status of the deployment.
      *
      * @param notificationDestination where deployment notifications will be sent
      * @param asgName of the ASG to modify

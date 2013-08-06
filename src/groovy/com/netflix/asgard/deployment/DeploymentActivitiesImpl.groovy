@@ -1,16 +1,17 @@
 /*
- * Copyright 2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2013 Netflix, Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://aws.amazon.com/apache2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.netflix.asgard.deployment
 
@@ -62,6 +63,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     LinkGenerator grailsLinkGenerator
     SpotInstanceRequestService spotInstanceRequestService
 
+    @Override
     AsgDeploymentNames getAsgDeploymentNames(UserContext userContext, String clusterName, String newSubnetPurpose,
             List<String> newZones) {
         AutoScalingGroupData lastAsg = awsAutoScalingService.getCluster(userContext, clusterName).last()
@@ -84,6 +86,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         )
     }
 
+    @Override
     String createLaunchConfigForNextAsg(UserContext userContext, AsgDeploymentNames asgDeploymentNames,
             LaunchConfigurationOptions overrides, InstancePriceType instancePriceType) {
         LaunchConfiguration templateLaunchConfiguration = awsAutoScalingService.getLaunchConfiguration(
@@ -107,6 +110,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         launchConfiguration.launchConfigurationName
     }
 
+    @Override
     String createNextAsgForCluster(UserContext userContext, AsgDeploymentNames asgDeploymentNames,
             AutoScalingGroupOptions overrides, Boolean initialTrafficPrevented, Boolean azRebalanceSuspended) {
         Task task = new Task()
@@ -130,6 +134,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         resultingAutoScalingGroup?.autoScalingGroupName
     }
 
+    @Override
     Integer copyScalingPolicies(UserContext userContext, AsgDeploymentNames asgDeploymentNames) {
         List<ScalingPolicyData> newScalingPolicies = awsAutoScalingService.getScalingPolicyDatas(userContext,
                 asgDeploymentNames.previousAsgName).collect { it.copyForAsg(asgDeploymentNames.nextAsgName) }
@@ -137,6 +142,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         newScalingPolicies.size()
     }
 
+    @Override
     Integer copyScheduledActions(UserContext userContext, AsgDeploymentNames asgDeploymentNames) {
         List<ScheduledUpdateGroupAction> lastScheduledActions = awsAutoScalingService.getScheduledActionsForGroup(
                 userContext, asgDeploymentNames.previousAsgName)
@@ -146,10 +152,12 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         lastScheduledActions.size()
     }
 
+    @Override
     void resizeAsg(UserContext userContext, String asgName, int min, int desired, int max) {
         awsAutoScalingService.resizeAutoScalingGroup(userContext, asgName, min, desired, max)
     }
 
+    @Override
     String reasonAsgIsUnhealthy(UserContext userContext, String asgName, int expectedSize) {
         String reasonAsgIsUnhealthy = awsAutoScalingService.reasonAsgIsUnhealthy(userContext, asgName, expectedSize)
         if (reasonAsgIsUnhealthy) {
@@ -158,6 +166,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         null
     }
 
+    @Override
     void enableAsg(UserContext userContext, String asgName) {
         Task task = new Task()
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, asgName)
@@ -166,14 +175,11 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         AutoScalingProcessType.getDisableProcesses().each { AutoScalingProcessType processType ->
             awsAutoScalingService.resumeProcess(userContext, processType, asgName, task)
         }
-
         List<String> instanceIds = group.instances.collect { it.instanceId }
         if (instanceIds.size()) {
-            if (group.loadBalancerNames.size()) {
-                group.loadBalancerNames.eachWithIndex { String loadBalName, int i ->
-                    if (i >= 1) { Time.sleepCancellably(250) } // Avoid rate limits when there are dozens of ELBs
-                    awsLoadBalancerService.addInstances(userContext, loadBalName, instanceIds, task)
-                }
+            group.loadBalancerNames.eachWithIndex { String loadBalName, int i ->
+                if (i >= 1) { Time.sleepCancellably(250) } // Avoid rate limits when there are dozens of ELBs
+                awsLoadBalancerService.addInstances(userContext, loadBalName, instanceIds, task)
             }
             if (configService.doesRegionalDiscoveryExist(userContext.region)) {
                 discoveryService.enableAppInstances(userContext, appName, instanceIds, task)
@@ -181,6 +187,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         }
     }
 
+    @Override
     void disableAsg(UserContext userContext, String asgName) {
         Task task = new Task()
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, asgName)
@@ -203,6 +210,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         }
     }
 
+    @Override
     void deleteAsg(UserContext userContext, String asgName) {
         Task task = new Task()
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, asgName)
@@ -215,6 +223,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     }
 
     @ManualActivityCompletion
+    @Override
     Boolean askIfDeploymentShouldProceed(String notificationDestination, String asgName, String operationDescription,
             String reasonAsgIsUnhealthy) {
         WorkflowExecution workflowExecution = activity.workflowExecution
@@ -233,6 +242,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         true
     }
 
+    @Override
     void sendNotification(String notificationDestination, String asgName, String subject, String reasonAsgIsUnhealthy) {
         String clusterName = Relationships.clusterFromGroupName(asgName)
         String message = """

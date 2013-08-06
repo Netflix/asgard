@@ -218,16 +218,17 @@ ${lastGroup.loadBalancerNames}"""
         attributes?.putAll([
                 deploymentWorkflowOptions: new DeploymentWorkflowOptions(
                         notificationDestination: params.notificationDestination ?: email,
-                        delayDuration: params.delayDuration ?: 0,
-                        doCanary: ProceedPreference.Yes.name().equalsIgnoreCase(params.doCanary),
+                        delayDurationMinutes: params.delayDurationMinutes ?: 0,
+                        doCanary: Boolean.parseBoolean(params.doCanary),
                         canaryCapacity: params.canaryCount ?: 1,
-                        canaryStartUpTimeout: params.canaryStartupLimit ?: 30,
-                        canaryAssessmentDuration: params.canaryAssessmentDuration ?: 60,
+                        canaryStartUpTimeoutMinutes: params.canaryStartUpTimeoutMinutes ?: 30,
+                        canaryAssessmentDurationMinutes: params.canaryAssessmentDurationMinutes ?: 60,
                         scaleUp: scaleUp,
-                        desiredCapacityStartUpTimeout: params.desiredCapacityStartupLimit ?: 40,
-                        desiredCapacityAssessmentDuration : params.desiredCapacityAssessmentDuration ?: 120,
+                        desiredCapacityStartUpTimeoutMinutes: params.desiredCapacityStartUpTimeoutMinutes ?: 40,
+                        desiredCapacityAssessmentDurationMinutes: params.
+                                desiredCapacityAssessmentDurationMinutes ?: 120,
                         disablePreviousAsg: disablePreviousAsg,
-                        fullTrafficAssessmentDuration : params.fullTrafficAssessmentDuration ?: 240,
+                        fullTrafficAssessmentDurationMinutes: params.fullTrafficAssessmentDurationMinutes ?: 240,
                         deletePreviousAsg: deletePreviousAsg
                 )
         ])
@@ -311,10 +312,10 @@ ${lastGroup.loadBalancerNames}"""
         if (params.createAsgOnly) {
             deploymentOptions.with {
                 notificationDestination = email
-                delayDuration = 0
+                delayDurationMinutes = 0
                 doCanary = false
-                desiredCapacityStartUpTimeout = 30
-                desiredCapacityAssessmentDuration = 0
+                desiredCapacityStartUpTimeoutMinutes = 30
+                desiredCapacityAssessmentDurationMinutes = 0
                 disablePreviousAsg = ProceedPreference.No
             }
         }

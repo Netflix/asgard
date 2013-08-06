@@ -1,16 +1,17 @@
 /*
- * Copyright 2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2013 Netflix, Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://aws.amazon.com/apache2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.netflix.asgard.flow.example
 
@@ -28,6 +29,7 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
     @Delegate
     Workflow<HelloWorldActivities> workflow = SwfWorkflow.of(HelloWorldActivities)
 
+    @Override
     void helloWorld(String name) {
         status 'starting task'
 
@@ -46,7 +48,7 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
         cancelTryBlockOnceTimerFires(doneMsg)
     }
 
-    void useInjectedService() {
+    private void useInjectedService() {
         Promise<Collection<String>> clusterNames = promiseFor(activities.getClusterNames())
         status 'pre clusterNames received'
         waitFor(clusterNames) {
@@ -56,7 +58,7 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
         }
     }
 
-    void demonstrateRetryLogic() {
+    private void demonstrateRetryLogic() {
         doTry {
             retry(new ExponentialRetryPolicy(1L).withMaximumAttempts(3)) {
                 activities.throwException()
@@ -72,7 +74,7 @@ class HelloWorldWorkflowImpl implements HelloWorldWorkflow {
         }
     }
 
-    void cancelTryBlockOnceTimerFires(Promise<String> doneMsg) {
+    private void cancelTryBlockOnceTimerFires(Promise<String> doneMsg) {
         DoTry<Boolean> nap = doTry(doneMsg) {
             Promise<Boolean> result = promiseFor(activities.takeNap(3L))
             waitFor(result) {

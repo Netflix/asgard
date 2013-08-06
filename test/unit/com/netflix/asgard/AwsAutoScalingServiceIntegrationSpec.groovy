@@ -37,6 +37,10 @@ import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.ScalingPolicyData
 import spock.lang.Specification
 
+/**
+ * These tests were separated from the unit tests because they are time consuming to run. This is typically because of
+ * their use of Mocks to construct services and the associated file I/O to read the json data.
+ */
 @SuppressWarnings(["GroovyAssignabilityCheck"])
 class AwsAutoScalingServiceIntegrationSpec extends Specification {
 

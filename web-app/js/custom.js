@@ -790,7 +790,7 @@ jQuery(document).ready(function() {
     var setUpDeploymentWorkflowOptions = function() {
         jQuery("input[name='doCanary']").click(function() {
             var doCanary;
-            doCanary = jQuery(this).val() == "Yes";
+            doCanary = jQuery(this).val() == "true";
             jQuery("tbody.canaryOptions").toggleClass("concealed", !doCanary);
         });
         jQuery("input[name='disablePreviousAsg']").click(function() {
@@ -921,7 +921,7 @@ jQuery(document).ready(function() {
             var scroller = autoScroller(logElem[0]);
             var poller;
             var ajaxOptions = {
-                url: document.location.origin + document.location.pathname + '.json' + document.location.search,
+                url: window.location.origin + window.location.pathname + '.json' + window.location.search,
                 dataType: 'json',
                 error: function(e) {
                     if (poller) { poller.stop = true; }

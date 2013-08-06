@@ -1,16 +1,17 @@
 /*
- * Copyright 2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2013 Netflix, Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://aws.amazon.com/apache2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.netflix.asgard.deployment
 
@@ -36,13 +37,14 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
 
     Closure<Integer> minutesToSeconds = { it * 60 }
 
+    @Override
     void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions, LaunchConfigurationOptions lcOverrides,
                 AutoScalingGroupOptions asgOverrides) {
-        if (deploymentOptions.delayDuration) {
-            status "Waiting ${unit(deploymentOptions.delayDuration, 'minute')} before starting deployment."
+        if (deploymentOptions.delayDurationMinutes) {
+            status "Waiting ${unit(deploymentOptions.delayDurationMinutes, 'minute')} before starting deployment."
         }
         Promise<AsgDeploymentNames> asgDeploymentNames = waitFor(timer(minutesToSeconds(deploymentOptions.
-                delayDuration))) {
+                delayDurationMinutes))) {
             status "Starting deployment for Cluster '${deploymentOptions.clusterName}'."
             promiseFor(activities.getAsgDeploymentNames(userContext, deploymentOptions.clusterName,
                     deploymentOptions.subnetPurpose, asgOverrides.availabilityZones))
@@ -61,12 +63,12 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
         }
 
         Promise<Integer> scalingPolicyCount = waitFor(nextAsgName) {
-            status "Copying Scaling Policies."
+            status 'Copying Scaling Policies.'
             promiseFor(activities.copyScalingPolicies(userContext, asgDeploymentNames.get()))
         }
 
         Promise<Integer> scheduledActionCount = waitFor(nextAsgName) {
-            status "Copying Scheduled Actions."
+            status 'Copying Scheduled Actions.'
             promiseFor(activities.copyScheduledActions(userContext, asgDeploymentNames.get()))
         }
 
@@ -76,10 +78,10 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
             if (!deploymentOptions.doCanary) {
                 return promiseFor(true)
             }
-            status "Canary testing will now be performed."
-            scaleAsgAndWaitForDecision(userContext, nextAsgName.get(), deploymentOptions.canaryStartUpTimeout,
+            status 'Canary testing will now be performed.'
+            scaleAsgAndWaitForDecision(userContext, nextAsgName.get(), deploymentOptions.canaryStartUpTimeoutMinutes,
                     deploymentOptions.canaryCapacity, deploymentOptions.canaryCapacity,
-                    deploymentOptions.canaryCapacity, deploymentOptions.canaryAssessmentDuration,
+                    deploymentOptions.canaryCapacity, deploymentOptions.canaryAssessmentDurationMinutes,
                     deploymentOptions.notificationDestination, deploymentOptions.scaleUp, 'canary capacity')
         }
 
@@ -88,10 +90,11 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
                 rollback(userContext, asgDeploymentNames.get())
                 return promiseFor(false)
             }
-            status "Scaling to full capacity."
+            status 'Scaling to full capacity.'
             Promise<Boolean> isNewAsgHealthyAtDesiredCapacity = scaleAsgAndWaitForDecision(userContext, nextAsgName.get(),
-                    deploymentOptions.desiredCapacityStartUpTimeout, asgOverrides.minSize, asgOverrides.desiredCapacity,
-                    asgOverrides.maxSize, deploymentOptions.desiredCapacityAssessmentDuration,
+                    deploymentOptions.desiredCapacityStartUpTimeoutMinutes, asgOverrides.minSize,
+                    asgOverrides.desiredCapacity, asgOverrides.maxSize,
+                    deploymentOptions.desiredCapacityAssessmentDurationMinutes,
                     deploymentOptions.notificationDestination, deploymentOptions.disablePreviousAsg,
                     'full capacity')
             waitFor(isNewAsgHealthyAtDesiredCapacity) {
@@ -115,11 +118,11 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
             if (!isPreviousAsgDisabled.get()) {
                 status "ASG '${previousAsgName}' was not disabled. Full traffic health check will not take place."
             } else {
-                long timeToWaitAfterEurekaChange = DiscoveryService.SECONDS_TO_WAIT_AFTER_EUREKA_CHANGE
-                status "Waiting ${timeToWaitAfterEurekaChange} seconds for clients to stop using instances."
-                waitFor(timer(timeToWaitAfterEurekaChange)) {
+                long secondsToWaitAfterEurekaChange = DiscoveryService.SECONDS_TO_WAIT_AFTER_EUREKA_CHANGE
+                status "Waiting ${secondsToWaitAfterEurekaChange} seconds for clients to stop using instances."
+                waitFor(timer(secondsToWaitAfterEurekaChange)) {
                     Promise<Boolean> isNewAsgHealthyWithFullTraffic = startAssessmentPeriodWaitForDecision(userContext,
-                            nextAsgName.get(), deploymentOptions.fullTrafficAssessmentDuration,
+                            nextAsgName.get(), deploymentOptions.fullTrafficAssessmentDurationMinutes,
                             deploymentOptions.notificationDestination, deploymentOptions.deletePreviousAsg,
                             asgOverrides.desiredCapacity, 'full traffic')
                     waitFor(isNewAsgHealthyWithFullTraffic) {
@@ -143,7 +146,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
 
     }
 
-    Promise<Boolean> scaleAsgAndWaitForDecision(UserContext userContext, String nextAsgName, int startupLimit,
+    private Promise<Boolean> scaleAsgAndWaitForDecision(UserContext userContext, String nextAsgName, int startupLimit,
             int min, int capacity, int max, int assessmentDuration, String notificationDestination,
             ProceedPreference continueWithNextStep, String operationDescription) {
         status "Scaling '${nextAsgName}' to ${unit(capacity, 'instance')}."
@@ -168,7 +171,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
         }
     }
 
-    Promise<Boolean> startAssessmentPeriodWaitForDecision(UserContext userContext, String nextAsgName,
+    private Promise<Boolean> startAssessmentPeriodWaitForDecision(UserContext userContext, String nextAsgName,
             int assessmentDuration, String notificationDestination, ProceedPreference continueWithNextStep, int capacity,
             String operationDescription) {
         if (assessmentDuration) {
@@ -208,7 +211,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
         }
     }
 
-    DoTry<String> checkAsgHealth(UserContext userContext, String asgName, int expectedInstances,
+    private DoTry<String> checkAsgHealth(UserContext userContext, String asgName, int expectedInstances,
             ExponentialRetryPolicy retryPolicy) {
         retryPolicy.withExceptionsToRetry([PushException])
         doTry() {
@@ -224,7 +227,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
         }
     }
 
-    void rollback(UserContext userContext, AsgDeploymentNames asgDeploymentNames) {
+    private void rollback(UserContext userContext, AsgDeploymentNames asgDeploymentNames) {
         status "Rolling back to '${asgDeploymentNames.previousAsgName}'."
         activities.enableAsg(userContext, asgDeploymentNames.previousAsgName)
         activities.disableAsg(userContext, asgDeploymentNames.nextAsgName)

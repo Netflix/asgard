@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package com.netflix.asgard
+
 import com.amazonaws.services.autoscaling.AmazonAutoScaling
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance

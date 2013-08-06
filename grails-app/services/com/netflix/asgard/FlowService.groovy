@@ -17,11 +17,11 @@ import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowType
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
-import com.netflix.asgard.flow.GlobalWorkflowAttributes
 import com.netflix.asgard.deployment.DeploymentActivitiesImpl
 import com.netflix.asgard.deployment.DeploymentWorkflow
 import com.netflix.asgard.deployment.DeploymentWorkflowDescriptionTemplate
 import com.netflix.asgard.deployment.DeploymentWorkflowImpl
+import com.netflix.asgard.flow.GlobalWorkflowAttributes
 import com.netflix.asgard.flow.InterfaceBasedWorkflowClient
 import com.netflix.asgard.flow.WorkflowDescriptionTemplate
 import com.netflix.asgard.flow.WorkflowMetaAttributes
