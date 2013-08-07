@@ -78,10 +78,10 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
             if (!deploymentOptions.doCanary) {
                 return promiseFor(true)
             }
+            int canaryCapacity = deploymentOptions.canaryCapacity
             status 'Canary testing will now be performed.'
             scaleAsgAndWaitForDecision(userContext, nextAsgName.get(), deploymentOptions.canaryStartUpTimeoutMinutes,
-                    deploymentOptions.canaryCapacity, deploymentOptions.canaryCapacity,
-                    deploymentOptions.canaryCapacity, deploymentOptions.canaryAssessmentDurationMinutes,
+                    canaryCapacity, canaryCapacity, canaryCapacity, deploymentOptions.canaryAssessmentDurationMinutes,
                     deploymentOptions.notificationDestination, deploymentOptions.scaleUp, 'canary capacity')
         }
 

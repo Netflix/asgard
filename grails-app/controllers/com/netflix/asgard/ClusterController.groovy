@@ -199,7 +199,7 @@ ${lastGroup.loadBalancerNames}"""
             manualActivityCompletionClient.complete(shouldProceed)
             flash.message = "Automated deployment will ${shouldProceed ? '' : 'not '} proceed."
         } catch (Exception e) {
-            flash.message = "Deployment failed: ${e.message}"
+            flash.message = "Deployment failed: ${e.toString()}"
         }
         redirect([controller: 'task', action: 'show', params: [runId: runId, workflowId: workflowId]])
     }

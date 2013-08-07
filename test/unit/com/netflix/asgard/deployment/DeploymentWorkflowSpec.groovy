@@ -51,9 +51,9 @@ class DeploymentWorkflowSpec extends Specification {
     ]
 
     List<String> logForCanaryScaleUp = [
-        "Canary testing will now be performed.",
-        "Scaling 'the_seaward-v003' to 1 instance.",
-        "Waiting up to 30 minutes for 1 instance.",
+            "Canary testing will now be performed.",
+            "Scaling 'the_seaward-v003' to 1 instance.",
+            "Waiting up to 30 minutes for 1 instance.",
     ]
 
     List<String> logForCanaryCompletion = [
@@ -62,9 +62,9 @@ class DeploymentWorkflowSpec extends Specification {
             "Canary capacity assessment period for ASG 'the_seaward-v003' has completed."
     ]
     List<String> logForFullCapacityScaleUp = [
-        "Scaling to full capacity.",
-        "Scaling 'the_seaward-v003' to 3 instances.",
-        "Waiting up to 40 minutes for 3 instances.",
+            "Scaling to full capacity.",
+            "Scaling 'the_seaward-v003' to 3 instances.",
+            "Waiting up to 40 minutes for 3 instances.",
     ]
 
     private createAsgInteractions() {
