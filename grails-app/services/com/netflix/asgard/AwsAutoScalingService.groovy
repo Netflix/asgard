@@ -423,13 +423,11 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
      * @return true if the group's desired size should be set manually because alarms are not causing dynamic scaling
      */
     boolean shouldGroupBeManuallySized(UserContext userContext, AutoScalingGroup group) {
-        boolean alarmNotesSuspended = group?.isProcessSuspended(AutoScalingProcessType.AlarmNotifications)
+        boolean alarmNotificationsSuspended = group?.isProcessSuspended(AutoScalingProcessType.AlarmNotifications)
         String name = group.autoScalingGroupName
         boolean dynamicScalingDriversExist = getScalingPoliciesForGroup(userContext, name) ||
                 getScheduledActionsForGroup(userContext, name)
-        boolean manualStaticSizingNeeded = !dynamicScalingDriversExist || alarmNotesSuspended
-
-        manualStaticSizingNeeded
+        !dynamicScalingDriversExist || alarmNotificationsSuspended
     }
 
     /**

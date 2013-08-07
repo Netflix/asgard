@@ -40,6 +40,7 @@ import com.netflix.asgard.model.AlarmData.ComparisonOperator
 import com.netflix.asgard.model.AlarmData.Statistic
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.AutoScalingGroupData
+import com.netflix.asgard.model.AutoScalingGroupMixin
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.ScalingPolicyData
@@ -156,24 +157,25 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
 scheduled actions #scheduleNames and suspended processes #processNames""")
     def 'should determine whether or not a group needs to be manually sized'() {
         given:
-        Mocks.createDynamicMethods()
-        awsAutoScalingService = new AwsAutoScalingService()
+        AutoScalingGroup.mixin AutoScalingGroupMixin
         AmazonAutoScaling mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
-        awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
-
-        when:
-        mockAmazonAutoScalingClient.describePolicies(_) >> {
-            new DescribePoliciesResult(scalingPolicies: policyNames.collect { new ScalingPolicy(policyName: it) })
-        }
-        mockAmazonAutoScalingClient.describeScheduledActions(_) >> {
-            new DescribeScheduledActionsResult(scheduledUpdateGroupActions: scheduleNames.collect {
-                new ScheduledUpdateGroupAction(scheduledActionName: it)
-            })
+        awsAutoScalingService = new AwsAutoScalingService(
+            awsClient: new MultiRegionAwsClient({ mockAmazonAutoScalingClient })
+        )
+        with (mockAmazonAutoScalingClient) {
+            describePolicies(_) >> {
+                new DescribePoliciesResult(scalingPolicies: policyNames.collect { new ScalingPolicy(policyName: it) })
+            }
+            describeScheduledActions(_) >> {
+                new DescribeScheduledActionsResult(scheduledUpdateGroupActions: scheduleNames.collect {
+                    new ScheduledUpdateGroupAction(scheduledActionName: it)
+                })
+            }
         }
         AutoScalingGroup group = new AutoScalingGroup(autoScalingGroupName: 'hi', suspendedProcesses:
                 processNames.collect { new SuspendedProcess(processName: it) })
 
-        then:
+        expect:
         awsAutoScalingService.shouldGroupBeManuallySized(UserContext.auto(Region.US_WEST_2), group) == result
 
         where:
