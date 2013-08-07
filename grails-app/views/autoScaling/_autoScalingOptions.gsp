@@ -18,12 +18,32 @@
 <%@ page import="com.netflix.asgard.model.AutoScalingGroupHealthCheckType" %>
 <tr class="prop">
   <td class="name">
-    Instance Counts:
+    Instance<br/>Bounds:
   </td>
   <td class="value numbers">
     <label for="min">Min:</label> <input type="text" class="number" id="min" name="min" value="${group?.minSize}"/>
-    <label for="desiredCapacity">Desired:</label> <input type="text" class="number" id="desiredCapacity" name="desiredCapacity" value="${group?.desiredCapacity}"/>
     <label for="max">Max:</label> <input type="text" class="number" id="max" name="max" value="${group?.maxSize}"/>
+  </td>
+</tr>
+<tr class="prop">
+  <td class="name">
+    Desired<br/>Capacity:
+  </td>
+  <td class="numbers">
+    <div class="desiredCapacityContainer ${manualStaticSizingNeeded ? 'showManual' : ''}">
+      <div class="manualDesiredCapacity">
+        <input type="text" class="number" id="desiredCapacity" name="desiredCapacity" value="${group?.desiredCapacity}" /> instances
+      </div>
+      <div class="dynamicDesiredCapacity">
+        ${group?.desiredCapacity} instance${group?.desiredCapacity == 1 ? '' : 's'}
+        <g:tip tipStyle="interactive">
+          Controlled automatically.<br/>
+          <span class="fakeLink enableManualDesiredCapacityOverride">Click here</span> to change<br/>
+          desired capacity manually.<br/>
+          (Not recommended)
+        </g:tip>
+      </div>
+    </div>
   </td>
 </tr>
 <tr class="prop advanced" title="The number of seconds after a scaling activity completes before any further scaling activities can start">
@@ -36,7 +56,7 @@
 </tr>
 <tr class="prop advanced" title="The method that the group will use to decide when to replace a problematic instance">
   <td class="name">
-    <label for="healthCheckType">ASG Health Check Type:</label>
+    <label for="healthCheckType">ASG Health<br/>Check Type:</label>
   </td>
   <td class="value">
     <select id="healthCheckType" name="healthCheckType">
@@ -48,7 +68,7 @@
 </tr>
 <tr class="prop advanced" title="The number of seconds to wait after instance launch before running the health check">
   <td class="name">
-    <label for="healthCheckGracePeriod">ASG Health Check Grace Period:</label>
+    <label for="healthCheckGracePeriod">ASG Health<br/>Check Grace<br/>Period:</label>
   </td>
   <td class="value">
     <input type="text" class="number" id="healthCheckGracePeriod" name="healthCheckGracePeriod" value="${group?.healthCheckGracePeriod == null ? '600' : group?.healthCheckGracePeriod}"/> seconds
@@ -56,7 +76,7 @@
 </tr>
 <tr class="prop advanced" title="The algorithm to use when selecting which instance to terminate">
   <td class="name">
-    <label for="terminationPolicy">Termination Policy:</label>
+    <label for="terminationPolicy">Termination<br/>Policy:</label>
   </td>
   <td>
     <select id="terminationPolicy" name="terminationPolicy">

@@ -61,7 +61,7 @@
   <g:render template="/common/securityGroupSelection" />
   <tr class="prop advanced">
     <td class="name">
-      <label>Spot Instances<br/>(On-Demand price bid):</label>
+      <label>Spot Instances<br/>(On-Demand<br/>price bid):</label>
     </td>
     <td>
       <div>
@@ -93,7 +93,7 @@
   </tr>
   <tr class="prop advanced">
     <td class="name">
-      <label for="iamInstanceProfile">IAM Instance Profile:</label>
+      <label for="iamInstanceProfile">IAM Instance<br/>Profile:</label>
     </td>
     <td>
       <input type="text" id="iamInstanceProfile" name="iamInstanceProfile" value="${params.iamInstanceProfile ?: iamInstanceProfile}"/>
