@@ -59,7 +59,7 @@ class RdsInstanceControllerSpec extends Specification {
         controller.params.putAll(showParams)
         final cmd = new DbCreateCommand(showParams)
         def awsRdsService = Mock(AwsRdsService)
-        awsRdsService._ >> {throw new IllegalStateException("Exception Thrown for test.")}
+        awsRdsService._ >> { throw new IllegalStateException("Exception Thrown for test.") }
         controller.awsRdsService =  awsRdsService
 
         when:
