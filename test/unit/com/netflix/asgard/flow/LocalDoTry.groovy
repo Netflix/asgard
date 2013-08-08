@@ -23,14 +23,13 @@ import com.amazonaws.services.simpleworkflow.flow.core.Settable
  */
 class LocalDoTry implements DoTry {
 
-    Exception error
-    boolean errorWasCaught = false
+    private Exception error
 
-    private Settable result = new Settable()
+    private Promise result = new Settable()
 
-    LocalDoTry(Closure tryBlock) {
+    LocalDoTry(Closure<? extends Promise> tryBlock) {
         try {
-            result.set(tryBlock())
+            result = tryBlock()
         } catch (Exception e) {
             error = e
         }
@@ -38,10 +37,10 @@ class LocalDoTry implements DoTry {
 
     @Override
     DoTry withCatch(Closure doCatchBlock) {
-        errorWasCaught = true
         if (error) {
             try {
-                doCatchBlock(error)
+                result = doCatchBlock(error)
+                error = null
             } catch (Exception e) {
                 error = e
             }
@@ -52,7 +51,7 @@ class LocalDoTry implements DoTry {
     @Override
     DoTry withFinally(Closure doFinallyBlock) {
         doFinallyBlock()
-        if (!errorWasCaught) {
+        if (error) {
             throw error
         }
         this

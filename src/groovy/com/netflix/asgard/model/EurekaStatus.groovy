@@ -13,26 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.flow.example
-
-import com.amazonaws.services.simpleworkflow.flow.annotations.Activities
-import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrationOptions
+package com.netflix.asgard.model
 
 /**
- * Contract of the hello world activities
+ * The status of an instance in Eureka
  */
-@Activities(version = "1.0")
-@ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30L,
-        defaultTaskStartToCloseTimeoutSeconds = 10L)
-interface HelloWorldActivities {
-
-    void printHello(String name)
-
-    String getHello()
-
-    Collection<String> getClusterNames()
-
-    void throwException()
-
-    Boolean takeNap(long seconds)
-}
+enum EurekaStatus {UP, DOWN, OUT_OF_SERVICE}

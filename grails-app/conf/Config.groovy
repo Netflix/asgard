@@ -198,7 +198,7 @@ environments {
         plugin {
             refreshDelay = 5000
         }
-        workflow.domain = "asgard_${System.getProperty('user.name')}"
+        workflow.taskList = "asgard_${System.getProperty('user.name')}"
     }
     test {
         server.online = false

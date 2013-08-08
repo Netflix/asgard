@@ -113,7 +113,7 @@ class MonkeyPatcherService implements InitializingBean {
         }
         if (!(AutoScalingGroup.class.methods as List).contains("getVariables")) {
             AutoScalingGroup.metaClass.getVariables = { ->
-                Relationships.parts(delegate.autoScalingGroupName)
+                Relationships.parts(delegate.autoScalingGroupName as String)
             }
         }
 

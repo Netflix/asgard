@@ -327,6 +327,10 @@ button.resize div, a.resize                   { background-image: url(../images/
 .buttons button.restore div                   { background-image: url(../images/tango/24/actions/edit-undo.png);                                 }
 .buttons button.elastic div                   { background-image: url(../images/tango/24/tools/select-lasso.png);                                }
 .buttons button.save div                      { background-image: url(../images/tango/24/actions/document-save.png);                             }
+.buttons button.deploy div                    { background-image: url(../images/tango/24/tools/deploy.png);                                      }
+.buttons a.deploy                             { background-image: url(../images/tango/24/tools/deploy.png);                                      }
+.buttons button.proceed div                   { background-image: url(../images/tango/24/actions/media-playback-start.png);                      }
+.buttons button.rollback div                  { background-image: url(../images/tango/24/actions/media-playback-stop.png);                       }
 .buttons button.schedule div                  { background-image: url(../images/tango/24/actions/appointment-new.png);                           }
 .buttons button.outOfService div              { background-image: url(../images/tango/24/status/weather-clear-night.png);                        }
 .buttons button.inService div                 { background-image: url(../images/tango/24/status/weather-clear.png);                              }
@@ -452,6 +456,9 @@ td.checkbox          { text-align: center; }
 .groupReplacingPush select                       { max-width: 240px; }
 .groupReplacingPush .filter                      { width: 60px;      }
 .groupReplacingPush .name                        { white-space: normal; min-width: 86px; }
+
+.groupReplacingPush li.deploymentWorkflowOptions         { max-width: 500px; }
+.groupReplacingPush li.deploymentWorkflowOptions .name   { min-width: 280px; }
 
 #showAdvancedOptionsToCreateFastProperty   { margin-left: 230px; }
 

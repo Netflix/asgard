@@ -123,7 +123,7 @@ class PushService {
     }
 
     /** Run processing that is common to multiple edit screens for preparing a push. */
-    Map prepareEdit(UserContext userContext, String groupName, boolean showAllImages, String actionName,
+    Map<String, Object> prepareEdit(UserContext userContext, String groupName, boolean showAllImages, String actionName,
                     Collection<String> selectedSecurityGroups) {
         String name = groupName
 
@@ -151,7 +151,7 @@ class PushService {
         String vpcId = subnets.coerceLoneOrNoneFromIds(subnetIds)?.vpcId
         Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
         String pricing = lc.spotPrice ? InstancePriceType.SPOT.name() : InstancePriceType.ON_DEMAND.name()
-        Map result = [
+        Map<String, Object> result = [
                 appName: appName,
                 name: name,
                 cluster: Relationships.clusterFromGroupName(name),

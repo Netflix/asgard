@@ -92,6 +92,7 @@ import com.netflix.asgard.model.SecurityGroupOption
 import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.ZoneAvailability
 import com.netflix.frigga.ami.AppVersion
+import groovyx.gpars.GParsExecutorsPool
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import org.apache.commons.codec.binary.Base64
@@ -110,6 +111,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     def configService
     def restClientService
     def taskService
+    ThreadScheduler threadScheduler
     List<String> accounts = [] // main account is accounts[0]
 
     /** The state names for instances that count against reservation usage. */
@@ -803,6 +805,19 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             return restClientService.checkOkayResponseCode(responseCode)
         }
         true
+    }
+
+    /**
+     * Test health of instances in parallel. One failing health check stops all checks and returns false.
+     *
+     * @param healthCheckUrls of instances
+     * @return indicates if all instances are healthy
+     */
+    Boolean checkHostsHealth(Collection<String> healthCheckUrls) {
+        GParsExecutorsPool.withExistingPool(threadScheduler.scheduler) {
+            String unhealthyHostUrl = healthCheckUrls.findAnyParallel { !checkHostHealth(it) }
+            !unhealthyHostUrl
+        }
     }
 
     List<InstanceStateChange> terminateInstances(UserContext userContext, Collection<String> instanceIds,

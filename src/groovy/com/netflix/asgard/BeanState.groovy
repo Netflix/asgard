@@ -65,7 +65,7 @@ class BeanState {
         new BeanState(propertyNamesToValues)
     }
 
-    BeanState ignoreProperties(List<String> propertiesToIgnore) {
+    BeanState ignoreProperties(Collection<String> propertiesToIgnore) {
         return new BeanState(Maps.filterKeys(propertyNamesToValues, { !(it in propertiesToIgnore) } as Predicate))
     }
 
