@@ -790,12 +790,12 @@ jQuery(document).ready(function() {
     var setUpDeploymentWorkflowOptions = function() {
         jQuery("input[name='doCanary']").click(function() {
             var doCanary;
-            doCanary = jQuery(this).val() === "true";
+            doCanary = this.id === "doCanaryTrue";
             jQuery("tbody.canaryOptions").toggleClass("concealed", !doCanary);
         });
         jQuery("input[name='disablePreviousAsg']").click(function() {
             var disablePreviousAsg;
-            disablePreviousAsg = jQuery(this).val() === "No";
+            disablePreviousAsg = this.id === "disablePreviousAsgNo";
             jQuery("tbody.fullTrafficOptions").toggleClass("concealed", disablePreviousAsg);
         });
     };

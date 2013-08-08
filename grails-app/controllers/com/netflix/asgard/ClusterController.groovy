@@ -210,11 +210,6 @@ ${lastGroup.loadBalancerNames}"""
         Map<String, Object> attributes = commonNextAsgPreparation(userContext, cluster)
         String appName = Relationships.appNameFromGroupName(cluster.name)
         String email = applicationService.getEmailFromApp(userContext, appName)
-        ProceedPreference scaleUp = params.scaleUp ? ProceedPreference.valueOf(params.scaleUp) : ProceedPreference.Ask
-        ProceedPreference disablePreviousAsg = params.disablePreviousAsg ? ProceedPreference.
-                valueOf(params.disablePreviousAsg) : ProceedPreference.Ask
-        ProceedPreference deletePreviousAsg = params.deletePreviousAsg ? ProceedPreference.
-                valueOf(params.deletePreviousAsg) : ProceedPreference.Ask
         attributes?.putAll([
                 deploymentWorkflowOptions: new DeploymentWorkflowOptions(
                         notificationDestination: params.notificationDestination ?: email,
@@ -223,13 +218,13 @@ ${lastGroup.loadBalancerNames}"""
                         canaryCapacity: params.canaryCount ?: 1,
                         canaryStartUpTimeoutMinutes: params.canaryStartUpTimeoutMinutes ?: 30,
                         canaryAssessmentDurationMinutes: params.canaryAssessmentDurationMinutes ?: 60,
-                        scaleUp: scaleUp,
+                        scaleUp: ProceedPreference.parse(params.scaleUp),
                         desiredCapacityStartUpTimeoutMinutes: params.desiredCapacityStartUpTimeoutMinutes ?: 40,
                         desiredCapacityAssessmentDurationMinutes: params.
                                 desiredCapacityAssessmentDurationMinutes ?: 120,
-                        disablePreviousAsg: disablePreviousAsg,
+                        disablePreviousAsg: ProceedPreference.parse(params.disablePreviousAsg),
                         fullTrafficAssessmentDurationMinutes: params.fullTrafficAssessmentDurationMinutes ?: 240,
-                        deletePreviousAsg: deletePreviousAsg
+                        deletePreviousAsg: ProceedPreference.parse(params.deletePreviousAsg)
                 )
         ])
         attributes
