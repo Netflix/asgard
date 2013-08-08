@@ -50,7 +50,6 @@ class TrackingFilters {
                 }
                 if (session.isNew()) {
                     String hostName = Requests.getClientHostName(request)
-                    ServerController.hostNames.add(hostName)
                     if (userAgent && !userAgent.matches(nonBrowserUserAgents)) {
                         log.info "${new DateTime()} Session started. Client ${hostName}, User-Agent ${userAgent}"
                     }
