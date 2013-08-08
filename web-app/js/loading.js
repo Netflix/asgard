@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 jQuery(function() {
-    var url = window.location.href;
-    var reloadPage = function() {
+    var url, reloadPage, statusChecker;
+    url = window.location.href;
+    reloadPage = function() {
         window.location.replace(url);
     };
-    var statusChecker = function() {
+    statusChecker = function() {
         jQuery.ajax({
             url: url,
             success: reloadPage,
@@ -31,6 +32,6 @@ jQuery(function() {
                 }
             }
         });
-    }
+    };
     window.setTimeout(statusChecker, 5000);
 });
