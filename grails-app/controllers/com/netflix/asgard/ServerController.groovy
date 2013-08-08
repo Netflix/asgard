@@ -57,6 +57,8 @@ class ServerController {
 
     def minutesSinceStartup = { render "${serverService.getMinutesSinceStartup()}" }
 
+    def uptime = { render "${serverService.getUptimeString()}" }
+
     def moveTraffic = {
         String targetServer = pickServer(params)
         String forceNowValue = params.forceNow
