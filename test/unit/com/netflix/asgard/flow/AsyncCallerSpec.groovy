@@ -28,7 +28,7 @@ class AsyncCallerSpec extends Specification {
             getInstance() >> mockDynamicActivitiesClient
         }
 
-        def activities = AsyncCaller.of(HelloWorldActivities, mockDynamicActivitiesClientFactory)
+        def activities = AsyncCaller.of(HelloWorldActivities, null, mockDynamicActivitiesClientFactory)
 
         when:
         activities.printHello('hi')

@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.flow
 
+import com.amazonaws.services.simpleworkflow.flow.ActivitySchedulingOptions
 import com.amazonaws.services.simpleworkflow.flow.DecisionContext
 import com.amazonaws.services.simpleworkflow.flow.DecisionContextProvider
 import com.amazonaws.services.simpleworkflow.flow.DecisionContextProviderImpl
@@ -24,7 +25,6 @@ import com.amazonaws.services.simpleworkflow.flow.core.Settable
 import com.amazonaws.services.simpleworkflow.flow.interceptors.AsyncExecutor
 import com.amazonaws.services.simpleworkflow.flow.interceptors.AsyncRetryingExecutor
 import com.amazonaws.services.simpleworkflow.flow.interceptors.AsyncRunnable
-import com.amazonaws.services.simpleworkflow.flow.interceptors.ExponentialRetryPolicy
 import com.amazonaws.services.simpleworkflow.flow.interceptors.RetryPolicy
 import groovy.transform.Canonical
 
@@ -34,11 +34,12 @@ import groovy.transform.Canonical
 @Canonical
 class SwfWorkflow<A> extends Workflow<A> {
 
-    static <T> SwfWorkflow<T> of(Class<T> activitiesType) {
-        new SwfWorkflow<T>(activitiesType)
+    static <T> SwfWorkflow<T> of(Class<T> activitiesType, ActivitySchedulingOptions activitySchedulingOptions = null) {
+        new SwfWorkflow<T>(activitiesType, activitySchedulingOptions)
     }
 
     final Class<A> activitiesType
+    final ActivitySchedulingOptions activitySchedulingOptions
 
     private DecisionContext overrideDecisionContext
 
@@ -47,7 +48,7 @@ class SwfWorkflow<A> extends Workflow<A> {
 
     @Override
     A getActivities() {
-        AsyncCaller.of(activitiesType)
+        AsyncCaller.of(activitiesType, activitySchedulingOptions)
     }
 
     @Override
@@ -96,8 +97,4 @@ class SwfWorkflow<A> extends Workflow<A> {
         result
     }
 
-    @Override
-    <T> Promise<T> retry(Closure<? extends Promise<T>> work) {
-        retry(new ExponentialRetryPolicy(1L), work)
-    }
 }

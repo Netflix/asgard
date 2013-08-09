@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.flow.example
+package com.netflix.asgard.deployment
 
-import com.amazonaws.services.simpleworkflow.flow.annotations.Activities
-import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrationOptions
+import groovy.transform.Canonical
 
 /**
- * Contract of the hello world activities
+ * Attributes specified when creating a new auto scaling group.
+ * @see com.amazonaws.services.autoscaling.model.AutoScalingGroup
  */
-@Activities(version = "1.0")
-@ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30L,
-        defaultTaskStartToCloseTimeoutSeconds = 10L)
-interface HelloWorldActivities {
+@Canonical class AutoScalingGroupOptions {
 
-    void printHello(String name)
+    Integer minSize
+    Integer maxSize
+    Integer desiredCapacity
+    Integer defaultCooldown
+    List<String> availabilityZones
+    List<String> loadBalancerNames
+    String healthCheckType
+    Integer healthCheckGracePeriod
+    List<String> terminationPolicies
 
-    String getHello()
-
-    Collection<String> getClusterNames()
-
-    void throwException()
-
-    Boolean takeNap(long seconds)
 }

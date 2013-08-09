@@ -13,26 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.flow.example
+package com.netflix.asgard.deployment
 
-import com.amazonaws.services.simpleworkflow.flow.annotations.Activities
-import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrationOptions
+import groovy.transform.Canonical
 
 /**
- * Contract of the hello world activities
+ * Attributes specified when creating a new launchConfiguration.
+ * @see com.amazonaws.services.autoscaling.model.LaunchConfiguration
  */
-@Activities(version = "1.0")
-@ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30L,
-        defaultTaskStartToCloseTimeoutSeconds = 10L)
-interface HelloWorldActivities {
-
-    void printHello(String name)
-
-    String getHello()
-
-    Collection<String> getClusterNames()
-
-    void throwException()
-
-    Boolean takeNap(long seconds)
+@Canonical class LaunchConfigurationOptions {
+    String imageId
+    String keyName
+    List<String> securityGroups
+    String instanceType
+    String iamInstanceProfile
+    Boolean ebsOptimized
 }

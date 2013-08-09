@@ -13,26 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.flow.example
-
-import com.amazonaws.services.simpleworkflow.flow.annotations.Activities
-import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrationOptions
+package com.netflix.asgard.deployment
 
 /**
- * Contract of the hello world activities
+ * Possible preferences specifying if and how to proceed.
  */
-@Activities(version = "1.0")
-@ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30L,
-        defaultTaskStartToCloseTimeoutSeconds = 10L)
-interface HelloWorldActivities {
+enum ProceedPreference { Yes, No, Ask;
 
-    void printHello(String name)
-
-    String getHello()
-
-    Collection<String> getClusterNames()
-
-    void throwException()
-
-    Boolean takeNap(long seconds)
+    static ProceedPreference parse(String value) {
+        values().find { it.name().equalsIgnoreCase(value) } ?: Ask
+    }
 }
+

@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.flow
 
+import com.amazonaws.services.simpleworkflow.flow.ActivitySchedulingOptions
 import com.amazonaws.services.simpleworkflow.flow.DynamicActivitiesClient
 import com.amazonaws.services.simpleworkflow.flow.DynamicActivitiesClientImpl
 import com.amazonaws.services.simpleworkflow.flow.annotations.Activities
@@ -31,11 +32,13 @@ import java.lang.reflect.Method
 class AsyncCaller<T> {
 
     final Class<T> type
+    final ActivitySchedulingOptions activitySchedulingOptions
     final DynamicActivitiesClientFactory dynamicActivitiesClientFactory
 
-    static <T> T of(Class<T> type, DynamicActivitiesClientFactory dynamicActivitiesClientFactory =
+    static <T> T of(Class<T> type, ActivitySchedulingOptions activitySchedulingOptions,
+            DynamicActivitiesClientFactory dynamicActivitiesClientFactory =
             new DynamicActivitiesClientFactory(DynamicActivitiesClientImpl)) {
-        new AsyncCaller(type, dynamicActivitiesClientFactory) as T
+        new AsyncCaller(type, activitySchedulingOptions, dynamicActivitiesClientFactory) as T
     }
 
     def methodMissing(String name, args) {
@@ -54,7 +57,8 @@ class AsyncCaller<T> {
         }
         List<Promise<?>> promises = args.collect { Promise.asPromise(it) }
         DynamicActivitiesClient dynamicActivitiesClient = dynamicActivitiesClientFactory.getInstance()
-        return dynamicActivitiesClient.scheduleActivity(activityType, promises as Promise[], null, returnType, null)
+        return dynamicActivitiesClient.scheduleActivity(activityType, promises as Promise[], activitySchedulingOptions,
+                returnType, null)
     }
 
     @Canonical

@@ -104,7 +104,8 @@ class RollingPushOperation extends AbstractPushOperation {
         String newLaunchName = Relationships.buildLaunchConfigurationName(groupName)
         AutoScalingGroup groupForUserData = new AutoScalingGroup().withAutoScalingGroupName(group.autoScalingGroupName).
                 withLaunchConfigurationName(newLaunchName)
-        String userData = launchTemplateService.buildUserData(options.common.userContext, groupForUserData)
+        String userData = launchTemplateService.buildUserData(options.common.userContext,
+                groupForUserData.autoScalingGroupName, groupForUserData.launchConfigurationName)
         Time.sleepCancellably 100 // tiny pause before LC create to avoid rate limiting
         Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(options.securityGroups,
                 group.VPCZoneIdentifier, options.userContext.region)

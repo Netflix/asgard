@@ -7,6 +7,7 @@ import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactory
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClientFactoryImpl
 import com.amazonaws.services.simpleworkflow.flow.StartWorkflowOptions
+import com.amazonaws.services.simpleworkflow.flow.WorkerBase
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClientExternalBase
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClientFactoryExternalBase
@@ -16,6 +17,11 @@ import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowType
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
+import com.netflix.asgard.deployment.DeploymentActivitiesImpl
+import com.netflix.asgard.deployment.DeploymentWorkflow
+import com.netflix.asgard.deployment.DeploymentWorkflowDescriptionTemplate
+import com.netflix.asgard.deployment.DeploymentWorkflowImpl
+import com.netflix.asgard.flow.GlobalWorkflowAttributes
 import com.netflix.asgard.flow.InterfaceBasedWorkflowClient
 import com.netflix.asgard.flow.WorkflowDescriptionTemplate
 import com.netflix.asgard.flow.WorkflowMetaAttributes
@@ -35,26 +41,41 @@ class FlowService implements InitializingBean {
     WorkflowWorker workflowWorker
     ActivityWorker activityWorker
 
-    final ImmutableSet<Class<?>> workflowImplementationTypes = ImmutableSet.of()
-    final ImmutableMap<Class<?>, WorkflowDescriptionTemplate> workflowToDescriptionTemplate = ImmutableMap.
-            copyOf([:] as Map)
-    final ImmutableSet<Object> activityImplementations = ImmutableSet.of()
+    // For every workflow the following data structures should be populated.
+    /** Declares workflow implementations. */
+    final ImmutableSet<Class<?>> workflowImplementationTypes = ImmutableSet.of(DeploymentWorkflowImpl)
+    /* Declares workflow description templates. */
+    final ImmutableMap<Class<?>, WorkflowDescriptionTemplate> workflowToDescriptionTemplate = ImmutableMap.copyOf([
+            (DeploymentWorkflow): new DeploymentWorkflowDescriptionTemplate()
+    ] as Map)
+    /** Declares workflow activity implementations. */
+    final ImmutableSet<Object> activityImplementations = ImmutableSet.of(new DeploymentActivitiesImpl())
 
-    /* The AWS SWF domain that will be used in this service for polling and scheduling workflows */
+    /** The AWS SWF domain that will be used in this service for polling and scheduling workflows */
     private String domain
+
+    /** The AWS SWF domain that will be used in this service for polling and scheduling workflows */
+    String taskList
 
     void afterPropertiesSet() {
         domain = configService.simpleWorkflowDomain
+        taskList = configService.simpleWorkflowTaskList
+        GlobalWorkflowAttributes.taskList = taskList
         simpleWorkflow = awsClientService.create(AmazonSimpleWorkflow)
         activityImplementations.each { Spring.autowire(it) }
-        workflowWorker = new WorkflowWorker(simpleWorkflow, domain, domain)
+        workflowWorker = new WorkflowWorker(simpleWorkflow, domain, taskList)
         workflowWorker.setWorkflowImplementationTypes(workflowImplementationTypes)
         workflowWorker.start()
-        log.info('Workflow Host Service Started...')
-        activityWorker = activityWorker ?: new ActivityWorker(simpleWorkflow, domain, domain)
+        log.info(workerStartMessage('Workflow', workflowWorker))
+        activityWorker = activityWorker ?: new ActivityWorker(simpleWorkflow, domain, taskList)
         activityWorker.addActivitiesImplementations(activityImplementations)
         activityWorker.start()
-        log.info("Activity Worker Started for Task List: ${activityWorker.getTaskListToPoll()}")
+        log.info(workerStartMessage('Activity', activityWorker))
+    }
+
+    private String workerStartMessage(String workerType, WorkerBase workerBase) {
+        "${workerType} worker started on '${workerBase.identity}' for Domain: '${workerBase.domain}' and Task List: \
+'${workerBase.getTaskListToPoll()}'."
     }
 
     /**
@@ -81,7 +102,8 @@ class FlowService implements InitializingBean {
         SwfWorkflowTags workflowTags = new SwfWorkflowTags()
         workflowTags.user = userContext
         workflowTags.link = link
-        factory.startWorkflowOptions = new StartWorkflowOptions(tagList: workflowTags.constructTags())
+        factory.startWorkflowOptions = new StartWorkflowOptions(tagList: workflowTags.constructTags(),
+                taskList: taskList)
         factory.client
     }
 

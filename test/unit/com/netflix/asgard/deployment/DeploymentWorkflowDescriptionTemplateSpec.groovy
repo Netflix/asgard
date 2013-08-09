@@ -13,26 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.flow.example
+package com.netflix.asgard.deployment
 
-import com.amazonaws.services.simpleworkflow.flow.annotations.Activities
-import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrationOptions
+import spock.lang.Specification
 
-/**
- * Contract of the hello world activities
- */
-@Activities(version = "1.0")
-@ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30L,
-        defaultTaskStartToCloseTimeoutSeconds = 10L)
-interface HelloWorldActivities {
+class DeploymentWorkflowDescriptionTemplateSpec extends Specification {
 
-    void printHello(String name)
+    def 'should construct description'() {
+        DeploymentWorkflowDescriptionTemplate  descriptionTemplate = new DeploymentWorkflowDescriptionTemplate()
 
-    String getHello()
+        when:
+        descriptionTemplate.deploy(null, new DeploymentWorkflowOptions(clusterName: 'the_seaward'), null, null)
 
-    Collection<String> getClusterNames()
-
-    void throwException()
-
-    Boolean takeNap(long seconds)
+        then:
+        "Deploying new ASG to cluster 'the_seaward'" == descriptionTemplate.description
+    }
 }

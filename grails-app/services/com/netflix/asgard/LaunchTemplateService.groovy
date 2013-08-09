@@ -15,7 +15,6 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.ec2.model.Image
 
 class LaunchTemplateService {
@@ -55,12 +54,12 @@ class LaunchTemplateService {
         pluginService.userDataProvider.buildUserDataForVariables(userContext, appName, '', '')
     }
 
-    String buildUserData(UserContext userContext, AutoScalingGroup autoScalingGroup) {
-        String appName = Check.notEmpty(autoScalingGroup.appName as String, 'appName')
-        String autoScalingGroupName = Check.notEmpty(autoScalingGroup.autoScalingGroupName, 'autoScalingGroupName')
-        String launchConfigName = Check.notEmpty(autoScalingGroup.launchConfigurationName, 'launchConfigurationName')
+    String buildUserData(UserContext userContext, String autoScalingGroupName, String launchConfigurationName) {
+        Check.notEmpty(autoScalingGroupName, 'autoScalingGroupName')
+        Check.notEmpty(launchConfigurationName, 'launchConfigurationName')
+        String appName = Relationships.appNameFromGroupName(autoScalingGroupName)
         pluginService.userDataProvider.buildUserDataForVariables(userContext, appName, autoScalingGroupName,
-                launchConfigName)
+                launchConfigurationName)
     }
 
 }

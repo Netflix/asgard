@@ -37,7 +37,6 @@ import com.amazonaws.services.simpleworkflow.model.ListDomainsRequest
 import com.amazonaws.services.simpleworkflow.model.ListOpenWorkflowExecutionsRequest
 import com.amazonaws.services.simpleworkflow.model.ListWorkflowTypesRequest
 import com.amazonaws.services.simpleworkflow.model.RegisterDomainRequest
-import com.amazonaws.services.simpleworkflow.model.UnknownResourceException
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionDetail
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
@@ -293,15 +292,6 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         if (!(domain in domains*.name)) {
             log.debug("${domain} workflow domain is not yet created. Attempting to create it.")
             registerWorkflowDomain()
-
-            // If the domain still doesn't appear in the list then throw an exception
-            domains = domainFetcher.retrieve(Region.defaultRegion(), request)
-            log.debug("Found workflow domains: ${domains*.name} ${domains}")
-            if (!(domain in domains*.name)) {
-                String msg = "Failed to register and retrieve workflow domain '${domain}'"
-                log.error(msg)
-                throw new UnknownResourceException(msg)
-            }
         }
         domains
     }

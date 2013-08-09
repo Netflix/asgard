@@ -13,24 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.flow.example
+package com.netflix.asgard.deployment
 
 import com.amazonaws.services.simpleworkflow.flow.annotations.Execute
 import com.amazonaws.services.simpleworkflow.flow.annotations.GetState
 import com.amazonaws.services.simpleworkflow.flow.annotations.Workflow
 import com.amazonaws.services.simpleworkflow.flow.annotations.WorkflowRegistrationOptions
+import com.netflix.asgard.UserContext
 
 /**
- * Contract of the hello world workflow
+ * Method contracts and annotations used for the automatic deployment SWF workflow.
  */
 @Workflow
-@WorkflowRegistrationOptions(defaultExecutionStartToCloseTimeoutSeconds = 60L)
-public interface HelloWorldWorkflow {
+@WorkflowRegistrationOptions(defaultExecutionStartToCloseTimeoutSeconds = 604800L)
+interface DeploymentWorkflow {
 
-    @Execute(version = '1.0')
-    void helloWorld(String name)
+    /**
+     * Start the deployment of a new ASG in an existing cluster.
+     *
+     * @param userContext who, where, why
+     * @param deploymentOptions dictate what the deployment will do
+     * @param lcOverrides specify changes to the template launch configuration
+     * @param asgOverrides specify changes to the template auto scaling group
+     */
+    @Execute(version = "1.2")
+    void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
+                LaunchConfigurationOptions lcOverrides, AutoScalingGroupOptions asgOverrides)
 
+    /**
+     * @return current log history of the workflow
+     */
     @GetState
     List<String> getLogHistory()
-
 }
