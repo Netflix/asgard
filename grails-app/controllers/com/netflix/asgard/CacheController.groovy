@@ -33,6 +33,24 @@ class CacheController {
     def index = { redirect(action: 'list', params: params) }
 
     def list = {
+        Map<String, ? extends List> result = analyzeCaches()
+        withFormat {
+            html { result }
+            xml { new XML(result).render(response) }
+            json { new JSON(result).render(response) }
+        }
+    }
+
+    def remaining = {
+        List<String> unfilled = analyzeCaches().unfilled
+        withFormat {
+            html { unfilled }
+            xml { new XML(unfilled).render(response) }
+            json { new JSON(unfilled).render(response) }
+        }
+    }
+
+    public Map<String, ? extends List> analyzeCaches() {
         Collection<Fillable> fillableCaches = caches.properties*.value.findAll { it instanceof Fillable }
         List<Map> multiRegionSummaries = []
         List<Map> globalSummaries = []
@@ -57,11 +75,7 @@ class CacheController {
         List<String> unfilled = listUnfilled(prices) + listUnfilled(globalSummaries) + listUnfilled(multiRegionSummaries)
         Map<String, List> result = [unfilled: unfilled, globalCaches: globalSummaries, prices: prices,
                 multiRegionCaches: multiRegionSummaries]
-        withFormat {
-            html { result }
-            xml { new XML(result).render(response) }
-            json { new JSON(result).render(response) }
-        }
+        result
     }
 
     private Map<String, Object> summarize(CachedMap c) {

@@ -48,8 +48,9 @@ class ThreadScheduler {
      * @param job the operation to execute periodically
      */
     void schedule(int intervalSeconds, int maxJitterSeconds, Runnable job) {
-        int maxJitterToUse = Math.max(maxJitterSeconds, 1) // At least one second to avoid errors in random.nextInt
-        int jitterSeconds = configService.useJitter ? random.nextInt(maxJitterToUse) : 0
+        // Random jitter should be not be too long, even if the interval is long
+        int maxJitterToUse = Math.min(maxJitterSeconds, 15)
+        int jitterSeconds = (maxJitterToUse && configService.useJitter) ? random.nextInt(maxJitterToUse) : 0
         scheduler.scheduleAtFixedRate(job, jitterSeconds, intervalSeconds, TimeUnit.SECONDS)
     }
 }
