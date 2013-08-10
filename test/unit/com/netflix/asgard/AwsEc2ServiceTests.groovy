@@ -34,7 +34,7 @@ import grails.test.MockUtils
 class AwsEc2ServiceTests extends GrailsUnitTestCase {
 
     void setUp() {
-        Mocks.createDynamicMethods() 
+        Mocks.createDynamicMethods()
     }
 
     void testGetSpotInstanceRequests() {
@@ -82,11 +82,11 @@ class AwsEc2ServiceTests extends GrailsUnitTestCase {
     }
 
     @SuppressWarnings("GroovyAccessibility")
-    void testGetCountedAppVersions() {
+    void testgetCountedAppVersionsForInstancesAndImages() {
 
         AwsEc2Service service = new AwsEc2Service()
 
-        Multiset<AppVersion> noAppVersions = service.getCountedAppVersions([], [:])
+        Multiset<AppVersion> noAppVersions = service.getCountedAppVersionsForInstancesAndImages([], [:])
         assert noAppVersions.isEmpty()
 
         String appVersionString1 = "app-1.2.3-456789.h321/WE-WAPP-app/321"
@@ -105,24 +105,24 @@ class AwsEc2ServiceTests extends GrailsUnitTestCase {
         Instance img2_inst2 = (new Instance()).withImageId(image2.imageId)
         Instance imgNoApp_inst1 = (new Instance()).withImageId(imageNoApp.imageId)
 
-        Multiset<AppVersion> oneAppOneInstance = service.getCountedAppVersions([img1_inst1], [(image1.imageId): image1])
+        Multiset<AppVersion> oneAppOneInstance = service.getCountedAppVersionsForInstancesAndImages([img1_inst1], [(image1.imageId): image1])
         assert 1 == oneAppOneInstance.size()
         assert 1 == oneAppOneInstance.count(appVersion1)
         assert 0 == oneAppOneInstance.count(appVersion2)
 
-        Multiset<AppVersion> oneAppTwoInstance = service.getCountedAppVersions([img1_inst1, img1_inst2],
+        Multiset<AppVersion> oneAppTwoInstance = service.getCountedAppVersionsForInstancesAndImages([img1_inst1, img1_inst2],
             [(image1.imageId): image1])
         assert 2 == oneAppTwoInstance.size()
         assert 2 == oneAppTwoInstance.count(appVersion1)
         assert 0 == oneAppTwoInstance.count(appVersion2)
 
-        Multiset<AppVersion> twoAppThreeInstance = service.getCountedAppVersions([img1_inst1, img2_inst1, img2_inst2],
+        Multiset<AppVersion> twoAppThreeInstance = service.getCountedAppVersionsForInstancesAndImages([img1_inst1, img2_inst1, img2_inst2],
             [(image1.imageId): image1, (image2.imageId): image2])
         assert 3 == twoAppThreeInstance.size()
         assert 1 == twoAppThreeInstance.count(appVersion1)
         assert 2 == twoAppThreeInstance.count(appVersion2)
 
-        Multiset<AppVersion> threeAppThreeInstance = service.getCountedAppVersions([img1_inst1, img2_inst1, imgNoApp_inst1],
+        Multiset<AppVersion> threeAppThreeInstance = service.getCountedAppVersionsForInstancesAndImages([img1_inst1, img2_inst1, imgNoApp_inst1],
             [(image1.imageId): image1, (image2.imageId): image2, (imageNoApp.imageId): imageNoApp])
         assert 2 == threeAppThreeInstance.size()
         assert 1 == threeAppThreeInstance.count(appVersion1)
