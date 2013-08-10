@@ -190,10 +190,7 @@ class ConfigService {
      *         to reduce the number of large, simultaneous data retrieval calls to cloud APIs
      */
     boolean getUseJitter() {
-        if (isOnline()) {
-            return grailsApplication.config.thread?.useJitter
-        }
-        false
+        grailsApplication.config.thread?.useJitter
     }
 
     /**
