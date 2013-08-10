@@ -17,24 +17,71 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.AmazonAutoScaling
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.autoscaling.model.DescribePoliciesResult
+import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsResult
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.LifecycleState
+import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
+import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
 import com.amazonaws.services.ec2.model.Image
 import com.netflix.asgard.model.ApplicationInstance
+import com.netflix.asgard.model.AutoScalingGroupMixin
 import com.netflix.asgard.model.EurekaStatus
 import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.StackAsg
 import com.netflix.frigga.ami.AppVersion
 import java.util.concurrent.Executors
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @SuppressWarnings(["GroovyAssignabilityCheck"])
 class AwsAutoScalingServiceUnitSpec extends Specification {
 
     AwsAutoScalingService awsAutoScalingService
+
+    @Unroll("""it is #result that a group should be manually sized if it has scaling policies #policyNames and \
+scheduled actions #scheduleNames and suspended processes #processNames""")
+    def 'should determine whether or not a group needs to be manually sized'() {
+        given:
+        AutoScalingGroup.mixin AutoScalingGroupMixin
+        AmazonAutoScaling mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
+        awsAutoScalingService = new AwsAutoScalingService(
+            awsClient: new MultiRegionAwsClient({ mockAmazonAutoScalingClient })
+        )
+        with (mockAmazonAutoScalingClient) {
+            describePolicies(_) >> {
+                new DescribePoliciesResult(scalingPolicies: policyNames.collect { new ScalingPolicy(policyName: it) })
+            }
+            describeScheduledActions(_) >> {
+                new DescribeScheduledActionsResult(scheduledUpdateGroupActions: scheduleNames.collect {
+                    new ScheduledUpdateGroupAction(scheduledActionName: it)
+                })
+            }
+        }
+        AutoScalingGroup group = new AutoScalingGroup(autoScalingGroupName: 'hi', suspendedProcesses:
+                processNames.collect { new SuspendedProcess(processName: it) })
+
+        expect:
+        awsAutoScalingService.shouldGroupBeManuallySized(UserContext.auto(Region.US_WEST_2), group) == result
+
+        where:
+        result | policyNames      | scheduleNames | processNames
+        true   | []               | []            | []
+        true   | []               | []            | ['Launch']
+        true   | []               | []            | ['Terminate']
+        true   | []               | []            | ['AlarmNotifications']
+        true   | []               | []            | ['Launch', 'Terminate', 'AlarmNotifications']
+        false  | ['hi-1', 'hi-2'] | ['hi-8']      | []
+        false  | ['hi-1', 'hi-2'] | []            | []
+        false  | []               | ['hi-8']      | []
+        false  | ['hi-1', 'hi-2'] | ['hi-8']      | ['Launch']
+        false  | ['hi-1', 'hi-2'] | ['hi-8']      | ['Terminate']
+        true   | ['hi-1', 'hi-2'] | ['hi-8']      | ['AlarmNotifications']
+        true   | ['hi-1', 'hi-2'] | ['hi-8']      | ['Launch', 'Terminate', 'AlarmNotifications']
+    }
 
     def 'should retrieve instance health checks'() {
         CachedMap mockAutoScalingCache = Mock {
@@ -78,6 +125,7 @@ class AwsAutoScalingServiceUnitSpec extends Specification {
         awsAutoScalingService = new AwsAutoScalingService(caches: caches, configService: configService,
                 awsEc2Service: awsEc2Service, threadScheduler: new ThreadScheduler(null))
 
+        //noinspection GroovyAccessibility
         expect:
         awsAutoScalingService.retrieveInstanceHealthChecks(Region.US_EAST_1) == [
                 'i-10000001': true,

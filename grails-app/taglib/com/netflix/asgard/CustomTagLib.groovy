@@ -139,4 +139,24 @@ href="${failureImage.url}">${failureImage.owner}</a></figcaption>""" : ''
             out << "<${tag} class=\"${styleClass}\">${inner}</${tag}>"
         }
     }
+
+    /**
+     * Shows a question mark help icon with a specified class so JavaScript can find the icon and add tooltip behavior.
+     */
+    def tip = { attrs, body ->
+        def innerBody = body()
+        if (!attrs.value && !innerBody) {
+            throwTagError("Tip tag requires either a [value] attribute or a body")
+        }
+        def value = attrs.value ? attrs.remove('value') : null
+
+        String tipStyle = attrs.tipStyle ? attrs.remove('tipStyle') : null
+        String dataTipStyleAttribute = tipStyle ? " data-tip-style=\"${tipStyle}\"" : ''
+
+        // Use the value or the body of the tip tag as the tip content
+        String imageElement = "<img src=\"${g.resource(dir: 'images/tango/16/apps', file: 'help-browser.png')}\" />"
+        String templateElement = "<span class=\"template\">${innerBody ?: value}</span>"
+
+        out << "<span class=\"tip\"${dataTipStyleAttribute}>${imageElement}${templateElement}</span>"
+    }
 }

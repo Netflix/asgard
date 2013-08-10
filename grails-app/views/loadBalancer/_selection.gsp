@@ -29,5 +29,8 @@
                   from="${loadBalancersGroupedByVpcId[vpcIdForLoadBalancer]}" value="${selectedLoadBalancers}" />
       </div>
     </g:each>
+    <g:if test="${!loadBalancersGroupedByVpcId}">
+      There are no load balancers in this account-region.
+    </g:if>
   </td>
 </tr>

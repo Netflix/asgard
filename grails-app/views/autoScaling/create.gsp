@@ -44,7 +44,7 @@
                 <h2>Auto Scaling</h2>
               </td>
             </tr>
-            <g:render template="autoScalingOptions" />
+            <g:render template="autoScalingOptions" model="[manualStaticSizingNeeded: true]" />
             <g:render template="/loadBalancer/selection"/>
           </tbody>
           <g:render template="/launchConfiguration/launchConfigOptions" />

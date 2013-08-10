@@ -642,8 +642,40 @@ jQuery(document).ready(function() {
 
         // If there's a textarea that should be resizable, make it so.
         jQuery('textarea.resizable').TextAreaResizer();
+
+        Opentip.styles.interactive = {
+            hideTriggers: ['closeButton'] // Keeps the tip visible until the user clicks the close button
+        };
+        Opentip.styles.standard.target = true; // Take the chosen element as a target of the stem
+        Opentip.styles.standard.background = '#fffbc5'; // Pale yellow
     };
     setUpCommonUserInterfaceEnhancements();
+
+    var hideAllOpentips = function() {
+        var i;
+        for(i = 0; i < Opentip.tips.length; i++) {
+            Opentip.tips[i].hide();
+        }
+    };
+
+    var activateTooltips = function() {
+        var i, jTipContainers, activateTooltip;
+
+        activateTooltip = function(tipContainer) {
+            var tipStyle, jImage, jTemplate, jTipContainer;
+            jTipContainer = jQuery(tipContainer);
+            tipStyle = jTipContainer.data('tip-style');
+            jImage = jTipContainer.find('img');
+            jTemplate = jTipContainer.find('.template');
+            jImage.opentip(jTemplate.html(), { style: tipStyle || 'standard' });
+        };
+
+        jTipContainers = jQuery('.tip');
+        for (i = 0; i < jTipContainers.length; i++) {
+            activateTooltip(jTipContainers[i]);
+        }
+    };
+    activateTooltips();
 
     // Push prepare page
     var setUpPushPreparePage = function() {
@@ -1023,6 +1055,19 @@ jQuery(document).ready(function() {
         updatePreview(); // If the page has a validation error then fields are pre-populated on page load.
     };
     setUpAutoScalingGroupCreatePage();
+
+    // Auto Scaling Group edit page
+    var setUpGroupEditScreen = function() {
+        var showAndEnableDesiredSize, jDesiredCapacityContainer = jQuery('.desiredCapacityContainer');;
+        if (jDesiredCapacityContainer.exists()) {
+            showAndEnableDesiredSize = function() {
+                jDesiredCapacityContainer.addClass('showManual').yellowFade();
+                hideAllOpentips();
+            };
+            jQuery(document).on('click', '.enableManualDesiredCapacityOverride', showAndEnableDesiredSize);
+        }
+    };
+    setUpGroupEditScreen();
 
     // Auto Scaling Group detail page
     var setUpGroupDetailScreen = function() {
