@@ -57,7 +57,10 @@
               <td>${dbi.dBInstanceStatus}</td>
               <td>${dbi.dBName}</td>
               <td>${dbi.dBInstanceClass}</td>
-              <td>${dbi.availabilityZone}</td>
+              <td>
+                <g:if test="${dbi.multiAZ}">All</g:if>
+                <g:else>${dbi.availabilityZone}</g:else>
+              </td>
             </tr>
           </g:each>
           </tbody>

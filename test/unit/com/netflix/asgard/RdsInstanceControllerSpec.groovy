@@ -35,6 +35,38 @@ class RdsInstanceControllerSpec extends Specification {
         preferredMaintenanceWindow: "",
     ]
 
+    final showMultiAZParams = [
+        allocatedStorage: 5,
+        availabilityZone: "us-east-1a",
+        backupRetentionPeriod: 0,
+        dBInstanceClass: "dbClass",
+        dBInstanceIdentifier: "testDB",
+        dBName: "DBname",
+        masterUsername: "testname",
+        masterUserPassword: "testpassword",
+        multiAZ: "on",
+        port: 3306,
+        preferredBackupWindow: "",
+        preferredMaintenanceWindow: "",
+        selectedDBSecurityGroups: "testsecgroup",
+    ]
+
+    final showVPCParams = [
+        allocatedStorage: 5,
+        availabilityZone: "us-east-1a",
+        backupRetentionPeriod: 0,
+        dBInstanceClass: "dbClass",
+        dBInstanceIdentifier: "testDB",
+        dBName: "DBname",
+        masterUsername: "testname",
+        masterUserPassword: "testpassword",
+        port: 3306,
+        preferredBackupWindow: "",
+        preferredMaintenanceWindow: "",
+        selectedDBSecurityGroups: "testsecgroup",
+        subnetPurpose: "internal",
+    ]
+
     void setup() {
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(DbCreateCommand)
@@ -54,6 +86,26 @@ class RdsInstanceControllerSpec extends Specification {
         then:
         response.redirectUrl == '/rdsInstance/show/testDB'
      }
+
+    def 'save should return exception when multiaz on and availability zone specified'() {
+        def cmd = new DbCreateCommand(showMultiAZParams)
+
+        when:
+        controller.save(cmd)
+
+        then:
+        '/rdsInstance/create' == response.redirectUrl
+    }
+
+    def 'save should return exception when VPC and DB security groups specified'() {
+        def cmd = new DbCreateCommand(showVPCParams)
+
+        when:
+        controller.save(cmd)
+
+        then:
+        '/rdsInstance/create' == response.redirectUrl
+    }
 
     def 'save should return exception message when necessary'() {
         controller.params.putAll(showParams)
@@ -81,7 +133,7 @@ class RdsInstanceControllerSpec extends Specification {
         then:
         response.redirectUrl == '/rdsInstance/create?' + showParams.collect { k,v -> "$k=$v" }.join('&')
         flash.chainModel.cmd.errors.allocatedStorage == 'range'
-     }
+    }
 
     def 'create should return possible RDS engines and license model selections'() {
         controller.params.dBInstanceIdentifier = '0'

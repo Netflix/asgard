@@ -21,6 +21,7 @@ import com.amazonaws.services.rds.model.AuthorizeDBSecurityGroupIngressRequest
 import com.amazonaws.services.rds.model.CreateDBInstanceRequest
 import com.amazonaws.services.rds.model.CreateDBSecurityGroupRequest
 import com.amazonaws.services.rds.model.CreateDBSnapshotRequest
+import com.amazonaws.services.rds.model.CreateDBSubnetGroupRequest
 import com.amazonaws.services.rds.model.DBInstance
 import com.amazonaws.services.rds.model.DBSecurityGroup
 import com.amazonaws.services.rds.model.DBSnapshot
@@ -31,6 +32,8 @@ import com.amazonaws.services.rds.model.DescribeDBInstancesRequest
 import com.amazonaws.services.rds.model.DescribeDBSecurityGroupsRequest
 import com.amazonaws.services.rds.model.DescribeDBSnapshotsRequest
 import com.amazonaws.services.rds.model.DescribeDBSnapshotsResult
+import com.amazonaws.services.rds.model.DescribeDBSubnetGroupsRequest
+import com.amazonaws.services.rds.model.DescribeDBSubnetGroupsResult
 import com.amazonaws.services.rds.model.ModifyDBInstanceRequest
 import com.amazonaws.services.rds.model.RestoreDBInstanceFromDBSnapshotRequest
 import com.amazonaws.services.rds.model.RevokeDBSecurityGroupIngressRequest
@@ -115,13 +118,34 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
         }, Link.to(EntityType.rdsInstance, dbInstanceId))
     }
 
-    DBInstance createDBInstance(UserContext userContext, DBInstance templateDbInstance, String masterUserPassword, Integer port) {
+    DBInstance createDBInstance(UserContext userContext, DBInstance templateDbInstance, String masterUserPassword, Integer port, String subnetPurpose) {
         final BeanState templateDbInstanceState = BeanState.ofSourceBean(templateDbInstance)
         final CreateDBInstanceRequest request = templateDbInstanceState.injectState(new CreateDBInstanceRequest())
         request.masterUserPassword = masterUserPassword
         if (port) {request.setPort(port)}
         taskService.runTask(userContext, "Creating DB instance '${templateDbInstance.DBInstanceIdentifier}'", { task ->
-            final DBInstance createdInstance = awsClient.by(userContext.region).createDBInstance(request)
+            if (subnetPurpose) {
+                DescribeDBSubnetGroupsResult dbSubnetGroups
+                try {
+                    DescribeDBSubnetGroupsRequest subnetExistsRequest = new DescribeDBSubnetGroupsRequest()
+                        .withDBSubnetGroupName(templateDbInstance.DBSubnetGroup.DBSubnetGroupName)
+                    dbSubnetGroups = awsClient.by(userContext.region).describeDBSubnetGroups(subnetExistsRequest)?.DBSubnetGroups
+                } catch (AmazonServiceException ignored) {
+                    dbSubnetGroups = null
+                }
+
+                if (!dbSubnetGroups) {
+                    CreateDBSubnetGroupRequest subnetRequest = new CreateDBSubnetGroupRequest()
+                        .withDBSubnetGroupName(templateDbInstance.DBSubnetGroup.DBSubnetGroupName)
+                        .withDBSubnetGroupDescription(templateDbInstance.DBSubnetGroup.DBSubnetGroupDescription)
+                        .withSubnetIds(templateDbInstance.DBSubnetGroup.subnets.collect { it.subnetId })
+                    awsClient.by(userContext.region).createDBSubnetGroup(subnetRequest)
+                }
+                // If this is a VPC RDS then we must find the proper DBSubnetGroupName.
+                request.DBSubnetGroupName = templateDbInstance.DBSubnetGroup.DBSubnetGroupName
+                request.vpcSecurityGroupIds = templateDbInstance.vpcSecurityGroups
+            }
+            DBInstance createdInstance = awsClient.by(userContext.region).createDBInstance(request)
             caches.allDBInstances.by(userContext.region).put(createdInstance.getDBInstanceIdentifier(), createdInstance)
         }, Link.to(EntityType.rdsInstance, templateDbInstance.DBInstanceIdentifier))
         getDBInstance(userContext, templateDbInstance.DBInstanceIdentifier)
