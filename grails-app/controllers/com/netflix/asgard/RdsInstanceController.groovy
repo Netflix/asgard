@@ -79,7 +79,6 @@ class RdsInstanceController {
 
                 final DBInstance dbInstance = new DBInstance()
                     .withAllocatedStorage(params.allocatedStorage as Integer)
-                    .withAvailabilityZone(params.availabilityZone)
                     .withBackupRetentionPeriod(params.backupRetentionPeriod as Integer)
                     .withDBInstanceClass(params.dBInstanceClass,)
                     .withDBInstanceIdentifier(params.dBInstanceIdentifier)
@@ -91,6 +90,10 @@ class RdsInstanceController {
                     .withPreferredBackupWindow(params.preferredBackupWindow)
                     .withPreferredMaintenanceWindow(params.preferredMaintenanceWindow)
                     .withLicenseModel(params.licenseModel)
+
+                if (!multiAZ) {
+                    dbInstance.availabilityZone = params.availabilityZone
+                }
 
                 awsRdsService.createDBInstance(userContext, dbInstance, params.masterUserPassword, params.port as Integer)
                 flash.message = "DB Instance '${params.dBInstanceIdentifier}' has been created."
@@ -184,6 +187,7 @@ class DbCreateCommand {
     String masterUsername // Must be an alphanumeric string containing from 1 to 16 characters.
     String masterUserPassword // Must contain 4 to 16 alphanumeric characters.
     Integer port
+    String multiAZ
     String preferredBackupWindow // Constraints: Must be in the format hh24:mi-hh24:mi.
     // Times should be 24-hour Universal Time Coordinated (UTC).
     // Must not conflict with the --preferred-maintenance-window.
@@ -196,7 +200,7 @@ class DbCreateCommand {
 
     static constraints = {
         allocatedStorage(nullable: false, range: 5..1024)
-        availabilityZone(nullable: false, blank: false) // Need more -- custom validator?
+        availabilityZone(nullable: false, validator: { value, object -> "on".equals(object.multiAZ) != value.length() > 0 ?: 'dbCreateCommand.multiaz.availabilityzones.error' })
         backupRetentionPeriod(blank: false, nullable: false, range: 0..8)
         dBInstanceClass(nullable: false, blank: false)
         dBInstanceIdentifier(nullable: false, blank: false, size: 1..63, matches: '[a-zA-Z]{1}[a-zA-Z0-9-]*[^-]$') // This match does not check the double-hyphen
