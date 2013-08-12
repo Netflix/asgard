@@ -98,5 +98,4 @@ public class Response {
         return false;
     }
 
-
 }
