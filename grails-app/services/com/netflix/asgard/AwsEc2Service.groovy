@@ -720,6 +720,21 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         getInstances(userContext).findAll { Instance instance -> instance.imageId == imageId }
     }
 
+    /**
+     * Finds all the instances that were launched with the specified security group.
+     *
+     * @param userContext who, where, why
+     * @param securityGroup the security group for which to find relevant instances
+     * @return all the instances associated with the specified security group
+     */
+    Collection<Instance> getInstancesWithSecurityGroup(UserContext userContext, SecurityGroup securityGroup) {
+        getInstances(userContext).findAll {
+            String name = securityGroup.groupName
+            String id = securityGroup.groupId
+            (name && (name in it.securityGroups*.groupName)) || (id && (id in it.securityGroups*.groupId))
+        }
+    }
+
     Instance getInstance(UserContext userContext, String instanceId, From from = From.AWS) {
         if (from == From.CACHE) {
             return caches.allInstances.by(userContext.region).get(instanceId)

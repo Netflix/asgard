@@ -21,6 +21,7 @@ import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult
+import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.InstanceState
 import com.amazonaws.services.ec2.model.IpPermission
@@ -37,6 +38,7 @@ import com.netflix.asgard.model.SubnetData
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.ZoneAvailability
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class AwsEc2ServiceUnitSpec extends Specification {
 
@@ -65,6 +67,37 @@ class AwsEc2ServiceUnitSpec extends Specification {
         }
         awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }), caches: caches,
                 taskService: taskService)
+    }
+
+    @Unroll("""getInstancesWithSecurityGroup should return #instanceIds when groupId is #groupId \
+and groupName is #groupName""")
+    def 'should get the instances for a specified security group by name or id'() {
+        GroupIdentifier apiGroup = new GroupIdentifier(groupName: 'api')
+        GroupIdentifier cassGroup = new GroupIdentifier(groupName: 'cass')
+        GroupIdentifier idGroup = new GroupIdentifier(groupId: 'sg-12345678')
+        awsEc2Service = Spy(AwsEc2Service) {
+            getInstances(_) >> {
+                [
+                        new Instance(instanceId: 'i-deadbeef', securityGroups: [apiGroup, idGroup]),
+                        new Instance(instanceId: 'i-ba5eba11', securityGroups: []),
+                        new Instance(instanceId: 'i-cafebabe', securityGroups: [apiGroup, cassGroup]),
+                        new Instance(instanceId: 'i-f005ba11', securityGroups: [apiGroup]),
+                        new Instance(instanceId: 'i-ca55e77e', securityGroups: [apiGroup, cassGroup]),
+                        new Instance(instanceId: 'i-b01dface', securityGroups: [idGroup])
+                ]
+            }
+        }
+        SecurityGroup securityGroup = new SecurityGroup(groupName: groupName, groupId: groupId)
+        UserContext userContext = UserContext.auto(Region.US_WEST_1)
+
+        expect:
+        instanceIds == awsEc2Service.getInstancesWithSecurityGroup(userContext, securityGroup)*.instanceId
+
+        where:
+        groupId       | groupName | instanceIds
+        'sg-12345678' | null      | ['i-deadbeef', 'i-b01dface']
+        null          | 'api'     | ['i-deadbeef', 'i-cafebabe', 'i-f005ba11', 'i-ca55e77e']
+        null          | 'cass'    | ['i-cafebabe', 'i-ca55e77e']
     }
 
     def 'active instances should only include pending and running states'() {

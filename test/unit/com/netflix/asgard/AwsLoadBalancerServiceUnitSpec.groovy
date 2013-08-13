@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing
 import com.amazonaws.services.elasticloadbalancing.model.AttachLoadBalancerToSubnetsRequest
 import com.amazonaws.services.elasticloadbalancing.model.DescribeInstanceHealthResult
@@ -27,6 +28,7 @@ import com.amazonaws.services.elasticloadbalancing.model.InstanceState
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.InstanceStateData
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class AwsLoadBalancerServiceUnitSpec extends Specification {
 
@@ -49,6 +51,39 @@ class AwsLoadBalancerServiceUnitSpec extends Specification {
         ]))
         awsLoadBalancerService = new AwsLoadBalancerService(awsClient: awsClient, taskService: taskService,
                 caches: caches)
+    }
+
+    @Unroll("getLoadBalancersWithSecurityGroup should return #elbNames when groupId is #id and groupName is #name")
+    def 'should get the load balancers for a specified security group by name or id'() {
+
+        awsLoadBalancerService = Spy(AwsLoadBalancerService) {
+            getLoadBalancers(_) >> {
+                [
+                        new LoadBalancerDescription(loadBalancerName: 'han', securityGroups: ['outside']),
+                        new LoadBalancerDescription(loadBalancerName: 'luke', securityGroups: ['api', 'sg-12345678']),
+                        new LoadBalancerDescription(loadBalancerName: 'chewie', securityGroups: []),
+                        new LoadBalancerDescription(loadBalancerName: 'leia', securityGroups: ['api', 'cass']),
+                        new LoadBalancerDescription(loadBalancerName: 'artoo', securityGroups: ['api']),
+                        new LoadBalancerDescription(loadBalancerName: 'threepio', securityGroups: ['api', 'cass']),
+                        new LoadBalancerDescription(loadBalancerName: 'ben', securityGroups: ['sg-12345678'])
+                ]
+            }
+        }
+        SecurityGroup securityGroup = new SecurityGroup(groupName: name, groupId: id)
+        UserContext userContext = UserContext.auto(Region.US_WEST_1)
+
+        when:
+        List<LoadBalancerDescription> elbs = awsLoadBalancerService.getLoadBalancersWithSecurityGroup(userContext,
+                securityGroup)
+
+        then:
+        elbs*.loadBalancerName == elbNames
+
+        where:
+        name   | id            | elbNames
+        null   | 'sg-12345678' | ['luke', 'ben']
+        'api'  | null          | ['luke', 'leia', 'artoo', 'threepio']
+        'cass' | null          | ['leia', 'threepio']
     }
 
     def 'instance state data should include and be sorted by availability zone and auto scaling group'() {
