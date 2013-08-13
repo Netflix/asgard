@@ -170,7 +170,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         // Temporary workaround because Amazon can send us the list of images without the tags occasionally.
         // So far it's prevented the image cache from going in a bad state again, but we need a better long term fix.
         if (images && !images.any { it.tags } ) {
-            log.warn "Detected image tags missing for region ${region.code}, attempting to request tags explicitly"
+            log.trace "Detected image tags missing for region ${region.code}, attempting to request tags explicitly"
             Filter hasTagFilter = new Filter('tag-key', ['*']) // This only requests images that have tags
             DescribeImagesRequest hasTagRequest = request.withFilters(hasTagFilter)
             List<Image> imagesWithTags = awsClientForRegion.describeImages(hasTagRequest).getImages()
