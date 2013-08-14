@@ -27,6 +27,7 @@ import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
 import com.amazonaws.services.ec2.model.Image
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.AutoScalingGroupMixin
 import com.netflix.asgard.model.EurekaStatus
@@ -41,6 +42,40 @@ import spock.lang.Unroll
 class AwsAutoScalingServiceUnitSpec extends Specification {
 
     AwsAutoScalingService awsAutoScalingService
+
+    @Unroll("""getLaunchConfigurationsForSecurityGroup should return #launchConfigNames when groupId is #groupId \
+and groupName is #groupName""")
+    def 'should get the launch configurations for a specified security group by name or id'() {
+        Closure newLaunchConfig = { name, groups ->
+            new LaunchConfiguration(launchConfigurationName: name, securityGroups: groups)
+        }
+        awsAutoScalingService = Spy(AwsAutoScalingService) {
+            getLaunchConfigurations(_) >> {
+                [
+                        newLaunchConfig('h-1', ['hello', 'elb', 'infrastructure']),
+                        newLaunchConfig('h-2', ['elb', 'infrastructure']),
+                        newLaunchConfig('h-3', ['hello', 'elb', 'infrastructure']),
+                        newLaunchConfig('h-4', ['elb', 'sg-12345678']),
+                        newLaunchConfig('h-5', ['elb']),
+                        newLaunchConfig('h-6', ['elb', 'sg-12345678']),
+                ]
+            }
+        }
+        SecurityGroup securityGroup = new SecurityGroup(groupName: groupName, groupId: groupId)
+        UserContext userContext = UserContext.auto(Region.US_WEST_1)
+
+        when:
+        List<LaunchConfiguration> launchConfigurations = awsAutoScalingService.getLaunchConfigurationsForSecurityGroup(
+                userContext, securityGroup)
+
+        then:
+        launchConfigNames == launchConfigurations*.launchConfigurationName
+
+        where:
+        launchConfigNames | groupId       | groupName
+        ['h-4', 'h-6']    | 'sg-12345678' | null
+        ['h-1', 'h-3']    | null          | 'hello'
+    }
 
     @Unroll("""it is #result that a group should be manually sized if it has scaling policies #policyNames and \
 scheduled actions #scheduleNames and suspended processes #processNames""")

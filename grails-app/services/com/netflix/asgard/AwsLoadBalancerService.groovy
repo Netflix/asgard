@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing
 import com.amazonaws.services.elasticloadbalancing.model.AttachLoadBalancerToSubnetsRequest
 import com.amazonaws.services.elasticloadbalancing.model.ConfigureHealthCheckRequest
@@ -95,6 +96,19 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
     List<LoadBalancerDescription> getLoadBalancersForApp(UserContext userContext, String appName) {
         getLoadBalancers(userContext).findAll {
             Relationships.appNameFromLaunchConfigName(it.loadBalancerName) == appName
+        }
+    }
+
+    /**
+     * Finds all the load balancers with the specified security group.
+     *
+     * @param userContext who, where, why
+     * @param group the security group for which to find associated load balancers
+     * @return the load balancers that have the specified security group
+     */
+    List<LoadBalancerDescription> getLoadBalancersWithSecurityGroup(UserContext userContext, SecurityGroup group) {
+        getLoadBalancers(userContext).findAll {
+            group.groupName in it.securityGroups || group.groupId in it.securityGroups
         }
     }
 
