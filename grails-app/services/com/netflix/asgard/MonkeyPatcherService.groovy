@@ -139,7 +139,7 @@ class MonkeyPatcherService implements InitializingBean {
             }
         }
         if (!(AvailabilityZone.class.methods as List).contains("shouldBePreselected")) {
-            List<String> discouragedZones = grailsApplication.config.cloud.discouragedAvailabilityZones ?: []
+            List<String> discouragedZones = grailsApplication?.config?.cloud?.discouragedAvailabilityZones ?: []
             AvailabilityZone.metaClass.shouldBePreselected = { selectedZones, autoScalingGroup ->
                 String zoneName = delegate.getZoneName()
                 Boolean isZoneNameDiscouraged = discouragedZones.contains(zoneName)
