@@ -64,7 +64,7 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
                 awsLoadBalancerService: Mock(AwsLoadBalancerService),
                 mergedInstanceService: Mock(MergedInstanceService),
                 launchTemplateService: Mock(LaunchTemplateService) {
-                    buildUserData(_, _, _) >> 'export APP=helloworld'
+                    buildUserData(*_) >> 'export APP=helloworld'
                 },
                 applicationService: Mock(ApplicationService),
                 configService: new ConfigService(grailsApplication: new DefaultGrailsApplication()),
