@@ -52,6 +52,7 @@ import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGr
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.Image
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.cache.CacheInitializer
@@ -1105,6 +1106,18 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     List<LaunchConfiguration> getLaunchConfigurationsForApp(UserContext userContext, String appName) {
         def pat = ~/^(launch-)?${appName.toLowerCase()}(_\d+)?-\d+$/
         getLaunchConfigurations(userContext).findAll { it.launchConfigurationName ==~ pat }
+    }
+
+    /**
+     * Finds all the launch configurations that reference a specified security group.
+     *
+     * @param userContext who, where, why
+     * @param group the security group for which to find associated launch configurations
+     * @return the list of relevant launch configurations
+     */
+    List<LaunchConfiguration> getLaunchConfigurationsForSecurityGroup(UserContext userContext, SecurityGroup group) {
+        Collection<LaunchConfiguration> allLaunchConfigs = getLaunchConfigurations(userContext)
+        allLaunchConfigs.findAll { group.groupId in it.securityGroups || group.groupName in it.securityGroups }
     }
 
     Collection<LaunchConfiguration> getLaunchConfigurationsUsingImageId(UserContext userContext, String imageId) {

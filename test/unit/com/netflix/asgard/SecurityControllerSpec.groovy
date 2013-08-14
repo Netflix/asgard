@@ -15,29 +15,37 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.AmazonServiceException
-import com.amazonaws.services.ec2.AmazonEC2
-import com.amazonaws.services.ec2.model.CreateSecurityGroupRequest
-import com.amazonaws.services.ec2.model.CreateSecurityGroupResult
-import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
-import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.netflix.asgard.mock.Mocks
 import grails.test.MockUtils
 import grails.test.mixin.TestFor
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 @TestFor(SecurityController)
 class SecurityControllerSpec extends Specification {
-    AmazonEC2 amazonEC2 = Mock(AmazonEC2)
+
+    ApplicationService applicationService
+    AwsAutoScalingService awsAutoScalingService
+    AwsEc2Service awsEc2Service
+    AwsLoadBalancerService awsLoadBalancerService
 
     void setup() {
-        Mocks.createDynamicMethods()
+        new MonkeyPatcherService(grailsApplication: new DefaultGrailsApplication()).createDynamicMethods()
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(SecurityCreateCommand)
-        controller.awsEc2Service = Mocks.newAwsEc2Service(amazonEC2)
-        controller.applicationService = Mocks.applicationService()
-        controller.configService = Mocks.configService()
+        awsEc2Service = Mock(AwsEc2Service) { isSecurityGroupEditable(_) >> true }
+        controller.awsEc2Service = awsEc2Service
+        applicationService = Mock(ApplicationService) {
+            getRegisteredApplication(_, _) >> new AppRegistration(name: 'helloworld')
+        }
+        controller.applicationService = applicationService
+        controller.configService = Mock(ConfigService) { getAwsAccountNames() >> ['179000000000': 'test'] }
+        awsAutoScalingService = Mock(AwsAutoScalingService)
+        controller.awsAutoScalingService = awsAutoScalingService
+        awsLoadBalancerService = Mock(AwsLoadBalancerService)
+        controller.awsLoadBalancerService = awsLoadBalancerService
     }
 
     def 'show should display details for name'() {
@@ -51,9 +59,10 @@ class SecurityControllerSpec extends Specification {
         'helloworld' == attrs['group'].groupName
         'test' == attrs['accountNames']['179000000000']
         null != attrs['editable']
-        1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['helloworld'])) >>
-                new DescribeSecurityGroupsResult(securityGroups: [new SecurityGroup(groupName: 'helloworld')])
-        0 * _._
+        1 * awsEc2Service.getSecurityGroup(_, 'helloworld') >> new SecurityGroup(groupName: 'helloworld')
+        1 * awsEc2Service.getInstancesWithSecurityGroup(_, _) >> []
+        1 * awsAutoScalingService.getLaunchConfigurationsForSecurityGroup(_, _) >> []
+        1 * awsLoadBalancerService.getLoadBalancersWithSecurityGroup(_, _) >> []
     }
 
     def 'show should display details for id'() {
@@ -65,11 +74,14 @@ class SecurityControllerSpec extends Specification {
         then:
         'helloworld' == attrs['app'].name
         'helloworld' == attrs['group'].groupName
+        'sg-1337' == attrs['group'].groupId
         'test' == attrs['accountNames']['179000000000']
         null != attrs['editable']
-        1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-1337'])) >>
-                new DescribeSecurityGroupsResult(securityGroups: [new SecurityGroup(groupName: 'helloworld')])
-        0 * _._
+        1 * awsEc2Service.getSecurityGroup(_, 'sg-1337') >> new SecurityGroup(groupName: 'helloworld',
+                groupId: 'sg-1337')
+        1 * awsEc2Service.getInstancesWithSecurityGroup(_, _) >> []
+        1 * awsAutoScalingService.getLaunchConfigurationsForSecurityGroup(_, _) >> []
+        1 * awsLoadBalancerService.getLoadBalancersWithSecurityGroup(_, _) >> []
     }
 
     def 'show should not find missing security group'() {
@@ -81,9 +93,7 @@ class SecurityControllerSpec extends Specification {
         then:
         '/error/missing' == view
         "Security Group 'doesntexist' not found in us-east-1 test" == controller.flash.message
-        1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['doesntexist'])) >> {
-            throw new AmazonServiceException('Missing Security Group')
-        }
+        1 * awsEc2Service.getSecurityGroup(_, 'doesntexist') >> null
         0 * _._
     }
 
@@ -101,6 +111,7 @@ class SecurityControllerSpec extends Specification {
 
         then:
         '/security/create?wrongParam=helloworld' == response.redirectUrl
+        0 * _
     }
 
     def 'save should create security group'() {
@@ -121,15 +132,9 @@ class SecurityControllerSpec extends Specification {
         then:
         '/security/show/sg-123' == response.redirectUrl
         controller.flash.message == "Security Group 'helloworld-indiana' has been created."
-        1 * amazonEC2.createSecurityGroup(new CreateSecurityGroupRequest(groupName: 'helloworld-indiana',
-                description: 'Only accessible by Indiana Jones')) >> new CreateSecurityGroupResult(groupId: 'sg-123')
-        1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['helloworld-indiana'])) >> {
-            throw new AmazonServiceException('Missing Security Group')
-        }
-        1 * amazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >> {
-            new DescribeSecurityGroupsResult(
-                    securityGroups: [new SecurityGroup(groupName: 'helloworld-indiana', groupId: 'sg-123')])
-        }
+        1 * awsEc2Service.getSecurityGroup(_, 'helloworld-indiana')
+        1 * awsEc2Service.createSecurityGroup(_, 'helloworld-indiana', 'Only accessible by Indiana Jones', null) >>
+                new SecurityGroup(groupName: 'helloworld-indiana', groupId: 'sg-123')
         0 * _
     }
 }
