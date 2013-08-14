@@ -30,24 +30,50 @@ import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
 import com.amazonaws.services.cloudwatch.model.Dimension
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
-import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AlarmData
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.ScalingPolicyData
+import com.netflix.asgard.model.Subnets
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import spock.lang.Specification
 
 /**
- * These tests were separated from the unit tests because they are time consuming to run. This is typically because of
- * their use of Mocks to construct services and the associated file I/O to read the json data.
+ * These tests require more setup than simpler unit tests.
  */
 @SuppressWarnings(["GroovyAssignabilityCheck"])
 class AwsAutoScalingServiceIntegrationSpec extends Specification {
 
     AwsAutoScalingService awsAutoScalingService
+    UserContext userContext = UserContext.auto(Region.US_WEST_2)
+
+    void setup() {
+        awsAutoScalingService = new AwsAutoScalingService(
+                caches: new Caches(new MockCachedMapBuilder([
+                        (EntityType.autoScaling): Mock(CachedMap)
+                ])),
+                awsEc2Service: Mock(AwsEc2Service) {
+                    getSubnets(_) >> new Subnets([])
+                },
+                taskService: new TaskService() {
+                    def runTask(UserContext context, String name, Closure work, Link link = null,
+                                Task existingTask = null) {
+                        work(new Task())
+                    }
+                },
+                awsLoadBalancerService: Mock(AwsLoadBalancerService),
+                mergedInstanceService: Mock(MergedInstanceService),
+                launchTemplateService: Mock(LaunchTemplateService) {
+                    buildUserData(*_) >> 'export APP=helloworld'
+                },
+                applicationService: Mock(ApplicationService),
+                configService: new ConfigService(grailsApplication: new DefaultGrailsApplication()),
+                pushService: Mock(PushService)
+        )
+    }
 
     def 'should update ASG with proper AWS requests'() {
-        Mocks.createDynamicMethods()
+        new MonkeyPatcherService().createDynamicMethods()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         mockAmazonAutoScalingClient.describeAutoScalingGroups(_ as DescribeAutoScalingGroupsRequest) >> {
             List<SuspendedProcess> suspendedProcesses = AutoScalingProcessType.with { [AZRebalance, AddToLoadBalancer] }
@@ -57,12 +83,10 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
             )
         }
         mockAmazonAutoScalingClient.describePolicies(_) >> {[]}
-        awsAutoScalingService = Mocks.newAwsAutoScalingService()
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
 
-        //noinspection GroovyAccessibility
         when:
-        awsAutoScalingService.updateAutoScalingGroup(Mocks.userContext(),
+        awsAutoScalingService.updateAutoScalingGroup(userContext,
                 new AutoScalingGroupData('hiyaworld-example-v042', null, 31, 153, [], 'EC2', 17, [], [],
                         42, null, ['us-feast'], 256, [], 'newlaunchConfiguration', [], [:], [], [:], []),
                 AutoScalingProcessType.with { [Launch, AZRebalance] },
@@ -100,11 +124,10 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
                     .withTerminationPolicies([])
         })
         0 * mockAmazonAutoScalingClient.updateAutoScalingGroup(_)
-
     }
 
     def 'should create launch config and ASG'() {
-        Mocks.createDynamicMethods()
+        new MonkeyPatcherService().createDynamicMethods()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         mockAmazonAutoScalingClient.describeLaunchConfigurations(_) >> {
             new DescribeLaunchConfigurationsResult()
@@ -112,7 +135,6 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
         mockAmazonAutoScalingClient.describeAutoScalingGroups(_) >> {
             new DescribeAutoScalingGroupsResult()
         }
-        awsAutoScalingService = Mocks.newAwsAutoScalingService()
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
 
         final AutoScalingGroup groupTemplate = new AutoScalingGroup().withAutoScalingGroupName('helloworld-example').
@@ -124,7 +146,7 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
 
         when:
         final CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
-                Mocks.userContext(), groupTemplate, launchConfigTemplate, [AutoScalingProcessType.Terminate])
+                userContext, groupTemplate, launchConfigTemplate, [AutoScalingProcessType.Terminate])
 
         then:
         null == result.autoScalingCreateException
@@ -146,8 +168,7 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
     }
 
     def 'should get scaling policies'() {
-        Mocks.createDynamicMethods()
-        awsAutoScalingService = Mocks.newAwsAutoScalingService()
+        new MonkeyPatcherService().createDynamicMethods()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
         final AwsCloudWatchService mockAwsCloudWatchService = Mock(AwsCloudWatchService)
@@ -166,7 +187,7 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
 
         when:
         final Set<ScalingPolicyData> actualScalingPolicies = awsAutoScalingService.
-                getScalingPolicyDatas(Mocks.userContext(), 'hw_v046') as Set
+                getScalingPolicyDatas(userContext, 'hw_v046') as Set
 
         then:
         actualScalingPolicies == [
