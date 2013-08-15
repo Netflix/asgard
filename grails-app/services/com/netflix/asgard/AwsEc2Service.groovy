@@ -864,7 +864,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     String getConsoleOutput(UserContext userContext, String instanceId) {
         GetConsoleOutputResult result = awsClient.by(userContext.region).getConsoleOutput(
                 new GetConsoleOutputRequest().withInstanceId(instanceId))
-        new String(Base64.decodeBase64(result.getOutput().bytes))
+        String output = result.getOutput()
+        output ? new String(Base64.decodeBase64(output.bytes)) : null
     }
 
     // Elastic IPs
