@@ -62,8 +62,7 @@ class MockAmazonSimpleWorkflowClient extends AmazonSimpleWorkflowClient {
      */
     @Override
     DomainInfos listDomains(ListDomainsRequest listDomainsRequest) {
-        String domainName = "asgard_${System.getProperty('user.name')}"
-        DomainInfo domainInfo = new DomainInfo(name: domainName, description: 'Autobots roll out', status: 'REGISTERED')
+        DomainInfo domainInfo = new DomainInfo(name: 'asgard', description: 'Autobots roll out', status: 'REGISTERED')
         new DomainInfos().withDomainInfos(domainInfo)
     }
 
