@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.AmazonServiceException
 import org.apache.commons.lang.StringUtils
 import org.codehaus.groovy.runtime.StackTraceUtils
 import org.springframework.beans.factory.InitializingBean
@@ -80,9 +81,24 @@ class EmailerService implements InitializingBean {
         PrintWriter printWriter = new PrintWriter(sw)
         String emailSubject = grailsApplication.config.email.errorSubjectStart
         if (exception) {
-            Throwable cleanThrowable = StackTraceUtils.sanitize(exception)
+
+            // Find the root cause, but don't risk infinite loops of causes. Don't use ExceptionUtils.getRootCause
+            // because it returns null for some NullPointerException cases where the cause is the same as the exception.
+            Throwable rootProblem = exception
+            for (int i = 0; rootProblem.cause && i < 10; i++) {
+                rootProblem = rootProblem.cause
+            }
+
+            String message ="${rootProblem.class.simpleName} '${rootProblem.message}'"
+            if (rootProblem instanceof AmazonServiceException) {
+                String serviceName = rootProblem.serviceName
+                String errorCode = rootProblem.errorCode
+                message = "${serviceName} ${errorCode} ${message}"
+            }
+            emailSubject += ": ${StringUtils.abbreviate(message, 160)}"
+
+            Throwable cleanThrowable = StackTraceUtils.sanitize(rootProblem)
             cleanThrowable.printStackTrace(printWriter)
-            emailSubject += ": ${StringUtils.abbreviate(cleanThrowable.toString(), 160)}"
         }
         String emailBody = sw.toString()
         log.info "Sending email: ${emailBody}"
