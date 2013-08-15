@@ -22,17 +22,25 @@ import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsResult
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.LifecycleState
+import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
+import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest
 import com.amazonaws.services.autoscaling.model.SuspendedProcess
+import com.amazonaws.services.autoscaling.model.Tag
+import com.amazonaws.services.autoscaling.model.TagDescription
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.netflix.asgard.model.ApplicationInstance
+import com.netflix.asgard.model.AutoScalingGroupBeanOptions
+import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingGroupMixin
+import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.EurekaStatus
 import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.StackAsg
+import com.netflix.asgard.model.Subnets
 import com.netflix.frigga.ami.AppVersion
 import java.util.concurrent.Executors
 import spock.lang.Specification
@@ -247,6 +255,9 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
         awsAutoScalingService.awsClient = Mock(MultiRegionAwsClient) {
             by(_) >> mockAmazonAutoScaling
         }
+        awsAutoScalingService.awsEc2Service = Mock(AwsEc2Service) {
+            getSubnets(_) >> Subnets.from([])
+        }
 
         when:
         awsAutoScalingService.resizeAutoScalingGroup(UserContext.auto(Region.US_WEST_1), 'service1-int-v008', 1, 2, 3)
@@ -376,5 +387,143 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
 
         expect:
         awsAutoScalingService.reasonAsgIsUnhealthy(UserContext.auto(Region.US_WEST_1), 'service1-int-v008', 1) == null
+    }
+
+    def 'should update ASG and change everything'() {
+        AmazonAutoScaling mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
+        awsAutoScalingService = Spy(AwsAutoScalingService)
+        awsAutoScalingService.awsEc2Service = Mock(AwsEc2Service)
+        awsAutoScalingService.awsClient = new MultiRegionAwsClient({ mockAmazonAutoScalingClient })
+
+        when:
+        awsAutoScalingService.updateAutoScalingGroup(UserContext.auto(Region.US_WEST_1), 'autoScalingGroupName1') {
+            AutoScalingGroupBeanOptions options ->
+            options.with{
+                autoScalingGroupName = 'autoScalingGroupName2'
+                launchConfigurationName = 'launchConfigurationName2'
+                minSize = 6
+                maxSize = 8
+                desiredCapacity = 7
+                defaultCooldown = 9
+                availabilityZones = ['us-west-1b']
+                loadBalancerNames = ['lb2']
+                healthCheckType = AutoScalingGroupHealthCheckType.ELB
+                healthCheckGracePeriod = 6
+                placementGroup = 'placementGroup2'
+                subnetPurpose = 'subnetPurpose2'
+                terminationPolicies = ['tp2']
+                tags = [new Tag(key: 'key2', value: 'value2')]
+                suspendedProcesses = [AutoScalingProcessType.AZRebalance, AutoScalingProcessType.Launch]
+            }
+        }
+
+        then:
+        with (awsAutoScalingService) {
+            1 * getAutoScalingGroup(_, 'autoScalingGroupName1') >> new AutoScalingGroup(
+                    autoScalingGroupName: 'autoScalingGroupName1',
+                    launchConfigurationName: 'launchConfigurationName1',
+                    minSize: 1,
+                    maxSize: 3,
+                    desiredCapacity: 2,
+                    defaultCooldown: 4,
+                    availabilityZones: ['us-west-1a'],
+                    loadBalancerNames: ['lb1'],
+                    healthCheckType: AutoScalingGroupHealthCheckType.EC2,
+                    healthCheckGracePeriod: 5,
+                    placementGroup: 'placementGroup1',
+                    vPCZoneIdentifier: 'vPCZoneIdentifier1',
+                    terminationPolicies: ['tp1'],
+                    tags: [new TagDescription(key: 'key1', value: 'value1')],
+                    suspendedProcesses: ['Terminate', 'Launch'].collect { new SuspendedProcess(processName: it) }
+            )
+        }
+        with (awsAutoScalingService.awsEc2Service) {
+            1 * getSubnets(_) >> Mock(Subnets) {
+                1 * getPurposeFromVpcZoneIdentifier('vPCZoneIdentifier1') >> 'subnetPurpose1'
+            }
+        }
+        with (mockAmazonAutoScalingClient) {
+            1 * suspendProcesses(new SuspendProcessesRequest(autoScalingGroupName: 'autoScalingGroupName1',
+                    scalingProcesses: ['AZRebalance']
+            ))
+            1 * resumeProcesses(new ResumeProcessesRequest(autoScalingGroupName: 'autoScalingGroupName1',
+                    scalingProcesses: ['Terminate']
+            ))
+            1 * updateAutoScalingGroup(new UpdateAutoScalingGroupRequest(autoScalingGroupName: 'autoScalingGroupName1',
+                    launchConfigurationName: 'launchConfigurationName2', minSize: 6, maxSize: 8, desiredCapacity: 7,
+                    defaultCooldown: 9, availabilityZones: ['us-west-1b'], healthCheckType: 'ELB',
+                    healthCheckGracePeriod: 6, placementGroup: 'placementGroup2', terminationPolicies: ['tp2']
+            ))
+        }
+    }
+
+    def 'should update ASG and change nothing'() {
+        AmazonAutoScaling mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
+        awsAutoScalingService = Spy(AwsAutoScalingService)
+        awsAutoScalingService.awsEc2Service = Mock(AwsEc2Service)
+        awsAutoScalingService.awsClient = new MultiRegionAwsClient({ mockAmazonAutoScalingClient })
+
+        when:
+        awsAutoScalingService.updateAutoScalingGroup(UserContext.auto(Region.US_WEST_1), 'autoScalingGroupName1') {
+            AutoScalingGroupBeanOptions options ->
+        }
+
+        then:
+        with (awsAutoScalingService) {
+            1 * getAutoScalingGroup(_, 'autoScalingGroupName1') >> new AutoScalingGroup(
+                    autoScalingGroupName: 'autoScalingGroupName1',
+                    launchConfigurationName: 'launchConfigurationName1',
+                    minSize: 1,
+                    maxSize: 3,
+                    desiredCapacity: 2,
+                    defaultCooldown: 4,
+                    availabilityZones: ['us-west-1a'],
+                    loadBalancerNames: ['lb1'],
+                    healthCheckType: AutoScalingGroupHealthCheckType.EC2,
+                    healthCheckGracePeriod: 5,
+                    placementGroup: 'placementGroup1',
+                    vPCZoneIdentifier: 'vPCZoneIdentifier1',
+                    terminationPolicies: ['tp1'],
+                    tags: [new TagDescription(key: 'key1', value: 'value1')],
+                    suspendedProcesses: ['Terminate', 'Launch'].collect { new SuspendedProcess(processName: it) }
+            )
+        }
+        with (awsAutoScalingService.awsEc2Service) {
+            1 * getSubnets(_) >> Mock(Subnets) {
+                1 * getPurposeFromVpcZoneIdentifier('vPCZoneIdentifier1') >> 'subnetPurpose1'
+            }
+        }
+        with (mockAmazonAutoScalingClient) {
+            0 * suspendProcesses(_)
+            0 * resumeProcesses(_)
+            1 * updateAutoScalingGroup(new UpdateAutoScalingGroupRequest(autoScalingGroupName: 'autoScalingGroupName1',
+                    launchConfigurationName: 'launchConfigurationName1', minSize: 1, maxSize: 3, desiredCapacity: 2,
+                    defaultCooldown: 4, availabilityZones: ['us-west-1a'], healthCheckType: 'EC2',
+                    healthCheckGracePeriod: 5, placementGroup: 'placementGroup1', terminationPolicies: ['tp1']
+            ))
+        }
+    }
+
+    def 'should return null if update ASG does not exist'() {
+        AmazonAutoScaling mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
+        awsAutoScalingService = Spy(AwsAutoScalingService)
+        awsAutoScalingService.awsEc2Service = Mock(AwsEc2Service)
+        awsAutoScalingService.awsClient = new MultiRegionAwsClient({ mockAmazonAutoScalingClient })
+
+        when:
+        AutoScalingGroupBeanOptions options = awsAutoScalingService.updateAutoScalingGroup(UserContext.auto(Region.US_WEST_1), 'autoScalingGroupName1') {
+            AutoScalingGroupBeanOptions options ->
+        }
+
+        then:
+        options == null
+        with (awsAutoScalingService) {
+            1 * getAutoScalingGroup(_, 'autoScalingGroupName1') >> null
+        }
+        with (mockAmazonAutoScalingClient) {
+            0 * suspendProcesses(_)
+            0 * resumeProcesses(_)
+            0 * updateAutoScalingGroup(_)
+        }
     }
 }

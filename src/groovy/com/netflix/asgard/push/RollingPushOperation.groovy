@@ -28,7 +28,10 @@ import com.netflix.asgard.Spring
 import com.netflix.asgard.Time
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.ApplicationInstance
+import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.AutoScalingGroupData
+import com.netflix.asgard.model.LaunchConfigurationBeanOptions
+import com.netflix.asgard.model.Subnets
 import org.apache.commons.logging.LogFactory
 import org.joda.time.Duration
 
@@ -102,19 +105,24 @@ class RollingPushOperation extends AbstractPushOperation {
         String groupName = group.autoScalingGroupName
         loadBalancerNames = group.loadBalancerNames
         String newLaunchName = Relationships.buildLaunchConfigurationName(groupName)
-        AutoScalingGroup groupForUserData = new AutoScalingGroup().withAutoScalingGroupName(group.autoScalingGroupName).
-                withLaunchConfigurationName(newLaunchName)
-        String userData = launchTemplateService.buildUserData(options.common.userContext,
-                groupForUserData.autoScalingGroupName, groupForUserData.launchConfigurationName)
         Time.sleepCancellably 100 // tiny pause before LC create to avoid rate limiting
         Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(options.securityGroups,
-                group.VPCZoneIdentifier, options.userContext.region)
+                group.VPCZoneIdentifier as boolean, options.userContext.region)
         task.log("Updating launch from ${oldLaunch.launchConfigurationName} with ${options.imageId} into ${newLaunchName}")
         String iamInstanceProfile = options.iamInstanceProfile ?: null
-        awsAutoScalingService.createLaunchConfiguration(options.common.userContext, newLaunchName,
-                options.imageId, options.keyName, securityGroups, userData,
-                options.instanceType, oldLaunch.kernelId, oldLaunch.ramdiskId, iamInstanceProfile,
-                options.spotPrice, oldLaunch.ebsOptimized as boolean, task)
+        LaunchConfigurationBeanOptions launchConfig = new LaunchConfigurationBeanOptions(
+                launchConfigurationName: newLaunchName, imageId: options.imageId, keyName: options.keyName,
+                securityGroups: securityGroups, instanceType: options.instanceType,
+                kernelId: oldLaunch.kernelId, ramdiskId: oldLaunch.ramdiskId, iamInstanceProfile: iamInstanceProfile,
+                ebsOptimized: oldLaunch.ebsOptimized
+        )
+        UserContext userContext = options.common.userContext
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        AutoScalingGroupBeanOptions groupForUserData = AutoScalingGroupBeanOptions.from(group, subnets)
+        groupForUserData.launchConfigurationName = newLaunchName
+        launchConfig.userData = launchTemplateService.buildUserData(options.common.userContext, groupForUserData,
+                launchConfig)
+        awsAutoScalingService.createLaunchConfiguration(options.common.userContext, launchConfig, task)
 
         Time.sleepCancellably 200 // small pause before ASG update to avoid rate limiting
         task.log("Updating group ${groupName} to use launch config ${newLaunchName}")

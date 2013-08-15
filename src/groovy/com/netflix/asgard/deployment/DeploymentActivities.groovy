@@ -18,12 +18,13 @@ package com.netflix.asgard.deployment
 import com.amazonaws.services.simpleworkflow.flow.annotations.Activities
 import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrationOptions
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.model.InstancePriceType
+import com.netflix.asgard.model.AutoScalingGroupBeanOptions
+import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 
 /**
  * Method contracts and annotations used for the automatic deployment SWF workflow actions.
  */
-@Activities(version = "1.5")
+@Activities(version = "1.6")
 @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = -1L,
         defaultTaskStartToCloseTimeoutSeconds = 300L)
 interface DeploymentActivities {
@@ -33,37 +34,53 @@ interface DeploymentActivities {
      *
      * @param userContext who, where, why
      * @param clusterName where the deployment is taking place
-     * @param newSubnetPurpose for the next ASG
-     * @param newZones for the next ASG
      * @return names and identification for the ASGs involved in the deployment
      */
-    AsgDeploymentNames getAsgDeploymentNames(UserContext userContext, String clusterName, String newSubnetPurpose,
-            List<String> newZones)
+    AsgDeploymentNames getAsgDeploymentNames(UserContext userContext, String clusterName)
+
 
     /**
      * Creates the launch configuration for the next ASG in the cluster.
      *
      * @param userContext who, where, why
-     * @param asgDeploymentNames identification for the previous and next ASGs
-     * @param overrides attributes that override values from the template launch configuration
+     * @param nextAutoScalingGroup that will use this launch configuration
+     * @param inputs for attributes of the new launch configuration
      * @param instancePriceType determines if instance have on demand or spot pricing
+     * @return launch configuration attributes
+     */
+    LaunchConfigurationBeanOptions constructLaunchConfigForNextAsg(UserContext userContext,
+            AutoScalingGroupBeanOptions nextAutoScalingGroup, LaunchConfigurationBeanOptions inputs)
+
+    /**
+     * Creates the launch configuration for the next ASG in the cluster.
+     *
+     * @param userContext who, where, why
+     * @param autoScalingGroup that will use this launch configuration
+     * @param launchConfiguration attributes for the new launch configuration
      * @return name of the launch configuration
      */
-    String createLaunchConfigForNextAsg(UserContext userContext, AsgDeploymentNames asgDeploymentNames,
-            LaunchConfigurationOptions overrides, InstancePriceType instancePriceType)
+    String createLaunchConfigForNextAsg(UserContext userContext, AutoScalingGroupBeanOptions autoScalingGroup,
+            LaunchConfigurationBeanOptions launchConfiguration)
 
     /**
      * Creates the next ASG in the cluster.
      *
      * @param userContext who, where, why
      * @param asgDeploymentNames identification for the previous and next ASGs
-     * @param overrides attributes that override values from the template ASG
-     * @param initialTrafficPrevented determines if traffic will be prevented until the first assessment period
-     * @param azRebalanceSuspended determines if availability zone rebalancing will be suspended for new ASG
+     * @param inputs for attributes of the new ASG
+     * @return ASG attributes
+     */
+    AutoScalingGroupBeanOptions constructNextAsgForCluster(UserContext userContext,
+            AsgDeploymentNames asgDeploymentNames, AutoScalingGroupBeanOptions inputs)
+
+    /**
+     * Creates the next ASG in the cluster.
+     *
+     * @param userContext who, where, why
+     * @param autoScalingGroup attributes for the new ASG
      * @return name of the ASG
      */
-    String createNextAsgForCluster(UserContext userContext, AsgDeploymentNames asgDeploymentNames,
-            AutoScalingGroupOptions overrides, Boolean initialTrafficPrevented, Boolean azRebalanceSuspended)
+    String createNextAsgForCluster(UserContext userContext, AutoScalingGroupBeanOptions autoScalingGroup)
 
     /**
      * Copies scaling policies from the previous ASG to the next ASG.

@@ -36,6 +36,10 @@ enum InstancePriceType {
      */
     SPOT('http://spot-price.s3.amazonaws.com/', 'spot.js')
 
+    static InstancePriceType parse(String value) {
+        values().find { it.name().equalsIgnoreCase(value) } ?: ON_DEMAND
+    }
+
     /**
      * The beginning of the URL for getting the data file for pricing, when fetching live data remotely.
      */

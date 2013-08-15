@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.deployment
+package com.netflix.asgard.model
 
-import groovy.transform.Canonical
+import com.google.common.collect.Sets
 
-/**
- * Attributes specified when creating a new launchConfiguration.
- * @see com.amazonaws.services.autoscaling.model.LaunchConfiguration
- */
-@Canonical class LaunchConfigurationOptions {
-    String imageId
-    String keyName
-    List<String> securityGroups
-    String instanceType
-    String iamInstanceProfile
-    Boolean ebsOptimized
+class BeanOptions {
+
+    protected static <T> Set<T> copyNonNullToSet(Collection<T> source) {
+        if (source == null) { return null }
+        Sets.newHashSet(source)
+    }
 }
