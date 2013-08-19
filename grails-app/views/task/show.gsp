@@ -41,8 +41,8 @@
             <input type="hidden" name="runId" value="${task.runId}"/>
             <input type="hidden" name="workflowId" value="${task.workflowId}"/>
             <input type="hidden" name="taskToken" value="${params.taskToken}"/>
-            <g:buttonSubmit class="proceed" action="proceedWithDeployment" value="Proceed With Deployment"/>
             <g:buttonSubmit class="rollback" action="rollbackDeployment" value="Rollback Deployment"/>
+            <g:buttonSubmit class="proceed" action="proceedWithDeployment" value="Proceed With Deployment"/>
           </g:form>
         </g:if>
       </div>
