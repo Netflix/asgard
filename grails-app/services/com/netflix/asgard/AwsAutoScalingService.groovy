@@ -1137,21 +1137,27 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         CreateAutoScalingGroupResult result = new CreateAutoScalingGroupResult()
         String groupName = groupTemplate.autoScalingGroupName
         String launchConfigName = Relationships.buildLaunchConfigurationName(groupName)
+        launchConfigTemplate.launchConfigurationName = launchConfigName
+        groupTemplate.launchConfigurationName = launchConfigName
+        String imageId = launchConfigTemplate.imageId
+        Image image = awsEc2Service.getImage(userContext, imageId)
         String msg = "Create Auto Scaling Group '${groupName}'"
 
         Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(
                 launchConfigTemplate.securityGroups, groupTemplate.VPCZoneIdentifier, userContext.region)
+        launchConfigTemplate.securityGroups = securityGroups
+
+        String appName = Relationships.appNameFromGroupName(groupTemplate.autoScalingGroupName)
+        AppRegistration application = applicationService.getRegisteredApplication(userContext, appName)
+
         taskService.runTask(userContext, msg, { Task task ->
-            AutoScalingGroup groupForUserData = new AutoScalingGroup().
-                    withAutoScalingGroupName(groupTemplate.autoScalingGroupName).
-                    withLaunchConfigurationName(launchConfigName)
-            String userData = launchTemplateService.buildUserData(userContext, groupForUserData.autoScalingGroupName,
-                    groupForUserData.launchConfigurationName)
+            String userData = launchTemplateService.buildUserData(userContext, application, image, groupTemplate,
+                    launchConfigTemplate)
             result.launchConfigName = launchConfigName
             result.autoScalingGroupName = groupName
 
             try {
-                createLaunchConfiguration(userContext, launchConfigName, launchConfigTemplate.imageId,
+                createLaunchConfiguration(userContext, launchConfigName, imageId,
                         launchConfigTemplate.keyName, securityGroups, userData,
                         launchConfigTemplate.instanceType, launchConfigTemplate.kernelId,
                         launchConfigTemplate.ramdiskId, launchConfigTemplate.iamInstanceProfile,

@@ -21,6 +21,7 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.google.common.collect.Sets
+import com.netflix.asgard.ApplicationService
 import com.netflix.asgard.AwsAutoScalingService
 import com.netflix.asgard.AwsEc2Service
 import com.netflix.asgard.AwsLoadBalancerService
@@ -46,6 +47,7 @@ import spock.lang.Specification
 class DeploymentActivitiesSpec extends Specification {
 
     UserContext userContext = UserContext.auto(Region.US_WEST_1)
+    ApplicationService applicationService = Mock(ApplicationService)
     AwsAutoScalingService mockAwsAutoScalingService = Mock(AwsAutoScalingService)
     AwsEc2Service mockAwsEc2Service = Mock(AwsEc2Service)
     LaunchTemplateService mockLaunchTemplateService = Mock(LaunchTemplateService)
@@ -56,6 +58,7 @@ class DeploymentActivitiesSpec extends Specification {
     Activity mockActivity = Mock(Activity)
     LinkGenerator mockLinkGenerator = Mock(LinkGenerator)
     DeploymentActivities deploymentActivities = new DeploymentActivitiesImpl(
+            applicationService: applicationService,
             awsAutoScalingService: mockAwsAutoScalingService, awsEc2Service: mockAwsEc2Service,
             launchTemplateService: mockLaunchTemplateService, configService: mockConfigService,
             discoveryService: mockDiscoveryService, awsLoadBalancerService: mockAwsLoadBalancerService,
@@ -100,6 +103,11 @@ class DeploymentActivitiesSpec extends Specification {
 
         then:
         with(mockAwsAutoScalingService) {
+            1 * getAutoScalingGroup(_, 'rearden_metal_pourer-v001') >> new AutoScalingGroup(
+                    autoScalingGroupName: 'rearden_metal_pourer-v001',
+                    launchConfigurationName: 'rearden_metal_pourer-20130718090003',
+                    minSize: 3, desiredCapacity: 5, maxSize: 6, defaultCooldown: 100
+            )
             1 * getLaunchConfiguration(_, 'rearden_metal_pourer-20130718090003') >>
                     new LaunchConfiguration(
                             instanceType: 'instanceType1',

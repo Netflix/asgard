@@ -18,9 +18,12 @@ package com.netflix.asgard.deployment
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
+import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.simpleworkflow.flow.annotations.ManualActivityCompletion
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.google.common.collect.Sets
+import com.netflix.asgard.AppRegistration
+import com.netflix.asgard.ApplicationService
 import com.netflix.asgard.AwsAutoScalingService
 import com.netflix.asgard.AwsEc2Service
 import com.netflix.asgard.AwsLoadBalancerService
@@ -51,6 +54,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
 
     @Delegate Activity activity = new SwfActivity()
 
+    ApplicationService applicationService
     AwsAutoScalingService awsAutoScalingService
     AwsEc2Service awsEc2Service
     AwsLoadBalancerService awsLoadBalancerService
@@ -89,6 +93,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     @Override
     String createLaunchConfigForNextAsg(UserContext userContext, AsgDeploymentNames asgDeploymentNames,
             LaunchConfigurationOptions overrides, InstancePriceType instancePriceType) {
+
         LaunchConfiguration templateLaunchConfiguration = awsAutoScalingService.getLaunchConfiguration(
                 userContext, asgDeploymentNames.previousLaunchConfigName)
         LaunchConfiguration launchConfiguration = new LaunchConfiguration()
@@ -98,14 +103,25 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(
                 launchConfiguration.securityGroups, asgDeploymentNames.nextVpcZoneIdentifier, userContext.region)
         launchConfiguration.securityGroups = securityGroups
-        launchConfiguration.userData = launchTemplateService.buildUserData(userContext,
-                asgDeploymentNames.nextAsgName, asgDeploymentNames.nextLaunchConfigName)
+
+        AutoScalingGroup templateAutoScalingGroup = awsAutoScalingService.getAutoScalingGroup(userContext,
+                asgDeploymentNames.previousAsgName)
+        AutoScalingGroup autoScalingGroup = new AutoScalingGroup()
+        BeanState.ofSourceBean(templateAutoScalingGroup).injectState(autoScalingGroup)
+        autoScalingGroup.autoScalingGroupName = asgDeploymentNames.nextAsgName
+
         launchConfiguration.iamInstanceProfile = launchConfiguration.iamInstanceProfile ?: configService.defaultIamRole
         if (instancePriceType == InstancePriceType.SPOT ||
                 (!instancePriceType && templateLaunchConfiguration.spotPrice)) {
             launchConfiguration.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext,
                     launchConfiguration.instanceType)
         }
+
+        String appName = Relationships.appNameFromGroupName(asgDeploymentNames.nextAsgName)
+        AppRegistration app = applicationService.getRegisteredApplication(userContext, appName)
+        Image image = awsEc2Service.getImage(userContext, overrides.imageId)
+        launchConfiguration.userData = launchTemplateService.buildUserData(userContext, app, image, autoScalingGroup,
+                launchConfiguration)
         awsAutoScalingService.createLaunchConfiguration(userContext, launchConfiguration)
         launchConfiguration.launchConfigurationName
     }
