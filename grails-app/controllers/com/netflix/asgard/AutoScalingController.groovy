@@ -22,6 +22,8 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.autoscaling.model.SuspendedProcess
+import com.amazonaws.services.autoscaling.model.Tag
+import com.amazonaws.services.autoscaling.model.TagDescription;
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.Image
@@ -169,6 +171,10 @@ class AutoScalingController {
             } as Map
             String clusterName = Relationships.clusterFromGroupName(name)
             boolean isChaosMonkeyActive = cloudReadyService.isChaosMonkeyActive(userContext.region)
+			
+			//Grab tag data and set for display
+			List<TagDescription> tags = group.getTags()
+			
             def details = [
                     instanceCount: instanceCount,
                     showPostponeButton: showPostponeButton,
@@ -193,7 +199,8 @@ class AutoScalingController {
                     subnetPurpose: subnetPurpose ?: null,
                     vpcZoneIdentifier: group.VPCZoneIdentifier,
                     isChaosMonkeyActive: isChaosMonkeyActive,
-                    chaosMonkeyEditLink: cloudReadyService.constructChaosMonkeyEditLink(userContext.region, appName)
+                    chaosMonkeyEditLink: cloudReadyService.constructChaosMonkeyEditLink(userContext.region, appName),
+					tags: tags
             ]
             withFormat {
                 html { return details }
@@ -430,16 +437,28 @@ class AutoScalingController {
                 resumeProcesses << processType
             }
         }
-			//TODO: Get Tag values from POST, rip and replace,
-			//build a delete list, everything else is create/update
-			//iterate both lists, make separate calls
+			List<Tag> tags = new ArrayList<Tag>();
 			params.tags.value.each { key, value ->
-				println "Key: ${key} Value: ${value}"
+				Tag t = new Tag(key:key, value:value, propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:name, resourceType:"auto-scaling-group")
+				tags.add(t);
 			}
 			
-//			params.tags.value.delete { key, value ->
-//				println "Key: ${key} Value: ${value}"
-//			}
+			if (tags.size() > 0){
+				awsAutoScalingService.updateTags(userContext, tags, null)
+			}
+
+			tags = new ArrayList<Tag>();
+			params.tags.delete.each { key, value ->
+				if (value == 'on'){
+					Tag t = new Tag(key:key, value:params['tags.values.' + key], propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:name, resourceType:"auto-scaling-group")
+					tags.add(t)
+				}
+			}
+			
+			if (tags.size() > 0){
+				awsAutoScalingService.deleteTags(userContext, tags, null)
+			}
+			
         final AutoScalingGroupData autoScalingGroupData = AutoScalingGroupData.forUpdate(
                 name, lcName, minSize, desiredCapacity, maxSize, defaultCooldown, healthCheckType,
                 healthCheckGracePeriod, terminationPolicies, availabilityZones

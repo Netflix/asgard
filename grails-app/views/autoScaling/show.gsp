@@ -118,7 +118,7 @@
           <td class="name">VPC Zone Identifier:</td>
           <td class="value">${vpcZoneIdentifier}</td>
         </tr>
-        <g:render template="/common/showTags" model="[entity: group]"/>
+        <g:render template="/common/showTagsDetail" model="[entity: tags]" />
         <tr class="prop">
           <td class="name">AZ Rebalancing:</td>
           <td class="value">${azRebalanceStatus}</td>
