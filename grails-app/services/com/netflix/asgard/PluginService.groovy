@@ -39,7 +39,7 @@ class PluginService implements ApplicationContextAware {
     }
 
     Collection<TaskFinishedListener> getTaskFinishedListeners() {
-        List<String> beanNames = configService.getBeanNamesForPlugin(TASK_FINISHED_LISTENERS) ?: []
+        List<String> beanNames = configService.getBeanNamesForPlugin(TASK_FINISHED_LISTENERS) as List ?: []
         beanNames.collect { applicationContext.getBean(it) as TaskFinishedListener }
     }
 
