@@ -19,6 +19,7 @@ import com.netflix.asgard.plugin.AuthenticationProvider
 import com.netflix.asgard.plugin.AuthorizationProvider
 import com.netflix.asgard.plugin.TaskFinishedListener
 import com.netflix.asgard.plugin.UserDataProvider
+import com.netflix.asgard.plugin.AdvancedUserDataProvider
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
@@ -28,11 +29,30 @@ class PluginService implements ApplicationContextAware {
     static final String AUTHORIZATION_PROVIDERS = 'authorizationProviders'
     static final String TASK_FINISHED_LISTENERS = 'taskFinishedListeners'
     static final String USER_DATA_PROVIDER = 'userDataProvider'
+    static final String ADVANCED_USER_DATA_PROVIDER = 'advancedUserDataProvider'
 
     ApplicationContext applicationContext
     ConfigService configService
     FlagService flagService
 
+    /**
+     * Unless overridden, the default implementation of AdvancedUserDataProvider will be DefaultAdvancedUserDataProvider
+     * which delegates user data construction to the legacy userDataProvider plugin, for backward compatibility.
+     *
+     * @return the implementation of the user data provider that can take lots of cloud objects as inputs
+     */
+    AdvancedUserDataProvider getAdvancedUserDataProvider() {
+        Object configuredBeanName = configService.getBeanNamesForPlugin(ADVANCED_USER_DATA_PROVIDER)
+        String beanName = configuredBeanName ?: 'defaultAdvancedUserDataProvider'
+        applicationContext.getBean(beanName) as AdvancedUserDataProvider
+    }
+
+    /**
+     * This is maintained only for backward compatibility with existing overrides of userDataProvider.
+     *
+     * @return the chosen implementation of the limited legacy interface for creating user data based solely on
+     *          UserContext, ASG name, app name, and launch config name
+     */
     UserDataProvider getUserDataProvider() {
         String beanName = configService.getBeanNamesForPlugin(USER_DATA_PROVIDER) ?: 'defaultUserDataProvider'
         applicationContext.getBean(beanName) as UserDataProvider

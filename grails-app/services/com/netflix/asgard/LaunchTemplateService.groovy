@@ -18,12 +18,14 @@ package com.netflix.asgard
 import com.amazonaws.services.ec2.model.Image
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
+import com.netflix.asgard.model.LaunchContext
 
 class LaunchTemplateService {
 
     static transactional = false
 
     def applicationService
+    def awsEc2Service
     def configService
     def grailsApplication
     def pluginService
@@ -52,17 +54,22 @@ class LaunchTemplateService {
     }
 
     String buildUserDataForImage(UserContext userContext, Image image) {
-        String appName = image?.packageName ?: ''
-        pluginService.userDataProvider.buildUserDataForVariables(userContext, appName, '', '')
+        Check.notNull(image, Image)
+        LaunchContext launchContext = new LaunchContext(userContext: userContext, image: image)
+        pluginService.advancedUserDataProvider.buildUserData(launchContext)
     }
 
     String buildUserData(UserContext userContext, AutoScalingGroupBeanOptions autoScalingGroup,
             LaunchConfigurationBeanOptions launchConfiguration) {
-        Check.notEmpty(autoScalingGroup.autoScalingGroupName, 'autoScalingGroupName')
-        Check.notEmpty(autoScalingGroup.launchConfigurationName, 'launchConfigurationName')
+
+        String imageId = launchConfiguration.imageId
+        Image image = awsEc2Service.getImage(userContext, imageId)
         String appName = Relationships.appNameFromGroupName(autoScalingGroup.autoScalingGroupName)
-        pluginService.userDataProvider.buildUserDataForVariables(userContext, appName,
-                autoScalingGroup.autoScalingGroupName, autoScalingGroup.launchConfigurationName)
+        AppRegistration app = applicationService.getRegisteredApplication(userContext, appName)
+
+        // Wrap all the inputs in a single class so we can add more inputs later without changing the plugin interface.
+        LaunchContext launchContext = new LaunchContext(userContext, image, app, autoScalingGroup, launchConfiguration)
+        pluginService.advancedUserDataProvider.buildUserData(launchContext)
     }
 
 }
