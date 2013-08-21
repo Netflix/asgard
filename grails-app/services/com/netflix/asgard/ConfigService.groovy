@@ -344,6 +344,9 @@ class ConfigService {
         grailsApplication.config.cloud?.applicationsDomain ?: 'CLOUD_APPLICATIONS'
     }
 
+    /**
+     * @return the first part of all the environment variable names to be inserted into user data
+     */
     String getUserDataVarPrefix() {
         grailsApplication.config.cloud?.userDataVarPrefix ?: 'CLOUD_'
     }
