@@ -7,8 +7,6 @@
     <th>Tag</th>
     <th>Value</th>
     <th>Propagate</th>
-    <th>Resource</th>
-    <th>Type</th>
     </tr>
     </thead>
     <tbody>
@@ -16,9 +14,7 @@
         <tr class="prop">
           <td><pre>${tag.key}</pre></td>
           <td><pre>${tag.value}</pre></td>
-          <td><pre>${tag.propagateAtLaunch}</pre></td>
-          <td><pre>${tag.resourceId}</pre></td>
-          <td><pre>${tag.resourceType}</pre></td>
+          <td><pre>${tag.propagateAtLaunch}</pre></td>                    
         </tr>
       </g:each>
       </tbody>
