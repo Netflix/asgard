@@ -21,18 +21,6 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
   <title>Edit Auto Scaling Group</title>
-  <script>
-  	function toggleRow(id){
-  	  	var tg = document.getElementById(id);
-  	  	var bgColor = '#ffffff';
-  	  	if(tg.checked){
-  	  	  	bgColor = '#FF0000';
-  	  	}
-  	  	var parent = tg.parentNode;
-  	  	var trParent = parent.parentNode;
-  	  	trParent.style.backgroundColor = bgColor;	  	
-  	}
-  </script>
 </head>
 <body>
   <div class="body">
@@ -107,9 +95,9 @@
           <tr class="prop">
           	<td class="name">Tags:</td>
           	<td>
-          	<g:if test="${tags }">
+          	
           	<div class="list">
-          	<table class="sortable subitems">
+          	<table id="tags">
           	<thead>
           	<tr>
           		<th>Key</th>
@@ -120,20 +108,21 @@
           	</thead>
 		      <g:each var="tag" in="${tags}" status="i">
 		        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-		          <td>${tag.key }</td>
-		          <td><input type="text" id="tags.value.${tag.key}" name="tags.value.${tag.key}" value="${tag.value}"/></td>
+		          <td>${tag.key}<input type="hidden" id="tags.name.${tag.key}" class="tagName" value="${tag.key}"/></td>
+		          <td><input type="text" id="tags.value.${tag.key}" name="tags.value.${tag.key}" class="tagValue" value="${tag.value}" required onchange="uniqueValue(jQuery(this))"/></td>
 		          <g:if test="${tag.propagateAtLaunch }">
 		          	<td><input type="checkbox" id="tags.props.${tag.key}" name="tags.props.${tag.key}" checked="yes" /></td>
 		          </g:if>
 		          <g:else>
 		          	<td><input type="checkbox" id="tags.props.${tag.key}" name="tags.props.${tag.key}" /></td>
 		          </g:else>
-		          <td><input type="checkbox" id="tags.delete.${tag.key }" name="tags.delete.${tag.key }" onclick="toggleRow('tags.delete.${tag.key}');"/></td>
+		          <td><input type="checkbox" class="tagsDel" id="tags.delete.${tag.key }" name="tags.delete.${tag.key }" /></td>
 		        </tr>
 		      	</g:each>
 		      	</table>
+		      	<input type="button" id="addrow" value="Add Tag" />		      	
 		      	</div>
-		      </g:if>
+		      
 		      </td>
           </tr>
           

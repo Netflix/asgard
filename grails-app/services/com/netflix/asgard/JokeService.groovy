@@ -37,7 +37,8 @@ class JokeService {
             'Something sank your battleship', 'Blame the dog', 'Blame the cat', 'The code broke',
             "That wasn't supposed to happen", 'Not enough test coverage', "Let's blame Microsoft",
             "Let's blame Oracle", 'I sense a disruption in the force', "Don't blame yourself",
-            'An interaction between man and machine has failed today'].asImmutable()
+            'An interaction between man and machine has failed today',
+			'The Baboon is LOOSE!', 'Your job... It\'s over!'].asImmutable()
 
     private final List<FailureImage> failureImages = ImageAttributions.FAILURE_IMAGES
 
