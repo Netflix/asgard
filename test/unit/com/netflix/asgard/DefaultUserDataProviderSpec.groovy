@@ -18,30 +18,55 @@ package com.netflix.asgard
 import javax.xml.bind.DatatypeConverter
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class DefaultUserDataProviderSpec extends Specification {
 
-    def 'should generate user data with blanks for null values'() {
+    ConfigService configService
+    ApplicationService applicationService
+    DefaultUserDataProvider provider
+    UserContext userContext = UserContext.auto(Region.SA_EAST_1)
 
-        ConfigService configService = Mock(ConfigService) {
+    void setup() {
+        configService = Mock(ConfigService) {
             getUserDataVarPrefix() >> ''
         }
-        ApplicationService applicationService = Mock(ApplicationService)
-        DefaultUserDataProvider provider = new DefaultUserDataProvider(configService: configService,
-                applicationService: applicationService)
-        UserContext userContext = UserContext.auto(Region.SA_EAST_1)
+        applicationService = Mock(ApplicationService) {
+            getMonitorBucket(_, _, _) >> { it[1] }
+        }
+        provider = new DefaultUserDataProvider(configService: configService, applicationService: applicationService)
+    }
+
+    def 'should generate user data in the default format'() {
 
         when:
-        String userDataEncoded = provider.buildUserDataForVariables(userContext, 'helloworld', 'helloworld',
-                'helloworld-1234567890')
+        String userDataEncoded = provider.buildUserDataForVariables(userContext, 'helloworld',
+                'helloworld-example-v345', 'helloworld-example-v345-1234567890')
 
         then:
         decode(userDataEncoded) == """export ENVIRONMENT=
-export MONITOR_BUCKET=
+export MONITOR_BUCKET=helloworld
+export APP=helloworld
+export STACK=example
+export CLUSTER=helloworld-example
+export AUTO_SCALE_GROUP=helloworld-example-v345
+export LAUNCH_CONFIG=helloworld-example-v345-1234567890
+export EC2_REGION=sa-east-1
+"""
+    }
+
+    def 'should generate user data with blanks for null values'() {
+
+        when:
+        String userDataEncoded = provider.buildUserDataForVariables(userContext, 'helloworld', null, null)
+
+        then:
+        decode(userDataEncoded) == """export ENVIRONMENT=
+export MONITOR_BUCKET=helloworld
 export APP=helloworld
 export STACK=
-export CLUSTER=helloworld
-export AUTO_SCALE_GROUP=helloworld
-export LAUNCH_CONFIG=helloworld-1234567890
+export CLUSTER=
+export AUTO_SCALE_GROUP=
+export LAUNCH_CONFIG=
 export EC2_REGION=sa-east-1
 """
     }
