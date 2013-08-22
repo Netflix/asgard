@@ -32,7 +32,7 @@ import org.joda.time.format.DateTimeFormatter
  * secured by generating a HMAC value with an encryption key of the supplied values to include in the token string.
  *
  * New tokens are generated using the public constructor and tokens are validated by creating an instance of this class
- * with the {@link fromApiTokenString(String)} method.
+ * with the {@link ApiToken#fromApiTokenString(String)} method.
  */
 class ApiToken implements AuthenticationToken {
 
@@ -130,7 +130,7 @@ class ApiToken implements AuthenticationToken {
     /**
      * Returns API Token as a String. This will be the input to validate requests.
      *
-     * @return String representation of this token. Token can be reconstructed using {@link fromApiTokenString(String)}
+     * @return String representation of this token. Token can be reconstructed using {@link #fromApiTokenString(String)}
      */
     String getTokenString() {
         List<String> components = [purpose, TOKEN_DATE_FORMAT.print(expires), username, URLEncoder.encode(hash)]
