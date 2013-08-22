@@ -61,6 +61,10 @@
           </td>
         </tr>
         <tr class="prop">
+          <td class="name">Policies:</td>
+          <td class="value">${loadBalancer.policies.otherPolicies}</td>
+        </tr>
+        <tr class="prop">
           <td class="name">VPC Purpose:</td>
           <td class="value">${subnetPurpose}</td>
         </tr>

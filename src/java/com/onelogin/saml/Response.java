@@ -2,9 +2,11 @@ package com.onelogin.saml;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import javax.xml.crypto.MarshalException;
+
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
@@ -16,6 +18,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import com.onelogin.AccountSettings;
 import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -88,5 +92,27 @@ public class Response {
         }
 
         return nodes.item(0).getTextContent();
-}
+    }
+
+    private void tagIdAttributes(Document xmlDoc) {
+        NodeList nodeList = xmlDoc.getElementsByTagName("*");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                if (node.getAttributes().getNamedItem("ID") != null) {
+                    ((Element) node).setIdAttribute("ID", true);
+                }
+            }
+        }
+    }
+
+    private boolean setIdAttributeExists() {
+        for (Method method : Element.class.getDeclaredMethods()) {
+            if (method.getName().equals("setIdAttribute")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

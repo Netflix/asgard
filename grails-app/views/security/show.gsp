@@ -94,6 +94,30 @@
           <td class="name">Application:</td>
           <td class="value"><g:linkObject type="application" name="${app?.name}"/></td>
         </tr>
+        <tr class="prop">
+          <td class="name">Launch Configurations:</td>
+          <td class="value">
+            <g:each var="launchConfig" in="${launchConfigs}" status="i">
+              <g:linkObject type="launchConfiguration" name="${launchConfig.launchConfigurationName}"/>
+            </g:each>
+          </td>
+        </tr>
+        <tr class="prop">
+          <td class="name">Instances:</td>
+          <td class="value">
+            <g:each var="instance" in="${instances}" status="i">
+              <g:linkObject type="instance" name="${instance.instanceId}"/>
+            </g:each>
+          </td>
+        </tr>
+        <tr class="prop">
+          <td class="name">Load Balancers:</td>
+          <td class="value">
+            <g:each var="elb" in="${elbs}" status="i">
+              <g:linkObject type="loadBalancer" name="${elb.loadBalancerName}"/>
+            </g:each>
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>

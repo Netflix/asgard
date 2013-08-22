@@ -24,7 +24,6 @@ class ServerController {
 
     def serverService
     def taskService
-    static Set<String> hostNames = new TreeSet<String>()
 
     def index = { render InetAddress.localHost.hostName }
 
@@ -51,11 +50,11 @@ class ServerController {
 
     def env = { render "${grailsApplication.config.cloud.accountName}" }
 
-    def users = { render hostNames.join("\n") }
-
     def hoursSinceStartup = { render "${serverService.getHoursSinceStartup()}" }
 
     def minutesSinceStartup = { render "${serverService.getMinutesSinceStartup()}" }
+
+    def uptime = { render "${serverService.getUptimeString()}" }
 
     def moveTraffic = {
         String targetServer = pickServer(params)

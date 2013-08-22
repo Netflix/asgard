@@ -15,9 +15,7 @@
  */
 package com.netflix.asgard
 
-import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 
 /**
  * Tag library class for fast properties views
@@ -85,7 +83,7 @@ class FastPropsTagLib {
 
     /**
      * Calculates and prints expiration timestamp for a fastProperty
-     * The output format is an ISOi-8601. It does not include seconds, msecs or explicit 
+     * The output format is an ISOi-8601. It does not include seconds, msecs or explicit
      * timezone information.
      *
      * @attr ttl TTL in seconds as stored for a fastProperty

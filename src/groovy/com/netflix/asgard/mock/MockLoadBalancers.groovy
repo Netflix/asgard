@@ -21,11 +21,15 @@ class MockLoadBalancers {
 [
   {
     "DNSName": "helloworld--frontend-1444444444.us-east-1.elb.amazonaws.com",
+    "VPCId": null,
     "availabilityZones":
     [
       "us-east-1a",
       "us-east-1c",
       "us-east-1d"
+    ],
+    "backendServerDescriptions":
+    [
     ],
     "canonicalHostedZoneName": "helloworld--frontend-1444444444.us-east-1.elb.amazonaws.com",
     "canonicalHostedZoneNameID": "EQO5M30Q23N41P",
@@ -66,6 +70,7 @@ class MockLoadBalancers {
           "SSLCertificateId": null,
           "class": "com.amazonaws.services.elasticloadbalancing.model.Listener",
           "instancePort": 7001,
+          "instanceProtocol": "HTTP",
           "loadBalancerPort": 80,
           "protocol": "HTTP"
         },
@@ -82,19 +87,33 @@ class MockLoadBalancers {
       "appCookieStickinessPolicies":
       [
       ],
-      "class": "com.amazonaws.services.elasticloadbalancing.model.Policies"
+      "class": "com.amazonaws.services.elasticloadbalancing.model.Policies",
+      "otherPolicies":
+      [
+      ]
     },
+    "scheme": "internet-facing",
+    "securityGroups":
+    [
+    ],
     "sourceSecurityGroup": {
       "class": "com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup",
       "groupName": "amazon-elb-sg",
       "ownerAlias": "amazon-elb"
-    }
+    },
+    "subnets":
+    [
+    ]
   },
   {
     "DNSName": "ntsuiboot--frontend-2111111111.us-east-1.elb.amazonaws.com",
+    "VPCId": null,
     "availabilityZones":
     [
       "us-east-1d"
+    ],
+    "backendServerDescriptions":
+    [
     ],
     "canonicalHostedZoneName": "ntsuiboot--frontend-2111111111.us-east-1.elb.amazonaws.com",
     "canonicalHostedZoneNameID": "EQO5M30Q23N41P",
@@ -123,6 +142,7 @@ class MockLoadBalancers {
           "SSLCertificateId": null,
           "class": "com.amazonaws.services.elasticloadbalancing.model.Listener",
           "instancePort": 7001,
+          "instanceProtocol": "HTTP",
           "loadBalancerPort": 80,
           "protocol": "HTTP"
         },
@@ -136,6 +156,7 @@ class MockLoadBalancers {
           "SSLCertificateId": "arn:aws:iam::179000000000:server-certificate/uiboot.company.com-CA2009",
           "class": "com.amazonaws.services.elasticloadbalancing.model.Listener",
           "instancePort": 7001,
+          "instanceProtocol": "HTTP",
           "loadBalancerPort": 443,
           "protocol": "HTTPS"
         },
@@ -152,13 +173,25 @@ class MockLoadBalancers {
       "appCookieStickinessPolicies":
       [
       ],
-      "class": "com.amazonaws.services.elasticloadbalancing.model.Policies"
+      "class": "com.amazonaws.services.elasticloadbalancing.model.Policies",
+      "otherPolicies":
+      [
+        "SSLNegotiationPolicy",
+        "CrossZoneLoadBalancingPolicy"
+      ]
     },
+    "scheme": "internet-facing",
+    "securityGroups":
+    [
+    ],
     "sourceSecurityGroup": {
       "class": "com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup",
       "groupName": "amazon-elb-sg",
       "ownerAlias": "amazon-elb"
-    }
+    },
+    "subnets":
+    [
+    ]
   }
 ]
 '''

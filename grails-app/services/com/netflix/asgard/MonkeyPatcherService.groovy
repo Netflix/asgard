@@ -113,7 +113,7 @@ class MonkeyPatcherService implements InitializingBean {
         }
         if (!(AutoScalingGroup.class.methods as List).contains("getVariables")) {
             AutoScalingGroup.metaClass.getVariables = { ->
-                Relationships.parts(delegate.autoScalingGroupName)
+                Relationships.parts(delegate.autoScalingGroupName as String)
             }
         }
 
@@ -139,7 +139,7 @@ class MonkeyPatcherService implements InitializingBean {
             }
         }
         if (!(AvailabilityZone.class.methods as List).contains("shouldBePreselected")) {
-            List<String> discouragedZones = grailsApplication.config.cloud.discouragedAvailabilityZones ?: []
+            List<String> discouragedZones = grailsApplication?.config?.cloud?.discouragedAvailabilityZones ?: []
             AvailabilityZone.metaClass.shouldBePreselected = { selectedZones, autoScalingGroup ->
                 String zoneName = delegate.getZoneName()
                 Boolean isZoneNameDiscouraged = discouragedZones.contains(zoneName)

@@ -22,7 +22,9 @@ enum MonitorBucketType {
 
     application, cluster
 
-    String getDescription() { "Aggregate monitoring data by ${name()}" }
+    String getDescription() {
+        "Aggregate monitoring data by ${name()}"
+    }
 
     /**
      * Takes a string returns the matching MonitorBucketType object, or null if no match exists.

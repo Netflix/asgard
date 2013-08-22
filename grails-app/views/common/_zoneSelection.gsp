@@ -17,7 +17,7 @@
 --%>
 <tr class="prop advanced">
   <td class="name">
-    <label for="selectedZones">Availablity Zones:</label>
+    <label for="selectedZones">Availablity<br/>Zones:</label>
   </td>
   <td>
     <g:each var="purposeForZones" in="${zonesGroupedByPurpose?.keySet()}">

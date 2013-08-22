@@ -92,6 +92,7 @@ import com.netflix.asgard.model.SecurityGroupOption
 import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.ZoneAvailability
 import com.netflix.frigga.ami.AppVersion
+import groovyx.gpars.GParsExecutorsPool
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import org.apache.commons.codec.binary.Base64
@@ -110,6 +111,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     def configService
     def restClientService
     def taskService
+    ThreadScheduler threadScheduler
     List<String> accounts = [] // main account is accounts[0]
 
     /** The state names for instances that count against reservation usage. */
@@ -168,7 +170,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         // Temporary workaround because Amazon can send us the list of images without the tags occasionally.
         // So far it's prevented the image cache from going in a bad state again, but we need a better long term fix.
         if (images && !images.any { it.tags } ) {
-            log.warn "Detected image tags missing for region ${region.code}, attempting to request tags explicitly"
+            log.trace "Detected image tags missing for region ${region.code}, attempting to request tags explicitly"
             Filter hasTagFilter = new Filter('tag-key', ['*']) // This only requests images that have tags
             DescribeImagesRequest hasTagRequest = request.withFilters(hasTagFilter)
             List<Image> imagesWithTags = awsClientForRegion.describeImages(hasTagRequest).getImages()
@@ -718,6 +720,21 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         getInstances(userContext).findAll { Instance instance -> instance.imageId == imageId }
     }
 
+    /**
+     * Finds all the instances that were launched with the specified security group.
+     *
+     * @param userContext who, where, why
+     * @param securityGroup the security group for which to find relevant instances
+     * @return all the instances associated with the specified security group
+     */
+    Collection<Instance> getInstancesWithSecurityGroup(UserContext userContext, SecurityGroup securityGroup) {
+        getInstances(userContext).findAll {
+            String name = securityGroup.groupName
+            String id = securityGroup.groupId
+            (name && (name in it.securityGroups*.groupName)) || (id && (id in it.securityGroups*.groupId))
+        }
+    }
+
     Instance getInstance(UserContext userContext, String instanceId, From from = From.AWS) {
         if (from == From.CACHE) {
             return caches.allInstances.by(userContext.region).get(instanceId)
@@ -727,10 +744,12 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     Multiset<AppVersion> getCountedAppVersions(UserContext userContext) {
-        getCountedAppVersions(getInstances(userContext), caches.allImages.by(userContext.region).unmodifiable())
+        Map<String, Image> imageIdsToImages = caches.allImages.by(userContext.region).unmodifiable()
+        getCountedAppVersionsForInstancesAndImages(getInstances(userContext), imageIdsToImages)
     }
 
-    private Multiset<AppVersion> getCountedAppVersions(Collection<Instance> instances, Map<String, Image> images) {
+    private Multiset<AppVersion> getCountedAppVersionsForInstancesAndImages(Collection<Instance> instances,
+            Map<String, Image> images) {
         Multiset<AppVersion> appVersions = TreeMultiset.create()
         instances.each { Instance instance ->
             Image image = images.get(instance.imageId)
@@ -798,8 +817,24 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     Boolean checkHostHealth(String url) {
-        Integer responseCode = restClientService.getRepeatedResponseCode(url)
-        restClientService.checkOkayResponseCode(responseCode)
+        if (configService.isOnline()) {
+            Integer responseCode = restClientService.getRepeatedResponseCode(url)
+            return restClientService.checkOkayResponseCode(responseCode)
+        }
+        true
+    }
+
+    /**
+     * Test health of instances in parallel. One failing health check stops all checks and returns false.
+     *
+     * @param healthCheckUrls of instances
+     * @return indicates if all instances are healthy
+     */
+    Boolean checkHostsHealth(Collection<String> healthCheckUrls) {
+        GParsExecutorsPool.withExistingPool(threadScheduler.scheduler) {
+            String unhealthyHostUrl = healthCheckUrls.findAnyParallel { !checkHostHealth(it) }
+            !unhealthyHostUrl
+        }
     }
 
     List<InstanceStateChange> terminateInstances(UserContext userContext, Collection<String> instanceIds,
@@ -829,7 +864,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     String getConsoleOutput(UserContext userContext, String instanceId) {
         GetConsoleOutputResult result = awsClient.by(userContext.region).getConsoleOutput(
                 new GetConsoleOutputRequest().withInstanceId(instanceId))
-        new String(Base64.decodeBase64(result.getOutput().bytes))
+        String output = result.getOutput()
+        output ? new String(Base64.decodeBase64(output.bytes)) : null
     }
 
     // Elastic IPs

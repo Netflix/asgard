@@ -104,7 +104,8 @@ class RollingPushOperation extends AbstractPushOperation {
         String newLaunchName = Relationships.buildLaunchConfigurationName(groupName)
         AutoScalingGroup groupForUserData = new AutoScalingGroup().withAutoScalingGroupName(group.autoScalingGroupName).
                 withLaunchConfigurationName(newLaunchName)
-        String userData = launchTemplateService.buildUserData(options.common.userContext, groupForUserData)
+        String userData = launchTemplateService.buildUserData(options.common.userContext,
+                groupForUserData.autoScalingGroupName, groupForUserData.launchConfigurationName)
         Time.sleepCancellably 100 // tiny pause before LC create to avoid rate limiting
         Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(options.securityGroups,
                 group.VPCZoneIdentifier, options.userContext.region)
@@ -113,7 +114,7 @@ class RollingPushOperation extends AbstractPushOperation {
         awsAutoScalingService.createLaunchConfiguration(options.common.userContext, newLaunchName,
                 options.imageId, options.keyName, securityGroups, userData,
                 options.instanceType, oldLaunch.kernelId, oldLaunch.ramdiskId, iamInstanceProfile,
-                oldLaunch.blockDeviceMappings, options.spotPrice, oldLaunch.ebsOptimized as boolean, task)
+                options.spotPrice, oldLaunch.ebsOptimized as boolean, task)
 
         Time.sleepCancellably 200 // small pause before ASG update to avoid rate limiting
         task.log("Updating group ${groupName} to use launch config ${newLaunchName}")

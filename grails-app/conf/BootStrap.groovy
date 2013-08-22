@@ -1,6 +1,3 @@
-import com.netflix.asgard.FastProperty
-import grails.converters.JSON
-
 /*
  * Copyright 2012 Netflix, Inc.
  *
@@ -16,11 +13,18 @@ import grails.converters.JSON
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.netflix.asgard.FastProperty
+import grails.converters.JSON
+
 class BootStrap {
 
+    /** This "unused" variable needs to be declared here in order to get the referenced service initialized early. */
     def cacheLoadStartService
+
     def configService
     def initService
+
+    /** This "unused" variable needs to be declared here in order to get the referenced service initialized early. */
     def monkeyPatcherService
 
     def init = { servletContext ->

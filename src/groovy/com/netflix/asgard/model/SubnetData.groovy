@@ -61,16 +61,16 @@ import org.codehaus.groovy.grails.web.json.JSONElement
      */
     static SubnetData from(Subnet subnet) {
         JSONElement metadata = getJsonMetaData(subnet.tags)
-        new SubnetData(purpose: getPurpose(metadata), target: getTarget(metadata), subnetId: subnet.subnetId,
-                state: subnet.state, vpcId: subnet.vpcId, cidrBlock: subnet.cidrBlock,
+        new SubnetData(purpose: getPurposeFromJson(metadata), target: getTargetFromJson(metadata),
+                subnetId: subnet.subnetId, state: subnet.state, vpcId: subnet.vpcId, cidrBlock: subnet.cidrBlock,
                 availableIpAddressCount: subnet.availableIpAddressCount, availabilityZone: subnet.availabilityZone)
     }
 
-    private static String getPurpose(JSONElement json) {
+    private static String getPurposeFromJson(JSONElement json) {
         json?.purpose
     }
 
-    private static SubnetTarget getTarget(JSONElement json) {
+    private static SubnetTarget getTargetFromJson(JSONElement json) {
         String targetName = json?.target
         if (!targetName) { return null }
         SubnetTarget.forText(targetName)

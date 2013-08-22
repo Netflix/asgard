@@ -16,12 +16,15 @@
 package com.netflix.asgard
 
 import groovy.transform.Immutable
+import org.codehaus.jackson.annotate.JsonCreator
+import org.codehaus.jackson.annotate.JsonProperty
 
 @Immutable final class Link {
     EntityType type
     String id
 
-    static Link to(EntityType type, String id) {
+    @JsonCreator
+    static Link to(@JsonProperty('type') EntityType type, @JsonProperty('id') String id) {
         new Link(type: type, id: id)
     }
 }

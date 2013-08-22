@@ -15,8 +15,11 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.SecurityGroup
+import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
@@ -26,6 +29,7 @@ import grails.converters.XML
 class SecurityController {
 
     def applicationService
+    def awsAutoScalingService
     def awsEc2Service
     def awsLoadBalancerService
     def configService
@@ -64,13 +68,21 @@ class SecurityController {
         }
         group.ipPermissions.sort { it.userIdGroupPairs ? it.userIdGroupPairs[0].groupName : it.fromPort }
         group.ipPermissions.each { it.userIdGroupPairs.sort { it.groupName } }
+
+        List<LaunchConfiguration> launchConfigs = awsAutoScalingService.getLaunchConfigurationsForSecurityGroup(
+                userContext, group)
+        Collection<Instance> instances = awsEc2Service.getInstancesWithSecurityGroup(userContext, group)
+        List<LoadBalancerDescription> lbs = awsLoadBalancerService.getLoadBalancersWithSecurityGroup(userContext, group)
+
         def details = [
                 group: group,
                 app: applicationService.getRegisteredApplication(userContext, group.groupName),
                 accountNames: configService.awsAccountNames,
-                editable: awsEc2Service.isSecurityGroupEditable(group.groupName)
+                editable: awsEc2Service.isSecurityGroupEditable(group.groupName),
+                launchConfigs: launchConfigs,
+                instances: instances,
+                elbs: lbs
         ]
-        // TODO referenced-from lists would be nice too
         withFormat {
             html { return details }
             xml { new XML(details).render(response) }

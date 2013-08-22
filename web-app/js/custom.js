@@ -642,8 +642,40 @@ jQuery(document).ready(function() {
 
         // If there's a textarea that should be resizable, make it so.
         jQuery('textarea.resizable').TextAreaResizer();
+
+        Opentip.styles.interactive = {
+            hideTriggers: ['closeButton'] // Keeps the tip visible until the user clicks the close button
+        };
+        Opentip.styles.standard.target = true; // Take the chosen element as a target of the stem
+        Opentip.styles.standard.background = '#fffbc5'; // Pale yellow
     };
     setUpCommonUserInterfaceEnhancements();
+
+    var hideAllOpentips = function() {
+        var i;
+        for(i = 0; i < Opentip.tips.length; i++) {
+            Opentip.tips[i].hide();
+        }
+    };
+
+    var activateTooltips = function() {
+        var i, jTipContainers, activateTooltip;
+
+        activateTooltip = function(tipContainer) {
+            var tipStyle, jImage, jTemplate, jTipContainer;
+            jTipContainer = jQuery(tipContainer);
+            tipStyle = jTipContainer.data('tip-style');
+            jImage = jTipContainer.find('img');
+            jTemplate = jTipContainer.find('.template');
+            jImage.opentip(jTemplate.html(), { style: tipStyle || 'standard' });
+        };
+
+        jTipContainers = jQuery('.tip');
+        for (i = 0; i < jTipContainers.length; i++) {
+            activateTooltip(jTipContainers[i]);
+        }
+    };
+    activateTooltips();
 
     // Push prepare page
     var setUpPushPreparePage = function() {
@@ -787,6 +819,20 @@ jQuery(document).ready(function() {
     };
     setUpClusterChaosMonkeyOptions();
 
+    var setUpDeploymentWorkflowOptions = function() {
+        jQuery("input[name='doCanary']").click(function() {
+            var doCanary;
+            doCanary = this.id === "doCanaryTrue";
+            jQuery("tbody.canaryOptions").toggleClass("concealed", !doCanary);
+        });
+        jQuery("input[name='disablePreviousAsg']").click(function() {
+            var disablePreviousAsg;
+            disablePreviousAsg = this.id === "disablePreviousAsgNo";
+            jQuery("tbody.fullTrafficOptions").toggleClass("concealed", disablePreviousAsg);
+        });
+    };
+    setUpDeploymentWorkflowOptions();
+
     // Cluster page
     var setUpClusterPage = function() {
         var config, jCreateContainer, jCreateAdvancedTrs;
@@ -875,7 +921,7 @@ jQuery(document).ready(function() {
                         return null;
                     },
 
-                    // return true if we are in the "stick to bottom" mode
+                    // Return true if we are in the "stick to bottom" mode
                     isSticking : function() {
                         var scrollDiv = this.scrollContainer;
                         var currentHeight = this.getCurrentHeight();
@@ -907,9 +953,9 @@ jQuery(document).ready(function() {
             var scroller = autoScroller(logElem[0]);
             var poller;
             var ajaxOptions = {
-                url: document.location.href + '.json',
+                url: window.location.origin + window.location.pathname + '.json' + window.location.search,
                 dataType: 'json',
-                error: function() {
+                error: function(e) {
                     if (poller) { poller.stop = true; }
                     logElem.before('<div class="error">Error polling for log. Please reload page.</div>');
                 },
@@ -1009,6 +1055,19 @@ jQuery(document).ready(function() {
         updatePreview(); // If the page has a validation error then fields are pre-populated on page load.
     };
     setUpAutoScalingGroupCreatePage();
+
+    // Auto Scaling Group edit page
+    var setUpGroupEditScreen = function() {
+        var showAndEnableDesiredSize, jDesiredCapacityContainer = jQuery('.desiredCapacityContainer');;
+        if (jDesiredCapacityContainer.exists()) {
+            showAndEnableDesiredSize = function() {
+                jDesiredCapacityContainer.addClass('showManual').yellowFade();
+                hideAllOpentips();
+            };
+            jQuery(document).on('click', '.enableManualDesiredCapacityOverride', showAndEnableDesiredSize);
+        }
+    };
+    setUpGroupEditScreen();
 
     // Auto Scaling Group detail page
     var setUpGroupDetailScreen = function() {
@@ -1304,11 +1363,11 @@ jQuery(document).ready(function() {
 
         config = {
             minOptionCountForSearch: 10,
-            maxOptionsForRequiredSearch: 1000 // for performance, searching 6000 amis is slow
+            maxOptionsForRequiredSearch: 1000 // For performance, searching 6000 amis is slow
         };
 
         convertSelects = function() {
-            jQuery('select:visible:not(#regionSwitcher)').each(function() {
+            jQuery('select:visible:not(.noSelect2)').each(function() {
                 var selectElement = jQuery(this);
                 var options = {
                     width: (selectElement.outerWidth() + 10) + 'px',
@@ -1318,10 +1377,10 @@ jQuery(document).ready(function() {
                     options['minimumResultsForSearch'] = config.minOptionCountForSearch;
                 }
                 if (config.maxOptionsForRequiredSearch && this.options.length > config.maxOptionsForRequiredSearch) {
-                    options['minimumInputLength'] = 3;
+                    options['minimumInputLength'] = 2;
                 }
                 selectElement.select2(options);
-                // hack so select2 selects the first item when it's a blank value
+                // Hack so select2 selects the first item when it's a blank value
                 if (selectElement.is('.allowEmptySelect') && selectElement.select2('val') == '') {
                     selectElement.select2('val', '');
                 }
@@ -1349,11 +1408,11 @@ jQuery(document).ready(function() {
 
         var sorttable = {
             init: function() {
-                // quit if this function has already been called
+                // Quit if this function has already been called
                 if (arguments.callee.done) {
                     return;
                 }
-                // flag this function so we don't do the same thing twice
+                // Flag this function so we don't do the same thing twice
                 arguments.callee.done = true;
 
                 if (!document.createElement || !document.getElementsByTagName) {
@@ -1380,7 +1439,7 @@ jQuery(document).ready(function() {
 
                     var theadrow;
                     if (this.className.search(/\bsorttable_sorted\b/) != -1) {
-                        // if we're already sorted by this column, just
+                        // If we're already sorted by this column, just
                         // reverse the table, which is quicker
                         sorttable.reverse(this.sorttable_tbody);
                         this.className = this.className.replace('sorttable_sorted',
@@ -1393,7 +1452,7 @@ jQuery(document).ready(function() {
                         return;
                     }
                     if (this.className.search(/\bsorttable_sorted_reverse\b/) != -1) {
-                        // if we're already sorted by this column in reverse, just
+                        // If we're already sorted by this column in reverse, just
                         // re-reverse the table, which is quicker
                         sorttable.reverse(this.sorttable_tbody);
                         this.className = this.className.replace('sorttable_sorted_reverse',
@@ -1406,7 +1465,7 @@ jQuery(document).ready(function() {
                         return;
                     }
 
-                    // remove sorttable_sorted classes
+                    // Remove sorttable_sorted classes
                     theadrow = this.parentNode;
                     jQuery(theadrow).find('th, td').removeClass('sorttable_sorted sorttable_sorted_reverse');
                     sortfwdind = document.getElementById('sorttable_sortfwdind');
@@ -1420,7 +1479,7 @@ jQuery(document).ready(function() {
                     sortfwdind.innerHTML = jQuery.browser.ie ? '&nbsp<font face="webdings">6</font>' : '&nbsp;&#x25BE;';
                     this.appendChild(sortfwdind);
 
-                    // build an array to sort. This is a Schwartzian transform thing,
+                    // Build an array to sort. This is a Schwartzian transform thing,
                     // i.e., we "decorate" each row with the actual sort key,
                     // sort based on the sort keys, and then put the rows back in order
                     // which is a lot faster because you only do getInnerText once per row
@@ -1444,7 +1503,7 @@ jQuery(document).ready(function() {
                 };
 
                 if (table.getElementsByTagName('thead').length === 0) {
-                    // table doesn't have a tHead. Since it should have, create one and
+                    // Table doesn't have a tHead. Since it should have, create one and
                     // put the first table row in it.
                     the = document.createElement('thead');
                     the.appendChild(table.rows[0]);
@@ -1457,7 +1516,7 @@ jQuery(document).ready(function() {
 
                 if (table.tHead.rows.length != 1) {
                     return;
-                } // can't cope with two header rows
+                } // Can't cope with two header rows
 
                 // Sorttable v1 put rows with a class of "sortbottom" at the bottom (as
                 // "total" rows, for example). This is B&R, since what you're supposed
@@ -1471,7 +1530,7 @@ jQuery(document).ready(function() {
                 }
                 if (sortbottomrows.length >= 1) {
                     if (!table.tFoot) {
-                        // table doesn't have a tfoot. Create one.
+                        // Table doesn't have a tfoot. Create one.
                         tfo = document.createElement('tfoot');
                         table.appendChild(tfo);
                     }
@@ -1480,11 +1539,11 @@ jQuery(document).ready(function() {
                     }
                 }
 
-                // work through each column and calculate its type
+                // Work through each column and calculate its type
                 headrow = table.tHead.rows[0].cells;
                 for (i = 0; i < headrow.length; i++) {
-                    // manually override the type with a sorttable_type attribute
-                    if (!headrow[i].className.match(/\bsorttable_nosort\b/)) { // skip this col
+                    // Manually override the type with a sorttable_type attribute
+                    if (!headrow[i].className.match(/\bsorttable_nosort\b/)) { // Skip this col
                         mtch = headrow[i].className.match(/\bsorttable_([a-z0-9]+)\b/);
                         if (mtch) {
                             override = mtch[1];
@@ -1494,7 +1553,7 @@ jQuery(document).ready(function() {
                         } else {
                             headrow[i].sorttable_sortfunction = sorttable.guessType(table, i);
                         }
-                        // make it clickable to sort
+                        // Make it clickable to sort
                         headrow[i].sorttable_columnindex = i;
                         headrow[i].sorttable_tbody = table.tBodies[0];
                         jQuery(headrow[i]).click(headerClickHandler);
@@ -1504,7 +1563,7 @@ jQuery(document).ready(function() {
 
             guessType: function(table, column) {
                 var text, possdate, first, second;
-                // guess the type of a column based on its first non-blank row
+                // Guess the type of a column based on its first non-blank row
                 var sortfn = sorttable.sort_alpha;
                 for (var i = 0; i < table.tBodies[0].rows.length; i++) {
                     text = sorttable.getInnerText(table.tBodies[0].rows[i].cells[column]);
@@ -1512,21 +1571,21 @@ jQuery(document).ready(function() {
                         if (text.match(/^-?[$]?[\d,.]+%?$/)) {
                             return sorttable.sort_numeric;
                         }
-                        // check for a date: dd/mm/yyyy or dd/mm/yy
-                        // can have / or . or - as separator
-                        // can be mm/dd as well
+                        // Check for a date: dd/mm/yyyy or dd/mm/yy
+                        // Can have / or . or - as separator
+                        // Can be mm/dd as well
                         possdate = text.match(sorttable.DATE_RE);
                         if (possdate) {
-                            // looks like a date
+                            // Looks like a date
                             first = parseInt(possdate[1], 10);
                             second = parseInt(possdate[2], 10);
                             if (first > 12) {
-                                // definitely dd/mm
+                                // Definitely dd/mm
                                 return sorttable.sort_ddmm;
                             } else if (second > 12) {
                                 return sorttable.sort_mmdd;
                             } else {
-                                // looks like a date, but we can't tell which, so assume
+                                // Looks like a date, but we can't tell which, so assume
                                 // that it's dd/mm (English imperialism!) and keep looking
                                 sortfn = sorttable.sort_ddmm;
                             }
@@ -1537,11 +1596,11 @@ jQuery(document).ready(function() {
             },
 
             getInnerText: function(node) {
-                // gets the text we want to use for sorting for a cell.
-                // strips leading and trailing whitespace.
-                // this is *not* a generic getInnerText function; it's special to sorttable.
-                // for example, you can override the cell text with a customkey attribute.
-                // it also gets .value for <input> fields.
+                // Gets the text we want to use for sorting for a cell.
+                // Strips leading and trailing whitespace.
+                // This is *not* a generic getInnerText function; it's special to sorttable.
+                // For example, you can override the cell text with a customkey attribute.
+                // It also gets .value for <input> fields.
 
                 var hasInputs = (typeof node.getElementsByTagName == 'function') &&
                         node.getElementsByTagName('input').length;
@@ -1584,7 +1643,7 @@ jQuery(document).ready(function() {
 
             reverse: function(tbody) {
                 var i;
-                // reverse the rows in a tbody
+                // Reverse the rows in a tbody
                 var newrows = [];
                 for (i = 0; i < tbody.rows.length; i++) {
                     newrows[newrows.length] = tbody.rows[i];

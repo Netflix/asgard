@@ -27,6 +27,7 @@ class ConfigService {
     static transactional = false
 
     def grailsApplication
+    def flagService
 
     /**
      * Gets the most commonly used namespace for Amazon CloudWatch metrics used for auto scaling policies. If not
@@ -91,8 +92,11 @@ class ConfigService {
      * @return the Discovery server URL for the specified region, or null if there isn't one
      */
     String getRegionalDiscoveryServer(Region region) {
-        Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.eureka?.regionsToServers
-        regionsToDiscoveryServers ? regionsToDiscoveryServers[region] : null
+        if (isOnline()) {
+            Map<Region, String> regionsToDiscoveryServers = grailsApplication.config.eureka?.regionsToServers
+            return regionsToDiscoveryServers ? regionsToDiscoveryServers[region] : null
+        }
+        null
     }
 
     /**
@@ -102,8 +106,11 @@ class ConfigService {
      * @return the PlatformService server URL for the specified region, or null if there isn't one
      */
     String getRegionalPlatformServiceServer(Region region) {
-        Map<Region, String> regionsToPlatformServiceServers = grailsApplication.config.platform?.regionsToServers
-        regionsToPlatformServiceServers ? regionsToPlatformServiceServers[region] : null
+        if (isOnline()) {
+            Map<Region, String> regionsToPlatformServiceServers = grailsApplication.config.platform?.regionsToServers
+            return regionsToPlatformServiceServers ? regionsToPlatformServiceServers[region] : null
+        }
+        null
     }
 
     /**
@@ -183,11 +190,7 @@ class ConfigService {
      *         to reduce the number of large, simultaneous data retrieval calls to cloud APIs
      */
     boolean getUseJitter() {
-        Boolean result = grailsApplication.config.thread?.useJitter
-        if (result == null) {
-            return true
-        }
-        result
+        grailsApplication.config.thread?.useJitter
     }
 
     /**
@@ -242,6 +245,27 @@ class ConfigService {
      */
     String getDefaultKeyName() {
         grailsApplication.config.cloud?.defaultKeyName ?: ''
+    }
+
+    /**
+     * @return the name of the Amazon Simple Workflow domain that should be used for automation
+     */
+    String getSimpleWorkflowDomain() {
+        grailsApplication.config?.workflow?.domain ?: 'asgard'
+    }
+
+    /**
+     * @return the name of the Amazon Simple Workflow task list that should be used for automation
+     */
+    String getSimpleWorkflowTaskList() {
+        grailsApplication.config?.workflow?.taskList ?: 'primary'
+    }
+
+    /**
+     * @return the number of days to retain Amazon Simple Workflow closed executions
+     */
+    Integer getWorkflowExecutionRetentionPeriodInDays() {
+        grailsApplication.config?.workflow?.workflowExecutionRetentionPeriodInDays ?: 90
     }
 
     /**
@@ -331,7 +355,7 @@ class ConfigService {
      */
     Object getBeanNamesForPlugin(String pluginName) {
         Object beanNames = grailsApplication.config.plugin[pluginName]
-        beanNames ? beanNames : null
+        beanNames ?: null
     }
 
     /**
@@ -561,6 +585,9 @@ class ConfigService {
      * @return true if edit links should be hidden for unauthenticated users, false to show edit links to all users
      */
     boolean isAuthenticationRequiredForEdit() {
+        if (flagService.isOn(Flag.SUSPEND_AUTHENTICATION_REQUIREMENT)) {
+            return false
+        }
         grailsApplication.config.security?.authenticationRequiredForEdit ?: false
     }
 
@@ -626,13 +653,13 @@ class ConfigService {
      * @return the size of EBS volumes added to launch configurations for specific instance types
      */
     int getSizeOfEbsVolumesAddedToLaunchConfigs() {
-        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.size ?: 250
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.size ?: 125
     }
 
     /**
-     * @return device name for the single EBS volume added to launch configurations for specific instance types
+     * @return device names for the EBS volumes added to launch configurations for specific instance types
      */
-    String getEbsVolumeDeviceNameForLaunchConfigs() {
-        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.deviceName ?: '/dev/sdb'
+    List<String> getEbsVolumeDeviceNamesForLaunchConfigs() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.deviceNames ?: ['/dev/sdb', '/dev/sdc']
     }
 }
