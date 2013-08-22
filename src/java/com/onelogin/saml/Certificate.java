@@ -13,14 +13,14 @@ import org.apache.commons.codec.binary.Base64;
 public class Certificate {
 
 	private final X509Certificate x509Cert;
-	
+
 	/**
 	 * Constructs a certificate from a base64 encoded string
 	 */
  	public Certificate(String certificate) throws CertificateException {
         this(certificate.getBytes());
 	}
-	
+
 	/**
 	 * Constructs a certificate from a encoded base64 byte array.
 	 * @param certificate an encoded base64 byte array.
@@ -34,5 +34,5 @@ public class Certificate {
 
 	public X509Certificate getX509Cert() {
 		return x509Cert;
-	}						
+	}
 }
