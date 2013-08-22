@@ -143,18 +143,19 @@ class CachedMap<T> implements Fillable {
         needsInitialization = false
     }
 
+    private Closure fillCacheAndPerformCallback = {
+        try {
+            fill()
+            callback?.call()
+        } catch (Exception e) {
+            // For some reason StackTraceUtils does not print anything successfully.
+            log.error "Exception filling cache ${name}", e
+        }
+    }
+
     private void start(int intervalSeconds) {
-        CachedMap<T> thisMap = this
         int maxJitterSeconds = Math.min(intervalSeconds, 120) / 6
-        threadScheduler.schedule(intervalSeconds, maxJitterSeconds, {
-            try {
-                thisMap.fill()
-                callback?.call()
-            } catch (Exception e) {
-                // For some reason StackTraceUtils does not print anything successfully.
-                log.error "Exception filling cache ${name}", e
-            }
-        })
+        threadScheduler.scheduleAtFixedRate(intervalSeconds, maxJitterSeconds, fillCacheAndPerformCallback)
     }
 
     /**
@@ -168,6 +169,8 @@ class CachedMap<T> implements Fillable {
         // Do not fill this cache yet if the system is not yet ready to execute this cache's fill algorithm.
         // For example, if other caches need to be filled first then do not yet fill this cache.
         if (doingFirstFill && !readinessChecker()) {
+            // Not ready yet, so try again very soon.
+            threadScheduler.schedule(1, fillCacheAndPerformCallback)
             return
         }
         // Try to obtain the fill lock for this cached map. If another thread is already holding the lock, then let that
