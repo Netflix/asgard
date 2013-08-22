@@ -26,6 +26,7 @@ import com.netflix.asgard.plugin.AdvancedUserDataProvider
 import com.netflix.asgard.plugin.UserDataProvider
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class LaunchTemplateServiceSpec extends Specification {
 
     ConfigService mockConfigService = Mock(ConfigService)
@@ -129,7 +130,7 @@ class LaunchTemplateServiceSpec extends Specification {
         UserContext userContext = UserContext.auto(Region.US_WEST_1)
         AppRegistration application = new AppRegistration(name: 'hello', monitorBucketType: MonitorBucketType.cluster)
         Image image = new Image(imageId: 'ami-deadfeed')
-        AutoScalingGroup asg = new AutoScalingGroup(autoScalingGroupName: 'hello-wassup', launchConfigurationName: 'hello-wassup-987654321')
+        AutoScalingGroup asg = new AutoScalingGroup(autoScalingGroupName: 'hello-wassup')
         LaunchConfiguration launchConfig = new LaunchConfiguration(launchConfigurationName: 'hello-wassup-987654321')
 
         when:
@@ -137,7 +138,7 @@ class LaunchTemplateServiceSpec extends Specification {
 
         then:
         1 * advancedUserDataProvider.buildUserDataForCloudObjects(
-                new LaunchContext(userContext, image, application, asg, launchConfig)) >> 'ta da!'
-        userData == 'ta da!'
+                new LaunchContext(userContext, image, application, asg, launchConfig)) >> { it[0].application.name }
+        userData == 'hello'
     }
 }

@@ -63,9 +63,9 @@ class LaunchTemplateService {
                          AutoScalingGroup groupTemplate, LaunchConfiguration launchConfigTemplate) {
 
         Check.notNull(image, Image)
-        Check.notEmpty(groupTemplate.appName as String, 'appName')
+        Check.notEmpty(application.name, 'appName')
         Check.notEmpty(groupTemplate.autoScalingGroupName, 'autoScalingGroupName')
-        Check.notEmpty(groupTemplate.launchConfigurationName, 'launchConfigurationName')
+        Check.notEmpty(launchConfigTemplate.launchConfigurationName, 'launchConfigurationName')
 
         // Wrap all the inputs in a single class so we can add more inputs later without changing the plugin interface.
         LaunchContext launchContext = new LaunchContext(userContext, image, application, groupTemplate,
