@@ -394,6 +394,8 @@ ${lastGroup.loadBalancerNames}"""
             }
 
             final String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
+            if (params.nextAsgName && params.nextAsgName != nextGroupName)
+                throw new IllegalStateException("Asked for ${params.nextAsgName} but found ${nextGroupName}")
             List<ScalingPolicyData> lastScalingPolicies = awsAutoScalingService.getScalingPolicyDatas(userContext,
                     lastGroup.autoScalingGroupName)
             List<ScalingPolicyData> newScalingPolicies = lastScalingPolicies.collect { ScalingPolicyData policy ->
