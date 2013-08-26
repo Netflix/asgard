@@ -38,7 +38,7 @@ class EmailerServiceUnitSpec extends Specification {
         String expectedSubject = "Trouble: IOException 'Unable to reach Internet due to comet'"
         String expectedBodyStart = """Something has gone horribly wrong
 java.io.IOException: Unable to reach Internet due to comet
-\tat com.netflix.asgard.EmailerServiceUnitSpec"""
+\tat"""
 
         when:
         String body = emailerService.sendExceptionEmail('Something has gone horribly wrong', exception)
@@ -62,7 +62,7 @@ java.io.IOException: Unable to reach Internet due to comet
         String expectedBodyStart = """You tried to terminate HAL, yet he lives
 Status Code: 403, AWS Service: HalService, AWS Request ID: deadbeef, AWS Error Code: HalKnowsBest, \
 AWS Error Message: I'm sorry, Dave. I'm afraid I can't do that.
-\tat com.netflix.asgard.EmailerServiceUnitSpec"""
+\tat"""
 
         when:
         String body = emailerService.sendExceptionEmail('You tried to terminate HAL, yet he lives', grailsException)
