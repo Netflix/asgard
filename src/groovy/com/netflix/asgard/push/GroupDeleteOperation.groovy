@@ -17,13 +17,17 @@ package com.netflix.asgard.push
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.netflix.asgard.EntityType
+import com.netflix.asgard.From
 import com.netflix.asgard.Link
 import com.netflix.asgard.Relationships
 import com.netflix.asgard.Spring
 import com.netflix.asgard.Task
+import com.netflix.asgard.Time
 import com.netflix.asgard.UserContext
 import com.netflix.frigga.Names
 import org.apache.commons.logging.LogFactory
+import org.joda.time.DateTime
+import org.joda.time.Duration
 
 /**
  * A long running process that sets an auto scaling group to size 0, waits for all the instances to terminate, then
@@ -34,6 +38,8 @@ class GroupDeleteOperation extends AbstractPushOperation {
 
     UserContext userContext
     AutoScalingGroup autoScalingGroup
+
+    private static Duration MAX_TIME_FOR_DELETION = Duration.standardMinutes(10)
 
     GroupDeleteOperation() {
         log.info "Autowiring services in GroupDeleteOperation instance"
@@ -61,8 +67,10 @@ class GroupDeleteOperation extends AbstractPushOperation {
 
             deregisterAllInstancesInAutoScalingGroupFromLoadBalancers()
             forceDeleteAutoScalingGroup()
-            deleteLaunchConfigs(oldLaunchConfigNames)
             task.log("Auto scaling group '${groupName}' will be deleted after deflation finishes")
+            waitForDeletion()
+            deleteLaunchConfigs(oldLaunchConfigNames)
+            task.log("Finished deletion of '${autoScalingGroup.autoScalingGroupName}'")
         }, Link.to(EntityType.cluster, clusterName))
     }
 
@@ -80,6 +88,22 @@ class GroupDeleteOperation extends AbstractPushOperation {
         task.log("Deleting auto scaling group '${autoScalingGroup.autoScalingGroupName}'")
         awsAutoScalingService.deleteAutoScalingGroup(userContext, autoScalingGroup.autoScalingGroupName,
                 AsgDeletionMode.FORCE, task)
+    }
+
+    private void waitForDeletion() {
+        DateTime terminationStartTime = Time.now()
+        boolean asgStillExists = true
+        while(asgStillExists) {
+            Time.sleepCancellably(5000)
+            AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext,
+                    autoScalingGroup.autoScalingGroupName, From.AWS_NOCACHE)
+            if (!group) {
+                asgStillExists = false
+            } else if (new Duration(terminationStartTime, Time.now()).isLongerThan(MAX_TIME_FOR_DELETION)) {
+                throw new PushException("Timeout waiting ${Time.format(MAX_TIME_FOR_DELETION)} for auto scaling group " +
+                        "'${autoScalingGroup.autoScalingGroupName}' to disappear from AWS.")
+            }
+        }
     }
 
     private void deleteLaunchConfigs(List<String> launchConfigNames) {
