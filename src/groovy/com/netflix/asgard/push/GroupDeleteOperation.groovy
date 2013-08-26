@@ -92,13 +92,13 @@ class GroupDeleteOperation extends AbstractPushOperation {
 
     private void waitForDeletion() {
         DateTime terminationStartTime = Time.now()
-        boolean instanceStillExists = true
-        while(instanceStillExists) {
+        boolean asgStillExists = true
+        while(asgStillExists) {
             Time.sleepCancellably(5000)
             AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext,
                     autoScalingGroup.autoScalingGroupName, From.AWS_NOCACHE)
             if (!group) {
-                instanceStillExists = false
+                asgStillExists = false
             } else if (new Duration(terminationStartTime, Time.now()).isLongerThan(MAX_TIME_FOR_DELETION)) {
                 throw new PushException("Timeout waiting ${Time.format(MAX_TIME_FOR_DELETION)} for auto scaling group " +
                         "'${autoScalingGroup.autoScalingGroupName}' to disappear from AWS.")
