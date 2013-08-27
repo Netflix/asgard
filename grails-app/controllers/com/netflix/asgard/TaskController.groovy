@@ -62,8 +62,8 @@ class TaskController {
 
     def show = {
         Task task
-        if (params.id) {
-            String id = params.id
+        String id = params.id
+        if (id) {
             task = taskService.getTaskById(id)
         } else {
             String runId = params.runId
@@ -74,11 +74,11 @@ class TaskController {
             List<HistoryEvent> events = awsSimpleWorkflowService.getExecutionHistory(workflowExecution)
             task = Task.fromSwf(workflowExecutionDetail, events)
         }
-        String updateTime = task.updateTime ? Time.format(task.updateTime) : ''
         if (!task) {
             Requests.renderNotFound('Task', id, this)
             return
         } else {
+            String updateTime = task.updateTime ? Time.format(task.updateTime) : ''
             withFormat {
                 html { return [ 'task' : task ] }
                 xml { new XML(task).render(response) }
