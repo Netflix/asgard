@@ -17,9 +17,11 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
+import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
 
+@ContextParam('region')
 class ScheduledActionController {
 
     def awsAutoScalingService
