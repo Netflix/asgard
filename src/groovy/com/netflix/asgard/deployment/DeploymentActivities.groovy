@@ -23,8 +23,8 @@ import com.netflix.asgard.model.InstancePriceType
 /**
  * Method contracts and annotations used for the automatic deployment SWF workflow actions.
  */
-@Activities(version = "1.3")
-@ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 10L,
+@Activities(version = "1.5")
+@ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = -1L,
         defaultTaskStartToCloseTimeoutSeconds = 300L)
 interface DeploymentActivities {
 
@@ -138,7 +138,7 @@ interface DeploymentActivities {
      * @param reasonAsgIsUnhealthy textual description of the reason why an ASG is not at full health, or null if it is
      * @return indication on whether to proceed with the deployment
      */
-    @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 10L,
+    @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = -1L,
             defaultTaskStartToCloseTimeoutSeconds = 86400L)
     Boolean askIfDeploymentShouldProceed(String notificationDestination, String asgName, String operationDescription,
             String reasonAsgIsUnhealthy)
