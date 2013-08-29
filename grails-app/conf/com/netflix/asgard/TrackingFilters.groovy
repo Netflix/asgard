@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.netflix.asgard.Requests
-import com.netflix.asgard.ServerController
+package com.netflix.asgard
+
 import java.util.regex.Pattern
 import org.joda.time.DateTime
 
