@@ -37,6 +37,8 @@ class SettingsFilters {
                 request.platformserviceExists = grailsApplication.config.cloud.platformserviceRegions ? true : false
                 request.ticketLabel = configService.ticketLabel
                 request.fullTicketLabel = configService.fullTicketLabel
+                request.bleskJavaScriptUrl = configService.bleskJavaScriptUrl
+                request.bleskDataUrl = configService.bleskDataUrl
                 request.authenticationEnabled = (pluginService.authenticationProvider != null)
                 request.apiTokenEnabled = configService.apiTokenEnabled
                 boolean authenticated = SecurityUtils.subject?.authenticated
