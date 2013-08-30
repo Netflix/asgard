@@ -50,7 +50,7 @@ class WorkflowClientExternalToWorkflowInterfaceAdapter {
                 workflowOptions.tagList = workflowTags.constructTags()
             }
             dynamicWorkflowClient.startWorkflowExecution(args as Object[], workflowOptions)
-            callback.call(dynamicWorkflowClient.workflowExecution)
+            callback?.call(dynamicWorkflowClient.workflowExecution)
         }
         if (reflectionHelper.findAnnotationOnMethod(GetState, method)) {
             return dynamicWorkflowClient.getWorkflowExecutionState(method.returnType)
