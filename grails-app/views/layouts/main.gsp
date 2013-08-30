@@ -143,7 +143,7 @@
   </g:if>
   <div class="clear"></div>
   <g:if test="${bleskDataUrl}">
-    <div id="blesk" data-appid="asgard" data-server="${bleskDataUrl}"></div>
+    <div id="blesk" data-appid="asgard" data-server="${bleskDataUrl}" data-context-env="${env}" data-context-region="${region.code}"></div>
   </g:if>
   <g:layoutBody/>
   <script type="text/javascript">
