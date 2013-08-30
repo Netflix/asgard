@@ -351,8 +351,8 @@ class ConfigService {
     /**
      * @return the base server URL for generating links to the current Asgard instance in outgoing emails
      */
-    String getEmailLinkServerUrl() {
-        grailsApplication.config.email?.linkServerUrl ?: grailsApplication.config.grails.serverURL ?:
+    String getLinkCanonicalServerUrl() {
+        grailsApplication.config.link?.canonicalServerUrl ?: grailsApplication.config.grails.serverURL ?:
                 'http://localhost:8080/'
     }
 

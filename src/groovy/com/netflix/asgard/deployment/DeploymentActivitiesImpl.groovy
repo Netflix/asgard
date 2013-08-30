@@ -233,7 +233,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         ${getStatusText(asgName, reasonAsgIsUnhealthy)}
         Please determine if the deployment should proceed.
 
-        ${grailsLinkGenerator.link(base: configService.emailLinkServerUrl, controller: 'task', action: 'show',
+        ${grailsLinkGenerator.link(base: configService.linkCanonicalServerUrl, controller: 'task', action: 'show',
                 params: [workflowId: workflowExecution.workflowId, runId: workflowExecution.runId,
                         taskToken: activity.taskToken])}
         """.stripIndent()
@@ -248,7 +248,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         String message = """
         ${getStatusText(asgName, reasonAsgIsUnhealthy)}
 
-        ${grailsLinkGenerator.link(base: configService.emailLinkServerUrl, controller: 'cluster', action: 'show',
+        ${grailsLinkGenerator.link(base: configService.linkCanonicalServerUrl, controller: 'cluster', action: 'show',
                 id: clusterName)}
         """.stripIndent()
         emailerService.sendUserEmail(notificationDestination, subject, message)
