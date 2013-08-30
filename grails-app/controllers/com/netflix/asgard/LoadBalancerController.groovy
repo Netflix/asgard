@@ -234,7 +234,7 @@ class LoadBalancerController {
         }
 
         if (healthCheckUpdated) {
-            String msg  = "Load Balancer '${name}' health check has been updated. "
+            String msg = "Load Balancer '${name}' health check has been updated. "
             flash.message = flash.message ? flash.message + msg : msg
         }
         redirect(action: 'show', params: [id: name])

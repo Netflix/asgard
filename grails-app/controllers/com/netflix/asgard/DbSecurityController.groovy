@@ -36,8 +36,10 @@ class DbSecurityController {
                 it.getDBSecurityGroupName().toLowerCase() }
         withFormat {
             html {
-                [ 'dbSecurityGroups' : dbSecurityGroups,
-                  'accountNames' : grailsApplication.config.grails.awsAccountNames ]
+                [
+                        dbSecurityGroups: dbSecurityGroups,
+                        accountNames: grailsApplication.config.grails.awsAccountNames
+                ]
             }
             xml { new XML(dbSecurityGroups).render(response) }
             json { new JSON(dbSecurityGroups).render(response) }
@@ -51,9 +53,10 @@ class DbSecurityController {
         if (!group) {
             Requests.renderNotFound('DB Security Group', name, this)
         } else {
-            def details = [
-                    'group' : group,
-                    'accountNames' : grailsApplication.config.grails.awsAccountNames ]
+            Map details = [
+                    group: group,
+                    accountNames: grailsApplication.config.grails.awsAccountNames
+            ]
             // TODO referenced-from lists would be nice too
             withFormat {
                 html { return details }

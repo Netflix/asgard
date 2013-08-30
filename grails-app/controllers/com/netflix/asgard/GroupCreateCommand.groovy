@@ -57,7 +57,7 @@ import grails.validation.Validateable
         if (groupName.length() > Relationships.GROUP_NAME_MAX_LENGTH) {
             return ['compoundName.invalid.max.size', groupName, Relationships.GROUP_NAME_MAX_LENGTH]
         }
-        Region region =  Region.withCode(command.region)
+        Region region = Region.withCode(command.region)
         if (command.awsAutoScalingService.getAutoScalingGroup(new UserContext(region: region), groupName)) {
             return ['groupName.exists', groupName]
         }
