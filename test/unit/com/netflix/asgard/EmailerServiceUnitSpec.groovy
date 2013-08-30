@@ -20,16 +20,93 @@ import com.amazonaws.services.identitymanagement.model.DeleteConflictException
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.exceptions.GrailsRuntimeException
+import org.springframework.mail.MailSender
+import org.springframework.mail.SimpleMailMessage
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class EmailerServiceUnitSpec extends Specification {
 
+    MailSender mailSender = Mock(MailSender)
     EmailerService emailerService = Spy(EmailerService)
     GrailsApplication grailsApplication = new DefaultGrailsApplication()
+    ConfigService configService = new ConfigService(grailsApplication: grailsApplication)
 
     void setup() {
         grailsApplication.config.email.errorSubjectStart = 'Trouble'
+        grailsApplication.config.email.systemEmailAddress = 'hal9000@discoveryone.gov'
+        grailsApplication.config.email.fromAddress = 'mom'
         emailerService.grailsApplication = grailsApplication
+    }
+
+    def 'should send system email if configured to do so'() {
+        grailsApplication.config.email.systemEnabled = true
+        emailerService.afterPropertiesSet()
+        emailerService.mailSender = mailSender
+
+        when:
+        emailerService.sendSystemEmail('sub', 'bod')
+
+        then:
+        1 * mailSender.send(_) >> { SimpleMailMessage msg ->
+            assert msg.from == 'hal9000@discoveryone.gov'
+            assert msg.replyTo == 'hal9000@discoveryone.gov'
+            assert msg.subject == 'sub'
+            assert msg.text == 'bod'
+            assert msg.to == ['hal9000@discoveryone.gov']
+        }
+    }
+
+    def 'should not send system email if configured not to do so'() {
+        grailsApplication.config.email.systemEnabled = false
+        emailerService.afterPropertiesSet()
+        emailerService.mailSender = mailSender
+
+        when:
+        emailerService.sendSystemEmail('sub', 'bod')
+
+        then:
+        0 * mailSender.send(_)
+    }
+
+    def 'should send user email with correct from address, if configured to do so'() {
+        grailsApplication.config.email.userEnabled = true
+        emailerService.afterPropertiesSet()
+        emailerService.mailSender = mailSender
+
+        when:
+        emailerService.sendUserEmail('dadams', 'sub', 'bod')
+
+        then:
+        1 * mailSender.send(_) >> { SimpleMailMessage msg ->
+            assert msg.from == 'mom'
+            assert msg.replyTo == 'mom'
+            assert msg.subject == 'sub'
+            assert msg.text == 'bod'
+            assert msg.to == ['dadams']
+        }
+    }
+
+    def 'should not send user email if configured not to do so'() {
+        grailsApplication.config.email.userEnabled = false
+        emailerService.afterPropertiesSet()
+        emailerService.mailSender = mailSender
+
+        when:
+        emailerService.sendUserEmail('dadams', 'sub', 'bod')
+
+        then:
+        0 * mailSender.send(_)
+    }
+
+    def 'smtp host should be set'() {
+        grailsApplication.config.email.smtpHost = 'oogabooga.com'
+
+        when:
+        emailerService.afterPropertiesSet()
+
+        then:
+        emailerService.mailSender.host == 'oogabooga.com'
     }
 
     def 'non-Amazon error email subject should get to the point'() {
