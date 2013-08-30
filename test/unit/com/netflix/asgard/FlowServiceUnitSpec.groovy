@@ -52,7 +52,7 @@ class FlowServiceUnitSpec extends Specification {
         client.schedulingOptions.tagList == expectedTagList
 
         when:
-        def workflow = client.asWorkflow(dynamicWorkflowClient)
+        def workflow = client.asWorkflow(null, dynamicWorkflowClient)
 
         then:
         workflow instanceof WorkflowClientExternalToWorkflowInterfaceAdapter

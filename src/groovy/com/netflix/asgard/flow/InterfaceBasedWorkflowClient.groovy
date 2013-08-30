@@ -37,7 +37,8 @@ class InterfaceBasedWorkflowClient<T> extends WorkflowClientExternalBase {
 
     InterfaceBasedWorkflowClient(Class<T> workflowInterface, WorkflowDescriptionTemplate workflowDescriptionTemplate,
             WorkflowExecution workflowExecution, WorkflowType workflowType, StartWorkflowOptions options,
-            DataConverter dataConverter, GenericWorkflowClientExternal genericClient, workflowTags = new WorkflowTags()) {
+            DataConverter dataConverter, GenericWorkflowClientExternal genericClient,
+            workflowTags = new WorkflowTags()) {
         super(workflowExecution, workflowType, options, dataConverter, genericClient)
         this.workflowInterface = workflowInterface
         this.workflowDescriptionTemplate = workflowDescriptionTemplate
@@ -48,8 +49,9 @@ class InterfaceBasedWorkflowClient<T> extends WorkflowClientExternalBase {
      * @param client override for specifying an alternate client (useful during testing)
      * @return an SWF workflow client that looks like the workflow interface
      */
-    public T asWorkflow(DynamicWorkflowClientExternal client = null) {
+    public T asWorkflow(WorkflowExecutionCreationCallback callback = new NoOpWorkflowExecutionCreationCallback(),
+                        DynamicWorkflowClientExternal client = null) {
         new WorkflowClientExternalToWorkflowInterfaceAdapter(client ?: dynamicWorkflowClient, workflowInterface,
-                workflowDescriptionTemplate, workflowTags) as T
+                workflowDescriptionTemplate, workflowTags, callback) as T
     }
 }
