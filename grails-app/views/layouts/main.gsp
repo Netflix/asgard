@@ -142,6 +142,9 @@
    </ul>
   </g:if>
   <div class="clear"></div>
+  <g:if test="${bleskDataUrl}">
+    <div id="blesk" data-appid="asgard" data-server="${bleskDataUrl}"></div>
+  </g:if>
   <g:layoutBody/>
   <script type="text/javascript">
     window.browserGlobalsFromServer = {
@@ -154,6 +157,9 @@
   <script type="text/javascript" src="${resource(dir: 'js', file: 'jquery.js')}?v=${build}"></script>
   <script defer type="text/javascript" src="${resource(dir: 'js/select2-3.2', file: 'select2.min.js')}?v=${build}"></script>
   <script defer type="text/javascript" src="${resource(dir: 'js', file: 'custom.js')}?v=${build}"></script>
+  <g:if test="${bleskJavaScriptUrl}">
+    <script defer type="text/javascript" src="${bleskJavaScriptUrl}?v=${build}"></script>
+  </g:if>
   <g:render template="/layouts/occasion"/>
 </body>
 </html>
