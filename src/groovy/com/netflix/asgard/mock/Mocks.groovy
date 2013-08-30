@@ -369,7 +369,7 @@ class Mocks {
         if (emailerService == null) {
             MockUtils.mockLogging(EmailerService, false)
             emailerService = new EmailerService()
-            emailerService.grailsApplication = grailsApplication()
+            emailerService.configService = configService()
             emailerService.afterPropertiesSet()
         }
         emailerService

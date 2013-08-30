@@ -34,7 +34,7 @@ class EmailerService implements InitializingBean {
     boolean userEmailsEnabled = true
     MailSender mailSender
     SimpleMailMessage mailMessage // a "prototype" email instance
-    def grailsApplication
+    def configService
 
     void afterPropertiesSet() {
         // Hide Spring and Tomcat stack trace elements in sanitized exceptions.
@@ -43,23 +43,23 @@ class EmailerService implements InitializingBean {
                 "gjdk.groovy.,org.apache.catalina.,org.apache.coyote.,org.apache.tomcat.,org.springframework.web.,")
 
         // Only send error emails for non-development instances
-        systemEmailsEnabled = grailsApplication.config.email.systemEnabled ? true : false
-        userEmailsEnabled = grailsApplication.config.email.userEnabled ? true : false
+        systemEmailsEnabled = configService.systemEmailEnabled
+        userEmailsEnabled = configService.userEmailEnabled
         mailSender = new JavaMailSenderImpl()
-        mailSender.host = grailsApplication.config.email.smtpHost
+        mailSender.host = configService.smtpHost
         mailMessage = new SimpleMailMessage()
     }
 
     def sendUserEmail(String to, String subject, String text) {
         if (userEmailsEnabled) {
-            String from = grailsApplication.config.email.fromAddress
+            String from = configService.fromAddressForEmail
             sendEmail(to, from, from, subject, text)
         }
     }
 
     def sendSystemEmail(String subject, String text) {
         if (systemEmailsEnabled) {
-            String systemEmailAddress = grailsApplication.config.email.systemEmailAddress
+            String systemEmailAddress = configService.systemEmailAddress
             sendEmail(systemEmailAddress, systemEmailAddress, systemEmailAddress, subject, text)
         }
     }
@@ -79,7 +79,7 @@ class EmailerService implements InitializingBean {
         StringWriter sw = new StringWriter()
         sw.write(debugData + "\n")
         PrintWriter printWriter = new PrintWriter(sw)
-        String emailSubject = grailsApplication.config.email.errorSubjectStart
+        String emailSubject = configService.errorEmailSubjectStart
         if (exception) {
 
             // Find the root cause, but don't risk infinite loops of causes. Don't use ExceptionUtils.getRootCause

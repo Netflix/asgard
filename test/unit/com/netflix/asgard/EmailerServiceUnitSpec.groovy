@@ -36,7 +36,7 @@ class EmailerServiceUnitSpec extends Specification {
         grailsApplication.config.email.errorSubjectStart = 'Trouble'
         grailsApplication.config.email.systemEmailAddress = 'hal9000@discoveryone.gov'
         grailsApplication.config.email.fromAddress = 'mom'
-        emailerService.grailsApplication = grailsApplication
+        emailerService.configService = configService
     }
 
     def 'should send system email if configured to do so'() {
