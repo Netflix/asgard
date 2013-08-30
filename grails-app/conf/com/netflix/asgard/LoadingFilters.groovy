@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Netflix, Inc.
+ * Copyright 2012 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.netflix.asgard.plugin.AuthorizationProvider
+package com.netflix.asgard
 
-/**
- * Invokes Shiro's access control if any of the configured {@link AuthorizationProvider} objects indicates the current
- * subject does not have access to the requested endpoint.
- */
-class AuthorizationFilters {
+import javax.servlet.http.HttpServletResponse
 
-    def pluginService
+class LoadingFilters {
+
+    def dependsOn = [InitFilters]
+
+    def initService
 
     def filters = {
-        all(controller: '*', action: '*') {
+        all(controller: '(cache|init|healthcheck|server|firefox)', invert: true) {
             before = {
-                Collection<AuthorizationProvider> authorizationProviders = pluginService.authorizationProviders
-                if (authorizationProviders.any { !it.isAuthorized(request, controllerName, actionName) }) {
-                    return accessControl()
+                if (!initService.cachesFilled() && !System.getProperty('skipCacheFill')) {
+                    render(status: HttpServletResponse.SC_SERVICE_UNAVAILABLE, view: '/loading')
+                    return false
                 }
-                true
+                return true
             }
         }
     }
+
 }

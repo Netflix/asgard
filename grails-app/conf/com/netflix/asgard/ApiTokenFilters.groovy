@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.netflix.asgard
+
 import com.netflix.asgard.auth.ApiToken
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.AuthenticationException
