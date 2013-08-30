@@ -349,6 +349,14 @@ class ConfigService {
     }
 
     /**
+     * @return the base server URL for generating links to the current Asgard instance in outgoing emails
+     */
+    String getLinkCanonicalServerUrl() {
+        grailsApplication.config.link?.canonicalServerUrl ?: grailsApplication.config.grails.serverURL ?:
+                'http://localhost:8080/'
+    }
+
+    /**
      * @param the plugin name
      * @return the bean names used for this plugin implementation, null if none configured. This can be either a single
      *          string or a list of strings depending on the plugin
