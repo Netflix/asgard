@@ -42,6 +42,7 @@ class WorkflowClientExternalToWorkflowInterfaceAdapter {
         if (reflectionHelper.findAnnotationOnMethod(Execute, method)) {
             StartWorkflowOptions workflowOptions = dynamicWorkflowClient.schedulingOptions ?: new StartWorkflowOptions()
             if (workflowDescriptionTemplate) {
+                //noinspection GroovyAssignabilityCheck
                 method.invoke(workflowDescriptionTemplate, args)
                 workflowTags.withTags(workflowOptions.tagList)
                 workflowTags.desc = workflowDescriptionTemplate.description
