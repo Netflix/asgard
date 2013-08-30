@@ -293,6 +293,9 @@ class DeploymentActivitiesSpec extends Specification {
                     <link>
                     '''.stripIndent())
         }
+        with(mockConfigService) {
+            1 * getEmailLinkServerUrl() >> 'http://asgard'
+        }
         0 * _
     }
 
@@ -317,6 +320,9 @@ class DeploymentActivitiesSpec extends Specification {
 
                     <link>
                     '''.stripIndent())
+        }
+        with(mockConfigService) {
+            1 * getEmailLinkServerUrl() >> 'http://asgard'
         }
         0 * _
     }
