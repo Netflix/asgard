@@ -453,6 +453,20 @@ class ConfigService {
     }
 
     /**
+     * @return the URL of the JavaScript file to import when integrating with the Blesk notification system
+     */
+    String getBleskJavaScriptUrl() {
+        grailsApplication.config.blesk?.javaScriptUrl ?: null
+    }
+
+    /**
+     * @return the URL from which Blesk should pull notification data
+     */
+    String getBleskDataUrl() {
+        grailsApplication.config.blesk?.dataUrl ?: null
+    }
+
+    /**
      * @return the names of the security groups that should be applied to all non-VPC deployments
      */
     List<String> getDefaultSecurityGroups() {
