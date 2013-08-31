@@ -35,6 +35,7 @@ class WorkflowClientExternalToWorkflowInterfaceAdapter {
     final Class workflowType
     final WorkflowDescriptionTemplate workflowDescriptionTemplate
     final WorkflowTags workflowTags = new WorkflowTags()
+    final WorkflowExecutionCreationCallback callback
 
     def methodMissing(String name, args) {
         ReflectionHelper reflectionHelper = new ReflectionHelper(workflowType)
@@ -42,12 +43,14 @@ class WorkflowClientExternalToWorkflowInterfaceAdapter {
         if (reflectionHelper.findAnnotationOnMethod(Execute, method)) {
             StartWorkflowOptions workflowOptions = dynamicWorkflowClient.schedulingOptions ?: new StartWorkflowOptions()
             if (workflowDescriptionTemplate) {
+                //noinspection GroovyAssignabilityCheck
                 method.invoke(workflowDescriptionTemplate, args)
                 workflowTags.withTags(workflowOptions.tagList)
                 workflowTags.desc = workflowDescriptionTemplate.description
                 workflowOptions.tagList = workflowTags.constructTags()
             }
             dynamicWorkflowClient.startWorkflowExecution(args as Object[], workflowOptions)
+            callback?.call(dynamicWorkflowClient.workflowExecution)
         }
         if (reflectionHelper.findAnnotationOnMethod(GetState, method)) {
             return dynamicWorkflowClient.getWorkflowExecutionState(method.returnType)
