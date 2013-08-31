@@ -47,6 +47,48 @@ class ConfigService {
     }
 
     /**
+     * @return true if emails are enabled for sending system errors to Asgard admins, false otherwise
+     */
+    boolean isSystemEmailEnabled() {
+        grailsApplication.config.email.systemEnabled
+    }
+
+    /**
+     * @return true if emails are enabled for sending notifications to app owners about cloud changes, false otherwise
+     */
+    boolean isUserEmailEnabled() {
+        grailsApplication.config.email.userEnabled
+    }
+
+    /**
+     * @return the Simple Mail Transport Protocol (SMTP) host that should be used for sending emails
+     */
+    String getSmtpHost() {
+        grailsApplication.config.email.smtpHost ?: null
+    }
+
+    /**
+     * @return the "from" address for sending user emails
+     */
+    String getFromAddressForEmail() {
+        grailsApplication.config.email.fromAddress ?: null
+    }
+
+    /**
+     * @return the email address that should receive system-level error email alerts
+     */
+    String getSystemEmailAddress() {
+        grailsApplication.config.email.systemEmailAddress ?: null
+    }
+
+    /**
+     * @return the common beginning of all system error email subjects
+     */
+    String getErrorEmailSubjectStart() {
+        grailsApplication.config.email.errorSubjectStart ?: null
+    }
+
+    /**
      * Gets the Amazon Web Services account number for the current environment. This must be the first account number
      * string in the awsAccounts list in Config.groovy.
      *
