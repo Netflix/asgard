@@ -15,7 +15,10 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.ec2.model.Image
+import com.netflix.asgard.model.LaunchContext
 
 class LaunchTemplateService {
 
@@ -50,16 +53,24 @@ class LaunchTemplateService {
     }
 
     String buildUserDataForImage(UserContext userContext, Image image) {
-        String appName = image?.packageName ?: ''
-        pluginService.userDataProvider.buildUserDataForVariables(userContext, appName, '', '')
+
+        Check.notNull(image, Image)
+        LaunchContext launchContext = new LaunchContext(userContext: userContext, image: image)
+        pluginService.advancedUserDataProvider.buildUserDataForCloudObjects(launchContext)
     }
 
-    String buildUserData(UserContext userContext, String autoScalingGroupName, String launchConfigurationName) {
-        Check.notEmpty(autoScalingGroupName, 'autoScalingGroupName')
-        Check.notEmpty(launchConfigurationName, 'launchConfigurationName')
-        String appName = Relationships.appNameFromGroupName(autoScalingGroupName)
-        pluginService.userDataProvider.buildUserDataForVariables(userContext, appName, autoScalingGroupName,
-                launchConfigurationName)
+    String buildUserData(UserContext userContext, AppRegistration application, Image image,
+                         AutoScalingGroup groupTemplate, LaunchConfiguration launchConfigTemplate) {
+
+        Check.notNull(image, Image)
+        Check.notEmpty(application.name, 'appName')
+        Check.notEmpty(groupTemplate.autoScalingGroupName, 'autoScalingGroupName')
+        Check.notEmpty(launchConfigTemplate.launchConfigurationName, 'launchConfigurationName')
+
+        // Wrap all the inputs in a single class so we can add more inputs later without changing the plugin interface.
+        LaunchContext launchContext = new LaunchContext(userContext, image, application, groupTemplate,
+                launchConfigTemplate)
+        pluginService.advancedUserDataProvider.buildUserDataForCloudObjects(launchContext)
     }
 
 }

@@ -15,19 +15,39 @@
  */
 package com.netflix.asgard
 
-import spock.lang.Specification
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.SecurityGroup
+import com.netflix.asgard.mock.Mocks
+import com.netflix.asgard.model.LaunchContext
+import com.netflix.asgard.model.MonitorBucketType
+import com.netflix.asgard.plugin.AdvancedUserDataProvider
+import com.netflix.asgard.plugin.UserDataProvider
+import spock.lang.Specification
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class LaunchTemplateServiceSpec extends Specification {
 
     ConfigService mockConfigService = Mock(ConfigService)
     CachedMap mockSecurityGroupCache = Mock(CachedMap)
     Caches caches
     LaunchTemplateService launchTemplateService
+    PluginService pluginService
+    AdvancedUserDataProvider advancedUserDataProvider
+    UserDataProvider userDataProvider
 
     def setup() {
         caches = new Caches(new MockCachedMapBuilder([(EntityType.security): mockSecurityGroupCache]))
-        launchTemplateService = new LaunchTemplateService(configService: mockConfigService, caches: caches)
+        advancedUserDataProvider = Mock(DefaultAdvancedUserDataProvider)
+        userDataProvider = Mock(UserDataProvider)
+        pluginService = Mock(PluginService) {
+            getAdvancedUserDataProvider() >> advancedUserDataProvider
+        }
+        advancedUserDataProvider.getPluginService() >> pluginService
+        launchTemplateService = new LaunchTemplateService(configService: mockConfigService, caches: caches,
+                pluginService: pluginService)
+        Mocks.createDynamicMethods()
     }
 
     def 'should include default security group names'() {
@@ -103,5 +123,22 @@ class LaunchTemplateServiceSpec extends Specification {
 
         then:
         securityGroups == ['sg1', 'dsg1'] as Set
+    }
+
+    def 'should build user data string'() {
+
+        UserContext userContext = UserContext.auto(Region.US_WEST_1)
+        AppRegistration application = new AppRegistration(name: 'hello', monitorBucketType: MonitorBucketType.cluster)
+        Image image = new Image(imageId: 'ami-deadfeed')
+        AutoScalingGroup asg = new AutoScalingGroup(autoScalingGroupName: 'hello-wassup')
+        LaunchConfiguration launchConfig = new LaunchConfiguration(launchConfigurationName: 'hello-wassup-987654321')
+
+        when:
+        String userData = launchTemplateService.buildUserData(userContext, application, image, asg, launchConfig)
+
+        then:
+        1 * advancedUserDataProvider.buildUserDataForCloudObjects(
+                new LaunchContext(userContext, image, application, asg, launchConfig)) >> { it[0].application.name }
+        userData == 'hello'
     }
 }

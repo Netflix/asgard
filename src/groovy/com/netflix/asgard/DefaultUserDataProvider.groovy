@@ -46,6 +46,6 @@ class DefaultUserDataProvider implements UserDataProvider {
     }
 
     private String exportVar(String name, String val, boolean includePrefix = true) {
-        "export ${includePrefix ? configService.userDataVarPrefix : ''}${name}=${val}\n"
+        "export ${includePrefix ? configService.userDataVarPrefix : ''}${name}=${val ?: ''}\n"
     }
 }
