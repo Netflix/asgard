@@ -17,19 +17,24 @@ package com.netflix.asgard.model
 import com.amazonaws.services.ec2.model.Subnet
 import com.google.common.base.Function
 import com.google.common.base.Supplier
+import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Maps
 import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
 import com.netflix.asgard.Check
 import com.netflix.asgard.Relationships
-import groovy.transform.Immutable
+import groovy.transform.Canonical
 
 /**
  * These are nontrivial queries we like to perform on subnets.
  */
-@Immutable class Subnets {
+@Canonical class Subnets {
     /** All of the subnets contained in this object. */
-    Collection<SubnetData> allSubnets
+    final private Collection<SubnetData> allSubnets
+
+    private Subnets(Collection<SubnetData> allSubnets) {
+        this.allSubnets = ImmutableSet.copyOf(allSubnets)
+    }
 
     /**
      * Construct Subnets from AWS Subnets
@@ -38,7 +43,7 @@ import groovy.transform.Immutable
      * @return a new immutable Subnets based off the subnets
      */
     public static Subnets from(Collection<Subnet> subnets) {
-        new Subnets(allSubnets: subnets.collect() { SubnetData.from(it) })
+        new Subnets(subnets.collect() { SubnetData.from(it) })
     }
 
     /**
