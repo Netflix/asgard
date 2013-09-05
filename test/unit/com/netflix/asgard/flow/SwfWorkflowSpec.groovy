@@ -20,12 +20,12 @@ import com.amazonaws.services.simpleworkflow.flow.WorkflowClock
 import com.amazonaws.services.simpleworkflow.flow.core.Promise
 import com.amazonaws.services.simpleworkflow.flow.core.Settable
 import com.amazonaws.services.simpleworkflow.flow.worker.CurrentDecisionContext
-import com.netflix.asgard.flow.example.HelloWorldActivities
+import com.netflix.asgard.flow.example.trip.BayAreaTripActivities
 import spock.lang.Specification
 
 class SwfWorkflowSpec extends Specification {
 
-    Workflow<HelloWorldActivities> workflow = SwfWorkflow.of(HelloWorldActivities)
+    Workflow<BayAreaTripActivities> workflow = SwfWorkflow.of(BayAreaTripActivities)
 
     def 'should get activities'() {
         expect:

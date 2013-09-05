@@ -24,6 +24,8 @@ import java.util.concurrent.CancellationException
 
 /**
  * Common behavior for an SWF workflow. This enables implementations that are not tied to SWF.
+ *
+ * @param < A > The interface for the SWF activities used by this workflow.
  */
 abstract class Workflow<A> {
 
@@ -33,11 +35,13 @@ abstract class Workflow<A> {
      * Log a message from the workflow.
      *
      * @param message to log
+     * @return void promise to satisfy blocks expecting a returned promise (status is often the last line)
      */
-    void status(String message) {
+    Promise<Void> status(String message) {
         if (message) {
             logHistory << message
         }
+        Promise.Void()
     }
 
     /**
@@ -70,10 +74,21 @@ abstract class Workflow<A> {
      * Execute the closure once the promise is ready. No threads are made to sleep in the process.
      *
      * @param promise that must be ready before work can be done
-     * @param work to do
+     * @param work is a Closure that has the actual result of the waited on promise passed in
      * @return a promised result of the work
      */
     abstract <T> Promise<T> waitFor(Promise<?> promise, Closure<? extends Promise<T>> work)
+
+    /**
+     * Execute the closure once the activity result is ready. No threads are made to sleep in the process.
+     *
+     * @param activityResult that must be ready before work can be done
+     * @param work is a Closure that has the actual result of the waited on promise passed in
+     * @return a promised result of the work
+     */
+    public <T> Promise<T> waitFor(Object activityResult, Closure<? extends Promise<T>> work) {
+        waitFor(promiseFor(activityResult), work)
+    }
 
     /**
      * Using this with the results from activities avoids code generation that would change the return

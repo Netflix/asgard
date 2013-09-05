@@ -43,7 +43,7 @@ class LocalWorkflow<A> extends Workflow<A> {
     @Override
     <T> Promise<T> waitFor(Promise<?> promise, Closure<? extends Promise<T>> work) {
         if (promise.isReady()) {
-            return work()
+            return work(promise.get())
         }
         new Settable()
     }

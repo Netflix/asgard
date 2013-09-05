@@ -17,7 +17,7 @@ package com.netflix.asgard.flow
 
 import com.amazonaws.services.simpleworkflow.flow.DynamicActivitiesClient
 import com.amazonaws.services.simpleworkflow.model.ActivityType
-import com.netflix.asgard.flow.example.HelloWorldActivities
+import com.netflix.asgard.flow.example.trip.BayAreaTripActivities
 import spock.lang.Specification
 
 class AsyncCallerSpec extends Specification {
@@ -28,13 +28,13 @@ class AsyncCallerSpec extends Specification {
             getInstance() >> mockDynamicActivitiesClient
         }
 
-        def activities = AsyncCaller.of(HelloWorldActivities, null, mockDynamicActivitiesClientFactory)
+        def activities = AsyncCaller.of(BayAreaTripActivities, null, mockDynamicActivitiesClientFactory)
 
         when:
-        activities.printHello('hi')
+        activities.enjoy('passing tests')
 
         then:
-        1 * mockDynamicActivitiesClient.scheduleActivity(new ActivityType(name: 'HelloWorldActivities.printHello',
-                version: '1.0'), { it.collect { it.get() } == ['hi'] }, null, Void, null)
+        1 * mockDynamicActivitiesClient.scheduleActivity(new ActivityType(name: 'BayAreaTripActivities.enjoy',
+                version: '1.0'), { it.collect { it.get() } == ['passing tests'] }, null, String, null)
     }
 }

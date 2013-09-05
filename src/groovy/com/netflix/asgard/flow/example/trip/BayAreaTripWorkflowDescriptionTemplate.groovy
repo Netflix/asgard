@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.flow
+package com.netflix.asgard.flow.example.trip
 
-import com.amazonaws.services.simpleworkflow.model.WorkflowType
-import com.netflix.asgard.flow.example.trip.BayAreaTripWorkflow
-import spock.lang.Specification
+import com.netflix.asgard.flow.WorkflowDescriptionTemplate
 
-class WorkflowMetaAttributesSpec extends Specification {
+/**
+ * Constructs the description for a specific execution of the BayAreaTripWorkflow.
+ */
+class BayAreaTripWorkflowDescriptionTemplate extends WorkflowDescriptionTemplate implements BayAreaTripWorkflow {
 
-    def 'should get WorkflowType for class'() {
-        WorkflowMetaAttributes workflowMetaAttributes = new WorkflowMetaAttributes(BayAreaTripWorkflow)
-
-        expect:
-        workflowMetaAttributes.workflowType == new WorkflowType(name: 'BayAreaTripWorkflow.start', version: '1.0')
+    @Override
+    void start(String name, Collection<BayAreaLocation> previouslyVisited) {
+        description = "${name} is taking a trip in the Bay Area."
     }
-
 }

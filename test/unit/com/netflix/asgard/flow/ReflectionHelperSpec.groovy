@@ -18,19 +18,19 @@ package com.netflix.asgard.flow
 import com.amazonaws.services.simpleworkflow.flow.annotations.Execute
 import com.amazonaws.services.simpleworkflow.flow.annotations.GetState
 import com.amazonaws.services.simpleworkflow.flow.annotations.WorkflowRegistrationOptions
-import com.netflix.asgard.flow.example.HelloWorldWorkflow
+import com.netflix.asgard.flow.example.trip.BayAreaTripWorkflow
 import java.lang.reflect.Method
 import spock.lang.Specification
 
 class ReflectionHelperSpec extends Specification {
 
-    ReflectionHelper reflectionHelper = new ReflectionHelper(HelloWorldWorkflow)
+    ReflectionHelper reflectionHelper = new ReflectionHelper(BayAreaTripWorkflow)
 
     def 'should return method'() {
         expect:
-        reflectionHelper.findMethodForNameAndArgs('helloWorld', ['']).name == 'helloWorld'
-        !reflectionHelper.findMethodForNameAndArgs('yoWorld', [''])
-        !reflectionHelper.findMethodForNameAndArgs('helloWorld', [0])
+        reflectionHelper.findMethodForNameAndArgs('start', ['', []]).name == 'start'
+        !reflectionHelper.findMethodForNameAndArgs('end', ['', []])
+        !reflectionHelper.findMethodForNameAndArgs('start', [0])
     }
 
     class DoSomethinger {
@@ -54,7 +54,7 @@ class ReflectionHelperSpec extends Specification {
     }
 
     def 'should return annotation on method'() {
-        Method method = reflectionHelper.findMethodForNameAndArgs('helloWorld',[''])
+        Method method = reflectionHelper.findMethodForNameAndArgs('start', ['', []])
 
         expect:
         reflectionHelper.findAnnotationOnMethod(Execute, method).version() == '1.0'

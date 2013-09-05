@@ -56,7 +56,7 @@ class SwfWorkflow<A> extends Workflow<A> {
         new Functor([promise] as Promise[]) {
             @Override
             protected Promise doExecute() {
-                work()
+                work(promise.get())
             }
         }
     }

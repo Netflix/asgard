@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.flow.example
-
-import com.amazonaws.services.simpleworkflow.flow.annotations.Activities
-import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrationOptions
+package com.netflix.asgard.flow.example.trip
 
 /**
- * Contract of the hello world activities
+ * Used as part of the BayAreaTripWorkflow example of an SWF workflow.
  */
-@Activities(version = "1.0")
-@ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = 30L,
-        defaultTaskStartToCloseTimeoutSeconds = 10L)
-interface HelloWorldActivities {
+public enum BayAreaLocation {
+    GoldenGateBridge('the Golden Gate Bridge'),
+    Redwoods('Muir Woods'),
+    Boardwalk('the Santa Cruz Boardwalk'),
+    Monterey('Monterey Bay')
 
-    void printHello(String name)
+    private final String displayName
 
-    String getHello()
+    BayAreaLocation(String displayName) {
+        this.displayName = displayName
+    }
 
-    Collection<String> getClusterNames()
-
-    void throwException()
-
-    Boolean takeNap(long seconds)
+    String toString() {
+        displayName
+    }
 }
