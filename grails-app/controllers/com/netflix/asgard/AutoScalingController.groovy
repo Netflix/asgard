@@ -243,7 +243,8 @@ class AutoScalingController {
                 healthCheckType: params.healthCheckType,
                 healthCheckGracePeriod: tryParse(params.healthCheckGracePeriod),
                 availabilityZones: selectedZones,
-                suspendedProcesses: processes
+                suspendedProcesses: processes,
+				tags: params.tags
         )
         List<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
             it.groupName?.toLowerCase()
@@ -302,6 +303,16 @@ class AutoScalingController {
             Subnets subnets = awsEc2Service.getSubnets(userContext)
             String subnetPurpose = params.subnetPurpose ?: null
             String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
+			
+			// Auto Scaling Group Tags
+			List<Tag> tags = new ArrayList<Tag>();
+			
+			if (params.tags) {
+				params.tags.value.each { key, value ->
+					Tag t = new Tag(key:key, value:value, propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:groupName, resourceType:"auto-scaling-group")
+					tags.add(t);
+				}
+			}
 
             // Auto Scaling Group
             Integer minSize = (params.min ?: 0) as Integer
@@ -320,7 +331,7 @@ class AutoScalingController {
                     withMinSize(minSize).withDesiredCapacity(desiredCapacity).
                     withMaxSize(maxSize).withDefaultCooldown(defaultCooldown).
                     withHealthCheckType(healthCheckType).withHealthCheckGracePeriod(healthCheckGracePeriod).
-                    withTerminationPolicies(terminationPolicies)
+                    withTerminationPolicies(terminationPolicies).withTags(tags)
 
             // If this ASG lauches VPC instances, we must find the proper subnets and add them.
             if (subnetPurpose) {

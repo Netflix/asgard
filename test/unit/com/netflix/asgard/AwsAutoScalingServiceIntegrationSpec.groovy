@@ -27,6 +27,7 @@ import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest
 import com.amazonaws.services.autoscaling.model.SuspendedProcess
+import com.amazonaws.services.autoscaling.model.Tag
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
 import com.amazonaws.services.cloudwatch.model.Dimension
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
@@ -139,7 +140,8 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
 
         final AutoScalingGroup groupTemplate = new AutoScalingGroup().withAutoScalingGroupName('helloworld-example').
                 withAvailabilityZones([]).withLoadBalancerNames([]).
-                withMaxSize(0).withMinSize(0).withDefaultCooldown(0)
+                withMaxSize(0).withMinSize(0).withDefaultCooldown(0).
+				withTags([new Tag(resourceType:'auto-scaling-group', resourceId:'helloworld-example',key:'test',value:'lastTag')])
         final LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId('ami-deadbeef').
                 withInstanceType('m1.small').withKeyName('keyName').withSecurityGroups([]).withUserData('').
                 withEbsOptimized(false)

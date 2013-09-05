@@ -51,6 +51,7 @@
               <td class="value">${entry.value}</td>
             </tr>
           </g:each>
+          <g:render template="/common/showTagsDetail" model="[entity: tags]" />
           <g:render template="/launchConfiguration/launchConfigOptions" />
           </tbody>
           <tbody class="numbers">
