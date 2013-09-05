@@ -18,6 +18,8 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
+import com.amazonaws.services.autoscaling.model.Tag;
+import com.amazonaws.services.autoscaling.model.TagDescription;
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
@@ -145,6 +147,7 @@ ${lastGroup.loadBalancerNames}"""
                             SubnetTarget.EC2).sort()
                     Map<String, Collection<String>> zonesByPurpose = subnets.groupZonesByPurpose(
                             availabilityZones*.zoneName, SubnetTarget.EC2)
+					List<TagDescription> tags = lastGroup.getTags()
                     attributes.putAll([
                             cluster: cluster,
                             runningTasks: runningTasks,
@@ -161,7 +164,8 @@ ${lastGroup.loadBalancerNames}"""
                             loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
                             selectedLoadBalancers: selectedLoadBalancers,
                             spotUrl: configService.spotUrl,
-                            pricing: params.pricing ?: attributes.pricing
+                            pricing: params.pricing ?: attributes.pricing,
+							tags:tags
                     ])
                     attributes
                 }
@@ -436,6 +440,19 @@ Group: ${lastGroup.loadBalancerNames}"""
                 vpcZoneIdentifier = vpcZoneIdentifier ?: subnets.constructNewVpcZoneIdentifierForZones(
                         lastGroup.vpcZoneIdentifier, selectedZones)
             }
+						 			
+			List<Tag> tags = new ArrayList<Tag>();						
+			if (params.tags) {						
+				params.tags.value.each { key, value ->
+					Tag t = new Tag(key:key, value:value, propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:nextGroupName, resourceType:"auto-scaling-group")
+					tags.add(t);
+				}
+			}			
+			else {
+				tags = lastGroup.tags;
+			}
+			
+			
             log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers for next \
 Group: ${loadBalancerNames}"""
             GroupCreateOptions options = new GroupCreateOptions(
@@ -469,7 +486,8 @@ Group: ${loadBalancerNames}"""
                     scheduledActions: newScheduledActions,
                     vpcZoneIdentifier: vpcZoneIdentifier,
                     spotPrice: spotPrice,
-                    ebsOptimized: ebsOptimized
+                    ebsOptimized: ebsOptimized,
+					tags: tags
             )
             def operation = pushService.startGroupCreate(options)
             flash.message = "${operation.task.name} has been started."

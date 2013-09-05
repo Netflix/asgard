@@ -463,7 +463,7 @@ td.checkbox          { text-align: center; }
 .groupReplacingPush li.disabledGroup,
 .groupReplacingPush li.disabledGroup th,
 .groupReplacingPush li.disabledGroup div.buttons { background-color: #EBEBEB; background-image: none; }
-.groupReplacingPush li.create                    { max-width: 380px; }
+.groupReplacingPush li.create                    { max-width: 540px; }
 .groupReplacingPush li.create table              { width: auto;      }
 .groupReplacingPush li h2                        { margin-top: 0;    }
 .groupReplacingPush li.create h2:first-of-type   { float: left;      }

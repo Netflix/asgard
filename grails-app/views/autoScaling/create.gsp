@@ -48,6 +48,7 @@
             <g:render template="/loadBalancer/selection"/>
           </tbody>
           <g:render template="/launchConfiguration/launchConfigOptions" />
+          <g:render template="/common/editTags" model="[entity: tags]" />
           <tbody class="clusterChaosMonkeyOptions ${params.appName in appsWithClusterOptLevel ? '' : 'concealed'}">
             <g:render template="/common/chaosMonkeyOptions" />
           <tbody>
@@ -56,8 +57,8 @@
           <g:each var="app" in="${appsWithClusterOptLevel}">
             <li>${app}</li>
           </g:each>
-        </ul>
-      </div>
+        </ul>        
+      </div>      
       <div class="buttons">
         <g:buttonSubmit class="save" action="save">Create New Auto Scaling Group</g:buttonSubmit>
       </div>

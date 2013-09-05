@@ -936,11 +936,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     void createOrUpdateAutoScalingGroupTags(UserContext userContext, String autoScalingGroupName, Map<String,
                                     String> tagNameValuePairs, Task existingTask = null) {
 
-        // TODO: Re-enable this call after Amazon fixes bugs on their side and tell us it's safe again
 
-        
-
-        // Hopefully Amazon will eventually change CreateOrUpdateTagsRequest to take List<Tag> instead of List<String>
         List<String> tagStringsEqualDelimited = tagNameValuePairs.collect { "${it.key}=${it.value}".toString() }
 
         String suffix = tagNameValuePairs.size() == 1 ? '' : 's'
@@ -974,24 +970,6 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 			awsClient.by(userContext.region).deleteTags(request)
 		}, Link.to(EntityType.autoScaling, autoScalingGroupName), existingTask)
 	}
-
-    void deleteAutoScalingGroupTags(UserContext userContext, String autoScalingGroupName, List<String> tagNames,
-                                   Task existingTask = null) {
-
-        // TODO: Re-enable this call after Amazon fixes bugs on their side and tell us it's safe again
-
-        /*
-
-        String suffix = tagNames.size() == 1 ? '' : 's'
-        String msg = "Delete tag${suffix} ${tagNames} on Auto Scaling Group on '${autoScalingGroupName}'"
-        taskService.runTask(userContext, msg, { Task task ->
-            DeleteTagsRequest request = new DeleteTagsRequest(autoScalingGroupName: autoScalingGroupName,
-                    tagsToDelete: tagNames)
-            awsClient.by(userContext.region).deleteTags(request)
-        }, Link.to(EntityType.autoScaling, autoScalingGroupName), existingTask)
-
-        */
-    }
 
     void deleteAutoScalingGroup(UserContext userContext, String name, AsgDeletionMode mode = AsgDeletionMode.ATTEMPT,
                                 Task existingTask = null) {
