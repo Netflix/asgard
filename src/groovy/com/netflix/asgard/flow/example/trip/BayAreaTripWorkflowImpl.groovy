@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package com.netflix.asgard.flow.example.trip
+
 import com.amazonaws.services.simpleworkflow.flow.core.Promise
 import com.amazonaws.services.simpleworkflow.flow.interceptors.ExponentialRetryPolicy
 import com.amazonaws.services.simpleworkflow.flow.interceptors.RetryPolicy

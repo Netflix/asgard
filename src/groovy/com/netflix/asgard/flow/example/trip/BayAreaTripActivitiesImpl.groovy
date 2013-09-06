@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package com.netflix.asgard.flow.example.trip
+
 import com.amazonaws.services.simpleworkflow.flow.annotations.ManualActivityCompletion
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.netflix.asgard.flow.Activity
