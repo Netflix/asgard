@@ -19,7 +19,6 @@ import com.amazonaws.services.simpleworkflow.flow.DynamicWorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.flow.annotations.Execute
 import com.amazonaws.services.simpleworkflow.flow.annotations.GetState
 import com.amazonaws.services.simpleworkflow.flow.annotations.WorkflowRegistrationOptions
-import com.netflix.asgard.UserContext
 import groovy.transform.Canonical
 import spock.lang.Specification
 
@@ -31,7 +30,7 @@ class WorkflowClientExternalToWorkflowInterfaceAdapterSpec extends Specification
                 new TestWorkflowDescriptionTemplate())
 
         when:
-        adapter.go(null, 'Rhaegar', new WrappingObject(nestedName: 'Targaryen'))
+        adapter.go('Rhaegar', new WrappingObject(nestedName: 'Targaryen'))
 
         then:
         1 * client.startWorkflowExecution(_, _) >> { List<?> args ->
@@ -55,14 +54,14 @@ class WorkflowClientExternalToWorkflowInterfaceAdapterSpec extends Specification
 @WorkflowRegistrationOptions(defaultExecutionStartToCloseTimeoutSeconds = 60L)
 interface TestWorkflow {
     @Execute(version = "1.0")
-    void go(UserContext userContext, String name, WrappingObject wrappingObject)
+    void go(String name, WrappingObject wrappingObject)
 
     @GetState
     List<String> getLogHistory()
 }
 
 class TestWorkflowDescriptionTemplate extends WorkflowDescriptionTemplate implements TestWorkflow {
-    void go(UserContext userContext, String name, WrappingObject wrappingObject) {
+    void go(String name, WrappingObject wrappingObject) {
         description = "Describe workflow for '${name}' '${wrappingObject.nestedName}'"
     }
 }

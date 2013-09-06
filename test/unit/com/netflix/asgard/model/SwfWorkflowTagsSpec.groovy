@@ -138,7 +138,7 @@ class SwfWorkflowTagsSpec extends Specification {
                 new TestWorkflowDescriptionTemplate(), new SwfWorkflowTags())
 
         when:
-        adapter.go(null, 'Rhaegar', new WrappingObject(nestedName: 'Targaryen'))
+        adapter.go('Rhaegar', new WrappingObject(nestedName: 'Targaryen'))
 
         then:
         1 * client.startWorkflowExecution(_, _) >> { List<?> args ->

@@ -48,7 +48,7 @@ class InterfaceBasedWorkflowClientSpec extends Specification {
     def 'callback should not be called when client is converted to workflow without a callback'() {
 
         when:
-        client.asWorkflow().go(null, 'Rhaegar', new WrappingObject(nestedName: 'Targaryen'))
+        client.asWorkflow().go('Rhaegar', new WrappingObject(nestedName: 'Targaryen'))
 
         then:
         0 * callback.call(_)
@@ -57,7 +57,7 @@ class InterfaceBasedWorkflowClientSpec extends Specification {
     def 'callback should be called with WorkflowExecution object when client is converted to workflow'() {
 
         when:
-        client.asWorkflow(callback).go(null, 'Rhaegar', new WrappingObject(nestedName: 'Targaryen'))
+        client.asWorkflow(callback).go('Rhaegar', new WrappingObject(nestedName: 'Targaryen'))
 
         then:
         1 * callback.call(workflowExecution)

@@ -27,7 +27,6 @@ import com.amazonaws.services.simpleworkflow.flow.WorkflowClientFactoryExternalB
 import com.amazonaws.services.simpleworkflow.flow.generic.GenericWorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowType
-import com.netflix.asgard.model.SwfWorkflowTags
 import groovy.transform.Canonical
 
 @Canonical class WorkflowClientFactory {
@@ -57,7 +56,7 @@ import groovy.transform.Canonical
                     StartWorkflowOptions options, DataConverter dataConverter,
                     GenericWorkflowClientExternal genericClient) {
                 new InterfaceBasedWorkflowClient(workflow, workflowDescriptionTemplate, workflowExecution, workflowType,
-                        options, dataConverter, genericClient, new SwfWorkflowTags())
+                        options, dataConverter, genericClient, tags)
             }
         }
         StartWorkflowOptions startWorkflowOptions = new StartWorkflowOptions(taskList: taskList)
