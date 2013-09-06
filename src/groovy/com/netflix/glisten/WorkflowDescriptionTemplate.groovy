@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.model
-
-import com.netflix.asgard.Link
-import com.netflix.asgard.UserContext
-import com.netflix.glisten.WorkflowTags
-import groovy.transform.Canonical
+package com.netflix.glisten
 
 /**
- * Asgard specific tags for an SWF workflow.
+ * A place to put templates for creating workflow descriptions based on the arguments to the workflow execution.
  */
-@Canonical
-class SwfWorkflowTags extends WorkflowTags {
+abstract class WorkflowDescriptionTemplate {
 
-    /** A link that corresponds to the workflow for use in constructing an Asgard Task */
-    Link link
+    String description
 
-    /** A UserContext that corresponds to the workflow for use in constructing an Asgard Task */
-    UserContext user
+    /**
+     * A common method for workflows that one doesn't need to implement when creating a description.
+     */
+    List<String> getLogHistory() {
+        throw new UnsupportedOperationException('WorkflowDescriptionTemplate cannot be used to get a workflow log.')
+    }
 }

@@ -18,9 +18,9 @@ package com.netflix.asgard
 import com.amazonaws.services.simpleworkflow.model.HistoryEvent
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
-import com.netflix.asgard.flow.EventAttributes
-import com.netflix.asgard.flow.HistoryAnalyzer
-import com.netflix.asgard.flow.WorkflowTags
+import com.netflix.glisten.EventAttributes
+import com.netflix.glisten.HistoryAnalyzer
+import com.netflix.glisten.WorkflowTags
 import com.netflix.asgard.model.SwfWorkflowTags
 import grails.converters.JSON
 import grails.converters.XML

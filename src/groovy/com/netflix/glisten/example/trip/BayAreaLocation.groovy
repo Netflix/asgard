@@ -13,22 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.model
-
-import com.netflix.asgard.Link
-import com.netflix.asgard.UserContext
-import com.netflix.glisten.WorkflowTags
-import groovy.transform.Canonical
+package com.netflix.glisten.example.trip
 
 /**
- * Asgard specific tags for an SWF workflow.
+ * Used as part of the BayAreaTripWorkflow example of an SWF workflow.
  */
-@Canonical
-class SwfWorkflowTags extends WorkflowTags {
+public enum BayAreaLocation {
+    GoldenGateBridge('the Golden Gate Bridge'),
+    Redwoods('Muir Woods'),
+    Boardwalk('the Santa Cruz Boardwalk'),
+    Monterey('Monterey Bay')
 
-    /** A link that corresponds to the workflow for use in constructing an Asgard Task */
-    Link link
+    private final String displayName
 
-    /** A UserContext that corresponds to the workflow for use in constructing an Asgard Task */
-    UserContext user
+    BayAreaLocation(String displayName) {
+        this.displayName = displayName
+    }
+
+    String toString() {
+        displayName
+    }
 }

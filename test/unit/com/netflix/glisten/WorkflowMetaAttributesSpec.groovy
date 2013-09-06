@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.model
+package com.netflix.glisten
 
-import com.netflix.asgard.Link
-import com.netflix.asgard.UserContext
-import com.netflix.glisten.WorkflowTags
-import groovy.transform.Canonical
+import com.amazonaws.services.simpleworkflow.model.WorkflowType
+import com.netflix.glisten.WorkflowMetaAttributes
+import com.netflix.glisten.example.trip.BayAreaTripWorkflow
+import spock.lang.Specification
 
-/**
- * Asgard specific tags for an SWF workflow.
- */
-@Canonical
-class SwfWorkflowTags extends WorkflowTags {
+class WorkflowMetaAttributesSpec extends Specification {
 
-    /** A link that corresponds to the workflow for use in constructing an Asgard Task */
-    Link link
+    def 'should get WorkflowType for class'() {
+        WorkflowMetaAttributes workflowMetaAttributes = new WorkflowMetaAttributes(BayAreaTripWorkflow)
 
-    /** A UserContext that corresponds to the workflow for use in constructing an Asgard Task */
-    UserContext user
+        expect:
+        workflowMetaAttributes.workflowType == new WorkflowType(name: 'BayAreaTripWorkflow.start', version: '1.0')
+    }
+
 }

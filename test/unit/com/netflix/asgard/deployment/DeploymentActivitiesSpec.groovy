@@ -30,7 +30,7 @@ import com.netflix.asgard.EmailerService
 import com.netflix.asgard.LaunchTemplateService
 import com.netflix.asgard.Region
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.flow.Activity
+import com.netflix.glisten.Activity
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupMixin
 import com.netflix.asgard.model.AutoScalingProcessType

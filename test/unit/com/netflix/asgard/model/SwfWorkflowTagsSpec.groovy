@@ -21,10 +21,10 @@ import com.netflix.asgard.EntityType
 import com.netflix.asgard.Link
 import com.netflix.asgard.Region
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.flow.TestWorkflow
-import com.netflix.asgard.flow.TestWorkflowDescriptionTemplate
-import com.netflix.asgard.flow.WorkflowClientExternalToWorkflowInterfaceAdapter
-import com.netflix.asgard.flow.WrappingObject
+import com.netflix.glisten.TestWorkflow
+import com.netflix.glisten.TestWorkflowDescriptionTemplate
+import com.netflix.glisten.WorkflowClientExternalToWorkflowInterfaceAdapter
+import com.netflix.glisten.WrappingObject
 import spock.lang.Specification
 
 class SwfWorkflowTagsSpec extends Specification {
@@ -138,7 +138,7 @@ class SwfWorkflowTagsSpec extends Specification {
                 new TestWorkflowDescriptionTemplate(), new SwfWorkflowTags())
 
         when:
-        adapter.go(null, 'Rhaegar', new WrappingObject(nestedName: 'Targaryen'))
+        adapter.go('Rhaegar', new WrappingObject(nestedName: 'Targaryen'))
 
         then:
         1 * client.startWorkflowExecution(_, _) >> { List<?> args ->
