@@ -13,10 +13,10 @@ import com.netflix.asgard.deployment.DeploymentActivitiesImpl
 import com.netflix.asgard.deployment.DeploymentWorkflow
 import com.netflix.asgard.deployment.DeploymentWorkflowDescriptionTemplate
 import com.netflix.asgard.deployment.DeploymentWorkflowImpl
-import com.netflix.asgard.flow.GlobalWorkflowAttributes
-import com.netflix.asgard.flow.InterfaceBasedWorkflowClient
-import com.netflix.asgard.flow.WorkflowClientFactory
-import com.netflix.asgard.flow.WorkflowDescriptionTemplate
+import com.netflix.glisten.GlobalWorkflowAttributes
+import com.netflix.glisten.InterfaceBasedWorkflowClient
+import com.netflix.glisten.WorkflowClientFactory
+import com.netflix.glisten.WorkflowDescriptionTemplate
 import com.netflix.asgard.model.SwfWorkflowTags
 import org.springframework.beans.factory.InitializingBean
 

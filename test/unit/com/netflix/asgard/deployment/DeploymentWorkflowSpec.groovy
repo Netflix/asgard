@@ -17,7 +17,7 @@ package com.netflix.asgard.deployment
 
 import com.netflix.asgard.Region
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.flow.LocalWorkflow
+import com.netflix.glisten.LocalWorkflow
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.push.PushException
 import spock.lang.Specification

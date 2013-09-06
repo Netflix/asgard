@@ -13,22 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.model
-
-import com.netflix.asgard.Link
-import com.netflix.asgard.UserContext
-import com.netflix.glisten.WorkflowTags
-import groovy.transform.Canonical
+package com.netflix.glisten
 
 /**
- * Asgard specific tags for an SWF workflow.
+ * This class with its static fields is an abomination and I would love to remove it. The problem is that I need to
+ * provide some information to all SWF workflows. The Flow framework instantiates and executes the workflow without
+ * ever giving me access to it. This is the only way I know how to make this state available.
  */
-@Canonical
-class SwfWorkflowTags extends WorkflowTags {
+class GlobalWorkflowAttributes {
 
-    /** A link that corresponds to the workflow for use in constructing an Asgard Task */
-    Link link
-
-    /** A UserContext that corresponds to the workflow for use in constructing an Asgard Task */
-    UserContext user
+    /** SWF taskList that activities will be scheduled with */
+    static String taskList
 }

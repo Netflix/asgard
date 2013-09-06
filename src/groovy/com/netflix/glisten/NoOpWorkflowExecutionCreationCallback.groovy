@@ -13,22 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.model
+package com.netflix.glisten
 
-import com.netflix.asgard.Link
-import com.netflix.asgard.UserContext
-import com.netflix.glisten.WorkflowTags
-import groovy.transform.Canonical
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 
 /**
- * Asgard specific tags for an SWF workflow.
+ * The default behavior after starting a workflow execution is to do nothing special. This default value allows
+ * programmers to skip the optional callback parameter to InterfaceBasedWorkflowClient.asWorkflow()
  */
-@Canonical
-class SwfWorkflowTags extends WorkflowTags {
+class NoOpWorkflowExecutionCreationCallback implements WorkflowExecutionCreationCallback {
 
-    /** A link that corresponds to the workflow for use in constructing an Asgard Task */
-    Link link
-
-    /** A UserContext that corresponds to the workflow for use in constructing an Asgard Task */
-    UserContext user
+    @Override
+    void call(WorkflowExecution workflowExecution) { }
 }

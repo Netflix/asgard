@@ -13,22 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.model
+package com.netflix.glisten.example.trip
 
-import com.netflix.asgard.Link
-import com.netflix.asgard.UserContext
-import com.netflix.glisten.WorkflowTags
-import groovy.transform.Canonical
+import com.netflix.glisten.WorkflowDescriptionTemplate
 
 /**
- * Asgard specific tags for an SWF workflow.
+ * Constructs the description for a specific execution of the BayAreaTripWorkflow.
  */
-@Canonical
-class SwfWorkflowTags extends WorkflowTags {
+class BayAreaTripWorkflowDescriptionTemplate extends WorkflowDescriptionTemplate implements BayAreaTripWorkflow {
 
-    /** A link that corresponds to the workflow for use in constructing an Asgard Task */
-    Link link
-
-    /** A UserContext that corresponds to the workflow for use in constructing an Asgard Task */
-    UserContext user
+    @Override
+    void start(String name, Collection<BayAreaLocation> previouslyVisited) {
+        description = "${name} is taking a trip in the Bay Area."
+    }
 }

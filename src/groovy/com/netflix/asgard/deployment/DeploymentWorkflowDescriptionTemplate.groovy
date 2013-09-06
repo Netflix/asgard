@@ -16,7 +16,7 @@
 package com.netflix.asgard.deployment
 
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.flow.WorkflowDescriptionTemplate
+import com.netflix.glisten.WorkflowDescriptionTemplate
 
 /**
  * Constructs the description for a specific deployment workflow execution.

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.glisten
 
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow
 import com.amazonaws.services.simpleworkflow.flow.DynamicWorkflowClientExternal
@@ -26,28 +26,20 @@ import com.netflix.glisten.WorkflowClientFactory
 import com.netflix.glisten.example.trip.BayAreaTripWorkflow
 import spock.lang.Specification
 
-class FlowServiceUnitSpec extends Specification {
+class WorkflowClientFactorySpec extends Specification {
 
     WorkflowClientFactory workflowClientFactory = new WorkflowClientFactory(Mock(AmazonSimpleWorkflow))
-    FlowService flowService = new FlowService(workflowClientFactory: workflowClientFactory)
 
-    def 'should get new workflow client'() {
-        UserContext userContext = new UserContext(username: 'rtargaryen')
-        Link link = new Link(type: EntityType.cluster, id: '123')
+    def 'should get new workflow client'() {\
         DynamicWorkflowClientExternal dynamicWorkflowClient = Mock(DynamicWorkflowClientExternal)
-        List<String> expectedTagList = [
-                '{"link":{"type":{"name":"cluster"},"id":"123"}}',
-                '{"user":{"ticket":null,"username":"rtargaryen","clientHostName":null,"clientIpAddress":null,\
-"region":null,"internalAutomation":null}}'
-        ]
 
         when:
-        def client = flowService.getNewWorkflowClient(userContext, BayAreaTripWorkflow, link)
+        def client = workflowClientFactory.getNewWorkflowClient(BayAreaTripWorkflow, null)
 
         then:
         client instanceof InterfaceBasedWorkflowClient
         client.workflowExecution != null
-        client.schedulingOptions.tagList == expectedTagList
+        client.schedulingOptions.tagList == null
 
         when:
         def workflow = client.asWorkflow(null, dynamicWorkflowClient)
@@ -64,12 +56,13 @@ class FlowServiceUnitSpec extends Specification {
 
     def 'should get an existing workflow client'() {
         expect:
-        flowService.getWorkflowClient(new WorkflowExecution()) instanceof WorkflowClientExternal
+        workflowClientFactory.getWorkflowClient(new WorkflowExecution()) instanceof WorkflowClientExternal
     }
 
     def 'should get a ManualActivityCompletionClient'() {
         expect:
-        flowService.getManualActivityCompletionClient('123') instanceof ManualActivityCompletionClient
+        workflowClientFactory.getManualActivityCompletionClient('123') instanceof ManualActivityCompletionClient
     }
 
 }
+

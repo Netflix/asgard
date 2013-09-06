@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.model
+package com.netflix.glisten
 
-import com.netflix.asgard.Link
-import com.netflix.asgard.UserContext
-import com.netflix.glisten.WorkflowTags
 import groovy.transform.Canonical
 
 /**
- * Asgard specific tags for an SWF workflow.
+ * Basic formatting of log messages.
  */
 @Canonical
-class SwfWorkflowTags extends WorkflowTags {
+class LogMessage {
+    Date timestamp
+    String text
 
-    /** A link that corresponds to the workflow for use in constructing an Asgard Task */
-    Link link
-
-    /** A UserContext that corresponds to the workflow for use in constructing an Asgard Task */
-    UserContext user
+    String toString() {
+        "${timestamp.format("yyyy-MM-dd_HH:mm:ss")} ${text}"
+    }
 }
