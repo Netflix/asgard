@@ -23,7 +23,7 @@ import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.autoscaling.model.Tag
-import com.amazonaws.services.autoscaling.model.TagDescription;
+import com.amazonaws.services.autoscaling.model.TagDescription
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.Image
@@ -303,14 +303,14 @@ class AutoScalingController {
             Subnets subnets = awsEc2Service.getSubnets(userContext)
             String subnetPurpose = params.subnetPurpose ?: null
             String vpcId = subnets.getVpcIdForSubnetPurpose(subnetPurpose) ?: ''
-			
+
 			// Auto Scaling Group Tags
-			List<Tag> tags = new ArrayList<Tag>();
+			List<Tag> tags = new ArrayList<Tag>()
 			
 			if (params.tags) {
 				params.tags.value.each { key, value ->
 					Tag t = new Tag(key:key, value:value, propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:groupName, resourceType:"auto-scaling-group")
-					tags.add(t);
+					tags.add(t)
 				}
 			}
 
@@ -448,19 +448,19 @@ class AutoScalingController {
                 resumeProcesses << processType
             }
         }
-			List<Tag> tags = new ArrayList<Tag>();
+			List<Tag> tags = new ArrayList<Tag>()
 			
 			if (params.tags) {
 				params.tags.value.each { key, value ->
 					Tag t = new Tag(key:key, value:value, propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:name, resourceType:"auto-scaling-group")
-					tags.add(t);
+					tags.add(t)
 				}
 				
 				if (tags.size() > 0){
 					awsAutoScalingService.updateTags(userContext, tags, name)
 				}
 			
-				tags = new ArrayList<Tag>();
+				tags = new ArrayList<Tag>()
 				params.tags.delete.each { key, value ->
 					if (value == 'on'){
 						Tag t = new Tag(key:key, value:params['tags.values.' + key], propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:name, resourceType:"auto-scaling-group")

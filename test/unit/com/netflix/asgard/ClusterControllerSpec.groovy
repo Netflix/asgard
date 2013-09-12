@@ -170,7 +170,7 @@ class ClusterControllerSpec extends Specification {
                 assert vpcZoneIdentifier == 'subnet-1'
                 assert iamInstanceProfile == 'lastIamProfile'
                 assert spotPrice == '1.23'
-				assert tags.getAt("value") == ['lastTag']
+				assert tags["value"] == ['lastTag']
             }
             true
         }) >> { args ->
@@ -228,6 +228,7 @@ class ClusterControllerSpec extends Specification {
         controller.awsAutoScalingService.getLaunchConfiguration(_, 'helloworld-lc') >> launchConfiguration
         controller.params.with() {
             name = 'helloworld-example'
+			noOptionalDefaults = 'true'
             selectedSecurityGroups = 'sg-789'
             selectedZones = 'us-east-1e'
             terminationPolicy = 'hello-tp2'
@@ -272,7 +273,7 @@ class ClusterControllerSpec extends Specification {
                 assert vpcZoneIdentifier == 'subnet-4'
                 assert iamInstanceProfile == 'newIamProfile'
                 assert spotPrice == null
-				assert tags.getAt("value") == ['newTag']
+				assert tags["value"] == ['newTag']
             }
             true
         }) >> { args ->
