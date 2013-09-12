@@ -18,8 +18,8 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
-import com.amazonaws.services.autoscaling.model.Tag;
-import com.amazonaws.services.autoscaling.model.TagDescription;
+import com.amazonaws.services.autoscaling.model.Tag
+import com.amazonaws.services.autoscaling.model.TagDescription
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
@@ -420,24 +420,21 @@ ${loadBalancerNames}"""
 Group: ${lastGroup.loadBalancerNames}"""
             boolean ebsOptimized = params.containsKey('ebsOptimized') ? params.ebsOptimized?.toBoolean() :
                 lastLaunchConfig.ebsOptimized
+			List<Tag> tags = new ArrayList<Tag>()
+			if (params.tags) {
+				params.tags.value.each { key, value ->
+					Tag t = new Tag(key:key, value:value, propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:nextGroupName, resourceType:"auto-scaling-group")
+					tags.add(t)
+				}
+			}
             if (params.noOptionalDefaults != 'true') {
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
                 loadBalancerNames = loadBalancerNames ?: lastGroup.loadBalancerNames
                 vpcZoneIdentifier = vpcZoneIdentifier ?: subnets.constructNewVpcZoneIdentifierForZones(lastGroup.vpcZoneIdentifier,
                         selectedZones)
+				tags = lastGroup.tags
             }
-						 			
-			List<Tag> tags = new ArrayList<Tag>();						
-			if (params.tags) {						
-				params.tags.value.each { key, value ->
-					Tag t = new Tag(key:key, value:value, propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:nextGroupName, resourceType:"auto-scaling-group")
-					tags.add(t);
-				}
-			}			
-			else {
-				tags = lastGroup.tags;
-			}
 			
 			
             log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers for next \
