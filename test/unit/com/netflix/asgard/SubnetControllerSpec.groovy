@@ -32,7 +32,7 @@ class SubnetControllerSpec extends ControllerSpec {
     }
 
     def 'list should display subnets'() {
-        controller.awsEc2Service.getSubnets(_) >> new Subnets(allSubnets: [
+        controller.awsEc2Service.getSubnets(_) >> new Subnets([
                 subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
                 subnet('subnet-e9b0a3a1', 'us-east-1b', 'internal', SubnetTarget.EC2),
                 subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', null),

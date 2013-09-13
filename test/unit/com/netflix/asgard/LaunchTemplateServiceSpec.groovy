@@ -50,7 +50,7 @@ class LaunchTemplateServiceSpec extends Specification {
 
     def 'should include default VPC security group IDs'() {
         when:
-        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups([], 'vpc-1', Region.US_EAST_1)
+        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups([], true, Region.US_EAST_1)
 
         then:
         securityGroups == ['sg-101', 'sg-102'] as Set
@@ -62,7 +62,7 @@ class LaunchTemplateServiceSpec extends Specification {
     def 'should not include duplicate VPC security group IDs'() {
         when:
         Set<String> securityGroups = launchTemplateService.
-                includeDefaultSecurityGroups(['sg1', 'sg-102'], 'vpc-1', Region.US_EAST_1)
+                includeDefaultSecurityGroups(['sg1', 'sg-102'], true, Region.US_EAST_1)
 
         then:
         securityGroups == ['sg1', 'sg-101', 'sg-102'] as Set
@@ -73,7 +73,7 @@ class LaunchTemplateServiceSpec extends Specification {
 
     def 'should not include default VPC security group IDs not in cache'() {
         when:
-        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(['sg1'], 'vpc-1',
+        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(['sg1'], true,
                 Region.US_EAST_1)
 
         then:
