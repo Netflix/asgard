@@ -22,10 +22,11 @@ import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
-import com.netflix.asgard.deployment.AutoScalingGroupOptions
+import com.google.common.collect.Sets
+import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.deployment.DeploymentWorkflowOptions
 import com.netflix.asgard.deployment.DeploymentWorkflow
-import com.netflix.asgard.deployment.LaunchConfigurationOptions
+import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.deployment.ProceedPreference
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
@@ -291,16 +292,7 @@ ${lastGroup.loadBalancerNames}"""
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions()
         bindData(deploymentOptions, params)
         deploymentOptions.clusterName = cmd.clusterName
-        deploymentOptions.subnetPurpose = params.subnetPurpose
-        if (params.trafficAllowed) {
-            deploymentOptions.initialTrafficPrevented = !Boolean.getBoolean(params.trafficAllowed)
-        }
-        if (params.azRebalance) {
-            deploymentOptions.azRebalanceSuspended = params.azRebalance == 'disabled'
-        }
-        if (params.pricing) {
-            deploymentOptions.instancePriceType = InstancePriceType.valueOf(params.pricing as String)
-        }
+
         UserContext userContext = UserContext.of(request)
         String appName = Relationships.appNameFromGroupName(cmd.clusterName)
         String email = applicationService.getEmailFromApp(userContext, appName)
@@ -314,12 +306,21 @@ ${lastGroup.loadBalancerNames}"""
                 disablePreviousAsg = ProceedPreference.No
             }
         }
+        String subnetPurpose = params.subnetPurpose
         Subnets subnets = awsEc2Service.getSubnets(userContext)
-        String vpcId = subnets.mapPurposeToVpcId()[deploymentOptions.subnetPurpose] ?: ''
+        String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
         List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"] ?:
             params["selectedLoadBalancers"])
 
-        AutoScalingGroupOptions asgOverrides = new AutoScalingGroupOptions(
+        Collection<AutoScalingProcessType> newSuspendedProcesses = Sets.newHashSet()
+        if (params.azRebalance == 'disabled') {
+            newSuspendedProcesses << AutoScalingProcessType.AZRebalance
+        }
+        if (Boolean.getBoolean(params.trafficAllowed)) {
+            newSuspendedProcesses << AutoScalingProcessType.AddToLoadBalancer
+        }
+
+        AutoScalingGroupBeanOptions asgOverrides = new AutoScalingGroupBeanOptions(
                 availabilityZones: Requests.ensureList(params.selectedZones),
                 loadBalancerNames: loadBalancerNames,
                 minSize: params.min as Integer,
@@ -328,15 +329,18 @@ ${lastGroup.loadBalancerNames}"""
                 defaultCooldown: params.defaultCooldown as Integer,
                 healthCheckType: params.healthCheckType,
                 healthCheckGracePeriod: params.healthCheckGracePeriod as Integer,
-                terminationPolicies: Requests.ensureList(params.terminationPolicy)
+                terminationPolicies: Requests.ensureList(params.terminationPolicy),
+                subnetPurpose: subnetPurpose,
+                suspendedProcesses: newSuspendedProcesses
         )
 
-        LaunchConfigurationOptions lcOverrides = new LaunchConfigurationOptions(
+        LaunchConfigurationBeanOptions lcOverrides = new LaunchConfigurationBeanOptions(
                 imageId: params.imageId,
                 instanceType: params.instanceType,
                 keyName: params.keyName,
                 securityGroups: Requests.ensureList(params.selectedSecurityGroups),
                 iamInstanceProfile: params.iamInstanceProfile,
+                instancePriceType: InstancePriceType.parse(params.pricing),
                 ebsOptimized: params.ebsOptimized?.toBoolean()
         )
 

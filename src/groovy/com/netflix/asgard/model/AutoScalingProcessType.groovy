@@ -49,6 +49,10 @@ enum AutoScalingProcessType {
         this.resumeMessage = resumeMessage
     }
 
+    static AutoScalingProcessType parse(String value) {
+        values().find { it.name().equalsIgnoreCase(value) }
+    }
+
     static Set<AutoScalingProcessType> getDisableProcesses() {
         EnumSet.of(Launch, Terminate, AddToLoadBalancer)
     }

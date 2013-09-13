@@ -37,6 +37,16 @@ enum InstancePriceType {
     SPOT('http://spot-price.s3.amazonaws.com/', 'spot.js')
 
     /**
+     * Creates enum from a String. Ignores case and defaults to ON_DEMAND if there is not a match.
+     *
+     * @param value String representation
+     * @return new enum based on value
+     */
+    static InstancePriceType parse(String value) {
+        values().find { it.name().equalsIgnoreCase(value) } ?: ON_DEMAND
+    }
+
+    /**
      * The beginning of the URL for getting the data file for pricing, when fetching live data remotely.
      */
     String dataSourceUrlBase
