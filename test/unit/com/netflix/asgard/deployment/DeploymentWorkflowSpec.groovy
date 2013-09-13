@@ -83,10 +83,8 @@ class DeploymentWorkflowSpec extends Specification {
             1 * getAsgDeploymentNames(userContext, 'the_seaward') >> asgDeploymentNames
             1 * constructNextAsgForCluster(userContext, asgDeploymentNames, asgInputs) >> asgTemplate
             1 * constructLaunchConfigForNextAsg(userContext, asgTemplate, lcInputs) >> lcTemplate
-            1 * createLaunchConfigForNextAsg(userContext, asgTemplate, lcTemplate) >>
-                    'the_seaward-v003-20130626140848'
-            1 * createNextAsgForCluster(userContext, asgTemplate) >>
-                    'the_seaward-v003'
+            1 * createLaunchConfigForNextAsg(userContext, asgTemplate, lcTemplate) >> 'the_seaward-v003-20130626140848'
+            1 * createNextAsgForCluster(userContext, asgTemplate) >> 'the_seaward-v003'
             1 * copyScalingPolicies(userContext, asgDeploymentNames) >> 0
             1 * copyScheduledActions(userContext, asgDeploymentNames) >> 0
         }

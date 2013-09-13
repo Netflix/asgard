@@ -17,10 +17,22 @@ package com.netflix.asgard.model
 
 import com.google.common.collect.Sets
 
-class BeanOptions {
+/**
+ * Bean options are classes that hold related mutable state that often changes together. It results in more
+ * maintainable code to pass these related attributes around as a group, and have relevant operations in one
+ * place in the codebase. Operations that are common across specific implementations can go here.
+ * An example where this is useful is for AWS objects where similar data is often translated into various
+ * representations including requests to the AWS API.
+ */
+abstract class BeanOptions {
 
+    /**
+     * Copies a non null collection to a new Set. It does not deep copy.
+     *
+     * @param source collection to copy
+     * @return a new Set containing the same objects or null if source was null
+     */
     protected static <T> Set<T> copyNonNullToSet(Collection<T> source) {
-        if (source == null) { return null }
-        Sets.newHashSet(source)
+        source == null ? null : Sets.newHashSet(source)
     }
 }

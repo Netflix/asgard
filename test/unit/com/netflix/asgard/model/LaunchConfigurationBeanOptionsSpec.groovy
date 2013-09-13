@@ -25,19 +25,19 @@ import spock.lang.Specification
 class LaunchConfigurationBeanOptionsSpec extends Specification {
 
     LaunchConfigurationBeanOptions lcOptions = new LaunchConfigurationBeanOptions(
-        launchConfigurationName: 'launchConfigurationName1',
-        imageId: 'imageId1',
-        keyName: 'keyName1',
-        securityGroups: ['sg-1'],
-        userData: 'userData1',
-        instanceType: 'instanceType1',
-        kernelId: 'kernelId1',
-        ramdiskId: 'ramdiskId1',
-        blockDeviceMappings: [new BlockDeviceMapping(deviceName: 'deviceName1', ebs: new Ebs(volumeSize: 256))],
-        instanceMonitoring: null,
-        instancePriceType: InstancePriceType.ON_DEMAND,
-        iamInstanceProfile: 'iamInstanceProfile1',
-        ebsOptimized: false
+            launchConfigurationName: 'launchConfigurationName1',
+            imageId: 'imageId1',
+            keyName: 'keyName1',
+            securityGroups: ['sg-1'],
+            userData: 'userData1',
+            instanceType: 'instanceType1',
+            kernelId: 'kernelId1',
+            ramdiskId: 'ramdiskId1',
+            blockDeviceMappings: [new BlockDeviceMapping(deviceName: 'deviceName1', ebs: new Ebs(volumeSize: 256))],
+            instanceMonitoring: null,
+            instancePriceType: InstancePriceType.ON_DEMAND,
+            iamInstanceProfile: 'iamInstanceProfile1',
+            ebsOptimized: false
     )
 
     LaunchConfiguration awsLaunchConfiguration = new LaunchConfiguration(
