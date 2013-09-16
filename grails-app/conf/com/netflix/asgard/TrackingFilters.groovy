@@ -24,25 +24,13 @@ class TrackingFilters {
             '.*(libcurl|Python-urllib|Wget|HttpClient|lwp-request|Java).*')
 
     static filters = {
-        all(controller: 'firefox', invert: true) {
+        all(controller: '*', action: '*') {
             before = {
                 Requests.preventCaching(response)
 
                 String userAgent = request.getHeader('user-agent')
                 if (userAgent?.contains('MSIE') && !userAgent.contains('chromeframe')) {
                     request['ieWithoutChromeFrame'] = true
-                }
-
-                // Firefox has a sporadic, critical bug on some complex pages, when there are multiple select elements
-                // with the same name (legal in all other browsers), if the user refreshes the page many times.
-                // For now, disable Firefox use entirely until there is time to build a robust workaround.
-                // Browser sniffing is not a good long-term solution, but denying Firefox use will protect Asgard users
-                // from causing major outages while we build the workaround.
-                // For our purposes, detecting the string "Firefox" is adequate.
-                // See user agent strings at http://www.zytrax.com/tech/web/browser_ids.htm
-                if (userAgent?.contains('Firefox')) {
-                    redirect(controller: 'firefox', action: 'warning')
-                    return false
                 }
 
                 if (!request["originalRequestDump"]) {
