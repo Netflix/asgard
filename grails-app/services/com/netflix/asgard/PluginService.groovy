@@ -23,6 +23,10 @@ import com.netflix.asgard.plugin.AdvancedUserDataProvider
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 
+/**
+ * This service provides a way for other parts of the code base to gain access to functionality stored in overridable
+ * Asgard plugins.
+ */
 class PluginService implements ApplicationContextAware {
 
     static final String AUTHENTICATION_PROVIDER = 'authenticationProvider'
@@ -39,6 +43,8 @@ class PluginService implements ApplicationContextAware {
      * Unless overridden, the default implementation of AdvancedUserDataProvider will be DefaultAdvancedUserDataProvider
      * which delegates user data construction to the legacy userDataProvider plugin, for backward compatibility.
      *
+     * See NetflixAdvancedUserDataProvider for an example of how a company can override Asgard's default user data.
+     *
      * @return the implementation of the user data provider that can take lots of cloud objects as inputs
      */
     AdvancedUserDataProvider getAdvancedUserDataProvider() {
@@ -48,7 +54,9 @@ class PluginService implements ApplicationContextAware {
     }
 
     /**
-     * This is maintained only for backward compatibility with existing overrides of userDataProvider.
+     * This is maintained only for backward compatibility with existing overrides of userDataProvider. It's not
+     * technically deprecated because we don't have plans to remove it yet, but it's not recommended anymore. Better to
+     * override AdvancedUserDataProvider instead.
      *
      * @return the chosen implementation of the limited legacy interface for creating user data based solely on
      *          UserContext, ASG name, app name, and launch config name
@@ -58,13 +66,19 @@ class PluginService implements ApplicationContextAware {
         applicationContext.getBean(beanName) as UserDataProvider
     }
 
+    /**
+     * Gets all the listeners for task completion events, to do things like publishing logs to a topic, or writing
+     * comments to a change control system.
+     *
+     * @return the collection of all task finished listeners that are configured
+     */
     Collection<TaskFinishedListener> getTaskFinishedListeners() {
         List<String> beanNames = configService.getBeanNamesForPlugin(TASK_FINISHED_LISTENERS) as List ?: []
         beanNames.collect { applicationContext.getBean(it) as TaskFinishedListener }
     }
 
     /**
-     * @return The configured {@link AuthenticationProvider} Spring bean, null if one isn't configured.
+     * @return the configured {@link AuthenticationProvider} Spring bean, null if one isn't configured
      */
     AuthenticationProvider getAuthenticationProvider() {
         if (flagService.isOn(Flag.SUSPEND_AUTHENTICATION_REQUIREMENT)) {
@@ -77,7 +91,7 @@ class PluginService implements ApplicationContextAware {
     }
 
     /**
-     * @return A list of configured {@link AuthorizationProvider} Spring beans, empty list if none configured.
+     * @return a list of configured {@link AuthorizationProvider} Spring beans, empty list if none configured
      */
     Collection<AuthorizationProvider> getAuthorizationProviders() {
         if (flagService.isOn(Flag.SUSPEND_AUTHENTICATION_REQUIREMENT)) {
