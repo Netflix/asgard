@@ -20,18 +20,17 @@ import com.amazonaws.services.simpleworkflow.flow.DynamicWorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
-import com.netflix.asgard.flow.InterfaceBasedWorkflowClient
-import com.netflix.asgard.flow.WorkflowClientExternalToWorkflowInterfaceAdapter
-import com.netflix.asgard.flow.example.HelloWorldWorkflow
+import com.netflix.glisten.InterfaceBasedWorkflowClient
+import com.netflix.glisten.WorkflowClientExternalToWorkflowInterfaceAdapter
+import com.netflix.glisten.WorkflowClientFactory
+import com.netflix.glisten.example.trip.BayAreaTripWorkflow
 import spock.lang.Specification
 
 class FlowServiceUnitSpec extends Specification {
 
-    FlowService flowService = new FlowService()
+    WorkflowClientFactory workflowClientFactory = new WorkflowClientFactory(Mock(AmazonSimpleWorkflow))
+    FlowService flowService = new FlowService(workflowClientFactory: workflowClientFactory)
 
-    def setup() {
-        flowService.simpleWorkflow = Mock(AmazonSimpleWorkflow)
-    }
 
     def 'should get new workflow client'() {
         UserContext userContext = new UserContext(username: 'rtargaryen')
@@ -44,7 +43,7 @@ class FlowServiceUnitSpec extends Specification {
         ]
 
         when:
-        def client = flowService.getNewWorkflowClient(userContext, HelloWorldWorkflow, link)
+        def client = flowService.getNewWorkflowClient(userContext, BayAreaTripWorkflow, link)
 
         then:
         client instanceof InterfaceBasedWorkflowClient
@@ -58,10 +57,10 @@ class FlowServiceUnitSpec extends Specification {
         workflow instanceof WorkflowClientExternalToWorkflowInterfaceAdapter
 
         when:
-        workflow.helloWorld('Sup!?')
+        workflow.start('John Snow', [])
 
         then:
-        1 * dynamicWorkflowClient.startWorkflowExecution(['Sup!?'] as Object[], _)
+        1 * dynamicWorkflowClient.startWorkflowExecution(['John Snow', []] as Object[], _)
     }
 
     def 'should get an existing workflow client'() {

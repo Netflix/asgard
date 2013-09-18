@@ -20,7 +20,7 @@ import com.amazonaws.services.simpleworkflow.model.HistoryEvent
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionDetail
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
-import com.netflix.asgard.flow.LogMessage
+import com.netflix.glisten.LogMessage
 import spock.lang.Specification
 
 class TaskSpec extends Specification {
