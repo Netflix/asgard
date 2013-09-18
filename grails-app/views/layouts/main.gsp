@@ -96,7 +96,9 @@
          <li class="menuButton"><g:link class="users" controller="application" action="owner">Owners</g:link></li>
          <li class="menuButton"><g:link class="securityGroups" controller="security" action="list">Security Groups</g:link></li>
          <g:if test="${platformserviceExists}">
-           <li class="menuButton"><g:link class="fastProperties" controller="fastProperty" action="apps">Fast Properties</g:link></li>
+           <li class="menuButton">
+             <g:extLinkToPropertiesConsole />
+           </li>
          </g:if>
        </ul>
      </li>

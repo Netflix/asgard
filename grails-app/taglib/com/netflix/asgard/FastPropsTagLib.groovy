@@ -25,6 +25,8 @@ import org.joda.time.format.ISODateTimeFormat
  */
 class FastPropsTagLib {
 
+    def configService
+
     /**
      * Builds additional scope attributes inline table for a fastProperty
      *
@@ -99,6 +101,13 @@ class FastPropsTagLib {
             def expTime = createdTime.plusSeconds(ttl?.toInteger())
             out << outputFormatter.print(expTime)
         }
+    }
+
+    def extLinkToPropertiesConsole = {
+        def awsAccount = configService.getAccountName()
+        def envName = awsAccount ?: 'test'
+        def propertiesConsoleUrl = "http://persistedproperties.us-east-1.dyn${envName}.netflix.net:7001/"
+        out << '<a href="' + propertiesConsoleUrl + '" target="_blank" class="fastProperties">Fast Properties</a>'
     }
 
 }
