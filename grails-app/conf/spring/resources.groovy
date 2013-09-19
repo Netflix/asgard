@@ -16,7 +16,9 @@
 import com.google.common.base.CaseFormat
 import com.netflix.asgard.CachedMapBuilder
 import com.netflix.asgard.Caches
+import com.netflix.asgard.DefaultAdvancedUserDataProvider
 import com.netflix.asgard.DefaultUserDataProvider
+import com.netflix.asgard.NetflixAdvancedUserDataProvider
 import com.netflix.asgard.Region
 import com.netflix.asgard.ServiceInitLoggingBeanPostProcessor
 import com.netflix.asgard.SnsTaskFinishedListener
@@ -39,12 +41,22 @@ beans = {
         bean.lazyInit = true
     }
 
+    defaultAdvancedUserDataProvider(DefaultAdvancedUserDataProvider) { bean ->
+        bean.lazyInit = true
+    }
+
     snsTaskFinishedListener(SnsTaskFinishedListener) { bean ->
         bean.lazyInit = true
     }
 
     if (application.config.plugin?.authenticationProvider == 'oneLoginAuthenticationProvider') {
         oneLoginAuthenticationProvider(OneLoginAuthenticationProvider) { bean ->
+            bean.lazyInit = true
+        }
+    }
+
+    if (application.config.plugin?.advancedUserDataProvider == 'netflixAdvancedUserDataProvider') {
+        netflixAdvancedUserDataProvider(NetflixAdvancedUserDataProvider) { bean ->
             bean.lazyInit = true
         }
     }
