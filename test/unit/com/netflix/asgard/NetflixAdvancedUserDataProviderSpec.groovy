@@ -61,15 +61,16 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
         launchContext = new LaunchContext(userContext: userContext)
     }
 
-    final static String helloStandardUserData = """export NETFLIX_ENVIRONMENT=test
-export NETFLIX_MONITOR_BUCKET=hello
-export NETFLIX_APP=hello
-export NETFLIX_STACK=dev
-export NETFLIX_CLUSTER=hello-dev
-export NETFLIX_AUTO_SCALE_GROUP=hello-dev-v001
-export NETFLIX_LAUNCH_CONFIG=hello-dev-v001-1234567
-export EC2_REGION=us-west-2
-"""
+    final static String helloStandardUserData = """\
+            export NETFLIX_ENVIRONMENT=test
+            export NETFLIX_MONITOR_BUCKET=hello
+            export NETFLIX_APP=hello
+            export NETFLIX_STACK=dev
+            export NETFLIX_CLUSTER=hello-dev
+            export NETFLIX_AUTO_SCALE_GROUP=hello-dev-v001
+            export NETFLIX_LAUNCH_CONFIG=hello-dev-v001-1234567
+            export EC2_REGION=us-west-2
+            """.stripIndent()
     final static String helloCustomUserData = "No soup for you. region=us-west-2 app=hello asg=hello-dev-v001"
 
     def 'should choose user data format based on nflx-base version in AMI description'() {
@@ -134,15 +135,16 @@ export EC2_REGION=us-west-2
         String userData = decode(netflixAdvancedUserDataProvider.buildUserData(launchContext))
 
         then:
-        userData == """export NETFLIX_ENVIRONMENT=test
-export NETFLIX_MONITOR_BUCKET=${appEnvVar}
-export NETFLIX_APP=${appEnvVar}
-export NETFLIX_STACK=
-export NETFLIX_CLUSTER=${asg?.autoScalingGroupName ?: ''}
-export NETFLIX_AUTO_SCALE_GROUP=${asg?.autoScalingGroupName ?: ''}
-export NETFLIX_LAUNCH_CONFIG=robot-123456
-export EC2_REGION=us-west-2
-"""
+        userData == """\
+                export NETFLIX_ENVIRONMENT=test
+                export NETFLIX_MONITOR_BUCKET=${appEnvVar}
+                export NETFLIX_APP=${appEnvVar}
+                export NETFLIX_STACK=
+                export NETFLIX_CLUSTER=${asg?.autoScalingGroupName ?: ''}
+                export NETFLIX_AUTO_SCALE_GROUP=${asg?.autoScalingGroupName ?: ''}
+                export NETFLIX_LAUNCH_CONFIG=robot-123456
+                export EC2_REGION=us-west-2
+                """.stripIndent()
 
         where:
         appEnvVar  | app                                  | asg                   | packageName

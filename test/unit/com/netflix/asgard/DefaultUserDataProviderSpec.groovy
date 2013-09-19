@@ -43,15 +43,16 @@ class DefaultUserDataProviderSpec extends Specification {
                 'helloworld-example-v345', 'helloworld-example-v345-1234567890')
 
         then:
-        decode(userDataEncoded) == """export ENVIRONMENT=
-export MONITOR_BUCKET=helloworld
-export APP=helloworld
-export STACK=example
-export CLUSTER=helloworld-example
-export AUTO_SCALE_GROUP=helloworld-example-v345
-export LAUNCH_CONFIG=helloworld-example-v345-1234567890
-export EC2_REGION=sa-east-1
-"""
+        decode(userDataEncoded) == '''\
+                export ENVIRONMENT=
+                export MONITOR_BUCKET=helloworld
+                export APP=helloworld
+                export STACK=example
+                export CLUSTER=helloworld-example
+                export AUTO_SCALE_GROUP=helloworld-example-v345
+                export LAUNCH_CONFIG=helloworld-example-v345-1234567890
+                export EC2_REGION=sa-east-1
+                '''.stripIndent()
     }
 
     def 'should generate user data with blanks for null values'() {
@@ -60,15 +61,16 @@ export EC2_REGION=sa-east-1
         String userDataEncoded = provider.buildUserDataForVariables(userContext, 'helloworld', null, null)
 
         then:
-        decode(userDataEncoded) == """export ENVIRONMENT=
-export MONITOR_BUCKET=helloworld
-export APP=helloworld
-export STACK=
-export CLUSTER=
-export AUTO_SCALE_GROUP=
-export LAUNCH_CONFIG=
-export EC2_REGION=sa-east-1
-"""
+        decode(userDataEncoded) == '''\
+                export ENVIRONMENT=
+                export MONITOR_BUCKET=helloworld
+                export APP=helloworld
+                export STACK=
+                export CLUSTER=
+                export AUTO_SCALE_GROUP=
+                export LAUNCH_CONFIG=
+                export EC2_REGION=sa-east-1
+                '''.stripIndent()
     }
 
     private String decode(String encoded) {
