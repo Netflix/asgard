@@ -47,6 +47,14 @@
             </td>
           </tr>
           <tr class="prop">
+            <td valign="top" class="name">
+              <label for="group">App Group:</label>
+            </td>
+            <td valign="top">
+              <input type="text" id="group" name="group" value="${params.group}"/>
+            </td>
+          </tr>
+          <tr class="prop">
             <td class="name">
               <label for="type">Type:</label>
             </td>
