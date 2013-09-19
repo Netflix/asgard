@@ -17,15 +17,12 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
-import com.netflix.asgard.mock.Mocks
 
 class AutoScalingGroupTests extends GroovyTestCase {
 
     void testCopy() {
 
-        Mocks.createDynamicMethods() 
-
-        Mocks.awsAutoScalingService()
+        new MonkeyPatcherService().createDynamicMethods()
 
         Date start = new Date()
         Collection<Instance> instances = [new Instance().withInstanceId("id-blahblah")]

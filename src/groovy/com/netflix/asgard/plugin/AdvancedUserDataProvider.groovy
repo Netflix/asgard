@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2013 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,18 @@
  */
 package com.netflix.asgard.plugin
 
-import com.netflix.asgard.UserContext
+import com.netflix.asgard.model.LaunchContext
 
 /**
- * This is maintained only for backward compatibility with existing overrides of userDataProvider.
- *
- * Limited legacy interface for creating user data based solely on UserContext, ASG name, app name, and launch config
- * name. Implementing this interface as a plugin should be considered deprecated. Instead, implement
- * AdvancedUserDataProvider.
+ * Interface for plugin implementations for creating user data from various cloud object inputs.
  */
-interface UserDataProvider {
+interface AdvancedUserDataProvider {
 
-    String buildUserDataForVariables(UserContext userContext, String appName, String autoScalingGroupName,
-            String launchConfigName)
+    /**
+     * Constructs a user data string based on a collection of various inputs.
+     *
+     * @param launchContext collection of various cloud object inputs
+     * @return user data string
+     */
+    String buildUserData(LaunchContext launchContext)
 }

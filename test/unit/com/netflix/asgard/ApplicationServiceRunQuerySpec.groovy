@@ -21,7 +21,6 @@ import com.amazonaws.services.simpledb.model.CreateDomainRequest
 import com.amazonaws.services.simpledb.model.Item
 import com.amazonaws.services.simpledb.model.SelectRequest
 import com.amazonaws.services.simpledb.model.SelectResult
-import com.netflix.asgard.mock.Mocks
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyAccessibility")
@@ -36,7 +35,7 @@ class ApplicationServiceRunQuerySpec extends Specification {
         domainName: DOMAIN_NAME)
 
     def setup() {
-        Mocks.createDynamicMethods() 
+        new MonkeyPatcherService().createDynamicMethods()
     }
 
     def 'should retrieve applications'() {
