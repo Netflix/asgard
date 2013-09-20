@@ -18,7 +18,7 @@
 <g:if test="${task.objectType && task.objectId}">
   <tr class="prop">
     <td class="name">Return to<br/>${task.objectType.displayName}:</td>
-    <td class="value"><g:linkObject region="${task.userContext.region.code}"
+    <td class="value"><g:linkObject region="${task.userContext?.region?.code}"
                                     type="${task.objectType.name()}" name="${task.objectId}" /></td>
   </tr>
 </g:if>

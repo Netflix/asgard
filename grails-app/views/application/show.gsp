@@ -53,6 +53,10 @@
           </td>
         </tr>
         <tr class="prop">
+          <td class="name">App Group:</td>
+          <td class="value">${app.group}</td>
+        </tr>
+        <tr class="prop">
           <td class="name">Type:</td>
           <td class="value">${app.type}</td>
         </tr>

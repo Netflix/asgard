@@ -20,6 +20,14 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
+import com.google.common.collect.Sets
+import com.netflix.asgard.model.AutoScalingGroupBeanOptions
+import com.netflix.asgard.deployment.DeploymentWorkflowOptions
+import com.netflix.asgard.deployment.DeploymentWorkflow
+import com.netflix.asgard.model.LaunchConfigurationBeanOptions
+import com.netflix.asgard.deployment.ProceedPreference
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.InstancePriceType
@@ -42,13 +50,15 @@ import grails.converters.XML
 class ClusterController {
 
     def static allowedMethods = [createNextGroup: 'POST', resize: 'POST', delete: 'POST', activate: 'POST',
-            deactivate: 'POST']
+            deactivate: 'POST', deploy: 'POST', proceedWithDeployment: 'POST', rollbackDeployment: 'POST']
 
     def grailsApplication
+    def applicationService
     def awsAutoScalingService
     def awsEc2Service
     def awsLoadBalancerService
     def configService
+    def flowService
     def mergedInstanceService
     def pushService
     def spotInstanceRequestService
@@ -175,6 +185,173 @@ ${lastGroup.loadBalancerNames}"""
 
     def result = { render view: '/common/result' }
 
+    def proceedWithDeployment(String taskToken, String runId, String workflowId) {
+        completeDeployment(taskToken, runId, workflowId, true)
+    }
+
+    def rollbackDeployment(String taskToken, String runId, String workflowId) {
+        completeDeployment(taskToken, runId, workflowId, false)
+    }
+
+    private void completeDeployment(String taskToken, String runId, String workflowId, boolean shouldProceed) {
+        ManualActivityCompletionClient manualActivityCompletionClient = flowService.
+                getManualActivityCompletionClient(taskToken)
+        try {
+            manualActivityCompletionClient.complete(shouldProceed)
+            flash.message = "Automated deployment will ${shouldProceed ? '' : 'not '} proceed."
+        } catch (Exception e) {
+            flash.message = "Deployment failed: ${e.toString()}"
+        }
+        redirect([controller: 'task', action: 'show', params: [runId: runId, workflowId: workflowId]])
+    }
+
+    def prepareDeployment(String id) {
+        UserContext userContext = UserContext.of(request)
+        Cluster cluster = awsAutoScalingService.getCluster(userContext, id)
+        Map<String, Object> attributes = commonNextAsgPreparation(userContext, cluster)
+        String appName = Relationships.appNameFromGroupName(cluster.name)
+        String email = applicationService.getEmailFromApp(userContext, appName)
+        attributes?.putAll([
+                deploymentWorkflowOptions: new DeploymentWorkflowOptions(
+                        notificationDestination: params.notificationDestination ?: email,
+                        delayDurationMinutes: params.delayDurationMinutes ?: 0,
+                        doCanary: Boolean.parseBoolean(params.doCanary),
+                        canaryCapacity: params.canaryCount ?: 1,
+                        canaryStartUpTimeoutMinutes: params.canaryStartUpTimeoutMinutes ?: 30,
+                        canaryAssessmentDurationMinutes: params.canaryAssessmentDurationMinutes ?: 60,
+                        scaleUp: ProceedPreference.parse(params.scaleUp),
+                        desiredCapacityStartUpTimeoutMinutes: params.desiredCapacityStartUpTimeoutMinutes ?: 40,
+                        desiredCapacityAssessmentDurationMinutes: params.
+                                desiredCapacityAssessmentDurationMinutes ?: 120,
+                        disablePreviousAsg: ProceedPreference.parse(params.disablePreviousAsg),
+                        fullTrafficAssessmentDurationMinutes: params.fullTrafficAssessmentDurationMinutes ?: 240,
+                        deletePreviousAsg: ProceedPreference.parse(params.deletePreviousAsg)
+                )
+        ])
+        attributes
+    }
+
+    def prepareNextAsg(String id) {
+        UserContext userContext = UserContext.of(request)
+        Cluster cluster = awsAutoScalingService.getCluster(userContext, id)
+        Map<String, Object> attributes = commonNextAsgPreparation(userContext, cluster)
+        render([view: 'prepareDeployment', model: attributes])
+    }
+
+    private Map<String, Object> commonNextAsgPreparation(UserContext userContext, Cluster cluster) {
+        if (!cluster) {
+            flash.message = "No auto scaling groups exist with cluster name ${cluster.name}"
+            redirect(action: 'result')
+            return null
+        }
+        Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
+        if (!okayToCreateGroup) {
+            flash.message = "Cluster '${cluster.name}' already contains too many ASGs."
+            redirect([action: 'show', params: [id: cluster.name]])
+            return null
+        }
+        AutoScalingGroupData lastGroup = cluster.last()
+        String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
+        boolean showAllImages = params.allImages ? true : false
+        Map<String, Object> attributes = pushService.prepareEdit(userContext, lastGroup.autoScalingGroupName, showAllImages,
+                actionName, Requests.ensureList(params.selectedSecurityGroups))
+        Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
+        Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(availabilityZones,
+                Requests.ensureList(params.selectedZones), lastGroup)
+        List<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext).
+                sort { it.loadBalancerName.toLowerCase() }
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(lastGroup.vpcZoneIdentifier)
+        String subnetPurpose = subnets.coerceLoneOrNoneFromIds(subnetIds)?.purpose
+        String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
+        List<String> selectedLoadBalancers = Requests.ensureList(
+                params["selectedLoadBalancersForVpcId${vpcId}"]) ?: lastGroup.loadBalancerNames
+        List<String> subnetPurposes = subnets.getPurposesForZones(availabilityZones*.zoneName,
+                SubnetTarget.EC2).sort()
+        attributes.putAll([
+                clusterName: cluster.name,
+                group: lastGroup,
+                nextGroupName: nextGroupName,
+                vpcZoneIdentifier: lastGroup.vpcZoneIdentifier,
+                zonesGroupedByPurpose: subnets.groupZonesByPurpose(availabilityZones*.zoneName, SubnetTarget.EC2),
+                selectedZones: selectedZones,
+                subnetPurposes: subnetPurposes,
+                subnetPurpose: subnetPurpose ?: null,
+                loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
+                selectedLoadBalancers: selectedLoadBalancers,
+                spotUrl: configService.spotUrl,
+        ])
+        attributes
+    }
+
+    def deploy(DeployCommand cmd) {
+        if (cmd.hasErrors()) {
+            chain(action: 'prepareDeployment', model: [cmd:cmd], params: params)
+            return
+        }
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions()
+        bindData(deploymentOptions, params)
+        deploymentOptions.clusterName = cmd.clusterName
+
+        UserContext userContext = UserContext.of(request)
+        String appName = Relationships.appNameFromGroupName(cmd.clusterName)
+        String email = applicationService.getEmailFromApp(userContext, appName)
+        if (params.createAsgOnly) {
+            deploymentOptions.with {
+                notificationDestination = email
+                delayDurationMinutes = 0
+                doCanary = false
+                desiredCapacityStartUpTimeoutMinutes = 30
+                desiredCapacityAssessmentDurationMinutes = 0
+                disablePreviousAsg = ProceedPreference.No
+            }
+        }
+        String subnetPurpose = params.subnetPurpose
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
+        List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"] ?:
+            params["selectedLoadBalancers"])
+
+        Collection<AutoScalingProcessType> newSuspendedProcesses = Sets.newHashSet()
+        if (params.azRebalance == 'disabled') {
+            newSuspendedProcesses << AutoScalingProcessType.AZRebalance
+        }
+        if (Boolean.getBoolean(params.trafficAllowed)) {
+            newSuspendedProcesses << AutoScalingProcessType.AddToLoadBalancer
+        }
+
+        AutoScalingGroupBeanOptions asgOverrides = new AutoScalingGroupBeanOptions(
+                availabilityZones: Requests.ensureList(params.selectedZones),
+                loadBalancerNames: loadBalancerNames,
+                minSize: params.min as Integer,
+                desiredCapacity: params.desiredCapacity as Integer,
+                maxSize: params.max as Integer,
+                defaultCooldown: params.defaultCooldown as Integer,
+                healthCheckType: params.healthCheckType,
+                healthCheckGracePeriod: params.healthCheckGracePeriod as Integer,
+                terminationPolicies: Requests.ensureList(params.terminationPolicy),
+                subnetPurpose: subnetPurpose,
+                suspendedProcesses: newSuspendedProcesses
+        )
+
+        LaunchConfigurationBeanOptions lcOverrides = new LaunchConfigurationBeanOptions(
+                imageId: params.imageId,
+                instanceType: params.instanceType,
+                keyName: params.keyName,
+                securityGroups: Requests.ensureList(params.selectedSecurityGroups),
+                iamInstanceProfile: params.iamInstanceProfile,
+                instancePriceType: InstancePriceType.parse(params.pricing),
+                ebsOptimized: params.ebsOptimized?.toBoolean()
+        )
+
+        def client = flowService.getNewWorkflowClient(userContext, DeploymentWorkflow,
+                new Link(EntityType.cluster, cmd.clusterName))
+        client.asWorkflow().deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        WorkflowExecution workflowExecution = client.workflowExecution
+        redirect(controller: 'task', action: 'show', params: [runId: workflowExecution.runId,
+                workflowId: workflowExecution.workflowId])
+    }
+
     def createNextGroup = {
         UserContext userContext = UserContext.of(request)
         String name = params.name
@@ -229,18 +406,8 @@ ${lastGroup.loadBalancerNames}"""
 
             List<ScheduledUpdateGroupAction> lastScheduledActions = awsAutoScalingService.getScheduledActionsForGroup(
                     userContext, lastGroup.autoScalingGroupName)
-            List<String> ignoredScheduledActionProperties = ['startTime', 'time', 'autoScalingGroupName',
-                    'scheduledActionName', 'scheduledActionARN']
-            List<ScheduledUpdateGroupAction> newScheduledActions = lastScheduledActions.collect {
-                ScheduledUpdateGroupAction newScheduledAction = BeanState.ofSourceBean(it).
-                        ignoreProperties(ignoredScheduledActionProperties).injectState(new ScheduledUpdateGroupAction())
-                String id = awsAutoScalingService.nextPolicyId(userContext)
-                newScheduledAction.with {
-                    autoScalingGroupName = nextGroupName
-                    scheduledActionName = Relationships.buildScalingPolicyName(nextGroupName, id)
-                }
-                newScheduledAction
-            }
+            List<ScheduledUpdateGroupAction> newScheduledActions = awsAutoScalingService.copyScheduledActionsForNewAsg(
+                    userContext, nextGroupName, lastScheduledActions)
 
             Integer lastGracePeriod = lastGroup.healthCheckGracePeriod
             String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForPurposeAndZones(subnetPurpose,
@@ -361,4 +528,13 @@ Group: ${loadBalancerNames}"""
     private void redirectToTask(String taskId) {
         redirect(controller: 'task', action: 'show', params: [id: taskId])
     }
+}
+
+class DeployCommand {
+    String clusterName
+
+    static constraints = {
+        clusterName(nullable: false, blank: false)
+    }
+
 }

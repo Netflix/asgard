@@ -120,7 +120,7 @@ grails.project.dependency.resolution = {
                 'org.jsoup:jsoup:1.6.1',
 
                 // Static analysis for Groovy code.
-                'org.codenarc:CodeNarc:0.18.1',
+                'org.codenarc:CodeNarc:0.19',
 
                 // This fixes ivy resolution issues we had with our transitive dependency on 1.4.
                 'commons-codec:commons-codec:1.5',
@@ -132,7 +132,12 @@ grails.project.dependency.resolution = {
                 'com.netflix.frigga:frigga:0.6',
 
                 // Groovy concurrency framework.
-                'org.codehaus.gpars:gpars:1.0.0'
+                'org.codehaus.gpars:gpars:1.0.0',
+
+                // Used for JSON parsing of AWS Simple Workflow Service metadata.
+                // Previously this was an indirect depencency through Grails itself, but this caused errors in some
+                // Grails environments.
+                'com.googlecode.json-simple:json-simple:1.1'
         ) { // Exclude superfluous and dangerous transitive dependencies
             excludes(
                     // Some libraries bring older versions of JUnit as a transitive dependency and that can interfere
@@ -142,6 +147,9 @@ grails.project.dependency.resolution = {
                     'mockito-core',
             )
         }
+
+        // Spock in Grails 2.2.x http://grails.org/plugin/spock
+        test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
 
         // Optional dependency for Spock to support mocking objects without a parameterless constructor.
         test 'org.objenesis:objenesis:1.2'
@@ -156,7 +164,10 @@ grails.project.dependency.resolution = {
 
         runtime ":cors:1.0.4"
 
-        test ':spock:0.7'
+        // Spock in Grails 2.2.x http://grails.org/plugin/spock
+        test(":spock:0.7") {
+            exclude "spock-grails-support"
+        }
 
         test ':code-coverage:1.2.5'
 

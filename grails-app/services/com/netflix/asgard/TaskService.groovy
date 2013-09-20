@@ -84,7 +84,10 @@ class TaskService {
         } catch (CancelledException ignored) {
             // Thrown if task is cancelled while sleeping. Not an error.
         } catch (Exception e) {
-            if (task.status != 'failed') { // Tasks can be nested. We only want to capture the failure once.
+            if (task.status != 'failed' && task.name) {
+                // Tasks can be nested. We only want to capture the failure once.
+                // Unnamed tasks should not be marked completed. They are useful when you need to reuse code based on
+                // tasks without actually using the task system (like in an AWS SWF workflow with its own task system).
                 exception(task, e)
             }
             throw e

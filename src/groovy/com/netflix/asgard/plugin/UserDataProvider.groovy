@@ -17,6 +17,13 @@ package com.netflix.asgard.plugin
 
 import com.netflix.asgard.UserContext
 
+/**
+ * This is maintained only for backward compatibility with existing overrides of userDataProvider.
+ *
+ * Limited legacy interface for creating user data based solely on UserContext, ASG name, app name, and launch config
+ * name. Implementing this interface as a plugin should be considered deprecated. Instead, implement
+ * AdvancedUserDataProvider.
+ */
 interface UserDataProvider {
 
     String buildUserDataForVariables(UserContext userContext, String appName, String autoScalingGroupName,

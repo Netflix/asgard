@@ -37,6 +37,6 @@ license {
 }
 
 task(test, type:Exec) {
- commandLine './grailsw', 'test-app'    
+    commandLine './grailsw', 'test-app'    
 }
 

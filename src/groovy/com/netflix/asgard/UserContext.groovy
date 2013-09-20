@@ -19,6 +19,8 @@ import groovy.transform.Immutable
 import javax.servlet.http.HttpServletRequest
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.UnavailableSecurityManagerException
+import org.codehaus.jackson.annotate.JsonCreator
+import org.codehaus.jackson.annotate.JsonProperty
 
 @Immutable final class UserContext {
 
@@ -42,6 +44,21 @@ import org.apache.shiro.UnavailableSecurityManagerException
      * runs automatically and therefore should not require a tracking code.
      */
     Boolean internalAutomation
+
+    @JsonCreator
+    static UserContext of(@JsonProperty('ticket') String ticket, @JsonProperty('username') String username,
+              @JsonProperty('clientHostName') String clientHostName,
+              @JsonProperty('clientIpAddress') String clientIpAddress,
+              @JsonProperty('region') Region region, @JsonProperty('internalAutomation') Boolean internalAutomation) {
+        new UserContext(
+                ticket: ticket,
+                username: username,
+                clientHostName: clientHostName,
+                clientIpAddress: clientIpAddress,
+                region: region,
+                internalAutomation: internalAutomation
+        )
+    }
 
     /** Factory method takes an HttpServletRequest or a MockHttpServletRequest */
     static of(HttpServletRequest request) {

@@ -29,12 +29,23 @@
       <div class="message">${flash.message}</div>
     </g:if>
     <g:if test="${!task.isDone()}">
-      <g:form method="post">
-        <input type="hidden" name="id" value="${task.id}"/>
-        <div class="buttons" id="taskCancellationForm">
+      <div class="buttons" id="taskCancellationForm">
+        <g:form method="post">
+          <input type="hidden" name="id" value="${task.id}"/>
+          <input type="hidden" name="runId" value="${task.runId}"/>
+          <input type="hidden" name="workflowId" value="${task.workflowId}"/>
           <g:buttonSubmit class="stop" data-warning="Really stop task ${StringEscapeUtils.escapeJavaScript(task.name)} ?" action="cancel" value="Stop Task"/>
-        </div>
-      </g:form>
+        </g:form>
+        <g:if test="${params.taskToken}">
+          <g:form method="post" controller="cluster">
+            <input type="hidden" name="runId" value="${task.runId}"/>
+            <input type="hidden" name="workflowId" value="${task.workflowId}"/>
+            <input type="hidden" name="taskToken" value="${params.taskToken}"/>
+            <g:buttonSubmit class="proceed" action="proceedWithDeployment" value="Proceed With Deployment"/>
+            <g:buttonSubmit class="rollback" action="rollbackDeployment" value="Rollback Deployment"/>
+          </g:form>
+        </g:if>
+      </div>
     </g:if>
     <div class="task">
       <table>
@@ -46,7 +57,7 @@
         </tr>
         <tr class="prop">
           <td class="name">Region:</td>
-          <td class="value">${task.userContext.region}</td>
+          <td class="value">${task.userContext?.region}</td>
         </tr>
         <tr class="prop">
           <td class="name">Status:</td>
@@ -70,21 +81,21 @@
         </tr>
         <tr class="prop">
           <td class="name">${ticketLabel}:</td>
-          <td class="value">${task.userContext.ticket}</td>
+          <td class="value">${task.userContext?.ticket}</td>
         </tr>
         <g:if test="${authenticationEnabled}">
           <tr class="prop">
             <td class="name">Username:</td>
-            <td class="value">${task.userContext.username}</td>
+            <td class="value">${task.userContext?.username}</td>
           </tr>
         </g:if>
         <tr class="prop">
           <td class="name">Client Host Name<br/>(best guess,<br/>may be wrong):</td>
-          <td class="value">${task.userContext.clientHostName}</td>
+          <td class="value">${task.userContext?.clientHostName}</td>
         </tr>
         <tr class="prop">
           <td class="name">Client IP Address:</td>
-          <td class="value">${task.userContext.clientIpAddress}</td>
+          <td class="value">${task.userContext?.clientIpAddress}</td>
         </tr>
         <tr class="prop">
           <td class="name">Log:</td>

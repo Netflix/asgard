@@ -44,6 +44,14 @@
           </tr>
           <tr class="prop">
             <td class="name">
+              <label for="group">App Group:</label>
+            </td>
+            <td class="value">
+              <input type="text" id="group" name="group" value="${app.group}"/>
+            </td>
+          </tr>
+          <tr class="prop">
+            <td class="name">
               <label for="type">Type:</label>
             </td>
             <td class="value">

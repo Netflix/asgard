@@ -35,6 +35,10 @@ import org.apache.commons.io.FileUtils
 import org.apache.commons.lang.StringUtils
 import org.springframework.beans.factory.InitializingBean
 
+/**
+ * Legacy system for adding behavior to existing Java classes from libraries. Over time, as much of this as possible
+ * should get migrated to unit-tested mixins, and the mixins should get directly initialized from Bootstrap.groovy.
+ */
 class MonkeyPatcherService implements InitializingBean {
 
     static transactional = false
@@ -113,7 +117,7 @@ class MonkeyPatcherService implements InitializingBean {
         }
         if (!(AutoScalingGroup.class.methods as List).contains("getVariables")) {
             AutoScalingGroup.metaClass.getVariables = { ->
-                Relationships.parts(delegate.autoScalingGroupName)
+                Relationships.parts(delegate.autoScalingGroupName as String)
             }
         }
 
@@ -139,7 +143,7 @@ class MonkeyPatcherService implements InitializingBean {
             }
         }
         if (!(AvailabilityZone.class.methods as List).contains("shouldBePreselected")) {
-            List<String> discouragedZones = grailsApplication.config.cloud.discouragedAvailabilityZones ?: []
+            List<String> discouragedZones = grailsApplication?.config?.cloud?.discouragedAvailabilityZones ?: []
             AvailabilityZone.metaClass.shouldBePreselected = { selectedZones, autoScalingGroup ->
                 String zoneName = delegate.getZoneName()
                 Boolean isZoneNameDiscouraged = discouragedZones.contains(zoneName)

@@ -55,18 +55,18 @@ class AwsSimpleDbService implements InitializingBean {
     List<String> listDomains(Region region) {
         List<String> domains = []
 
-        ListDomainsResult result = listDomains(region, null)
+        ListDomainsResult result = listDomainsWithToken(region, null)
         while (true) {
             domains.addAll(result.domainNames)
             if (result.getNextToken() == null) {
                 break
             }
-            result = listDomains(region, result.getNextToken())
+            result = listDomainsWithToken(region, result.getNextToken())
         }
         domains
     }
 
-    private ListDomainsResult listDomains(Region region, String nextToken) {
+    private ListDomainsResult listDomainsWithToken(Region region, String nextToken) {
         awsClient.by(region).listDomains(new ListDomainsRequest().withNextToken(nextToken))
     }
 

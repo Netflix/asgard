@@ -79,8 +79,12 @@
           </tr>
         </g:each>
         <tr class="prop">
-          <td class="name">Instance Counts:</td>
-          <td class="value subProperties"><label>Min</label> ${group.minSize} <label>Desired</label> ${group.desiredCapacity} <label>Max</label> ${group.maxSize}</td>
+          <td class="name">Instance Bounds:</td>
+          <td class="value subProperties"><label>Min</label> ${group.minSize} <label>Max</label> ${group.maxSize}</td>
+        </tr>
+        <tr class="prop">
+          <td class="name">Desired Size:</td>
+          <td class="value subProperties">${group.desiredCapacity} <label>instance${group.desiredCapacity == 1 ? '' : 's'}</label></td>
         </tr>
         <tr class="prop" title="The number of seconds after a scaling activity completes before any further scaling activities can start">
           <td class="name">Cooldown:</td>

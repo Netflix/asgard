@@ -40,16 +40,27 @@ class ThreadScheduler {
     }
 
     /**
-     * Adds another job to the set of repetitive, timed background jobs.
+     * Adds another job to the set of repetitive, scheduled background jobs.
      *
      * @param intervalSeconds the minimum time between operation start times for the specified job
      * @param maxJitterSeconds the upper limit to the random amount of time to wait before the periodic schedule begins,
      *          in order to reduce numerous simultaneous jobs from running together
      * @param job the operation to execute periodically
      */
-    void schedule(int intervalSeconds, int maxJitterSeconds, Runnable job) {
-        int maxJitterToUse = Math.max(maxJitterSeconds, 1) // At least one second to avoid errors in random.nextInt
-        int jitterSeconds = configService.useJitter ? random.nextInt(maxJitterToUse) : 0
+    void scheduleAtFixedRate(int intervalSeconds, int maxJitterSeconds, Runnable job) {
+        // Random jitter should be not be too long, even if the interval is long
+        int maxJitterToUse = Math.min(maxJitterSeconds, 15)
+        int jitterSeconds = (maxJitterToUse && configService.useJitter) ? random.nextInt(maxJitterToUse) : 0
         scheduler.scheduleAtFixedRate(job, jitterSeconds, intervalSeconds, TimeUnit.SECONDS)
+    }
+
+    /**
+     * Schedules a job to run once after a delay.
+     *
+     * @param delaySeconds the number of seconds to wait before the job is allowed to run
+     * @param job the operation to execute
+     */
+    void schedule(int delaySeconds, Runnable job) {
+        scheduler.schedule(job, delaySeconds, TimeUnit.SECONDS)
     }
 }

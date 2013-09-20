@@ -14,11 +14,25 @@
  * limitations under the License.
  */
 jQuery(function() {
-    var url = window.location.href;
-    var reloadPage = function() {
+    var url, reloadPage, statusChecker, timeChecker, uptimeUrl, timeUpdater, remainingCachesUrl, remainingCachesLister,
+        remainingCacheListUpdater;
+    url = window.location.href;
+    uptimeUrl = '/server/uptime';
+    remainingCachesUrl = '/cache/remaining.json';
+    timeUpdater = function(ajaxResponse) {
+        jQuery('#timeSinceStartup').html(ajaxResponse);
+    };
+    remainingCacheListUpdater = function(ajaxResponse) {
+        var container = jQuery('<div></div>');
+        jQuery.each(ajaxResponse, function(index, item) {
+            container.append('<div>' + item + '</div>');
+        });
+        jQuery('#remainingCaches').html(container);
+    };
+    reloadPage = function() {
         window.location.replace(url);
     };
-    var statusChecker = function() {
+    statusChecker = function() {
         jQuery.ajax({
             url: url,
             success: reloadPage,
@@ -31,6 +45,18 @@ jQuery(function() {
                 }
             }
         });
-    }
+    };
     window.setTimeout(statusChecker, 5000);
+
+    timeChecker = function() {
+        jQuery.get(uptimeUrl, timeUpdater);
+    };
+    timeChecker();
+    window.setInterval(timeChecker, 1000);
+
+    remainingCachesLister = function() {
+        jQuery.get(remainingCachesUrl, remainingCacheListUpdater);
+    };
+    remainingCachesLister();
+    window.setInterval(remainingCachesLister, 5000);
 });

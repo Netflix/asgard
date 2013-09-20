@@ -15,6 +15,7 @@
     limitations under the License.
 
 --%>
+<%@ page import="com.netflix.asgard.Occasion" %>
 <g:if test="${occasion.name() == Occasion.APRILFOOLS.name()}">
   <link rel="stylesheet" href="${resource(dir: 'js/shadowbox-3.0.3', file: 'shadowbox.css')}?v=${build}"/>
   <script defer type="text/javascript" src="${resource(dir: 'js/shadowbox-3.0.3', file: 'shadowbox.js')}?v=${build}"></script>

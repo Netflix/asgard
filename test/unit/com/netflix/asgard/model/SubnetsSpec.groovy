@@ -18,6 +18,7 @@ package com.netflix.asgard.model
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Tag
+import com.google.common.collect.ImmutableSet
 import spock.lang.Specification
 
 class SubnetsSpec extends Specification {
@@ -49,13 +50,12 @@ class SubnetsSpec extends Specification {
                         cidrBlock: '10.10.1.0/21', availableIpAddressCount: 42, availabilityZone: 'us-east-1a',
                         tags: [new Tag(key: 'immutable_metadata', value: '{purpose: "internal", "target": "ec2" }')]),
         ]
-        List<SubnetData> expectedSubnets = [
+        Set<SubnetData> expectedSubnets = ImmutableSet.of(
                 new SubnetData(subnetId: 'subnet-e9b0a3a1', state: 'available', vpcId: 'vpc-11112222',
                         cidrBlock: '10.10.1.0/21', availableIpAddressCount: 42, availabilityZone: 'us-east-1a',
                         purpose: 'internal', target: SubnetTarget.EC2)
-        ]
+        )
         expect: expectedSubnets == Subnets.from(awsSubnets).allSubnets
-
     }
 
     def 'should create subnet without target from AWS object with invalid target'() {
@@ -64,13 +64,12 @@ class SubnetsSpec extends Specification {
                         cidrBlock: '10.10.1.0/21', availableIpAddressCount: 42, availabilityZone: 'us-east-1a',
                         tags: [new Tag(key: 'immutable_metadata', value: '{purpose: "internal", "target": "y2k" }')]),
         ]
-        List<SubnetData> expectedSubnets = [
+        Set<SubnetData> expectedSubnets = ImmutableSet.of(
                 new SubnetData(subnetId: 'subnet-e9b0a3a1', state: 'available', vpcId: 'vpc-11112222',
                         cidrBlock: '10.10.1.0/21', availableIpAddressCount: 42, availabilityZone: 'us-east-1a',
                         purpose: 'internal')
-        ]
+        )
         expect: expectedSubnets == Subnets.from(awsSubnets).allSubnets
-
     }
 
     def 'should find subnet by ID'() {

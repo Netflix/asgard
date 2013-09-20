@@ -34,6 +34,7 @@ enum AutoScalingProcessType {
     Launch('new instance launching'),
     Terminate('instance termination'),
     AZRebalance('availability zone rebalancing'),
+    AlarmNotifications('automatic alarm-based scaling'),
     AddToLoadBalancer('adding instances to ELB')
 
     final String resumeMessage
@@ -46,6 +47,10 @@ enum AutoScalingProcessType {
     AutoScalingProcessType(String suspendMessage, String resumeMessage) {
         this.suspendMessage = suspendMessage
         this.resumeMessage = resumeMessage
+    }
+
+    static AutoScalingProcessType parse(String value) {
+        values().find { it.name().equalsIgnoreCase(value) }
     }
 
     static Set<AutoScalingProcessType> getDisableProcesses() {

@@ -257,6 +257,15 @@ class ServerService implements InitializingBean {
         trafficMover?.isAlive() ?: false
     }
 
+    /**
+     * Gets the time the server has been up, expressed as a short string like '13s' or '6h 20m 3s'.
+     *
+     * @return the time the server has been up, as an abbreviated string
+     */
+    String getUptimeString() {
+        Time.format(serverStartupTime, new DateTime())
+    }
+
     Integer getMinutesSinceStartup() {
         Minutes.minutesBetween(serverStartupTime, new DateTime()).minutes
     }
