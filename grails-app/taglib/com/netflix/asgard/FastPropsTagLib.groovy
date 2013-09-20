@@ -103,6 +103,18 @@ class FastPropsTagLib {
         }
     }
 
+    /**
+     * Builds fast property console url link if found in configuration
+     * It does not create any output if configuration does not contain this information
+     * Configuration needed for this tag -
+     *  fastPropertyConsoleUrls {
+     *      test = '...'
+     *      prod = '...'
+     *  }
+     * This way you configure an external console url based on the account type (test/prod)
+     * @attr - none
+     *
+     */
     def extLinkToPropertiesConsole = {
         def propertiesConsoleUrl = configService.getFastPropertiesConsoleUrl()
         if (propertiesConsoleUrl) {
