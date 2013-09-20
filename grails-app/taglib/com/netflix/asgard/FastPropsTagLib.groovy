@@ -26,7 +26,6 @@ import org.joda.time.format.ISODateTimeFormat
 class FastPropsTagLib {
 
     def configService
-    def grailsApplication
 
     /**
      * Builds additional scope attributes inline table for a fastProperty
@@ -105,10 +104,12 @@ class FastPropsTagLib {
     }
 
     def extLinkToPropertiesConsole = {
-        def awsAccount = configService.getAccountName()
-        def envName = awsAccount ?: 'test'
-        def propertiesConsoleUrl = grailsApplication.config.platform?.fastPropertyConsoleUrls[envName] ?: '#'
-        out << '<a href="' + propertiesConsoleUrl + '" target="_blank" class="fastProperties">Fast Properties</a>'
+        def propertiesConsoleUrl = configService.getFastPropertiesConsoleUrl()
+        if (propertiesConsoleUrl) {
+            out << '<li class="menuButton">'
+            out << '<a href="' + propertiesConsoleUrl + '" target="_blank" class="fastProperties">Fast Properties</a>'
+            out << '</li>'
+        }
     }
 
 }
