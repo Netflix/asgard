@@ -164,7 +164,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         Check.notNull(monitorBucketType, MonitorBucketType, 'monitorBucketType')
         String nowEpoch = new DateTime().millis as String
         Collection<ReplaceableAttribute> attributes = []
-        attributes << new ReplaceableAttribute('group', Check.notEmpty(group), replaceExistingValues)
+        attributes << new ReplaceableAttribute('group', group, replaceExistingValues)
         attributes << new ReplaceableAttribute('type', Check.notEmpty(type), replaceExistingValues)
         attributes << new ReplaceableAttribute('description', Check.notEmpty(description), replaceExistingValues)
         attributes << new ReplaceableAttribute('owner', Check.notEmpty(owner), replaceExistingValues)
