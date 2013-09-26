@@ -191,7 +191,7 @@
             </g:form>
           </g:if>
           <g:else>
-            <g:link controller="auth" action="login" params="${[targetUri: request.forwardURI.encodeAsHTML()]}">
+            <g:link controller="auth" action="login" params="${[targetUri: targetUri]}">
               Login to enable Create Next Group.
             </g:link>
           </g:else>
