@@ -81,8 +81,24 @@ class InstanceTypeService implements CacheInitializer {
         caches.allInstanceTypes.by(userContext.region).get(instanceTypeName)
     }
 
+    /**
+     * Gets the instance types with associated pricing data for the current region.
+     *
+     * @param userContext who, where, why
+     * @return the instance types, sorted by price, with unpriced types at the end sorted by name
+     */
     Collection<InstanceTypeData> getInstanceTypes(UserContext userContext) {
-        caches.allInstanceTypes.by(userContext.region).list().sort { it.linuxOnDemandPrice }
+        caches.allInstanceTypes.by(userContext.region).list().sort { a, b ->
+            BigDecimal aPrice = a.linuxOnDemandPrice
+            BigDecimal bPrice = b.linuxOnDemandPrice
+            if (aPrice == null) {
+                return bPrice == null ? a.name.compareTo(b.name) : 1 // b goes first when a is the only null price
+            } else if (bPrice == null) {
+                return -1 // a goes first when b is the only null price
+            }
+            // When both prices exist, smaller goes first. Return integers. Avoid subtraction decimal rounding errors.
+            return aPrice < bPrice ? -1 : 1
+        }
     }
 
     private JSONElement fetchPricingJsonData(InstancePriceType instancePriceType) {
