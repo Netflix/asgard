@@ -27,7 +27,7 @@ class ApplicationServiceUnitSpec extends Specification {
 
     def allApplications = Mock(CachedMap)
     def caches = new Caches(new MockCachedMapBuilder([
-        (EntityType.application): allApplications,
+            (EntityType.application): allApplications,
     ]))
     ApplicationService applicationService
 
@@ -70,7 +70,8 @@ class ApplicationServiceUnitSpec extends Specification {
     }
 
     void mockApplications() {
-        allApplications.list() >> APP_NAMES.collect { new AppRegistration(name: it)}
+        allApplications.list() >> APP_NAMES.collect { new AppRegistration(name: it) }
+    }
 
     def 'application group should be optional when creating an app'() {
 
