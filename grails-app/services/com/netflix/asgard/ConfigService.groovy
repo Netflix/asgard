@@ -782,38 +782,31 @@ class ConfigService {
     }
 
     /**
-     * @return Application specific URL from SAML IdP to redirect SSO login requests to.
+     * @return application specific URL from OneLogin to redirect Single Sign-On (SSO) requests to
      */
-    String getSamlLoginUrl() {
-        grailsApplication.config.security?.saml?.loginUrl ?: null
+    String getOneLoginUrl() {
+        grailsApplication.config.security?.onelogin?.url ?: null
     }
 
     /**
-     * @return URL to redirect user to on logout to terminate SAML session.
+     * @return URL to redirect user to on logout to terminate OneLogin session
      */
-    String getSamlLogoutUrl() {
-        grailsApplication.config.security?.saml?.logoutUrl ?: null
+    String getOneLoginLogoutUrl() {
+        grailsApplication.config.security?.onelogin?.logoutUrl ?: null
     }
 
     /**
-     * @return Application specific issuer URL from SAML IdP, defaults to the login URL which works for some IdPs.
+     * @return Certificate provided by OneLogin used to validate SAML tokens
      */
-    String getSamlIssuer() {
-        grailsApplication.config.security?.saml?.issuer ?: samlLoginUrl
+    String getOneLoginCertificate() {
+        grailsApplication.config.security?.onelogin?.certificate ?: null
     }
 
     /**
-     * @return Certificate provided by SAML IdP used to validate SAML tokens.
+     * @return common suffix to truncate off usernames returned by OneLogin. For example '@netflix.com'
      */
-    String getSamlCertificate() {
-        grailsApplication.config.security?.saml?.certificate ?: null
-    }
-
-    /**
-     * @return Common suffix to strip off usernames returned by SAML IdP. For example '@netflix.com'.
-     */
-    String getSamlUsernameSuffix() {
-        grailsApplication.config.security?.saml?.usernameSuffix ?: null
+    String getOneLoginUsernameSuffix() {
+        grailsApplication.config.security?.onelogin?.usernameSuffix ?: null
     }
 
     /**
