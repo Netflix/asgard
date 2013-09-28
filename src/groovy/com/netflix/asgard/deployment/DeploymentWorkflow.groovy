@@ -20,6 +20,8 @@ import com.amazonaws.services.simpleworkflow.flow.annotations.GetState
 import com.amazonaws.services.simpleworkflow.flow.annotations.Workflow
 import com.amazonaws.services.simpleworkflow.flow.annotations.WorkflowRegistrationOptions
 import com.netflix.asgard.UserContext
+import com.netflix.asgard.model.AutoScalingGroupBeanOptions
+import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 
 /**
  * Method contracts and annotations used for the automatic deployment SWF workflow.
@@ -36,9 +38,9 @@ interface DeploymentWorkflow {
      * @param lcOverrides specify changes to the template launch configuration
      * @param asgOverrides specify changes to the template auto scaling group
      */
-    @Execute(version = "1.2")
+    @Execute(version = "1.3")
     void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
-                LaunchConfigurationOptions lcOverrides, AutoScalingGroupOptions asgOverrides)
+                LaunchConfigurationBeanOptions lcOverrides, AutoScalingGroupBeanOptions asgOverrides)
 
     /**
      * @return current log history of the workflow

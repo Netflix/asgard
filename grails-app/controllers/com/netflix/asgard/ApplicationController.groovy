@@ -170,6 +170,7 @@ class ApplicationController {
         } else {
             String name = params.name
             UserContext userContext = UserContext.of(request)
+            String group = params.group
             String type = params.type
             String desc = params.description
             String owner = params.owner
@@ -177,8 +178,8 @@ class ApplicationController {
             String monitorBucketTypeString = params.monitorBucketType
             boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
             MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
-            CreateApplicationResult result = applicationService.createRegisteredApplication(userContext, name, type,
-                    desc, owner, email, bucketType, enableChaosMonkey)
+            CreateApplicationResult result = applicationService.createRegisteredApplication(userContext, name, group,
+                    type, desc, owner, email, bucketType, enableChaosMonkey)
             flash.message = result.toString()
             if (result.succeeded()) {
                 redirect(action: 'show', params: [id: name])
@@ -199,6 +200,7 @@ class ApplicationController {
     def update = {
         String name = params.name
         UserContext userContext = UserContext.of(request)
+        String group = params.group
         String type = params.type
         String desc = params.description
         String owner = params.owner
@@ -206,7 +208,7 @@ class ApplicationController {
         String monitorBucketTypeString = params.monitorBucketType
         try {
             MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
-            applicationService.updateRegisteredApplication(userContext, name, type, desc, owner, email,
+            applicationService.updateRegisteredApplication(userContext, name, group, type, desc, owner, email,
                     bucketType)
             flash.message = "Application '${name}' has been updated."
         } catch (Exception e) {

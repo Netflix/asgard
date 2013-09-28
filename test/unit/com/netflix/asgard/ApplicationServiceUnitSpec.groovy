@@ -15,19 +15,34 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.simpledb.AmazonSimpleDB
 import com.netflix.asgard.mock.Mocks
-import grails.test.mixin.*
+import com.netflix.asgard.model.MonitorBucketType
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class ApplicationServiceUnitSpec extends Specification {
 
     final Collection<String> APP_NAMES = ['aws_stats', 'api', 'cryptex', 'helloworld', 'abcache']
 
     def allApplications = Mock(CachedMap)
     def caches = new Caches(new MockCachedMapBuilder([
-        (EntityType.application): allApplications,
+            (EntityType.application): allApplications,
     ]))
-    ApplicationService applicationService = new ApplicationService(caches: caches)
+    ApplicationService applicationService
+
+    void setup() {
+        applicationService = Spy(ApplicationService)
+        applicationService.caches = caches
+        applicationService.taskService = new TaskService() {
+            def runTask(UserContext context, String name, Closure work, Link link = null,
+                        Task existingTask = null) {
+                work(new Task())
+            }
+        }
+        applicationService.simpleDbClient = Mock(AmazonSimpleDB)
+        applicationService.cloudReadyService = Mock(CloudReadyService)
+    }
 
     def 'should return correct apps for load balancer'() {
         mockApplications()
@@ -55,6 +70,20 @@ class ApplicationServiceUnitSpec extends Specification {
     }
 
     void mockApplications() {
-        allApplications.list() >> APP_NAMES.collect { new AppRegistration(name: it)}
+        allApplications.list() >> APP_NAMES.collect { new AppRegistration(name: it) }
+    }
+
+    def 'application group should be optional when creating an app'() {
+
+        applicationService.getRegisteredApplication(_, _) >> null
+
+        when:
+        CreateApplicationResult result = applicationService.createRegisteredApplication(
+                UserContext.auto(Region.US_EAST_1), 'helloworld', null,
+                'Web Application', 'Say hello', 'jsmith', 'jsmith@example.com', MonitorBucketType.application, true)
+
+        then:
+        1 * applicationService.simpleDbClient.putAttributes(_)
+        notThrown(NullPointerException)
     }
 }

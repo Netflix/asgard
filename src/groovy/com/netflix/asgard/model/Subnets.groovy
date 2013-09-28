@@ -17,19 +17,24 @@ package com.netflix.asgard.model
 import com.amazonaws.services.ec2.model.Subnet
 import com.google.common.base.Function
 import com.google.common.base.Supplier
+import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Maps
 import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
 import com.netflix.asgard.Check
 import com.netflix.asgard.Relationships
-import groovy.transform.Immutable
+import groovy.transform.Canonical
 
 /**
  * These are nontrivial queries we like to perform on subnets.
  */
-@Immutable class Subnets {
+@Canonical class Subnets {
     /** All of the subnets contained in this object. */
-    Collection<SubnetData> allSubnets
+    final private Collection<SubnetData> allSubnets
+
+    private Subnets(Collection<SubnetData> allSubnets) {
+        this.allSubnets = ImmutableSet.copyOf(allSubnets)
+    }
 
     /**
      * Construct Subnets from AWS Subnets
@@ -38,7 +43,7 @@ import groovy.transform.Immutable
      * @return a new immutable Subnets based off the subnets
      */
     public static Subnets from(Collection<Subnet> subnets) {
-        new Subnets(allSubnets: subnets.collect() { SubnetData.from(it) })
+        new Subnets(subnets.collect() { SubnetData.from(it) })
     }
 
     /**
@@ -72,7 +77,7 @@ import groovy.transform.Immutable
      * @return the subnet IDs returned in the same order as the zones sent in or an empty List
      * @throws IllegalArgumentException if there are multiple subnets with the same purpose and zone
      */
-    List<String> getSubnetIdsForZones(List<String> zones, String purpose, SubnetTarget target = null) {
+    List<String> getSubnetIdsForZones(Collection<String> zones, String purpose, SubnetTarget target = null) {
         if (!zones) {
             return Collections.emptyList()
         }
@@ -142,7 +147,7 @@ import groovy.transform.Immutable
      * @return map of subnet purposes to their VPC ID
      */
     Map<String, String> mapPurposeToVpcId() {
-        Map<Object, List<SubnetData>> subnetsGroupedByPurpose = allSubnets.groupBy { it.purpose }
+        Map<String, List<SubnetData>> subnetsGroupedByPurpose = allSubnets.groupBy { it.purpose }
         subnetsGroupedByPurpose.inject([:]) { Map purposeToVpcId, Map.Entry entry ->
             String purpose = entry.key
             if (!purpose) {
@@ -174,9 +179,20 @@ import groovy.transform.Immutable
             // No zones were selected because there was no chance to change them. Keep the VPC Zone Identifier.
             return vpcZoneIdentifier
         }
-        List<String> oldSubnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(vpcZoneIdentifier)
-        String purpose = coerceLoneOrNoneFromIds(oldSubnetIds)?.purpose
+        String purpose = getPurposeFromVpcZoneIdentifier(vpcZoneIdentifier)
         constructNewVpcZoneIdentifierForPurposeAndZones(purpose, zones)
+    }
+
+    /**
+     * Figure out the subnet purpose given a VPC zone identifier.
+     *
+     * @param  vpcZoneIdentifier is used to derive a subnet purpose from
+     * @return the subnet purpose indicated by the vpcZoneIdentifier
+     */
+    String getPurposeFromVpcZoneIdentifier(String vpcZoneIdentifier) {
+        List<String> oldSubnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(vpcZoneIdentifier)
+        // All subnets used in the vpcZoneIdentifier will have the same subnet purpose if set up in Asgard.
+        coerceLoneOrNoneFromIds(oldSubnetIds)?.purpose
     }
 
     /**
@@ -186,7 +202,7 @@ import groovy.transform.Immutable
      * @param  zones which the new VPC Zone Identifier will contain
      * @return a new VPC Zone Identifier or null if no purpose was specified
      */
-    String constructNewVpcZoneIdentifierForPurposeAndZones(String purpose, List<String> zones) {
+    String constructNewVpcZoneIdentifierForPurposeAndZones(String purpose, Collection<String> zones) {
         if (purpose) {
             List<String> newSubnetIds = getSubnetIdsForZones(zones, purpose, SubnetTarget.EC2) // This is only for ASGs.
             if (newSubnetIds) {

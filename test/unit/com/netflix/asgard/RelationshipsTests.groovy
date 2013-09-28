@@ -23,6 +23,7 @@ import com.netflix.frigga.ami.AppVersion
 import grails.test.GrailsUnitTestCase
 import org.joda.time.DateTime
 
+@SuppressWarnings("GroovyAccessibility")
 class RelationshipsTests extends GrailsUnitTestCase {
 
     void setUp() {

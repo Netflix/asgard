@@ -16,15 +16,12 @@
 package com.netflix.asgard.deployment
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
-import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.simpleworkflow.flow.annotations.ManualActivityCompletion
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
-import com.google.common.collect.Sets
 import com.netflix.asgard.AwsAutoScalingService
 import com.netflix.asgard.AwsEc2Service
 import com.netflix.asgard.AwsLoadBalancerService
-import com.netflix.asgard.BeanState
 import com.netflix.asgard.Caches
 import com.netflix.asgard.CloudReadyService
 import com.netflix.asgard.ConfigService
@@ -32,17 +29,16 @@ import com.netflix.asgard.DiscoveryService
 import com.netflix.asgard.EmailerService
 import com.netflix.asgard.LaunchTemplateService
 import com.netflix.asgard.Relationships
-import com.netflix.asgard.SpotInstanceRequestService
 import com.netflix.asgard.Task
 import com.netflix.asgard.Time
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.flow.Activity
 import com.netflix.asgard.flow.SwfActivity
+import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
-import com.netflix.asgard.model.InstancePriceType
+import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScalingPolicyData
-import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.push.AsgDeletionMode
 import com.netflix.asgard.push.PushException
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
@@ -61,76 +57,58 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     EmailerService emailerService
     LaunchTemplateService launchTemplateService
     LinkGenerator grailsLinkGenerator
-    SpotInstanceRequestService spotInstanceRequestService
 
     @Override
-    AsgDeploymentNames getAsgDeploymentNames(UserContext userContext, String clusterName, String newSubnetPurpose,
-            List<String> newZones) {
+    AsgDeploymentNames getAsgDeploymentNames(UserContext userContext, String clusterName) {
         AutoScalingGroupData lastAsg = awsAutoScalingService.getCluster(userContext, clusterName).last()
         String nextAsgName = Relationships.buildNextAutoScalingGroupName(lastAsg.autoScalingGroupName)
-
-        Subnets subnets = awsEc2Service.getSubnets(userContext)
-        String newVpcZoneIdentifier
-        if (newSubnetPurpose == null) {
-            newVpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForZones(lastAsg.vpcZoneIdentifier, newZones)
-        } else {
-            newVpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForPurposeAndZones(newSubnetPurpose, newZones)
-        }
         new AsgDeploymentNames(
                 previousAsgName: lastAsg.autoScalingGroupName,
                 previousLaunchConfigName: lastAsg.launchConfigurationName,
-                previousVpcZoneIdentifier: lastAsg.vpcZoneIdentifier,
                 nextAsgName: nextAsgName,
-                nextLaunchConfigName: Relationships.buildLaunchConfigurationName(nextAsgName),
-                nextVpcZoneIdentifier: newVpcZoneIdentifier
+                nextLaunchConfigName: Relationships.buildLaunchConfigurationName(nextAsgName)
         )
     }
 
     @Override
-    String createLaunchConfigForNextAsg(UserContext userContext, AsgDeploymentNames asgDeploymentNames,
-            LaunchConfigurationOptions overrides, InstancePriceType instancePriceType) {
-        LaunchConfiguration templateLaunchConfiguration = awsAutoScalingService.getLaunchConfiguration(
-                userContext, asgDeploymentNames.previousLaunchConfigName)
-        LaunchConfiguration launchConfiguration = new LaunchConfiguration()
-        BeanState.ofSourceBean(templateLaunchConfiguration).injectState(launchConfiguration)
-        BeanState.ofSourceBean(overrides).injectState(launchConfiguration)
-        launchConfiguration.launchConfigurationName = asgDeploymentNames.nextLaunchConfigName
-        Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(
-                launchConfiguration.securityGroups, asgDeploymentNames.nextVpcZoneIdentifier, userContext.region)
-        launchConfiguration.securityGroups = securityGroups
-        launchConfiguration.userData = launchTemplateService.buildUserData(userContext,
-                asgDeploymentNames.nextAsgName, asgDeploymentNames.nextLaunchConfigName)
-        launchConfiguration.iamInstanceProfile = launchConfiguration.iamInstanceProfile ?: configService.defaultIamRole
-        if (instancePriceType == InstancePriceType.SPOT ||
-                (!instancePriceType && templateLaunchConfiguration.spotPrice)) {
-            launchConfiguration.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext,
-                    launchConfiguration.instanceType)
+    AutoScalingGroupBeanOptions constructNextAsgForCluster(UserContext userContext, AsgDeploymentNames asgDeploymentNames,
+            AutoScalingGroupBeanOptions inputs) {
+        AutoScalingGroupBeanOptions autoScalingGroup = AutoScalingGroupBeanOptions.from(inputs)
+        autoScalingGroup.with {
+            autoScalingGroupName = asgDeploymentNames.nextAsgName
+            launchConfigurationName = asgDeploymentNames.nextLaunchConfigName
+            minSize = 0
+            desiredCapacity = 0
         }
-        awsAutoScalingService.createLaunchConfiguration(userContext, launchConfiguration)
+        autoScalingGroup
+    }
+
+    @Override
+    LaunchConfigurationBeanOptions constructLaunchConfigForNextAsg(UserContext userContext,
+            AutoScalingGroupBeanOptions nextAutoScalingGroup, LaunchConfigurationBeanOptions inputs) {
+        LaunchConfigurationBeanOptions launchConfiguration = LaunchConfigurationBeanOptions.from(inputs)
+        launchConfiguration.launchConfigurationName = nextAutoScalingGroup.launchConfigurationName
+        Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(
+                launchConfiguration.securityGroups, nextAutoScalingGroup.subnetPurpose as boolean, userContext.region)
+        launchConfiguration.securityGroups = securityGroups
+        launchConfiguration.iamInstanceProfile = launchConfiguration.iamInstanceProfile ?: configService.defaultIamRole
+        launchConfiguration
+    }
+
+    @Override
+    String createLaunchConfigForNextAsg(UserContext userContext, AutoScalingGroupBeanOptions autoScalingGroup,
+        LaunchConfigurationBeanOptions launchConfiguration) {
+        launchConfiguration.userData = launchTemplateService.buildUserData(userContext, autoScalingGroup,
+                launchConfiguration)
+        awsAutoScalingService.createLaunchConfiguration(userContext, launchConfiguration, new Task())
         launchConfiguration.launchConfigurationName
     }
 
     @Override
-    String createNextAsgForCluster(UserContext userContext, AsgDeploymentNames asgDeploymentNames,
-            AutoScalingGroupOptions overrides, Boolean initialTrafficPrevented, Boolean azRebalanceSuspended) {
+    String createNextAsgForCluster(UserContext userContext, AutoScalingGroupBeanOptions autoScalingGroup) {
         Task task = new Task()
-        AutoScalingGroup templateAsg = awsAutoScalingService.getAutoScalingGroup(userContext,
-                asgDeploymentNames.previousAsgName)
-        AutoScalingGroup autoScalingGroup = new AutoScalingGroup()
-        BeanState.ofSourceBean(templateAsg).injectState(autoScalingGroup)
-        BeanState.ofSourceBean(overrides).injectState(autoScalingGroup)
-        autoScalingGroup.withAutoScalingGroupName(asgDeploymentNames.nextAsgName).withMinSize(0).withDesiredCapacity(0).
-                withVPCZoneIdentifier(asgDeploymentNames.nextVpcZoneIdentifier)
-        Collection<AutoScalingProcessType> suspendedProcesses = Sets.newHashSet()
-        boolean lastRebalanceSuspended = templateAsg.isProcessSuspended(AutoScalingProcessType.AZRebalance)
-        if ((azRebalanceSuspended == null) ? lastRebalanceSuspended : azRebalanceSuspended) {
-            suspendedProcesses << AutoScalingProcessType.AZRebalance
-        }
-        if (initialTrafficPrevented) {
-            suspendedProcesses << AutoScalingProcessType.AddToLoadBalancer
-        }
         AutoScalingGroup resultingAutoScalingGroup = awsAutoScalingService.createAutoScalingGroup(userContext,
-                autoScalingGroup, asgDeploymentNames.nextLaunchConfigName, suspendedProcesses, task)
+                autoScalingGroup, task)
         resultingAutoScalingGroup?.autoScalingGroupName
     }
 

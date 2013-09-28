@@ -24,6 +24,8 @@ import com.netflix.asgard.flow.DoTry
 import com.netflix.asgard.flow.GlobalWorkflowAttributes
 import com.netflix.asgard.flow.SwfWorkflow
 import com.netflix.asgard.flow.Workflow
+import com.netflix.asgard.model.AutoScalingGroupBeanOptions
+import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.push.PushException
 
 class DeploymentWorkflowImpl implements DeploymentWorkflow {
@@ -38,28 +40,34 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
     Closure<Integer> minutesToSeconds = { it * 60 }
 
     @Override
-    void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions, LaunchConfigurationOptions lcOverrides,
-                AutoScalingGroupOptions asgOverrides) {
+    void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
+                LaunchConfigurationBeanOptions lcInputs, AutoScalingGroupBeanOptions asgInputs) {
         if (deploymentOptions.delayDurationMinutes) {
             status "Waiting ${unit(deploymentOptions.delayDurationMinutes, 'minute')} before starting deployment."
         }
         Promise<AsgDeploymentNames> asgDeploymentNames = waitFor(timer(minutesToSeconds(deploymentOptions.
                 delayDurationMinutes))) {
             status "Starting deployment for Cluster '${deploymentOptions.clusterName}'."
-            promiseFor(activities.getAsgDeploymentNames(userContext, deploymentOptions.clusterName,
-                    deploymentOptions.subnetPurpose, asgOverrides.availabilityZones))
+            promiseFor(activities.getAsgDeploymentNames(userContext, deploymentOptions.clusterName))
         }
 
-        Promise<String> nextLcName = waitFor(asgDeploymentNames) {
+        Promise<AutoScalingGroupBeanOptions> nextAsgTemplate = waitFor(asgDeploymentNames) {
+            promiseFor(activities.constructNextAsgForCluster(userContext, asgDeploymentNames.get(), asgInputs))
+        }
+
+        Promise<LaunchConfigurationBeanOptions> nextLcTemplate = waitFor(nextAsgTemplate) {
+            promiseFor(activities.constructLaunchConfigForNextAsg(userContext, nextAsgTemplate.get(), lcInputs))
+        }
+
+        Promise<String> nextLcName = waitFor(allPromises(asgDeploymentNames, nextLcTemplate)) {
             status "Creating Launch Configuration '${asgDeploymentNames.get().nextLaunchConfigName}'."
-            promiseFor(activities.createLaunchConfigForNextAsg(userContext, asgDeploymentNames.get(),
-                    lcOverrides, deploymentOptions.instancePriceType))
+            promiseFor(activities.createLaunchConfigForNextAsg(userContext, nextAsgTemplate.get(),
+                    nextLcTemplate.get()))
         }
 
         Promise<String> nextAsgName = waitFor(nextLcName) {
             status "Creating Auto Scaling Group '${asgDeploymentNames.get().nextAsgName}' initially with 0 instances."
-            promiseFor(activities.createNextAsgForCluster(userContext, asgDeploymentNames.get(), asgOverrides,
-                    deploymentOptions.initialTrafficPrevented, deploymentOptions.azRebalanceSuspended))
+            promiseFor(activities.createNextAsgForCluster(userContext, nextAsgTemplate.get()))
         }
 
         Promise<Integer> scalingPolicyCount = waitFor(nextAsgName) {
@@ -92,8 +100,8 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
             }
             status 'Scaling to full capacity.'
             Promise<Boolean> isNewAsgHealthyAtDesiredCapacity = scaleAsgAndWaitForDecision(userContext, nextAsgName.get(),
-                    deploymentOptions.desiredCapacityStartUpTimeoutMinutes, asgOverrides.minSize,
-                    asgOverrides.desiredCapacity, asgOverrides.maxSize,
+                    deploymentOptions.desiredCapacityStartUpTimeoutMinutes, asgInputs.minSize,
+                    asgInputs.desiredCapacity, asgInputs.maxSize,
                     deploymentOptions.desiredCapacityAssessmentDurationMinutes,
                     deploymentOptions.notificationDestination, deploymentOptions.disablePreviousAsg,
                     'full capacity')
@@ -124,7 +132,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
                     Promise<Boolean> isNewAsgHealthyWithFullTraffic = startAssessmentPeriodWaitForDecision(userContext,
                             nextAsgName.get(), deploymentOptions.fullTrafficAssessmentDurationMinutes,
                             deploymentOptions.notificationDestination, deploymentOptions.deletePreviousAsg,
-                            asgOverrides.desiredCapacity, 'full traffic')
+                            asgInputs.desiredCapacity, 'full traffic')
                     waitFor(isNewAsgHealthyWithFullTraffic) {
                         boolean isAsgHealthy = isNewAsgHealthyWithFullTraffic.get()
                         if (isAsgHealthy) {

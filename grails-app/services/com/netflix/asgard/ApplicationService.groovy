@@ -126,7 +126,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         Relationships.checkAppNameForLoadBalancer(name) ? getRegisteredApplication(userContext, name) : null
     }
 
-    CreateApplicationResult createRegisteredApplication(UserContext userContext, String name, String type,
+    CreateApplicationResult createRegisteredApplication(UserContext userContext, String name, String group, String type,
             String description, String owner, String email, MonitorBucketType monitorBucketType,
             boolean enableChaosMonkey) {
         name = name.toLowerCase()
@@ -137,7 +137,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
             return result
         }
         String nowEpoch = new DateTime().millis as String
-        Collection<ReplaceableAttribute> attributes = buildAttributesList(type, description, owner, email,
+        Collection<ReplaceableAttribute> attributes = buildAttributesList(group, type, description, owner, email,
                 monitorBucketType, false)
         attributes << new ReplaceableAttribute('createTs', nowEpoch, false)
         String creationLogMessage = "Create registered app ${name}, type ${type}, owner ${owner}, email ${email}"
@@ -158,13 +158,13 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         result
     }
 
-    private Collection<ReplaceableAttribute> buildAttributesList(String type, String description, String owner,
-            String email, MonitorBucketType monitorBucketType,
-            Boolean replaceExistingValues) {
+    private Collection<ReplaceableAttribute> buildAttributesList(String group, String type, String description,
+            String owner, String email, MonitorBucketType monitorBucketType, Boolean replaceExistingValues) {
 
         Check.notNull(monitorBucketType, MonitorBucketType, 'monitorBucketType')
         String nowEpoch = new DateTime().millis as String
         Collection<ReplaceableAttribute> attributes = []
+        attributes << new ReplaceableAttribute('group', group, replaceExistingValues)
         attributes << new ReplaceableAttribute('type', Check.notEmpty(type), replaceExistingValues)
         attributes << new ReplaceableAttribute('description', Check.notEmpty(description), replaceExistingValues)
         attributes << new ReplaceableAttribute('owner', Check.notEmpty(owner), replaceExistingValues)
@@ -174,9 +174,9 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         return attributes
     }
 
-    void updateRegisteredApplication(UserContext userContext, String name, String type, String desc, String owner,
-                                     String email, MonitorBucketType bucketType) {
-        Collection<ReplaceableAttribute> attributes = buildAttributesList(type, desc, owner, email,
+    void updateRegisteredApplication(UserContext userContext, String name, String group, String type, String desc,
+                                     String owner, String email, MonitorBucketType bucketType) {
+        Collection<ReplaceableAttribute> attributes = buildAttributesList(group, type, desc, owner, email,
                 bucketType, true)
         taskService.runTask(userContext,
                 "Update registered app ${name}, type ${type}, owner ${owner}, email ${email}", { task ->

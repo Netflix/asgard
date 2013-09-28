@@ -62,7 +62,6 @@
         <input type="text" name="ticket" placeholder="${ticketLabel}" id="ticketNumber" title="${fullTicketLabel} number" class="${ticketRequired ? 'required' : 'optional'}"/>
       </div>
       <g:if test="${authenticationEnabled}">
-        <g:set var='targetUri' value="${request.requestURL + (request.queryString ? '?' + request.queryString : '')}"/>
         <shiro:isLoggedIn>
           <div class="authentication">
             Logged in as <shiro:principal/>

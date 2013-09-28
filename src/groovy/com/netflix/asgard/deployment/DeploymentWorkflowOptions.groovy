@@ -15,7 +15,6 @@
  */
 package com.netflix.asgard.deployment
 
-import com.netflix.asgard.model.InstancePriceType
 import groovy.transform.Canonical
 
 /**
@@ -62,15 +61,4 @@ import groovy.transform.Canonical
     /** How to proceed after the full traffic assessment */
     ProceedPreference deletePreviousAsg
 
-    /** Subnet purpose for new ASG */
-    String subnetPurpose
-
-    /** Will traffic be prevented until the first assessment period */
-    Boolean initialTrafficPrevented
-
-    /** Will availability zone rebalancing be suspended for new ASG */
-    Boolean azRebalanceSuspended
-
-    /** Type of pricing for instances in new ASG */
-    InstancePriceType instancePriceType
 }

@@ -18,7 +18,9 @@ package com.netflix.asgard.deployment
 import com.netflix.asgard.Region
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.flow.LocalWorkflow
+import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.InstancePriceType
+import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.push.PushException
 import spock.lang.Specification
 
@@ -31,15 +33,24 @@ class DeploymentWorkflowSpec extends Specification {
 
     AsgDeploymentNames asgDeploymentNames = new AsgDeploymentNames(
         previousAsgName: 'the_seaward-v002', previousLaunchConfigName: 'the_seaward-v002-20130626140848',
-        previousVpcZoneIdentifier: 'subnet-baadd00d,subnet-defaced1',
-        nextAsgName: 'the_seaward-v003', nextLaunchConfigName: 'the_seaward-v003-20130626140848',
-        nextVpcZoneIdentifier: 'subnet-baadd00d,subnet-defaced1'
+        nextAsgName: 'the_seaward-v003', nextLaunchConfigName: 'the_seaward-v003-20130626140848'
     )
 
-    LaunchConfigurationOptions lcOverrides = new LaunchConfigurationOptions(securityGroups: ['sg-defec8ed'])
+    LaunchConfigurationBeanOptions lcInputs = new LaunchConfigurationBeanOptions(securityGroups: ['sg-defec8ed'],
+            instancePriceType: InstancePriceType.ON_DEMAND)
 
-    AutoScalingGroupOptions asgOverrides = new AutoScalingGroupOptions(availabilityZones: ['us-west2a', 'us-west2b'],
-        minSize: 2, desiredCapacity: 3, maxSize: 4)
+    LaunchConfigurationBeanOptions lcTemplate = new LaunchConfigurationBeanOptions(
+            securityGroups: ['sg-defec8ed', 'sg-default'], iamInstanceProfile: 'defaultIamInstanceProfile',
+            instancePriceType: InstancePriceType.ON_DEMAND, launchConfigurationName: 'the_seaward-v003-20130626140848')
+
+    AutoScalingGroupBeanOptions asgInputs = new AutoScalingGroupBeanOptions(
+            availabilityZones: ['us-west2a', 'us-west2b'], minSize: 2, desiredCapacity: 3, maxSize: 4,
+            subnetPurpose: 'internal')
+
+    AutoScalingGroupBeanOptions asgTemplate = new AutoScalingGroupBeanOptions(
+            availabilityZones: ['us-west2a', 'us-west2b'], minSize: 0, desiredCapacity: 0, maxSize: 4,
+            subnetPurpose: 'internal', launchConfigurationName: 'the_seaward-v003-20130626140848',
+            autoScalingGroupName: 'the_seaward-v003')
 
     List<String> logForCreatingAsg = [
             "Starting deployment for Cluster 'the_seaward'.",
@@ -69,12 +80,11 @@ class DeploymentWorkflowSpec extends Specification {
 
     private createAsgInteractions() {
         with(mockActivities) {
-            1 * getAsgDeploymentNames(userContext, 'the_seaward',
-                    'internal', ['us-west2a', 'us-west2b']) >> asgDeploymentNames
-            1 * createLaunchConfigForNextAsg(userContext, asgDeploymentNames, lcOverrides,
-                    InstancePriceType.ON_DEMAND) >> 'the_seaward-v003-20130626140848'
-            1 * createNextAsgForCluster(userContext, asgDeploymentNames, asgOverrides, false, false) >>
-                    'the_seaward-v003'
+            1 * getAsgDeploymentNames(userContext, 'the_seaward') >> asgDeploymentNames
+            1 * constructNextAsgForCluster(userContext, asgDeploymentNames, asgInputs) >> asgTemplate
+            1 * constructLaunchConfigForNextAsg(userContext, asgTemplate, lcInputs) >> lcTemplate
+            1 * createLaunchConfigForNextAsg(userContext, asgTemplate, lcTemplate) >> 'the_seaward-v003-20130626140848'
+            1 * createNextAsgForCluster(userContext, asgTemplate) >> 'the_seaward-v003'
             1 * copyScalingPolicies(userContext, asgDeploymentNames) >> 0
             1 * copyScheduledActions(userContext, asgDeploymentNames) >> 0
         }
@@ -82,16 +92,14 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should execute full deployment'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(
-                clusterName: 'the_seaward', delayDurationMinutes: 10,
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
+                clusterName: 'the_seaward', delayDurationMinutes: 10, doCanary: true,
                 canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 desiredCapacityStartUpTimeoutMinutes: 40, desiredCapacityAssessmentDurationMinutes: 120,
                 fullTrafficAssessmentDurationMinutes: 240, scaleUp: ProceedPreference.Yes,
                 disablePreviousAsg: ProceedPreference.Yes, deletePreviousAsg: ProceedPreference.Yes)
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == ['Waiting 10 minutes before starting deployment.'] +
@@ -105,6 +113,7 @@ class DeploymentWorkflowSpec extends Specification {
                 "Full traffic assessment period for ASG 'the_seaward-v003' has completed.",
                 "Deleting ASG 'the_seaward-v002'.",
         ]
+
         interaction {
             createAsgInteractions()
         }
@@ -121,14 +130,13 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should execute deployment without canary or delay'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
-                desiredCapacityStartUpTimeoutMinutes: 40, desiredCapacityAssessmentDurationMinutes: 120,
-                fullTrafficAssessmentDurationMinutes: 240, scaleUp: ProceedPreference.Yes,
-                disablePreviousAsg: ProceedPreference.Yes, deletePreviousAsg: ProceedPreference.Yes)
+                doCanary: false, desiredCapacityStartUpTimeoutMinutes: 40,
+                desiredCapacityAssessmentDurationMinutes: 120, fullTrafficAssessmentDurationMinutes: 240,
+                scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Yes,
+                deletePreviousAsg: ProceedPreference.Yes)
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
@@ -155,14 +163,12 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should execute canary without scaling up'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
+                notificationDestination: 'gob@bluth.com', doCanary: true,
                 canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 scaleUp: ProceedPreference.No)
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForCanaryScaleUp + logForCanaryCompletion + [
@@ -182,14 +188,12 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should display error and rollback deployment if there is an error checking health'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
+                notificationDestination: 'gob@bluth.com', doCanary: true,
                 canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 scaleUp: ProceedPreference.No)
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + [
@@ -216,14 +220,12 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should retry health check if not ready yet.'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
+                notificationDestination: 'gob@bluth.com', doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.No,
                 desiredCapacityStartUpTimeoutMinutes: 40)
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
@@ -246,14 +248,12 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should rollback and notify if health check fails at the end of an assessment period set to auto proceed.'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
+                notificationDestination: 'gob@bluth.com', doCanary: true,
                 canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 scaleUp: ProceedPreference.Yes)
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForCanaryScaleUp + [
@@ -286,14 +286,12 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should rollback for canary start up time out'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
+                notificationDestination: 'gob@bluth.com', doCanary: true,
                 canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 scaleUp: ProceedPreference.No)
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForCanaryScaleUp + [
@@ -316,11 +314,10 @@ class DeploymentWorkflowSpec extends Specification {
     def 'should rollback for desired capacity start up time out'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com', desiredCapacityStartUpTimeoutMinutes: 40,
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, scaleUp: ProceedPreference.Yes)
+                scaleUp: ProceedPreference.Yes)
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
@@ -342,14 +339,12 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should rollback for canary decision to not proceed'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
+                notificationDestination: 'gob@bluth.com', doCanary: true,
                 canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 scaleUp: ProceedPreference.Ask)
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForCanaryScaleUp + logForCanaryCompletion + [
@@ -373,15 +368,13 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should continue deployment for canary decision to proceed'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: true,
+                notificationDestination: 'gob@bluth.com', doCanary: true,
                 canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryAssessmentDurationMinutes: 60,
                 desiredCapacityStartUpTimeoutMinutes: 40,
                 scaleUp: ProceedPreference.Ask, disablePreviousAsg: ProceedPreference.No)
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForCanaryScaleUp + logForCanaryCompletion +
@@ -406,14 +399,12 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should rollback deployment for full capacity decision to not proceed'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
+                notificationDestination: 'gob@bluth.com', doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Ask,
                 deletePreviousAsg: ProceedPreference.Yes, desiredCapacityStartUpTimeoutMinutes: 40, )
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
@@ -440,14 +431,12 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should continue with full capacity decision to proceed'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
+                notificationDestination: 'gob@bluth.com', doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Ask,
                 deletePreviousAsg: ProceedPreference.Yes, desiredCapacityStartUpTimeoutMinutes: 40, )
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
@@ -477,14 +466,12 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should not delete previous ASG if specified not to'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
+                notificationDestination: 'gob@bluth.com', doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Yes,
                 deletePreviousAsg: ProceedPreference.No, desiredCapacityStartUpTimeoutMinutes: 40, )
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
@@ -509,14 +496,12 @@ class DeploymentWorkflowSpec extends Specification {
 
     def 'should rollback deployment for full traffic decision to not proceed'() {
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
-                notificationDestination: 'gob@bluth.com',
-                subnetPurpose: 'internal', initialTrafficPrevented: false, azRebalanceSuspended: false,
-                instancePriceType: InstancePriceType.ON_DEMAND, doCanary: false,
+                notificationDestination: 'gob@bluth.com', doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Yes,
                 deletePreviousAsg: ProceedPreference.Ask, desiredCapacityStartUpTimeoutMinutes: 40, )
 
         when:
-        workflow.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
         workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [

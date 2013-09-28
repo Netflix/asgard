@@ -30,32 +30,22 @@ import org.codehaus.jackson.annotate.JsonProperty
     /** Name of the existing launch configuration used as a template */
     String previousLaunchConfigName
 
-    /** VPC zone identifier from the previous auto scaling group */
-    String previousVpcZoneIdentifier
-
     /** Name of the new auto scaling group being created */
     String nextAsgName
 
     /** Name of the new launch configuration being created */
     String nextLaunchConfigName
 
-    /** VPC zone identifier for the next auto scaling group */
-    String nextVpcZoneIdentifier
-
     @JsonCreator
     static AsgDeploymentNames of(@JsonProperty('previousAsgName') String previousAsgName,
                                  @JsonProperty('previousLaunchConfigName') String previousLaunchConfigName,
-                                 @JsonProperty('previousVpcZoneIdentifier') String previousVpcZoneIdentifier,
                                  @JsonProperty('nextAsgName') String nextAsgName,
-                                 @JsonProperty('nextLaunchConfigName') String nextLaunchConfigName,
-                                 @JsonProperty('nextVpcZoneIdentifier') String nextVpcZoneIdentifier) {
+                                 @JsonProperty('nextLaunchConfigName') String nextLaunchConfigName) {
         new AsgDeploymentNames(
                 previousAsgName: previousAsgName,
                 previousLaunchConfigName: previousLaunchConfigName,
-                previousVpcZoneIdentifier: previousVpcZoneIdentifier,
                 nextAsgName: nextAsgName,
-                nextLaunchConfigName: nextLaunchConfigName,
-                nextVpcZoneIdentifier: nextVpcZoneIdentifier
+                nextLaunchConfigName: nextLaunchConfigName
         )
     }
 

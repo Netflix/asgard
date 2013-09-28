@@ -216,6 +216,7 @@ th.desc a                   { background-image: url(../images/skin/sorted_desc.g
 .list td.launchConfig a     { max-width: 100px; word-wrap: break-word; font-size: 9px; }
 .list td.loadBalancer a     { max-width: 100px; word-wrap: break-word; }
 .list td.ami a              { max-width: 200px; word-wrap: break-word; }
+.list td.ami                { max-width: 200px; word-wrap: break-word; }
 .list td.propKey a          { max-width: 260px; word-wrap: break-word; }
 .list td.availabilityZone   {                                          white-space: nowrap; }
 .list td.lbPolicies         { max-width: 182px;                        }

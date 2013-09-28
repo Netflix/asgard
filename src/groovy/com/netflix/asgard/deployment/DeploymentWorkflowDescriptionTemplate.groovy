@@ -17,6 +17,8 @@ package com.netflix.asgard.deployment
 
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.flow.WorkflowDescriptionTemplate
+import com.netflix.asgard.model.AutoScalingGroupBeanOptions
+import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 
 /**
  * Constructs the description for a specific deployment workflow execution.
@@ -25,7 +27,7 @@ class DeploymentWorkflowDescriptionTemplate extends WorkflowDescriptionTemplate 
 
     @Override
     void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
-                LaunchConfigurationOptions lcOverrides, AutoScalingGroupOptions asgOverrides) {
+                LaunchConfigurationBeanOptions lcOverrides, AutoScalingGroupBeanOptions asgOverrides) {
         description = "Deploying new ASG to cluster '${deploymentOptions.clusterName}'"
     }
 }

@@ -35,8 +35,7 @@
         <tr>
           <th>ID</th>
           <th>Name</th>
-          <th>Location</th>
-          <th>Architecture</th>
+          <th>Description</th>
           <th>State</th>
           <th>Owner</th>
           <th>Creator</th>
@@ -52,8 +51,7 @@
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
             <td><g:linkObject type="image" name="${image.imageId}"/></td>
             <td class="ami">${image.name}</td>
-            <td class="ami">${image.imageLocation}</td>
-            <td>${image.architecture}</td>
+            <td class="ami">${image.description}</td>
             <td>${image.state}</td>
             <td>${accounts[image.ownerId] ?: image.ownerId}</td>
             <td>${image.creator}</td>

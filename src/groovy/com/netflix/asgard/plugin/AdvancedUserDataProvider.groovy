@@ -13,19 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.deployment
+package com.netflix.asgard.plugin
 
-import groovy.transform.Canonical
+import com.netflix.asgard.model.LaunchContext
 
 /**
- * Attributes specified when creating a new launchConfiguration.
- * @see com.amazonaws.services.autoscaling.model.LaunchConfiguration
+ * Interface for plugin implementations for creating user data from various cloud object inputs.
  */
-@Canonical class LaunchConfigurationOptions {
-    String imageId
-    String keyName
-    List<String> securityGroups
-    String instanceType
-    String iamInstanceProfile
-    Boolean ebsOptimized
+interface AdvancedUserDataProvider {
+
+    /**
+     * Constructs a user data string based on a collection of various inputs.
+     *
+     * @param launchContext collection of various cloud object inputs
+     * @return user data string
+     */
+    String buildUserData(LaunchContext launchContext)
 }
