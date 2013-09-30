@@ -59,6 +59,7 @@ import com.netflix.asgard.StackService
 import com.netflix.asgard.Task
 import com.netflix.asgard.TaskService
 import com.netflix.asgard.ThreadScheduler
+import com.netflix.asgard.Time
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.cache.Fillable
 import com.netflix.asgard.model.HardwareProfile
@@ -652,7 +653,7 @@ class Mocks {
 
     static void waitForFill(Fillable cache) {
         while (!cache.filled) {
-            sleep 10
+            Time.sleepCancellably(10)
         }
     }
 
