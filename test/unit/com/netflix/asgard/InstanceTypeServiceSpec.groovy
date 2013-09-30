@@ -31,13 +31,16 @@ class InstanceTypeServiceSpec extends Specification {
     InstanceTypeService instanceTypeService
     ConfigService mockConfigService
     CachedMap mockHardwareProfilesCache
+    CachedMap mockInstanceTypesCache
 
     def setup() {
         userContext = UserContext.auto(Region.US_EAST_1)
         mockConfigService = Mock(ConfigService)
         mockHardwareProfilesCache = Mock(CachedMap)
+        mockInstanceTypesCache = Mock(CachedMap)
         caches = new Caches(new MockCachedMapBuilder([
                 (EntityType.hardwareProfile): mockHardwareProfilesCache,
+                (EntityType.instanceType): mockInstanceTypesCache
         ]))
         MockUtils.mockLogging(InstanceTypeService)
         instanceTypeService = new InstanceTypeService(caches: caches, configService: mockConfigService)
@@ -80,5 +83,29 @@ class InstanceTypeServiceSpec extends Specification {
                 'Medium instance', 'Large instance', 'SSD'] == instanceTypes*.hardwareProfile*.description
         [null, null, null, null, null, null, null, null, null, null, null, null, null, 0.05, 0.23, 0.68, 3.10
                 ] == instanceTypes*.linuxOnDemandPrice
+    }
+
+    def 'instance types list should have unpriced types at the end'() {
+
+        UserContext userContext = UserContext.auto(Region.defaultRegion())
+        Closure type = { BigDecimal linuxOnDemandPrice, String instanceType ->
+            new InstanceTypeData(linuxOnDemandPrice: linuxOnDemandPrice,
+                    hardwareProfile: new HardwareProfile(instanceType: instanceType))
+        }
+        mockInstanceTypesCache.list() >> [
+                type(0.68, 'm1.large'),
+                type(0.05, 'm1.small'),
+                type(null, 'm3.xxlarge'),
+                type(null, 'm3.large'),
+                type(null, 'm3.medium'),
+                type(0.23, 'm1.medium'),
+        ]
+
+        when:
+        List<InstanceTypeData> instanceTypes = instanceTypeService.getInstanceTypes(userContext)
+
+        then:
+        instanceTypes*.name == ['m1.small', 'm1.medium', 'm1.large', 'm3.large', 'm3.medium', 'm3.xxlarge']
+        instanceTypes*.linuxOnDemandPrice == [0.05, 0.23, 0.68, null, null, null]
     }
 }

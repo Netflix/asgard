@@ -39,6 +39,7 @@ import com.netflix.glisten.ActivityOperations
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class DeploymentActivitiesSpec extends Specification {
 
     UserContext userContext = UserContext.auto(Region.US_WEST_1)

@@ -162,7 +162,7 @@ class SecretServiceUnitSpec extends Specification {
         secretService.currentApiEncryptionKey == 'key1'
     }
 
-    def 'should grab ecryption keys from file'() {
+    def 'should grab encryption keys from file'() {
         setupKeysInConfig()
         setupRemoteServerInfo()
         configService.apiTokenEnabled >> true
