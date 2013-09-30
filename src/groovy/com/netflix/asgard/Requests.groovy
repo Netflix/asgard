@@ -138,7 +138,7 @@ class Requests {
     }
 
     static String getBaseUrl(HttpServletRequest request) {
-        String port = (request.serverPort && request.serverPort) != 80 ? ":${request.serverPort}" : ''
+        String port = (request.serverPort && request.serverPort) == 80 ? '' : ":${request.serverPort}"
         "${request.scheme}://${request.serverName}${port}"
     }
 

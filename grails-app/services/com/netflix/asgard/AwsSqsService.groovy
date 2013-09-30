@@ -77,7 +77,7 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
         Map<String, String> attributes = getQueueAttributes(userContext, queueName)
         SimpleQueue queue = null
         CachedMap<SimpleQueue> queues = caches.allQueues.by(userContext.region)
-        if (attributes == null) {
+        if (!attributes.size()) {
             queues.remove(queueName)
         } else {
             SimpleQueue existingQueue = queues.get(queueName)
@@ -98,7 +98,7 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
             GetQueueAttributesRequest attrRequest = new GetQueueAttributesRequest(url).withAttributeNames('All')
             return awsClient.by(userContext.region).getQueueAttributes(attrRequest).attributes.sort()
         } catch (AmazonServiceException ignored) {
-            return null
+            return [:]
         }
     }
 

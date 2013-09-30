@@ -77,6 +77,7 @@ import groovy.transform.Canonical
         this.blockDeviceMappings = copyBlockDeviceMappings(blockDeviceMappings)
     }
 
+    @SuppressWarnings('ReturnsNullInsteadOfEmptyCollection')
     private static Set<BlockDeviceMapping> copyBlockDeviceMappings(Collection<BlockDeviceMapping> source) {
         if (source == null) { return null }
         source.collect {
