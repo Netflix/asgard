@@ -54,10 +54,11 @@ class ScalingPolicyControllerSpec extends Specification {
         awsCloudWatchService.awsClient = new MultiRegionAwsClient({ mockAmazonCloudWatchClient })
         awsAutoScalingService.awsCloudWatchService = awsCloudWatchService
 
-        final mockAwsSimpleDbService = Mock(AwsSimpleDbService)
-        awsAutoScalingService.awsSimpleDbService = mockAwsSimpleDbService
-        awsCloudWatchService.awsSimpleDbService = mockAwsSimpleDbService
-        mockAwsSimpleDbService.incrementAndGetSequenceNumber(_, _) >> { 1 }
+        final mockIdService = Mock(IdService) {
+            nextId(_, _) >> '1'
+        }
+        awsAutoScalingService.idService = mockIdService
+        awsCloudWatchService.idService = mockIdService
 
         controller.awsAutoScalingService = awsAutoScalingService
         controller.awsCloudWatchService = awsCloudWatchService

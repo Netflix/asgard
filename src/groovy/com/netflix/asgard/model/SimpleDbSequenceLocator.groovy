@@ -16,11 +16,22 @@
 package com.netflix.asgard.model
 
 import com.netflix.asgard.Region
-import groovy.transform.Immutable
 
-@Immutable final class SimpleDbSequenceLocator {
-    Region region
-    String domainName
-    String itemName
-    String attributeName
+/**
+ * The location of the sequence number in SimpleDB
+*/
+enum SimpleDbSequenceLocator { Policy, Alarm, Task
+
+    final Region region
+    final String domainName
+    final String itemName
+    final String attributeName
+
+    SimpleDbSequenceLocator() {
+        String name = this.name()
+        region = Region.defaultRegion()
+        domainName = "CLOUD_${name.toUpperCase()}_SEQUENCE"
+        itemName = "${name.toLowerCase()}_id"
+        attributeName = 'value'
+    }
 }

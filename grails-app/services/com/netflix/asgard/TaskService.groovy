@@ -34,16 +34,12 @@ class TaskService {
             'DuplicateLoadBalancerName', 'InvalidDBInstanceState', 'InvalidDBSnapshotState', 'InvalidGroup.Duplicate',
             'InvalidGroup.InUse', 'InvalidParameterValue', 'ValidationError']
 
-    def awsSimpleDbService
     def emailerService
+    def idService
     def grailsApplication
     def pluginService
 
     Integer numberOfCompletedTasksToRetain = 500
-
-    /** The location of the sequence number in SimpleDB */
-    final SimpleDbSequenceLocator sequenceLocator = new SimpleDbSequenceLocator(region: Region.defaultRegion(),
-            domainName: 'CLOUD_TASK_SEQUENCE', itemName: 'task_id', attributeName: 'value')
 
     private Queue<Task> running = new ConcurrentLinkedQueue<Task>()
     private Queue<Task> completed = new ConcurrentLinkedQueue<Task>()
@@ -94,23 +90,14 @@ class TaskService {
         }
     }
 
-    private String nextTaskId(UserContext userContext) {
-        try {
-            return awsSimpleDbService.incrementAndGetSequenceNumber(userContext, sequenceLocator)
-        } catch (Exception e) {
-            emailerService.sendExceptionEmail(e.toString(), e)
-            return UUID.randomUUID().toString()
-        }
-    }
-
     private Task newTask(UserContext userContext, String name, Link link) {
         if (!userContext.ticket && !userContext.internalAutomation &&
                 grailsApplication.config.cloud.accountName in grailsApplication.config.cloud.highRiskAccountNames) {
             String msg = grailsApplication.config.cloud.trackingTicketRequiredMessage ?: 'Tracking ticket required'
             throw new ValidationException(msg)
         }
-
-        Task task = new Task(id: nextTaskId(userContext), userContext: userContext, name: name, status: 'starting',
+        String id = idService.nextId(userContext, SimpleDbSequenceLocator.Task)
+        Task task = new Task(id: id, userContext: userContext, name: name, status: 'starting',
                 startTime: new Date(), env: grailsApplication.config.cloud.accountName, objectType: link?.type,
                 objectId: link?.id
         )
