@@ -242,13 +242,13 @@ ${lastGroup.loadBalancerNames}"""
         if (!cluster) {
             flash.message = "No auto scaling groups exist with cluster name ${cluster.name}"
             redirect(action: 'result')
-            return null
+            return [:]
         }
         Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
         if (!okayToCreateGroup) {
             flash.message = "Cluster '${cluster.name}' already contains too many ASGs."
             redirect([action: 'show', params: [id: cluster.name]])
-            return null
+            return [:]
         }
         AutoScalingGroupData lastGroup = cluster.last()
         String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
@@ -316,7 +316,7 @@ ${lastGroup.loadBalancerNames}"""
         if (params.azRebalance == 'disabled') {
             newSuspendedProcesses << AutoScalingProcessType.AZRebalance
         }
-        if (Boolean.getBoolean(params.trafficAllowed)) {
+        if (Boolean.parseBoolean(params.trafficAllowed)) {
             newSuspendedProcesses << AutoScalingProcessType.AddToLoadBalancer
         }
 

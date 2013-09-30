@@ -93,6 +93,7 @@ import groovy.transform.Canonical
         this.suspendedProcesses = copyNonNullToSet(suspendedProcesses)
     }
 
+    @SuppressWarnings('ReturnsNullInsteadOfEmptyCollection')
     private static Set<Tag> copyTags(Collection tags) {
         if (tags == null) { return null }
         tags.collect {

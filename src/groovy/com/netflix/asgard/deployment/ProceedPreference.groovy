@@ -18,7 +18,7 @@ package com.netflix.asgard.deployment
 /**
  * Possible preferences specifying if and how to proceed.
  */
-enum ProceedPreference { Yes, No, Ask;
+enum ProceedPreference { Yes, No, Ask
 
     static ProceedPreference parse(String value) {
         values().find { it.name().equalsIgnoreCase(value) } ?: Ask
