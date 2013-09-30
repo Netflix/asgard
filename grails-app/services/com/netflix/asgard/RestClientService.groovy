@@ -42,6 +42,7 @@ import org.apache.http.util.EntityUtils
 import org.springframework.beans.factory.InitializingBean
 import sun.net.InetAddressCachePolicy
 
+@SuppressWarnings('ImportFromSunPackages')
 class RestClientService implements InitializingBean {
 
     static transactional = false
