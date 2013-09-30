@@ -132,6 +132,23 @@ class GroupCreateCommandSpec extends Specification {
         'blah-v305'   | 'name.usesReservedFormat'
     }
 
+    @Unroll("""should validate devPhase input '#devPhase' with error code '#error'""")
+    def 'devPhase constraints'() {
+        cmd.stack = 'iphone'
+        cmd.devPhase = devPhase
+
+        when:
+        cmd.validate()
+
+        then:
+        cmd.errors.devPhase == error
+
+        where:
+        devPhase      | error
+        'v305'        | 'name.usesReservedFormat'
+        'foo-bar'     | 'devPhase.illegalChar'
+    }
+
     @Unroll("""should validate chaosMonkey input '#chaosMonkey' with error code '#error' when requestedFromGui is \
 '#requestedFromGui' and isChaosMonkeyActive is '#isChaosMonkeyActive' and optLevel is '#optLevel'""")
     def 'chaosMonkey constraints'() {
