@@ -398,7 +398,7 @@ class ConfigService {
      */
     String getLinkCanonicalServerUrl() {
         grailsApplication.config.link?.canonicalServerUrl ?: grailsApplication.config.grails.serverURL ?:
-                'http://localhost:8080/'
+                'http://localhost:8080'
     }
 
     /**
