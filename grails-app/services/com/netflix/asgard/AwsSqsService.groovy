@@ -77,7 +77,7 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
         Map<String, String> attributes = getQueueAttributes(userContext, queueName)
         SimpleQueue queue = null
         CachedMap<SimpleQueue> queues = caches.allQueues.by(userContext.region)
-        if (!attributes.size()) {
+        if (!attributes) {
             queues.remove(queueName)
         } else {
             SimpleQueue existingQueue = queues.get(queueName)
