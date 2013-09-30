@@ -32,8 +32,6 @@ import com.netflix.asgard.Relationships
 import com.netflix.asgard.Task
 import com.netflix.asgard.Time
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.flow.Activity
-import com.netflix.asgard.flow.SwfActivity
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
@@ -41,11 +39,13 @@ import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.push.AsgDeletionMode
 import com.netflix.asgard.push.PushException
+import com.netflix.glisten.ActivityOperations
+import com.netflix.glisten.SwfActivityOperations
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 class DeploymentActivitiesImpl implements DeploymentActivities {
 
-    @Delegate Activity activity = new SwfActivity()
+    @Delegate ActivityOperations activity = new SwfActivityOperations()
 
     AwsAutoScalingService awsAutoScalingService
     AwsEc2Service awsEc2Service

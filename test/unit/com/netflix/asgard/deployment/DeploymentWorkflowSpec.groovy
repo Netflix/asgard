@@ -17,17 +17,17 @@ package com.netflix.asgard.deployment
 
 import com.netflix.asgard.Region
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.flow.LocalWorkflow
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.push.PushException
+import com.netflix.glisten.LocalWorkflowOperations
 import spock.lang.Specification
 
 class DeploymentWorkflowSpec extends Specification {
 
     DeploymentActivities mockActivities = Mock(DeploymentActivities)
-    DeploymentWorkflow workflow = new DeploymentWorkflowImpl(workflow: LocalWorkflow.of(mockActivities))
+    DeploymentWorkflow workflow = new DeploymentWorkflowImpl(workflow: LocalWorkflowOperations.of(mockActivities))
 
     UserContext userContext = UserContext.auto(Region.US_WEST_2)
 
