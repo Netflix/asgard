@@ -126,7 +126,7 @@ class AutoScalingController {
 
             Collection<LoadBalancerDescription> mismatchedLoadBalancers = group.loadBalancerNames.findResults {
                 LoadBalancerDescription elb = awsLoadBalancerService.getLoadBalancer(userContext, it, From.CACHE)
-                elb?.availabilityZones?.sort() != groupData.availabilityZones ? elb : null
+                elb?.availabilityZones?.sort() == groupData.availabilityZones ? null : elb
             }
             Map<String, List<String>> mismatchedElbNamesToZoneLists = mismatchedLoadBalancers.collectEntries {
                 [it.loadBalancerName, it.availabilityZones.sort()]

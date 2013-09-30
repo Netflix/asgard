@@ -26,7 +26,9 @@ ruleset {
     AssignmentInConditional
     BigDecimalInstantiation
     BitwiseOperatorInConditional
-    BooleanGetBoolean
+    BooleanGetBoolean {
+        priority = 1
+    }
     BrokenNullCheck
     BrokenOddnessCheck
     ClassForName
@@ -206,7 +208,7 @@ ruleset {
 //    ExplicitTreeSetInstantiation
     GStringAsMapKey
 //    GetterMethodCouldBeProperty
-//    GroovyLangImmutable  TODO: Enable for Groovy 1.8
+    GroovyLangImmutable
 //    UseCollectMany
     UseCollectNested
 
@@ -251,7 +253,7 @@ ruleset {
     LoggerWithWrongModifiers
     LoggingSwallowsStacktrace
     MultipleLoggers
-    PrintStackTrace{
+    PrintStackTrace {
         priority = 1
     }
     Println {

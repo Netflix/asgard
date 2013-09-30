@@ -15,6 +15,6 @@
  */
 package com.netflix.asgard
 
-interface TagNames {
-    String EXPIRATION_TIME = 'expiration_time'
+class TagNames {
+    static final String EXPIRATION_TIME = 'expiration_time'
 }
