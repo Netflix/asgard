@@ -131,7 +131,7 @@ grails.project.dependency.resolution = {
                 // Rules for AWS named objects.
                 'com.netflix.frigga:frigga:0.6',
 
-                // ease of use library for AWS SWF
+                // Ease of use library for AWS SWF.
                 'com.netflix.glisten:glisten:0.2',
 
                 // Groovy concurrency framework.
