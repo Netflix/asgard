@@ -18,9 +18,9 @@ package com.netflix.asgard
 import com.amazonaws.services.simpleworkflow.model.HistoryEvent
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionDetail
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
-import com.netflix.asgard.flow.HistoryAnalyzer
-import com.netflix.asgard.flow.LogMessage
 import com.netflix.asgard.model.SwfWorkflowTags
+import com.netflix.glisten.HistoryAnalyzer
+import com.netflix.glisten.LogMessage
 import java.util.concurrent.CopyOnWriteArrayList
 import org.apache.commons.logging.LogFactory
 import org.joda.time.DateTime

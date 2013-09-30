@@ -15,16 +15,10 @@
  */
 package com.netflix.asgard.model
 
-import com.amazonaws.services.simpleworkflow.flow.DynamicWorkflowClientExternal
-import com.amazonaws.services.simpleworkflow.flow.StartWorkflowOptions
 import com.netflix.asgard.EntityType
 import com.netflix.asgard.Link
 import com.netflix.asgard.Region
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.flow.TestWorkflow
-import com.netflix.asgard.flow.TestWorkflowDescriptionTemplate
-import com.netflix.asgard.flow.WorkflowClientExternalToWorkflowInterfaceAdapter
-import com.netflix.asgard.flow.WrappingObject
 import spock.lang.Specification
 
 class SwfWorkflowTagsSpec extends Specification {
@@ -129,23 +123,4 @@ class SwfWorkflowTagsSpec extends Specification {
         workflowTags.link == null
     }
 
-    def 'client should construct workflow tags including Asgard specific ones'() {
-        DynamicWorkflowClientExternal client = Mock(DynamicWorkflowClientExternal)
-        client.schedulingOptions >> new StartWorkflowOptions(tagList: [
-                '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
-        ])
-        def adapter = new WorkflowClientExternalToWorkflowInterfaceAdapter(client, TestWorkflow,
-                new TestWorkflowDescriptionTemplate(), new SwfWorkflowTags())
-
-        when:
-        adapter.go(null, 'Rhaegar', new WrappingObject(nestedName: 'Targaryen'))
-
-        then:
-        1 * client.startWorkflowExecution(_, _) >> { List<?> args ->
-            assert args[1].tagList as Set == [
-                    '{"desc":"Describe workflow for \'Rhaegar\' \'Targaryen\'"}',
-                    '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
-            ] as Set
-        }
-    }
 }

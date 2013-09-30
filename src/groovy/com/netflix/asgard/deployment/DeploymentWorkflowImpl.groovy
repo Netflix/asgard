@@ -20,17 +20,17 @@ import com.amazonaws.services.simpleworkflow.flow.core.Promise
 import com.amazonaws.services.simpleworkflow.flow.interceptors.ExponentialRetryPolicy
 import com.netflix.asgard.DiscoveryService
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.flow.DoTry
-import com.netflix.asgard.flow.GlobalWorkflowAttributes
-import com.netflix.asgard.flow.SwfWorkflow
-import com.netflix.asgard.flow.Workflow
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.push.PushException
+import com.netflix.glisten.DoTry
+import com.netflix.glisten.GlobalWorkflowAttributes
+import com.netflix.glisten.SwfWorkflowOperations
+import com.netflix.glisten.WorkflowOperations
 
 class DeploymentWorkflowImpl implements DeploymentWorkflow {
 
-    @Delegate Workflow<DeploymentActivities> workflow = SwfWorkflow.of(DeploymentActivities,
+    @Delegate WorkflowOperations<DeploymentActivities> workflow = SwfWorkflowOperations.of(DeploymentActivities,
             new ActivitySchedulingOptions(taskList: GlobalWorkflowAttributes.taskList))
 
     Closure<String> unit = { int count, String unitName ->
