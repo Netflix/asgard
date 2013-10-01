@@ -382,7 +382,7 @@ ruleset {
     UnusedArray
 //    UnusedMethodParameter
     UnusedObject
-//    UnusedPrivateField // showed false positives
+    UnusedPrivateField
     UnusedPrivateMethod
 //    UnusedPrivateMethodParameter
 //    UnusedVariable
