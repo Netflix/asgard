@@ -69,7 +69,7 @@ ruleset {
     // rulesets/braces.xml
     ElseBlockBraces
     ForStatementBraces
-//    IfStatementBraces
+    IfStatementBraces
     WhileStatementBraces
 
     // rulesets/concurrency.xml

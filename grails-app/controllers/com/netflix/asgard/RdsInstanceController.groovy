@@ -74,7 +74,7 @@ class RdsInstanceController {
             try {
                 boolean multiAZ = "on".equals(params.multiAZ)
                 def selectedDBSecurityGroups = (params.selectedDBSecurityGroups instanceof String) ? [params.selectedDBSecurityGroups] : params.selectedDBSecurityGroups as List
-                if (!selectedDBSecurityGroups) selectedDBSecurityGroups = ["default"]
+                if (!selectedDBSecurityGroups) { selectedDBSecurityGroups = ["default"] }
                 //awsRdsService.createDBSecurityGroup(params.name, params.description)
 
                 final DBInstance dbInstance = new DBInstance()
@@ -110,7 +110,7 @@ class RdsInstanceController {
             try {
                 boolean multiAZ = ("on" == params.multiAZ)
                 def selectedDBSecurityGroups = (params.selectedDBSecurityGroups instanceof String) ? [params.selectedDBSecurityGroups] : params.selectedDBSecurityGroups
-                if (!selectedDBSecurityGroups) selectedDBSecurityGroups = ["default"]
+                if (!selectedDBSecurityGroups) { selectedDBSecurityGroups = ["default"] }
                 awsRdsService.updateDBInstance(
                     userContext,
                     params.allocatedStorage.toInteger(),

@@ -102,7 +102,9 @@ class DbSecurityController {
         List<String> selectedGroups = Requests.ensureList(params.selectedGroups)
 
         List<String> ipRanges = []
-        if (params.ipRanges) params.ipRanges.splitEachLine(/[\s,]/, {ipRanges.addAll(it) })
+        if (params.ipRanges) {
+            params.ipRanges.splitEachLine(/[\s,]/, { ipRanges.addAll(it) })
+        }
         DBSecurityGroup group = awsRdsService.getDBSecurityGroup(userContext, name)
         try {
             if (description != group.getDBSecurityGroupDescription() || newName != name) {

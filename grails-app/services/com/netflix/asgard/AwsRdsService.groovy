@@ -151,7 +151,7 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
                 .withMultiAZ(multiAZ)
                 .withPreferredBackupWindow(preferredBackupWindow)
                 .withPreferredMaintenanceWindow(preferredMaintenanceWindow)
-            if (masterUserPassword) request.setMasterUserPassword(masterUserPassword)
+            if (masterUserPassword) { request.setMasterUserPassword(masterUserPassword) }
             DBInstance instance = awsClient.by(userContext.region).modifyDBInstance(request)
             caches.allDBInstances.by(userContext.region).put(instance.getDBInstanceIdentifier(), instance)
         }, Link.to(EntityType.rdsInstance, dbInstanceId))

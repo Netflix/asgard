@@ -86,7 +86,7 @@ class DbSnapshotController {
     def delete = {
         UserContext userContext = UserContext.of(request)
         def snapshotIds = []
-        if (params.dBSnapshotIdentifier) snapshotIds << params.dBSnapshotIdentifier
+        if (params.dBSnapshotIdentifier) { snapshotIds << params.dBSnapshotIdentifier }
         if (params.selectedSnapshots) {
             snapshotIds.addAll ((params.selectedSnapshots instanceof String) ? [params.selectedSnapshots] : params.selectedSnapshots as List)
         }
