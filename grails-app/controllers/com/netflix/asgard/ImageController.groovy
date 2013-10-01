@@ -327,7 +327,7 @@ class ImageController {
         List<Image> baseless = []
         List<Image> baselessInUse = []
 
-        Set<String> amisInUse = new HashSet<String>()
+        Set<String> amisInUse = [] as Set
         Map<String, List<MergedInstance>> imageIdsToInstanceLists = [:]
         List<MergedInstance> instances = mergedInstanceGroupingService.getMergedInstances(userContext, '')
         instances.each { MergedInstance instance ->

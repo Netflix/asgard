@@ -79,7 +79,7 @@ class EurekaAddressCollectorService implements CacheInitializer {
         }
         Integer maxConsecutiveDnsLookupsWithoutNewResult = configService.maxConsecutiveDnsLookupsWithoutNewResult
         Integer dnsThrottleMillis = configService.dnsThrottleMillis
-        Set<String> allAddressesSoFar = new HashSet<String>()
+        Set<String> allAddressesSoFar = [] as Set
         Integer lookupsSinceLastUniqueResult = 0
         Boolean firstTime = true
         while (lookupsSinceLastUniqueResult <= maxConsecutiveDnsLookupsWithoutNewResult) {

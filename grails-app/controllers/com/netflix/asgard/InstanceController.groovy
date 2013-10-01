@@ -215,7 +215,7 @@ class InstanceController {
             String asg = awsAutoScalingService.getAutoScalingGroupFor(userContext, instanceId)?.autoScalingGroupName
             if (asg) {
                 if (!asgNamesToInstanceIdSets.containsKey(asg)) {
-                    asgNamesToInstanceIdSets.put(asg, new HashSet<String>())
+                    asgNamesToInstanceIdSets.put(asg, [] as Set)
                 }
                 asgNamesToInstanceIdSets[asg].add(instanceId)
             }
