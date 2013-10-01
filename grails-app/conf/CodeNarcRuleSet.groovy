@@ -33,7 +33,7 @@ ruleset {
     BrokenOddnessCheck
     ClassForName
     ComparisonOfTwoConstants
-//    ComparisonWithSelf
+    ComparisonWithSelf
     ConstantAssertExpression
     ConstantIfExpression
     ConstantTernaryExpression
