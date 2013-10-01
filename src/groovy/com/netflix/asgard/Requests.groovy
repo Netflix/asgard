@@ -89,7 +89,7 @@ class Requests {
             output += '[\n'
             value.each { k, v ->  output += prettyPrint(v, indent + 5, k) }
             output += "${spaces}]\n"
-        } else if  (value instanceof Collection || value?.class?.array) {
+        } else if (value instanceof Collection || value?.class?.array) {
             output += '[\n'
             value.each { it -> output += prettyPrint(it, indent + 5)}
             output += "${spaces}]\n"

@@ -169,7 +169,7 @@ ruleset {
 //    SpaceAfterClosingBrace
     SpaceAfterComma
     SpaceAfterFor
-//    SpaceAfterIf
+    SpaceAfterIf
 //    SpaceAfterOpeningBrace
     SpaceAfterSemicolon
     SpaceAfterSwitch
