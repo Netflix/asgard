@@ -175,7 +175,7 @@ ruleset {
     SpaceAfterSwitch
     SpaceAfterWhile
     SpaceAroundClosureArrow
-//    SpaceAroundOperator
+    SpaceAroundOperator
     SpaceBeforeClosingBrace
 //    SpaceBeforeOpeningBrace
 

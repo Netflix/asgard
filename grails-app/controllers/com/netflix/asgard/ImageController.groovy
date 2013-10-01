@@ -115,7 +115,7 @@ class ImageController {
     def update = {
         def imageId = EntityType.image.ensurePrefix(params.imageId)
         UserContext userContext = UserContext.of(request)
-        List<String> launchPermissions = (params.launchPermissions instanceof String) ? [ params.launchPermissions ] : params.launchPermissions?: []
+        List<String> launchPermissions = (params.launchPermissions instanceof String) ? [ params.launchPermissions ] : params.launchPermissions ?: []
         try {
             awsEc2Service.setImageLaunchers(userContext, imageId, launchPermissions)
             flash.message = "Image '${imageId}' has been updated."
