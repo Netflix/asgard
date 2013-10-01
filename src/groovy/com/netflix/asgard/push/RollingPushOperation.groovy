@@ -160,153 +160,34 @@ class RollingPushOperation extends AbstractPushOperation {
                 // If too many other slots are still in progress, then skip this unstarted slot for now.
                 if (areTooManyInProgress()) { break }
 
-                // Disable the app in discovery and ELBs so that clients don't try to talk to it
-                String appName = options.common.appName
-                String appInstanceId = "${appName} / ${instanceInfo.id}"
-                if (loadBalancerNames) {
-                    task.log("Disabling ${appInstanceId} in ${loadBalancerNames.size()} ELBs.")
-                    for (String loadBalancerName in loadBalancerNames) {
-                        awsLoadBalancerService.removeInstances(userContext, loadBalancerName, [instanceInfo.id], task)
-                    }
-                }
-                if (discoveryExists) {
-                    discoveryService.disableAppInstances(userContext, appName, [instanceInfo.id], task)
-                    if (options.rudeShutdown) {
-                        task.log("Rude shutdown mode. Not waiting for clients to stop using ${appInstanceId}")
-                    } else {
-                        task.log("Waiting ${Time.format(afterDiscovery)} for clients to stop using ${appInstanceId}")
-                    }
-                }
-                instanceInfo.state = InstanceState.unregistered
+                handleInitialPhase(instanceInfo, userContext, discoveryExists, afterDiscovery)
                 break
 
             case InstanceState.unregistered:
                 // Shut down abruptly or wait for clients of the instance to adjust to the change.
-                if (options.rudeShutdown || timeSinceChange.isLongerThan(afterDiscovery)) {
-                    task.log("Terminating instance ${instanceInfo.id}")
-                    if (awsEc2Service.terminateInstances(userContext, [instanceInfo.id], task) == null) {
-                        fail("${reportSummary()} Instance ${instanceInfo.id} failed to terminate. Aborting push.")
-                    }
-                    instanceInfo.state = InstanceState.terminated
-                    String duration = Time.format(InstanceState.terminated.timeOutToExitState)
-                    task.log("Waiting up to ${duration} for new instance of ${options.groupName} to become Pending.")
-                }
+                handleUnregisteredPhase(timeSinceChange, afterDiscovery, instanceInfo, userContext)
                 break
 
             case InstanceState.terminated:
-                AutoScalingGroup freshGroup = checkGroupStillExists(userContext, options.groupName, From.AWS_NOCACHE)
-                // See if new ASG instance can be found yet
-                def newInst = freshGroup.instances.find {
-                    def instanceFromGroup = it
-                    def matchingSlot = relaunchSlots.find {theSlot->
-                        instanceFromGroup.instanceId == theSlot.fresh.id
-                    }
-                    // AWS lifecycleState values are Pending, InService, Terminating and Terminated
-                    // http://docs.amazonwebservices.com/AutoScaling/latest/DeveloperGuide/CHAP_Glossary.html
-                    (instanceFromGroup?.lifecycleState?.equals("Pending")) && !matchingSlot
-                }
-                if (newInst) {
-                    // Get the EC2 Instance object based on the ASG Instance object
-                    com.amazonaws.services.ec2.model.Instance instance = awsEc2Service.getInstance(userContext, newInst.instanceId)
-                    if (instance) {
-                        task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance ${instanceInfo.id} to terminate and be replaced by ${instance.instanceId}")
-                        slot.fresh.instance = instance
-                        slot.fresh.state = InstanceState.pending
-                        task.log("Waiting up to ${Time.format(InstanceState.pending.timeOutToExitState)} for Pending ${instance.instanceId} to go InService.")
-                    }
-                }
+                handleTerminatedPhase(userContext, instanceInfo, slot)
                 break
 
             // After here instanceInfo holds the state of the fresh instance, not the old instance
             case InstanceState.pending:
                 //if (state == InstanceState.pending) {
-                def freshGroup = checkGroupStillExists(userContext, options.groupName, From.AWS_NOCACHE)
-                def newInst = freshGroup.instances.find { it.instanceId == instanceInfo.id }
-                String lifecycleState = newInst?.lifecycleState
-                Boolean freshInstanceFailed = !newInst || "Terminated" == lifecycleState
-                if (timeForPeriodicLogging || freshInstanceFailed) {
-                    task.log("Instance of ${options.appName} on ${instanceInfo.id} is in lifecycle state ${lifecycleState ?: 'Not Found'}")
-                }
-
-                if (freshInstanceFailed) {
-                    Integer startupTriesDone = slot.replaceFreshInstance()
-                    if (startupTriesDone > options.maxStartupRetries) {
-                        fail("${reportSummary()} Startup failed ${startupTriesDone} times for one slot. " +
-                                "Max ${options.maxStartupRetries} tries allowed. Aborting push.")
-                    } else {
-                        task.log("Startup failed on ${instanceInfo.id} so Amazon terminated it. Waiting up to ${Time.format(InstanceState.terminated.timeOutToExitState)} for another instance.")
-                    }
-                }
-
-                // If no longer pending, change state
-                if (newInst?.lifecycleState?.equals("InService")) {
-                    task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance ${instanceInfo.id} to go from Pending to InService")
-                    instanceInfo.state = InstanceState.running
-                    if (options.checkHealth) {
-                        task.log("Waiting up to ${Time.format(InstanceState.running.timeOutToExitState)} for Eureka registration of ${options.appName} on ${instanceInfo.id}")
-                    }
-                }
+                handlePendingPhase(userContext, instanceInfo, timeForPeriodicLogging, slot)
                 break
 
             case InstanceState.running:
-                if (options.checkHealth) {
-
-                    // Eureka isn't yet strong enough to handle sustained rapid fire requests.
-                    Time.sleepCancellably(discoveryService.MILLIS_DELAY_BETWEEN_DISCOVERY_CALLS)
-
-                    ApplicationInstance appInst = discoveryService.getAppInstance(userContext,
-                            options.common.appName, instanceInfo.id)
-                    if (appInst) {
-                        task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance " +
-                                "${instanceInfo.id} to go from InService to registered with Eureka")
-                        instanceInfo.state = InstanceState.registered
-                        def healthCheckUrl = appInst.healthCheckUrl
-                        if (healthCheckUrl) {
-                            instanceInfo.healthCheckUrl = healthCheckUrl
-                            task.log("Waiting up to ${Time.format(InstanceState.registered.timeOutToExitState)} for health check pass at ${healthCheckUrl}")
-                        }
-                    }
-                }
-                // If check health is off, prepare for final wait
-                else {
-                    startSnoozing(instanceInfo)
-                }
+                handleRunningPhase(userContext, instanceInfo)
                 break
 
             case InstanceState.registered:
-                // If there's a health check URL then check it before preparing for final wait
-                if (instanceInfo.healthCheckUrl) {
-                    Integer responseCode = restClientService.getRepeatedResponseCode(instanceInfo.healthCheckUrl)
-                    String message = "Health check response code is ${responseCode} for application ${options.appName} on instance ${instanceInfo.id}"
-                    if (responseCode >= 400 ) {
-                        fail("${reportSummary()} ${message}. Push was aborted because ${instanceInfo.healthCheckUrl} " +
-                                "shows a sick instance. See http://go/healthcheck for guidelines.")
-                    }
-                    Boolean healthy = responseCode == 200
-                    if (timeForPeriodicLogging || healthy) { task.log(message) }
-                    if (healthy) {
-                        task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance " +
-                                "${instanceInfo.id} to go from registered to healthy")
-                        startSnoozing(instanceInfo)
-                    }
-                }
-                // If there is no health check URL, assume instance is ready for final wait
-                else {
-                    task.log("Can't check health of ${options.appName} on ${instanceInfo.id} since no URL is registered.")
-                    startSnoozing(instanceInfo)
-                }
+                handleRegisteredPhase(instanceInfo, timeForPeriodicLogging)
                 break
 
             case InstanceState.snoozing:
-                Boolean ready = true
-                if (options.shouldWaitAfterBoot()
-                        && timeSinceChange.isShorterThan(Duration.standardSeconds(options.common.afterBootWait))) {
-                    ready = false
-                }
-                if (ready) {
-                    instanceInfo.state = InstanceState.ready
-                    task.log("Instance ${options.appName} on ${instanceInfo.id} is ready for use. ${reportSummary()}")
-                }
+                handleSnoozingPhase(timeSinceChange, instanceInfo)
                 break
         }
 
@@ -316,6 +197,155 @@ class RollingPushOperation extends AbstractPushOperation {
             err += "from ${instanceInfo.state?.name()} state. "
             err += "(Maximum ${Time.format(instanceInfo.state.timeOutToExitState)} allowed)."
             fail(err)
+        }
+    }
+
+    private void handleInitialPhase(InstanceMetaData instanceInfo, UserContext userContext, boolean discoveryExists, Duration afterDiscovery) {
+        // Disable the app in discovery and ELBs so that clients don't try to talk to it
+        String appName = options.common.appName
+        String appInstanceId = "${appName} / ${instanceInfo.id}"
+        if (loadBalancerNames) {
+            task.log("Disabling ${appInstanceId} in ${loadBalancerNames.size()} ELBs.")
+            for (String loadBalancerName in loadBalancerNames) {
+                awsLoadBalancerService.removeInstances(userContext, loadBalancerName, [instanceInfo.id], task)
+            }
+        }
+        if (discoveryExists) {
+            discoveryService.disableAppInstances(userContext, appName, [instanceInfo.id], task)
+            if (options.rudeShutdown) {
+                task.log("Rude shutdown mode. Not waiting for clients to stop using ${appInstanceId}")
+            } else {
+                task.log("Waiting ${Time.format(afterDiscovery)} for clients to stop using ${appInstanceId}")
+            }
+        }
+        instanceInfo.state = InstanceState.unregistered
+    }
+
+    private void handleUnregisteredPhase(Duration timeSinceChange, Duration afterDiscovery, InstanceMetaData instanceInfo, UserContext userContext) {
+        if (options.rudeShutdown || timeSinceChange.isLongerThan(afterDiscovery)) {
+            task.log("Terminating instance ${instanceInfo.id}")
+            if (awsEc2Service.terminateInstances(userContext, [instanceInfo.id], task) == null) {
+                fail("${reportSummary()} Instance ${instanceInfo.id} failed to terminate. Aborting push.")
+            }
+            instanceInfo.state = InstanceState.terminated
+            String duration = Time.format(InstanceState.terminated.timeOutToExitState)
+            task.log("Waiting up to ${duration} for new instance of ${options.groupName} to become Pending.")
+        }
+    }
+
+    private void handleTerminatedPhase(UserContext userContext, InstanceMetaData instanceInfo, Slot slot) {
+        AutoScalingGroup freshGroup = checkGroupStillExists(userContext, options.groupName, From.AWS_NOCACHE)
+        // See if new ASG instance can be found yet
+        def newInst = freshGroup.instances.find {
+            def instanceFromGroup = it
+            def matchingSlot = relaunchSlots.find { theSlot ->
+                instanceFromGroup.instanceId == theSlot.fresh.id
+            }
+            // AWS lifecycleState values are Pending, InService, Terminating and Terminated
+            // http://docs.amazonwebservices.com/AutoScaling/latest/DeveloperGuide/CHAP_Glossary.html
+            (instanceFromGroup?.lifecycleState?.equals("Pending")) && !matchingSlot
+        }
+        if (newInst) {
+            // Get the EC2 Instance object based on the ASG Instance object
+            com.amazonaws.services.ec2.model.Instance instance = awsEc2Service.getInstance(userContext, newInst.instanceId)
+            if (instance) {
+                task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance ${instanceInfo.id} to terminate and be replaced by ${instance.instanceId}")
+                slot.fresh.instance = instance
+                slot.fresh.state = InstanceState.pending
+                task.log("Waiting up to ${Time.format(InstanceState.pending.timeOutToExitState)} for Pending ${instance.instanceId} to go InService.")
+            }
+        }
+    }
+
+    private void handlePendingPhase(UserContext userContext, InstanceMetaData instanceInfo, boolean timeForPeriodicLogging, Slot slot) {
+        def freshGroup = checkGroupStillExists(userContext, options.groupName, From.AWS_NOCACHE)
+        def newInst = freshGroup.instances.find { it.instanceId == instanceInfo.id }
+        String lifecycleState = newInst?.lifecycleState
+        Boolean freshInstanceFailed = !newInst || "Terminated" == lifecycleState
+        if (timeForPeriodicLogging || freshInstanceFailed) {
+            task.log("Instance of ${options.appName} on ${instanceInfo.id} is in lifecycle state ${lifecycleState ?: 'Not Found'}")
+        }
+
+        if (freshInstanceFailed) {
+            Integer startupTriesDone = slot.replaceFreshInstance()
+            if (startupTriesDone > options.maxStartupRetries) {
+                fail("${reportSummary()} Startup failed ${startupTriesDone} times for one slot. " +
+                        "Max ${options.maxStartupRetries} tries allowed. Aborting push.")
+            } else {
+                task.log("Startup failed on ${instanceInfo.id} so Amazon terminated it. Waiting up to ${Time.format(InstanceState.terminated.timeOutToExitState)} for another instance.")
+            }
+        }
+
+        // If no longer pending, change state
+        if (newInst?.lifecycleState?.equals("InService")) {
+            task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance ${instanceInfo.id} to go from Pending to InService")
+            instanceInfo.state = InstanceState.running
+            if (options.checkHealth) {
+                task.log("Waiting up to ${Time.format(InstanceState.running.timeOutToExitState)} for Eureka registration of ${options.appName} on ${instanceInfo.id}")
+            }
+        }
+    }
+
+    private void handleRunningPhase(UserContext userContext, InstanceMetaData instanceInfo) {
+        if (options.checkHealth) {
+
+            // Eureka isn't yet strong enough to handle sustained rapid fire requests.
+            Time.sleepCancellably(discoveryService.MILLIS_DELAY_BETWEEN_DISCOVERY_CALLS as Integer)
+
+            ApplicationInstance appInst = discoveryService.getAppInstance(userContext,
+                    options.common.appName, instanceInfo.id)
+            if (appInst) {
+                task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance " +
+                        "${instanceInfo.id} to go from InService to registered with Eureka")
+                instanceInfo.state = InstanceState.registered
+                def healthCheckUrl = appInst.healthCheckUrl
+                if (healthCheckUrl) {
+                    instanceInfo.healthCheckUrl = healthCheckUrl
+                    task.log("Waiting up to ${Time.format(InstanceState.registered.timeOutToExitState)} for health check pass at ${healthCheckUrl}")
+                }
+            }
+        }
+        // If check health is off, prepare for final wait
+        else {
+            startSnoozing(instanceInfo)
+        }
+    }
+
+    private void handleRegisteredPhase(InstanceMetaData instanceInfo, boolean timeForPeriodicLogging) {
+        // If there's a health check URL then check it before preparing for final wait
+        if (instanceInfo.healthCheckUrl) {
+            Integer responseCode = restClientService.getRepeatedResponseCode(instanceInfo.healthCheckUrl)
+            String message = "Health check response code is ${responseCode} for application ${options.appName} on instance ${instanceInfo.id}"
+            if (responseCode >= 400) {
+                fail("${reportSummary()} ${message}. Push was aborted because ${instanceInfo.healthCheckUrl} " +
+                        "shows a sick instance. See http://go/healthcheck for guidelines.")
+            }
+            Boolean healthy = responseCode == 200
+            if (timeForPeriodicLogging || healthy) {
+                task.log(message)
+            }
+            if (healthy) {
+                task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance " +
+                        "${instanceInfo.id} to go from registered to healthy")
+                startSnoozing(instanceInfo)
+            }
+        }
+        // If there is no health check URL, assume instance is ready for final wait
+        else {
+            task.log("Can't check health of ${options.appName} on ${instanceInfo.id} since no URL is registered.")
+            startSnoozing(instanceInfo)
+        }
+    }
+
+    private void handleSnoozingPhase(Duration timeSinceChange, InstanceMetaData instanceInfo) {
+        Boolean ready = true
+        if (options.shouldWaitAfterBoot()
+                && timeSinceChange.isShorterThan(Duration.standardSeconds(options.common.afterBootWait))) {
+            ready = false
+        }
+        if (ready) {
+            instanceInfo.state = InstanceState.ready
+            task.log("Instance ${options.appName} on ${instanceInfo.id} is ready for use. ${reportSummary()}")
         }
     }
 
