@@ -117,22 +117,22 @@ class MonkeyPatcherService implements InitializingBean {
         addImageTagGetterMethod('getAppVersion', 'appversion')
         addImageTagGetterMethod('getLastReferencedTime', 'last_referenced_time')
         if (!(Image.class.methods as List).contains('getParsedAppVersion')) {
-            Image.metaClass['getParsedAppVersion'] = {-> Relationships.dissectAppVersion(delegate.appVersion) }
+            Image.metaClass['getParsedAppVersion'] = { -> Relationships.dissectAppVersion(delegate.appVersion) }
         }
         if (!(Image.class.methods as List).contains('getPackageName')) {
-            Image.metaClass['getPackageName'] = {-> Relationships.packageFromAppVersion(delegate.appVersion) }
+            Image.metaClass['getPackageName'] = { -> Relationships.packageFromAppVersion(delegate.appVersion) }
         }
         if (!(Image.class.methods as List).contains('getBaseAmiId')) {
-            Image.metaClass['getBaseAmiId'] = {-> Relationships.baseAmiIdFromDescription(delegate.description) }
+            Image.metaClass['getBaseAmiId'] = { -> Relationships.baseAmiIdFromDescription(delegate.description) }
         }
         if (!(Image.class.methods as List).contains('getBaseAmiName')) {
-            Image.metaClass['getBaseAmiName'] = {-> Relationships.baseAmiNameFromDescription(delegate.description) }
+            Image.metaClass['getBaseAmiName'] = { -> Relationships.baseAmiNameFromDescription(delegate.description) }
         }
         if (!(Image.class.methods as List).contains('getBaseAmiDate')) {
-            Image.metaClass['getBaseAmiDate'] = {-> Relationships.baseAmiDateFromDescription(delegate.description) }
+            Image.metaClass['getBaseAmiDate'] = { -> Relationships.baseAmiDateFromDescription(delegate.description) }
         }
         if (!(Image.class.methods as List).contains('isKeepForever')) {
-            Image.metaClass['isKeepForever'] = {-> delegate.getTag('expiration_time') == 'never' }
+            Image.metaClass['isKeepForever'] = { -> delegate.getTag('expiration_time') == 'never' }
         }
     }
 
@@ -154,22 +154,22 @@ class MonkeyPatcherService implements InitializingBean {
 
     private void monkeyPatchAutoScalingGroup() {
         if (!(AutoScalingGroup.class.methods as List).contains("getAppName")) {
-            AutoScalingGroup.metaClass.getAppName = {->
+            AutoScalingGroup.metaClass.getAppName = { ->
                 Relationships.appNameFromGroupName(delegate.autoScalingGroupName)
             }
         }
         if (!(AutoScalingGroup.class.methods as List).contains("getClusterName")) {
-            AutoScalingGroup.metaClass.getClusterName = {->
+            AutoScalingGroup.metaClass.getClusterName = { ->
                 Relationships.clusterFromGroupName(delegate.autoScalingGroupName)
             }
         }
         if (!(AutoScalingGroup.class.methods as List).contains("getStack")) {
-            AutoScalingGroup.metaClass.getStack = {->
+            AutoScalingGroup.metaClass.getStack = { ->
                 Relationships.stackNameFromGroupName(delegate.autoScalingGroupName)
             }
         }
         if (!(AutoScalingGroup.class.methods as List).contains("getVariables")) {
-            AutoScalingGroup.metaClass.getVariables = {->
+            AutoScalingGroup.metaClass.getVariables = { ->
                 Relationships.parts(delegate.autoScalingGroupName as String)
             }
         }
@@ -182,17 +182,17 @@ class MonkeyPatcherService implements InitializingBean {
             }
         }
         if (!(DomainMetadataResult.class.methods as List).contains("getItemNamesSize")) {
-            DomainMetadataResult.metaClass.getItemNamesSize = {->
+            DomainMetadataResult.metaClass.getItemNamesSize = { ->
                 FileUtils.byteCountToDisplaySize(delegate.itemNamesSizeBytes as Integer)
             }
         }
         if (!(DomainMetadataResult.class.methods as List).contains("getAttributeNamesSize")) {
-            DomainMetadataResult.metaClass.getAttributeNamesSize = {->
+            DomainMetadataResult.metaClass.getAttributeNamesSize = { ->
                 FileUtils.byteCountToDisplaySize(delegate.attributeNamesSizeBytes as Integer)
             }
         }
         if (!(DomainMetadataResult.class.methods as List).contains("getAttributeValuesSize")) {
-            DomainMetadataResult.metaClass.getAttributeValuesSize = {->
+            DomainMetadataResult.metaClass.getAttributeValuesSize = { ->
                 FileUtils.byteCountToDisplaySize(delegate.attributeValuesSizeBytes as Integer)
             }
         }
@@ -200,7 +200,7 @@ class MonkeyPatcherService implements InitializingBean {
 
     private void monkeyPatchLoadBalancerDescription() {
         if (!(LoadBalancerDescription.class.methods as List).contains("getTargetTruncated")) {
-            LoadBalancerDescription.metaClass.getTargetTruncated = {->
+            LoadBalancerDescription.metaClass.getTargetTruncated = { ->
                 StringUtils.abbreviate(delegate.healthCheck.target, 25)
             }
         }

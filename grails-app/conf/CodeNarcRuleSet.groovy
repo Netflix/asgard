@@ -174,7 +174,7 @@ ruleset {
     SpaceAfterSemicolon
     SpaceAfterSwitch
     SpaceAfterWhile
-//    SpaceAroundClosureArrow
+    SpaceAroundClosureArrow
 //    SpaceAroundOperator
 //    SpaceBeforeClosingBrace
 //    SpaceBeforeOpeningBrace
