@@ -224,8 +224,8 @@ ruleset {
 //    ExplicitHashMapInstantiation
 //    ExplicitHashSetInstantiation
     ExplicitLinkedHashMapInstantiation
-//    ExplicitLinkedListInstantiation
-//    ExplicitStackInstantiation
+    ExplicitLinkedListInstantiation
+    ExplicitStackInstantiation
 //    ExplicitTreeSetInstantiation
     GStringAsMapKey
 //    GetterMethodCouldBeProperty
