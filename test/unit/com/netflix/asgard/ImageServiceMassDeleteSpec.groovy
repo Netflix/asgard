@@ -182,7 +182,7 @@ class ImageServiceMassDeleteSpec extends ImageServiceSpec {
         Exception e = new Exception('foo')
 
         when:
-        awsEc2Service.getImage(userContext, IMAGE_ID) >> { throw e}
+        awsEc2Service.getImage(userContext, IMAGE_ID) >> { throw e }
         prototypeRequest.mode = JanitorMode.EXECUTE
         List<Image> toDelete = imageService.massDelete(userContext, prototypeRequest)
 
@@ -236,8 +236,8 @@ class ImageServiceMassDeleteSpec extends ImageServiceSpec {
     Image createImage(DateTime creationTime, DateTime lastReferencedTime, String ownerId = Mocks.TEST_AWS_ACCOUNT_ID) {
         Image image = new Image()
         image.metaClass {
-            getCreationTime { creationTime ? Time.format(creationTime) : ''}
-            getLastReferencedTime { lastReferencedTime ? Time.format(lastReferencedTime) : ''}
+            getCreationTime { creationTime ? Time.format(creationTime) : '' }
+            getLastReferencedTime { lastReferencedTime ? Time.format(lastReferencedTime) : '' }
             isKeepForever { false }
         }
         image.imageId = IMAGE_ID

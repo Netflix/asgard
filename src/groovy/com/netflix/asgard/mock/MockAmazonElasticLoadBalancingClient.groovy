@@ -101,11 +101,12 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
         mockLoadBalancers = loadMockLoadBalancers()
     }
 
-    void setEndpoint(String s) {}
+    void setEndpoint(String s) { }
 
-    void createLoadBalancerListeners(CreateLoadBalancerListenersRequest createLoadBalancerListenersRequest) {}
+    void createLoadBalancerListeners(CreateLoadBalancerListenersRequest createLoadBalancerListenersRequest) { }
 
-    CreateLBCookieStickinessPolicyResult createLBCookieStickinessPolicy(CreateLBCookieStickinessPolicyRequest createLBCookieStickinessPolicyRequest) { null }
+    CreateLBCookieStickinessPolicyResult createLBCookieStickinessPolicy(
+            CreateLBCookieStickinessPolicyRequest createLBCookieStickinessPolicyRequest) { null }
 
     ConfigureHealthCheckResult configureHealthCheck(ConfigureHealthCheckRequest configureHealthCheckRequest) { null }
 
@@ -127,32 +128,38 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
         return new DescribeLoadBalancersResult().withLoadBalancerDescriptions(loadBalancers)
     }
 
-    void setLoadBalancerListenerSSLCertificate(SetLoadBalancerListenerSSLCertificateRequest setLoadBalancerListenerSSLCertificateRequest) {}
+    void setLoadBalancerListenerSSLCertificate(
+            SetLoadBalancerListenerSSLCertificateRequest setLoadBalancerListenerSSLCertificateRequest) { }
 
     CreateLoadBalancerResult createLoadBalancer(CreateLoadBalancerRequest createLoadBalancerRequest) { null }
 
-    EnableAvailabilityZonesForLoadBalancerResult enableAvailabilityZonesForLoadBalancer(EnableAvailabilityZonesForLoadBalancerRequest enableAvailabilityZonesForLoadBalancerRequest) { null }
+    EnableAvailabilityZonesForLoadBalancerResult enableAvailabilityZonesForLoadBalancer(
+            EnableAvailabilityZonesForLoadBalancerRequest enableAvailabilityZonesForLoadBalancerRequest) { null }
 
     DescribeInstanceHealthResult describeInstanceHealth(DescribeInstanceHealthRequest describeInstanceHealthRequest) {
         String loadBalancerName = describeInstanceHealthRequest.loadBalancerName
-        LoadBalancerDescription loadBalancer = mockLoadBalancers.find { it.loadBalancerName == loadBalancerName}
+        LoadBalancerDescription loadBalancer = mockLoadBalancers.find { it.loadBalancerName == loadBalancerName }
         Collection<InstanceState> instanceStates = loadBalancer.instances.collect {
             new InstanceState().withInstanceId(it.instanceId).withState('InService')
         }
         new DescribeInstanceHealthResult().withInstanceStates(instanceStates)
     }
 
-    DeleteLoadBalancerPolicyResult deleteLoadBalancerPolicy(DeleteLoadBalancerPolicyRequest deleteLoadBalancerPolicyRequest) { null }
+    DeleteLoadBalancerPolicyResult deleteLoadBalancerPolicy(
+            DeleteLoadBalancerPolicyRequest deleteLoadBalancerPolicyRequest) { null }
 
-    DisableAvailabilityZonesForLoadBalancerResult disableAvailabilityZonesForLoadBalancer(DisableAvailabilityZonesForLoadBalancerRequest disableAvailabilityZonesForLoadBalancerRequest) { null }
+    DisableAvailabilityZonesForLoadBalancerResult disableAvailabilityZonesForLoadBalancer(
+            DisableAvailabilityZonesForLoadBalancerRequest disableAvailabilityZonesForLoadBalancerRequest) { null }
 
-    DeregisterInstancesFromLoadBalancerResult deregisterInstancesFromLoadBalancer(DeregisterInstancesFromLoadBalancerRequest deregisterInstancesFromLoadBalancerRequest) { null }
+    DeregisterInstancesFromLoadBalancerResult deregisterInstancesFromLoadBalancer(
+            DeregisterInstancesFromLoadBalancerRequest deregisterInstancesFromLoadBalancerRequest) { null }
 
-    void deleteLoadBalancerListeners(DeleteLoadBalancerListenersRequest deleteLoadBalancerListenersRequest) {}
+    void deleteLoadBalancerListeners(DeleteLoadBalancerListenersRequest deleteLoadBalancerListenersRequest) { }
 
-    void deleteLoadBalancer(DeleteLoadBalancerRequest deleteLoadBalancerRequest) {}
+    void deleteLoadBalancer(DeleteLoadBalancerRequest deleteLoadBalancerRequest) { }
 
-    CreateAppCookieStickinessPolicyResult createAppCookieStickinessPolicy(CreateAppCookieStickinessPolicyRequest createAppCookieStickinessPolicyRequest) { null }
+    CreateAppCookieStickinessPolicyResult createAppCookieStickinessPolicy(
+            CreateAppCookieStickinessPolicyRequest createAppCookieStickinessPolicyRequest) { null }
 
     int timesRegisterWasCalled = 0
 
@@ -173,11 +180,12 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
         new RegisterInstancesWithLoadBalancerResult().withInstances(loadBalancer.instances)
     }
 
-    SetLoadBalancerPoliciesOfListenerResult setLoadBalancerPoliciesOfListener(SetLoadBalancerPoliciesOfListenerRequest setLoadBalancerPoliciesOfListenerRequest) { null }
+    SetLoadBalancerPoliciesOfListenerResult setLoadBalancerPoliciesOfListener(
+            SetLoadBalancerPoliciesOfListenerRequest setLoadBalancerPoliciesOfListenerRequest) { null }
 
     DescribeLoadBalancersResult describeLoadBalancers() { new DescribeLoadBalancersResult() }
 
-    void shutdown() {}
+    void shutdown() { }
 
     ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest amazonWebServiceRequest) { null }
 }

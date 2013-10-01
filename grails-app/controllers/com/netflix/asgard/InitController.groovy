@@ -72,7 +72,7 @@ class InitializeCommand {
         ConfigObject rootConfig = new ConfigObject()
         ConfigObject grailsConfig = new ConfigObject()
         rootConfig['grails'] = grailsConfig
-        String accountNumber = accountNumber.replace('-','')
+        String accountNumber = accountNumber.replace('-', '')
         grailsConfig['awsAccounts'] = [accountNumber]
         grailsConfig['awsAccountNames'] = [(accountNumber): 'prod']
 

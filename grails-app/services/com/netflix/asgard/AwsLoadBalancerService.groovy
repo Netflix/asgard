@@ -137,7 +137,7 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
 
     List<LoadBalancerDescription> getLoadBalancersFor(UserContext userContext, String instanceId) {
         if (!instanceId) { return [] }
-        getLoadBalancers(userContext).findAll { it.instances.any { it.instanceId == instanceId }}
+        getLoadBalancers(userContext).findAll { it.instances.any { it.instanceId == instanceId } }
     }
 
     Map<String, Collection<LoadBalancerDescription>> mapInstanceIdsToLoadBalancers(UserContext userContext,

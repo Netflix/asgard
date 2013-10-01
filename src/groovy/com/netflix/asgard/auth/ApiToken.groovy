@@ -177,7 +177,7 @@ class ApiToken implements AuthenticationToken {
     }
 
     boolean equals(Object obj) {
-        if(!(obj instanceof ApiToken)) {
+        if (!(obj instanceof ApiToken)) {
             return false
         }
         ApiToken other = (ApiToken) obj

@@ -115,7 +115,7 @@ class ImageController {
     def update = {
         def imageId = EntityType.image.ensurePrefix(params.imageId)
         UserContext userContext = UserContext.of(request)
-        List<String> launchPermissions = (params.launchPermissions instanceof String) ? [ params.launchPermissions ] : params.launchPermissions?: []
+        List<String> launchPermissions = Requests.ensureList(params.launchPermissions)
         try {
             awsEc2Service.setImageLaunchers(userContext, imageId, launchPermissions)
             flash.message = "Image '${imageId}' has been updated."
@@ -161,7 +161,7 @@ class ImageController {
     def launch = {
 
         String message = ''
-        Closure output = {}
+        Closure output = { }
         List<String> instanceIds = []
         List<String> spotInstanceRequestIds = []
 
@@ -311,8 +311,10 @@ class ImageController {
         DataBindingUtils.bindObjectToInstance(massDeleteRequest, params)
         List<Image> deleted = imageService.massDelete(userContext, massDeleteRequest)
 
-        String executeMessage = "Started deleting the following ${deleted.size()} images in ${userContext.region}:\n"
-        String dryRunMessage = "Dry run mode. If executed, this job would delete ${deleted.size()} images in ${userContext.region}:\n"
+        Integer count = deleted.size()
+        String executeMessage = "Started deleting the following ${count} images in ${userContext.region}:\n"
+        Region region = userContext.region
+        String dryRunMessage = "Dry run mode. If executed, this job would delete ${count} images in ${region}:\n"
         String initialMessage = JanitorMode.EXECUTE == massDeleteRequest.mode ? executeMessage : dryRunMessage
         String message = deleted.inject(initialMessage) { message, image -> message + image + '\n' }
         render "<pre>\n${message}</pre>\n"

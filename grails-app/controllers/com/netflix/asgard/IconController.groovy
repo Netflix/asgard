@@ -33,7 +33,7 @@ class IconController {
             tangoPath += params.id
         }
 
-        new File(tangoPath).eachDirRecurse{File dir ->
+        new File(tangoPath).eachDirRecurse { File dir ->
             if (dir.list().size() > 0) {
                 def icons = []
                 dir.eachFile{ file ->

@@ -174,7 +174,7 @@ class TaskService {
         if (task.email) {
             emailerService.sendUserEmail(task.email, task.summary, task.logAsString)
         }
-        for(TaskFinishedListener taskFinishedListener in pluginService?.taskFinishedListeners) {
+        for (TaskFinishedListener taskFinishedListener in pluginService?.taskFinishedListeners) {
             try {
                 taskFinishedListener.taskFinished(task)
             } catch (Exception e) {

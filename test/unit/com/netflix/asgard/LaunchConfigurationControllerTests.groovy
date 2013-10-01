@@ -22,7 +22,7 @@ class LaunchConfigurationControllerTests {
 
     @Before
     void setUp() {
-        Mocks.createDynamicMethods() 
+        Mocks.createDynamicMethods()
         TestUtils.setUpMockRequest()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
         controller.applicationService = Mocks.applicationService()
@@ -41,7 +41,7 @@ class LaunchConfigurationControllerTests {
 
     void testShowNonExistent() {
         def p = controller.params
-        p.name ='doesntexist'
+        p.name = 'doesntexist'
         controller.show()
         assert '/error/missing' == view
         assert "Launch Configuration 'doesntexist' not found in us-east-1 test" == controller.flash.message

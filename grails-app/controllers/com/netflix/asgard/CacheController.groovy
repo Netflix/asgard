@@ -52,7 +52,7 @@ class CacheController {
 
     public Map<String, ? extends List> analyzeCaches() {
         Collection<Fillable> fillableCaches = caches.properties*.value.findAll { it instanceof Fillable }
-        List<Map> multiRegionSummaries = []
+        List<Map> multiRegSummaries = []
         List<Map> globalSummaries = []
         List<Map> prices = []
         fillableCaches.sort { it.name }.each {
@@ -65,16 +65,16 @@ class CacheController {
                     Map<String, Object> cachedMapSummary = summarize(cachedMap)
                     regionsToSummaries.put(it.code, cachedMapSummary)
                 }
-                multiRegionSummaries << [name: multi.name, filled: multi.filled, regionalCaches: regionsToSummaries]
+                multiRegSummaries << [name: multi.name, filled: multi.filled, regionalCaches: regionsToSummaries]
             } else if (it instanceof CachedMap) {
                 globalSummaries << summarize(it)
             } else if (it instanceof MultiRegionInstancePrices) {
                 prices << [name: it.name, filled: it.filled]
             }
         }
-        List<String> unfilled = listUnfilled(prices) + listUnfilled(globalSummaries) + listUnfilled(multiRegionSummaries)
+        List<String> unfilled = listUnfilled(prices) + listUnfilled(globalSummaries) + listUnfilled(multiRegSummaries)
         Map<String, List> result = [unfilled: unfilled, globalCaches: globalSummaries, prices: prices,
-                multiRegionCaches: multiRegionSummaries]
+                multiRegionCaches: multiRegSummaries]
         result
     }
 

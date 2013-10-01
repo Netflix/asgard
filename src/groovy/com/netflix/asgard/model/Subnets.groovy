@@ -90,7 +90,7 @@ import groovy.transform.Canonical
             }
             SubnetData subnetForPurpose = Maps.uniqueIndex(subnetsForZone, purposeOfSubnet)[purpose]
             subnetForPurpose?.subnetId
-        }.findAll { it != null}
+        }.findAll { it != null }
     }
 
     /**

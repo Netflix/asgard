@@ -77,7 +77,7 @@ class ImageService implements BackgroundProcessInitializer {
         String userData = Ensure.encoded(launchTemplateService.buildUserDataForImage(userContext, image))
         Map<String, String> tagPairs = buildTagPairs(image, ownerName)
 
-        List<Tag> tags = tagPairs.collect { String key, String value -> new Tag(key, value)}
+        List<Tag> tags = tagPairs.collect { String key, String value -> new Tag(key, value) }
 
         BigDecimal spotPrice = instanceTypeService.calculateLeisureLinuxSpotBid(userContext, instanceType)
 

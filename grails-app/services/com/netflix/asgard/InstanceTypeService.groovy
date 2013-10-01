@@ -201,24 +201,24 @@ class InstanceTypeService implements CacheInitializer {
                 Element dataParagraph = dataParagraphs.get(i)
                 List<Node> dataChildNodes = dataParagraph.childNodes().findAll { it.nodeName() != 'br' }
                 Collection<String> textNodes = dataChildNodes.collect { it.text().trim() }
-                String name = Check.notEmpty(textNodes.find { it.startsWith('API name: ')}, 'name') - 'API name: '
+                String name = Check.notEmpty(textNodes.find { it.startsWith('API name: ') }, 'name') - 'API name: '
 
                 // Skip any instance type Amazon has added to their web page that is not yet in their Java SDK
                 if (InstanceType.values().any { it.toString() == name }) {
 
-                    String memoryRaw = Check.notEmpty(textNodes.find { it.endsWith(' memory')}, 'memory')
+                    String memoryRaw = Check.notEmpty(textNodes.find { it.endsWith(' memory') }, 'memory')
                     String memory = (memoryRaw - ' of memory' - ' memory').trim()
 
-                    String cpu = (Check.notEmpty(textNodes.find { it.contains('Compute Unit')}, 'cpu')).trim()
+                    String cpu = (Check.notEmpty(textNodes.find { it.contains('Compute Unit') }, 'cpu')).trim()
 
-                    String storageRaw = Check.notEmpty(textNodes.find { it.contains('storage')}, 'storage')
+                    String storageRaw = Check.notEmpty(textNodes.find { it.contains('storage') }, 'storage')
                     String storage = (storageRaw - ' of instance storage' - ' instance storage' - ' storage').trim()
 
-                    String archRaw = textNodes.find { it.endsWith('platform')}
+                    String archRaw = textNodes.find { it.endsWith('platform') }
                     String validArchRaw = Check.notEmpty(archRaw, 'architecture')
                     String architecture = (validArchRaw - ' platform').trim()
 
-                    String ioPerfRaw = textNodes.find { it.startsWith('I/O Performance: ')}
+                    String ioPerfRaw = textNodes.find { it.startsWith('I/O Performance: ') }
                     String validIoPerfRaw = Check.notEmpty(ioPerfRaw, 'ioPerformance')
                     String ioPerformance = (validIoPerfRaw - 'I/O Performance: ').trim()
 
