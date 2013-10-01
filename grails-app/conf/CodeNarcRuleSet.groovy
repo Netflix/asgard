@@ -350,7 +350,7 @@ ruleset {
     UnnecessaryDefInFieldDeclaration
     UnnecessaryDefInMethodDeclaration
     UnnecessaryDefInVariableDeclaration
-//    UnnecessaryDotClass
+    UnnecessaryDotClass
     UnnecessaryDoubleInstantiation
 //    UnnecessaryElseStatement
     UnnecessaryFinalOnPrivateMethod
