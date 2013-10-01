@@ -208,8 +208,8 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
         taskService.runTask(userContext, msg, { Task task ->
             removeDBSecurityGroup(userContext, group.getDBSecurityGroupName())
             createDBSecurityGroup(userContext, newName, description)
-            group.ipPermissions.each {perm ->
-                perm.userIdGroupPairs.each {pair ->
+            group.ipPermissions.each { perm ->
+                perm.userIdGroupPairs.each { pair ->
                     authorizeDBSecurityGroupIngress(newName, pair.groupName, perm.ipProtocol, perm.fromPort, perm.toPort)
                 }
             }

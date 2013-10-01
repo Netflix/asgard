@@ -101,9 +101,9 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
         mockLoadBalancers = loadMockLoadBalancers()
     }
 
-    void setEndpoint(String s) {}
+    void setEndpoint(String s) { }
 
-    void createLoadBalancerListeners(CreateLoadBalancerListenersRequest createLoadBalancerListenersRequest) {}
+    void createLoadBalancerListeners(CreateLoadBalancerListenersRequest createLoadBalancerListenersRequest) { }
 
     CreateLBCookieStickinessPolicyResult createLBCookieStickinessPolicy(CreateLBCookieStickinessPolicyRequest createLBCookieStickinessPolicyRequest) { null }
 
@@ -127,7 +127,7 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
         return new DescribeLoadBalancersResult().withLoadBalancerDescriptions(loadBalancers)
     }
 
-    void setLoadBalancerListenerSSLCertificate(SetLoadBalancerListenerSSLCertificateRequest setLoadBalancerListenerSSLCertificateRequest) {}
+    void setLoadBalancerListenerSSLCertificate(SetLoadBalancerListenerSSLCertificateRequest setLoadBalancerListenerSSLCertificateRequest) { }
 
     CreateLoadBalancerResult createLoadBalancer(CreateLoadBalancerRequest createLoadBalancerRequest) { null }
 
@@ -148,9 +148,9 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
 
     DeregisterInstancesFromLoadBalancerResult deregisterInstancesFromLoadBalancer(DeregisterInstancesFromLoadBalancerRequest deregisterInstancesFromLoadBalancerRequest) { null }
 
-    void deleteLoadBalancerListeners(DeleteLoadBalancerListenersRequest deleteLoadBalancerListenersRequest) {}
+    void deleteLoadBalancerListeners(DeleteLoadBalancerListenersRequest deleteLoadBalancerListenersRequest) { }
 
-    void deleteLoadBalancer(DeleteLoadBalancerRequest deleteLoadBalancerRequest) {}
+    void deleteLoadBalancer(DeleteLoadBalancerRequest deleteLoadBalancerRequest) { }
 
     CreateAppCookieStickinessPolicyResult createAppCookieStickinessPolicy(CreateAppCookieStickinessPolicyRequest createAppCookieStickinessPolicyRequest) { null }
 
@@ -177,7 +177,7 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
 
     DescribeLoadBalancersResult describeLoadBalancers() { new DescribeLoadBalancersResult() }
 
-    void shutdown() {}
+    void shutdown() { }
 
     ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest amazonWebServiceRequest) { null }
 }

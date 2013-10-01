@@ -170,7 +170,7 @@ ruleset {
     SpaceAfterComma
     SpaceAfterFor
     SpaceAfterIf
-//    SpaceAfterOpeningBrace
+    SpaceAfterOpeningBrace
     SpaceAfterSemicolon
     SpaceAfterSwitch
     SpaceAfterWhile

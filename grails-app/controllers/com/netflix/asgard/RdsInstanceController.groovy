@@ -102,7 +102,7 @@ class RdsInstanceController {
         }
     }
 
-    def update = {DbUpdateCommand cmd ->
+    def update = { DbUpdateCommand cmd ->
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
             chain(action: 'edit', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params

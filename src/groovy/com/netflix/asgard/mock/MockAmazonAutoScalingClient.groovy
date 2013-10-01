@@ -111,15 +111,15 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
         mockLaunchConfigs = loadMockLaunchConfigs()
     }
 
-    void setEndpoint(String endpoint) {}
+    void setEndpoint(String endpoint) { }
 
-    void putScheduledUpdateGroupAction(PutScheduledUpdateGroupActionRequest putScheduledUpdateGroupActionRequest) {}
+    void putScheduledUpdateGroupAction(PutScheduledUpdateGroupActionRequest putScheduledUpdateGroupActionRequest) { }
 
-    void setDesiredCapacity(SetDesiredCapacityRequest setDesiredCapacityRequest) {}
+    void setDesiredCapacity(SetDesiredCapacityRequest setDesiredCapacityRequest) { }
 
-    void deletePolicy(DeletePolicyRequest deletePolicyRequest) {}
+    void deletePolicy(DeletePolicyRequest deletePolicyRequest) { }
 
-    void deleteScheduledAction(DeleteScheduledActionRequest deleteScheduledActionRequest) {}
+    void deleteScheduledAction(DeleteScheduledActionRequest deleteScheduledActionRequest) { }
 
     DescribeLaunchConfigurationsResult describeLaunchConfigurations(
             DescribeLaunchConfigurationsRequest describeLaunchConfigurationsRequest) {
@@ -145,44 +145,44 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
 
     DescribePoliciesResult describePolicies(DescribePoliciesRequest describePoliciesRequest) { new DescribePoliciesResult() }
 
-    void enableMetricsCollection(EnableMetricsCollectionRequest enableMetricsCollectionRequest) {}
+    void enableMetricsCollection(EnableMetricsCollectionRequest enableMetricsCollectionRequest) { }
 
     TerminateInstanceInAutoScalingGroupResult terminateInstanceInAutoScalingGroup(TerminateInstanceInAutoScalingGroupRequest terminateInstanceInAutoScalingGroupRequest) { null }
 
     DescribeScalingActivitiesResult describeScalingActivities(DescribeScalingActivitiesRequest describeScalingActivitiesRequest) { new DescribeScalingActivitiesResult() }
 
-    void executePolicy(ExecutePolicyRequest executePolicyRequest) {}
+    void executePolicy(ExecutePolicyRequest executePolicyRequest) { }
 
     DescribeMetricCollectionTypesResult describeMetricCollectionTypes(DescribeMetricCollectionTypesRequest describeMetricCollectionTypesRequest) { null }
 
     DescribeAdjustmentTypesResult describeAdjustmentTypes(DescribeAdjustmentTypesRequest describeAdjustmentTypesRequest) { null }
 
-    void deleteAutoScalingGroup(DeleteAutoScalingGroupRequest deleteAutoScalingGroupRequest) {}
+    void deleteAutoScalingGroup(DeleteAutoScalingGroupRequest deleteAutoScalingGroupRequest) { }
 
-    void createAutoScalingGroup(CreateAutoScalingGroupRequest createAutoScalingGroupRequest) {}
+    void createAutoScalingGroup(CreateAutoScalingGroupRequest createAutoScalingGroupRequest) { }
 
     DescribeAutoScalingInstancesResult describeAutoScalingInstances(DescribeAutoScalingInstancesRequest describeAutoScalingInstancesRequest) { null }
 
-    void deleteLaunchConfiguration(DeleteLaunchConfigurationRequest deleteLaunchConfigurationRequest) {}
+    void deleteLaunchConfiguration(DeleteLaunchConfigurationRequest deleteLaunchConfigurationRequest) { }
 
     PutScalingPolicyResult putScalingPolicy(PutScalingPolicyRequest putScalingPolicyRequest) { null }
 
-    void setInstanceHealth(SetInstanceHealthRequest setInstanceHealthRequest) {}
+    void setInstanceHealth(SetInstanceHealthRequest setInstanceHealthRequest) { }
 
-    void updateAutoScalingGroup(UpdateAutoScalingGroupRequest updateAutoScalingGroupRequest) {}
+    void updateAutoScalingGroup(UpdateAutoScalingGroupRequest updateAutoScalingGroupRequest) { }
 
     DescribeScheduledActionsResult describeScheduledActions(
             DescribeScheduledActionsRequest describeScheduledActionsRequest) {
         new DescribeScheduledActionsResult(scheduledUpdateGroupActions: [])
     }
 
-    void suspendProcesses(SuspendProcessesRequest suspendProcessesRequest) {}
+    void suspendProcesses(SuspendProcessesRequest suspendProcessesRequest) { }
 
-    void resumeProcesses(ResumeProcessesRequest resumeProcessesRequest) {}
+    void resumeProcesses(ResumeProcessesRequest resumeProcessesRequest) { }
 
-    void createLaunchConfiguration(CreateLaunchConfigurationRequest createLaunchConfigurationRequest) {}
+    void createLaunchConfiguration(CreateLaunchConfigurationRequest createLaunchConfigurationRequest) { }
 
-    void disableMetricsCollection(DisableMetricsCollectionRequest disableMetricsCollectionRequest) {}
+    void disableMetricsCollection(DisableMetricsCollectionRequest disableMetricsCollectionRequest) { }
 
     DescribeLaunchConfigurationsResult describeLaunchConfigurations() { new DescribeLaunchConfigurationsResult() }
 
@@ -204,7 +204,7 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
         new DescribeScheduledActionsResult(scheduledUpdateGroupActions: [])
     }
 
-    void shutdown() {}
+    void shutdown() { }
 
     ResponseMetadata getCachedResponseMetadata(AmazonWebServiceRequest request) { null }
 

@@ -75,7 +75,7 @@ class RollingPushOperation extends AbstractPushOperation {
         String appversion = image.getAppVersion()
         task = taskService.startTask(options.userContext, "Pushing $options.imageId " +
                 (appversion ? "with package $appversion " : '') +
-                "into group $options.groupName for app $options.appName", {task ->
+                "into group $options.groupName for app $options.appName", { task ->
 
             task.email = applicationService.getEmailFromApp(options.common.userContext, options.common.appName)
 
@@ -389,7 +389,7 @@ class RollingPushOperation extends AbstractPushOperation {
         // Iterate through the slots that are marked for relaunch and choose the next action to take for each one.
         Boolean allDone = false
         while (!allDone && task.status == "running") {
-            relaunchSlots.findAll { it.shouldRelaunch }.each {Slot slot -> decideActionsForSlot(slot) }
+            relaunchSlots.findAll { it.shouldRelaunch }.each { Slot slot -> decideActionsForSlot(slot) }
             replacePushStatus()
             allDone = pushStatus.allDone
 

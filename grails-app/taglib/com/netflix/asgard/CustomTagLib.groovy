@@ -119,7 +119,7 @@ href="${failureImage.url}">${failureImage.owner}</a></figcaption>""" : ''
     void outputAttributes(attrs) {
         attrs.remove('tagName') // Just in case one is left
         def writer = getOut()
-        attrs.each {k, v ->
+        attrs.each { k, v ->
             writer << "$k=\"${v.encodeAsHTML()}\" "
         }
     }

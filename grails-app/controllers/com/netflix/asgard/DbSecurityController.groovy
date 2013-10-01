@@ -88,7 +88,7 @@ class DbSecurityController {
             return [
                 'group' : group,
                 'allEC2Groups' : awsEc2Service.getEffectiveSecurityGroups(userContext).collect { it.groupName },
-                'selectedEC2Groups' : group.getEC2SecurityGroups().collect{it.getEC2SecurityGroupName()}
+                'selectedEC2Groups' : group.getEC2SecurityGroups().collect { it.getEC2SecurityGroupName() }
             ]
         }
     }
