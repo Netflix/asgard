@@ -380,22 +380,14 @@ ${lastGroup.loadBalancerNames}"""
             List<String> selectedZones = Requests.ensureList(params.selectedZones) ?: lastGroup.availabilityZones
             String azRebalance = params.azRebalance
             boolean lastRebalanceSuspended = lastGroup.isProcessSuspended(AutoScalingProcessType.AZRebalance)
-            boolean azRebalanceSuspended = (azRebalance == null) ? lastRebalanceSuspended : (azRebalance == 'disabled')
-            String minSizeParam = params.min
-            Integer minSize = minSizeParam ? minSizeParam as Integer : lastGroup.minSize
-            String desiredCapacityParam = params.desiredCapacity
-            Integer desiredCapacity = desiredCapacityParam ? desiredCapacityParam as Integer : lastGroup.desiredCapacity
-            String maxSizeParam = params.max
-            Integer maxSize = maxSizeParam ? maxSizeParam as Integer : lastGroup.maxSize
+            boolean azRebalanceSuspended = shouldAzRebalanceBeSuspended(azRebalance, lastRebalanceSuspended)
+            Integer minSize = convertToIntOrUseDefault(params.min, lastGroup.minSize)
+            Integer desiredCapacity = convertToIntOrUseDefault(params.desiredCapacity, lastGroup.desiredCapacity)
+            Integer maxSize = convertToIntOrUseDefault(params.max, lastGroup.maxSize)
             InitialTraffic initialTraffic = params.trafficAllowed ? InitialTraffic.ALLOWED : InitialTraffic.PREVENTED
             boolean checkHealth = params.containsKey('checkHealth')
             String instanceType = params.instanceType ?: lastLaunchConfig.instanceType
-            String spotPrice = null
-            if (!params.pricing) {
-                spotPrice = lastLaunchConfig.spotPrice
-            } else if (params.pricing == InstancePriceType.SPOT.name()) {
-                spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instanceType)
-            }
+            String spotPrice = determineSpotPrice(lastLaunchConfig, userContext, instanceType)
 
             final String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
             List<ScalingPolicyData> lastScalingPolicies = awsAutoScalingService.getScalingPolicyDatas(userContext,
@@ -433,24 +425,24 @@ Group: ${loadBalancerNames}"""
                     common: new CommonPushOptions(
                             userContext: userContext,
                             checkHealth: checkHealth,
-                            afterBootWait: params.afterBootWait?.toInteger() ?: 30,
+                            afterBootWait: convertToIntOrUseDefault(params.afterBootWait, 30),
                             appName: appName,
                             env: grailsApplication.config.cloud.accountName,
                             imageId: params.imageId ?: lastLaunchConfig.imageId,
                             instanceType: instanceType,
                             groupName: nextGroupName,
                             securityGroups: securityGroups,
-                            maxStartupRetries: params.maxStartupRetries?.toInteger() ?: 5
+                            maxStartupRetries: convertToIntOrUseDefault(params.maxStartupRetries, 5)
                     ),
                     initialTraffic: initialTraffic,
                     minSize: minSize,
                     desiredCapacity: desiredCapacity,
                     maxSize: maxSize,
-                    defaultCooldown: params.defaultCooldown as Integer ?: lastGroup.defaultCooldown,
+                    defaultCooldown: convertToIntOrUseDefault(params.defaultCooldown, lastGroup.defaultCooldown),
                     healthCheckType: params.healthCheckType ?: lastGroup.healthCheckType.name(),
-                    healthCheckGracePeriod: params.healthCheckGracePeriod as Integer ?: lastGracePeriod,
+                    healthCheckGracePeriod: convertToIntOrUseDefault(params.healthCheckGracePeriod, lastGracePeriod),
                     terminationPolicies: termPolicies,
-                    batchSize: params.batchSize as Integer ?: GroupResizeOperation.DEFAULT_BATCH_SIZE,
+                    batchSize: convertToIntOrUseDefault(params.batchSize, GroupResizeOperation.DEFAULT_BATCH_SIZE),
                     loadBalancerNames: loadBalancerNames,
                     iamInstanceProfile: iamInstanceProfile,
                     keyName: params.keyName ?: lastLaunchConfig.keyName,
@@ -466,6 +458,24 @@ Group: ${loadBalancerNames}"""
             flash.message = "${operation.task.name} has been started."
             redirectToTask(operation.taskId)
         }
+    }
+
+    private int convertToIntOrUseDefault(String value, Integer defaultValue) {
+        value?.toInteger() ?: defaultValue
+    }
+
+    private boolean shouldAzRebalanceBeSuspended(String azRebalance, boolean lastRebalanceSuspended) {
+        (azRebalance == null) ? lastRebalanceSuspended : (azRebalance == 'disabled')
+    }
+
+    private String determineSpotPrice(LaunchConfiguration lastLaunchConfig, UserContext userContext, String instanceType) {
+        String spotPrice = null
+        if (!params.pricing) {
+            spotPrice = lastLaunchConfig.spotPrice
+        } else if (params.pricing == InstancePriceType.SPOT.name()) {
+            spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instanceType)
+        }
+        spotPrice
     }
 
     def resize = {
