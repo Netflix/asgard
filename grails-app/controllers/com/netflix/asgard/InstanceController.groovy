@@ -158,7 +158,7 @@ class InstanceController {
             appInst = discoveryService.getAppInstance(userContext, instanceId)
             appName = appInst?.appName
         }
-        Reservation instRsrv = instanceId ? awsEc2Service.getInstanceReservation(userContext, instanceId) : null
+        Reservation instRsrv = awsEc2Service.getInstanceReservation(userContext, instanceId)
         Instance instance = instRsrv ? instRsrv.instances[0] : null
         if (!appInst && !instance) {
             String identifier = instanceId ?: "${params.appName}/${params.hostName}"

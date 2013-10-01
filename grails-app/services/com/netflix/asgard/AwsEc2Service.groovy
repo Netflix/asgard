@@ -762,7 +762,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     Reservation getInstanceReservation(UserContext userContext, String instanceId) {
-        Check.notNull(instanceId, Reservation, "instanceId")
+        if (!instanceId) { return null }
         def result
         try {
             result = awsClient.by(userContext.region).describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId))
