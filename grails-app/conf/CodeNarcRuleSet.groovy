@@ -208,7 +208,7 @@ ruleset {
     ConfusingMultipleReturns
     ExplicitArrayListInstantiation
     ExplicitCallToAndMethod
-//    ExplicitCallToCompareToMethod
+    ExplicitCallToCompareToMethod
     ExplicitCallToDivMethod
 //    ExplicitCallToEqualsMethod
     ExplicitCallToGetAtMethod
