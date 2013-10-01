@@ -30,8 +30,7 @@ class TaskController {
     FlowService flowService
     def taskService
 
-    // the delete, save and update actions only accept POST requests
-    def static allowedMethods = [cancel:'POST']
+    static allowedMethods = [cancel: 'POST']
 
     def index = { redirect(action: 'list', params:params) }
 

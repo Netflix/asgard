@@ -103,8 +103,8 @@ class Mocks {
             monkeyPatcherService()
     }
 
-    private static def grailsApplication
-    static def grailsApplication() {
+    private static grailsApplication
+    static grailsApplication() {
         if (grailsApplication == null) {
             grailsApplication = [
                     config: [
@@ -156,8 +156,8 @@ class Mocks {
         caches
     }
 
-    private static def monkeyPatcherService
-    static def monkeyPatcherService() {
+    private static MonkeyPatcherService monkeyPatcherService
+    static MonkeyPatcherService monkeyPatcherService() {
         if (monkeyPatcherService == null) {
             MockUtils.mockLogging(MonkeyPatcherService, false)
             monkeyPatcherService = new MonkeyPatcherService()

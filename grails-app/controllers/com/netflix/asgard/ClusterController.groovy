@@ -49,7 +49,7 @@ import grails.converters.XML
 @ContextParam('region')
 class ClusterController {
 
-    def static allowedMethods = [createNextGroup: 'POST', resize: 'POST', delete: 'POST', activate: 'POST',
+    static allowedMethods = [createNextGroup: 'POST', resize: 'POST', delete: 'POST', activate: 'POST',
             deactivate: 'POST', deploy: 'POST', proceedWithDeployment: 'POST', rollbackDeployment: 'POST']
 
     def grailsApplication

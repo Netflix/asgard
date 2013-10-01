@@ -34,7 +34,7 @@ class LaunchConfigurationController {
     def flagService
     def instanceTypeService
 
-    def static allowedMethods = [delete:'POST', save:'POST', update:'POST', cleanup: 'POST', massDelete: 'POST']
+    static allowedMethods = [delete:'POST', save:'POST', update:'POST', cleanup: 'POST', massDelete: 'POST']
 
     def index = { redirect(action: 'list', params:params) }
 

@@ -41,11 +41,11 @@ class ImageController {
     def taskService
     def grailsApplication
 
-    def static allowedMethods = [update: 'POST', delete: ['POST', 'DELETE'], launch: 'POST', addTag: 'POST',
+    static allowedMethods = [update: 'POST', delete: ['POST', 'DELETE'], launch: 'POST', addTag: 'POST',
             addTags: 'POST', removeTag: ['POST', 'DELETE'], removeTags: ['POST', 'DELETE'], removeAllTags: 'DELETE',
             massDelete: ['POST', 'DELETE']]
 
-    def static editActions = ['prelaunch']
+    static editActions = ['prelaunch']
 
     def index = { redirect(action: 'list', params:params) }
 

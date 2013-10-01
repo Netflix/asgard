@@ -25,10 +25,9 @@ import grails.converters.XML
 @ContextParam('region')
 class RdsInstanceController {
 
-    // the delete actions only accept POST requests
-    def static allowedMethods = [delete:'POST']
+    static allowedMethods = [delete: 'POST']
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def awsRdsService
     def awsEc2Service

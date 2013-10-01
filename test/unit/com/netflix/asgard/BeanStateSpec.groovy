@@ -25,7 +25,7 @@ import spock.lang.Specification
 class BeanStateSpec extends Specification {
 
     final Bean originalBean = new Bean()
-    def BeanState originalState
+    BeanState originalState
 
     def setup() {
         originalBean.with {

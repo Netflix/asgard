@@ -60,7 +60,7 @@ class AutoScalingController {
     def spotInstanceRequestService
     def stackService
 
-    def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', postpone: 'POST', pushStart: 'POST']
+    static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', postpone: 'POST', pushStart: 'POST']
 
     def index = { redirect(action: 'list', params: params) }
 

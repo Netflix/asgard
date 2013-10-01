@@ -76,7 +76,7 @@ class GroupResizeOperation extends AbstractPushOperation {
     }
 
     private String appName
-    private def thisOperation = this
+    private GroupResizeOperation thisOperation = this
     private DateTime lastBatchStartTime = Time.now()
     private static Duration MAX_TIME_PER_BATCH = Duration.standardMinutes(25)
 
