@@ -70,56 +70,9 @@ class MonkeyPatcherService implements InitializingBean {
         }
         HttpServletResponse.metaClass.deleteCookie = { String name -> Cookies.delete(delegate, name) }
 
-        // Load Balancers
-        if (!(LoadBalancerDescription.class.methods as List).contains("getTargetTruncated")) {
-            LoadBalancerDescription.metaClass.getTargetTruncated = { ->
-                StringUtils.abbreviate(delegate.healthCheck.target, 25)
-            }
-        }
-
-        // SimpleDB
-        if (!(Item.class.methods as List).contains('getAttribute')) {
-            Item.metaClass.getAttribute = { String name ->
-                delegate.attributes.find { Attribute attr -> attr.name == name }
-            }
-        }
-        if (!(DomainMetadataResult.class.methods as List).contains("getItemNamesSize")) {
-            DomainMetadataResult.metaClass.getItemNamesSize = { ->
-                FileUtils.byteCountToDisplaySize(delegate.itemNamesSizeBytes as Integer)
-            }
-        }
-        if (!(DomainMetadataResult.class.methods as List).contains("getAttributeNamesSize")) {
-            DomainMetadataResult.metaClass.getAttributeNamesSize = { ->
-                FileUtils.byteCountToDisplaySize(delegate.attributeNamesSizeBytes as Integer)
-            }
-        }
-        if (!(DomainMetadataResult.class.methods as List).contains("getAttributeValuesSize")) {
-            DomainMetadataResult.metaClass.getAttributeValuesSize = { ->
-                FileUtils.byteCountToDisplaySize(delegate.attributeValuesSizeBytes as Integer)
-            }
-        }
-
-        // Auto scaling groups
-        if (!(AutoScalingGroup.class.methods as List).contains("getAppName")) {
-            AutoScalingGroup.metaClass.getAppName = { ->
-                Relationships.appNameFromGroupName(delegate.autoScalingGroupName)
-            }
-        }
-        if (!(AutoScalingGroup.class.methods as List).contains("getClusterName")) {
-            AutoScalingGroup.metaClass.getClusterName = { ->
-                Relationships.clusterFromGroupName(delegate.autoScalingGroupName)
-            }
-        }
-        if (!(AutoScalingGroup.class.methods as List).contains("getStack")) {
-            AutoScalingGroup.metaClass.getStack = { ->
-                Relationships.stackNameFromGroupName(delegate.autoScalingGroupName)
-            }
-        }
-        if (!(AutoScalingGroup.class.methods as List).contains("getVariables")) {
-            AutoScalingGroup.metaClass.getVariables = { ->
-                Relationships.parts(delegate.autoScalingGroupName as String)
-            }
-        }
+        monkeyPatchLoadBalancerDescription()
+        monkeyPatchSimpleDbClasses()
+        monkeyPatchAutoScalingGroup()
 
         AutoScalingGroup.mixin AutoScalingGroupMixin
         ScalingPolicy.mixin ScalingPolicyMixin
@@ -142,21 +95,20 @@ class MonkeyPatcherService implements InitializingBean {
                 asgCopy
             }
         }
-        if (!(AvailabilityZone.class.methods as List).contains("shouldBePreselected")) {
-            List<String> discouragedZones = grailsApplication?.config?.cloud?.discouragedAvailabilityZones ?: []
-            AvailabilityZone.metaClass.shouldBePreselected = { selectedZones, autoScalingGroup ->
-                String zoneName = delegate.getZoneName()
-                Boolean isZoneNameDiscouraged = discouragedZones.contains(zoneName)
-                Boolean zoneIsUsedByCurrentAsg = autoScalingGroup?.availabilityZones?.contains(zoneName)
-                Boolean zoneHasAlreadyBeenSelected = Requests.ensureList(selectedZones).contains(zoneName)
-                Boolean noAsgOrSelectionAndZoneIsFine = !selectedZones && !autoScalingGroup && !isZoneNameDiscouraged
-                Boolean shouldBePreselected = zoneIsUsedByCurrentAsg || zoneHasAlreadyBeenSelected ||
-                                              noAsgOrSelectionAndZoneIsFine
-                return shouldBePreselected
-            }
-        }
+        monkeyPatchAvailabilityZone()
+        monkeyPatchImage()
+        monkeyPatchInstance()
+    }
 
-        // Images
+    private void monkeyPatchInstance() {
+        if (!(Instance.class.methods as List).contains('getTag')) {
+            Instance.metaClass['getTag'] = { String key -> delegate.tags?.find({ it.key == key })?.value }
+        }
+        addInstanceTagGetterMethod('getApp', 'app')
+        addInstanceTagGetterMethod('getOwner', 'owner')
+    }
+
+    private void monkeyPatchImage() {
         if (!(Image.class.methods as List).contains('getTag')) {
             Image.metaClass['getTag'] = { String key -> delegate.tags?.find({ it.key == key })?.value }
         }
@@ -182,13 +134,76 @@ class MonkeyPatcherService implements InitializingBean {
         if (!(Image.class.methods as List).contains('isKeepForever')) {
             Image.metaClass['isKeepForever'] = { -> delegate.getTag('expiration_time') == 'never' }
         }
+    }
 
-        // ec2 Instances
-        if (!(Instance.class.methods as List).contains('getTag')) {
-            Instance.metaClass['getTag'] = { String key -> delegate.tags?.find({ it.key == key })?.value }
+    private void monkeyPatchAvailabilityZone() {
+        if (!(AvailabilityZone.class.methods as List).contains("shouldBePreselected")) {
+            List<String> discouragedZones = grailsApplication?.config?.cloud?.discouragedAvailabilityZones ?: []
+            AvailabilityZone.metaClass.shouldBePreselected = { selectedZones, autoScalingGroup ->
+                String zoneName = delegate.getZoneName()
+                Boolean isZoneNameDiscouraged = discouragedZones.contains(zoneName)
+                Boolean zoneIsUsedByCurrentAsg = autoScalingGroup?.availabilityZones?.contains(zoneName)
+                Boolean zoneHasAlreadyBeenSelected = Requests.ensureList(selectedZones).contains(zoneName)
+                Boolean noAsgOrSelectionAndZoneIsFine = !selectedZones && !autoScalingGroup && !isZoneNameDiscouraged
+                Boolean shouldBePreselected = zoneIsUsedByCurrentAsg || zoneHasAlreadyBeenSelected ||
+                        noAsgOrSelectionAndZoneIsFine
+                return shouldBePreselected
+            }
         }
-        addInstanceTagGetterMethod('getApp', 'app')
-        addInstanceTagGetterMethod('getOwner', 'owner')
+    }
+
+    private void monkeyPatchAutoScalingGroup() {
+        if (!(AutoScalingGroup.class.methods as List).contains("getAppName")) {
+            AutoScalingGroup.metaClass.getAppName = { ->
+                Relationships.appNameFromGroupName(delegate.autoScalingGroupName)
+            }
+        }
+        if (!(AutoScalingGroup.class.methods as List).contains("getClusterName")) {
+            AutoScalingGroup.metaClass.getClusterName = { ->
+                Relationships.clusterFromGroupName(delegate.autoScalingGroupName)
+            }
+        }
+        if (!(AutoScalingGroup.class.methods as List).contains("getStack")) {
+            AutoScalingGroup.metaClass.getStack = { ->
+                Relationships.stackNameFromGroupName(delegate.autoScalingGroupName)
+            }
+        }
+        if (!(AutoScalingGroup.class.methods as List).contains("getVariables")) {
+            AutoScalingGroup.metaClass.getVariables = { ->
+                Relationships.parts(delegate.autoScalingGroupName as String)
+            }
+        }
+    }
+
+    private void monkeyPatchSimpleDbClasses() {
+        if (!(Item.class.methods as List).contains('getAttribute')) {
+            Item.metaClass.getAttribute = { String name ->
+                delegate.attributes.find { Attribute attr -> attr.name == name }
+            }
+        }
+        if (!(DomainMetadataResult.class.methods as List).contains("getItemNamesSize")) {
+            DomainMetadataResult.metaClass.getItemNamesSize = { ->
+                FileUtils.byteCountToDisplaySize(delegate.itemNamesSizeBytes as Integer)
+            }
+        }
+        if (!(DomainMetadataResult.class.methods as List).contains("getAttributeNamesSize")) {
+            DomainMetadataResult.metaClass.getAttributeNamesSize = { ->
+                FileUtils.byteCountToDisplaySize(delegate.attributeNamesSizeBytes as Integer)
+            }
+        }
+        if (!(DomainMetadataResult.class.methods as List).contains("getAttributeValuesSize")) {
+            DomainMetadataResult.metaClass.getAttributeValuesSize = { ->
+                FileUtils.byteCountToDisplaySize(delegate.attributeValuesSizeBytes as Integer)
+            }
+        }
+    }
+
+    private void monkeyPatchLoadBalancerDescription() {
+        if (!(LoadBalancerDescription.class.methods as List).contains("getTargetTruncated")) {
+            LoadBalancerDescription.metaClass.getTargetTruncated = { ->
+                StringUtils.abbreviate(delegate.healthCheck.target, 25)
+            }
+        }
     }
 
     private void addImageTagGetterMethod(String getter, String key) {

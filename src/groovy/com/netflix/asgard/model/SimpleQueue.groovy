@@ -39,8 +39,8 @@ class SimpleQueue {
     static final String DELAY_SECONDS_ATTR_NAME = 'DelaySeconds'
 
     private static Map<String, Closure> ATTR_NAMES_TO_HUMAN_READABILITY_METHODS = [
-            'VisibilityTimeout': { "${it} seconds"},
-            'MaximumMessageSize': { "${it} bytes"},
+            'VisibilityTimeout': { "${it} seconds" },
+            'MaximumMessageSize': { "${it} bytes" },
             'MessageRetentionPeriod': { Time.format(Duration.standardSeconds(it as Long)) },
             'CreatedTimestamp': { Time.format(new DateTime((it as Long) * 1000)) },
             'LastModifiedTimestamp': { Time.format(new DateTime((it as Long) * 1000)) }

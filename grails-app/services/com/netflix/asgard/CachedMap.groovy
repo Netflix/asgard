@@ -131,7 +131,7 @@ class CachedMap<T> implements Fillable {
      * @param readinessChecker an optional closure to determine whether or not external state is ready for this
      *          regional cached map to run its own fill algorithm
      */
-    void ensureSetUp(Closure retriever, Closure callback = {}, Closure readinessChecker = { true }) {
+    void ensureSetUp(Closure retriever, Closure callback = { }, Closure readinessChecker = { true }) {
         if (needsInitialization) {
             this.retriever = retriever
             this.callback = callback

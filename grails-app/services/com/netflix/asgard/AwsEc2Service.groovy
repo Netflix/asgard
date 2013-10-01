@@ -356,7 +356,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         try {
             List<String> hasAccounts = getImageLaunchers(userContext, imageId)
             hasAccounts += configService.awsAccountNumber
-            List<String> addAccounts = configService.awsAccounts.findAll {account -> !hasAccounts.any {it == account}}
+            List<String> addAccounts = configService.awsAccounts.findAll { acct -> !hasAccounts.any { it == acct } }
             if (addAccounts.size() > 0) {
                 addImageLaunchers(userContext, imageId, addAccounts, existingTask)
             }
@@ -537,7 +537,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             }
         }
         wantPerms.each { wantPerm ->
-            if (!havePerms.any { hp -> hp.fromPort == wantPerm.fromPort && hp.toPort == wantPerm.toPort} ) {
+            if (!havePerms.any { hp -> hp.fromPort == wantPerm.fromPort && hp.toPort == wantPerm.toPort } ) {
                 authorizeSecurityGroupIngress(userContext, targetGroup, sourceGroup, 'tcp',
                         wantPerm.fromPort, wantPerm.toPort)
                 somethingChanged = true
@@ -762,7 +762,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     Reservation getInstanceReservation(UserContext userContext, String instanceId) {
-        Check.notNull(instanceId, Reservation, "instanceId")
+        if (!instanceId) { return null }
         def result
         try {
             result = awsClient.by(userContext.region).describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId))

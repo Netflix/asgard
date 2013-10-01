@@ -70,7 +70,7 @@ class MockCachedMapBuilder<T> extends CachedMapBuilder<T> {
             this.cachedMap = cachedMap
         }
 
-        void ensureSetUp(Closure multiRegionRetriever, Closure multiRegionCallback = {},
+        void ensureSetUp(Closure multiRegionRetriever, Closure multiRegionCallback = { },
                          Closure multiRegionReadinessChecker = { true }) {
             Region region = Region.US_EAST_1
             cachedMap.ensureSetUp({ multiRegionRetriever(region) }, { multiRegionCallback(region) },

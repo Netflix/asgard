@@ -76,7 +76,7 @@ class AuthControllerSpec extends Specification {
 
     def 'should return 401 if AuthenticationException thrown'() {
         prepareAuthentication()
-        subject.login(asgardToken) >> { throw new AuthenticationException('Chaos!!')}
+        subject.login(asgardToken) >> { throw new AuthenticationException('Chaos!!') }
 
         when:
         controller.signIn()

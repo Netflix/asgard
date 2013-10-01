@@ -74,7 +74,7 @@ class RdsInstanceController {
             try {
                 boolean multiAZ = "on".equals(params.multiAZ)
                 def selectedDBSecurityGroups = (params.selectedDBSecurityGroups instanceof String) ? [params.selectedDBSecurityGroups] : params.selectedDBSecurityGroups as List
-                if (!selectedDBSecurityGroups) selectedDBSecurityGroups = ["default"]
+                if (!selectedDBSecurityGroups) { selectedDBSecurityGroups = ["default"] }
                 //awsRdsService.createDBSecurityGroup(params.name, params.description)
 
                 final DBInstance dbInstance = new DBInstance()
@@ -102,7 +102,7 @@ class RdsInstanceController {
         }
     }
 
-    def update = {DbUpdateCommand cmd ->
+    def update = { DbUpdateCommand cmd ->
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
             chain(action: 'edit', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
@@ -110,7 +110,7 @@ class RdsInstanceController {
             try {
                 boolean multiAZ = ("on" == params.multiAZ)
                 def selectedDBSecurityGroups = (params.selectedDBSecurityGroups instanceof String) ? [params.selectedDBSecurityGroups] : params.selectedDBSecurityGroups
-                if (!selectedDBSecurityGroups) selectedDBSecurityGroups = ["default"]
+                if (!selectedDBSecurityGroups) { selectedDBSecurityGroups = ["default"] }
                 awsRdsService.updateDBInstance(
                     userContext,
                     params.allocatedStorage.toInteger(),

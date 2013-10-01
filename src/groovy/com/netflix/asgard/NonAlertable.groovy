@@ -18,4 +18,4 @@ package com.netflix.asgard
 /**
  * Marker for custom exception types that should not result in system alerts.
  */
-interface NonAlertable {}
+interface NonAlertable { }

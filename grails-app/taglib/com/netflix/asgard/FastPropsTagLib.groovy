@@ -48,36 +48,58 @@ class FastPropsTagLib {
         if (instanceId || asg || ami || cluster || countries || stack || zone) {
             out << '<table class="scopeAttribs">'
 
-            // in the order or priority
-            if (instanceId) {
-                out << "<tr><td>Instance</td><td>${instanceId?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (asg) {
-                out << "<tr><td>ASG</td><td>${asg?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (ami) {
-                out << "<tr><td>AMI</td><td>${ami?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (cluster) {
-                out << "<tr><td>Cluster</td><td>${cluster?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (countries) {
-                out << "<tr><td>Countries</td><td>${countries?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (stack) {
-                out << "<tr><td>Stack</td><td>${stack?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (zone) {
-                out << "<tr><td>Zone</td><td>${zone?.encodeAsHTML()}</td></tr>"
-            }
+            // In the order of priority
+            outputInstanceId(instanceId)
+            outputAsg(asg)
+            outputAmi(ami)
+            outputCluster(cluster)
+            outputCountries(countries)
+            outputStack(stack)
+            outputZone(zone)
 
             out << '</table>'
+        }
+    }
+
+    private void outputZone(zone) {
+        if (zone) {
+            out << "<tr><td>Zone</td><td>${zone?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputStack(stack) {
+        if (stack) {
+            out << "<tr><td>Stack</td><td>${stack?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputCountries(countries) {
+        if (countries) {
+            out << "<tr><td>Countries</td><td>${countries?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputCluster(cluster) {
+        if (cluster) {
+            out << "<tr><td>Cluster</td><td>${cluster?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputAmi(ami) {
+        if (ami) {
+            out << "<tr><td>AMI</td><td>${ami?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputAsg(asg) {
+        if (asg) {
+            out << "<tr><td>ASG</td><td>${asg?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputInstanceId(instanceId) {
+        if (instanceId) {
+            out << "<tr><td>Instance</td><td>${instanceId?.encodeAsHTML()}</td></tr>"
         }
     }
 

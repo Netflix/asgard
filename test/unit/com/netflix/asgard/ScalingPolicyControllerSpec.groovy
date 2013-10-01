@@ -54,7 +54,7 @@ class ScalingPolicyControllerSpec extends Specification {
         awsCloudWatchService.awsClient = new MultiRegionAwsClient({ mockAmazonCloudWatchClient })
         awsAutoScalingService.awsCloudWatchService = awsCloudWatchService
 
-        final mockAwsSimpleDbService  = Mock(AwsSimpleDbService)
+        final mockAwsSimpleDbService = Mock(AwsSimpleDbService)
         awsAutoScalingService.awsSimpleDbService = mockAwsSimpleDbService
         awsCloudWatchService.awsSimpleDbService = mockAwsSimpleDbService
         mockAwsSimpleDbService.incrementAndGetSequenceNumber(_, _) >> { 1 }
@@ -161,7 +161,7 @@ class ScalingPolicyControllerSpec extends Specification {
                         autoScalingGroupName: 'helloworld--scalingtest-v000', cooldown: 301,
                         alarms: []
                 )]
-        )}
+        ) }
 
         1 * mockAmazonAutoScalingClient.deletePolicy(new DeletePolicyRequest(
                 autoScalingGroupName: 'helloworld--scalingtest-v000',
@@ -198,7 +198,7 @@ class ScalingPolicyControllerSpec extends Specification {
                         autoScalingGroupName: 'helloworld--scalingtest-v000', cooldown: 301,
                         alarms: [new Alarm(alarmName: 'scale-up-alarm-helloworld--scalingtest-v000-CPUUtilization-87')]
                 )]
-        )}
+        ) }
 
         1 * mockAmazonAutoScalingClient.deletePolicy(new DeletePolicyRequest(
                 autoScalingGroupName: 'helloworld--scalingtest-v000',

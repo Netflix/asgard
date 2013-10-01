@@ -208,7 +208,7 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
             AlarmData alarmData = null) {
         Collection<String> topicNames = awsSnsService.getTopics(userContext)*.name.sort()
         String description = params.description ?: alarmData?.description
-        String statistic = params.statistic ?: alarmData?.statistic ?: AlarmData.Statistic.default.name()
+        String statistic = chooseStatistic(params, alarmData)
         boolean useExistingMetric = !params.namespace && !params.metric
         String existingMetric = params.existingMetric
         MetricNamespaces namespaces = getMetricNamespaces()
@@ -220,13 +220,13 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
             metrics << currentMetric
         }
         List<MetricId> sortedMetrics = metrics?.sort()
-        String namespace = params.namespace ?: alarmData?.namespace ?: configService.defaultMetricNamespace
+        String namespace = chooseNamespace(params, alarmData)
         List<String> dimensions = namespaces.getDimensionsForNamespace(namespace)
         String metric = params.metric ?: alarmData?.metricName
         String comparisonOperator = params.comparisonOperator ?: alarmData?.comparisonOperator
         String threshold = params.threshold ?: alarmData?.threshold
-        String period = params.period ?: alarmData?.period ?: '60'
-        String evaluationPeriods = params.evaluationPeriods ?: alarmData?.evaluationPeriods ?: '5'
+        String period = choosePeriod(params, alarmData)
+        String evaluationPeriods = chooseEvaluationPeriods(params, alarmData)
         String topic = params.topic ?: Check.loneOrNone(alarmData?.topicNames ?: [], String)
         [
                 comparisonOperators: AlarmData.ComparisonOperator.values(), statistics: AlarmData.Statistic.values(),
@@ -236,5 +236,21 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
                 threshold: threshold, period: period, evaluationPeriods: evaluationPeriods, topic: topic,
                 dimensions: dimensions, dimensionValues: alarmData?.dimensions
         ]
+    }
+
+    private String chooseNamespace(Map<String, String> params, AlarmData alarmData) {
+        params.namespace ?: alarmData?.namespace ?: configService.defaultMetricNamespace
+    }
+
+    private Serializable choosePeriod(Map<String, String> params, AlarmData alarmData) {
+        params.period ?: alarmData?.period ?: '60'
+    }
+
+    private Serializable chooseEvaluationPeriods(Map<String, String> params, AlarmData alarmData) {
+        params.evaluationPeriods ?: alarmData?.evaluationPeriods ?: '5'
+    }
+
+    private Serializable chooseStatistic(Map<String, String> params, AlarmData alarmData) {
+        params.statistic ?: alarmData?.statistic ?: AlarmData.Statistic.default.name()
     }
 }

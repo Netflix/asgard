@@ -34,7 +34,7 @@ class Styler {
             return zonesToStyleClasses[zone]
         }
         Matcher zoneMatcher = zone =~ /^.*?-[0-9]([a-z])$/
-        if(zoneMatcher.matches()) {
+        if (zoneMatcher.matches()) {
             String zoneLetter = zoneMatcher[0][1]
             return zonesToStyleClasses[zone] = "zone${zoneLetter.toUpperCase()}"
         }

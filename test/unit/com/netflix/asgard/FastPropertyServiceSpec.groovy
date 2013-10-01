@@ -63,7 +63,7 @@ class FastPropertyServiceSpec extends Specification {
     def 'should collect fast property app names'() {
         fastPropertiesCachedMap.list() >> ['API', 'API', 'GPS'].collect { new FastProperty(appId: it) }
         service.applicationService = Mock(ApplicationService) {
-            getRegisteredApplications(_) >> ['api', 'helloworld'].collect { new AppRegistration(name: it)}
+            getRegisteredApplications(_) >> ['api', 'helloworld'].collect { new AppRegistration(name: it) }
         }
 
         expect:

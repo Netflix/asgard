@@ -117,7 +117,7 @@ class SearchService implements InitializingBean {
         Collection<SearchResultItem> results = []
         if (!guessedType) {
             AppRegistration app = applicationService.getRegisteredApplication(userContext, term, From.CACHE)
-            if (app) { results << new SearchResultItem(EntityType.application, region, app)}
+            if (app) { results << new SearchResultItem(EntityType.application, region, app) }
         }
         results
     }
@@ -147,43 +147,103 @@ class SearchService implements InitializingBean {
                 return [new SearchResultItem(EntityType.image, region, image)]
             }
         } else {
-            SecurityGroup securityGroup = awsEc2Service.getSecurityGroup(userContext, term, From.CACHE)
-            if (securityGroup) { results << new SearchResultItem(EntityType.security, region, securityGroup)}
-
-            AutoScalingGroup autoScalingGroup = awsAutoScalingService.getAutoScalingGroup(userContext, term, From.CACHE)
-            if (autoScalingGroup) { results << new SearchResultItem(EntityType.autoScaling, region, autoScalingGroup)}
-
-            Cluster cluster = awsAutoScalingService.getCluster(userContext, term, From.CACHE)
-            if (cluster) { results << new SearchResultItem(EntityType.cluster, region, cluster)}
-
-            LaunchConfiguration launchConfig = awsAutoScalingService.getLaunchConfiguration(userContext, term, From.CACHE)
-            if (launchConfig) { results << new SearchResultItem(EntityType.launchConfiguration, region, launchConfig)}
-
-            MetricAlarm alarm = awsCloudWatchService.getAlarm(userContext, term, From.CACHE)
-            if (alarm) { results << new SearchResultItem(EntityType.alarm, region, alarm)}
-
-            LoadBalancerDescription loadBalancer = awsLoadBalancerService.getLoadBalancer(userContext, term, From.CACHE)
-            if (loadBalancer) { results << new SearchResultItem(EntityType.loadBalancer, region, loadBalancer)}
-
-            String domain = simpleDbDomainService.getDomainFromCache(userContext, term)
-            if (domain) { results << new SearchResultItem(EntityType.domain, region, domain)}
-
-            TopicData topic = awsSnsService.getTopic(userContext, term, From.CACHE)
-            if (topic) { results << new SearchResultItem(EntityType.topic, region, topic)}
-
-            SimpleQueue queue = awsSqsService.getQueue(userContext, term, From.CACHE)
-            if (queue) { results << new SearchResultItem(EntityType.queue, region, queue)}
-
-            DBInstance dbInstance = awsRdsService.getDBInstance(userContext, term, From.CACHE)
-            if (dbInstance) { results << new SearchResultItem(EntityType.rdsInstance, region, dbInstance)}
-
-            DBSecurityGroup dbSecurityGroup = awsRdsService.getDBSecurityGroup(userContext, term, From.CACHE)
-            if (dbSecurityGroup) { results << new SearchResultItem(EntityType.dbSecurity, region, dbSecurityGroup)}
-
-            DBSnapshot dbSnapshot = awsRdsService.getDBSnapshot(userContext, term, From.CACHE)
-            if (dbSnapshot) { results << new SearchResultItem(EntityType.dbSnapshot, region, dbSnapshot)}
-
+            searchForSecurityGroup(userContext, term, results, region)
+            searchForAutoScalingGroup(userContext, term, results, region)
+            searchForCluster(userContext, term, results, region)
+            searchForLaunchConfiguration(userContext, term, results, region)
+            searchForAlarm(userContext, term, results, region)
+            searchForLoadBalancer(userContext, term, results, region)
+            searchForSimpleDbDomain(userContext, term, results, region)
+            searchForTopic(userContext, term, results, region)
+            searchForQueue(userContext, term, results, region)
+            searchForDbInstance(userContext, term, results, region)
+            searchForDbSecurityGroup(userContext, term, results, region)
+            searchForDbSnapshot(userContext, term, results, region)
         }
         results
+    }
+
+    private void searchForSecurityGroup(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        SecurityGroup securityGroup = awsEc2Service.getSecurityGroup(userContext, term, From.CACHE)
+        if (securityGroup) {
+            results << new SearchResultItem(EntityType.security, region, securityGroup)
+        }
+    }
+
+    private void searchForAutoScalingGroup(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        AutoScalingGroup autoScalingGroup = awsAutoScalingService.getAutoScalingGroup(userContext, term, From.CACHE)
+        if (autoScalingGroup) {
+            results << new SearchResultItem(EntityType.autoScaling, region, autoScalingGroup)
+        }
+    }
+
+    private void searchForCluster(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        Cluster cluster = awsAutoScalingService.getCluster(userContext, term, From.CACHE)
+        if (cluster) {
+            results << new SearchResultItem(EntityType.cluster, region, cluster)
+        }
+    }
+
+    private void searchForLaunchConfiguration(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        LaunchConfiguration launchConfig = awsAutoScalingService.getLaunchConfiguration(userContext, term, From.CACHE)
+        if (launchConfig) {
+            results << new SearchResultItem(EntityType.launchConfiguration, region, launchConfig)
+        }
+    }
+
+    private void searchForAlarm(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        MetricAlarm alarm = awsCloudWatchService.getAlarm(userContext, term, From.CACHE)
+        if (alarm) {
+            results << new SearchResultItem(EntityType.alarm, region, alarm)
+        }
+    }
+
+    private void searchForLoadBalancer(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        LoadBalancerDescription loadBalancer = awsLoadBalancerService.getLoadBalancer(userContext, term, From.CACHE)
+        if (loadBalancer) {
+            results << new SearchResultItem(EntityType.loadBalancer, region, loadBalancer)
+        }
+    }
+
+    private void searchForSimpleDbDomain(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        String domain = simpleDbDomainService.getDomainFromCache(userContext, term)
+        if (domain) {
+            results << new SearchResultItem(EntityType.domain, region, domain)
+        }
+    }
+
+    private void searchForTopic(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        TopicData topic = awsSnsService.getTopic(userContext, term, From.CACHE)
+        if (topic) {
+            results << new SearchResultItem(EntityType.topic, region, topic)
+        }
+    }
+
+    private void searchForQueue(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        SimpleQueue queue = awsSqsService.getQueue(userContext, term, From.CACHE)
+        if (queue) {
+            results << new SearchResultItem(EntityType.queue, region, queue)
+        }
+    }
+
+    private void searchForDbInstance(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        DBInstance dbInstance = awsRdsService.getDBInstance(userContext, term, From.CACHE)
+        if (dbInstance) {
+            results << new SearchResultItem(EntityType.rdsInstance, region, dbInstance)
+        }
+    }
+
+    private void searchForDbSecurityGroup(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        DBSecurityGroup dbSecurityGroup = awsRdsService.getDBSecurityGroup(userContext, term, From.CACHE)
+        if (dbSecurityGroup) {
+            results << new SearchResultItem(EntityType.dbSecurity, region, dbSecurityGroup)
+        }
+    }
+
+    private void searchForDbSnapshot(UserContext userContext, String term, Collection<SearchResultItem> results, Region region) {
+        DBSnapshot dbSnapshot = awsRdsService.getDBSnapshot(userContext, term, From.CACHE)
+        if (dbSnapshot) {
+            results << new SearchResultItem(EntityType.dbSnapshot, region, dbSnapshot)
+        }
     }
 }

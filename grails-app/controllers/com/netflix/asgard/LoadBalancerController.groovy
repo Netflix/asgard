@@ -318,7 +318,7 @@ class LoadBalancerCreateCommand {
 
     static constraints = {
 
-        appName(nullable: false, blank: false, validator: { value, command->
+        appName(nullable: false, blank: false, validator: { value, command ->
             UserContext userContext = UserContext.of(Requests.request)
             if (!Relationships.checkStrictName(value)) {
                 return "application.name.illegalChar"
@@ -334,7 +334,7 @@ class LoadBalancerCreateCommand {
             }
         })
 
-        stack(nullable: true, validator: { value, command->
+        stack(nullable: true, validator: { value, command ->
             if (value && !Relationships.checkName(value)) {
                 return "The stack must be empty or consist of alphanumeric characters"
             }
@@ -343,7 +343,7 @@ class LoadBalancerCreateCommand {
             }
         })
 
-        newStack(nullable: true, validator: { value, command->
+        newStack(nullable: true, validator: { value, command ->
             if (value && !Relationships.checkName(value)) {
                 return "stack.illegalChar"
             }
@@ -355,7 +355,7 @@ class LoadBalancerCreateCommand {
             }
         })
 
-        detail(nullable: true, validator: { value, command->
+        detail(nullable: true, validator: { value, command ->
             if (value && !Relationships.checkDetail(value)) {
                 return "The detail must be empty or consist of alphanumeric characters and hyphens"
             }
@@ -368,7 +368,7 @@ class LoadBalancerCreateCommand {
         lbPort1(nullable: false, range: 0..65535)
         instancePort1(nullable: false, range: 0..65535)
 
-        protocol2(nullable: true, validator: { value, command->
+        protocol2(nullable: true, validator: { value, command ->
             if (value && (!command.lbPort2 || !command.instancePort2) ) {
                 return "Please enter port numbers for the second protocol"
             }

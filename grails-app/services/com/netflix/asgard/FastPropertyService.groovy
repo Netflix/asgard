@@ -43,7 +43,7 @@ class FastPropertyService implements CacheInitializer {
     def taskService
 
     void initializeCaches() {
-        caches.allFastProperties.ensureSetUp({ Region region -> retrieveFastProperties(region) }, {}, { true })
+        caches.allFastProperties.ensureSetUp({ Region region -> retrieveFastProperties(region) }, { }, { true })
     }
 
     private List<FastProperty> retrieveFastProperties(Region region) {

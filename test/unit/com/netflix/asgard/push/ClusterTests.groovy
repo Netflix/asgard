@@ -23,7 +23,7 @@ import com.netflix.asgard.model.AutoScalingGroupData
 class ClusterTests extends GroovyTestCase {
 
     void setUp() {
-        Mocks.createDynamicMethods() 
+        Mocks.createDynamicMethods()
         Mocks.awsAutoScalingService()
     }
 
@@ -50,16 +50,16 @@ class ClusterTests extends GroovyTestCase {
     }
 
     void testGetInstances() {
-        Instance ideadbeef = new Instance().withInstanceId('i-deadbeef')
-        Instance iaaaa4444 = new Instance().withInstanceId('i-aaaa4444')
-        Instance ieeee9999 = new Instance().withInstanceId('i-eeee9999')
+        Instance deadbeef = new Instance().withInstanceId('i-deadbeef')
+        Instance aaaa4444 = new Instance().withInstanceId('i-aaaa4444')
+        Instance eeee9999 = new Instance().withInstanceId('i-eeee9999')
 
-        AutoScalingGroupData groupOrig = makeGroupData('helloworld-example', [ideadbeef, iaaaa4444])
+        AutoScalingGroupData groupOrig = makeGroupData('helloworld-example', [deadbeef, aaaa4444])
         AutoScalingGroupData groupv000 = makeGroupData('helloworld-example-v000')
-        AutoScalingGroupData groupv001 = makeGroupData('helloworld-example-v001', [ieeee9999])
+        AutoScalingGroupData groupv001 = makeGroupData('helloworld-example-v001', [eeee9999])
         AutoScalingGroupData groupv002 = makeGroupData('helloworld-example-v002')
         Cluster cluster = new Cluster([groupv000, groupv002, groupOrig, groupv001])
-        assert [ideadbeef, iaaaa4444, ieeee9999].collect { it.instanceId } == cluster.instances.collect { it.instanceId }
+        assert [deadbeef, aaaa4444, eeee9999].collect { it.instanceId } == cluster.instances.collect { it.instanceId }
     }
 
     void testGetInstanceIds() {

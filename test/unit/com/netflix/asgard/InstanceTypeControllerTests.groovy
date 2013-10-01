@@ -36,7 +36,7 @@ class InstanceTypeControllerTests {
         assert 't1.micro' == types[0].name
         InstanceTypeData m1Small = types[1]
         assert 'M1 Small' == m1Small.hardwareProfile.description
-        assert '3.75 GiB' == types.find { it.name == 'm1.medium'}.hardwareProfile.memory
+        assert '3.75 GiB' == types.find { it.name == 'm1.medium' }.hardwareProfile.memory
         assert '68.4 GiB' == types.find { it.name == 'm2.4xlarge' }.hardwareProfile.memory
         InstanceTypeData c1medium = types.find { it.name == 'c1.medium' }
         assert '5 EC2 Compute Units (2 virtual cores with 2.5 EC2 Compute Units each)' == c1medium.hardwareProfile.cpu

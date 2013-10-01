@@ -168,7 +168,7 @@ class EurekaServiceUnitSpec extends Specification {
             }
             XML.parse(APP_INSTANCES_LIST_XML)
         }
-        1 * eurekaAddressCollectorService.fillCache(Region.US_WEST_2) >> {}
+        1 * eurekaAddressCollectorService.fillCache(Region.US_WEST_2) >> { }
         2 * eurekaAddressCollectorService.chooseBestEurekaNode(_) >> { '1.1.1.1' }
         2 * cachedMap.list() >> { ['1.1.1.1', '2.2.2.2', '3.3.3.3'] }
         instances.size() == 2
@@ -189,7 +189,7 @@ class EurekaServiceUnitSpec extends Specification {
             }
             XML.parse(APP_INSTANCE_XML)
         }
-        1 * eurekaAddressCollectorService.fillCache(Region.US_WEST_2) >> {}
+        1 * eurekaAddressCollectorService.fillCache(Region.US_WEST_2) >> { }
         2 * eurekaAddressCollectorService.chooseBestEurekaNode(_) >> { '1.1.1.1' }
         2 * cachedMap.list() >> { ['1.1.1.1', '2.2.2.2', '3.3.3.3'] }
         instance.instanceId == 'i-deadbeef'
@@ -210,7 +210,7 @@ class EurekaServiceUnitSpec extends Specification {
             }
             XML.parse(APP_INSTANCE_XML)
         }
-        1 * eurekaAddressCollectorService.fillCache(Region.US_WEST_2) >> {}
+        1 * eurekaAddressCollectorService.fillCache(Region.US_WEST_2) >> { }
         2 * eurekaAddressCollectorService.chooseBestEurekaNode(_) >> { '1.1.1.1' }
         2 * cachedMap.list() >> { ['1.1.1.1', '2.2.2.2', '3.3.3.3'] }
         instance.appName == 'fishfood'
@@ -234,7 +234,7 @@ class EurekaServiceUnitSpec extends Specification {
             200
         }
         !instanceIsEnabledInEureka
-        1 * eurekaAddressCollectorService.fillCache(Region.US_WEST_2) >> {}
+        1 * eurekaAddressCollectorService.fillCache(Region.US_WEST_2) >> { }
         2 * eurekaAddressCollectorService.chooseBestEurekaNode(_) >> { '1.1.1.1' }
         2 * cachedMap.list() >> { ['1.1.1.1', '2.2.2.2', '3.3.3.3'] }
     }
@@ -257,7 +257,7 @@ class EurekaServiceUnitSpec extends Specification {
             200
         }
         instanceIsEnabledInEureka
-        1 * eurekaAddressCollectorService.fillCache(Region.US_WEST_2) >> {}
+        1 * eurekaAddressCollectorService.fillCache(Region.US_WEST_2) >> { }
         2 * eurekaAddressCollectorService.chooseBestEurekaNode(_) >> { '1.1.1.1' }
         2 * cachedMap.list() >> { ['1.1.1.1', '2.2.2.2', '3.3.3.3'] }
     }

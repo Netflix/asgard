@@ -106,13 +106,13 @@ class ApiTokenControllerSpec extends Specification {
 
         where:
 
-        purpose | valid
-        null    | false
-        ''      | false
-        'ab12'  | true
-        'ab_12.'| true
-        'ab 12' | false
-        'ab:12' | false
+        purpose  | valid
+        null     | false
+        ''       | false
+        'ab12'   | true
+        'ab_12.' | true
+        'ab 12'  | false
+        'ab:12'  | false
     }
 
     @Unroll("hasErrors should return #valid when email is #email")

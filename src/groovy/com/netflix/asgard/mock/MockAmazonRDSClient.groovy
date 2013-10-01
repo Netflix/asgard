@@ -108,7 +108,8 @@ class MockAmazonRDSClient extends AmazonRDSClient {
         null
     }
 
-    DBSecurityGroup revokeDBSecurityGroupIngress(RevokeDBSecurityGroupIngressRequest revokeDBSecurityGroupIngressRequest) {
+    DBSecurityGroup revokeDBSecurityGroupIngress(
+            RevokeDBSecurityGroupIngressRequest revokeDBSecurityGroupIngressRequest) {
         null
     }
 
@@ -128,7 +129,8 @@ class MockAmazonRDSClient extends AmazonRDSClient {
         new DescribeDBInstancesResult().withDBInstances(mockDbInstances)
     }
 
-    DescribeDBParameterGroupsResult describeDBParameterGroups(DescribeDBParameterGroupsRequest describeDBParameterGroupsRequest) {
+    DescribeDBParameterGroupsResult describeDBParameterGroups(
+            DescribeDBParameterGroupsRequest describeDBParameterGroupsRequest) {
         null
     }
 
@@ -136,7 +138,8 @@ class MockAmazonRDSClient extends AmazonRDSClient {
         null
     }
 
-    DescribeDBEngineVersionsResult describeDBEngineVersions(DescribeDBEngineVersionsRequest describeDBEngineVersionsRequest) {
+    DescribeDBEngineVersionsResult describeDBEngineVersions(
+            DescribeDBEngineVersionsRequest describeDBEngineVersionsRequest) {
         null
     }
 
@@ -144,11 +147,13 @@ class MockAmazonRDSClient extends AmazonRDSClient {
         null
     }
 
-    DBSecurityGroup authorizeDBSecurityGroupIngress(AuthorizeDBSecurityGroupIngressRequest authorizeDBSecurityGroupIngressRequest) {
+    DBSecurityGroup authorizeDBSecurityGroupIngress(
+            AuthorizeDBSecurityGroupIngressRequest authorizeDBSecurityGroupIngressRequest) {
         null
     }
 
-    DBInstance restoreDBInstanceToPointInTime(RestoreDBInstanceToPointInTimeRequest restoreDBInstanceToPointInTimeRequest) {
+    DBInstance restoreDBInstanceToPointInTime(
+            RestoreDBInstanceToPointInTimeRequest restoreDBInstanceToPointInTimeRequest) {
         null
     }
 
@@ -156,11 +161,13 @@ class MockAmazonRDSClient extends AmazonRDSClient {
         new DescribeDBSnapshotsResult().withDBSnapshots(mockDbSnapshots)
     }
 
-    DescribeReservedDBInstancesOfferingsResult describeReservedDBInstancesOfferings(DescribeReservedDBInstancesOfferingsRequest describeReservedDBInstancesOfferingsRequest) {
+    DescribeReservedDBInstancesOfferingsResult describeReservedDBInstancesOfferings(
+            DescribeReservedDBInstancesOfferingsRequest describeReservedDBInstancesOfferingsRequest) {
         null
     }
 
-    EngineDefaults describeEngineDefaultParameters(DescribeEngineDefaultParametersRequest describeEngineDefaultParametersRequest) {
+    EngineDefaults describeEngineDefaultParameters(
+            DescribeEngineDefaultParametersRequest describeEngineDefaultParametersRequest) {
         null
     }
 
@@ -168,7 +175,8 @@ class MockAmazonRDSClient extends AmazonRDSClient {
         null
     }
 
-    DescribeDBSecurityGroupsResult describeDBSecurityGroups(DescribeDBSecurityGroupsRequest describeDBSecurityGroupsRequest) {
+    DescribeDBSecurityGroupsResult describeDBSecurityGroups(
+            DescribeDBSecurityGroupsRequest describeDBSecurityGroupsRequest) {
         new DescribeDBSecurityGroupsResult().withDBSecurityGroups(mockDbSecurityGroups)
     }
 
@@ -184,15 +192,18 @@ class MockAmazonRDSClient extends AmazonRDSClient {
         null
     }
 
-    DBInstance restoreDBInstanceFromDBSnapshot(RestoreDBInstanceFromDBSnapshotRequest restoreDBInstanceFromDBSnapshotRequest) {
+    DBInstance restoreDBInstanceFromDBSnapshot(
+            RestoreDBInstanceFromDBSnapshotRequest restoreDBInstanceFromDBSnapshotRequest) {
         null
     }
 
-    DescribeReservedDBInstancesResult describeReservedDBInstances(DescribeReservedDBInstancesRequest describeReservedDBInstancesRequest) {
+    DescribeReservedDBInstancesResult describeReservedDBInstances(
+            DescribeReservedDBInstancesRequest describeReservedDBInstancesRequest) {
         null
     }
 
-    DBParameterGroup createDBParameterGroup(CreateDBParameterGroupRequest createDBParameterGroupRequest) {
+    DBParameterGroup createDBParameterGroup(
+            CreateDBParameterGroupRequest createDBParameterGroupRequest) {
         null
     }
 
@@ -204,7 +215,8 @@ class MockAmazonRDSClient extends AmazonRDSClient {
         null
     }
 
-    ReservedDBInstance purchaseReservedDBInstancesOffering(PurchaseReservedDBInstancesOfferingRequest purchaseReservedDBInstancesOfferingRequest) {
+    ReservedDBInstance purchaseReservedDBInstancesOffering(
+            PurchaseReservedDBInstancesOfferingRequest purchaseReservedDBInstancesOfferingRequest) {
         null
     }
 

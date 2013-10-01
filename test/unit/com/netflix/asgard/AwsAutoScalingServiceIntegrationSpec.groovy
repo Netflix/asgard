@@ -82,8 +82,8 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
                     .withAutoScalingGroupName('hiyaworld-example-v042').withSuspendedProcesses(suspendedProcesses)
             )
         }
-        mockAmazonAutoScalingClient.describePolicies(_) >> {[]}
-        awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
+        mockAmazonAutoScalingClient.describePolicies(_) >> { [] }
+        awsAutoScalingService.awsClient = new MultiRegionAwsClient({ mockAmazonAutoScalingClient })
 
         when:
         awsAutoScalingService.updateAutoScalingGroup(userContext,
@@ -135,7 +135,7 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
         mockAmazonAutoScalingClient.describeAutoScalingGroups(_) >> {
             new DescribeAutoScalingGroupsResult()
         }
-        awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
+        awsAutoScalingService.awsClient = new MultiRegionAwsClient({ mockAmazonAutoScalingClient })
 
         final AutoScalingGroup groupTemplate = new AutoScalingGroup().withAutoScalingGroupName('helloworld-example').
                 withAvailabilityZones([]).withLoadBalancerNames([]).
@@ -170,7 +170,7 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
     def 'should get scaling policies'() {
         new MonkeyPatcherService().createDynamicMethods()
         final mockAmazonAutoScalingClient = Mock(AmazonAutoScaling)
-        awsAutoScalingService.awsClient = new MultiRegionAwsClient({mockAmazonAutoScalingClient})
+        awsAutoScalingService.awsClient = new MultiRegionAwsClient({ mockAmazonAutoScalingClient })
         final AwsCloudWatchService mockAwsCloudWatchService = Mock(AwsCloudWatchService)
         awsAutoScalingService.awsCloudWatchService = mockAwsCloudWatchService
 
@@ -238,7 +238,7 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
                 ]),
         ] as Set
 
-        1 * mockAwsCloudWatchService.getAlarms(_, ['alarm1','alarm2', 'alarm3']) >> {[
+        1 * mockAwsCloudWatchService.getAlarms(_, ['alarm1','alarm2', 'alarm3']) >> { [
                 new MetricAlarm(alarmName: 'alarm1', threshold: 78, comparisonOperator: 'GreaterThanThreshold',
                         statistic: 'Average', dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG,
                         value: 'hw_v046')]),
@@ -248,7 +248,7 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
                 new MetricAlarm(alarmName: 'alarm3', threshold: 23, comparisonOperator: 'LessThanThreshold',
                         statistic: 'Average', dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG,
                         value: 'hw_v046')])
-        ]}
+        ] }
         0 * mockAwsCloudWatchService.getAlarms(_, _)
     }
 

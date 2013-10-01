@@ -82,15 +82,15 @@ class AutoScalingControllerSpec extends Specification {
         final attrs = controller.show()
 
         then:
-        1 * mockAwsAutoScalingService.getScalingPoliciesForGroup(_, 'helloworld-example-v015') >> {[
+        1 * mockAwsAutoScalingService.getScalingPoliciesForGroup(_, 'helloworld-example-v015') >> { [
             new ScalingPolicy(alarms: [new Alarm(alarmName: 'alarm1')]),
             new ScalingPolicy(alarms: [new Alarm(alarmName: 'alarm2'), new Alarm(alarmName: 'alarm3')]),
-        ]}
-        1 * mockAwsCloudWatchService.getAlarms(_, ['alarm1', 'alarm2', 'alarm3']) >> {[
+        ] }
+        1 * mockAwsCloudWatchService.getAlarms(_, ['alarm1', 'alarm2', 'alarm3']) >> { [
             new MetricAlarm(alarmName: 'alarm1', metricName: 'metric1'),
             new MetricAlarm(alarmName: 'alarm2', metricName: 'metric2'),
             new MetricAlarm(alarmName: 'alarm3', metricName: 'metric3'),
-        ]}
+        ] }
         attrs['alarmsByName'] == [
                 alarm1: new MetricAlarm(alarmName: 'alarm1', metricName: 'metric1'),
                 alarm2: new MetricAlarm(alarmName: 'alarm2', metricName: 'metric2'),

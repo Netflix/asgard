@@ -158,7 +158,7 @@ class InstanceController {
             appInst = discoveryService.getAppInstance(userContext, instanceId)
             appName = appInst?.appName
         }
-        Reservation instRsrv = instanceId ? awsEc2Service.getInstanceReservation(userContext, instanceId) : null
+        Reservation instRsrv = awsEc2Service.getInstanceReservation(userContext, instanceId)
         Instance instance = instRsrv ? instRsrv.instances[0] : null
         if (!appInst && !instance) {
             String identifier = instanceId ?: "${params.appName}/${params.hostName}"
@@ -275,7 +275,8 @@ class InstanceController {
     private void chooseRedirect(String autoScalingGroupName, List<String> instanceIds, String appName = null) {
         Map destination = [action: 'list']
         if (autoScalingGroupName) {
-            destination = [controller: 'autoScaling', action: 'show', params: [id: autoScalingGroupName, runHealthChecks: true]]
+            destination = [controller: 'autoScaling', action: 'show', params: [id: autoScalingGroupName,
+                    runHealthChecks: true]]
         } else if (instanceIds.size() == 1) {
             destination = [action: 'show', params: [id: instanceIds[0]]]
         } else if (appName) {
@@ -290,8 +291,9 @@ class InstanceController {
         String autoScalingGroupName = params.autoScalingGroupName
 
         Set<String> lbNames = new TreeSet<String>()
-        instanceIds.each { instanceId ->
-            lbNames.addAll(awsLoadBalancerService.getLoadBalancersFor(userContext, instanceId).collect { it.loadBalancerName })
+        instanceIds.each { id ->
+            List<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancersFor(userContext, id)
+            lbNames.addAll(loadBalancers.collect { it.loadBalancerName })
         }
 
         if (lbNames.isEmpty()) {
