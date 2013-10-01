@@ -173,7 +173,7 @@ ruleset {
 //    SpaceAfterOpeningBrace
     SpaceAfterSemicolon
     SpaceAfterSwitch
-//    SpaceAfterWhile
+    SpaceAfterWhile
 //    SpaceAroundClosureArrow
 //    SpaceAroundOperator
 //    SpaceBeforeClosingBrace

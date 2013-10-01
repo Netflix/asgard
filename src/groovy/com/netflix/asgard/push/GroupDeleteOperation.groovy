@@ -93,7 +93,7 @@ class GroupDeleteOperation extends AbstractPushOperation {
     private void waitForDeletion() {
         DateTime terminationStartTime = Time.now()
         boolean asgStillExists = true
-        while(asgStillExists) {
+        while (asgStillExists) {
             Time.sleepCancellably(5000)
             AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext,
                     autoScalingGroup.autoScalingGroupName, From.AWS_NOCACHE)
