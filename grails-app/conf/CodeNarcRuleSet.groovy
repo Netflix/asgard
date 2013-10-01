@@ -210,7 +210,7 @@ ruleset {
     ExplicitCallToAndMethod
     ExplicitCallToCompareToMethod
     ExplicitCallToDivMethod
-//    ExplicitCallToEqualsMethod
+    ExplicitCallToEqualsMethod
     ExplicitCallToGetAtMethod
     ExplicitCallToLeftShiftMethod
     ExplicitCallToMinusMethod

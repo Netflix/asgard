@@ -72,7 +72,7 @@ class RdsInstanceController {
             chain(action: 'create', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
         } else {
             try {
-                boolean multiAZ = "on".equals(params.multiAZ)
+                boolean multiAZ = params.multiAZ == 'on'
                 def selectedDBSecurityGroups = (params.selectedDBSecurityGroups instanceof String) ? [params.selectedDBSecurityGroups] : params.selectedDBSecurityGroups as List
                 if (!selectedDBSecurityGroups) { selectedDBSecurityGroups = ["default"] }
                 //awsRdsService.createDBSecurityGroup(params.name, params.description)
