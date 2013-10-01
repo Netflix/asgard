@@ -210,7 +210,7 @@ class InstanceController {
 
         // All this deregister-before-terminate logic is complicated because it needs to be done in large batches to
         // reduce Amazon errors. When Amazon fixes their ELB bugs a lot of this code should be removed for simplicity.
-        Map<String, Collection<String>> asgNamesToInstanceIdSets = new HashMap<String, Collection<String>>()
+        Map<String, Collection<String>> asgNamesToInstanceIdSets = [:]
         for (String instanceId in instanceIds) {
             String asg = awsAutoScalingService.getAutoScalingGroupFor(userContext, instanceId)?.autoScalingGroupName
             if (asg) {

@@ -191,7 +191,7 @@ class CachedMap<T> implements Fillable {
         try {
             DateTime dataPullStartTime = new DateTime()
             Set<String> cachedKeys = new HashSet<String>(map.keySet())
-            Map<String, T> datasource = new HashMap<String, T>()
+            Map<String, T> datasource = [:]
             Collection<T> items = retriever()
             items.each { val -> datasource.put(entityType.key(val), val) }
 

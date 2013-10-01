@@ -221,7 +221,7 @@ ruleset {
     ExplicitCallToPowerMethod
     ExplicitCallToRightShiftMethod
     ExplicitCallToXorMethod
-//    ExplicitHashMapInstantiation
+    ExplicitHashMapInstantiation
     ExplicitHashSetInstantiation
     ExplicitLinkedHashMapInstantiation
     ExplicitLinkedListInstantiation
