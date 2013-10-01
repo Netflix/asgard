@@ -42,7 +42,7 @@ ruleset {
     DuplicateCaseStatement
     DuplicateMapKey
     DuplicateSetValue
-//    EmptyCatchBlock
+    EmptyCatchBlock
     EmptyElseBlock
     EmptyFinallyBlock
     EmptyForStatement

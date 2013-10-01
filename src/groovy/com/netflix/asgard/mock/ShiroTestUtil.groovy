@@ -60,7 +60,7 @@ abstract class ShiroTestUtil {
         try {
             SecurityManager securityManager = SecurityUtils.getSecurityManager()
             LifecycleUtils.destroy(securityManager)
-        } catch (UnavailableSecurityManagerException e) {
+        } catch (UnavailableSecurityManagerException ignored) {
             // We don't care about this when cleaning up the test environment.
         }
         SecurityUtils.setSecurityManager(null)
