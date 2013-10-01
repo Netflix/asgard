@@ -25,7 +25,7 @@ class DiscoveryService implements CacheInitializer {
 
     static transactional = false
 
-    static final SECONDS_TO_WAIT_AFTER_EUREKA_CHANGE = 90
+    static final Integer SECONDS_TO_WAIT_AFTER_EUREKA_CHANGE = 90
 
     def grailsApplication  // injected after construction
     Caches caches

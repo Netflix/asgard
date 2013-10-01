@@ -352,6 +352,7 @@ ${lastGroup.loadBalancerNames}"""
                 workflowId: workflowExecution.workflowId])
     }
 
+    @SuppressWarnings("GroovyAssignabilityCheck")
     def createNextGroup = {
         UserContext userContext = UserContext.of(request)
         String name = params.name
