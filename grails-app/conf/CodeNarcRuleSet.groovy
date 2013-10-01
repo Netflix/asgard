@@ -107,7 +107,7 @@ ruleset {
     IfStatementCouldBeTernary
 //    InvertedIfElse
     LongLiteralWithLowerCaseL
-//    ParameterReassignment
+    ParameterReassignment
     TernaryCouldBeElvis
     VectorIsObsolete
 

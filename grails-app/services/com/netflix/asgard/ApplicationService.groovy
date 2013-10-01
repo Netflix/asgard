@@ -108,9 +108,9 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         })
     }
 
-    AppRegistration getRegisteredApplication(UserContext userContext, String name, From from = From.AWS) {
-        if (!name) { return null }
-        name = name.toLowerCase()
+    AppRegistration getRegisteredApplication(UserContext userContext, String nameInput, From from = From.AWS) {
+        if (!nameInput) { return null }
+        String name = nameInput.toLowerCase()
         if (from == From.CACHE) {
             return caches.allApplications.get(name)
         }
@@ -126,10 +126,10 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         Relationships.checkAppNameForLoadBalancer(name) ? getRegisteredApplication(userContext, name) : null
     }
 
-    CreateApplicationResult createRegisteredApplication(UserContext userContext, String name, String group, String type,
-            String description, String owner, String email, MonitorBucketType monitorBucketType,
+    CreateApplicationResult createRegisteredApplication(UserContext userContext, String nameInput, String group,
+            String type, String description, String owner, String email, MonitorBucketType monitorBucketType,
             boolean enableChaosMonkey) {
-        name = name.toLowerCase()
+        String name = nameInput.toLowerCase()
         CreateApplicationResult result = new CreateApplicationResult()
         result.appName = name
         if (getRegisteredApplication(userContext, name)) {
