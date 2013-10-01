@@ -334,7 +334,7 @@ ruleset {
 //    NestedBlockDepth
 
     // rulesets/unnecessary.xml
-//    AddEmptyString
+    AddEmptyString
     ConsecutiveLiteralAppends
     ConsecutiveStringConcatenation
     UnnecessaryBigDecimalInstantiation

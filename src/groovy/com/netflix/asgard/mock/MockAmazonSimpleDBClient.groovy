@@ -54,9 +54,9 @@ class MockAmazonSimpleDBClient extends AmazonSimpleDBClient {
                     new Attribute('type', it.type), new Attribute('owner', it.owner),
                     new Attribute('email', it.email),
                     new Attribute('createTs',
-                            '' + ISODateTimeFormat.dateTimeParser().parseDateTime(it.createTime).millis),
+                            ISODateTimeFormat.dateTimeParser().parseDateTime(it.createTime).millis.toString()),
                     new Attribute('updateTs',
-                            '' + ISODateTimeFormat.dateTimeParser().parseDateTime(it.updateTime).millis)
+                            ISODateTimeFormat.dateTimeParser().parseDateTime(it.updateTime).millis.toString())
             )
         }
     }

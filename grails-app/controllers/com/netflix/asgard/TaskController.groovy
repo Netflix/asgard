@@ -128,6 +128,6 @@ class TaskController {
     }
 
     def runningCount = {
-        render '' + taskService.getRunning().size()
+        render taskService.getRunning().size().toString()
     }
 }
