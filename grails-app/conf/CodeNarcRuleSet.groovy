@@ -206,24 +206,24 @@ ruleset {
 //    ClosureAsLastMethodParameter
     CollectAllIsDeprecated
     ConfusingMultipleReturns
-//    ExplicitArrayListInstantiation
+    ExplicitArrayListInstantiation
     ExplicitCallToAndMethod
 //    ExplicitCallToCompareToMethod
     ExplicitCallToDivMethod
 //    ExplicitCallToEqualsMethod
     ExplicitCallToGetAtMethod
     ExplicitCallToLeftShiftMethod
-//    ExplicitCallToMinusMethod
+    ExplicitCallToMinusMethod
     ExplicitCallToModMethod
     ExplicitCallToMultiplyMethod
     ExplicitCallToOrMethod
-//    ExplicitCallToPlusMethod
+    ExplicitCallToPlusMethod
     ExplicitCallToPowerMethod
     ExplicitCallToRightShiftMethod
     ExplicitCallToXorMethod
 //    ExplicitHashMapInstantiation
 //    ExplicitHashSetInstantiation
-//    ExplicitLinkedHashMapInstantiation
+    ExplicitLinkedHashMapInstantiation
 //    ExplicitLinkedListInstantiation
 //    ExplicitStackInstantiation
 //    ExplicitTreeSetInstantiation
