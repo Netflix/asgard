@@ -35,6 +35,8 @@ codenarc {
     }
     ruleSetFiles='file:grails-app/conf/CodeNarcRuleSet.groovy'
     maxPriority1Violations = 0
+    maxPriority2Violations = 0
+    maxPriority3Violations = 0
 }
 
 grails.project.dependency.resolution = {
