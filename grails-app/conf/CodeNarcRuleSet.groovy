@@ -104,7 +104,7 @@ ruleset {
     ConfusingTernary
 //    CouldBeElvis
     HashtableIsObsolete
-//    IfStatementCouldBeTernary
+    IfStatementCouldBeTernary
 //    InvertedIfElse
     LongLiteralWithLowerCaseL
 //    ParameterReassignment
