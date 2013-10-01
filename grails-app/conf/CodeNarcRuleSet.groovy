@@ -91,6 +91,7 @@ ruleset {
     SynchronizedOnThis
     SynchronizedReadObjectMethod
     SystemRunFinalizersOnExit
+//    ThisReferenceEscapesConstructor
     ThreadGroup
     ThreadLocalNotStaticFinal
     ThreadYield
@@ -103,6 +104,7 @@ ruleset {
     ConfusingTernary
 //    CouldBeElvis
     HashtableIsObsolete
+//    IfStatementCouldBeTernary
 //    InvertedIfElse
     LongLiteralWithLowerCaseL
 //    ParameterReassignment
@@ -145,6 +147,7 @@ ruleset {
     CatchThrowable
     ConfusingClassNamedException
     ExceptionExtendsError
+    ExceptionNotThrown
     MissingNewInThrowStatement
 //    ReturnNullFromCatchBlock
     SwallowThreadDeath
@@ -162,8 +165,22 @@ ruleset {
     BracesForTryCatchFinally
     ClassJavadoc
 //    LineLength
+//    SpaceAfterCatch
+//    SpaceAfterClosingBrace
+//    SpaceAfterComma
+//    SpaceAfterFor
+//    SpaceAfterIf
+//    SpaceAfterOpeningBrace
+    SpaceAfterSemicolon
+    SpaceAfterSwitch
+//    SpaceAfterWhile
+//    SpaceAroundClosureArrow
+//    SpaceAroundOperator
+//    SpaceBeforeClosingBrace
+//    SpaceBeforeOpeningBrace
 
     // rulesets/generic.xml
+    IllegalClassMember
     IllegalClassReference
     IllegalPackageReference
     IllegalRegex
@@ -174,10 +191,14 @@ ruleset {
     // rulesets/grails.xml
 //    GrailsDomainHasEquals
 //    GrailsDomainHasToString
+    GrailsDuplicateMapping
 //    GrailsPublicControllerMethod
     GrailsServletContextReference
     GrailsSessionReference
 //    GrailsStatelessService
+    GrailsDuplicateConstraint
+    GrailsDomainWithServiceReference
+    GrailsDomainReservedSqlKeywordName
 
     // rulesets/groovyism.xml
 //    AssignCollectionSort
@@ -209,6 +230,7 @@ ruleset {
     GStringAsMapKey
 //    GetterMethodCouldBeProperty
     GroovyLangImmutable
+//    GStringExpressionWithinString
 //    UseCollectMany
     UseCollectNested
 
@@ -232,12 +254,15 @@ ruleset {
     JUnitAssertAlwaysFails
     JUnitAssertAlwaysSucceeds
     JUnitFailWithoutMessage
+//    JUnitLostTest
+    JUnitPublicField
     JUnitPublicNonTestMethod
 //    JUnitSetUpCallsSuper
 //    JUnitStyleAssertions
 //    JUnitTearDownCallsSuper
     JUnitTestMethodWithoutAssert
     JUnitUnnecessarySetUp
+    JUnitUnnecessaryThrowsException
     JUnitUnnecessaryTearDown
     SpockIgnoreRestUsed
     UnnecessaryFail
@@ -269,6 +294,7 @@ ruleset {
     // rulesets/naming.xml
     AbstractClassName
     ClassName
+    ClassNameSameAsFilename
 //    ConfusingMethodName
 //    FactoryMethodName
 //    FieldName // we are a bit lax about conventions here
@@ -292,12 +318,14 @@ ruleset {
     UnsafeArrayDeclaration
 
     // rulesets/serialization.xml
+    EnumCustomSerializationIgnored
     SerialPersistentFields
     SerialVersionUID
 //    SerializableClassMustDefineSerialVersionUID
 
     // rulesets/size.xml
 //    AbcComplexity
+//    AbcMetric
 //    ClassSize
 //    CrapMetric
     CyclomaticComplexity
