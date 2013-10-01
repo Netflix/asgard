@@ -270,10 +270,12 @@ class ApplicationController {
 
     // Security Group permission updating logic
 
-    private void updateSecurityEgress(UserContext userContext, SecurityGroup srcGroup, List<String> selectedGroups, Map portMap) {
+    private void updateSecurityEgress(UserContext userContext, SecurityGroup srcGroup, List<String> selectedGroups,
+                                      Map portMap) {
         awsEc2Service.getSecurityGroups(userContext).each { SecurityGroup targetGroup ->
-            boolean wantAccess = selectedGroups.any { it == targetGroup.groupName } && portMap[targetGroup.groupName] != ''
-            String  wantPorts = wantAccess ? portMap[targetGroup.groupName] : null
+            boolean wantAccess = selectedGroups.any { it == targetGroup.groupName } &&
+                    portMap[targetGroup.groupName] != ''
+            String wantPorts = wantAccess ? portMap[targetGroup.groupName] : null
             List<IpPermission> wantPerms = awsEc2Service.permissionsFromString(wantPorts)
             awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, srcGroup, wantPerms)
         }

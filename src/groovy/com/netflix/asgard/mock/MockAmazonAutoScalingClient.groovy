@@ -76,15 +76,17 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
         return jsonArray.collect {
             new AutoScalingGroup().withAutoScalingGroupName(it.autoScalingGroupName).
                     withDesiredCapacity(it.desiredCapacity).withDefaultCooldown(it.defaultCooldown).
-                    withMinSize(it.minSize).withMaxSize(it.maxSize).withHealthCheckGracePeriod(it.healthCheckGracePeriod).
+                    withMinSize(it.minSize).withMaxSize(it.maxSize).
+                    withHealthCheckGracePeriod(it.healthCheckGracePeriod).
                     withAvailabilityZones(it.availabilityZones as List).withHealthCheckType(it.healthCheckType).
                     withLaunchConfigurationName(it.launchConfigurationName).
                     withCreatedTime(ISODateTimeFormat.dateTimeParser().parseDateTime(it.createdTime).toDate()).
                     withLoadBalancerNames(it.loadBalancerNames as List).
                     withInstances(it.instances.collect { def inst ->
                         new Instance().withAvailabilityZone(inst.availabilityZone).withHealthStatus(inst.healthStatus).
-                        withInstanceId(inst.instanceId).withLaunchConfigurationName(inst.launchConfigurationName).
-                        withLifecycleState(inst.lifecycleState as String)
+                                withInstanceId(inst.instanceId).
+                                withLaunchConfigurationName(inst.launchConfigurationName).
+                                withLifecycleState(inst.lifecycleState as String)
                     }).
                     withSuspendedProcesses(it.suspendedProcesses.collect { def suspendedProcess ->
                         new SuspendedProcess().withProcessName(suspendedProcess.processName).
@@ -127,41 +129,49 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
         List<String> names = describeLaunchConfigurationsRequest.launchConfigurationNames
         if (names) {
             return new DescribeLaunchConfigurationsResult().withLaunchConfigurations(
-                    mockLaunchConfigs.findAll { it.launchConfigurationName in names } )
+                    mockLaunchConfigs.findAll { it.launchConfigurationName in names })
         }
         new DescribeLaunchConfigurationsResult().withLaunchConfigurations(mockLaunchConfigs)
     }
 
-    DescribeScalingProcessTypesResult describeScalingProcessTypes(DescribeScalingProcessTypesRequest describeScalingProcessTypesRequest) { null }
+    DescribeScalingProcessTypesResult describeScalingProcessTypes(
+            DescribeScalingProcessTypesRequest describeScalingProcessTypesRequest) { null }
 
-    DescribeAutoScalingGroupsResult describeAutoScalingGroups(DescribeAutoScalingGroupsRequest describeAutoScalingGroupsRequest) {
+    DescribeAutoScalingGroupsResult describeAutoScalingGroups(
+            DescribeAutoScalingGroupsRequest describeAutoScalingGroupsRequest) {
         List<String> names = describeAutoScalingGroupsRequest.autoScalingGroupNames
         if (names) {
             return new DescribeAutoScalingGroupsResult().withAutoScalingGroups(
-                    mockAsgs.findAll { it.autoScalingGroupName in names } )
+                    mockAsgs.findAll { it.autoScalingGroupName in names })
         }
         new DescribeAutoScalingGroupsResult().withAutoScalingGroups(mockAsgs)
     }
 
-    DescribePoliciesResult describePolicies(DescribePoliciesRequest describePoliciesRequest) { new DescribePoliciesResult() }
+    DescribePoliciesResult describePolicies(
+            DescribePoliciesRequest describePoliciesRequest) { new DescribePoliciesResult() }
 
     void enableMetricsCollection(EnableMetricsCollectionRequest enableMetricsCollectionRequest) { }
 
-    TerminateInstanceInAutoScalingGroupResult terminateInstanceInAutoScalingGroup(TerminateInstanceInAutoScalingGroupRequest terminateInstanceInAutoScalingGroupRequest) { null }
+    TerminateInstanceInAutoScalingGroupResult terminateInstanceInAutoScalingGroup(
+            TerminateInstanceInAutoScalingGroupRequest terminateInstanceInAutoScalingGroupRequest) { null }
 
-    DescribeScalingActivitiesResult describeScalingActivities(DescribeScalingActivitiesRequest describeScalingActivitiesRequest) { new DescribeScalingActivitiesResult() }
+    DescribeScalingActivitiesResult describeScalingActivities(
+            DescribeScalingActivitiesRequest describeScalingActivitiesRequest) { new DescribeScalingActivitiesResult() }
 
     void executePolicy(ExecutePolicyRequest executePolicyRequest) { }
 
-    DescribeMetricCollectionTypesResult describeMetricCollectionTypes(DescribeMetricCollectionTypesRequest describeMetricCollectionTypesRequest) { null }
+    DescribeMetricCollectionTypesResult describeMetricCollectionTypes(
+            DescribeMetricCollectionTypesRequest describeMetricCollectionTypesRequest) { null }
 
-    DescribeAdjustmentTypesResult describeAdjustmentTypes(DescribeAdjustmentTypesRequest describeAdjustmentTypesRequest) { null }
+    DescribeAdjustmentTypesResult describeAdjustmentTypes(
+            DescribeAdjustmentTypesRequest describeAdjustmentTypesRequest) { null }
 
     void deleteAutoScalingGroup(DeleteAutoScalingGroupRequest deleteAutoScalingGroupRequest) { }
 
     void createAutoScalingGroup(CreateAutoScalingGroupRequest createAutoScalingGroupRequest) { }
 
-    DescribeAutoScalingInstancesResult describeAutoScalingInstances(DescribeAutoScalingInstancesRequest describeAutoScalingInstancesRequest) { null }
+    DescribeAutoScalingInstancesResult describeAutoScalingInstances(
+            DescribeAutoScalingInstancesRequest describeAutoScalingInstancesRequest) { null }
 
     void deleteLaunchConfiguration(DeleteLaunchConfigurationRequest deleteLaunchConfigurationRequest) { }
 

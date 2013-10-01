@@ -143,6 +143,8 @@ class ClusterController {
 ${lastGroup.loadBalancerNames}"""
                     List<String> subnetPurposes = subnets.getPurposesForZones(availabilityZones*.zoneName,
                             SubnetTarget.EC2).sort()
+                    Map<String, Collection<String>> zonesByPurpose = subnets.groupZonesByPurpose(
+                            availabilityZones*.zoneName, SubnetTarget.EC2)
                     attributes.putAll([
                             cluster: cluster,
                             runningTasks: runningTasks,
@@ -152,7 +154,7 @@ ${lastGroup.loadBalancerNames}"""
                             recommendedNextStep: recommendedNextStep,
                             buildServer: configService.buildServerUrl,
                             vpcZoneIdentifier: lastGroup.vpcZoneIdentifier,
-                            zonesGroupedByPurpose: subnets.groupZonesByPurpose(availabilityZones*.zoneName, SubnetTarget.EC2),
+                            zonesGroupedByPurpose: zonesByPurpose,
                             selectedZones: selectedZones,
                             subnetPurposes: subnetPurposes,
                             subnetPurpose: subnetPurpose ?: null,
@@ -253,8 +255,8 @@ ${lastGroup.loadBalancerNames}"""
         AutoScalingGroupData lastGroup = cluster.last()
         String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
         boolean showAllImages = params.allImages ? true : false
-        Map<String, Object> attributes = pushService.prepareEdit(userContext, lastGroup.autoScalingGroupName, showAllImages,
-                actionName, Requests.ensureList(params.selectedSecurityGroups))
+        Map<String, Object> attributes = pushService.prepareEdit(userContext, lastGroup.autoScalingGroupName,
+                showAllImages, actionName, Requests.ensureList(params.selectedSecurityGroups))
         Collection<AvailabilityZone> availabilityZones = awsEc2Service.getAvailabilityZones(userContext)
         Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(availabilityZones,
                 Requests.ensureList(params.selectedZones), lastGroup)
@@ -417,8 +419,8 @@ Group: ${lastGroup.loadBalancerNames}"""
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
                 loadBalancerNames = loadBalancerNames ?: lastGroup.loadBalancerNames
-                vpcZoneIdentifier = vpcZoneIdentifier ?: subnets.constructNewVpcZoneIdentifierForZones(lastGroup.vpcZoneIdentifier,
-                        selectedZones)
+                vpcZoneIdentifier = vpcZoneIdentifier ?: subnets.constructNewVpcZoneIdentifierForZones(
+                        lastGroup.vpcZoneIdentifier, selectedZones)
             }
             log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers for next \
 Group: ${loadBalancerNames}"""
@@ -469,7 +471,8 @@ Group: ${loadBalancerNames}"""
         (azRebalance == null) ? lastRebalanceSuspended : (azRebalance == 'disabled')
     }
 
-    private String determineSpotPrice(LaunchConfiguration lastLaunchConfig, UserContext userContext, String instanceType) {
+    private String determineSpotPrice(LaunchConfiguration lastLaunchConfig, UserContext userContext,
+                                      String instanceType) {
         String spotPrice = null
         if (!params.pricing) {
             spotPrice = lastLaunchConfig.spotPrice

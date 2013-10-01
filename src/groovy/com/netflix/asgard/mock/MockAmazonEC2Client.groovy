@@ -337,11 +337,13 @@ class MockAmazonEC2Client extends AmazonEC2Client {
 
     void rebootInstances(RebootInstancesRequest rebootInstancesRequest) { }
 
-    DescribePlacementGroupsResult describePlacementGroups(DescribePlacementGroupsRequest describePlacementGroupsRequest) { null }
+    DescribePlacementGroupsResult describePlacementGroups(
+            DescribePlacementGroupsRequest describePlacementGroupsRequest) { null }
 
     RunInstancesResult runInstances(RunInstancesRequest runInstancesRequest) { null }
 
-    DescribeReservedInstancesResult describeReservedInstances(DescribeReservedInstancesRequest describeReservedInstancesRequest) { null }
+    DescribeReservedInstancesResult describeReservedInstances(
+            DescribeReservedInstancesRequest describeReservedInstancesRequest) { null }
 
     DescribeSubnetsResult describeSubnets(DescribeSubnetsRequest describeSubnetsRequest) { new DescribeSubnetsResult() }
 
@@ -420,7 +422,7 @@ class MockAmazonEC2Client extends AmazonEC2Client {
         String name = createSecurityGroupRequest.getGroupName()
         String description = createSecurityGroupRequest.getDescription()
         String vpcId = createSecurityGroupRequest.getVpcId()
-        SecurityGroup securityGroup = new SecurityGroup().withGroupName(name).withDescription(description).withVpcId(vpcId)
+        SecurityGroup securityGroup = new SecurityGroup(groupName: name, description: description, vpcId: vpcId)
         mockSecurityGroups.add(securityGroup)
         new CreateSecurityGroupResult().withGroupId(name)
     }
@@ -442,7 +444,8 @@ class MockAmazonEC2Client extends AmazonEC2Client {
 
     StopInstancesResult stopInstances(StopInstancesRequest stopInstancesRequest) { null }
 
-    DescribeCustomerGatewaysResult describeCustomerGateways(DescribeCustomerGatewaysRequest describeCustomerGatewaysRequest) { null }
+    DescribeCustomerGatewaysResult describeCustomerGateways(
+            DescribeCustomerGatewaysRequest describeCustomerGatewaysRequest) { null }
 
     ImportKeyPairResult importKeyPair(ImportKeyPairRequest importKeyPairRequest) { null }
 
@@ -482,7 +485,8 @@ class MockAmazonEC2Client extends AmazonEC2Client {
 
     void deregisterImage(DeregisterImageRequest deregisterImageRequest) { }
 
-    DescribeSpotDatafeedSubscriptionResult describeSpotDatafeedSubscription(DescribeSpotDatafeedSubscriptionRequest describeSpotDatafeedSubscriptionRequest) { null }
+    DescribeSpotDatafeedSubscriptionResult describeSpotDatafeedSubscription(
+            DescribeSpotDatafeedSubscriptionRequest describeSpotDatafeedSubscriptionRequest) { null }
 
     void deleteTags(DeleteTagsRequest deleteTagsRequest) { }
 
@@ -496,19 +500,22 @@ class MockAmazonEC2Client extends AmazonEC2Client {
 
     void deleteVpnGateway(DeleteVpnGatewayRequest deleteVpnGatewayRequest) { }
 
-    CancelSpotInstanceRequestsResult cancelSpotInstanceRequests(CancelSpotInstanceRequestsRequest cancelSpotInstanceRequestsRequest) { null }
+    CancelSpotInstanceRequestsResult cancelSpotInstanceRequests(
+            CancelSpotInstanceRequestsRequest cancelSpotInstanceRequestsRequest) { null }
 
     AttachVolumeResult attachVolume(AttachVolumeRequest attachVolumeRequest) { null }
 
     DescribeLicensesResult describeLicenses(DescribeLicensesRequest describeLicensesRequest) { null }
 
-    PurchaseReservedInstancesOfferingResult purchaseReservedInstancesOffering(PurchaseReservedInstancesOfferingRequest purchaseReservedInstancesOfferingRequest) { null }
+    PurchaseReservedInstancesOfferingResult purchaseReservedInstancesOffering(
+            PurchaseReservedInstancesOfferingRequest purchaseReservedInstancesOfferingRequest) { null }
 
     void activateLicense(ActivateLicenseRequest activateLicenseRequest) { }
 
     void resetImageAttribute(ResetImageAttributeRequest resetImageAttributeRequest) { }
 
-    DescribeVpnConnectionsResult describeVpnConnections(DescribeVpnConnectionsRequest describeVpnConnectionsRequest) { null }
+    DescribeVpnConnectionsResult describeVpnConnections(
+            DescribeVpnConnectionsRequest describeVpnConnectionsRequest) { null }
 
     CreateSnapshotResult createSnapshot(CreateSnapshotRequest createSnapshotRequest) { null }
 
@@ -524,7 +531,8 @@ class MockAmazonEC2Client extends AmazonEC2Client {
 
     void deactivateLicense(DeactivateLicenseRequest deactivateLicenseRequest) { }
 
-    DescribeSnapshotAttributeResult describeSnapshotAttribute(DescribeSnapshotAttributeRequest describeSnapshotAttributeRequest) { null }
+    DescribeSnapshotAttributeResult describeSnapshotAttribute(
+            DescribeSnapshotAttributeRequest describeSnapshotAttributeRequest) { null }
 
     void deleteCustomerGateway(DeleteCustomerGatewayRequest deleteCustomerGatewayRequest) { }
 
@@ -540,7 +548,8 @@ class MockAmazonEC2Client extends AmazonEC2Client {
         new DescribeImageAttributeResult().withImageAttribute(imageAttribute)
     }
 
-    ConfirmProductInstanceResult confirmProductInstance(ConfirmProductInstanceRequest confirmProductInstanceRequest) { null }
+    ConfirmProductInstanceResult confirmProductInstance(
+            ConfirmProductInstanceRequest confirmProductInstanceRequest) { null }
 
     CreateVolumeResult createVolume(CreateVolumeRequest createVolumeRequest) { null }
 
@@ -585,11 +594,13 @@ class MockAmazonEC2Client extends AmazonEC2Client {
 
     void releaseAddress(ReleaseAddressRequest releaseAddressRequest) { }
 
-    CreateCustomerGatewayResult createCustomerGateway(CreateCustomerGatewayRequest createCustomerGatewayRequest) { null }
+    CreateCustomerGatewayResult createCustomerGateway(
+            CreateCustomerGatewayRequest createCustomerGatewayRequest) { null }
 
     void resetInstanceAttribute(ResetInstanceAttributeRequest resetInstanceAttributeRequest) { }
 
-    CreateSpotDatafeedSubscriptionResult createSpotDatafeedSubscription(CreateSpotDatafeedSubscriptionRequest createSpotDatafeedSubscriptionRequest) { null }
+    CreateSpotDatafeedSubscriptionResult createSpotDatafeedSubscription(
+            CreateSpotDatafeedSubscriptionRequest createSpotDatafeedSubscriptionRequest) { null }
 
     CreateKeyPairResult createKeyPair(CreateKeyPairRequest createKeyPairRequest) { null }
 
@@ -603,7 +614,8 @@ class MockAmazonEC2Client extends AmazonEC2Client {
 
     CreateVpnConnectionResult createVpnConnection(CreateVpnConnectionRequest createVpnConnectionRequest) { null }
 
-    DescribeInstanceAttributeResult describeInstanceAttribute(DescribeInstanceAttributeRequest describeInstanceAttributeRequest) {
+    DescribeInstanceAttributeResult describeInstanceAttribute(
+            DescribeInstanceAttributeRequest describeInstanceAttributeRequest) {
         new DescribeInstanceAttributeResult().withInstanceAttribute(new InstanceAttribute().withUserData(null))
     }
 

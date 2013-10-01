@@ -40,7 +40,7 @@ class AwsResultsRetrieverSpec extends Specification {
                 request.withMaxResults(Math.min(10, remaining))
             }
         }
-        DescribeSpotPriceHistoryRequest request = new DescribeSpotPriceHistoryRequest().withAvailabilityZone('us-east-7')
+        DescribeSpotPriceHistoryRequest request = new DescribeSpotPriceHistoryRequest(availabilityZone: 'us-east-7')
         List<SpotPrice> actual = retriever.retrieve(Region.US_EAST_1, request)
 
         then:
@@ -99,7 +99,7 @@ class AwsResultsRetrieverSpec extends Specification {
                 request.withMaxResults(Math.min(10, remaining))
             }
         }
-        DescribeSpotPriceHistoryRequest request = new DescribeSpotPriceHistoryRequest().withAvailabilityZone('us-east-7')
+        DescribeSpotPriceHistoryRequest request = new DescribeSpotPriceHistoryRequest(availabilityZone: 'us-east-7')
         List<SpotPrice> actual = retriever.retrieve(Region.US_EAST_1, request)
 
         then:
@@ -138,7 +138,7 @@ class AwsResultsRetrieverSpec extends Specification {
                 request.withMaxResults(Math.min(3, remaining))
             }
         }
-        DescribeSpotPriceHistoryRequest request = new DescribeSpotPriceHistoryRequest().withAvailabilityZone('us-east-7')
+        DescribeSpotPriceHistoryRequest request = new DescribeSpotPriceHistoryRequest(availabilityZone: 'us-east-7')
         List<SpotPrice> actual = retriever.retrieve(Region.US_EAST_1, request)
 
         then:
@@ -181,7 +181,7 @@ class AwsResultsRetrieverSpec extends Specification {
                 result.spotPriceHistory
             }
         }
-        DescribeSpotPriceHistoryRequest request = new DescribeSpotPriceHistoryRequest().withAvailabilityZone('us-east-7')
+        DescribeSpotPriceHistoryRequest request = new DescribeSpotPriceHistoryRequest(availabilityZone: 'us-east-7')
         List<SpotPrice> actual = retriever.retrieve(Region.US_EAST_1, request)
 
         then:
