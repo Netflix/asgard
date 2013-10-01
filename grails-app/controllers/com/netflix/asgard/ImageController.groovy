@@ -248,7 +248,7 @@ class ImageController {
     }
 
     /**
-     * Adds or replaces a tags on a set of images in batch. Expects the following params:
+     * Adds or replaces a tag on a set of images in batch. Expects the following params:
      *         imageIds - comma separated list of image ids to add or replace tags on
      *         name - the key of the tag to add or replace
      *         value - the value of the tag to add or replace

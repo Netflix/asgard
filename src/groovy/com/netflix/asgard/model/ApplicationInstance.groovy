@@ -76,14 +76,13 @@ class ApplicationInstance {
     static Map parseKeyValue(xml) {
         Map map = [:]
         xml.'*'.each {
-            def key = it.name().trim()
+            String key = it.name().trim()
             if (!(key in ["metadata", "dataCenterInfo", "leaseInfo"])) {
-                def value = it.text()
+                String value = it.text()
                 if (value.isLong() && value.toLong() > SO_BIG_IT_MUST_BE_AN_EPOCH_TIMESTAMP) {
                     value = new DateTime(value.toLong()).toString()
                 }
                 map[key] = value
-                //println "      " + key + ": " + value
             }
         }
         map
