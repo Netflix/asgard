@@ -168,7 +168,7 @@ ruleset {
     SpaceAfterCatch
 //    SpaceAfterClosingBrace
     SpaceAfterComma
-//    SpaceAfterFor
+    SpaceAfterFor
 //    SpaceAfterIf
 //    SpaceAfterOpeningBrace
     SpaceAfterSemicolon
