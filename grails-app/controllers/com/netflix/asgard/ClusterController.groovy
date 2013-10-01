@@ -529,8 +529,8 @@ Group: ${loadBalancerNames}"""
         String result = mergedInstance?.getFieldValue(field)
         if (!result) {
             response.status = 404
-            if (!cluster) { result = "No cluster found with name '$name'"}
-            else if (!mergedInstance) { result = "No instances found for cluster '$name'"}
+            if (!cluster) { result = "No cluster found with name '$name'" }
+            else if (!mergedInstance) { result = "No instances found for cluster '$name'" }
             else { result = "'$field' not found. Valid fields: ${mergedInstance.listFieldNames()}" }
         }
         render result

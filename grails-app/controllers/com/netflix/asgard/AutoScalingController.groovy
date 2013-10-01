@@ -514,8 +514,8 @@ class AutoScalingController {
         String result = mergedInstance?.getFieldValue(field)
         if (!result) {
             response.status = 404
-            if (!group) { result = "No auto scaling group found with name '$name'"}
-            else if (!mergedInstance) { result = "No instances found for auto scaling group '$name'"}
+            if (!group) { result = "No auto scaling group found with name '$name'" }
+            else if (!mergedInstance) { result = "No instances found for auto scaling group '$name'" }
             else { result = "'$field' not found. Valid fields: ${mergedInstance.listFieldNames()}" }
         }
         render result

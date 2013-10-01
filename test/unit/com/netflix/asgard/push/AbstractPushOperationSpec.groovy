@@ -25,7 +25,7 @@ import spock.lang.Specification
 class AbstractPushOperationSpec extends Specification {
 
     def awsAutoScalingService = Mock(AwsAutoScalingService)
-    AbstractPushOperation pushOperation = new AbstractPushOperation() {}
+    AbstractPushOperation pushOperation = new AbstractPushOperation() { }
     UserContext userContext = Mocks.userContext()
 
     void setup() {

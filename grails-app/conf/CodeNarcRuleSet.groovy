@@ -176,7 +176,7 @@ ruleset {
     SpaceAfterWhile
     SpaceAroundClosureArrow
 //    SpaceAroundOperator
-//    SpaceBeforeClosingBrace
+    SpaceBeforeClosingBrace
 //    SpaceBeforeOpeningBrace
 
     // rulesets/generic.xml

@@ -174,7 +174,7 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
                 'i-10000001': true,
                 'i-30000001': true,
                 'i-30000002': false
-        ].collect { id, url -> new InstanceHealth(id, url)}
+        ].collect { id, url -> new InstanceHealth(id, url) }
     }
 
     def 'should construct Stack'() {

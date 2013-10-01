@@ -175,7 +175,7 @@ class SecurityController {
 
     private void updateSecurityIngress(UserContext userContext, SecurityGroup targetGroup, List<String> selectedGroups, Map portMap) {
         awsEc2Service.getSecurityGroups(userContext).each {srcGroup ->
-            boolean wantAccess = selectedGroups.any {it == srcGroup.groupName} && portMap[srcGroup.groupName] != ''
+            boolean wantAccess = selectedGroups.any { it == srcGroup.groupName } && portMap[srcGroup.groupName] != ''
             String wantPorts = wantAccess ? portMap[srcGroup.groupName] : null
             List<IpPermission> wantPerms = awsEc2Service.permissionsFromString(wantPorts)
             awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, srcGroup, wantPerms)

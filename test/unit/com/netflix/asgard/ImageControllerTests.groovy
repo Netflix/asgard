@@ -26,7 +26,7 @@ class ImageControllerTests {
 
     @Before
     void setUp() {
-        Mocks.createDynamicMethods() 
+        Mocks.createDynamicMethods()
         TestUtils.setUpMockRequest()
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
         controller.awsEc2Service = Mocks.awsEc2Service()
@@ -49,14 +49,14 @@ class ImageControllerTests {
 
     void testMassDeleteDryRun() {
         controller.params.mode = 'DRYRUN'
-        controller.imageService = [massDelete: {UserContext userContext, MassDeleteRequest request -> [new Image()]}]
+        controller.imageService = [massDelete: { UserContext userContext, MassDeleteRequest request -> [new Image()] }]
         controller.massDelete()
         assert controller.response.contentAsString =~ 'Dry run mode. If executed, this job would delete 1 images in us-east-1:'
     }
 
     void testMassDeleteExecute() {
         controller.params.mode = 'EXECUTE'
-        controller.imageService = [massDelete: {UserContext userContext, MassDeleteRequest request -> [new Image()]}]
+        controller.imageService = [massDelete: { UserContext userContext, MassDeleteRequest request -> [new Image()] }]
         controller.massDelete()
         assert controller.response.contentAsString =~ 'Started deleting the following 1 images in us-east-1:'
     }

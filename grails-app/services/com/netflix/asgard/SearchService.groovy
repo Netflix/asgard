@@ -117,7 +117,7 @@ class SearchService implements InitializingBean {
         Collection<SearchResultItem> results = []
         if (!guessedType) {
             AppRegistration app = applicationService.getRegisteredApplication(userContext, term, From.CACHE)
-            if (app) { results << new SearchResultItem(EntityType.application, region, app)}
+            if (app) { results << new SearchResultItem(EntityType.application, region, app) }
         }
         results
     }

@@ -87,7 +87,7 @@ class DbSecurityController {
         } else {
             return [
                 'group' : group,
-                'allEC2Groups' : awsEc2Service.getEffectiveSecurityGroups(userContext).collect{it.groupName},
+                'allEC2Groups' : awsEc2Service.getEffectiveSecurityGroups(userContext).collect { it.groupName },
                 'selectedEC2Groups' : group.getEC2SecurityGroups().collect{it.getEC2SecurityGroupName()}
             ]
         }
@@ -123,8 +123,8 @@ class DbSecurityController {
     }
 
     private void updateDBSecurityIngress(UserContext userContext, DBSecurityGroup targetGroup, List<String> selectedGroups, List<String> ipRanges) {
-        List<String> originalGroups = targetGroup.getEC2SecurityGroups().collect{it.getEC2SecurityGroupName()}
-        List<String> originalIPRanges = targetGroup.getIPRanges().collect{it.getCIDRIP()}
+        List<String> originalGroups = targetGroup.getEC2SecurityGroups().collect { it.getEC2SecurityGroupName() }
+        List<String> originalIPRanges = targetGroup.getIPRanges().collect { it.getCIDRIP() }
         List<String> newGroups = selectedGroups - originalGroups
         List<String> deletedGroups = originalGroups - selectedGroups
         List<String> newIPRanges = ipRanges - originalIPRanges

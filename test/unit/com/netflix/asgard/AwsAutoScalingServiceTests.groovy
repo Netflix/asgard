@@ -26,14 +26,14 @@ class AwsAutoScalingServiceTests extends GroovyTestCase {
     UserContext userContext = Mocks.userContext()
 
     void setUp() {
-        Mocks.createDynamicMethods() 
+        Mocks.createDynamicMethods()
     }
 
     void testGetClusters() {
         AwsAutoScalingService asgService = Mocks.awsAutoScalingService()
         Collection<Cluster> clusters = asgService.getClusters(userContext)
         assert clusters.size() > 1
-        assert clusters.any { 'akms' == it.name}
+        assert clusters.any { 'akms' == it.name }
     }
 
     void testGetCluster() {

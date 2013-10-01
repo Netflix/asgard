@@ -161,7 +161,7 @@ class ImageController {
     def launch = {
 
         String message = ''
-        Closure output = {}
+        Closure output = { }
         List<String> instanceIds = []
         List<String> spotInstanceRequestIds = []
 

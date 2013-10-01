@@ -39,7 +39,7 @@ class DiscoveryService implements CacheInitializer {
     final Integer MILLIS_DELAY_BETWEEN_DISCOVERY_CALLS = 700
 
     void initializeCaches() {
-        caches.allApplicationInstances.ensureSetUp({ Region region -> retrieveInstances(region) }, {},
+        caches.allApplicationInstances.ensureSetUp({ Region region -> retrieveInstances(region) }, { },
                 { Region region -> caches.allEurekaAddresses.by(region).filled }
         )
     }

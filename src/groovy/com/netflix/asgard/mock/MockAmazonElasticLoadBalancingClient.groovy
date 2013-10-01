@@ -135,7 +135,7 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
 
     DescribeInstanceHealthResult describeInstanceHealth(DescribeInstanceHealthRequest describeInstanceHealthRequest) {
         String loadBalancerName = describeInstanceHealthRequest.loadBalancerName
-        LoadBalancerDescription loadBalancer = mockLoadBalancers.find { it.loadBalancerName == loadBalancerName}
+        LoadBalancerDescription loadBalancer = mockLoadBalancers.find { it.loadBalancerName == loadBalancerName }
         Collection<InstanceState> instanceStates = loadBalancer.instances.collect {
             new InstanceState().withInstanceId(it.instanceId).withState('InService')
         }

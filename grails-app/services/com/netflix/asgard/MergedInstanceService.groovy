@@ -56,7 +56,7 @@ class MergedInstanceService {
     MergedInstance findHealthyInstance(UserContext userContext, List<String> instanceIds) {
         if (!instanceIds) { return null }
         List<String> runningInstanceIds = awsEc2Service.getInstancesByIds(userContext, instanceIds).
-                findAll { it.state.name == 'running'}*.instanceId
+                findAll { it.state.name == 'running' }*.instanceId
         List<MergedInstance> mergedInstances = getMergedInstancesByIds(userContext, runningInstanceIds)
         List<MergedInstance> upMergedInstances = mergedInstances.findAll { it.status == 'UP' }
         upMergedInstances ? upMergedInstances[0] : mergedInstances[0]

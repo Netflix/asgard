@@ -18,4 +18,4 @@ package com.netflix.asgard.model
 /**
  * The status of an instance in Eureka
  */
-enum EurekaStatus {UP, DOWN, OUT_OF_SERVICE}
+enum EurekaStatus { UP, DOWN, OUT_OF_SERVICE }

@@ -119,7 +119,7 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
         final BeanState templateDbInstanceState = BeanState.ofSourceBean(templateDbInstance)
         final CreateDBInstanceRequest request = templateDbInstanceState.injectState(new CreateDBInstanceRequest())
         request.masterUserPassword = masterUserPassword
-        if (port) {request.setPort(port)}
+        if (port) { request.setPort(port) }
         taskService.runTask(userContext, "Creating DB instance '${templateDbInstance.DBInstanceIdentifier}'", { task ->
             final DBInstance createdInstance = awsClient.by(userContext.region).createDBInstance(request)
             caches.allDBInstances.by(userContext.region).put(createdInstance.getDBInstanceIdentifier(), createdInstance)

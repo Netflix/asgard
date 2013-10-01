@@ -429,7 +429,7 @@ class MockAmazonEC2Client extends AmazonEC2Client {
         List<String> spotInstanceRequestIds = request.spotInstanceRequestIds
         if (spotInstanceRequestIds) {
             return new DescribeSpotInstanceRequestsResult().withSpotInstanceRequests(
-                    mockSpotInstanceRequests.findAll { it.spotInstanceRequestId in spotInstanceRequestIds} )
+                    mockSpotInstanceRequests.findAll { it.spotInstanceRequestId in spotInstanceRequestIds } )
         }
         new DescribeSpotInstanceRequestsResult().withSpotInstanceRequests(mockSpotInstanceRequests)
     }
@@ -552,7 +552,7 @@ class MockAmazonEC2Client extends AmazonEC2Client {
             DescribeReservedInstancesOfferingsRequest describeReservedInstancesOfferingsRequest) {
         new DescribeReservedInstancesOfferingsResult().withReservedInstancesOfferings(['c1.medium', 'c1.xlarge',
                 'cc1.4xlarge', 'cg1.4xlarge', 'm1.large', 'm1.small', 'm1.xlarge', 'm2.2xlarge', 'm2.4xlarge',
-                'm2.xlarge', 't1.micro'].collect { new ReservedInstancesOffering().withInstanceType(it)} )
+                'm2.xlarge', 't1.micro'].collect { new ReservedInstancesOffering().withInstanceType(it) } )
     }
 
     DescribeVolumesResult describeVolumes(DescribeVolumesRequest describeVolumesRequest) {

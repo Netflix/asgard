@@ -91,7 +91,7 @@ class Requests {
             output += "${spaces}]\n"
         } else if (value instanceof Collection || value?.class?.array) {
             output += '[\n'
-            value.each { it -> output += prettyPrint(it, indent + 5)}
+            value.each { it -> output += prettyPrint(it, indent + 5) }
             output += "${spaces}]\n"
         } else {
             if (value?.hasProperty('name') && value?.hasProperty('value')) {
