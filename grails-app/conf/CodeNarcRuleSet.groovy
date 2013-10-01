@@ -348,7 +348,7 @@ ruleset {
     UnnecessaryCollectionCall
     UnnecessaryConstructor
     UnnecessaryDefInFieldDeclaration
-//    UnnecessaryDefInMethodDeclaration
+    UnnecessaryDefInMethodDeclaration
 //    UnnecessaryDefInVariableDeclaration
 //    UnnecessaryDotClass
     UnnecessaryDoubleInstantiation

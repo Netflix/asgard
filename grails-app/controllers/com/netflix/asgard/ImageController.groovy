@@ -257,7 +257,7 @@ class ImageController {
         performAddTags(params.imageIds?.tokenize(','))
     }
 
-    private def performAddTags(Collection<String> imageIds) {
+    private performAddTags(Collection<String> imageIds) {
         String name = params.name
         String value = params.value
         Check.notEmpty(name, 'name')

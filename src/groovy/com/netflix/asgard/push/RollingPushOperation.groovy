@@ -360,7 +360,7 @@ class RollingPushOperation extends AbstractPushOperation {
         return "${pushStatus.countReadyNewInstances()} of ${options.relaunchCount} instance relaunches done."
     }
 
-    private def startSnoozing(InstanceMetaData instanceInfo) {
+    private void startSnoozing(InstanceMetaData instanceInfo) {
         if (options.shouldWaitAfterBoot()) {
             task.log("Waiting ${options.afterBootWait} second${options.afterBootWait == 1 ? "" : "s"} for ${options.appName} on ${instanceInfo.id} to be ready.")
         }

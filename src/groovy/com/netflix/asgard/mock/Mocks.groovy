@@ -199,7 +199,7 @@ class Mocks {
         applicationService
     }
 
-    private static def item(String name) {
+    private static Item item(String name) {
         new Item().withName(name).withAttributes(
                 [new Attribute('createTs', '1279755598817'), new Attribute('updateTs', '1279755598817')])
     }
