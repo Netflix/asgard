@@ -88,7 +88,7 @@ class RollingPushOperation extends AbstractPushOperation {
     }
 
     List<com.amazonaws.services.ec2.model.Instance> getSortedEc2Instances(List<Instance> asgInstances) {
-        Closure sortAlgorithm = options.newestFirst ? { a,b -> b.launchTime <=> a.launchTime } : { it.launchTime }
+        Closure sortAlgorithm = options.newestFirst ? { a, b -> b.launchTime <=> a.launchTime } : { it.launchTime }
         UserContext userContext = options.common.userContext
         List<com.amazonaws.services.ec2.model.Instance> ec2Instances =
                 asgInstances.collect { awsEc2Service.getInstance(userContext, it.instanceId) }

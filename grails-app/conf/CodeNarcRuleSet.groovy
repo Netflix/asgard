@@ -167,7 +167,7 @@ ruleset {
 //    LineLength
     SpaceAfterCatch
 //    SpaceAfterClosingBrace
-//    SpaceAfterComma
+    SpaceAfterComma
 //    SpaceAfterFor
 //    SpaceAfterIf
 //    SpaceAfterOpeningBrace
