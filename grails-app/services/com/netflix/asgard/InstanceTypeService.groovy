@@ -92,7 +92,7 @@ class InstanceTypeService implements CacheInitializer {
             BigDecimal aPrice = a.linuxOnDemandPrice
             BigDecimal bPrice = b.linuxOnDemandPrice
             if (aPrice == null) {
-                return bPrice == null ? a.name.compareTo(b.name) : 1 // b goes first when a is the only null price
+                return bPrice == null ? a.name <=> b.name : 1 // b goes first when a is the only null price
             } else if (bPrice == null) {
                 return -1 // a goes first when b is the only null price
             }

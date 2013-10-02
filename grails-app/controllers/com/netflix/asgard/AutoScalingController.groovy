@@ -60,7 +60,7 @@ class AutoScalingController {
     def spotInstanceRequestService
     def stackService
 
-    def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', postpone: 'POST', pushStart: 'POST']
+    static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', postpone: 'POST', pushStart: 'POST']
 
     def index = { redirect(action: 'list', params: params) }
 
@@ -83,7 +83,7 @@ class AutoScalingController {
         // Determine which app names are valid based on ASG names
         List<String> registeredAppNamesList = applicationService.getRegisteredApplications(userContext)*.name
         Set<String> registeredAppNames = new HashSet<String>(registeredAppNamesList)
-        Set<String> groupsWithValidAppNames = new HashSet<String>()
+        Set<String> groupsWithValidAppNames = [] as Set
         groups*.autoScalingGroupName.each { String asgName ->
             if (groupNamesToAppNames[asgName] in registeredAppNames) {
                 groupsWithValidAppNames << asgName

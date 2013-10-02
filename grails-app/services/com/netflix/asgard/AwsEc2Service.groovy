@@ -274,7 +274,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     Map<String, Image> mapImageIdsToImagesForMergedInstances(UserContext userContext,
                                                              Collection<MergedInstance> mergedInstances) {
-        Map<String, Image> imageIdsToImages = new HashMap<String, Image>()
+        Map<String, Image> imageIdsToImages = [:]
         for (MergedInstance mergedInstance : mergedInstances) {
             String imageId = mergedInstance?.amiId
             if (!(imageId in imageIdsToImages.keySet())) {

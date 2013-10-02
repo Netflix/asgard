@@ -78,16 +78,16 @@ class MonkeyPatcherService implements InitializingBean {
         ScalingPolicy.mixin ScalingPolicyMixin
         MetricAlarm.mixin MetricAlarmMixin
 
-        if (!(AutoScalingGroup.class.methods as List).contains("findInServiceInstanceIds")) {
+        if (!(AutoScalingGroup.methods as List).contains("findInServiceInstanceIds")) {
             AutoScalingGroup.metaClass.findInServiceInstanceIds = { ->
                 new TreeSet<String>(delegate.instances.findAll { it.lifecycleState == 'InService' }.collect { it.instanceId })
             }
         }
         // autoscaling Instances
-        if (!(com.amazonaws.services.autoscaling.model.Instance.class.methods as List).contains("copy")) {
+        if (!(com.amazonaws.services.autoscaling.model.Instance.methods as List).contains("copy")) {
             com.amazonaws.services.autoscaling.model.Instance.metaClass.copy = { -> Meta.copy(delegate) }
         }
-        if (!(AutoScalingGroup.class.methods as List).contains("copy")) {
+        if (!(AutoScalingGroup.methods as List).contains("copy")) {
             AutoScalingGroup.metaClass.copy = { ->
                 AutoScalingGroup asgCopy = Meta.copy(delegate as AutoScalingGroup)
                 // Deep copy the instances
@@ -101,7 +101,7 @@ class MonkeyPatcherService implements InitializingBean {
     }
 
     private void monkeyPatchInstance() {
-        if (!(Instance.class.methods as List).contains('getTag')) {
+        if (!(Instance.methods as List).contains('getTag')) {
             Instance.metaClass['getTag'] = { String key -> delegate.tags?.find({ it.key == key })?.value }
         }
         addInstanceTagGetterMethod('getApp', 'app')
@@ -109,35 +109,35 @@ class MonkeyPatcherService implements InitializingBean {
     }
 
     private void monkeyPatchImage() {
-        if (!(Image.class.methods as List).contains('getTag')) {
+        if (!(Image.methods as List).contains('getTag')) {
             Image.metaClass['getTag'] = { String key -> delegate.tags?.find({ it.key == key })?.value }
         }
         addImageTagGetterMethod('getCreator', 'creator')
         addImageTagGetterMethod('getCreationTime', 'creation_time')
         addImageTagGetterMethod('getAppVersion', 'appversion')
         addImageTagGetterMethod('getLastReferencedTime', 'last_referenced_time')
-        if (!(Image.class.methods as List).contains('getParsedAppVersion')) {
+        if (!(Image.methods as List).contains('getParsedAppVersion')) {
             Image.metaClass['getParsedAppVersion'] = { -> Relationships.dissectAppVersion(delegate.appVersion) }
         }
-        if (!(Image.class.methods as List).contains('getPackageName')) {
+        if (!(Image.methods as List).contains('getPackageName')) {
             Image.metaClass['getPackageName'] = { -> Relationships.packageFromAppVersion(delegate.appVersion) }
         }
-        if (!(Image.class.methods as List).contains('getBaseAmiId')) {
+        if (!(Image.methods as List).contains('getBaseAmiId')) {
             Image.metaClass['getBaseAmiId'] = { -> Relationships.baseAmiIdFromDescription(delegate.description) }
         }
-        if (!(Image.class.methods as List).contains('getBaseAmiName')) {
+        if (!(Image.methods as List).contains('getBaseAmiName')) {
             Image.metaClass['getBaseAmiName'] = { -> Relationships.baseAmiNameFromDescription(delegate.description) }
         }
-        if (!(Image.class.methods as List).contains('getBaseAmiDate')) {
+        if (!(Image.methods as List).contains('getBaseAmiDate')) {
             Image.metaClass['getBaseAmiDate'] = { -> Relationships.baseAmiDateFromDescription(delegate.description) }
         }
-        if (!(Image.class.methods as List).contains('isKeepForever')) {
+        if (!(Image.methods as List).contains('isKeepForever')) {
             Image.metaClass['isKeepForever'] = { -> delegate.getTag('expiration_time') == 'never' }
         }
     }
 
     private void monkeyPatchAvailabilityZone() {
-        if (!(AvailabilityZone.class.methods as List).contains("shouldBePreselected")) {
+        if (!(AvailabilityZone.methods as List).contains("shouldBePreselected")) {
             List<String> discouragedZones = grailsApplication?.config?.cloud?.discouragedAvailabilityZones ?: []
             AvailabilityZone.metaClass.shouldBePreselected = { selectedZones, autoScalingGroup ->
                 String zoneName = delegate.getZoneName()
@@ -153,22 +153,22 @@ class MonkeyPatcherService implements InitializingBean {
     }
 
     private void monkeyPatchAutoScalingGroup() {
-        if (!(AutoScalingGroup.class.methods as List).contains("getAppName")) {
+        if (!(AutoScalingGroup.methods as List).contains("getAppName")) {
             AutoScalingGroup.metaClass.getAppName = { ->
                 Relationships.appNameFromGroupName(delegate.autoScalingGroupName)
             }
         }
-        if (!(AutoScalingGroup.class.methods as List).contains("getClusterName")) {
+        if (!(AutoScalingGroup.methods as List).contains("getClusterName")) {
             AutoScalingGroup.metaClass.getClusterName = { ->
                 Relationships.clusterFromGroupName(delegate.autoScalingGroupName)
             }
         }
-        if (!(AutoScalingGroup.class.methods as List).contains("getStack")) {
+        if (!(AutoScalingGroup.methods as List).contains("getStack")) {
             AutoScalingGroup.metaClass.getStack = { ->
                 Relationships.stackNameFromGroupName(delegate.autoScalingGroupName)
             }
         }
-        if (!(AutoScalingGroup.class.methods as List).contains("getVariables")) {
+        if (!(AutoScalingGroup.methods as List).contains("getVariables")) {
             AutoScalingGroup.metaClass.getVariables = { ->
                 Relationships.parts(delegate.autoScalingGroupName as String)
             }
@@ -176,22 +176,22 @@ class MonkeyPatcherService implements InitializingBean {
     }
 
     private void monkeyPatchSimpleDbClasses() {
-        if (!(Item.class.methods as List).contains('getAttribute')) {
+        if (!(Item.methods as List).contains('getAttribute')) {
             Item.metaClass.getAttribute = { String name ->
                 delegate.attributes.find { Attribute attr -> attr.name == name }
             }
         }
-        if (!(DomainMetadataResult.class.methods as List).contains("getItemNamesSize")) {
+        if (!(DomainMetadataResult.methods as List).contains("getItemNamesSize")) {
             DomainMetadataResult.metaClass.getItemNamesSize = { ->
                 FileUtils.byteCountToDisplaySize(delegate.itemNamesSizeBytes as Integer)
             }
         }
-        if (!(DomainMetadataResult.class.methods as List).contains("getAttributeNamesSize")) {
+        if (!(DomainMetadataResult.methods as List).contains("getAttributeNamesSize")) {
             DomainMetadataResult.metaClass.getAttributeNamesSize = { ->
                 FileUtils.byteCountToDisplaySize(delegate.attributeNamesSizeBytes as Integer)
             }
         }
-        if (!(DomainMetadataResult.class.methods as List).contains("getAttributeValuesSize")) {
+        if (!(DomainMetadataResult.methods as List).contains("getAttributeValuesSize")) {
             DomainMetadataResult.metaClass.getAttributeValuesSize = { ->
                 FileUtils.byteCountToDisplaySize(delegate.attributeValuesSizeBytes as Integer)
             }
@@ -199,7 +199,7 @@ class MonkeyPatcherService implements InitializingBean {
     }
 
     private void monkeyPatchLoadBalancerDescription() {
-        if (!(LoadBalancerDescription.class.methods as List).contains("getTargetTruncated")) {
+        if (!(LoadBalancerDescription.methods as List).contains("getTargetTruncated")) {
             LoadBalancerDescription.metaClass.getTargetTruncated = { ->
                 StringUtils.abbreviate(delegate.healthCheck.target, 25)
             }
@@ -207,13 +207,13 @@ class MonkeyPatcherService implements InitializingBean {
     }
 
     private void addImageTagGetterMethod(String getter, String key) {
-        if (!(Image.class.methods as List).contains(getter)) {
+        if (!(Image.methods as List).contains(getter)) {
             Image.metaClass[getter] = { -> delegate.getTag(key) }
         }
     }
 
     private void addInstanceTagGetterMethod(String getter, String key) {
-        if (!(Instance.class.methods as List).contains(getter)) {
+        if (!(Instance.methods as List).contains(getter)) {
             Instance.metaClass[getter] = { -> delegate.getTag(key) }
         }
     }

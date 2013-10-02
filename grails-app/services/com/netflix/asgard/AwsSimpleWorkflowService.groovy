@@ -367,22 +367,6 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         domain
     }
 
-    private AwsResultsRetriever executionHistoryRetriever = new AwsResultsRetriever<HistoryEvent,
-            GetWorkflowExecutionHistoryRequest, History>() {
-        protected History makeRequest(Region region, GetWorkflowExecutionHistoryRequest request) {
-            simpleWorkflowClient.getWorkflowExecutionHistory(request)
-        }
-        protected List<HistoryEvent> accessResult(History result) {
-            result.events
-        }
-        protected void setNextToken(GetWorkflowExecutionHistoryRequest request, String nextToken) {
-            request.withNextPageToken(nextToken)
-        }
-        protected String getNextToken(History result) {
-            result.nextPageToken
-        }
-    }
-
     /**
      * Gets the execution history for specific workflow run.
      *

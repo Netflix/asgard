@@ -29,7 +29,7 @@ class AsgInstanceTests extends GroovyTestCase {
         Instance copy = original.copy()
 
         assert !copy.is(original)
-        assert copy.equals(original)
+        assert copy == original
 
         copy.setAvailabilityZone "us-east-1c"
         assert copy.getAvailabilityZone() == "us-east-1c"

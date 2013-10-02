@@ -26,9 +26,9 @@ import java.rmi.NoSuchObjectException
 @ContextParam('region')
 class PushController {
 
-    def static allowedMethods = [startRolling:'POST']
+    static allowedMethods = [startRolling:'POST']
 
-    def static editActions = ['editRolling']
+    static editActions = ['editRolling']
 
     def awsAutoScalingService
     def awsEc2Service

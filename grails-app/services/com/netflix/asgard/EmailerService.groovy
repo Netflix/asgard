@@ -64,7 +64,7 @@ class EmailerService implements InitializingBean {
         }
     }
 
-    private def sendEmail(String to, String from, String replyTo, String subject, String text) {
+    private sendEmail(String to, String from, String replyTo, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage(mailMessage)
         message.to = [to]
         message.from = from

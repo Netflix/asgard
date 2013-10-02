@@ -39,12 +39,11 @@ class LoadBalancerController {
     def configService
     def stackService
 
-    // The delete, save and update actions only accept POST requests
-    def static allowedMethods = [
+    static allowedMethods = [
             delete: 'POST', save: 'POST', update: 'POST', addListener: 'POST', removeListener: 'POST'
     ]
 
-    def static editActions = ['prepareListener']
+    static editActions = ['prepareListener']
 
     def index = { redirect(action: 'list', params: params) }
 

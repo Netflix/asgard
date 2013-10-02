@@ -41,11 +41,11 @@ class ImageController {
     def taskService
     def grailsApplication
 
-    def static allowedMethods = [update: 'POST', delete: ['POST', 'DELETE'], launch: 'POST', addTag: 'POST',
+    static allowedMethods = [update: 'POST', delete: ['POST', 'DELETE'], launch: 'POST', addTag: 'POST',
             addTags: 'POST', removeTag: ['POST', 'DELETE'], removeTags: ['POST', 'DELETE'], removeAllTags: 'DELETE',
             massDelete: ['POST', 'DELETE']]
 
-    def static editActions = ['prelaunch']
+    static editActions = ['prelaunch']
 
     def index = { redirect(action: 'list', params:params) }
 
@@ -248,7 +248,7 @@ class ImageController {
     }
 
     /**
-     * Adds or replaces a tags on a set of images in batch. Expects the following params:
+     * Adds or replaces a tag on a set of images in batch. Expects the following params:
      *         imageIds - comma separated list of image ids to add or replace tags on
      *         name - the key of the tag to add or replace
      *         value - the value of the tag to add or replace
@@ -257,7 +257,7 @@ class ImageController {
         performAddTags(params.imageIds?.tokenize(','))
     }
 
-    private def performAddTags(Collection<String> imageIds) {
+    private performAddTags(Collection<String> imageIds) {
         String name = params.name
         String value = params.value
         Check.notEmpty(name, 'name')
@@ -327,7 +327,7 @@ class ImageController {
         List<Image> baseless = []
         List<Image> baselessInUse = []
 
-        Set<String> amisInUse = new HashSet<String>()
+        Set<String> amisInUse = [] as Set
         Map<String, List<MergedInstance>> imageIdsToInstanceLists = [:]
         List<MergedInstance> instances = mergedInstanceGroupingService.getMergedInstances(userContext, '')
         instances.each { MergedInstance instance ->
