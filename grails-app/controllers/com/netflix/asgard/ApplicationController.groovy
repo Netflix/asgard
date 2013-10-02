@@ -36,9 +36,9 @@ class ApplicationController {
     def configService
     def discoveryService
 
-    def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', securityUpdate: 'POST']
+    static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', securityUpdate: 'POST']
 
-    def static editActions = ['security']
+    static editActions = ['security']
 
     def index = { redirect(action: 'list', params: params) }
 

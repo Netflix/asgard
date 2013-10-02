@@ -30,7 +30,7 @@ class TopicController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', subscribe: 'POST', unsubscribe: 'POST', publish: 'POST']
 
-    def static editActions = ['prepareSubscribe', 'preparePublish']
+    static editActions = ['prepareSubscribe', 'preparePublish']
 
     def index = { redirect(action: 'list', params:params) }
 

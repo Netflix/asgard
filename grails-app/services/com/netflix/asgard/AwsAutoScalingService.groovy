@@ -1104,7 +1104,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     Collection<String> getLaunchConfigurationNamesForAutoScalingGroup(UserContext userContext,
                                                                       String autoScalingGroupName) {
-        Set<String> launchConfigNamesForGroup = new HashSet<String>()
+        Set<String> launchConfigNamesForGroup = [] as Set
         String currentLaunchConfigName = getAutoScalingGroup(userContext, autoScalingGroupName).launchConfigurationName
         if (currentLaunchConfigName) {
             launchConfigNamesForGroup.add(currentLaunchConfigName)

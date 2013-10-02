@@ -33,7 +33,7 @@ ruleset {
     BrokenOddnessCheck
     ClassForName
     ComparisonOfTwoConstants
-//    ComparisonWithSelf
+    ComparisonWithSelf
     ConstantAssertExpression
     ConstantIfExpression
     ConstantTernaryExpression
@@ -107,7 +107,7 @@ ruleset {
     IfStatementCouldBeTernary
 //    InvertedIfElse
     LongLiteralWithLowerCaseL
-//    ParameterReassignment
+    ParameterReassignment
     TernaryCouldBeElvis
     VectorIsObsolete
 
@@ -208,9 +208,9 @@ ruleset {
     ConfusingMultipleReturns
     ExplicitArrayListInstantiation
     ExplicitCallToAndMethod
-//    ExplicitCallToCompareToMethod
+    ExplicitCallToCompareToMethod
     ExplicitCallToDivMethod
-//    ExplicitCallToEqualsMethod
+    ExplicitCallToEqualsMethod
     ExplicitCallToGetAtMethod
     ExplicitCallToLeftShiftMethod
     ExplicitCallToMinusMethod
@@ -221,11 +221,11 @@ ruleset {
     ExplicitCallToPowerMethod
     ExplicitCallToRightShiftMethod
     ExplicitCallToXorMethod
-//    ExplicitHashMapInstantiation
-//    ExplicitHashSetInstantiation
+    ExplicitHashMapInstantiation
+    ExplicitHashSetInstantiation
     ExplicitLinkedHashMapInstantiation
-//    ExplicitLinkedListInstantiation
-//    ExplicitStackInstantiation
+    ExplicitLinkedListInstantiation
+    ExplicitStackInstantiation
 //    ExplicitTreeSetInstantiation
     GStringAsMapKey
 //    GetterMethodCouldBeProperty
@@ -334,7 +334,7 @@ ruleset {
 //    NestedBlockDepth
 
     // rulesets/unnecessary.xml
-//    AddEmptyString
+    AddEmptyString
     ConsecutiveLiteralAppends
     ConsecutiveStringConcatenation
     UnnecessaryBigDecimalInstantiation
@@ -347,10 +347,10 @@ ruleset {
 //    UnnecessaryCollectCall
     UnnecessaryCollectionCall
     UnnecessaryConstructor
-//    UnnecessaryDefInFieldDeclaration
-//    UnnecessaryDefInMethodDeclaration
-//    UnnecessaryDefInVariableDeclaration
-//    UnnecessaryDotClass
+    UnnecessaryDefInFieldDeclaration
+    UnnecessaryDefInMethodDeclaration
+    UnnecessaryDefInVariableDeclaration
+    UnnecessaryDotClass
     UnnecessaryDoubleInstantiation
 //    UnnecessaryElseStatement
     UnnecessaryFinalOnPrivateMethod
@@ -382,9 +382,9 @@ ruleset {
     UnusedArray
 //    UnusedMethodParameter
     UnusedObject
-//    UnusedPrivateField // showed false positives
+    UnusedPrivateField
     UnusedPrivateMethod
-//    UnusedPrivateMethodParameter
+    UnusedPrivateMethodParameter
 //    UnusedVariable
 
 }

@@ -30,7 +30,7 @@ class MockFileUtils {
     private static Map<String, Document> fileNamesToHtmlDocuments = [:]
 
     private static InputStream getFileAsStream(String fileName) {
-        MockFileUtils.class.classLoader.getResourceAsStream("com/netflix/asgard/mock/${fileName}")
+        MockFileUtils.classLoader.getResourceAsStream("com/netflix/asgard/mock/${fileName}")
     }
 
     /**
