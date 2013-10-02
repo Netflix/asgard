@@ -16,8 +16,11 @@
 package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
+import com.amazonaws.services.simpleworkflow.flow.WorkflowClientExternal
+import com.amazonaws.services.simpleworkflow.model.ChildPolicy
 import com.google.common.collect.Lists
 import com.netflix.asgard.model.SimpleDbSequenceLocator
+import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.plugin.TaskFinishedListener
 import java.util.concurrent.ConcurrentLinkedQueue
 import org.codehaus.groovy.runtime.StackTraceUtils
@@ -34,7 +37,10 @@ class TaskService {
             'DuplicateLoadBalancerName', 'InvalidDBInstanceState', 'InvalidDBSnapshotState', 'InvalidGroup.Duplicate',
             'InvalidGroup.InUse', 'InvalidParameterValue', 'ValidationError']
 
+    Caches caches
+    def awsSimpleWorkflowService
     def emailerService
+    def flowService
     def idService
     def grailsApplication
     def pluginService
@@ -170,21 +176,55 @@ class TaskService {
         }
     }
 
-    def getRunning = { Lists.newArrayList(running) }
+    /**
+     * @return only in-memory running tasks (no SWF workflow executions)
+     */
+    List<Task> getRunningInMemory() {
+        Lists.newArrayList(running)
+    }
 
-    def getCompleted = { Lists.newArrayList(completed) }
-
-    Task getTaskById(String id) {
-        Task task = running.find { it.id == id }
-        if (!task) { task = completed.find { it.id == id } }
-
-        // If we hit a race condition where a task id is used before the task is running then wait and try again.
-        if (!task) {
-            sleep 1000
-            task = running.find { it.id == id }
+    /**
+     * @return all running tasks (including SWF workflow executions)
+     */
+    Collection<Task> getAllRunning() {
+        running + awsSimpleWorkflowService.openWorkflowExecutions.collect {
+            new WorkflowExecutionBeanOptions(it).asTask()
         }
+    }
 
-        task
+    /**
+     * @return all completed tasks (including SWF workflow executions within a recent time period)
+     */
+    Collection<Task> getAllCompleted() {
+        completed + awsSimpleWorkflowService.closedWorkflowExecutions.collect {
+            new WorkflowExecutionBeanOptions(it).asTask()
+        }
+    }
+
+    /**
+     * Look up a task by its ID.
+     *
+     * @param id for task
+     * @return task or null if no task was found
+     */
+    Task getTaskById(String id) {
+        if (!id) { return null }
+        try {
+            new Retriable<Task>(
+                    work: {
+                        Task task = running.find { it.id == id }
+                        if (!task) { task = completed.find { it.id == id } }
+                        if (!task) {
+                            task = awsSimpleWorkflowService.getWorkflowExecutionInfoByTaskId(id)?.asTask()
+                        }
+                        if (!task) { throw new IllegalArgumentException("There is no task with id ${id}.") }
+                        task
+                    },
+                    firstDelayMillis: 1000
+            ).performWithRetries()
+        } catch (CollectedExceptions ignore) {
+            return null
+        }
     }
 
     Collection<Task> getRunningTasksByObject(Link link, Region region) {
@@ -193,14 +233,19 @@ class TaskService {
     }
 
     void cancelTask(UserContext userContext, Task task) {
-        try {
-            task.thread.interrupt()
-            task.log("Cancelled by ${userContext.clientHostName}")
-            fail(task)
-        } catch (CancelledException ignored) {
-            // Thrown if task is cancelled while sleeping. Not an error.
-        } catch (Exception e) {
-            exception(task, e)
+        if (task.workflowExecution) {
+            WorkflowClientExternal client = flowService.getWorkflowClient(task.workflowExecution)
+            client.terminateWorkflowExecution('Canceled by user.', task.toString(), ChildPolicy.TERMINATE)
+        } else {
+            try {
+                task.thread.interrupt()
+                task.log("Cancelled by ${userContext.clientHostName}")
+                fail(task)
+            } catch (CancelledException ignored) {
+                // Thrown if task is cancelled while sleeping. Not an error.
+            } catch (Exception e) {
+                exception(task, e)
+            }
         }
     }
 }

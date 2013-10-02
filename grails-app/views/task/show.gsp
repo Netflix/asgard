@@ -32,14 +32,11 @@
       <div class="buttons" id="taskCancellationForm">
         <g:form method="post">
           <input type="hidden" name="id" value="${task.id}"/>
-          <input type="hidden" name="runId" value="${task.runId}"/>
-          <input type="hidden" name="workflowId" value="${task.workflowId}"/>
           <g:buttonSubmit class="stop" data-warning="Really stop task ${StringEscapeUtils.escapeJavaScript(task.name)} ?" action="cancel" value="Stop Task"/>
         </g:form>
         <g:if test="${params.taskToken}">
           <g:form method="post" controller="cluster">
-            <input type="hidden" name="runId" value="${task.runId}"/>
-            <input type="hidden" name="workflowId" value="${task.workflowId}"/>
+            <input type="hidden" name="id" value="${task.id}"/>
             <input type="hidden" name="taskToken" value="${params.taskToken}"/>
             <g:buttonSubmit class="rollback" action="rollbackDeployment" value="Rollback Deployment"/>
             <g:buttonSubmit class="proceed" action="proceedWithDeployment" value="Proceed With Deployment"/>
@@ -55,6 +52,12 @@
           <td class="name">Name:</td>
           <td class="value">${task.name}</td>
         </tr>
+        <g:if test="${task.workflowExecution}">
+          <tr class="prop">
+            <td class="name">Workflow:</td>
+            <td class="value"><g:link controller="workflowExecution" action="show" params="[runId: task.workflowExecution.runId, workflowId: task.workflowExecution.workflowId]">${task.id}</g:link></td>
+          </tr>
+        </g:if>
         <tr class="prop">
           <td class="name">Region:</td>
           <td class="value">${task.userContext?.region}</td>

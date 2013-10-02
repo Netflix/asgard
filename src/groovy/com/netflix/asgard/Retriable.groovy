@@ -48,7 +48,7 @@ import groovy.transform.Canonical
      *
      * Object work(int iterationCounter)
      */
-    Closure work
+    Closure<T> work
 
     /**
      * The number of times to try to perform the work before giving up and re-throwing the exceptions from the attempts.
@@ -100,7 +100,7 @@ import groovy.transform.Canonical
      *
      * @param milliseconds the number of milliseconds to sleep
      */
-    protected void delay(int milliseconds) {
+    void delay(int milliseconds) {
         Time.sleepCancellably(milliseconds)
     }
 }
