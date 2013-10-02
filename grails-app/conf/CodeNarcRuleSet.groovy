@@ -384,7 +384,7 @@ ruleset {
     UnusedObject
     UnusedPrivateField
     UnusedPrivateMethod
-//    UnusedPrivateMethodParameter
+    UnusedPrivateMethodParameter
 //    UnusedVariable
 
 }
