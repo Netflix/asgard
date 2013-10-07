@@ -727,6 +727,6 @@ class ConfigService {
      * @return fast property console url based on accountName
      */
     String getFastPropertiesConsoleUrl() {
-        grailsApplication.config.platform?.fastPropertyConsoleUrls?."$accountName" ?: ""
+        grailsApplication.config.platform?.fastPropertyConsoleUrls?."${accountName}" ?: ""
     }
 }
