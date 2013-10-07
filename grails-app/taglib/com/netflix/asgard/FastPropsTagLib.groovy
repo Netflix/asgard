@@ -18,8 +18,9 @@ package com.netflix.asgard
 import org.joda.time.format.ISODateTimeFormat
 
 /**
- * Tag library class for fast properties views
- * Implements custom tags to
+ * Tag library class for fast properties views.
+ *
+ * Implements custom tags which
  *    1. builds additional scope inline table
  *    2. calculates and prints expiration timestamp for a fast property
  */
@@ -111,7 +112,7 @@ class FastPropsTagLib {
      * timezone information.
      *
      * @attr ttl TTL in seconds as stored for a fastProperty
-     * @attr ts Last update/created timestamp in ISO-8601 format for a fastProperty
+     * @attr ts last update/created timestamp in ISO-8601 format for a fastProperty
      */
     def writeExpiration = { attrs ->
         def ttl = attrs.ttl ? attrs.remove('ttl') : null
@@ -128,22 +129,19 @@ class FastPropsTagLib {
     /**
      * Builds fast property console url link if found in configuration
      * It does not create any output if configuration does not contain this information
-     * Configuration needed for this tag -
+     * Configuration needed for this tag:
      *  fastPropertyConsoleUrls = [
      *      test : '...'
      *      prod : '...'
      *  ]
      * This way you configure an external console url based on the account type (test/prod)
-     * @attr - none
-     *
      */
     def extLinkToPropertiesConsole = {
-        def propertiesConsoleUrl = configService.getFastPropertiesConsoleUrl()
+        String propertiesConsoleUrl = configService.getFastPropertiesConsoleUrl()
         if (propertiesConsoleUrl) {
             out << '<li class="menuButton">'
             out << '<a href="' + propertiesConsoleUrl + '" target="_blank" class="fastProperties">Fast Properties</a>'
             out << '</li>'
         }
     }
-
 }

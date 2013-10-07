@@ -16,17 +16,18 @@
 package com.netflix.asgard
 
 import grails.test.mixin.TestFor
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import spock.lang.Specification
-import com.netflix.asgard.mock.Mocks
 
 @TestFor(FastPropsTagLib)
 class FastPropertyTagLibSpec extends Specification {
+
     def 'no config spec should create empty output'() {
-        given :
-        ConfigService configService = new ConfigService(grailsApplication: Mocks.grailsApplication())
+        given:
+        ConfigService configService = new ConfigService(grailsApplication: new DefaultGrailsApplication())
         tagLib.configService = configService
 
-        when :
+        when:
         String output = applyTemplate('<g:extLinkToPropertiesConsole />')
 
         then:
@@ -34,33 +35,37 @@ class FastPropertyTagLibSpec extends Specification {
     }
 
     def 'valid config value should create link markup'() {
-        given :
+        given:
         ConfigService configService = new ConfigService(grailsApplication: [
-            config: [ cloud: [ accountName: 'test' ],
-            platform: [ fastPropertyConsoleUrls: [ test: 'http://sometestlocation/' ] ] ]
+                config: [
+                        cloud: [accountName: 'test'],
+                        platform: [fastPropertyConsoleUrls: [test: 'http://sometestlocation/']]
+                ]
         ])
         tagLib.configService = configService
 
-        when :
+        when:
         String output = applyTemplate('<g:extLinkToPropertiesConsole />')
 
         then:
-        output == '<li class="menuButton"><a href="http://sometestlocation/" target="_blank" class="fastProperties">Fast Properties</a></li>'
+        output == '<li class="menuButton"><a href="http://sometestlocation/" target="_blank"' +
+                ' class="fastProperties">Fast Properties</a></li>'
     }
 
     def 'missing config value for current account should create empty output'() {
-        given :
+        given:
         ConfigService configService = new ConfigService(grailsApplication: [
-            config: [ cloud: [ accountName: 'test' ],
-            platform: [ fastPropertyConsoleUrls: [ beta: 'http://somebetalocation/' ] ] ]
+                config: [
+                        cloud: [accountName: 'test'],
+                        platform: [fastPropertyConsoleUrls: [beta: 'http://somebetalocation/']]
+                ]
         ])
         tagLib.configService = configService
 
-        when :
+        when:
         String output = applyTemplate('<g:extLinkToPropertiesConsole />')
 
         then:
         output == ''
     }
-
 }

@@ -34,7 +34,6 @@ class SettingsFilters {
                 request.ticketRequired = accountName in grailsApplication.config.cloud.highRiskAccountNames
                 request.build = grailsApplication.config.build.id
                 request.allowSdbPropertyEdit = false
-                request.platformserviceExists = grailsApplication.config.cloud.platformserviceRegions ? true : false
                 request.ticketLabel = configService.ticketLabel
                 request.fullTicketLabel = configService.fullTicketLabel
                 request.bleskJavaScriptUrl = configService.bleskJavaScriptUrl
