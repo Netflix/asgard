@@ -722,4 +722,11 @@ class ConfigService {
     List<String> getEbsVolumeDeviceNamesForLaunchConfigs() {
         grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.deviceNames ?: ['/dev/sdb', '/dev/sdc']
     }
+
+    /**
+     * @return fast property console url based on accountName
+     */
+    String getFastPropertiesConsoleUrl() {
+        grailsApplication.config.platform?.fastPropertyConsoleUrls?."$accountName" ?: ""
+    }
 }
