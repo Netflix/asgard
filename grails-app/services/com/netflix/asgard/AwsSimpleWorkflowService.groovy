@@ -69,6 +69,11 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     Caches caches
 
     /**
+     * Optional end date for workflow execution time filter, useful for testing, when current date is not desirable.
+     */
+    DateTime filterEndTime
+
+    /**
      * Configure service properties
      */
     void afterPropertiesSet() {
@@ -317,6 +322,27 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         caches.allOpenWorkflowExecutions.list().findAll { it.tagList }
     }
 
+    /**
+     * Looks first in the cache and then in AWS for an open workflow execution tagged with a link (name and object type)
+     * to a cloud object that the execution is acting upon.
+     *
+     * @param link the object that describes the type and name of the cloud object for which to find an execution
+     * @return any single WorkflowExecutionInfo tagged with the specified link, or null if no match found
+     */
+    WorkflowExecutionInfo getOpenWorkflowExecutionForObjectLink(Link link) {
+        String linkTag = new SwfWorkflowTags(link: link).constructTag('link')
+        WorkflowExecutionInfo workflowExecution = openWorkflowExecutions.find {
+            it.tagList.contains(linkTag)
+        }
+        if (!workflowExecution) {
+            List<WorkflowExecutionInfo> matches = getOpenWorkflowExecutionsForTag(linkTag)
+            if (matches) {
+                workflowExecution = matches[0]
+            }
+        }
+        workflowExecution
+    }
+
     // Closed workflow executions
 
     private List<WorkflowExecutionInfo> retrieveClosedWorkflowExecutions() {
@@ -327,7 +353,8 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     }
 
     private ExecutionTimeFilter getExecutionTimeFilter() {
-        Date oldestDate = new DateTime().minusDays(configService.workflowExecutionRetentionPeriodInDays).toDate()
+        DateTime endTime = filterEndTime ?: new DateTime()
+        Date oldestDate = endTime.minusDays(configService.workflowExecutionRetentionPeriodInDays).toDate()
         new ExecutionTimeFilter(oldestDate: oldestDate)
     }
 
