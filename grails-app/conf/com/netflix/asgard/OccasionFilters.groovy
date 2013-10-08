@@ -222,8 +222,9 @@ enum Occasion {
 
     private static LocalDate getChineseNewYearDate(int year) {
 
-        // Chinese New Year is complex. Use known values from http://en.wikipedia.org/wiki/Chinese_new_year and
-        // http://www.timeanddate.com/calendar/?year=2032&country=41
+        // Chinese New Year is complex. Use known values from
+        // http://en.wikipedia.org/wiki/Chinese_new_year and
+        // http://www.timeanddate.com/holidays/china/spring-festival
         Map<Integer, LocalDate> map = [:]
         addDate(map, 2012, DateTimeConstants.JANUARY, 23)
         addDate(map, 2013, DateTimeConstants.FEBRUARY, 10)
@@ -255,6 +256,34 @@ enum Occasion {
         addDate(map, 2040, DateTimeConstants.FEBRUARY, 12)
         addDate(map, 2041, DateTimeConstants.FEBRUARY, 1)
         addDate(map, 2042, DateTimeConstants.JANUARY, 22)
+        addDate(map, 2043, DateTimeConstants.FEBRUARY, 10)
+        addDate(map, 2044, DateTimeConstants.JANUARY, 30)
+        addDate(map, 2045, DateTimeConstants.FEBRUARY, 17)
+        addDate(map, 2046, DateTimeConstants.FEBRUARY, 6)
+        addDate(map, 2047, DateTimeConstants.JANUARY, 26)
+        addDate(map, 2048, DateTimeConstants.FEBRUARY, 14)
+        addDate(map, 2049, DateTimeConstants.FEBRUARY, 2)
+        addDate(map, 2050, DateTimeConstants.JANUARY, 23)
+        addDate(map, 2051, DateTimeConstants.FEBRUARY, 11)
+        addDate(map, 2052, DateTimeConstants.FEBRUARY, 1)
+        addDate(map, 2053, DateTimeConstants.FEBRUARY, 19)
+        addDate(map, 2054, DateTimeConstants.FEBRUARY, 8)
+        addDate(map, 2055, DateTimeConstants.JANUARY, 28)
+        addDate(map, 2056, DateTimeConstants.FEBRUARY, 15)
+        addDate(map, 2057, DateTimeConstants.FEBRUARY, 4)
+        addDate(map, 2058, DateTimeConstants.JANUARY, 24)
+        addDate(map, 2059, DateTimeConstants.FEBRUARY, 12)
+        addDate(map, 2060, DateTimeConstants.FEBRUARY, 2)
+        addDate(map, 2061, DateTimeConstants.JANUARY, 21)
+        addDate(map, 2062, DateTimeConstants.FEBRUARY, 9)
+        addDate(map, 2063, DateTimeConstants.JANUARY, 29)
+        addDate(map, 2064, DateTimeConstants.FEBRUARY, 17)
+        addDate(map, 2065, DateTimeConstants.FEBRUARY, 5)
+        addDate(map, 2066, DateTimeConstants.JANUARY, 26)
+        addDate(map, 2067, DateTimeConstants.FEBRUARY, 14)
+        addDate(map, 2068, DateTimeConstants.FEBRUARY, 3)
+        addDate(map, 2069, DateTimeConstants.JANUARY, 23)
+        addDate(map, 2070, DateTimeConstants.FEBRUARY, 11)
 
         map[year]
     }

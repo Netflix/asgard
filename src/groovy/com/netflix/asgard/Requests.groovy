@@ -87,7 +87,7 @@ class Requests {
         }
         if (value instanceof Map) {
             output += '[\n'
-            value.each { k, v ->  output += prettyPrint(v, indent + 5, k) }
+            value.each { k, v -> output += prettyPrint(v, indent + 5, k) }
             output += "${spaces}]\n"
         } else if (value instanceof Collection || value?.class?.array) {
             output += '[\n'

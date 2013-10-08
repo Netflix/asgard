@@ -57,7 +57,7 @@ class JokeService {
         List<FailureImage> failureImages = Lists.newArrayList(failureImages)
         try {
             failureImages += new File("${configService.asgardHome}/images/failure").listFiles(IMAGE_FILE_NAME_FILTER).
-                    collect { new FailureImage(path: "/externalImage/failure/${it.name}")  }
+                    collect { new FailureImage(path: "/externalImage/failure/${it.name}") }
         } catch (Exception e) {
             log.error('Error loading failure images', e)
         }
