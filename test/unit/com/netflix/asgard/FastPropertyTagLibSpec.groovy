@@ -24,7 +24,7 @@ class FastPropertyTagLibSpec extends Specification {
 
     def 'no config spec should create empty output'() {
         given:
-        ConfigService configService = new ConfigService(grailsApplication: new DefaultGrailsApplication())
+        ConfigService configService = new ConfigService(grailsApplication: [config: [platform: [:]]])
         tagLib.configService = configService
 
         when:
