@@ -38,7 +38,6 @@
           <th>Name</th>
           <th>ASGs</th>
           <th>Instances</th>
-          <th>Type</th>
           <th>Description</th>
           <th>Email</th>
           <th>Owner</th>
@@ -49,13 +48,12 @@
         <tbody>
         <g:each var="app" in="${applications}" status="i">
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-            <td><g:linkObject type="application" name="${app.name}"/></td>
+            <td class="app"><g:linkObject type="application" name="${app.name}"/></td>
             <td><g:link class="autoScaling" controller="autoScaling" action="list" id="${app.name}">${groupCountsPerAppName.getCount(app.name)}</g:link></td>
             <td><g:link class="instance" controller="instance" action="list" id="${app.name}">${instanceCountsPerAppName.getCount(app.name)}</g:link></td>
-            <td>${app.type}</td>
-            <td>${app.description}</td>
-            <td>${app.email}</td>
-            <td>${app.owner}</td>
+            <td class="description">${app.description}</td>
+            <td class="email">${app.email}</td>
+            <td class="owner">${app.owner}</td>
             <td><g:formatDate date="${app.createTime}"/></td>
             <td><g:formatDate date="${app.updateTime}"/></td>
           </tr>

@@ -107,9 +107,11 @@ class ImageController {
             flash.message = "Unable to modify ${imageId} on this account because ${e}"
             redirect(action: 'show', params: params)
         }
-        ['image' : awsEc2Service.getImage(userContext, imageId),
-         'launchPermissions' : launchUsers,
-         'accounts' : grailsApplication.config.grails.awsAccountNames]
+        [
+                image: awsEc2Service.getImage(userContext, imageId),
+                launchPermissions: launchUsers,
+                accounts: grailsApplication.config.grails.awsAccountNames
+        ]
     }
 
     def update = {
