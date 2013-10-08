@@ -299,7 +299,8 @@ form .compoundName td input + div span { color: #999; }
 .buttons button:active div, .buttons a:active { background-color: #6299C5 !important; border-color: #6299C5 #8BBBDF #8BBBDF #6299C5; color: #FFF;    }
 
 .buttons button.publish div, .buttons a.publish   { background-image: url(../images/tango/24/actions/mail-message-new.png);                          }
-.buttons button:disabled div, .buttons a:disabled { filter: alpha(opacity=50); opacity: 0.5; -moz-opacity: 0.50; background-color: inherit !important; border-color: inherit; color: inherit; cursor: default; }
+.buttons button:disabled div, .buttons a:disabled { cursor: default; filter: alpha(opacity=50); opacity: 0.5; -moz-opacity: 0.50; background-color: inherit !important; border-color: inherit; color: inherit; }
+.buttons button:disabled                          { cursor: default; }
 .buttons button                               { padding: 0; margin: 0; border: 0; cursor: pointer; background: none; }
 .buttons h3                                   { display: inline; font-size: 11px; padding: 0 3px 0 10px; }
 .buttons button.initListFilter                { float: right; }
