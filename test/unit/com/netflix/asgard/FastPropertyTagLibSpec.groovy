@@ -16,7 +16,6 @@
 package com.netflix.asgard
 
 import grails.test.mixin.TestFor
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import spock.lang.Specification
 
 @TestFor(FastPropsTagLib)
@@ -24,7 +23,7 @@ class FastPropertyTagLibSpec extends Specification {
 
     def 'no config spec should create empty output'() {
         given:
-        ConfigService configService = new ConfigService(grailsApplication: new DefaultGrailsApplication())
+        ConfigService configService = new ConfigService(grailsApplication: [config: [platform: [:]]])
         tagLib.configService = configService
 
         when:
