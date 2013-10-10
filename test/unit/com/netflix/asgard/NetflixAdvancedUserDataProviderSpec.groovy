@@ -153,6 +153,20 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
         'lionhead' | null                                 | null                  | 'lionhead'
     }
 
+    def 'launching an image without the name of a application should not send nulls to user data provider'() {
+
+        UserDataProvider userDataProvider = Mock(UserDataProvider)
+        pluginService = Mock(PluginService) { getUserDataProvider() >> userDataProvider }
+        netflixAdvancedUserDataProvider.pluginService = pluginService
+        launchContext.image = new Image()
+
+        when:
+        netflixAdvancedUserDataProvider.buildUserData(launchContext)
+
+        then: "no null string values sent to plugin"
+        1 * userDataProvider.buildUserDataForVariables(userContext, '', '', '')
+    }
+
     private AutoScalingGroupBeanOptions asg(String name) {
         new AutoScalingGroupBeanOptions(autoScalingGroupName: name)
     }
