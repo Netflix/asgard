@@ -16,7 +16,6 @@
 package com.netflix.asgard
 
 import grails.test.mixin.TestFor
-import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import spock.lang.Specification
 
 @TestFor(FastPropsTagLib)
