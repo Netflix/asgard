@@ -36,7 +36,8 @@ class IdServiceSpec extends Specification {
         1 * service.awsSimpleDbService.incrementAndGetSequenceNumber(_, SimpleDbSequenceLocator.Task) >> 42
     }
 
-    void "should return UUID as last resort"() {
+    void "should return UUID and email with error if nextId results in an error."() {
+        service.awsSimpleDbService = Mock(AwsSimpleDbService)
         service.emailerService = Mock(EmailerService)
 
         when:
@@ -44,6 +45,10 @@ class IdServiceSpec extends Specification {
 
         then:
         result
-        1 * service.emailerService.sendExceptionEmail(_, _)
+        1 * service.awsSimpleDbService.incrementAndGetSequenceNumber(_, SimpleDbSequenceLocator.Task) >> {
+            throw new IllegalStateException('AWS is down. No sequence ID for you!')
+        }
+        1 * service.emailerService.sendExceptionEmail(
+                'java.lang.IllegalStateException: AWS is down. No sequence ID for you!', _)
     }
 }

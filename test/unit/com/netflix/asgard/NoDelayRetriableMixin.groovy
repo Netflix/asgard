@@ -24,6 +24,6 @@ class NoDelayRetriableMixin {
 
     @Override
     void delay(int milliseconds) {
-        // do not sleep
+        // Do not sleep
     }
 }

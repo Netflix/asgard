@@ -19,7 +19,7 @@ import com.netflix.asgard.Region
 
 /**
  * The location of the sequence number in SimpleDB
-*/
+ */
 enum SimpleDbSequenceLocator { Policy, Alarm, Task
 
     final Region region

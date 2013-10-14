@@ -45,7 +45,7 @@ import groovy.transform.Canonical
     Task asTask() {
         SwfWorkflowTags swfWorkflowTags = new SwfWorkflowTags()
         swfWorkflowTags.withTags(executionInfo.tagList)
-        String status = executionInfo.closeStatus ? executionInfo.closeStatus.toLowerCase() : 'running'
+        String status = executionInfo.closeStatus?.toLowerCase() ?: 'running'
         Task task = new Task(id: swfWorkflowTags.id, workflowExecution: executionInfo.execution,
                 name: swfWorkflowTags.desc, userContext: swfWorkflowTags.user, status: status,
                 startTime: executionInfo.startTimestamp, updateTime: executionInfo.closeTimestamp)

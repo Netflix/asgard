@@ -24,6 +24,7 @@ import com.amazonaws.services.simpleworkflow.flow.WorkflowWorker
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
+import com.netflix.asgard.deployment.DeploymentActivitiesImpl
 import com.netflix.asgard.deployment.DeploymentWorkflow
 import com.netflix.asgard.deployment.DeploymentWorkflowDescriptionTemplate
 import com.netflix.asgard.deployment.DeploymentWorkflowImpl
@@ -44,7 +45,7 @@ class FlowService implements InitializingBean {
     def awsClientService
     def configService
     def idService
-    def deploymentActivitiesImpl
+    DeploymentActivitiesImpl deploymentActivitiesImpl
 
     WorkflowWorker workflowWorker
     ActivityWorker activityWorker

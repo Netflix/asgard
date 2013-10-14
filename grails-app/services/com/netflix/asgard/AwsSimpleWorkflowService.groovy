@@ -270,7 +270,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         WorkflowExecutionInfo newOpenWorkflowExecutionInfo = null
         WorkflowExecutionInfo newClosedWorkflowExecutionInfo = null
         if (workflowExecutionInfo) {
-            if (workflowExecutionInfo.executionStatus == 'CLOSED') {
+            if (workflowExecutionInfo.closeTimestamp) {
                 newClosedWorkflowExecutionInfo = workflowExecutionInfo
             } else {
                 newOpenWorkflowExecutionInfo = workflowExecutionInfo
@@ -284,12 +284,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     private List<WorkflowExecutionInfo> retrieveOpenWorkflowExecutions() {
         String domain = configService.simpleWorkflowDomain
         ensureDomainExists(domain)
-
-        Date oldestDate = new DateTime().minusDays(configService.workflowExecutionRetentionPeriodInDays).toDate()
-        Date latestDate = new Date()
-        ExecutionTimeFilter filter = new ExecutionTimeFilter(oldestDate: oldestDate, latestDate: latestDate)
-
-        def request = new ListOpenWorkflowExecutionsRequest(domain: domain, startTimeFilter: filter)
+        def request = new ListOpenWorkflowExecutionsRequest(domain: domain, startTimeFilter: executionTimeFilter)
         openWorkflowExecutionRetriever.retrieve(Region.defaultRegion(), request)
     }
 
@@ -335,8 +330,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
 
     private ExecutionTimeFilter getExecutionTimeFilter() {
         Date oldestDate = new DateTime().minusDays(configService.workflowExecutionRetentionPeriodInDays).toDate()
-        Date latestDate = new Date()
-        new ExecutionTimeFilter(oldestDate: oldestDate, latestDate: latestDate)
+        new ExecutionTimeFilter(oldestDate: oldestDate)
     }
 
     private AwsResultsRetriever closedWorkflowExecutionRetriever =

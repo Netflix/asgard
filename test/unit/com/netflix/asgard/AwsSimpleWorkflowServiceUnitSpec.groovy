@@ -34,7 +34,7 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
 
     def setup() {
         awsSimpleWorkflowService.caches = new Caches(new MockCachedMapBuilder([
-        (EntityType.workflowExecution): Mock(CachedMap)
+            (EntityType.workflowExecution): Mock(CachedMap)
         ]))
         awsSimpleWorkflowService.configService = Mock(ConfigService) {
             getSimpleWorkflowDomain() >> 'Westeros'

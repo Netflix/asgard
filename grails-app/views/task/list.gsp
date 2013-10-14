@@ -55,8 +55,8 @@
             <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
               <td><g:radio name="id" value="${rti.id}"/></td>
               <td>
-                  <g:link class="task" action="show" params="[id: rti.id]"
-                          title="Show details of this task">${rti.name}</g:link>
+                <g:link class="task" action="show" params="[id: rti.id]"
+                        title="Show details of this task">${rti.name}</g:link>
               </td>
               <td>${rti.userContext?.region}</td>
               <td><g:formatDate date="${rti.startTime}"/></td>
@@ -104,8 +104,8 @@
           <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
             <td><g:radio name="id" value="${cti.id}"/></td>
             <td>
-                <g:link class="task" action="show" params="${cti.id ? [id: cti.id] : [runId: cti.workflowExecution.runId]}"
-                        title="Show details of this task">${cti.name}</g:link>
+              <g:link class="task" action="show" params="${cti.id ? [id: cti.id] : [runId: cti.workflowExecution.runId]}"
+                      title="Show details of this task">${cti.name}</g:link>
             </td>
             <td>${cti.userContext?.region}</td>
             <td><g:formatDate date="${cti.startTime}"/></td>

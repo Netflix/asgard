@@ -202,7 +202,7 @@ class TaskService {
     }
 
     /**
-     * Look up a task by its ID.
+     * Looks up a task by its ID.
      *
      * @param id for task
      * @return task or null if no task was found
@@ -233,13 +233,14 @@ class TaskService {
     }
 
     void cancelTask(UserContext userContext, Task task) {
+        String cancelledByMessage = "Cancelled by ${userContext.username ?: 'user'}@${userContext.clientHostName}"
         if (task.workflowExecution) {
             WorkflowClientExternal client = flowService.getWorkflowClient(task.workflowExecution)
-            client.terminateWorkflowExecution('Canceled by user.', task.toString(), ChildPolicy.TERMINATE)
+            client.terminateWorkflowExecution(cancelledByMessage, task.toString(), ChildPolicy.TERMINATE)
         } else {
             try {
                 task.thread.interrupt()
-                task.log("Cancelled by ${userContext.clientHostName}")
+                task.log(cancelledByMessage)
                 fail(task)
             } catch (CancelledException ignored) {
                 // Thrown if task is cancelled while sleeping. Not an error.

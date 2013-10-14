@@ -54,8 +54,8 @@
         </tr>
         <g:if test="${task.workflowExecution}">
           <tr class="prop">
-            <td class="name">Workflow:</td>
-            <td class="value"><g:link controller="workflowExecution" action="show" params="[runId: task.workflowExecution.runId, workflowId: task.workflowExecution.workflowId]">${task.id}</g:link></td>
+            <td class="name">Workflow Execution Details:</td>
+            <td class="value"><g:link controller="workflowExecution" action="show" params="[runId: task.workflowExecution.runId, workflowId: task.workflowExecution.workflowId]">Workflow Execution</g:link></td>
           </tr>
         </g:if>
         <tr class="prop">

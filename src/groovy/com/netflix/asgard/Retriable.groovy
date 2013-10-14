@@ -46,7 +46,7 @@ import groovy.transform.Canonical
     /**
      * The work to try to execute without an exception getting thrown.
      *
-     * Object work(int iterationCounter)
+     * T work(int iterationCounter)
      */
     Closure<T> work
 

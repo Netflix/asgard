@@ -50,6 +50,7 @@ class TaskController {
 
     def show = {
         String id = params.id ?: params.runId
+        // TODO remove the params.runId when we are sure there are no longer workflow executions without a run ID
         Task task = taskService.getTaskById(id)
         if (!task) {
             Requests.renderNotFound('Task', id, this)
