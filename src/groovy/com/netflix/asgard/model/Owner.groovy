@@ -18,8 +18,8 @@ package com.netflix.asgard.model
 class Owner {
 
     String name
-    Set<String> emails = new HashSet<String>()
-    Set<String> appNames = new HashSet<String>()
+    Set<String> emails = [] as Set
+    Set<String> appNames = [] as Set
     Integer autoScalingGroupCount = 0
     Integer instanceCount = 0
 }

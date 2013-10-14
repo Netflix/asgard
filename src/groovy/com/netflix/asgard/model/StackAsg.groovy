@@ -46,14 +46,8 @@ import groovy.transform.Canonical
     String getHealthDescription() {
         int totalInstances = group.instances.size()
         if (healthyInstances == totalInstances) {
-            if (healthyInstances == 0) {
-                return 'empty'
-            }
-            return 'pass'
+            return healthyInstances == 0 ? 'empty' : 'pass'
         }
-        if (healthyInstances == 0) {
-            return 'fail'
-        }
-        return 'incomplete'
+        return healthyInstances == 0 ? 'fail' : 'incomplete'
     }
 }

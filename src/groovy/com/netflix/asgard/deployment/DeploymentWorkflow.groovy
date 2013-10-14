@@ -31,7 +31,7 @@ import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 interface DeploymentWorkflow {
 
     /**
-     * Start the deployment of a new ASG in an existing cluster.
+     * Starts the deployment of a new ASG in an existing cluster.
      *
      * @param userContext who, where, why
      * @param deploymentOptions dictate what the deployment will do

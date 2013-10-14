@@ -274,7 +274,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     Map<String, Image> mapImageIdsToImagesForMergedInstances(UserContext userContext,
                                                              Collection<MergedInstance> mergedInstances) {
-        Map<String, Image> imageIdsToImages = new HashMap<String, Image>()
+        Map<String, Image> imageIdsToImages = [:]
         for (MergedInstance mergedInstance : mergedInstances) {
             String imageId = mergedInstance?.amiId
             if (!(imageId in imageIdsToImages.keySet())) {
@@ -356,7 +356,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         try {
             List<String> hasAccounts = getImageLaunchers(userContext, imageId)
             hasAccounts += configService.awsAccountNumber
-            List<String> addAccounts = configService.awsAccounts.findAll {account -> !hasAccounts.any {it == account}}
+            List<String> addAccounts = configService.awsAccounts.findAll { acct -> !hasAccounts.any { it == acct } }
             if (addAccounts.size() > 0) {
                 addImageLaunchers(userContext, imageId, addAccounts, existingTask)
             }
@@ -537,7 +537,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             }
         }
         wantPerms.each { wantPerm ->
-            if (!havePerms.any { hp -> hp.fromPort == wantPerm.fromPort && hp.toPort == wantPerm.toPort} ) {
+            if (!havePerms.any { hp -> hp.fromPort == wantPerm.fromPort && hp.toPort == wantPerm.toPort } ) {
                 authorizeSecurityGroupIngress(userContext, targetGroup, sourceGroup, 'tcp',
                         wantPerm.fromPort, wantPerm.toPort)
                 somethingChanged = true
@@ -594,7 +594,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     private String bestIngressPortsFor(SecurityGroup targetGroup) {
         Map guess = ['7001' : 1]
         targetGroup.ipPermissions.each {
-            if (it.ipProtocol == 'tcp' &&  it.userIdGroupPairs.size() > 0) {
+            if (it.ipProtocol == 'tcp' && it.userIdGroupPairs.size() > 0) {
                 Integer count = it.userIdGroupPairs.size()
                 String portRange = portString(it.fromPort, it.toPort)
                 guess[portRange] = guess[portRange] ? guess[portRange] + count : count
@@ -762,7 +762,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     }
 
     Reservation getInstanceReservation(UserContext userContext, String instanceId) {
-        Check.notNull(instanceId, Reservation, "instanceId")
+        if (!instanceId) { return null }
         def result
         try {
             result = awsClient.by(userContext.region).describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId))

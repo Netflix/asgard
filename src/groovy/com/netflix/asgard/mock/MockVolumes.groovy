@@ -24,6 +24,7 @@ class MockVolumes {
     /**
      * Shortened and sanitized JSON string output from /volume/list.json
      */
+    @SuppressWarnings('LineLength')
     static final String DATA = '''
   [
     {

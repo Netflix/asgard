@@ -43,7 +43,7 @@ class FastPropertyService implements CacheInitializer {
     def taskService
 
     void initializeCaches() {
-        caches.allFastProperties.ensureSetUp({ Region region -> retrieveFastProperties(region) }, {}, { true })
+        caches.allFastProperties.ensureSetUp({ Region region -> retrieveFastProperties(region) }, { }, { true })
     }
 
     private List<FastProperty> retrieveFastProperties(Region region) {
@@ -122,11 +122,10 @@ class FastPropertyService implements CacheInitializer {
                 String errorMsg = XML.parse(restResponse.content).errorMsg
                 throw new ValidationException("Failed to create Fast Property. ${errorMsg}")
             }
-            fastProperty = FastProperty.fromXml(XML.parse(restResponse.content) as GPathResult)
+            FastProperty fastPropertyCreated = FastProperty.fromXml(XML.parse(restResponse.content) as GPathResult)
             // Refresh cache
-            get(userContextThatDelivered, fastProperty.id)
-        }, Link.to(EntityType.fastProperty, fastProperty.id), existingTask)
-        fastProperty
+            get(userContextThatDelivered, fastPropertyCreated.id)
+        }, Link.to(EntityType.fastProperty, fastProperty.id), existingTask) as FastProperty
     }
 
     void updateFastProperty(UserContext userContext, String id, String value, String updatedBy,

@@ -72,6 +72,7 @@ class GroupCreateCommandSpec extends Specification {
         cmd.hasErrors()
         1 == cmd.errors.errorCount
         'compoundName.invalid.max.size' == cmd.errors.appName
+        //noinspection GroovyAssignabilityCheck
         1 * mockApplicationService.getRegisteredApplication(_, 'videometadata') >> new AppRegistration()
     }
 

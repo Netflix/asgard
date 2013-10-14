@@ -41,11 +41,11 @@ class ImageController {
     def taskService
     def grailsApplication
 
-    def static allowedMethods = [update: 'POST', delete: ['POST', 'DELETE'], launch: 'POST', addTag: 'POST',
+    static allowedMethods = [update: 'POST', delete: ['POST', 'DELETE'], launch: 'POST', addTag: 'POST',
             addTags: 'POST', removeTag: ['POST', 'DELETE'], removeTags: ['POST', 'DELETE'], removeAllTags: 'DELETE',
             massDelete: ['POST', 'DELETE']]
 
-    def static editActions = ['prelaunch']
+    static editActions = ['prelaunch']
 
     def index = { redirect(action: 'list', params:params) }
 
@@ -107,15 +107,17 @@ class ImageController {
             flash.message = "Unable to modify ${imageId} on this account because ${e}"
             redirect(action: 'show', params: params)
         }
-        ['image' : awsEc2Service.getImage(userContext, imageId),
-         'launchPermissions' : launchUsers,
-         'accounts' : grailsApplication.config.grails.awsAccountNames]
+        [
+                image: awsEc2Service.getImage(userContext, imageId),
+                launchPermissions: launchUsers,
+                accounts: grailsApplication.config.grails.awsAccountNames
+        ]
     }
 
     def update = {
         def imageId = EntityType.image.ensurePrefix(params.imageId)
         UserContext userContext = UserContext.of(request)
-        List<String> launchPermissions = (params.launchPermissions instanceof String) ? [ params.launchPermissions ] : params.launchPermissions?: []
+        List<String> launchPermissions = Requests.ensureList(params.launchPermissions)
         try {
             awsEc2Service.setImageLaunchers(userContext, imageId, launchPermissions)
             flash.message = "Image '${imageId}' has been updated."
@@ -161,7 +163,7 @@ class ImageController {
     def launch = {
 
         String message = ''
-        Closure output = {}
+        Closure output = { }
         List<String> instanceIds = []
         List<String> spotInstanceRequestIds = []
 
@@ -248,7 +250,7 @@ class ImageController {
     }
 
     /**
-     * Adds or replaces a tags on a set of images in batch. Expects the following params:
+     * Adds or replaces a tag on a set of images in batch. Expects the following params:
      *         imageIds - comma separated list of image ids to add or replace tags on
      *         name - the key of the tag to add or replace
      *         value - the value of the tag to add or replace
@@ -257,7 +259,7 @@ class ImageController {
         performAddTags(params.imageIds?.tokenize(','))
     }
 
-    private def performAddTags(Collection<String> imageIds) {
+    private performAddTags(Collection<String> imageIds) {
         String name = params.name
         String value = params.value
         Check.notEmpty(name, 'name')
@@ -311,8 +313,10 @@ class ImageController {
         DataBindingUtils.bindObjectToInstance(massDeleteRequest, params)
         List<Image> deleted = imageService.massDelete(userContext, massDeleteRequest)
 
-        String executeMessage = "Started deleting the following ${deleted.size()} images in ${userContext.region}:\n"
-        String dryRunMessage = "Dry run mode. If executed, this job would delete ${deleted.size()} images in ${userContext.region}:\n"
+        Integer count = deleted.size()
+        String executeMessage = "Started deleting the following ${count} images in ${userContext.region}:\n"
+        Region region = userContext.region
+        String dryRunMessage = "Dry run mode. If executed, this job would delete ${count} images in ${region}:\n"
         String initialMessage = JanitorMode.EXECUTE == massDeleteRequest.mode ? executeMessage : dryRunMessage
         String message = deleted.inject(initialMessage) { message, image -> message + image + '\n' }
         render "<pre>\n${message}</pre>\n"
@@ -325,7 +329,7 @@ class ImageController {
         List<Image> baseless = []
         List<Image> baselessInUse = []
 
-        Set<String> amisInUse = new HashSet<String>()
+        Set<String> amisInUse = [] as Set
         Map<String, List<MergedInstance>> imageIdsToInstanceLists = [:]
         List<MergedInstance> instances = mergedInstanceGroupingService.getMergedInstances(userContext, '')
         instances.each { MergedInstance instance ->

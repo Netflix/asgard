@@ -24,7 +24,7 @@ class LoadBalancerControllerTests {
 
     @Before
     void setUp() {
-        Mocks.createDynamicMethods() 
+        Mocks.createDynamicMethods()
         TestUtils.setUpMockRequest()
         mockForConstraintsTests(LoadBalancerCreateCommand)
         controller.awsLoadBalancerService = Mocks.awsLoadBalancerService()
@@ -45,7 +45,7 @@ class LoadBalancerControllerTests {
     }
 
     void testShowNonExistent() {
-        controller.params.name ='doesntexist'
+        controller.params.name = 'doesntexist'
         controller.show()
         assert '/error/missing' == view
         assert "Load Balancer 'doesntexist' not found in us-east-1 test" == controller.flash.message
@@ -69,7 +69,7 @@ class LoadBalancerControllerTests {
         def p = controller.params
         p.appName = 'helloworld'
         p.stack = 'unittest'
-        p.detail ='frontend'
+        p.detail = 'frontend'
         p.protocol1 = 'HTTP'
         p.lbPort1 = '80'
         p.instancePort1 = '7001'

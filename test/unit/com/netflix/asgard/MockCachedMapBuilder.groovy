@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.google.common.collect.ImmutableMap
+
 /**
  * This class makes it easier to mock Caches for testing. You are responsible for initializing the CachedMaps, and the
  * setup enforced by the application is sidestepped. Usage is the same as CachedMapBuilder.
@@ -24,7 +25,7 @@ import com.google.common.collect.ImmutableMap
  */
 class MockCachedMapBuilder<T> extends CachedMapBuilder<T> {
     final ImmutableMap<EntityType, CachedMap> entityTypeToCacheMap
-    final EntityType  entityType
+    final EntityType entityType
 
     /**
      * Used to create a CachedMapBuilder where you have control over the initialization of the CachedMaps.
@@ -36,7 +37,7 @@ class MockCachedMapBuilder<T> extends CachedMapBuilder<T> {
     }
 
     // This constructor is private to indicate that it is not part of the public API.
-    private MockCachedMapBuilder(Map<EntityType, CachedMap> entityTypeToCacheMap, EntityType  entityType) {
+    private MockCachedMapBuilder(Map<EntityType, CachedMap> entityTypeToCacheMap, EntityType entityType) {
         super(null)
         this.entityTypeToCacheMap = ImmutableMap.copyOf(entityTypeToCacheMap)
         this.entityType = entityType
@@ -70,7 +71,7 @@ class MockCachedMapBuilder<T> extends CachedMapBuilder<T> {
             this.cachedMap = cachedMap
         }
 
-        void ensureSetUp(Closure multiRegionRetriever, Closure multiRegionCallback = {},
+        void ensureSetUp(Closure multiRegionRetriever, Closure multiRegionCallback = { },
                          Closure multiRegionReadinessChecker = { true }) {
             Region region = Region.US_EAST_1
             cachedMap.ensureSetUp({ multiRegionRetriever(region) }, { multiRegionCallback(region) },

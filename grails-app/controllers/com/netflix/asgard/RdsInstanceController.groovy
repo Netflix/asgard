@@ -25,10 +25,9 @@ import grails.converters.XML
 @ContextParam('region')
 class RdsInstanceController {
 
-    // the delete actions only accept POST requests
-    def static allowedMethods = [delete:'POST']
+    static allowedMethods = [delete: 'POST']
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def awsRdsService
     def awsEc2Service
@@ -72,9 +71,9 @@ class RdsInstanceController {
             chain(action: 'create', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
         } else {
             try {
-                boolean multiAZ = "on".equals(params.multiAZ)
+                boolean multiAZ = params.multiAZ == 'on'
                 def selectedDBSecurityGroups = (params.selectedDBSecurityGroups instanceof String) ? [params.selectedDBSecurityGroups] : params.selectedDBSecurityGroups as List
-                if (!selectedDBSecurityGroups) selectedDBSecurityGroups = ["default"]
+                if (!selectedDBSecurityGroups) { selectedDBSecurityGroups = ["default"] }
                 //awsRdsService.createDBSecurityGroup(params.name, params.description)
 
                 final DBInstance dbInstance = new DBInstance()
@@ -102,7 +101,7 @@ class RdsInstanceController {
         }
     }
 
-    def update = {DbUpdateCommand cmd ->
+    def update = { DbUpdateCommand cmd ->
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
             chain(action: 'edit', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
@@ -110,7 +109,7 @@ class RdsInstanceController {
             try {
                 boolean multiAZ = ("on" == params.multiAZ)
                 def selectedDBSecurityGroups = (params.selectedDBSecurityGroups instanceof String) ? [params.selectedDBSecurityGroups] : params.selectedDBSecurityGroups
-                if (!selectedDBSecurityGroups) selectedDBSecurityGroups = ["default"]
+                if (!selectedDBSecurityGroups) { selectedDBSecurityGroups = ["default"] }
                 awsRdsService.updateDBInstance(
                     userContext,
                     params.allocatedStorage.toInteger(),

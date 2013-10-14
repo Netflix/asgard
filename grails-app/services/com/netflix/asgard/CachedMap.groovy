@@ -131,7 +131,7 @@ class CachedMap<T> implements Fillable {
      * @param readinessChecker an optional closure to determine whether or not external state is ready for this
      *          regional cached map to run its own fill algorithm
      */
-    void ensureSetUp(Closure retriever, Closure callback = {}, Closure readinessChecker = { true }) {
+    void ensureSetUp(Closure retriever, Closure callback = { }, Closure readinessChecker = { true }) {
         if (needsInitialization) {
             this.retriever = retriever
             this.callback = callback
@@ -191,7 +191,7 @@ class CachedMap<T> implements Fillable {
         try {
             DateTime dataPullStartTime = new DateTime()
             Set<String> cachedKeys = new HashSet<String>(map.keySet())
-            Map<String, T> datasource = new HashMap<String, T>()
+            Map<String, T> datasource = [:]
             Collection<T> items = retriever()
             items.each { val -> datasource.put(entityType.key(val), val) }
 

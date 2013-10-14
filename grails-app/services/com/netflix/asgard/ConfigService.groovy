@@ -398,7 +398,7 @@ class ConfigService {
      */
     String getLinkCanonicalServerUrl() {
         grailsApplication.config.link?.canonicalServerUrl ?: grailsApplication.config.grails.serverURL ?:
-                'http://localhost:8080/'
+                'http://localhost:8080'
     }
 
     /**
@@ -721,5 +721,12 @@ class ConfigService {
      */
     List<String> getEbsVolumeDeviceNamesForLaunchConfigs() {
         grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.deviceNames ?: ['/dev/sdb', '/dev/sdc']
+    }
+
+    /**
+     * @return fast property console url based on accountName
+     */
+    String getFastPropertiesConsoleUrl() {
+        grailsApplication.config.platform?.fastPropertyConsoleUrls?."${accountName}" ?: ""
     }
 }

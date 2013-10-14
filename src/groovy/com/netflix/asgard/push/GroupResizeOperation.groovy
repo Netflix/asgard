@@ -76,7 +76,7 @@ class GroupResizeOperation extends AbstractPushOperation {
     }
 
     private String appName
-    private def thisOperation = this
+    private GroupResizeOperation thisOperation = this
     private DateTime lastBatchStartTime = Time.now()
     private static Duration MAX_TIME_PER_BATCH = Duration.standardMinutes(25)
 
@@ -278,7 +278,7 @@ class GroupResizeOperation extends AbstractPushOperation {
                         "for instances to register with Eureka${regardingUpStatus} and pass a health check. " +
                         "Expected ${newMin} discoverable, healthy instance${newMin == 1 ? '' : 's'}, but " +
                         "auto scaling group '${autoScalingGroupName}' still has ${unhealthyCount} " +
-                        "undiscoverable or unhealthy instance${unhealthyCount == 1 ? '': 's'} " +
+                        "undiscoverable or unhealthy instance${unhealthyCount == 1 ? '' : 's'} " +
                         "including ${idsOfInstancesThatAreNotYetHealthy}. Are the new instances having errors?")
             }
             Time.sleepCancellably(ITERATION_WAIT_MILLIS)

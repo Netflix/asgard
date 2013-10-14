@@ -48,7 +48,7 @@ class ApplicationControllerTests {
 
     void testShowNonExistent() {
         def p = controller.params
-        p.name ='doesntexist'
+        p.name = 'doesntexist'
         controller.show()
         assert '/error/missing' == view
         assert "Application 'doesntexist' not found in us-east-1 test" == controller.flash.message

@@ -23,7 +23,7 @@ class ApiTokenController {
     def configService
     def secretService
 
-    def static allowedMethods = [generate: 'POST']
+    static allowedMethods = [generate: 'POST']
 
     def beforeInterceptor = {
         if (!configService.apiTokenEnabled) {

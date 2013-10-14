@@ -24,6 +24,7 @@ class IconController {
 
     private static final String MID_PATH = 'images/tango/'
 
+    @SuppressWarnings('GrailsServletContextReference')
     def list = {
         // Get all the png files within web-app/images/tango/ on a Mac workstation or Linux server
         List iconSets = []
@@ -32,7 +33,7 @@ class IconController {
             tangoPath += params.id
         }
 
-        new File(tangoPath).eachDirRecurse{File dir ->
+        new File(tangoPath).eachDirRecurse { File dir ->
             if (dir.list().size() > 0) {
                 def icons = []
                 dir.eachFile{ file ->

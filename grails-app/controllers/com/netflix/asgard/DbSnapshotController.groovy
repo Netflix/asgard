@@ -56,7 +56,8 @@ class DbSnapshotController {
             redirect(action: 'list')
         } else {
             try {
-                DBInstance instance = awsRdsService.restoreFromSnapshot(userContext, params.name, params.dBInstanceIdentifier)
+                DBInstance instance = awsRdsService.restoreFromSnapshot(userContext, params.name,
+                        params.dBInstanceIdentifier)
                 String identifier = instance.getDBInstanceIdentifier()
                 redirect(controller: "rdsInstance", action: 'show', params: [dBInstanceIdentifier: identifier])
             } catch (Exception e) {
@@ -86,9 +87,10 @@ class DbSnapshotController {
     def delete = {
         UserContext userContext = UserContext.of(request)
         def snapshotIds = []
-        if (params.dBSnapshotIdentifier) snapshotIds << params.dBSnapshotIdentifier
-        if (params.selectedSnapshots) {
-            snapshotIds.addAll ((params.selectedSnapshots instanceof String) ? [params.selectedSnapshots] : params.selectedSnapshots as List)
+        if (params.dBSnapshotIdentifier) { snapshotIds << params.dBSnapshotIdentifier }
+        def selectedSnapshots = params.selectedSnapshots
+        if (selectedSnapshots) {
+            snapshotIds.addAll ((selectedSnapshots instanceof String) ? [selectedSnapshots] : selectedSnapshots as List)
         }
 
         def message = ""

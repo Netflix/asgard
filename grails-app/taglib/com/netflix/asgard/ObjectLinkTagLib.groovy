@@ -63,9 +63,9 @@ class ObjectLinkTagLib extends ApplicationTagLib {
         if (grailsApplication.controllerNamesToContextParams[(controller)].contains('region')) {
             // Get value for region parameter from tag attribute or request attribute. Ensure link has region parameter.
             String region = attrs.region ? attrs.remove('region') : request['region'].toString()
-            if (attrs.params)
+            if (attrs.params) {
                 attrs.params.put('region', region)
-            else {
+            } else {
                 attrs.params = ['region': region]
             }
         }

@@ -87,11 +87,11 @@ class Requests {
         }
         if (value instanceof Map) {
             output += '[\n'
-            value.each { k, v ->  output += prettyPrint(v, indent + 5, k) }
+            value.each { k, v -> output += prettyPrint(v, indent + 5, k) }
             output += "${spaces}]\n"
-        } else if  (value instanceof Collection || value?.class?.array) {
+        } else if (value instanceof Collection || value?.class?.array) {
             output += '[\n'
-            value.each { it -> output += prettyPrint(it, indent + 5)}
+            value.each { it -> output += prettyPrint(it, indent + 5) }
             output += "${spaces}]\n"
         } else {
             if (value?.hasProperty('name') && value?.hasProperty('value')) {
@@ -138,7 +138,7 @@ class Requests {
     }
 
     static String getBaseUrl(HttpServletRequest request) {
-        String port = (request.serverPort && request.serverPort) != 80 ? ":${request.serverPort}" : ''
+        String port = (request.serverPort && request.serverPort) == 80 ? '' : ":${request.serverPort}"
         "${request.scheme}://${request.serverName}${port}"
     }
 

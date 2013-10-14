@@ -25,9 +25,9 @@ class HomeController {
         Region region = request.region
         String discoveryBaseApiUrl = discoveryService.findCanonicalBaseApiUrl(region)
         [
-            'externalLinks' : configService.getExternalLinks(),
-            'discoveryUrl': discoveryService.findCanonicalBaseUrl(region),
-            'discoveryApiUrl': discoveryBaseApiUrl ? "${discoveryBaseApiUrl}/apps" : null
+                externalLinks: configService.getExternalLinks(),
+                discoveryUrl: discoveryService.findCanonicalBaseUrl(region),
+                discoveryApiUrl: discoveryBaseApiUrl ? "${discoveryBaseApiUrl}/apps" : null,
         ]
     }
 }

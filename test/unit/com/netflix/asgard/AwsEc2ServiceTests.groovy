@@ -174,7 +174,7 @@ class AwsEc2ServiceTests extends GrailsUnitTestCase {
 
     void testCreateTags() {
         def imageRange = 1..600
-        Collection<String> sixHundredImageIds = imageRange.collect { "image${it}"}
+        Collection<String> sixHundredImageIds = imageRange.collect { "image${it}" }
         AwsEc2Service awsEc2Service = new AwsEc2Service()
         def mockAmazonEC2 = mockFor(AmazonEC2)
         awsEc2Service.awsClient = new MultiRegionAwsClient({ mockAmazonEC2.createMock() })

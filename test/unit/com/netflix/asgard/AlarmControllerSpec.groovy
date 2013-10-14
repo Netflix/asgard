@@ -212,7 +212,7 @@ class AlarmControllerSpec extends Specification {
                         namespace: 'AWS/EC2', period: 300, statistic: 'Average', threshold: 87, alarmActions: [],
                         dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG, value: 'helloworld--scalingtest-v000')]
                 )]
-        )}
+        ) }
 
         1 * mockAmazonCloudWatchClient.deleteAlarms(new DeleteAlarmsRequest(
                 alarmNames: ['scale-up-alarm-helloworld--scalingtest-v000-CPUUtilization-87']

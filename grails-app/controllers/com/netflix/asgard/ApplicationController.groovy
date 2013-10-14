@@ -36,9 +36,9 @@ class ApplicationController {
     def configService
     def discoveryService
 
-    def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', securityUpdate: 'POST']
+    static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', securityUpdate: 'POST']
 
-    def static editActions = ['security']
+    static editActions = ['security']
 
     def index = { redirect(action: 'list', params: params) }
 
@@ -93,7 +93,7 @@ class ApplicationController {
 
         // Sort by number of instances descending, then by number of auto scaling groups descending
         List<Owner> owners = (ownerNamesToOwners.values() as List).
-                sort { -1 * it.autoScalingGroupCount}.sort { -1 * it.instanceCount }
+                sort { -1 * it.autoScalingGroupCount }.sort { -1 * it.instanceCount }
 
         withFormat {
             html { [owners: owners] }
@@ -270,10 +270,12 @@ class ApplicationController {
 
     // Security Group permission updating logic
 
-    private void updateSecurityEgress(UserContext userContext, SecurityGroup srcGroup, List<String> selectedGroups, Map portMap) {
-        awsEc2Service.getSecurityGroups(userContext).each {SecurityGroup targetGroup ->
-            boolean wantAccess = selectedGroups.any {it == targetGroup.groupName} && portMap[targetGroup.groupName] != ''
-            String  wantPorts = wantAccess ? portMap[targetGroup.groupName] : null
+    private void updateSecurityEgress(UserContext userContext, SecurityGroup srcGroup, List<String> selectedGroups,
+                                      Map portMap) {
+        awsEc2Service.getSecurityGroups(userContext).each { SecurityGroup targetGroup ->
+            boolean wantAccess = selectedGroups.any { it == targetGroup.groupName } &&
+                    portMap[targetGroup.groupName] != ''
+            String wantPorts = wantAccess ? portMap[targetGroup.groupName] : null
             List<IpPermission> wantPerms = awsEc2Service.permissionsFromString(wantPorts)
             awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, srcGroup, wantPerms)
         }

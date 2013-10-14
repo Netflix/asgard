@@ -26,12 +26,14 @@ ruleset {
     AssignmentInConditional
     BigDecimalInstantiation
     BitwiseOperatorInConditional
-    BooleanGetBoolean
+    BooleanGetBoolean {
+        priority = 1
+    }
     BrokenNullCheck
     BrokenOddnessCheck
     ClassForName
     ComparisonOfTwoConstants
-//    ComparisonWithSelf
+    ComparisonWithSelf
     ConstantAssertExpression
     ConstantIfExpression
     ConstantTernaryExpression
@@ -40,7 +42,7 @@ ruleset {
     DuplicateCaseStatement
     DuplicateMapKey
     DuplicateSetValue
-//    EmptyCatchBlock
+    EmptyCatchBlock
     EmptyElseBlock
     EmptyFinallyBlock
     EmptyForStatement
@@ -67,7 +69,7 @@ ruleset {
     // rulesets/braces.xml
     ElseBlockBraces
     ForStatementBraces
-//    IfStatementBraces
+    IfStatementBraces
     WhileStatementBraces
 
     // rulesets/concurrency.xml
@@ -89,6 +91,7 @@ ruleset {
     SynchronizedOnThis
     SynchronizedReadObjectMethod
     SystemRunFinalizersOnExit
+//    ThisReferenceEscapesConstructor
     ThreadGroup
     ThreadLocalNotStaticFinal
     ThreadYield
@@ -101,9 +104,10 @@ ruleset {
     ConfusingTernary
 //    CouldBeElvis
     HashtableIsObsolete
+    IfStatementCouldBeTernary
 //    InvertedIfElse
     LongLiteralWithLowerCaseL
-//    ParameterReassignment
+    ParameterReassignment
     TernaryCouldBeElvis
     VectorIsObsolete
 
@@ -143,6 +147,7 @@ ruleset {
     CatchThrowable
     ConfusingClassNamedException
     ExceptionExtendsError
+    ExceptionNotThrown
     MissingNewInThrowStatement
 //    ReturnNullFromCatchBlock
     SwallowThreadDeath
@@ -160,8 +165,22 @@ ruleset {
     BracesForTryCatchFinally
     ClassJavadoc
 //    LineLength
+    SpaceAfterCatch
+//    SpaceAfterClosingBrace
+    SpaceAfterComma
+    SpaceAfterFor
+    SpaceAfterIf
+    SpaceAfterOpeningBrace
+    SpaceAfterSemicolon
+    SpaceAfterSwitch
+    SpaceAfterWhile
+    SpaceAroundClosureArrow
+    SpaceAroundOperator
+    SpaceBeforeClosingBrace
+//    SpaceBeforeOpeningBrace
 
     // rulesets/generic.xml
+    IllegalClassMember
     IllegalClassReference
     IllegalPackageReference
     IllegalRegex
@@ -172,10 +191,14 @@ ruleset {
     // rulesets/grails.xml
 //    GrailsDomainHasEquals
 //    GrailsDomainHasToString
+    GrailsDuplicateMapping
 //    GrailsPublicControllerMethod
     GrailsServletContextReference
     GrailsSessionReference
 //    GrailsStatelessService
+    GrailsDuplicateConstraint
+    GrailsDomainWithServiceReference
+    GrailsDomainReservedSqlKeywordName
 
     // rulesets/groovyism.xml
 //    AssignCollectionSort
@@ -183,30 +206,31 @@ ruleset {
 //    ClosureAsLastMethodParameter
     CollectAllIsDeprecated
     ConfusingMultipleReturns
-//    ExplicitArrayListInstantiation
+    ExplicitArrayListInstantiation
     ExplicitCallToAndMethod
-//    ExplicitCallToCompareToMethod
+    ExplicitCallToCompareToMethod
     ExplicitCallToDivMethod
-//    ExplicitCallToEqualsMethod
+    ExplicitCallToEqualsMethod
     ExplicitCallToGetAtMethod
     ExplicitCallToLeftShiftMethod
-//    ExplicitCallToMinusMethod
+    ExplicitCallToMinusMethod
     ExplicitCallToModMethod
     ExplicitCallToMultiplyMethod
     ExplicitCallToOrMethod
-//    ExplicitCallToPlusMethod
+    ExplicitCallToPlusMethod
     ExplicitCallToPowerMethod
     ExplicitCallToRightShiftMethod
     ExplicitCallToXorMethod
-//    ExplicitHashMapInstantiation
-//    ExplicitHashSetInstantiation
-//    ExplicitLinkedHashMapInstantiation
-//    ExplicitLinkedListInstantiation
-//    ExplicitStackInstantiation
+    ExplicitHashMapInstantiation
+    ExplicitHashSetInstantiation
+    ExplicitLinkedHashMapInstantiation
+    ExplicitLinkedListInstantiation
+    ExplicitStackInstantiation
 //    ExplicitTreeSetInstantiation
     GStringAsMapKey
 //    GetterMethodCouldBeProperty
-//    GroovyLangImmutable  TODO: Enable for Groovy 1.8
+    GroovyLangImmutable
+//    GStringExpressionWithinString
 //    UseCollectMany
     UseCollectNested
 
@@ -230,12 +254,15 @@ ruleset {
     JUnitAssertAlwaysFails
     JUnitAssertAlwaysSucceeds
     JUnitFailWithoutMessage
+//    JUnitLostTest
+    JUnitPublicField
     JUnitPublicNonTestMethod
 //    JUnitSetUpCallsSuper
 //    JUnitStyleAssertions
 //    JUnitTearDownCallsSuper
     JUnitTestMethodWithoutAssert
     JUnitUnnecessarySetUp
+    JUnitUnnecessaryThrowsException
     JUnitUnnecessaryTearDown
     SpockIgnoreRestUsed
     UnnecessaryFail
@@ -251,7 +278,7 @@ ruleset {
     LoggerWithWrongModifiers
     LoggingSwallowsStacktrace
     MultipleLoggers
-    PrintStackTrace{
+    PrintStackTrace {
         priority = 1
     }
     Println {
@@ -267,6 +294,7 @@ ruleset {
     // rulesets/naming.xml
     AbstractClassName
     ClassName
+    ClassNameSameAsFilename
 //    ConfusingMethodName
 //    FactoryMethodName
 //    FieldName // we are a bit lax about conventions here
@@ -290,12 +318,14 @@ ruleset {
     UnsafeArrayDeclaration
 
     // rulesets/serialization.xml
+    EnumCustomSerializationIgnored
     SerialPersistentFields
     SerialVersionUID
 //    SerializableClassMustDefineSerialVersionUID
 
     // rulesets/size.xml
 //    AbcComplexity
+//    AbcMetric
 //    ClassSize
 //    CrapMetric
     CyclomaticComplexity
@@ -304,7 +334,7 @@ ruleset {
 //    NestedBlockDepth
 
     // rulesets/unnecessary.xml
-//    AddEmptyString
+    AddEmptyString
     ConsecutiveLiteralAppends
     ConsecutiveStringConcatenation
     UnnecessaryBigDecimalInstantiation
@@ -317,10 +347,10 @@ ruleset {
 //    UnnecessaryCollectCall
     UnnecessaryCollectionCall
     UnnecessaryConstructor
-//    UnnecessaryDefInFieldDeclaration
-//    UnnecessaryDefInMethodDeclaration
-//    UnnecessaryDefInVariableDeclaration
-//    UnnecessaryDotClass
+    UnnecessaryDefInFieldDeclaration
+    UnnecessaryDefInMethodDeclaration
+    UnnecessaryDefInVariableDeclaration
+    UnnecessaryDotClass
     UnnecessaryDoubleInstantiation
 //    UnnecessaryElseStatement
     UnnecessaryFinalOnPrivateMethod
@@ -352,9 +382,9 @@ ruleset {
     UnusedArray
 //    UnusedMethodParameter
     UnusedObject
-//    UnusedPrivateField // showed false positives
+    UnusedPrivateField
     UnusedPrivateMethod
-//    UnusedPrivateMethodParameter
+    UnusedPrivateMethodParameter
 //    UnusedVariable
 
 }

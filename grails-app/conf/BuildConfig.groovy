@@ -35,6 +35,8 @@ codenarc {
     }
     ruleSetFiles='file:grails-app/conf/CodeNarcRuleSet.groovy'
     maxPriority1Violations = 0
+    maxPriority2Violations = 0
+    maxPriority3Violations = 0
 }
 
 grails.project.dependency.resolution = {
@@ -130,6 +132,9 @@ grails.project.dependency.resolution = {
 
                 // Rules for AWS named objects.
                 'com.netflix.frigga:frigga:0.6',
+
+                // Ease of use library for AWS SWF.
+                'com.netflix.glisten:glisten:0.2',
 
                 // Groovy concurrency framework.
                 'org.codehaus.gpars:gpars:1.0.0',

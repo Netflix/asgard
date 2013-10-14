@@ -48,11 +48,11 @@ class NetflixAdvancedUserDataProvider implements AdvancedUserDataProvider {
 
         UserContext userContext = launchContext.userContext
         String appNameFromApplication = launchContext.application?.name
-        String groupName = launchContext.autoScalingGroup?.autoScalingGroupName
-        String launchConfigName = launchContext.launchConfiguration?.launchConfigurationName
+        String groupName = launchContext.autoScalingGroup?.autoScalingGroupName ?: ''
+        String launchConfigName = launchContext.launchConfiguration?.launchConfigurationName ?: ''
         Image image = launchContext.image
         String appName = appNameFromApplication ?: Relationships.appNameFromGroupName(groupName) ?:
-            Relationships.packageFromAppVersion(image.appVersion)
+            Relationships.packageFromAppVersion(image.appVersion) ?: ''
 
         // If the AMI's description shows a nflx-base version of 2 or greater, use the simple user data format.
         Matcher matcher = image?.description =~ /.*ancestor_version=nflx-base-([0-9]+)[^0-9].*/

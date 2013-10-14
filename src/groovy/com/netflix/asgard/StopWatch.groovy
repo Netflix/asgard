@@ -64,7 +64,7 @@ class StopWatch {
 }
 
 class DisabledStopWatch extends StopWatch {
-    void startActivity(String activity) {}
+    void startActivity(String activity) { }
     Period reportAndRestart(String activity) { null }
     Period stopAndReport() { null }
 }

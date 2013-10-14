@@ -139,7 +139,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     void initializeCaches() {
         // Cluster cache has no timer. It gets triggered by the Auto Scaling Group cache callback closure.
         caches.allClusters.ensureSetUp(
-                { Region region -> buildClusters(region, caches.allAutoScalingGroups.by(region).list()) }, {},
+                { Region region -> buildClusters(region, caches.allAutoScalingGroups.by(region).list()) }, { },
                 { Region region ->
                     boolean awaitingLoadBalancers = caches.allLoadBalancers.by(region).isDoingFirstFill()
                     boolean awaitingAppInstances = caches.allApplicationInstances.by(region).isDoingFirstFill()
@@ -155,7 +155,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         caches.allTerminationPolicyTypes.ensureSetUp({ Region region -> retrieveTerminationPolicyTypes() })
         caches.allScheduledActions.ensureSetUp({ Region region -> retrieveScheduledActions(region) })
         caches.allSignificantStackInstanceHealthChecks.ensureSetUp(
-                { Region region -> retrieveInstanceHealthChecks(region) }, {},
+                { Region region -> retrieveInstanceHealthChecks(region) }, { },
                 { Region region ->
                     caches.allApplicationInstances.by(region).filled && caches.allAutoScalingGroups.by(region).filled
                 }
@@ -366,13 +366,13 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         if (!instanceId) { return null }
         def groups = getAutoScalingGroups(userContext)
         //println "Looking for group for instance " + instanceId
-        groups.find { it.instances.any { it.instanceId == instanceId }}
+        groups.find { it.instances.any { it.instanceId == instanceId } }
     }
 
     List<AutoScalingGroup> getAutoScalingGroupsForLB(UserContext userContext, String lbName) {
         def groups = getAutoScalingGroups(userContext)
         //println "Looking for group for LB " + lbName
-        groups.findAll { it.loadBalancerNames.any { it == lbName }}
+        groups.findAll { it.loadBalancerNames.any { it == lbName } }
     }
 
     AutoScalingGroup getAutoScalingGroupForLaunchConfig(UserContext userContext, String lcName) {
@@ -1104,7 +1104,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     Collection<String> getLaunchConfigurationNamesForAutoScalingGroup(UserContext userContext,
                                                                       String autoScalingGroupName) {
-        Set<String> launchConfigNamesForGroup = new HashSet<String>()
+        Set<String> launchConfigNamesForGroup = [] as Set
         String currentLaunchConfigName = getAutoScalingGroup(userContext, autoScalingGroupName).launchConfigurationName
         if (currentLaunchConfigName) {
             launchConfigNamesForGroup.add(currentLaunchConfigName)

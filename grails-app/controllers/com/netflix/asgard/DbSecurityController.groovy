@@ -26,7 +26,7 @@ class DbSecurityController {
     def awsRdsService
     def awsEc2Service
 
-    def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
+    static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
     def index = { redirect(action: 'list', params: params) }
 
@@ -36,8 +36,10 @@ class DbSecurityController {
                 it.getDBSecurityGroupName().toLowerCase() }
         withFormat {
             html {
-                [ 'dbSecurityGroups' : dbSecurityGroups,
-                  'accountNames' : grailsApplication.config.grails.awsAccountNames ]
+                [
+                        dbSecurityGroups: dbSecurityGroups,
+                        accountNames: grailsApplication.config.grails.awsAccountNames
+                ]
             }
             xml { new XML(dbSecurityGroups).render(response) }
             json { new JSON(dbSecurityGroups).render(response) }
@@ -51,9 +53,10 @@ class DbSecurityController {
         if (!group) {
             Requests.renderNotFound('DB Security Group', name, this)
         } else {
-            def details = [
-                    'group' : group,
-                    'accountNames' : grailsApplication.config.grails.awsAccountNames ]
+            Map details = [
+                    group: group,
+                    accountNames: grailsApplication.config.grails.awsAccountNames
+            ]
             // TODO referenced-from lists would be nice too
             withFormat {
                 html { return details }
@@ -87,8 +90,8 @@ class DbSecurityController {
         } else {
             return [
                 'group' : group,
-                'allEC2Groups' : awsEc2Service.getEffectiveSecurityGroups(userContext).collect{it.groupName},
-                'selectedEC2Groups' : group.getEC2SecurityGroups().collect{it.getEC2SecurityGroupName()}
+                'allEC2Groups' : awsEc2Service.getEffectiveSecurityGroups(userContext).collect { it.groupName },
+                'selectedEC2Groups' : group.getEC2SecurityGroups().collect { it.getEC2SecurityGroupName() }
             ]
         }
     }
@@ -102,7 +105,9 @@ class DbSecurityController {
         List<String> selectedGroups = Requests.ensureList(params.selectedGroups)
 
         List<String> ipRanges = []
-        if (params.ipRanges) params.ipRanges.splitEachLine(/[\s,]/, {ipRanges.addAll(it) })
+        if (params.ipRanges) {
+            params.ipRanges.splitEachLine(/[\s,]/, { ipRanges.addAll(it) })
+        }
         DBSecurityGroup group = awsRdsService.getDBSecurityGroup(userContext, name)
         try {
             if (description != group.getDBSecurityGroupDescription() || newName != name) {
@@ -120,18 +125,23 @@ class DbSecurityController {
         redirect(action: 'show', params: [id: name])
     }
 
-    private void updateDBSecurityIngress(UserContext userContext, DBSecurityGroup targetGroup, List<String> selectedGroups, List<String> ipRanges) {
-        List<String> originalGroups = targetGroup.getEC2SecurityGroups().collect{it.getEC2SecurityGroupName()}
-        List<String> originalIPRanges = targetGroup.getIPRanges().collect{it.getCIDRIP()}
+    private void updateDBSecurityIngress(UserContext userContext, DBSecurityGroup targetGroup,
+                                         List<String> selectedGroups, List<String> ipRanges) {
+        List<String> originalGroups = targetGroup.getEC2SecurityGroups().collect { it.getEC2SecurityGroupName() }
+        List<String> originalIPRanges = targetGroup.getIPRanges().collect { it.getCIDRIP() }
         List<String> newGroups = selectedGroups - originalGroups
         List<String> deletedGroups = originalGroups - selectedGroups
         List<String> newIPRanges = ipRanges - originalIPRanges
         List<String> deletedIPRanges = originalIPRanges - ipRanges
 
-        newGroups.each{ awsRdsService.authorizeDBSecurityGroupIngressForGroup(userContext, targetGroup.getDBSecurityGroupName(), it) }
-        deletedGroups.each{ awsRdsService.revokeDBSecurityGroupIngressForGroup(userContext, targetGroup.getDBSecurityGroupName(), it) }
-        newIPRanges.each{ awsRdsService.authorizeDBSecurityGroupIngressForIP(userContext, targetGroup.getDBSecurityGroupName(), it) }
-        deletedIPRanges.each{ awsRdsService.revokeDBSecurityGroupIngressForIP(userContext, targetGroup.getDBSecurityGroupName(), it) }
+        newGroups.each { awsRdsService.authorizeDBSecurityGroupIngressForGroup(userContext,
+                targetGroup.getDBSecurityGroupName(), it) }
+        deletedGroups.each { awsRdsService.revokeDBSecurityGroupIngressForGroup(userContext,
+                targetGroup.getDBSecurityGroupName(), it) }
+        newIPRanges.each { awsRdsService.authorizeDBSecurityGroupIngressForIP(userContext,
+                targetGroup.getDBSecurityGroupName(), it) }
+        deletedIPRanges.each { awsRdsService.revokeDBSecurityGroupIngressForIP(userContext,
+                targetGroup.getDBSecurityGroupName(), it) }
     }
 
     def delete = {

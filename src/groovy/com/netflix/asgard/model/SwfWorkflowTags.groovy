@@ -17,7 +17,7 @@ package com.netflix.asgard.model
 
 import com.netflix.asgard.Link
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.flow.WorkflowTags
+import com.netflix.glisten.WorkflowTags
 import groovy.transform.Canonical
 
 /**

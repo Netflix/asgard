@@ -18,12 +18,15 @@ package com.netflix.asgard
 import org.joda.time.format.ISODateTimeFormat
 
 /**
- * Tag library class for fast properties views
- * Implements custom tags to
+ * Tag library class for fast properties views.
+ *
+ * Implements custom tags which
  *    1. builds additional scope inline table
  *    2. calculates and prints expiration timestamp for a fast property
  */
 class FastPropsTagLib {
+
+    def configService
 
     /**
      * Builds additional scope attributes inline table for a fastProperty
@@ -48,36 +51,58 @@ class FastPropsTagLib {
         if (instanceId || asg || ami || cluster || countries || stack || zone) {
             out << '<table class="scopeAttribs">'
 
-            // in the order or priority
-            if (instanceId) {
-                out << "<tr><td>Instance</td><td>${instanceId?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (asg) {
-                out << "<tr><td>ASG</td><td>${asg?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (ami) {
-                out << "<tr><td>AMI</td><td>${ami?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (cluster) {
-                out << "<tr><td>Cluster</td><td>${cluster?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (countries) {
-                out << "<tr><td>Countries</td><td>${countries?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (stack) {
-                out << "<tr><td>Stack</td><td>${stack?.encodeAsHTML()}</td></tr>"
-            }
-
-            if (zone) {
-                out << "<tr><td>Zone</td><td>${zone?.encodeAsHTML()}</td></tr>"
-            }
+            // In the order of priority
+            outputInstanceId(instanceId)
+            outputAsg(asg)
+            outputAmi(ami)
+            outputCluster(cluster)
+            outputCountries(countries)
+            outputStack(stack)
+            outputZone(zone)
 
             out << '</table>'
+        }
+    }
+
+    private void outputZone(zone) {
+        if (zone) {
+            out << "<tr><td>Zone</td><td>${zone?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputStack(stack) {
+        if (stack) {
+            out << "<tr><td>Stack</td><td>${stack?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputCountries(countries) {
+        if (countries) {
+            out << "<tr><td>Countries</td><td>${countries?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputCluster(cluster) {
+        if (cluster) {
+            out << "<tr><td>Cluster</td><td>${cluster?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputAmi(ami) {
+        if (ami) {
+            out << "<tr><td>AMI</td><td>${ami?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputAsg(asg) {
+        if (asg) {
+            out << "<tr><td>ASG</td><td>${asg?.encodeAsHTML()}</td></tr>"
+        }
+    }
+
+    private void outputInstanceId(instanceId) {
+        if (instanceId) {
+            out << "<tr><td>Instance</td><td>${instanceId?.encodeAsHTML()}</td></tr>"
         }
     }
 
@@ -87,7 +112,7 @@ class FastPropsTagLib {
      * timezone information.
      *
      * @attr ttl TTL in seconds as stored for a fastProperty
-     * @attr ts Last update/created timestamp in ISO-8601 format for a fastProperty
+     * @attr ts last update/created timestamp in ISO-8601 format for a fastProperty
      */
     def writeExpiration = { attrs ->
         def ttl = attrs.ttl ? attrs.remove('ttl') : null
@@ -101,4 +126,22 @@ class FastPropsTagLib {
         }
     }
 
+    /**
+     * Builds fast property console url link if found in configuration
+     * It does not create any output if configuration does not contain this information
+     * Configuration needed for this tag:
+     *  fastPropertyConsoleUrls = [
+     *      test : '...'
+     *      prod : '...'
+     *  ]
+     * This way you configure an external console url based on the account type (test/prod)
+     */
+    def extLinkToPropertiesConsole = {
+        String propertiesConsoleUrl = configService.getFastPropertiesConsoleUrl()
+        if (propertiesConsoleUrl) {
+            out << '<li class="menuButton">'
+            out << '<a href="' + propertiesConsoleUrl + '" target="_blank" class="fastProperties">Fast Properties</a>'
+            out << '</li>'
+        }
+    }
 }

@@ -17,6 +17,7 @@ package com.netflix.asgard.mock
 
 class MockSnapshots {
 
+    @SuppressWarnings('LineLength')
     static final String DATA = '''
 [
   {

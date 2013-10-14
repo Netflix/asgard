@@ -28,7 +28,6 @@ import com.netflix.asgard.EmailerService
 import com.netflix.asgard.LaunchTemplateService
 import com.netflix.asgard.Region
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.flow.Activity
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
@@ -36,6 +35,7 @@ import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.push.PushException
+import com.netflix.glisten.ActivityOperations
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 
@@ -50,13 +50,13 @@ class DeploymentActivitiesSpec extends Specification {
     DiscoveryService mockDiscoveryService = Mock(DiscoveryService)
     AwsLoadBalancerService mockAwsLoadBalancerService = Mock(AwsLoadBalancerService)
     EmailerService mockEmailerService = Mock(EmailerService)
-    Activity mockActivity = Mock(Activity)
+    ActivityOperations mockActivityOperations = Mock(ActivityOperations)
     LinkGenerator mockLinkGenerator = Mock(LinkGenerator)
     DeploymentActivities deploymentActivities = new DeploymentActivitiesImpl(
             awsAutoScalingService: mockAwsAutoScalingService, awsEc2Service: mockAwsEc2Service,
             launchTemplateService: mockLaunchTemplateService, configService: mockConfigService,
             discoveryService: mockDiscoveryService, awsLoadBalancerService: mockAwsLoadBalancerService,
-            emailerService: mockEmailerService, activity: mockActivity, grailsLinkGenerator: mockLinkGenerator)
+            emailerService: mockEmailerService, activity: mockActivityOperations, grailsLinkGenerator: mockLinkGenerator)
 
     AsgDeploymentNames asgDeploymentNames = new AsgDeploymentNames(
             previousAsgName: 'rearden_metal_pourer-v001',
@@ -282,7 +282,7 @@ class DeploymentActivitiesSpec extends Specification {
                 'It has finished pouring.', null)
 
         then:
-        with(mockActivity) {
+        with(mockActivityOperations) {
             getWorkflowExecution() >> new WorkflowExecution(runId: '123', workflowId: 'abc')
             getTaskToken() >> '8badf00d'
         }
@@ -313,7 +313,7 @@ class DeploymentActivitiesSpec extends Specification {
                 'Read this Hank!', 'Production has halted.')
 
         then:
-        with(mockActivity) {
+        with(mockActivityOperations) {
             getWorkflowExecution() >> new WorkflowExecution(runId: '123', workflowId: 'abc')
             getTaskToken() >> '8badf00d'
         }

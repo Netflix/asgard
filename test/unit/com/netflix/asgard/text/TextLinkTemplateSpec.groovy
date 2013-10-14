@@ -30,10 +30,12 @@ class TextLinkTemplateSpec extends Specification {
 
     def 'invalid template input should throw exception'() {
         when:
-        new TextLinkTemplate('http://helloworld:8080/healthcheck?p=2', 'Health Check')
+        TextLinkTemplate template = new TextLinkTemplate('http://helloworld:8080/healthcheck?p=2', 'Health Check')
 
         then:
+        !template
         IllegalStateException e = thrown()
-        e.message == 'ERROR: Cannot create link template for http://helloworld:8080/healthcheck?p=2 because it lacks a \${server} variable'
+        e.message == 'ERROR: Cannot create link template for http://helloworld:8080/healthcheck?p=2 because it lacks ' +
+                'a \${server} variable'
     }
 }

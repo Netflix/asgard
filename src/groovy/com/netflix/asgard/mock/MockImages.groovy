@@ -18,6 +18,7 @@ package com.netflix.asgard.mock
 class MockImages {
 
     // http://localhost:8080/us-east-1/image/list/akms,helloworld,ntsuiboot.json
+    @SuppressWarnings('LineLength')
     static final String DATA = '''
 [
   {

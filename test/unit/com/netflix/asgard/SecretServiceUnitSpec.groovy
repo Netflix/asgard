@@ -47,8 +47,8 @@ class SecretServiceUnitSpec extends Specification {
 
     def setup() {
         secretDir.mkdir()
-        accessKeyFile<< ACCESS_ID
-        secretKeyFile<< SECRET_KEY
+        accessKeyFile << ACCESS_ID
+        secretKeyFile << SECRET_KEY
     }
 
     def cleanup() {

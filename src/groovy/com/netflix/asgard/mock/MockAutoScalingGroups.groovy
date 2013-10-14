@@ -17,6 +17,7 @@ package com.netflix.asgard.mock
 
 class MockAutoScalingGroups {
 
+    @SuppressWarnings('LineLength')
     static final String DATA = '''
 [
   {

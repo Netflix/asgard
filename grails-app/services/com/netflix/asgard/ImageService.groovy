@@ -77,7 +77,7 @@ class ImageService implements BackgroundProcessInitializer {
         String userData = Ensure.encoded(launchTemplateService.buildUserDataForImage(userContext, image))
         Map<String, String> tagPairs = buildTagPairs(image, ownerName)
 
-        List<Tag> tags = tagPairs.collect { String key, String value -> new Tag(key, value)}
+        List<Tag> tags = tagPairs.collect { String key, String value -> new Tag(key, value) }
 
         BigDecimal spotPrice = instanceTypeService.calculateLeisureLinuxSpotBid(userContext, instanceType)
 
@@ -158,7 +158,7 @@ class ImageService implements BackgroundProcessInitializer {
     private Collection<String> findInUseImageNamesForRegion(Task task, Region region) {
         UserContext userContextForRegion = task.userContext.withRegion(region)
 
-        Collection<String> inUseImageIdsForRegion = new HashSet<String>()
+        Collection<String> inUseImageIdsForRegion = [] as Set
         Set<String> remoteUsedImageIds = getRemoteImageIdsInUse(region, task)
         log.debug "Remote in use AMI count: ${remoteUsedImageIds.size()}"
         inUseImageIdsForRegion += remoteUsedImageIds
@@ -197,7 +197,7 @@ class ImageService implements BackgroundProcessInitializer {
     }
 
     private Collection getInUseBaseImageIds(Collection<Image> amis, Collection<String> inUseImageIdsForRegion) {
-        Collection<String> inUseBaseImageIds = new HashSet<String>()
+        Collection<String> inUseBaseImageIds = [] as Set
         amis.each { Image ami ->
             if (inUseImageIdsForRegion.contains(ami.imageId)) {
                 String baseAmiId = Relationships.baseAmiIdFromDescription(ami.description)

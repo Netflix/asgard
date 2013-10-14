@@ -54,6 +54,9 @@ href="${failureImage.url}">${failureImage.owner}</a></figcaption>""" : ''
         out << """<figure class="failure"><img src="${failureImage.path}"/>${caption}</figure>"""
     }
 
+    private final String firefoxBugMessage = 'There is a form bug in Firefox that makes some operations unsafe.\n' +
+            'For now please use Chrome or Safari.'
+
     /**
      * This buttonSubmit tag is similar to actionSubmit. However, buttonSubmit create a <button> element, while
      * actionSubmit creates an <input> element. The button element allows for more rendering options in some browsers,
@@ -97,6 +100,21 @@ href="${failureImage.url}">${failureImage.owner}</a></figcaption>""" : ''
         // Use the body or the value inside the button
         def inner = innerBody ?: value
 
+        // Firefox has a sporadic, critical bug on some complex pages, when there are multiple select elements
+        // with the same name (legal in all other browsers), if the user refreshes the page many times.
+        // For now, disable Firefox use entirely until there is time to build a robust workaround.
+        // Browser sniffing is not a good long-term solution, but denying Firefox use will protect Asgard users
+        // from causing major outages while we build the workaround.
+        // For our purposes, detecting the string "Firefox" is adequate.
+        // See user agent strings at http://www.zytrax.com/tech/web/browser_ids.htm
+        if (request.getHeader('user-agent')?.contains('Firefox')) {
+            attrs.remove('title')
+            out << "<button disabled=\"disabled\" title=\"${firefoxBugMessage}\" "
+            outputAttributes(attrs)
+            out << "><div>${inner}</div></button>"
+            return
+        }
+
         out << "<button type=\"submit\" name=\"_action_${action}\" "
 
         // Only add HTML disabled attribute if the value is true or disabled, not empty, missing, or false.
@@ -119,7 +137,7 @@ href="${failureImage.url}">${failureImage.owner}</a></figcaption>""" : ''
     void outputAttributes(attrs) {
         attrs.remove('tagName') // Just in case one is left
         def writer = getOut()
-        attrs.each {k, v ->
+        attrs.each { k, v ->
             writer << "$k=\"${v.encodeAsHTML()}\" "
         }
     }

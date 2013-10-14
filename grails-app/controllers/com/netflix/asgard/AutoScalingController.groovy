@@ -60,7 +60,7 @@ class AutoScalingController {
     def spotInstanceRequestService
     def stackService
 
-    def static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', postpone: 'POST', pushStart: 'POST']
+    static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', postpone: 'POST', pushStart: 'POST']
 
     def index = { redirect(action: 'list', params: params) }
 
@@ -83,7 +83,7 @@ class AutoScalingController {
         // Determine which app names are valid based on ASG names
         List<String> registeredAppNamesList = applicationService.getRegisteredApplications(userContext)*.name
         Set<String> registeredAppNames = new HashSet<String>(registeredAppNamesList)
-        Set<String> groupsWithValidAppNames = new HashSet<String>()
+        Set<String> groupsWithValidAppNames = [] as Set
         groups*.autoScalingGroupName.each { String asgName ->
             if (groupNamesToAppNames[asgName] in registeredAppNames) {
                 groupsWithValidAppNames << asgName
@@ -126,7 +126,7 @@ class AutoScalingController {
 
             Collection<LoadBalancerDescription> mismatchedLoadBalancers = group.loadBalancerNames.findResults {
                 LoadBalancerDescription elb = awsLoadBalancerService.getLoadBalancer(userContext, it, From.CACHE)
-                elb?.availabilityZones?.sort() != groupData.availabilityZones ? elb : null
+                elb?.availabilityZones?.sort() == groupData.availabilityZones ? null : elb
             }
             Map<String, List<String>> mismatchedElbNamesToZoneLists = mismatchedLoadBalancers.collectEntries {
                 [it.loadBalancerName, it.availabilityZones.sort()]
@@ -287,7 +287,7 @@ class AutoScalingController {
 
     def save = { GroupCreateCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action: 'create', model: [cmd:cmd], params: params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model: [cmd:cmd], params: params) // Use chain to pass both the errors and params
         } else {
             UserContext userContext = UserContext.of(request)
             // Auto Scaling Group name
@@ -331,17 +331,17 @@ class AutoScalingController {
             String imageId = params.imageId
             String keyName = params.keyName
             List<String> securityGroups = Requests.ensureList(params.selectedSecurityGroups)
-            String instanceType = params.instanceType
+            String instType = params.instanceType
             String kernelId = params.kernelId ?: null
             String ramdiskId = params.ramdiskId ?: null
             String iamInstanceProfile = params.iamInstanceProfile ?: configService.defaultIamRole
             boolean ebsOptimized = params.ebsOptimized?.toBoolean()
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(imageId).
-                    withKernelId(kernelId).withInstanceType(instanceType).withKeyName(keyName).withRamdiskId(ramdiskId).
+                    withKernelId(kernelId).withInstanceType(instType).withKeyName(keyName).withRamdiskId(ramdiskId).
                     withSecurityGroups(securityGroups).withIamInstanceProfile(iamInstanceProfile).
                     withEbsOptimized(ebsOptimized)
             if (params.pricing == InstancePriceType.SPOT.name()) {
-                launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instanceType)
+                launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instType)
             }
             boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
             CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
@@ -514,8 +514,8 @@ class AutoScalingController {
         String result = mergedInstance?.getFieldValue(field)
         if (!result) {
             response.status = 404
-            if (!group) { result = "No auto scaling group found with name '$name'"}
-            else if (!mergedInstance) { result = "No instances found for auto scaling group '$name'"}
+            if (!group) { result = "No auto scaling group found with name '$name'" }
+            else if (!mergedInstance) { result = "No instances found for auto scaling group '$name'" }
             else { result = "'$field' not found. Valid fields: ${mergedInstance.listFieldNames()}" }
         }
         render result

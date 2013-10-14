@@ -59,6 +59,7 @@ import com.netflix.asgard.StackService
 import com.netflix.asgard.Task
 import com.netflix.asgard.TaskService
 import com.netflix.asgard.ThreadScheduler
+import com.netflix.asgard.Time
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.cache.Fillable
 import com.netflix.asgard.model.HardwareProfile
@@ -102,8 +103,8 @@ class Mocks {
             monkeyPatcherService()
     }
 
-    private static def grailsApplication
-    static def grailsApplication() {
+    private static grailsApplication
+    static grailsApplication() {
         if (grailsApplication == null) {
             grailsApplication = [
                     config: [
@@ -155,8 +156,8 @@ class Mocks {
         caches
     }
 
-    private static def monkeyPatcherService
-    static def monkeyPatcherService() {
+    private static MonkeyPatcherService monkeyPatcherService
+    static MonkeyPatcherService monkeyPatcherService() {
         if (monkeyPatcherService == null) {
             MockUtils.mockLogging(MonkeyPatcherService, false)
             monkeyPatcherService = new MonkeyPatcherService()
@@ -198,7 +199,7 @@ class Mocks {
         applicationService
     }
 
-    private static def item(String name) {
+    private static Item item(String name) {
         new Item().withName(name).withAttributes(
                 [new Attribute('createTs', '1279755598817'), new Attribute('updateTs', '1279755598817')])
     }
@@ -652,7 +653,7 @@ class Mocks {
 
     static void waitForFill(Fillable cache) {
         while (!cache.filled) {
-            sleep 10
+            Time.sleepCancellably(10)
         }
     }
 

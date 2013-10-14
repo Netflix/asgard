@@ -57,7 +57,7 @@ class RetriableSpec extends Specification {
 
     def 'exception handler should not be called if work succeeds the first time'() {
 
-        Retriable retriable = new Retriable(work: {})
+        Retriable retriable = new Retriable(work: { })
 
         when:
         retriable.performWithRetries()
