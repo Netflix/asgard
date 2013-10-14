@@ -61,6 +61,12 @@ beans = {
         }
     }
 
+    if (application.config.plugin?.advancedUserDataProvider == 'githubAdvancedUserDataProvider') {
+        githubAdvancedUserDataProvider(GithubAdvancedUserDataProvider) { bean ->
+            bean.lazyInit = true
+        }
+    }
+
     restrictEditAuthorizationProvider(RestrictEditAuthorizationProvider) { bean ->
         bean.lazyInit = true
     }
