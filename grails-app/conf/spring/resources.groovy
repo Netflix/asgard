@@ -61,8 +61,8 @@ beans = {
         }
     }
 
-    if (application.config.plugin?.advancedUserDataProvider == 'githubAdvancedUserDataProvider') {
-        githubAdvancedUserDataProvider(GithubAdvancedUserDataProvider) { bean ->
+    if (application.config.plugin?.advancedUserDataProvider == 'repoSourcedUserDataProvider') {
+        repoSourcedUserDataProvider(com.riotgames.asgard.RepoSourcedUserDataProvider) { bean ->
             bean.lazyInit = true
         }
     }

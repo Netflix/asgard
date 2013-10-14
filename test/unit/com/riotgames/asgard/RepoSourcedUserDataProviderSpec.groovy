@@ -9,10 +9,11 @@ import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchContext
 import org.yaml.snakeyaml.Yaml
 
-import static RepoSourcedUserDataProvider.*
+import spock.lang.Ignore
 import spock.lang.Specification
-
-import java.util.regex.Pattern
+import static RepoSourcedUserDataProvider.Formula
+import static RepoSourcedUserDataProvider.Repo
+import static RepoSourcedUserDataProvider.Variables
 
 /**
  *
@@ -155,6 +156,7 @@ parts:
     // These two tests are not unit tests, but are still very useful.
     //----------
 
+    @Ignore
     def 'Repo should retrieve simple file from public github'() {
         Repo repo = new Repo('https://api.github.com/repos/Netflix/asgard/contents/','', GH_ACCEPT)
         String f = repo.retrieveText('grailsw')
@@ -164,6 +166,7 @@ parts:
         f.length() > 0
     }
 
+    //@Ignore
     def 'should build complete user data'() {
         RepoSourcedUserDataProvider repoSourcedUserDataProvider = makeProvider()
         String ud = repoSourcedUserDataProvider.buildUserData(launchContext)

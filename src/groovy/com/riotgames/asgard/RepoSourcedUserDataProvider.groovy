@@ -7,7 +7,9 @@ import com.netflix.asgard.plugin.AdvancedUserDataProvider
 import org.apache.http.*
 import org.apache.http.client.methods.*
 import org.apache.http.impl.client.*
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.InitializingBean
 import org.yaml.snakeyaml.Yaml
 
 import javax.mail.*
@@ -19,13 +21,13 @@ import java.util.regex.Pattern
  * Implementation of AdvancedUserDataProvider that gathers input from Github or other repos using REST APIs and
  * combines the results into a single user-data blob String.
  */
-class RepoSourcedUserDataProvider implements AdvancedUserDataProvider {
+class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, InitializingBean {
 
     @Autowired
-    def grailsApplication
+    GrailsApplication grailsApplication
 
     @Autowired
-    def configService
+    ConfigService configService
 
     Repo repo
     String formulaPath
@@ -181,7 +183,7 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider {
          * Substitutes variables in the the source and target paths.
          */
         void substituteVariables(Variables variables) {
-            formula.parts.each { part->
+            formula.parts?.each { part->
                 part.source = variables.substituted(part.source)
                 part.target = variables.substituted(part.target)
                 if (part.target.endsWith('/'))
@@ -193,7 +195,7 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider {
          * Retrieves source blobs from the repo, and substitute vars as indicated.
          */
         void retrieveBlobs(Repo repo, Variables variables) {
-            formula.parts.each { part->
+            formula.parts?.each { part->
                 part.blob = repo.retrieveText(part.source) // stuff the blob in the part object
                 if (part.subst)
                     part.blob = variables.substituted(part.blob)
@@ -303,6 +305,8 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider {
             ByteArrayOutputStream baos = new ByteArrayOutputStream()
             msg.writeTo(baos, (String[])['Message-Id'])
             baos.toString()
+
+            //CQ: could/should gzip+base64 encode here.
         }
     }
 
