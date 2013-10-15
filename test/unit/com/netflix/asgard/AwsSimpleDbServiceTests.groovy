@@ -53,7 +53,7 @@ class AwsSimpleDbServiceTests extends GrailsUnitTestCase {
 
     void testIncrementAndGetSequenceNumber() {
 
-        SimpleDbSequenceLocator locator = Mocks.taskService().sequenceLocator
+        SimpleDbSequenceLocator locator = SimpleDbSequenceLocator.Task
 
         Long seqA = awsSimpleDbService.incrementAndGetSequenceNumber(userContext, locator).toLong()
         Long seqB = awsSimpleDbService.incrementAndGetSequenceNumber(userContext, locator).toLong()

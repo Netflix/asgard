@@ -22,6 +22,7 @@ import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.netflix.asgard.AwsAutoScalingService
 import com.netflix.asgard.AwsEc2Service
 import com.netflix.asgard.AwsLoadBalancerService
+import com.netflix.asgard.AwsSimpleWorkflowService
 import com.netflix.asgard.ConfigService
 import com.netflix.asgard.DiscoveryService
 import com.netflix.asgard.EmailerService
@@ -33,6 +34,8 @@ import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScalingPolicyData
+import com.netflix.asgard.model.SwfWorkflowTags
+import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.push.PushException
 import com.netflix.glisten.ActivityOperations
@@ -52,11 +55,13 @@ class DeploymentActivitiesSpec extends Specification {
     EmailerService mockEmailerService = Mock(EmailerService)
     ActivityOperations mockActivityOperations = Mock(ActivityOperations)
     LinkGenerator mockLinkGenerator = Mock(LinkGenerator)
+    AwsSimpleWorkflowService mockAwsSimpleWorkflowService = Mock(AwsSimpleWorkflowService)
     DeploymentActivities deploymentActivities = new DeploymentActivitiesImpl(
             awsAutoScalingService: mockAwsAutoScalingService, awsEc2Service: mockAwsEc2Service,
             launchTemplateService: mockLaunchTemplateService, configService: mockConfigService,
             discoveryService: mockDiscoveryService, awsLoadBalancerService: mockAwsLoadBalancerService,
-            emailerService: mockEmailerService, activity: mockActivityOperations, grailsLinkGenerator: mockLinkGenerator)
+            emailerService: mockEmailerService, activity: mockActivityOperations,
+            grailsLinkGenerator: mockLinkGenerator, awsSimpleWorkflowService: mockAwsSimpleWorkflowService)
 
     AsgDeploymentNames asgDeploymentNames = new AsgDeploymentNames(
             previousAsgName: 'rearden_metal_pourer-v001',
@@ -303,6 +308,12 @@ class DeploymentActivitiesSpec extends Specification {
         }
         with(mockConfigService) {
             1 * getLinkCanonicalServerUrl() >> 'http://asgard'
+        }
+        with(mockAwsSimpleWorkflowService) {
+            1 * getWorkflowExecutionInfoByWorkflowExecution(new WorkflowExecution(runId: '123', workflowId: 'abc')) >>
+                    Mock(WorkflowExecutionBeanOptions) {
+                getTags() >> new SwfWorkflowTags(id: 1)
+            }
         }
         0 * _
     }

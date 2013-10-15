@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 Netflix, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.netflix.asgard
 
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow
@@ -13,6 +28,7 @@ import com.netflix.asgard.deployment.DeploymentActivitiesImpl
 import com.netflix.asgard.deployment.DeploymentWorkflow
 import com.netflix.asgard.deployment.DeploymentWorkflowDescriptionTemplate
 import com.netflix.asgard.deployment.DeploymentWorkflowImpl
+import com.netflix.asgard.model.SimpleDbSequenceLocator
 import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.glisten.GlobalWorkflowAttributes
 import com.netflix.glisten.InterfaceBasedWorkflowClient
@@ -26,8 +42,10 @@ import org.springframework.beans.factory.InitializingBean
  */
 class FlowService implements InitializingBean {
 
-    AwsClientService awsClientService
-    ConfigService configService
+    def awsClientService
+    def configService
+    def idService
+    DeploymentActivitiesImpl deploymentActivitiesImpl
 
     WorkflowWorker workflowWorker
     ActivityWorker activityWorker
@@ -41,8 +59,6 @@ class FlowService implements InitializingBean {
     final ImmutableMap<Class<?>, WorkflowDescriptionTemplate> workflowToDescriptionTemplate = ImmutableMap.copyOf([
             (DeploymentWorkflow): new DeploymentWorkflowDescriptionTemplate()
     ] as Map)
-    /** Declares workflow activity implementations. */
-    final ImmutableSet<Object> activityImplementations = ImmutableSet.of(new DeploymentActivitiesImpl())
 
     void afterPropertiesSet() {
         String domain = configService.simpleWorkflowDomain
@@ -50,13 +66,12 @@ class FlowService implements InitializingBean {
         GlobalWorkflowAttributes.taskList = taskList
         AmazonSimpleWorkflow simpleWorkflow = awsClientService.create(AmazonSimpleWorkflow)
         workflowClientFactory = new WorkflowClientFactory(simpleWorkflow, domain, taskList)
-        activityImplementations.each { Spring.autowire(it) }
         workflowWorker = new WorkflowWorker(simpleWorkflow, domain, taskList)
         workflowWorker.setWorkflowImplementationTypes(workflowImplementationTypes)
         workflowWorker.start()
         log.info(workerStartMessage('Workflow', workflowWorker))
         activityWorker = activityWorker ?: new ActivityWorker(simpleWorkflow, domain, taskList)
-        activityWorker.addActivitiesImplementations(activityImplementations)
+        activityWorker.addActivitiesImplementations([deploymentActivitiesImpl])
         activityWorker.start()
         log.info(workerStartMessage('Activity', activityWorker))
     }
@@ -77,7 +92,8 @@ class FlowService implements InitializingBean {
     public <T> InterfaceBasedWorkflowClient<T> getNewWorkflowClient(UserContext userContext,
             Class<T> workflow, Link link = null) {
         WorkflowDescriptionTemplate workflowDescriptionTemplate = workflowToDescriptionTemplate[workflow]
-        SwfWorkflowTags tags = new SwfWorkflowTags(user: userContext, link: link)
+        String id = idService.nextId(userContext, SimpleDbSequenceLocator.Task)
+        SwfWorkflowTags tags = new SwfWorkflowTags(id: id, user: userContext, link: link)
         workflowClientFactory.getNewWorkflowClient(workflow, workflowDescriptionTemplate, tags)
     }
 

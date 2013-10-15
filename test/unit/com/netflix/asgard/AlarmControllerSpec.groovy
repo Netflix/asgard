@@ -73,9 +73,10 @@ class AlarmControllerSpec extends Specification {
         awsCloudWatchService.awsClient = new MultiRegionAwsClient({ mockAmazonCloudWatchClient })
         controller.awsCloudWatchService = awsCloudWatchService
 
-        final mockAwsSimpleDbService  = Mock(AwsSimpleDbService)
-        awsCloudWatchService.awsSimpleDbService = mockAwsSimpleDbService
-        mockAwsSimpleDbService.incrementAndGetSequenceNumber(_, _) >> { 1 }
+        final mockIdService  = Mock(IdService) {
+            nextId(_, _) >> '1'
+        }
+        awsCloudWatchService.idService = mockIdService
 
         final awsSnsService = Mock(AwsSnsService)
         controller.awsSnsService = awsSnsService
@@ -192,6 +193,7 @@ class AlarmControllerSpec extends Specification {
         final mockAmazonCloudWatchClient = Mock(AmazonCloudWatch)
         mockAmazonCloudWatchClient.describeAlarms(_) >> { new DescribeAlarmsResult() }
         awsCloudWatchService.awsClient = new MultiRegionAwsClient({ mockAmazonCloudWatchClient })
+        awsCloudWatchService.taskService.idService = Mock(IdService)
         controller.awsCloudWatchService = awsCloudWatchService
 
         controller.params.with {
@@ -218,7 +220,7 @@ class AlarmControllerSpec extends Specification {
                 alarmNames: ['scale-up-alarm-helloworld--scalingtest-v000-CPUUtilization-87']
         ))
 
-        0 * _._
+        0 * mockAmazonCloudWatchClient._
     }
 
 }

@@ -25,6 +25,7 @@ import com.netflix.asgard.SnsTaskFinishedListener
 import com.netflix.asgard.ThreadScheduler
 import com.netflix.asgard.auth.OneLoginAuthenticationProvider
 import com.netflix.asgard.auth.RestrictEditAuthorizationProvider
+import com.netflix.asgard.deployment.DeploymentActivitiesImpl
 import groovy.io.FileType
 
 beans = {
@@ -43,6 +44,10 @@ beans = {
 
     defaultAdvancedUserDataProvider(DefaultAdvancedUserDataProvider) { bean ->
         bean.lazyInit = true
+    }
+
+    deploymentActivitiesImpl(DeploymentActivitiesImpl) {
+        it.autowire = "byName"
     }
 
     snsTaskFinishedListener(SnsTaskFinishedListener) { bean ->

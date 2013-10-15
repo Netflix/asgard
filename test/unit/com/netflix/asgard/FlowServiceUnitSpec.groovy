@@ -41,6 +41,7 @@ class FlowServiceUnitSpec extends Specification {
                 '{"user":{"ticket":null,"username":"rtargaryen","clientHostName":null,"clientIpAddress":null,\
 "region":null,"internalAutomation":null}}'
         ]
+        flowService.idService = Mock(IdService)
 
         when:
         def client = flowService.getNewWorkflowClient(userContext, BayAreaTripWorkflow, link)

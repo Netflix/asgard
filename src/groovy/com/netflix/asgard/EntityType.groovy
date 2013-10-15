@@ -49,6 +49,7 @@ import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.model.MetricId
 import com.netflix.asgard.model.SimpleQueue
 import com.netflix.asgard.model.StackAsg
+import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.TopicData
 import com.netflix.asgard.push.Cluster
 import groovy.transform.Immutable
@@ -111,7 +112,8 @@ import org.codehaus.jackson.annotate.JsonProperty
     static final EntityType<Volume> volume = create('Volume', { it.volumeId }, 'vol-')
     static final EntityType<Vpc> vpc = create('VPC', { it.vpcId }, 'vpc-')
     static final EntityType<WorkflowExecutionInfo> workflowExecution = create('Workflow Execution',
-            { it.execution.runId })
+            { new SwfWorkflowTags().withTags(it.tagList).id ?: it.execution.runId })
+    // TODO remove the runId reference above when we are sure there are no longer workflow executions without a run ID
     static final EntityType<WorkflowTypeInfo> workflowType = create('Workflow Type',
             { "${it.workflowType.name}-${it.workflowType.version}" as String })
     static final EntityType<DomainInfo> workflowDomain = create('Workflow Domain', { it.name })

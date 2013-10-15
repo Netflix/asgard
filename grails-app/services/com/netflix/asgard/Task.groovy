@@ -15,22 +15,17 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.simpleworkflow.model.HistoryEvent
-import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionDetail
-import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
-import com.netflix.asgard.model.SwfWorkflowTags
-import com.netflix.glisten.HistoryAnalyzer
-import com.netflix.glisten.LogMessage
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
+import groovy.transform.ToString
 import java.util.concurrent.CopyOnWriteArrayList
 import org.apache.commons.logging.LogFactory
 import org.joda.time.DateTime
 
-class Task {
+@ToString class Task {
     private static final logger = LogFactory.getLog(this)
 
     String id
-    String runId
-    String workflowId
+    WorkflowExecution workflowExecution
     UserContext userContext
     String env
     String name
@@ -43,51 +38,6 @@ class Task {
     EntityType objectType
     String objectId
     List<String> log = new CopyOnWriteArrayList<String>()
-
-    /**
-     * Constructs a task based on the SWF workflow execution
-     *
-     * @param executionInfo information about a workflow execution
-     * @return task without log
-     */
-    static Task fromSwf(WorkflowExecutionInfo executionInfo) {
-        SwfWorkflowTags swfWorkflowTags = new SwfWorkflowTags()
-        swfWorkflowTags.withTags(executionInfo.tagList)
-        String status = executionInfo.closeStatus ? executionInfo.closeStatus.toLowerCase() : 'running'
-        Task task = new Task(runId: executionInfo.execution.runId, workflowId: executionInfo.execution.workflowId,
-                name: swfWorkflowTags.desc, userContext: swfWorkflowTags.user, status: status,
-                startTime: executionInfo.startTimestamp, updateTime: executionInfo.closeTimestamp)
-        if (swfWorkflowTags.link) {
-            EntityType entityType = EntityType.fromName(swfWorkflowTags.link.type?.name())
-            task.with {
-                objectType = entityType
-                objectId = swfWorkflowTags.link.id
-            }
-        }
-        task
-    }
-
-    /**
-     * Constructs a task based on the SWF workflow execution and history
-     *
-     * @param workflowExecutionDetail details about a workflow execution
-     * @param events of the workflow
-     * @return task with log
-     */
-    static Task fromSwf(WorkflowExecutionDetail workflowExecutionDetail, List<HistoryEvent> events = []) {
-        WorkflowExecutionInfo executionInfo = workflowExecutionDetail.executionInfo
-        Task task = fromSwf(executionInfo)
-        List<LogMessage> logMessages = HistoryAnalyzer.of(events).logMessages
-        boolean isDone = executionInfo.closeTimestamp != null
-        String currentOperation = isDone || !logMessages ? '' : logMessages.last().text
-        Date lastTime = isDone ? executionInfo.closeTimestamp : workflowExecutionDetail.latestActivityTaskTimestamp
-        task.with {
-            log = logMessages*.toString()
-            updateTime = lastTime
-            operation = currentOperation
-        }
-        task
-    }
 
     def log(String op) {
         updateTime = new Date()
