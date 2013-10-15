@@ -118,7 +118,7 @@ fi
 if [ -z "$STARTER_CONF" ]; then
     STARTER_CONF="$GRAILS_HOME/conf/groovy-starter.conf"
 fi
-STARTER_CLASSPATH="wrapper/grails-wrapper-runtime-2.2.4.jar:wrapper:."
+STARTER_CLASSPATH="wrapper/grails-wrapper-runtime-2.3.0.jar:wrapper:."
 
 # Allow access to Cocoa classes on OS X
 if $darwin; then
@@ -180,7 +180,7 @@ if $cygwin ; then
 fi
 
 if [ -z "$GRAILS_AGENT_CACHE_DIR" ]; then
-    GRAILS_AGENT_CACHE_DIR=~/.grails/2.2.4/
+    GRAILS_AGENT_CACHE_DIR=~/.grails/2.3.0/
 fi
 SPRINGLOADED_PARAMS=profile=grails\;cacheDir=$GRAILS_AGENT_CACHE_DIR
 if [ ! -d "$GRAILS_AGENT_CACHE_DIR" ]; then
@@ -190,7 +190,7 @@ fi
 # Process JVM args
 AGENT_STRING="-javaagent:wrapper/springloaded-core-1.1.3.jar -noverify -Dspringloaded.synchronize=true -Djdk.reflect.allowGetCallerClass=true -Dspringloaded=$SPRINGLOADED_PARAMS"
 CMD_LINE_ARGS=""
-DISABLE_RELOADING=false
+DISABLE_RELOADING=true
 
 while true; do
   if [ "$1" = "-cp" ] || [ "$1" = "-classpath" ]; then
@@ -201,6 +201,7 @@ while true; do
 
   if [ "$1" = "-reloading" ]; then
     AGENT=$AGENT_STRING
+    DISABLE_RELOADING=false
     shift
     break
   fi
@@ -314,6 +315,7 @@ startGrails() {
           -classpath "$STARTER_CLASSPATH" \
           -Dgrails.home="$GRAILS_HOME" \
           -Dtools.jar="$TOOLS_JAR" \
+          -Djava.net.preferIPv4Stack=true \
           $STARTER_MAIN_CLASS \
           --main $CLASS \
           --conf "$STARTER_CONF" \
@@ -323,6 +325,7 @@ startGrails() {
           -classpath "$STARTER_CLASSPATH" \
           -Dgrails.home="$GRAILS_HOME" \
           -Dtools.jar="$TOOLS_JAR" \
+          -Djava.net.preferIPv4Stack=true \
           $STARTER_MAIN_CLASS \
           --main $CLASS \
           --conf "$STARTER_CONF" \
