@@ -220,7 +220,7 @@ class TaskService {
                         if (!task) { throw new IllegalArgumentException("There is no task with id ${id}.") }
                         task
                     },
-                    firstDelayMillis: 1000
+                    firstDelayMillis: 300
             ).performWithRetries()
         } catch (CollectedExceptions ignore) {
             return null
