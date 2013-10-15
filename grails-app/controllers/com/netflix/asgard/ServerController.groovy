@@ -77,7 +77,7 @@ class ServerController {
     }
 
     def runningTaskCount = {
-        render taskService.getRunning().size() as String
+        render taskService.getRunningInMemory().size() as String
     }
 
     /**

@@ -37,6 +37,7 @@ import com.amazonaws.services.simpleworkflow.model.ListDomainsRequest
 import com.amazonaws.services.simpleworkflow.model.ListOpenWorkflowExecutionsRequest
 import com.amazonaws.services.simpleworkflow.model.ListWorkflowTypesRequest
 import com.amazonaws.services.simpleworkflow.model.RegisterDomainRequest
+import com.amazonaws.services.simpleworkflow.model.TagFilter
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionDetail
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
@@ -46,7 +47,11 @@ import com.amazonaws.services.simpleworkflow.model.WorkflowTypeDetail
 import com.amazonaws.services.simpleworkflow.model.WorkflowTypeInfo
 import com.amazonaws.services.simpleworkflow.model.WorkflowTypeInfos
 import com.netflix.asgard.cache.CacheInitializer
+import com.netflix.asgard.model.SwfWorkflowTags
+import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.retriever.AwsResultsRetriever
+import groovyx.gpars.dataflow.Dataflow
+import groovyx.gpars.dataflow.Promise
 import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
 
@@ -191,16 +196,93 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
                 workflowType: workflowType))
     }
 
+    /**
+     * Gets the workflow execution attributes related to a task by ID, and modifies local list caches appropriately.
+     *
+     * @param id of the related task
+     * @return workflow execution attributes
+     */
+    WorkflowExecutionBeanOptions getWorkflowExecutionInfoByTaskId(String id) {
+        // First check for a closed workflow execution in the cache. They don't get updated.
+        WorkflowExecutionInfo workflowExecutionInfo = caches.allClosedWorkflowExecutions.get(id)
+        if (!workflowExecutionInfo) {
+            SwfWorkflowTags swfWorkflowTags = new SwfWorkflowTags(id: id)
+            String tagValue = swfWorkflowTags.constructTag('id')
+            Promise<List<WorkflowExecutionInfo>> openExecutions = Dataflow.task {
+                getOpenWorkflowExecutionsForTag(tagValue)
+            }
+            Promise<List<WorkflowExecutionInfo>> closedExecutions = Dataflow.task {
+                getClosedWorkflowExecutionsForTag(tagValue)
+            }
+            List<WorkflowExecutionInfo> executionInfos = closedExecutions.get() ?: openExecutions.get()
+            Check.loneOrNone(executionInfos, 'reference')
+            if (!executionInfos) { return null }
+            workflowExecutionInfo = executionInfos[0]
+            updateWorkflowExecutionCaches(workflowExecutionInfo)
+        }
+        createWorkflowExecutionBeanOptions(workflowExecutionInfo)
+    }
+
+    private List<WorkflowExecutionInfo> getOpenWorkflowExecutionsForTag(String tagValue) {
+        String domain = configService.simpleWorkflowDomain
+        TagFilter tagFilter = new TagFilter(tag: tagValue)
+        ListOpenWorkflowExecutionsRequest openRequest = new ListOpenWorkflowExecutionsRequest(domain: domain,
+                tagFilter: tagFilter, startTimeFilter: executionTimeFilter)
+        simpleWorkflowClient.listOpenWorkflowExecutions(openRequest).executionInfos
+    }
+
+    private List<WorkflowExecutionInfo> getClosedWorkflowExecutionsForTag(String tagValue) {
+        String domain = configService.simpleWorkflowDomain
+        TagFilter tagFilter = new TagFilter(tag: tagValue)
+        ListClosedWorkflowExecutionsRequest closedRequest = new ListClosedWorkflowExecutionsRequest(domain: domain,
+                tagFilter: tagFilter, closeTimeFilter: executionTimeFilter)
+        simpleWorkflowClient.listClosedWorkflowExecutions(closedRequest).executionInfos
+    }
+
+    /**
+     * Gets the workflow execution attributes for the WorkflowExecution. Wait, what!?
+     * The WorkflowExecution is an AWS object that actually holds identifiers for the workflow execution.
+     * This method also modifies local list caches appropriately.
+     *
+     * @param workflowExecution holds identifiers for the workflow execution (really)
+     * @return workflow execution attributes
+     */
+    WorkflowExecutionBeanOptions getWorkflowExecutionInfoByWorkflowExecution(WorkflowExecution workflowExecution) {
+        String domain = configService.simpleWorkflowDomain
+        DescribeWorkflowExecutionRequest request = new DescribeWorkflowExecutionRequest(domain: domain,
+                execution: workflowExecution)
+        WorkflowExecutionDetail workflowExecutionDetail = simpleWorkflowClient.describeWorkflowExecution(request)
+        WorkflowExecutionInfo workflowExecutionInfo = workflowExecutionDetail.executionInfo
+        WorkflowExecutionBeanOptions options = createWorkflowExecutionBeanOptions(workflowExecutionInfo)
+        updateWorkflowExecutionCaches(workflowExecutionInfo)
+        options
+    }
+
+    private WorkflowExecutionBeanOptions createWorkflowExecutionBeanOptions(
+            WorkflowExecutionInfo workflowExecutionInfo) {
+        if (workflowExecutionInfo) {
+            List<HistoryEvent> events = getExecutionHistory(workflowExecutionInfo.execution)
+            return new WorkflowExecutionBeanOptions(workflowExecutionInfo, events)
+        }
+        null
+    }
+
+    private void updateWorkflowExecutionCaches(WorkflowExecutionInfo workflowExecutionInfo) {
+        if (workflowExecutionInfo == null) { return }
+        String key = EntityType.workflowExecution.keyer(workflowExecutionInfo)
+        CachedMap<WorkflowExecutionInfo> cacheToPutItemInto = caches.allOpenWorkflowExecutions
+        if (workflowExecutionInfo.closeTimestamp) {
+            caches.allOpenWorkflowExecutions.remove(key)
+            cacheToPutItemInto = caches.allClosedWorkflowExecutions
+        }
+        cacheToPutItemInto.put(key, workflowExecutionInfo)
+    }
+
     // Open workflow executions
     private List<WorkflowExecutionInfo> retrieveOpenWorkflowExecutions() {
         String domain = configService.simpleWorkflowDomain
         ensureDomainExists(domain)
-
-        Date oldestDate = new DateTime().minusDays(configService.workflowExecutionRetentionPeriodInDays).toDate()
-        Date latestDate = new Date()
-        ExecutionTimeFilter filter = new ExecutionTimeFilter(oldestDate: oldestDate, latestDate: latestDate)
-
-        def request = new ListOpenWorkflowExecutionsRequest(domain: domain, startTimeFilter: filter)
+        def request = new ListOpenWorkflowExecutionsRequest(domain: domain, startTimeFilter: executionTimeFilter)
         openWorkflowExecutionRetriever.retrieve(Region.defaultRegion(), request)
     }
 
@@ -240,13 +322,13 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     private List<WorkflowExecutionInfo> retrieveClosedWorkflowExecutions() {
         String domain = configService.simpleWorkflowDomain
         ensureDomainExists(domain)
-
-        Date oldestDate = new DateTime().minusDays(configService.workflowExecutionRetentionPeriodInDays).toDate()
-        Date latestDate = new Date()
-        ExecutionTimeFilter filter = new ExecutionTimeFilter(oldestDate: oldestDate, latestDate: latestDate)
-
-        def request = new ListClosedWorkflowExecutionsRequest(domain: domain, closeTimeFilter: filter)
+        def request = new ListClosedWorkflowExecutionsRequest(domain: domain, closeTimeFilter: executionTimeFilter)
         closedWorkflowExecutionRetriever.retrieve(Region.defaultRegion(), request)
+    }
+
+    private ExecutionTimeFilter getExecutionTimeFilter() {
+        Date oldestDate = new DateTime().minusDays(configService.workflowExecutionRetentionPeriodInDays).toDate()
+        new ExecutionTimeFilter(oldestDate: oldestDate)
     }
 
     private AwsResultsRetriever closedWorkflowExecutionRetriever =
@@ -370,7 +452,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     /**
      * Gets the execution history for specific workflow run.
      *
-     * @param workflowId user defined identifier associated with the workflow execution
+     * @param workflowExecution to identify workflow
      * @return execution history
      */
     List<HistoryEvent> getExecutionHistory(WorkflowExecution workflowExecution) {
@@ -393,18 +475,6 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
             }
         }
         retriever.retrieve(null, new GetWorkflowExecutionHistoryRequest(domain: domain, execution: workflowExecution))
-    }
-
-    /**
-     * Gets details about a workflow execution from AWS.
-     *
-     * @param execution workflow execution reference
-     * @return workflow execution details
-     */
-    WorkflowExecutionDetail getWorkflowExecutionDetail(WorkflowExecution execution) {
-        String domain = configService.simpleWorkflowDomain
-        simpleWorkflowClient.describeWorkflowExecution(new DescribeWorkflowExecutionRequest(domain: domain,
-                execution: execution))
     }
 
 }

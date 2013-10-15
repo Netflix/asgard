@@ -154,7 +154,7 @@ class RetriableSpec extends Specification {
      */
     private class NoSleepRetriable extends Retriable {
         List<Integer> delays = []
-        protected void delay(int milliseconds) {
+        void delay(int milliseconds) {
             delays << milliseconds
         }
     }

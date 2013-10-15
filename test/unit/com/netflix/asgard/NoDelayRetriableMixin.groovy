@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2013 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.model
-
-import com.netflix.asgard.Region
+package com.netflix.asgard
 
 /**
- * The location of the sequence number in SimpleDB
+ * Used in unit tests to keep retries from sleeping. Using this can be easier than making the delay configurable just
+ * for testing.
  */
-enum SimpleDbSequenceLocator { Policy, Alarm, Task
+@Category(Retriable)
+class NoDelayRetriableMixin {
 
-    final Region region
-    final String domainName
-    final String itemName
-    final String attributeName
-
-    SimpleDbSequenceLocator() {
-        String name = this.name()
-        region = Region.defaultRegion()
-        domainName = "CLOUD_${name.toUpperCase()}_SEQUENCE"
-        itemName = "${name.toLowerCase()}_id"
-        attributeName = 'value'
+    @Override
+    void delay(int milliseconds) {
+        // Do not sleep
     }
 }

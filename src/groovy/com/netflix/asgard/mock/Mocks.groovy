@@ -42,6 +42,7 @@ import com.netflix.asgard.EmailerService
 import com.netflix.asgard.EurekaAddressCollectorService
 import com.netflix.asgard.FastPropertyService
 import com.netflix.asgard.FlagService
+import com.netflix.asgard.IdService
 import com.netflix.asgard.InstanceTypeService
 import com.netflix.asgard.LaunchTemplateService
 import com.netflix.asgard.Link
@@ -64,6 +65,7 @@ import com.netflix.asgard.UserContext
 import com.netflix.asgard.cache.Fillable
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstanceTypeData
+import com.netflix.asgard.model.SimpleDbSequenceLocator
 import com.netflix.asgard.plugin.UserDataProvider
 import grails.converters.JSON
 import grails.converters.XML
@@ -361,6 +363,11 @@ class Mocks {
             taskService.grailsApplication = grailsApplication()
             taskService.emailerService = emailerService()
             taskService.awsSimpleDbService = awsSimpleDbService()
+            taskService.idService = new IdService() {
+                String nextId(UserContext userContext, SimpleDbSequenceLocator sequenceLocator) {
+                    '1'
+                }
+            }
         }
         taskService
     }

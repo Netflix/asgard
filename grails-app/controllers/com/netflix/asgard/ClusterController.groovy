@@ -21,19 +21,19 @@ import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
-import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.google.common.collect.Sets
-import com.netflix.asgard.model.AutoScalingGroupBeanOptions
-import com.netflix.asgard.deployment.DeploymentWorkflowOptions
 import com.netflix.asgard.deployment.DeploymentWorkflow
-import com.netflix.asgard.model.LaunchConfigurationBeanOptions
+import com.netflix.asgard.deployment.DeploymentWorkflowOptions
 import com.netflix.asgard.deployment.ProceedPreference
+import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.InstancePriceType
+import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
+import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.push.CommonPushOptions
 import com.netflix.asgard.push.GroupActivateOperation
@@ -187,15 +187,15 @@ ${lastGroup.loadBalancerNames}"""
 
     def result = { render view: '/common/result' }
 
-    def proceedWithDeployment(String taskToken, String runId, String workflowId) {
-        completeDeployment(taskToken, runId, workflowId, true)
+    def proceedWithDeployment(String taskToken, String taskId) {
+        completeDeployment(taskToken, taskId, true)
     }
 
-    def rollbackDeployment(String taskToken, String runId, String workflowId) {
-        completeDeployment(taskToken, runId, workflowId, false)
+    def rollbackDeployment(String taskToken, String taskId) {
+        completeDeployment(taskToken, taskId, false)
     }
 
-    private void completeDeployment(String taskToken, String runId, String workflowId, boolean shouldProceed) {
+    private void completeDeployment(String taskToken, String taskId, boolean shouldProceed) {
         ManualActivityCompletionClient manualActivityCompletionClient = flowService.
                 getManualActivityCompletionClient(taskToken)
         try {
@@ -204,7 +204,7 @@ ${lastGroup.loadBalancerNames}"""
         } catch (Exception e) {
             flash.message = "Deployment failed: ${e.toString()}"
         }
-        redirect([controller: 'task', action: 'show', params: [runId: runId, workflowId: workflowId]])
+        redirect([controller: 'task', action: 'show', id: taskId])
     }
 
     def prepareDeployment(String id) {
@@ -349,9 +349,8 @@ ${lastGroup.loadBalancerNames}"""
         def client = flowService.getNewWorkflowClient(userContext, DeploymentWorkflow,
                 new Link(EntityType.cluster, cmd.clusterName))
         client.asWorkflow().deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
-        WorkflowExecution workflowExecution = client.workflowExecution
-        redirect(controller: 'task', action: 'show', params: [runId: workflowExecution.runId,
-                workflowId: workflowExecution.workflowId])
+        SwfWorkflowTags tags = (SwfWorkflowTags) client.workflowTags
+        redirect(controller: 'task', action: 'show', id: tags.id)
     }
 
     @SuppressWarnings("GroovyAssignabilityCheck")
