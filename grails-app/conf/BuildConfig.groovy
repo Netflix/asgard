@@ -175,8 +175,6 @@ grails.project.dependency.resolution = {
             )
         }
 
-        // Optional dependency for Spock to support mocking objects without a parameterless constructor.
-        test 'org.objenesis:objenesis:1.2'
     }
 
     plugins {
