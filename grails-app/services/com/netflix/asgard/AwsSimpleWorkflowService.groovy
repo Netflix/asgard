@@ -197,7 +197,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     }
 
     /**
-     * Gets the workflow execution attributes related to a task by ID.
+     * Gets the workflow execution attributes related to a task by ID, and modifies local list caches appropriately.
      *
      * @param id of the related task
      * @return workflow execution attributes
@@ -218,7 +218,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
             Check.loneOrNone(executionInfos, 'reference')
             if (!executionInfos) { return null }
             workflowExecutionInfo = executionInfos[0]
-            updateWorkflowExecutionCaches(id, workflowExecutionInfo)
+            updateWorkflowExecutionCaches(workflowExecutionInfo)
         }
         createWorkflowExecutionBeanOptions(workflowExecutionInfo)
     }
@@ -242,6 +242,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     /**
      * Gets the workflow execution attributes for the WorkflowExecution. Wait, what!?
      * The WorkflowExecution is an AWS object that actually holds identifiers for the workflow execution.
+     * This method also modifies local list caches appropriately.
      *
      * @param workflowExecution holds identifiers for the workflow execution (really)
      * @return workflow execution attributes
@@ -253,7 +254,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         WorkflowExecutionDetail workflowExecutionDetail = simpleWorkflowClient.describeWorkflowExecution(request)
         WorkflowExecutionInfo workflowExecutionInfo = workflowExecutionDetail.executionInfo
         WorkflowExecutionBeanOptions options = createWorkflowExecutionBeanOptions(workflowExecutionInfo)
-        updateWorkflowExecutionCaches(options.tags.id, workflowExecutionInfo)
+        updateWorkflowExecutionCaches(workflowExecutionInfo)
         options
     }
 
@@ -266,18 +267,15 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         null
     }
 
-    private void updateWorkflowExecutionCaches(String id, WorkflowExecutionInfo workflowExecutionInfo) {
-        WorkflowExecutionInfo newOpenWorkflowExecutionInfo = null
-        WorkflowExecutionInfo newClosedWorkflowExecutionInfo = null
-        if (workflowExecutionInfo) {
-            if (workflowExecutionInfo.closeTimestamp) {
-                newClosedWorkflowExecutionInfo = workflowExecutionInfo
-            } else {
-                newOpenWorkflowExecutionInfo = workflowExecutionInfo
-            }
+    private void updateWorkflowExecutionCaches(WorkflowExecutionInfo workflowExecutionInfo) {
+        if (workflowExecutionInfo == null) { return }
+        String key = EntityType.workflowExecution.keyer(workflowExecutionInfo)
+        CachedMap<WorkflowExecutionInfo> cacheToPutItemInto = caches.allOpenWorkflowExecutions
+        if (workflowExecutionInfo.closeTimestamp) {
+            caches.allOpenWorkflowExecutions.remove(key)
+            cacheToPutItemInto = caches.allClosedWorkflowExecutions
         }
-        caches.allOpenWorkflowExecutions.put(id, newOpenWorkflowExecutionInfo)
-        caches.allClosedWorkflowExecutions.put(id, newClosedWorkflowExecutionInfo)
+        cacheToPutItemInto.put(key, workflowExecutionInfo)
     }
 
     // Open workflow executions
@@ -477,18 +475,6 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
             }
         }
         retriever.retrieve(null, new GetWorkflowExecutionHistoryRequest(domain: domain, execution: workflowExecution))
-    }
-
-    /**
-     * Gets details about a workflow execution from AWS.
-     *
-     * @param execution workflow execution reference
-     * @return workflow execution details
-     */
-    WorkflowExecutionDetail getWorkflowExecutionDetail(WorkflowExecution execution) {
-        String domain = configService.simpleWorkflowDomain
-        simpleWorkflowClient.describeWorkflowExecution(new DescribeWorkflowExecutionRequest(domain: domain,
-                execution: execution))
     }
 
 }

@@ -33,9 +33,7 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
     AwsSimpleWorkflowService awsSimpleWorkflowService = new AwsSimpleWorkflowService()
 
     def setup() {
-        awsSimpleWorkflowService.caches = new Caches(new MockCachedMapBuilder([
-            (EntityType.workflowExecution): Mock(CachedMap)
-        ]))
+        awsSimpleWorkflowService.caches = new Caches(new MockCachedMapBuilder([:], { Mock(CachedMap) }))
         awsSimpleWorkflowService.configService = Mock(ConfigService) {
             getSimpleWorkflowDomain() >> 'Westeros'
             getWorkflowExecutionRetentionPeriodInDays() >> 10
@@ -162,5 +160,45 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
 
         then:
         options.executionInfo.execution == new WorkflowExecution(workflowId: 'abc', runId: 'def')
+    }
+
+    def 'should cache an open workflow execution info'() {
+        WorkflowExecution workflowExecution = new WorkflowExecution(runId: '1234567')
+        WorkflowExecutionInfo workflowExecutionInfo = new WorkflowExecutionInfo(execution: workflowExecution)
+
+        when:
+        awsSimpleWorkflowService.updateWorkflowExecutionCaches(workflowExecutionInfo)
+
+        then:
+        with(awsSimpleWorkflowService) {
+            1 * caches.allOpenWorkflowExecutions.put('1234567', workflowExecutionInfo)
+            0 * caches._
+        }
+    }
+
+    def 'should cache a closed workflow execution info and ensure it is removed from the open cache'() {
+        WorkflowExecution workflowExecution = new WorkflowExecution(runId: '1234567')
+        WorkflowExecutionInfo workflowExecutionInfo = new WorkflowExecutionInfo(execution: workflowExecution,
+                closeTimestamp: new Date())
+
+        when:
+        awsSimpleWorkflowService.updateWorkflowExecutionCaches(workflowExecutionInfo)
+
+        then:
+        with(awsSimpleWorkflowService) {
+            1 * caches.allClosedWorkflowExecutions.put('1234567', workflowExecutionInfo)
+            1 * caches.allOpenWorkflowExecutions.remove('1234567')
+            0 * caches._
+        }
+    }
+
+    def 'should not cache a null workflow execution info'() {
+        when:
+        awsSimpleWorkflowService.updateWorkflowExecutionCaches(null)
+
+        then:
+        with(awsSimpleWorkflowService) {
+            0 * caches._
+        }
     }
 }
