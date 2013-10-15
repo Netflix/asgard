@@ -44,7 +44,7 @@ class IdServiceSpec extends Specification {
         String result = service.nextId(UserContext.auto(Region.US_EAST_1), SimpleDbSequenceLocator.Task)
 
         then:
-        result
+        result ==~ /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
         1 * service.awsSimpleDbService.incrementAndGetSequenceNumber(_, SimpleDbSequenceLocator.Task) >> {
             throw new IllegalStateException('AWS is down. No sequence ID for you!')
         }
