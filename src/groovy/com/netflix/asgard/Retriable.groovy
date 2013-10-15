@@ -38,7 +38,7 @@ import groovy.transform.Canonical
     /**
      * The base of the exponent to be used for exponential backoff.
      *
-     * A value of 1 disabled exponential backoff.
+     * A value of 1 disables exponential backoff.
      * A value of 2 causes retry delays to grow exponentially based on powers of 2.
      */
     Integer exponentialBackoffBaseMultiplier = 2

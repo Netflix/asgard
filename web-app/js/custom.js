@@ -644,6 +644,7 @@ jQuery(document).ready(function() {
         jQuery('textarea.resizable').TextAreaResizer();
 
         Opentip.styles.interactive = {
+            showOn: 'click',
             hideTriggers: ['closeButton'] // Keeps the tip visible until the user clicks the close button
         };
         Opentip.styles.standard.target = true; // Take the chosen element as a target of the stem
