@@ -57,7 +57,7 @@ class LoadBalancerCreateCommandTests {
         LoadBalancerCreateCommand cmd = validateParams(appName: "")
         assert cmd.hasErrors()
         assert 1 == cmd.errors.errorCount
-        assert "blank" == cmd.errors.appName
+        assert "nullable" == cmd.errors.appName
     }
 
     @Test
@@ -65,7 +65,7 @@ class LoadBalancerCreateCommandTests {
         LoadBalancerCreateCommand cmd = validateParams(appName: "   ")
         assert cmd.hasErrors()
         assert 1 == cmd.errors.errorCount
-        assert "blank" == cmd.errors.appName
+        assert "nullable" == cmd.errors.appName
     }
 
     @Test
