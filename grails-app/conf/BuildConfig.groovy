@@ -184,7 +184,7 @@ grails.project.dependency.resolution = {
         compile ':shiro:1.1.4'
         compile ":standalone:1.1.1"
 
-        runtime ":hibernate:3.6.10.1" // or ":hibernate4:4.1.11.1"
+        runtime ':hibernate:3.6.10.2'
         runtime ":cors:1.0.4"
 
         test ':code-coverage:1.2.6'
