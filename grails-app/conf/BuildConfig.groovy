@@ -159,9 +159,6 @@ grails.project.dependency.resolution = {
                 // Ease of use library for AWS SWF.
                 'com.netflix.glisten:glisten:0.2',
 
-                // Groovy concurrency framework.
-                'org.codehaus.gpars:gpars:1.0.0',
-
                 // Used for JSON parsing of AWS Simple Workflow Service metadata.
                 // Previously this was an indirect depencency through Grails itself, but this caused errors in some
                 // Grails environments.
