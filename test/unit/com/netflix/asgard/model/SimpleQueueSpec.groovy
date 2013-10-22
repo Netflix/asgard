@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2013 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,47 @@ package com.netflix.asgard.model
 import com.netflix.asgard.Region
 import com.netflix.asgard.Time
 import org.joda.time.DateTime
+import spock.lang.Specification
 
-class SimpleQueueTests extends GroovyTestCase {
+class SimpleQueueSpec extends Specification {
 
-    void testUrlToName() {
-        assert 'cloudBatchTestQueue1' ==
-                new SimpleQueue('https://sqs.us-east-1.amazonaws.com/179000000000/cloudBatchTestQueue1').name
+    def 'should parse from URL'() {
+        SimpleQueue queue = new SimpleQueue('https://sqs.us-east-1.amazonaws.com/179000000000/cloudBatchTestQueue1')
+
+        expect:
+        queue.region == 'us-east-1'
+        queue.accountNumber == '179000000000'
+        queue.name == 'cloudBatchTestQueue1'
+        queue.arn == 'arn:aws:sqs:us-east-1:179000000000:cloudBatchTestQueue1'
     }
 
-    void testNameToUrl() {
-        assert 'https://sqs.us-east-1.amazonaws.com/179000000000/cloudBatchTestQueue1' ==
-                new SimpleQueue(Region.defaultRegion(), '179000000000', 'cloudBatchTestQueue1').url
+    def 'should parse from ARN'() {
+        SimpleQueue queue = SimpleQueue.fromArn('arn:aws:sqs:us-east-1:179000000000:cloudBatchTestQueue1')
+
+        expect:
+        queue.region == 'us-east-1'
+        queue.accountNumber == '179000000000'
+        queue.name == 'cloudBatchTestQueue1'
+        queue.arn == 'arn:aws:sqs:us-east-1:179000000000:cloudBatchTestQueue1'
+        queue.url == 'https://sqs.us-east-1.amazonaws.com/179000000000/cloudBatchTestQueue1'
+    }
+
+    def 'should not parse from invalid ARN'() {
+        SimpleQueue queue = SimpleQueue.fromArn('1arn:aws:sqs:us-east-1:179000000000:cloudBatchTestQueue1')
+
+        expect:
+        queue == null
+    }
+
+    void 'should construct URL'() {
+        SimpleQueue queue = new SimpleQueue(Region.defaultRegion(), '179000000000', 'cloudBatchTestQueue1')
+
+        expect:
+        queue.url == 'https://sqs.us-east-1.amazonaws.com/179000000000/cloudBatchTestQueue1'
     }
 
     void testHumanReadableAttributes() {
-
         String timestamp = '1234566789'
-
         String url = 'https://sqs.us-east-1.amazonaws.com/179000000000/com_netflix_log4n_test_queue_error'
         SimpleQueue queue = new SimpleQueue(url)
         queue.attributes = [
@@ -48,8 +72,9 @@ class SimpleQueueTests extends GroovyTestCase {
                 CreatedTimestamp: timestamp,
                 LastModifiedTimestamp: timestamp
         ]
-        Map<String, String> actualHumanReadableMap = queue.humanReadableAttributes
-        Map<String, String> expectedResult = [
+
+        expect:
+        queue.humanReadableAttributes == [
                 'Approximate Number Of Messages': '11908',
                 'Approximate Number Of Messages Not Visible': '10515',
                 'Queue Arn': 'arn:aws:sqs:us-east-1:179000000000:com_netflix_log4n_test_queue_error',
@@ -59,8 +84,7 @@ class SimpleQueueTests extends GroovyTestCase {
                 'Message Retention Period': '1h',
                 /* using Time.format here makes this test independent of timezone it is running in */
                 'Created Timestamp': Time.format(new DateTime(Long.parseLong(timestamp) * 1000)),
-                'Last Modified Timestamp': Time.format(new DateTime(Long.parseLong(timestamp) * 1000))]
-
-        assert expectedResult == actualHumanReadableMap
+                'Last Modified Timestamp': Time.format(new DateTime(Long.parseLong(timestamp) * 1000))
+        ]
     }
 }

@@ -31,7 +31,8 @@ import org.joda.time.Duration
 @EqualsAndHashCode
 @ToString
 class SimpleQueue {
-    String url
+    String region
+    String accountNumber
     String name
     Map<String, String> attributes = [:]
 
@@ -57,26 +58,43 @@ class SimpleQueue {
     private static String PRE_REGION = 'https://sqs.'
     private static String REGION = '[-a-z0-9]+'
     private static String POST_REGION = '.amazonaws.com/'
-    private static String ACCOUNT_NUM_DIR = '[0-9]+/'
-    private static String URL_PATTERN = /${PRE_REGION}${REGION}${POST_REGION}${ACCOUNT_NUM_DIR}(.*?)/
+    private static String ACCOUNT_NUM_DIR = '[0-9]+'
+    private static String URL_PATTERN = ~/${PRE_REGION}(${REGION})${POST_REGION}(${ACCOUNT_NUM_DIR})\/(.*?)/
+    private static String ARN_PATTERN = ~/arn:aws:sqs:(${REGION}):(${ACCOUNT_NUM_DIR}):(.*?)/
 
     SimpleQueue(Region region, String accountNumber, String name) {
+        this(region.code, accountNumber, name)
+    }
+
+    private SimpleQueue(String region, String accountNumber, String name) {
+        this.region = region
+        this.accountNumber = accountNumber
         this.name = name
-        this.url = "${PRE_REGION}${region}${POST_REGION}${accountNumber}/${name}"
     }
 
     SimpleQueue(String url) {
-        this.url = url
-        this.name = nameFromUrl(url)
-    }
-
-    private String nameFromUrl(String url) {
         Matcher matcher = (url =~ URL_PATTERN)
         if (matcher.matches()) {
-            String capturedName = matcher.group(1)
-            return capturedName
+            region = matcher.group(1)
+            accountNumber = matcher.group(2)
+            name = matcher.group(3)
+        }
+    }
+
+    static SimpleQueue fromArn(String arn) {
+        Matcher matcher = (arn =~ ARN_PATTERN)
+        if (matcher.matches()) {
+            return new SimpleQueue(matcher.group(1), matcher.group(2), matcher.group(3))
         }
         null
+    }
+
+    String getUrl() {
+        "${PRE_REGION}${region}${POST_REGION}${accountNumber}/${name}"
+    }
+
+    String getArn() {
+        "arn:aws:sqs:${region}:${accountNumber}:${name}"
     }
 
     Map<String, String> getHumanReadableAttributes() {
