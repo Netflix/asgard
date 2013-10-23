@@ -1,3 +1,39 @@
+1.3
+
+Features
+- Auto-deployment process (beta)
+- Faster cache loading system initialization
+- More informative startup loading screen
+- Hide Desired Size input by default on ASGs that have scaling policies or scheduled actions
+- Show VPC on security group
+- Support for displaying notifications from Blesk
+- Basic initial support for the concept of an optional Application Group field
+- New, more powerful AdvancedUserDataProvider pluggable interface to replace limited legacy UserDataProvider
+- Allowed Firefox read-only usage, disabled submit buttons instead of page loads (Some forms are still not FF-safe)
+
+Infrastructure
+- Integration with SWF and Glisten
+- Upgraded to Grails 2.2.4
+- Stop spamming log with warning about image tags
+- Sped up unit test runs
+- Shorter system email subject lines
+- Moved filters to a package to make them easier to test
+- Refactored some config access code
+- Improved factory model for unit-tested instantiation of various ASG and LC related objects
+- More GroovyDoc comments
+- Shared IdService for generating numerical or UUID identifier strings for multiple types
+
+Bug Fixes
+- Instance types missing price info are sorted to bottom of drop-down instead of top
+- Fixed a memory leak
+- Prepared OneLogin integration for Java 7 and Grails 2.2.4
+- Fixed bug in /instance/appversions
+- Made raw instance log output null safe
+- ASG force delete starts long-running task until deletion completes
+- Scheduled Action links are now properly regional
+- Preserve query params on login redirect from cluster screen
+
+
 1.2
 
 Features
