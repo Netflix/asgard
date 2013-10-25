@@ -84,9 +84,9 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         caches.allWorkflowDomains.ensureSetUp({ retrieveDomainsAndEnsureDomainIsRegistered() }, {
             caches.allOpenWorkflowExecutions.ensureSetUp({ retrieveOpenWorkflowExecutions() })
             caches.allClosedWorkflowExecutions.ensureSetUp({ retrieveClosedWorkflowExecutions() })
+            caches.allWorkflowTypes.ensureSetUp({ retrieveWorkflowTypes() })
+            caches.allActivityTypes.ensureSetUp({ retrieveActivityTypes() })
         })
-        caches.allWorkflowTypes.ensureSetUp({ retrieveWorkflowTypes() })
-        caches.allActivityTypes.ensureSetUp({ retrieveActivityTypes() })
     }
 
     // Activity types
