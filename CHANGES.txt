@@ -1,3 +1,8 @@
+1.3.1
+
+Bug Fix
+- Fixed critical error for new Asgard installations that lack an existing Config.groovy file
+
 1.3
 
 Features

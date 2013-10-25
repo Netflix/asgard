@@ -48,6 +48,7 @@ beans = {
 
     deploymentActivitiesImpl(DeploymentActivitiesImpl) {
         it.autowire = "byName"
+        it.lazyInit = true
     }
 
     snsTaskFinishedListener(SnsTaskFinishedListener) { bean ->
