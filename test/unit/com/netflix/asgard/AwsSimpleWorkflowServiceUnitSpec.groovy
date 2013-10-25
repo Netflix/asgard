@@ -51,7 +51,7 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
         awsSimpleWorkflowService.simpleWorkflowClient = Mock(AmazonSimpleWorkflow)
 
         when:
-        List<DomainInfo> domains = awsSimpleWorkflowService.retrieveDomains()
+        List<DomainInfo> domains = awsSimpleWorkflowService.retrieveDomainsAndEnsureDomainIsRegistered()
 
         then:
         domains == [new DomainInfo(name: 'domain1')]
@@ -69,7 +69,7 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
         awsSimpleWorkflowService.simpleWorkflowClient = Mock(AmazonSimpleWorkflow)
 
         when:
-        awsSimpleWorkflowService.retrieveDomains()
+        awsSimpleWorkflowService.retrieveDomainsAndEnsureDomainIsRegistered()
 
         then:
         1 * awsSimpleWorkflowService.simpleWorkflowClient.registerDomain(_)
