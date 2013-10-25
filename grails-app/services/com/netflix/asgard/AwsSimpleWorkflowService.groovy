@@ -81,7 +81,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
      * Set up relevant cache objects to begin retrieving data.
      */
     void initializeCaches() {
-        caches.allWorkflowDomains.ensureSetUp({ retrieveDomains() }, {
+        caches.allWorkflowDomains.ensureSetUp({ retrieveDomainsAndEnsureDomainIsRegistered() }, {
             caches.allOpenWorkflowExecutions.ensureSetUp({ retrieveOpenWorkflowExecutions() })
             caches.allClosedWorkflowExecutions.ensureSetUp({ retrieveClosedWorkflowExecutions() })
         })
@@ -364,7 +364,7 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
 
     // Workflow Domains
 
-    private List<DomainInfo> retrieveDomains() {
+    private List<DomainInfo> retrieveDomainsAndEnsureDomainIsRegistered() {
         log.debug('Retrieve workflow domains')
         ListDomainsRequest request = new ListDomainsRequest(registrationStatus: 'REGISTERED')
         List<DomainInfo> domains = domainFetcher.retrieve(Region.defaultRegion(), request)
