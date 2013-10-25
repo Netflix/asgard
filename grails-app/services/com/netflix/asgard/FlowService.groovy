@@ -43,6 +43,7 @@ import org.springframework.beans.factory.InitializingBean
 class FlowService implements InitializingBean {
 
     def awsClientService
+    def awsSimpleWorkflowService
     def configService
     def idService
     DeploymentActivitiesImpl deploymentActivitiesImpl
@@ -61,6 +62,11 @@ class FlowService implements InitializingBean {
     ] as Map)
 
     void afterPropertiesSet() {
+
+        // Ensure that the domain has been registered before attempting to reference it with workers. This code runs
+        // before cache filling begins.
+        awsSimpleWorkflowService.retrieveDomainsAndEnsureDomainIsRegistered()
+
         String domain = configService.simpleWorkflowDomain
         String taskList = configService.simpleWorkflowTaskList
         GlobalWorkflowAttributes.taskList = taskList

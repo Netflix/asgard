@@ -364,7 +364,12 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
 
     // Workflow Domains
 
-    private List<DomainInfo> retrieveDomainsAndEnsureDomainIsRegistered() {
+    /**
+     * Gets all the SWF domains and registers the main domain we need if it's not already in the list.
+     *
+     * @return info objects for all the registered domains in the default region
+     */
+    List<DomainInfo> retrieveDomainsAndEnsureDomainIsRegistered() {
         log.debug('Retrieve workflow domains')
         ListDomainsRequest request = new ListDomainsRequest(registrationStatus: 'REGISTERED')
         List<DomainInfo> domains = domainFetcher.retrieve(Region.defaultRegion(), request)
