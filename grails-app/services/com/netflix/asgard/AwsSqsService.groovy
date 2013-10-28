@@ -25,6 +25,8 @@ import com.amazonaws.services.sqs.model.QueueAttributeName
 import com.amazonaws.services.sqs.model.SetQueueAttributesRequest
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.SimpleQueue
+import com.netflix.asgard.model.SqsPolicyToSendMessageFromTopic
+import com.netflix.asgard.model.TopicData
 import org.springframework.beans.factory.InitializingBean
 
 class AwsSqsService implements CacheInitializer, InitializingBean {
@@ -70,33 +72,36 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
     }
 
     SimpleQueue getQueue(UserContext userContext, String queueName, From from = From.AWS) {
+        getQueueInRegion(userContext.region, queueName, from)
+    }
+
+    private SimpleQueue getQueueInRegion(Region region, String queueName, From from = From.AWS) {
         Check.notEmpty(queueName, 'queue name')
         if (from == From.CACHE) {
-            return caches.allQueues.by(userContext.region).get(queueName)
+            return caches.allQueues.by(region).get(queueName)
         }
-        Map<String, String> attributes = getQueueAttributes(userContext, queueName)
+        Map<String, String> attributes = getQueueAttributes(region, queueName)
         SimpleQueue queue = null
-        CachedMap<SimpleQueue> queues = caches.allQueues.by(userContext.region)
+        CachedMap<SimpleQueue> queues = caches.allQueues.by(region)
         if (!attributes) {
             queues.remove(queueName)
         } else {
             SimpleQueue existingQueue = queues.get(queueName)
-            queue = existingQueue ?: new SimpleQueue(userContext.region, accountNumber, queueName)
+            queue = existingQueue ?: new SimpleQueue(region, accountNumber, queueName)
             queue.attributes = attributes
             queues.put(queueName, queue)
         }
         queue
     }
 
-    private Map<String, String> getQueueAttributes(UserContext userContext, String queueName) {
+    private Map<String, String> getQueueAttributes(Region region, String queueName) {
         Check.notEmpty(queueName, 'queue name')
-        Region region = userContext.region
         SimpleQueue existingQueue = caches.allQueues.by(region).get(queueName)
         SimpleQueue queue = existingQueue ?: new SimpleQueue(region, accountNumber, queueName)
         String url = queue.url
         try {
             GetQueueAttributesRequest attrRequest = new GetQueueAttributesRequest(url).withAttributeNames('All')
-            return awsClient.by(userContext.region).getQueueAttributes(attrRequest).attributes.sort()
+            return awsClient.by(region).getQueueAttributes(attrRequest).attributes.sort()
         } catch (AmazonServiceException ignored) {
             return [:]
         }
@@ -148,5 +153,28 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
                 queue = getQueue(userContext, queueName)
         }, Link.to(EntityType.queue, queueName))
         queue
+    }
+
+    /**
+     * Adds a policy to the SQS queue that allows messages to be sent from a particular SNS topic.
+     *
+     * @param userContext who, where, why
+     * @param sqsPolicy information needed to create policy
+     * @param existingTask will be used to do work if it is provided
+     */
+    void addSnsToSqsPolicy(UserContext userContext, SqsPolicyToSendMessageFromTopic sqsPolicy,
+            Task existingTask = null) {
+        SimpleQueue queue = SimpleQueue.fromArn(sqsPolicy.queueArn)
+        TopicData topic = new TopicData(sqsPolicy.topicArn)
+        Region sqsRegion = Region.withCode(queue.region)
+        String oldPolicy = getQueueAttributes(sqsRegion, queue.name)[QueueAttributeName.Policy.name()] ?: ''
+        String newPolicy = oldPolicy << sqsPolicy.toString()
+        String msg = "Update Queue '${queue.name}' to allow messages from Topic '${topic.name}'"
+        taskService.runTask(userContext, msg, { task ->
+            Map<String, String> attributes = [(QueueAttributeName.Policy.name()) : newPolicy]
+            SetQueueAttributesRequest request = new SetQueueAttributesRequest(queue.url, attributes)
+            awsClient.by(sqsRegion).setQueueAttributes(request)
+            queue = getQueueInRegion(sqsRegion, queue.name)
+        }, Link.to(EntityType.queue, queue.name), existingTask)
     }
 }
