@@ -84,7 +84,7 @@ import org.codehaus.jackson.annotate.JsonProperty
      * @param region the AWS region on which the current operation should execute
      * @return UserContext a new context object
      */
-    static auto(Region region) {
+    static auto(Region region = Region.defaultRegion()) {
         new UserContext(region: region, internalAutomation: true)
     }
 

@@ -40,16 +40,11 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
 
     MultiRegionAwsClient<AmazonCloudWatch> awsClient
     def awsClientService
-    def awsSimpleDbService
     def awsSnsService
     Caches caches
     def configService
-    def emailerService
+    def idService
     def taskService
-
-    /** The location of the sequence number in SimpleDB */
-    final SimpleDbSequenceLocator sequenceLocator = new SimpleDbSequenceLocator(region: Region.defaultRegion(),
-            domainName: 'CLOUD_ALARM_SEQUENCE', itemName: 'alarm_id', attributeName: 'value')
 
     void afterPropertiesSet() {
         awsClient = new MultiRegionAwsClient<AmazonCloudWatch>( { Region region ->
@@ -139,7 +134,8 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
     }
 
     String createAlarm(UserContext userContext, AlarmData alarmData, String policyArn, Task existingTask = null) {
-        PutMetricAlarmRequest request = alarmData.toPutMetricAlarmRequest(policyArn, nextAlarmId(userContext))
+        String id = idService.nextId(userContext, SimpleDbSequenceLocator.Alarm)
+        PutMetricAlarmRequest request = alarmData.toPutMetricAlarmRequest(policyArn, id)
         taskService.runTask(userContext, "Create Alarm '${request.alarmName}'", { Task task ->
             awsClient.by(userContext.region).putMetricAlarm(request)
         }, Link.to(EntityType.alarm, request.alarmName), existingTask)
@@ -165,14 +161,6 @@ class AwsCloudWatchService implements CacheInitializer, InitializingBean {
         }
     }
 
-    private String nextAlarmId(UserContext userContext) {
-        try {
-            return awsSimpleDbService.incrementAndGetSequenceNumber(userContext, sequenceLocator)
-        } catch (Exception e) {
-            emailerService.sendExceptionEmail(e.toString(), e)
-            return UUID.randomUUID().toString()
-        }
-    }
     List<Metric> getMetricsAppliedToGroups(Collection<Region> regions = Region.values()) {
         DimensionFilter dimensionFilter = new DimensionFilter(name: AlarmData.DIMENSION_NAME_FOR_ASG)
         AwsResultsRetriever retriever = new AwsResultsRetriever<Metric, ListMetricsRequest, ListMetricsResult>() {

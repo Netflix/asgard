@@ -38,7 +38,7 @@ import groovy.transform.Canonical
     /**
      * The base of the exponent to be used for exponential backoff.
      *
-     * A value of 1 disabled exponential backoff.
+     * A value of 1 disables exponential backoff.
      * A value of 2 causes retry delays to grow exponentially based on powers of 2.
      */
     Integer exponentialBackoffBaseMultiplier = 2
@@ -46,9 +46,9 @@ import groovy.transform.Canonical
     /**
      * The work to try to execute without an exception getting thrown.
      *
-     * Object work(int iterationCounter)
+     * T work(int iterationCounter)
      */
-    Closure work
+    Closure<T> work
 
     /**
      * The number of times to try to perform the work before giving up and re-throwing the exceptions from the attempts.
@@ -100,7 +100,7 @@ import groovy.transform.Canonical
      *
      * @param milliseconds the number of milliseconds to sleep
      */
-    protected void delay(int milliseconds) {
+    void delay(int milliseconds) {
         Time.sleepCancellably(milliseconds)
     }
 }

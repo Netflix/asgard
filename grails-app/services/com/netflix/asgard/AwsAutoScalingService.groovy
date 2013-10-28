@@ -89,22 +89,17 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     def awsCloudWatchService
     def awsEc2Service
     def awsLoadBalancerService
-    def awsSimpleDbService
     Caches caches
     def cloudReadyService
     def configService
     def discoveryService
-    def emailerService
+    def idService
     def launchTemplateService
     def mergedInstanceService
     def pushService
     def taskService
     def spotInstanceRequestService
     ThreadScheduler threadScheduler
-
-    /** The location of the sequence number in SimpleDB */
-    final SimpleDbSequenceLocator sequenceLocator = new SimpleDbSequenceLocator(region: Region.defaultRegion(),
-            domainName: 'CLOUD_POLICY_SEQUENCE', itemName: 'policy_id', attributeName: 'value')
 
     final AwsResultsRetriever scalingPolicyRetriever = new AwsResultsRetriever<ScalingPolicy, DescribePoliciesRequest,
             DescribePoliciesResult>() {
@@ -702,12 +697,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
 
     String nextPolicyId(UserContext userContext) {
-        try {
-            return awsSimpleDbService.incrementAndGetSequenceNumber(userContext, sequenceLocator)
-        } catch (Exception e) {
-            emailerService.sendExceptionEmail(e.toString(), e)
-            return UUID.randomUUID().toString()
-        }
+        idService.nextId(userContext, SimpleDbSequenceLocator.Policy)
     }
 
     /**

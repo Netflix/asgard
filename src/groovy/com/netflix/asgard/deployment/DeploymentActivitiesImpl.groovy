@@ -18,10 +18,10 @@ package com.netflix.asgard.deployment
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.simpleworkflow.flow.annotations.ManualActivityCompletion
-import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.netflix.asgard.AwsAutoScalingService
 import com.netflix.asgard.AwsEc2Service
 import com.netflix.asgard.AwsLoadBalancerService
+import com.netflix.asgard.AwsSimpleWorkflowService
 import com.netflix.asgard.Caches
 import com.netflix.asgard.CloudReadyService
 import com.netflix.asgard.ConfigService
@@ -37,6 +37,8 @@ import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScalingPolicyData
+import com.netflix.asgard.model.SwfWorkflowTags
+import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.push.AsgDeletionMode
 import com.netflix.asgard.push.PushException
 import com.netflix.glisten.ActivityOperations
@@ -50,6 +52,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     AwsAutoScalingService awsAutoScalingService
     AwsEc2Service awsEc2Service
     AwsLoadBalancerService awsLoadBalancerService
+    AwsSimpleWorkflowService awsSimpleWorkflowService
     Caches caches
     CloudReadyService cloudReadyService
     ConfigService configService
@@ -204,7 +207,9 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     @Override
     Boolean askIfDeploymentShouldProceed(String notificationDestination, String asgName, String operationDescription,
             String reasonAsgIsUnhealthy) {
-        WorkflowExecution workflowExecution = activity.workflowExecution
+        WorkflowExecutionBeanOptions workflowExecutionBeanOptions = awsSimpleWorkflowService.
+                getWorkflowExecutionInfoByWorkflowExecution(activity.workflowExecution)
+        SwfWorkflowTags tags = workflowExecutionBeanOptions.tags
         String message = """
         Auto Scaling Group '${asgName}' is being deployed.
         ${operationDescription}
@@ -212,8 +217,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         Please determine if the deployment should proceed.
 
         ${grailsLinkGenerator.link(base: configService.linkCanonicalServerUrl, controller: 'task', action: 'show',
-                params: [workflowId: workflowExecution.workflowId, runId: workflowExecution.runId,
-                        taskToken: activity.taskToken])}
+                params: [id: tags.id, taskToken: activity.taskToken])}
         """.stripIndent()
         String subject = "Asgard deployment response requested for '${asgName}'."
         emailerService.sendUserEmail(notificationDestination, subject, message)
