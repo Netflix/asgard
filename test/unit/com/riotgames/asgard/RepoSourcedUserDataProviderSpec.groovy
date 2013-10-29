@@ -36,7 +36,7 @@ class RepoSourcedUserDataProviderSpec extends Specification {
     static String GH_BASE = GHE_BASE
     static String GH_SUFFIX = GHE_SUFFIX
 
-    static String FORMULA_PATH = 'formula/shell.yaml'
+    static String FORMULA_PATH = 'base/userdata.formula'
 
     void setup() {
 
@@ -44,7 +44,7 @@ class RepoSourcedUserDataProviderSpec extends Specification {
             'base' : GHE_BASE,
             'suffix' : GHE_SUFFIX,
             'accept' : GH_ACCEPT,
-            'formulaPath' : FORMULA_PATH,
+            'formulaPaths' : [ FORMULA_PATH ],
         ]
 
         grailsApplication = Mocks.grailsApplication()
@@ -54,7 +54,6 @@ class RepoSourcedUserDataProviderSpec extends Specification {
             getAccountName() >> 'rcloud-test'
             getEnvStyle() >> 'test'
             getUserDataVarPrefix() >> 'CLOUD_'
-            getRegionalDiscoveryServer(_) >> 'https://eureka.my.com/eureka:8080'
         }
 
         launchContext = new LaunchContext(userContext: UserContext.auto(Region.US_WEST_2))
