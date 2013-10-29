@@ -111,23 +111,24 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
 
         /**
          * Populates a map for use by #substituteVariables and that contains a standard set of variable patterns,
-         * and values from LaunchContext data.
+         * and values from LaunchContext data. Note that autoScalingGroup and application in launchContext will be null
+         * when launching is done for a single instance, and not in an ASG.
          *
          * @param launchContext  the context to extract interesting variables from
          * @return  a map of regex Pattern => String for substituting variables with values.
          */
         Variables(ConfigService configService, LaunchContext launchContext) {
             String envName = splitTail(configService.accountName, '-')  //CQ: maybe use configService.envStyle as the default?
-            String groupName = launchContext.autoScalingGroup?.autoScalingGroupName //CQ: can this be null?
-            String appName = launchContext.application?.name  //CQ: can this be null?
+            String groupName = launchContext.autoScalingGroup?.autoScalingGroupName  // null on single instance launch
+            String appName = launchContext.application?.name  // null on single instance launch
             variables = [
                 (ACCOUNT_PAT) : configService.accountName,
                 (REGION_PAT) : launchContext.userContext.region.code,
                 (ENV_PAT) : envName,
-                (STACK_PAT) : Relationships.stackNameFromGroupName(groupName),
-                (APP_PAT) : appName,
-                (CLUSTER_PAT) : Relationships.clusterFromGroupName(groupName),
-                (GROUP_PAT) : groupName,
+                (STACK_PAT) : groupName ? Relationships.stackNameFromGroupName(groupName) : '',
+                (APP_PAT) : appName?: '',
+                (CLUSTER_PAT) : groupName ? Relationships.clusterFromGroupName(groupName) : '',
+                (GROUP_PAT) : groupName?: '',
                 (EUREKA_PAT) : configService.getRegionalDiscoveryServer(launchContext.userContext.region),
                 (VARPREFIX_PAT) : configService.userDataVarPrefix,
             ]
@@ -179,11 +180,15 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
             this.formula = formula
         }
 
+        boolean isValid() {
+            formula.getProperties()['parts']
+        }
+
         /**
          * Substitutes variables in the the source and target paths.
          */
         void substituteVariables(Variables variables) {
-            formula.parts?.each { part->
+            formula.parts.each { part->
                 part.source = variables.substituted(part.source)
                 part.target = variables.substituted(part.target)
                 if (part.target.endsWith('/'))
@@ -195,7 +200,7 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
          * Retrieves source blobs from the repo, and substitute vars as indicated.
          */
         void retrieveBlobs(Repo repo, Variables variables) {
-            formula.parts?.each { part->
+            formula.parts.each { part->
                 part.blob = repo.retrieveText(part.source) // stuff the blob in the part object
                 if (part.subst)
                     part.blob = variables.substituted(part.blob)
@@ -319,14 +324,18 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
         // Build the variable substitution map with LaunchContext-specific values
         Variables variables = new Variables(configService, launchContext)
 
-        // Substitute the vars and retrieve the formula in yaml from from the repo, and then parse it
+        // Substitute the path vars and retrieve the formula in yaml from from the repo, and then parse it
         Formula formula = Formula.fromRepo(repo, variables.substituted(formulaPath))
+        if (formula.valid) {
+            // Substitute the formula vars and retrieve any referenced blobs
+            formula.substituteVariables(variables)
+            formula.retrieveBlobs(repo, variables)
 
-        formula.substituteVariables(variables)
-        formula.retrieveBlobs(repo, variables)
-
-        // Put it all together into our final user data
-        formula.assembleUserData()
+            // Put it all together into our final user data
+            formula.assembleUserData()
+        } else {
+            ''
+        }
     }
 
 }
