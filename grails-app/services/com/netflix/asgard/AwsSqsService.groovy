@@ -139,7 +139,8 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
         }, Link.to(EntityType.queue, queueName))
     }
 
-    SimpleQueue updateQueue(UserContext userContext, String queueName, Integer timeout, Integer delay) {
+    SimpleQueue updateQueue(UserContext userContext, String queueName, Integer timeout, Integer delay,
+            Integer retention) {
         Check.notEmpty(queueName, 'queue name')
         SimpleQueue queue = null
         String msg = "Update Queue '${queueName}' with timeout ${timeout}s, delay ${delay}s"
@@ -147,7 +148,8 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
                 queue = getQueue(userContext, queueName)
                 Map<String, String> attributes = [
                     (QueueAttributeName.VisibilityTimeout.toString()) : timeout.toString(),
-                    (QueueAttributeName.DelaySeconds.toString()) : delay.toString()]
+                    (QueueAttributeName.DelaySeconds.toString()) : delay.toString(),
+                    (QueueAttributeName.MessageRetentionPeriod.toString()) : retention.toString()]
                 SetQueueAttributesRequest request = new SetQueueAttributesRequest(queue.url, attributes)
                 awsClient.by(userContext.region).setQueueAttributes(request)
                 queue = getQueue(userContext, queueName)

@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.model
 
+import com.amazonaws.services.sqs.model.QueueAttributeName
 import com.netflix.asgard.Meta
 import com.netflix.asgard.Region
 import com.netflix.asgard.Time
@@ -36,21 +37,24 @@ class SimpleQueue {
     String name
     Map<String, String> attributes = [:]
 
-    static final String VISIBILITY_TIMEOUT_ATTR_NAME = 'VisibilityTimeout'
-    static final String DELAY_SECONDS_ATTR_NAME = 'DelaySeconds'
-
-    private static Map<String, Closure> ATTR_NAMES_TO_HUMAN_READABILITY_METHODS = [
-            'VisibilityTimeout': { "${it} seconds" },
-            'MaximumMessageSize': { "${it} bytes" },
-            'MessageRetentionPeriod': { Time.format(Duration.standardSeconds(it as Long)) },
-            'CreatedTimestamp': { Time.format(new DateTime((it as Long) * 1000)) },
-            'LastModifiedTimestamp': { Time.format(new DateTime((it as Long) * 1000)) }
+    private static Map<QueueAttributeName, Closure<String>> ATTR_NAMES_TO_HUMAN_READABILITY_METHODS = [
+            (QueueAttributeName.VisibilityTimeout): { "${it} seconds" },
+            (QueueAttributeName.MaximumMessageSize): { "${it} bytes" },
+            (QueueAttributeName.MessageRetentionPeriod): { Time.format(Duration.standardSeconds(it as Long)) },
+            (QueueAttributeName.CreatedTimestamp): { Time.format(new DateTime((it as Long) * 1000)) },
+            (QueueAttributeName.LastModifiedTimestamp): { Time.format(new DateTime((it as Long) * 1000)) }
     ]
 
     private String humanReadableValue(String attrKey, String attrValue) {
-        Closure method = SimpleQueue.ATTR_NAMES_TO_HUMAN_READABILITY_METHODS[attrKey]
+        QueueAttributeName queueAttributeName
+        try {
+            queueAttributeName = QueueAttributeName.fromValue(attrKey)
+        } catch (IllegalArgumentException ignore) {
+            return attrValue
+        }
+        Closure<String> method = ATTR_NAMES_TO_HUMAN_READABILITY_METHODS[queueAttributeName]
         if (method) {
-            return method.call(attrValue)
+            return method(attrValue)
         }
         attrValue
     }
