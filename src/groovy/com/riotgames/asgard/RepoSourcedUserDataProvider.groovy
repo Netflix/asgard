@@ -30,7 +30,7 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
     ConfigService configService
 
     Repo repo
-    String formulaPath
+    String[] formulaPaths
 
     /**
      * Initializes a new RepoSourcedUserDataProvider that talks to the grailsApplication to get
@@ -39,7 +39,7 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
     void afterPropertiesSet() {
         def config = grailsApplication.config.cloud.repoSourcedUserData
         repo = new Repo(config)
-        formulaPath = config.formulaPath ?: ''
+        formulaPaths = config.formulaPaths ?: []
     }
 
     /**
@@ -165,23 +165,32 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
      * to yield the final representation which can then be assembled into a UserData string.
      */
     static class Formula {
-        final Object formula
+        final def formula
 
+        /**
+         * Retrieves a formula in YAML from from a repo, and returns a parsed Formula instance iff found and valid,
+         * null if not.
+         */
         static Formula fromRepo(Repo repo, String path) {
-            String yaml = repo.retrieveText(path)
-            new Formula(new Yaml().load(yaml))
+            fromYaml(repo.retrieveText(path))
         }
 
-        static Formula fromYaml(String yaml) {
-            new Formula(new Yaml().load(yaml))
+        /**
+         * Returns a parsed Formula instance from text iff it contains a valid formula definition,
+         * null if not.
+         */
+        static Formula fromYaml(String yamlText) {
+            if (yamlText) {
+                Object yaml = new Yaml().load(yamlText)
+                if (yaml?.parts) {
+                    return new Formula(yaml)
+                }
+            }
+            null
         }
 
         private Formula(Object formula) {
             this.formula = formula
-        }
-
-        boolean isValid() {
-            formula.getProperties()['parts']
         }
 
         /**
@@ -324,17 +333,19 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
         // Build the variable substitution map with LaunchContext-specific values
         Variables variables = new Variables(configService, launchContext)
 
-        // Substitute the path vars and retrieve the formula in yaml from from the repo, and then parse it
-        Formula formula = Formula.fromRepo(repo, variables.substituted(formulaPath))
-        if (formula.valid) {
+        // Scans the formulaPaths, substituting vars in each, and retrieves and parses the first one found.
+        Formula formula = formulaPaths.findResult { path->
+            Formula.fromRepo(repo, variables.substituted(path))
+        }
+        if (formula) {
             // Substitute the formula vars and retrieve any referenced blobs
             formula.substituteVariables(variables)
             formula.retrieveBlobs(repo, variables)
 
             // Put it all together into our final user data
-            formula.assembleUserData()
+            return formula.assembleUserData()
         } else {
-            ''
+            return ''
         }
     }
 
