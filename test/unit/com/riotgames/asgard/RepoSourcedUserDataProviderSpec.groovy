@@ -7,6 +7,7 @@ import com.netflix.asgard.UserContext
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchContext
+import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
 import org.yaml.snakeyaml.Yaml
 
 import spock.lang.Ignore
@@ -47,13 +48,14 @@ class RepoSourcedUserDataProviderSpec extends Specification {
             'formulaPaths' : [ FORMULA_PATH ],
         ]
 
-        grailsApplication = Mocks.grailsApplication()
+        grailsApplication = new DefaultGrailsApplication()
         grailsApplication.config.cloud.put('repoSourcedUserData', repoSourcedUserData)
 
         configService = Mock(ConfigService) {
             getAccountName() >> 'rcloud-test'
             getEnvStyle() >> 'test'
             getUserDataVarPrefix() >> 'CLOUD_'
+            getRegionalDiscoveryServer(_) >> 'https://eureka.my.com/eureka:8080'
         }
 
         launchContext = new LaunchContext(userContext: UserContext.auto(Region.US_WEST_2))
@@ -108,7 +110,7 @@ class RepoSourcedUserDataProviderSpec extends Specification {
         repoSourcedUserDataProvider.repo.base == GHE_BASE
         repoSourcedUserDataProvider.repo.suffix == GHE_SUFFIX
         repoSourcedUserDataProvider.repo.accept == GH_ACCEPT
-        repoSourcedUserDataProvider.formulaPath == FORMULA_PATH
+        repoSourcedUserDataProvider.formulaPaths == [FORMULA_PATH]
     }
 
     def 'Formula should assemble shell user data'() {
