@@ -25,7 +25,7 @@ import com.netflix.asgard.model.SimpleQueue
 import com.netflix.asgard.model.SqsPolicyToSendMessageFromTopic
 import spock.lang.Specification
 
-class AwsSqsServiceSpec extends Specification {
+class AwsSqsServiceUnitSpec extends Specification {
 
     AwsSqsService awsSqsService = new AwsSqsService()
     AmazonSQS mockAmazonSQS = Mock(AmazonSQS)

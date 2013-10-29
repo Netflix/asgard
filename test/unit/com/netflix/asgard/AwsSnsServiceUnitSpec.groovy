@@ -21,7 +21,7 @@ import com.netflix.asgard.model.SqsPolicyToSendMessageFromTopic
 import com.netflix.asgard.model.SubscriptionData
 import spock.lang.Specification
 
-class AwsSnsServiceSpec extends Specification {
+class AwsSnsServiceUnitSpec extends Specification {
 
     AwsSnsService awsSnsService = new AwsSnsService()
     AmazonSNS mockAmazonSNS = Mock(AmazonSNS)
