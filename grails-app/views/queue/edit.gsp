@@ -15,7 +15,7 @@
     limitations under the License.
 
 --%>
-<%@ page import="com.netflix.asgard.model.SimpleQueue" %>
+<%@ page import="com.amazonaws.services.sqs.model.QueueAttributeName" %>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -46,14 +46,21 @@
             <td class="name"><label for="visibilityTimeout">Visibility Timeout:</label></td>
             <td>
               <input class="number" type="text" id="visibilityTimeout" name="visibilityTimeout"
-                     value="${queue.attributes[SimpleQueue.VISIBILITY_TIMEOUT_ATTR_NAME]}"/> seconds
+                     value="${queue.attributes[QueueAttributeName.VisibilityTimeout.toString()]}"/> seconds
             </td>
           </tr>
           <tr>
             <td class="name"><label for="delay">Delay:</label></td>
             <td>
               <input class="number" type="text" id="delay" name="delay"
-                     value="${queue.attributes[SimpleQueue.DELAY_SECONDS_ATTR_NAME]}"/> seconds
+                     value="${queue.attributes[QueueAttributeName.DelaySeconds.toString()]}"/> seconds
+            </td>
+          </tr>
+          <tr>
+            <td class="name"><label for="retention">Message Retention Period:</label></td>
+            <td>
+              <input class="number" type="text" id="retention" name="retention"
+                     value="${queue.attributes[QueueAttributeName.MessageRetentionPeriod.toString()]}"/> seconds
             </td>
           </tr>
           </tbody>

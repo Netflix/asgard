@@ -59,7 +59,7 @@
                   </thead>
                     <g:each var="subscription" in="${subscriptions}" status="i">
                       <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-                        <td>${subscription.endpoint}</td>
+                        <td><g:snsSubscriptionEndpoint>${subscription.endpoint}</g:snsSubscriptionEndpoint></td>
                         <td>${subscription.protocol}</td>
                         <g:if test="${subscription.isConfirmed()}">
                           <td class="buttons">

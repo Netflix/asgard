@@ -49,7 +49,7 @@
         <g:each var="attribute" in="${queue.humanReadableAttributes}">
           <tr class="prop">
             <td class="name">${attribute.key}:</td>
-            <td class="value">${attribute.value}</td>
+            <td class="value"><g:render template="/common/jsonValue" model="['jsonValue': attribute.value]"/></td>
           </tr>
         </g:each>
         </tbody>
