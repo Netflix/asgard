@@ -18,15 +18,20 @@ package com.netflix.asgard.model
 import groovy.transform.Immutable
 
 /**
- * Constructs an SQS policy allowing an SNS topic to send messages to the policy.
+ * Constructs an SQS queue policy allowing an SNS topic to send messages to the queue.
  */
 @Immutable class SqsPolicyToSendMessageFromTopic {
 
+    /** Amazon Resource Name for the SQS queue that will own this policy. */
     String queueArn
+
+    /** Amazon Resource Name for the SNS topic that will be allowed to send messages to the queue. */
     String topicArn
 
+    @Override
     String toString() {
-        """{
+        """\
+{
     "Version": "2008-10-17",
     "Id": "${queueArn}/SQSDefaultPolicy",
     "Statement": [

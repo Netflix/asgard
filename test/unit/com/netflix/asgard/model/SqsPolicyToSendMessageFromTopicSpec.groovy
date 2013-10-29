@@ -23,7 +23,8 @@ class SqsPolicyToSendMessageFromTopicSpec extends Specification {
         expect:
         new SqsPolicyToSendMessageFromTopic(queueArn: 'arn:aws:sqs:us-east-1:170000000000:asgard-finished-tasks',
                 topicArn: 'arn:aws:sns:us-east-1:170000000001:asgard-finished-tasks').
-                toString() == '''{
+                toString() == '''\
+{
     "Version": "2008-10-17",
     "Id": "arn:aws:sqs:us-east-1:170000000000:asgard-finished-tasks/SQSDefaultPolicy",
     "Statement": [

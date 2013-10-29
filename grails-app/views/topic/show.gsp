@@ -59,13 +59,7 @@
                   </thead>
                     <g:each var="subscription" in="${subscriptions}" status="i">
                       <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-                        <g:set var="queue" value="${com.netflix.asgard.model.SimpleQueue.fromArn(subscription.endpoint)}"/>
-                        <g:if test="${queue?.accountNumber == accountNumber}">
-                          <td><g:linkObject type="queue" name="${queue.name}" region="${queue.region}">${subscription.endpoint}</g:linkObject></td>
-                        </g:if>
-                        <g:else>
-                          <td>${subscription.endpoint}</td>
-                        </g:else>
+                        <td><g:snsSubscriptionEndpoint>${subscription.endpoint}</g:snsSubscriptionEndpoint></td>
                         <td>${subscription.protocol}</td>
                         <g:if test="${subscription.isConfirmed()}">
                           <td class="buttons">

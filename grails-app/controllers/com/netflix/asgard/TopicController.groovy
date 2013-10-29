@@ -54,7 +54,7 @@ class TopicController {
         } else {
             List<SubscriptionData> subscriptions = awsSnsService.getSubscriptionsForTopic(userContext, topic).sort()
             boolean hasConfirmedSubscriptions = subscriptions.find { it.isConfirmed() } != null
-            Map result = [topic: topic, subscriptions: subscriptions, accountNumber: configService.awsAccountNumber,
+            Map result = [topic: topic, subscriptions: subscriptions,
                     hasConfirmedSubscriptions: hasConfirmedSubscriptions]
             withFormat {
                 html { return result }

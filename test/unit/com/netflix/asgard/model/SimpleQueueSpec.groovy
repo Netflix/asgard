@@ -23,7 +23,7 @@ import spock.lang.Specification
 class SimpleQueueSpec extends Specification {
 
     def 'should parse from URL'() {
-        SimpleQueue queue = new SimpleQueue('https://sqs.us-east-1.amazonaws.com/179000000000/cloudBatchTestQueue1')
+        SimpleQueue queue = SimpleQueue.fromUrl('https://sqs.us-east-1.amazonaws.com/179000000000/cloudBatchTestQueue1')
 
         expect:
         queue.region == 'us-east-1'
@@ -51,7 +51,8 @@ class SimpleQueueSpec extends Specification {
     }
 
     void 'should construct URL'() {
-        SimpleQueue queue = new SimpleQueue(Region.defaultRegion(), '179000000000', 'cloudBatchTestQueue1')
+        SimpleQueue queue = new SimpleQueue(region: Region.defaultRegion(), accountNumber: '179000000000',
+                name: 'cloudBatchTestQueue1')
 
         expect:
         queue.url == 'https://sqs.us-east-1.amazonaws.com/179000000000/cloudBatchTestQueue1'
@@ -60,7 +61,7 @@ class SimpleQueueSpec extends Specification {
     void testHumanReadableAttributes() {
         String timestamp = '1234566789'
         String url = 'https://sqs.us-east-1.amazonaws.com/179000000000/com_netflix_log4n_test_queue_error'
-        SimpleQueue queue = new SimpleQueue(url)
+        SimpleQueue queue = SimpleQueue.fromUrl(url)
         queue.attributes = [
                 ApproximateNumberOfMessages: '11908',
                 ApproximateNumberOfMessagesNotVisible: '10515',

@@ -53,8 +53,9 @@ class AwsSqsServiceUnitSpec extends Specification {
         awsSqsService.createQueue(userContext, name, 30, 0)
 
         then:
-        awsSqsService.getQueue(userContext, name) == new SimpleQueue(userContext.region, Mocks.TEST_AWS_ACCOUNT_ID,
-                name).withAttributes([VisibilityTimeout: '30', DelaySeconds: '0'])
+        awsSqsService.getQueue(userContext, name) == new SimpleQueue(region: userContext.region,
+                accountNumber: Mocks.TEST_AWS_ACCOUNT_ID, name: name).
+                withAttributes([VisibilityTimeout: '30', DelaySeconds: '0'])
 
         when:
         awsSqsService.deleteQueue(userContext, name)
@@ -64,6 +65,9 @@ class AwsSqsServiceUnitSpec extends Specification {
     }
 
     def 'should add policy to SQS queue to allow SNS topic to send messages to it'() {
+        awsSqsService.configService = Mock(ConfigService) {
+            getAwsAccountNumber() >> '170000000000'
+        }
         SqsPolicyToSendMessageFromTopic policy = new SqsPolicyToSendMessageFromTopic(
                 queueArn: 'arn:aws:sqs:us-west-1:170000000000:testSQS',
                 topicArn: 'arn:aws:sns:us-west-2:170000000000:testSNS')
@@ -78,6 +82,6 @@ class AwsSqsServiceUnitSpec extends Specification {
         2 * mockAmazonSQS.getQueueAttributes(new GetQueueAttributesRequest(
                 queueUrl: 'https://sqs.us-west-1.amazonaws.com/170000000000/testSQS', attributeNames: ['All'])) >>
                 new GetQueueAttributesResult(attributes: [:])
-        0 * _
+        0 * mockAmazonSQS._
     }
 }

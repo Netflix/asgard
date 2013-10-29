@@ -38,6 +38,7 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
     def grailsApplication
     def awsClientService
     Caches caches
+    def configService
     def taskService
 
     void afterPropertiesSet() {
@@ -58,7 +59,8 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
 
     private List<SimpleQueue> retrieveQueues(Region region) {
         try {
-            return awsClient.by(region).listQueues(new ListQueuesRequest()).queueUrls.collect { new SimpleQueue(it) }
+            return awsClient.by(region).listQueues(new ListQueuesRequest()).queueUrls.
+                    collect { SimpleQueue.fromUrl(it) }
         } catch (AmazonServiceException ase) {
             if (ase.errorCode != 'OptInRequired') { // Ignore if SQS is disabled for this account
                 throw ase
@@ -87,7 +89,7 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
             queues.remove(queueName)
         } else {
             SimpleQueue existingQueue = queues.get(queueName)
-            queue = existingQueue ?: new SimpleQueue(region, accountNumber, queueName)
+            queue = existingQueue ?: new SimpleQueue(region: region, accountNumber: accountNumber, name: queueName)
             queue.attributes = attributes
             queues.put(queueName, queue)
         }
@@ -97,7 +99,8 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
     private Map<String, String> getQueueAttributes(Region region, String queueName) {
         Check.notEmpty(queueName, 'queue name')
         SimpleQueue existingQueue = caches.allQueues.by(region).get(queueName)
-        SimpleQueue queue = existingQueue ?: new SimpleQueue(region, accountNumber, queueName)
+        SimpleQueue queue = existingQueue ?: new SimpleQueue(region: region, accountNumber: accountNumber,
+                name: queueName)
         String url = queue.url
         try {
             GetQueueAttributesRequest attrRequest = new GetQueueAttributesRequest(url).withAttributeNames('All')
@@ -167,6 +170,7 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
     void addSnsToSqsPolicy(UserContext userContext, SqsPolicyToSendMessageFromTopic sqsPolicy,
             Task existingTask = null) {
         SimpleQueue queue = SimpleQueue.fromArn(sqsPolicy.queueArn)
+        if (queue.accountNumber != configService.awsAccountNumber) { return }
         TopicData topic = new TopicData(sqsPolicy.topicArn)
         Region sqsRegion = Region.withCode(queue.region)
         String oldPolicy = getQueueAttributes(sqsRegion, queue.name)[QueueAttributeName.Policy.name()] ?: ''
@@ -176,7 +180,7 @@ class AwsSqsService implements CacheInitializer, InitializingBean {
             Map<String, String> attributes = [(QueueAttributeName.Policy.name()) : newPolicy]
             SetQueueAttributesRequest request = new SetQueueAttributesRequest(queue.url, attributes)
             awsClient.by(sqsRegion).setQueueAttributes(request)
-            queue = getQueueInRegion(sqsRegion, queue.name)
+            getQueueInRegion(sqsRegion, queue.name)
         }, Link.to(EntityType.queue, queue.name), existingTask)
     }
 }
