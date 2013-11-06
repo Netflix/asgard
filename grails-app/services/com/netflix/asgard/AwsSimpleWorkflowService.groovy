@@ -81,12 +81,12 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
      * Set up relevant cache objects to begin retrieving data.
      */
     void initializeCaches() {
-        caches.allWorkflowDomains.ensureSetUp({ retrieveDomains() }, {
+        caches.allWorkflowDomains.ensureSetUp({ retrieveDomainsAndEnsureDomainIsRegistered() }, {
             caches.allOpenWorkflowExecutions.ensureSetUp({ retrieveOpenWorkflowExecutions() })
             caches.allClosedWorkflowExecutions.ensureSetUp({ retrieveClosedWorkflowExecutions() })
+            caches.allWorkflowTypes.ensureSetUp({ retrieveWorkflowTypes() })
+            caches.allActivityTypes.ensureSetUp({ retrieveActivityTypes() })
         })
-        caches.allWorkflowTypes.ensureSetUp({ retrieveWorkflowTypes() })
-        caches.allActivityTypes.ensureSetUp({ retrieveActivityTypes() })
     }
 
     // Activity types
@@ -364,7 +364,12 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
 
     // Workflow Domains
 
-    private List<DomainInfo> retrieveDomains() {
+    /**
+     * Gets all the SWF domains and registers the main domain we need if it's not already in the list.
+     *
+     * @return info objects for all the registered domains in the default region
+     */
+    List<DomainInfo> retrieveDomainsAndEnsureDomainIsRegistered() {
         log.debug('Retrieve workflow domains')
         ListDomainsRequest request = new ListDomainsRequest(registrationStatus: 'REGISTERED')
         List<DomainInfo> domains = domainFetcher.retrieve(Region.defaultRegion(), request)

@@ -98,9 +98,10 @@ class QueueController {
         String queueName = params.name
         Integer visibilityTimeout = params.visibilityTimeout as Integer
         Integer delay = params.delay as Integer
+        Integer retention = params.retention as Integer
         UserContext userContext = UserContext.of(request)
         try {
-            awsSqsService.updateQueue(userContext, queueName, visibilityTimeout, delay)
+            awsSqsService.updateQueue(userContext, queueName, visibilityTimeout, delay, retention)
             flash.message = "Queue '${queueName}' has been updated."
         } catch (Exception e) {
             flash.message = "Failed to update Queue '${queueName}': ${e}"

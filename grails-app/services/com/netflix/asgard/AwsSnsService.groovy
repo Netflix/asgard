@@ -30,6 +30,7 @@ import com.amazonaws.services.sns.model.Subscription
 import com.amazonaws.services.sns.model.Topic
 import com.amazonaws.services.sns.model.UnsubscribeRequest
 import com.netflix.asgard.cache.CacheInitializer
+import com.netflix.asgard.model.SqsPolicyToSendMessageFromTopic
 import com.netflix.asgard.model.SubscriptionData
 import com.netflix.asgard.model.TopicData
 import com.netflix.asgard.retriever.AwsResultsRetriever
@@ -43,6 +44,7 @@ class AwsSnsService implements CacheInitializer, InitializingBean {
     MultiRegionAwsClient<AmazonSNS> awsClient
     def grailsApplication
     def awsClientService
+    def awsSqsService
     Caches caches
     def configService
     def taskService
@@ -133,9 +135,21 @@ class AwsSnsService implements CacheInitializer, InitializingBean {
         caches.allTopics.by(userContext.region).put(topic.name, null)
     }
 
+    /**
+     * Creates a subscription to the SNS topic.
+     *
+     * @param userContext who, where, why
+     * @param subscription information
+     * @param existingTask will be used to do work if it is provided
+     */
     void createSubscription(UserContext userContext, SubscriptionData subscription, Task existingTask = null) {
         taskService.runTask(userContext, "Create Subscription ${subscription}", { Task task ->
             awsClient.by(userContext.region).subscribe(subscription.toSubscribeRequest())
+            if (subscription.protocol == SubscriptionData.Protocol.SQS.value) {
+                SqsPolicyToSendMessageFromTopic policy = new SqsPolicyToSendMessageFromTopic(
+                        topicArn: subscription.topicArn, queueArn: subscription.endpoint)
+                awsSqsService.addSnsToSqsPolicy(userContext, policy, existingTask)
+            }
         }, Link.to(EntityType.topic, subscription.topicName), existingTask)
     }
 
