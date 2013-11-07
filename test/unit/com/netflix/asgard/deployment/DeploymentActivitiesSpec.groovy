@@ -37,7 +37,6 @@ import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.push.Cluster
-import com.netflix.asgard.push.PushException
 import com.netflix.glisten.ActivityOperations
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import spock.lang.Specification
@@ -118,20 +117,6 @@ class DeploymentActivitiesSpec extends Specification {
         }
     }
 
-    def 'should construct next ASG'() {
-        AutoScalingGroupBeanOptions expectedAsg = new AutoScalingGroupBeanOptions(minSize: 0, maxSize: 6,
-                desiredCapacity: 0, defaultCooldown: 200, healthCheckGracePeriod: 60,
-                autoScalingGroupName: 'rearden_metal_pourer-v002',
-                launchConfigurationName: 'rearden_metal_pourer-20130718090004',
-                suspendedProcesses: [AutoScalingProcessType.AlarmNotifications] as Set)
-
-        expect:
-        deploymentActivities.constructNextAsgForCluster(userContext, asgDeploymentNames,
-                new AutoScalingGroupBeanOptions(minSize: 4, maxSize: 6, defaultCooldown: 200,
-                        healthCheckGracePeriod: 60, suspendedProcesses: [AutoScalingProcessType.AlarmNotifications])
-        ) == expectedAsg
-    }
-
     def 'should create next ASG'() {
         when:
         deploymentActivities.createNextAsgForCluster(userContext, new AutoScalingGroupBeanOptions(
@@ -192,16 +177,15 @@ class DeploymentActivitiesSpec extends Specification {
         }
     }
 
-    def 'should throw a reason if ASG is unhealthy'() {
+    def 'should give a reason if ASG is unhealthy'() {
         when:
-        deploymentActivities.reasonAsgIsUnhealthy(userContext, 'rearden_metal_pourer-v001', 2)
+        String reason = deploymentActivities.reasonAsgIsNotOperational(userContext, 'rearden_metal_pourer-v001', 2)
 
         then:
         with(mockAwsAutoScalingService) {
-            1 * reasonAsgIsUnhealthy(_, 'rearden_metal_pourer-v001', 2) >> 'Who is John Galt?'
+            1 * reasonAsgIsNotOperational(_, 'rearden_metal_pourer-v001', 2) >> 'Who is John Galt?'
         }
-        PushException exception = thrown()
-        exception.message == 'Who is John Galt?'
+        reason == 'Who is John Galt?'
     }
 
     def 'should enable an ASG'() {
@@ -284,7 +268,7 @@ class DeploymentActivitiesSpec extends Specification {
     def 'should ask if deployment should proceed'() {
         when:
         deploymentActivities.askIfDeploymentShouldProceed('hrearden@reardenmetal.com', 'rearden_metal_pourer-v001',
-                'It has finished pouring.', null)
+                'It has finished pouring.')
 
         then:
         with(mockActivityOperations) {
@@ -300,7 +284,6 @@ class DeploymentActivitiesSpec extends Specification {
                     '''
                     Auto Scaling Group \'rearden_metal_pourer-v001\' is being deployed.
                     It has finished pouring.
-                    Auto Scaling Group \'rearden_metal_pourer-v001\' is healthy.
                     Please determine if the deployment should proceed.
 
                     <link>
@@ -332,13 +315,9 @@ class DeploymentActivitiesSpec extends Specification {
             1 * link(_) >> '<link>'
         }
         with(mockEmailerService) {
-            1 * sendUserEmail('hrearden@reardenmetal.com',
-                    'Read this Hank!',
-                    '''
-                    Auto Scaling Group \'rearden_metal_pourer-v001\' is unhealthy. Production has halted.
-
-                    <link>
-                    '''.stripIndent())
+            1 * sendUserEmail('hrearden@reardenmetal.com', 'Read this Hank!', '''\
+            Production has halted.
+            <link>'''.stripIndent())
         }
         with(mockConfigService) {
             1 * getLinkCanonicalServerUrl() >> 'http://asgard'

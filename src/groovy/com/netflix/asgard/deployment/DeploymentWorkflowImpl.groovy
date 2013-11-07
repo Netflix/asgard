@@ -18,7 +18,9 @@ package com.netflix.asgard.deployment
 import com.amazonaws.services.simpleworkflow.flow.ActivitySchedulingOptions
 import com.amazonaws.services.simpleworkflow.flow.core.Promise
 import com.amazonaws.services.simpleworkflow.flow.interceptors.ExponentialRetryPolicy
+import com.amazonaws.services.simpleworkflow.flow.interceptors.RetryPolicy
 import com.netflix.asgard.DiscoveryService
+import com.netflix.asgard.Relationships
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
@@ -45,200 +47,207 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow {
         if (deploymentOptions.delayDurationMinutes) {
             status "Waiting ${unit(deploymentOptions.delayDurationMinutes, 'minute')} before starting deployment."
         }
-        Promise<AsgDeploymentNames> asgDeploymentNames = waitFor(timer(minutesToSeconds(deploymentOptions.
-                delayDurationMinutes))) {
+        Promise<Void> delay = timer(minutesToSeconds(deploymentOptions.delayDurationMinutes), 'delay')
+        Promise<AsgDeploymentNames> asgDeploymentNamesPromise = promiseFor(activities.getAsgDeploymentNames(userContext,
+                deploymentOptions.clusterName))
+        Throwable rollbackCause = null
+        Promise<Void> deploymentComplete = waitFor(allPromises(asgDeploymentNamesPromise, delay)) {
             status "Starting deployment for Cluster '${deploymentOptions.clusterName}'."
-            promiseFor(activities.getAsgDeploymentNames(userContext, deploymentOptions.clusterName))
+            AsgDeploymentNames asgDeploymentNames = asgDeploymentNamesPromise.get()
+            AutoScalingGroupBeanOptions nextAsgTemplate = constructNextAsgForCluster(asgDeploymentNames, asgInputs)
+            doTry {
+                waitFor(activities.constructLaunchConfigForNextAsg(userContext, nextAsgTemplate, lcInputs)) {
+                    startDeployment(userContext, deploymentOptions, asgDeploymentNames, nextAsgTemplate, it)
+                }
+            } withCatch { Throwable e ->
+                rollbackCause = e
+                rollback(userContext, asgDeploymentNames, deploymentOptions.notificationDestination, rollbackCause)
+                promiseFor(false)
+            } result
+        }
+        waitFor(deploymentComplete) {
+            if (rollbackCause) {
+                if (rollbackCause.getClass() == PushException) {
+                    status "Deployment was rolled back. ${rollbackCause.message}"
+                } else {
+                    status "Deployment was rolled back due to error: ${rollbackCause.message}"
+                }
+            } else {
+                status 'Deployment was successful.'
+            }
+        }
+    }
+
+    private AutoScalingGroupBeanOptions constructNextAsgForCluster(AsgDeploymentNames asgDeploymentNames,
+            AutoScalingGroupBeanOptions inputs) {
+        AutoScalingGroupBeanOptions autoScalingGroup = AutoScalingGroupBeanOptions.from(inputs)
+        autoScalingGroup.with {
+            autoScalingGroupName = asgDeploymentNames.nextAsgName
+            launchConfigurationName = asgDeploymentNames.nextLaunchConfigName
+        }
+        autoScalingGroup
+    }
+
+    private Promise<Void> startDeployment(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
+            AsgDeploymentNames asgDeploymentNames, AutoScalingGroupBeanOptions nextAsgTemplate,
+            LaunchConfigurationBeanOptions nextLcTemplate) {
+        status "Creating Launch Configuration '${asgDeploymentNames.nextLaunchConfigName}'."
+        Promise<Void> asgCreated = waitFor(activities.createLaunchConfigForNextAsg(userContext,
+                nextAsgTemplate, nextLcTemplate)) {
+            status "Creating Auto Scaling Group '${asgDeploymentNames.nextAsgName}' initially with 0 instances."
+            waitFor(activities.createNextAsgForCluster(userContext, nextAsgTemplate)) {
+                status 'Copying Scaling Policies and Scheduled Actions.'
+                Promise<Integer> scalingPolicyCount = promiseFor(
+                        activities.copyScalingPolicies(userContext, asgDeploymentNames))
+                Promise<Integer> scheduledActionCount = promiseFor(
+                        activities.copyScheduledActions(userContext, asgDeploymentNames))
+                allPromises(scalingPolicyCount, scheduledActionCount)
+            }
         }
 
-        Promise<AutoScalingGroupBeanOptions> nextAsgTemplate = waitFor(asgDeploymentNames) {
-            promiseFor(activities.constructNextAsgForCluster(userContext, asgDeploymentNames.get(), asgInputs))
-        }
-
-        Promise<LaunchConfigurationBeanOptions> nextLcTemplate = waitFor(nextAsgTemplate) {
-            promiseFor(activities.constructLaunchConfigForNextAsg(userContext, nextAsgTemplate.get(), lcInputs))
-        }
-
-        Promise<String> nextLcName = waitFor(allPromises(asgDeploymentNames, nextLcTemplate)) {
-            status "Creating Launch Configuration '${asgDeploymentNames.get().nextLaunchConfigName}'."
-            promiseFor(activities.createLaunchConfigForNextAsg(userContext, nextAsgTemplate.get(),
-                    nextLcTemplate.get()))
-        }
-
-        Promise<String> nextAsgName = waitFor(nextLcName) {
-            status "Creating Auto Scaling Group '${asgDeploymentNames.get().nextAsgName}' initially with 0 instances."
-            promiseFor(activities.createNextAsgForCluster(userContext, nextAsgTemplate.get()))
-        }
-
-        Promise<Integer> scalingPolicyCount = waitFor(nextAsgName) {
-            status 'Copying Scaling Policies.'
-            promiseFor(activities.copyScalingPolicies(userContext, asgDeploymentNames.get()))
-        }
-
-        Promise<Integer> scheduledActionCount = waitFor(nextAsgName) {
-            status 'Copying Scheduled Actions.'
-            promiseFor(activities.copyScheduledActions(userContext, asgDeploymentNames.get()))
-        }
-
-        Promise<Boolean> shouldScaleToDesiredCapacity = waitFor(allPromises(scalingPolicyCount,
-                scheduledActionCount)) {
-            status "New ASG '${nextAsgName.get()}' was successfully created."
+        Promise<Boolean> scaleToDesiredCapacity = waitFor(asgCreated) {
+            status "New ASG '${asgDeploymentNames.nextAsgName}' was successfully created."
             if (!deploymentOptions.doCanary) {
                 return promiseFor(true)
             }
             int canaryCapacity = deploymentOptions.canaryCapacity
-            status 'Canary testing will now be performed.'
-            scaleAsgAndWaitForDecision(userContext, nextAsgName.get(), deploymentOptions.canaryStartUpTimeoutMinutes,
-                    canaryCapacity, canaryCapacity, canaryCapacity, deploymentOptions.canaryAssessmentDurationMinutes,
-                    deploymentOptions.notificationDestination, deploymentOptions.scaleUp, 'canary capacity')
+            Promise<Boolean> scaleAsgPromise = scaleAsg(userContext, asgDeploymentNames,
+                    deploymentOptions.canaryStartUpTimeoutMinutes, canaryCapacity, canaryCapacity,
+                    canaryCapacity, 'canary capacity')
+            waitFor(scaleAsgPromise) {
+                determineWhetherToProceedToNextStep(asgDeploymentNames, deploymentOptions.canaryJudgmentPeriodMinutes,
+                        deploymentOptions.notificationDestination, deploymentOptions.scaleUp, 'canary capacity')
+            }
         }
 
-        Promise<Boolean> isPreviousAsgDisabled = waitFor(shouldScaleToDesiredCapacity) {
-            if (!shouldScaleToDesiredCapacity.get()) {
-                rollback(userContext, asgDeploymentNames.get())
-                return promiseFor(false)
+        Promise<Boolean> isPreviousAsgDisabled = waitFor(scaleToDesiredCapacity) {
+            if (!it) { return promiseFor(false) }
+            Promise<Boolean> scaleAsgPromise = scaleAsg(userContext,
+                    asgDeploymentNames, deploymentOptions.desiredCapacityStartUpTimeoutMinutes, nextAsgTemplate.minSize,
+                    nextAsgTemplate.desiredCapacity, nextAsgTemplate.maxSize, 'full capacity')
+            Promise<Boolean> proceedToNextStep = waitFor(scaleAsgPromise) {
+                determineWhetherToProceedToNextStep(asgDeploymentNames,
+                        deploymentOptions.desiredCapacityJudgmentPeriodMinutes,
+                        deploymentOptions.notificationDestination, deploymentOptions.disablePreviousAsg,
+                        'full capacity')
             }
-            status 'Scaling to full capacity.'
-            Promise<Boolean> isNewAsgHealthyAtDesiredCapacity = scaleAsgAndWaitForDecision(userContext, nextAsgName.get(),
-                    deploymentOptions.desiredCapacityStartUpTimeoutMinutes, asgInputs.minSize,
-                    asgInputs.desiredCapacity, asgInputs.maxSize,
-                    deploymentOptions.desiredCapacityAssessmentDurationMinutes,
-                    deploymentOptions.notificationDestination, deploymentOptions.disablePreviousAsg,
-                    'full capacity')
-            waitFor(isNewAsgHealthyAtDesiredCapacity) {
-                if (!isNewAsgHealthyAtDesiredCapacity.get()) {
-                    if (deploymentOptions.disablePreviousAsg != ProceedPreference.No) {
-                        rollback(userContext, asgDeploymentNames.get())
-                    }
-                    return promiseFor(false)
-                }
+            waitFor(proceedToNextStep) {
+                if (!it) { return promiseFor(false) }
                 if (deploymentOptions.disablePreviousAsg) {
-                    String previousAsgName = asgDeploymentNames.get().previousAsgName
+                    String previousAsgName = asgDeploymentNames.previousAsgName
                     status "Disabling ASG '${previousAsgName}'."
                     activities.disableAsg(userContext, previousAsgName)
                 }
-                promiseFor(deploymentOptions.disablePreviousAsg)
+                promiseFor(true)
             }
         }
 
         waitFor(isPreviousAsgDisabled) {
-            String previousAsgName = asgDeploymentNames.get().previousAsgName
-            if (!isPreviousAsgDisabled.get()) {
-                status "ASG '${previousAsgName}' was not disabled. Full traffic health check will not take place."
+            String previousAsgName = asgDeploymentNames.previousAsgName
+            if (!it) {
+                status "ASG '${previousAsgName}' was not disabled. The new ASG is not taking full traffic."
             } else {
                 long secondsToWaitAfterEurekaChange = DiscoveryService.SECONDS_TO_WAIT_AFTER_EUREKA_CHANGE
                 status "Waiting ${secondsToWaitAfterEurekaChange} seconds for clients to stop using instances."
-                waitFor(timer(secondsToWaitAfterEurekaChange)) {
-                    Promise<Boolean> isNewAsgHealthyWithFullTraffic = startAssessmentPeriodWaitForDecision(userContext,
-                            nextAsgName.get(), deploymentOptions.fullTrafficAssessmentDurationMinutes,
+                waitFor(timer(secondsToWaitAfterEurekaChange, 'secondsToWaitAfterEurekaChange')) {
+                    Promise<Boolean> proceedToNextStep = determineWhetherToProceedToNextStep(
+                            asgDeploymentNames, deploymentOptions.fullTrafficJudgmentPeriodMinutes,
                             deploymentOptions.notificationDestination, deploymentOptions.deletePreviousAsg,
-                            asgInputs.desiredCapacity, 'full traffic')
-                    waitFor(isNewAsgHealthyWithFullTraffic) {
-                        boolean isAsgHealthy = isNewAsgHealthyWithFullTraffic.get()
-                        if (isAsgHealthy) {
-                            if (deploymentOptions.deletePreviousAsg) {
-                                status "Deleting ASG '${previousAsgName}'."
-                                activities.deleteAsg(userContext, previousAsgName)
-                            }
-                        } else {
-                            if (deploymentOptions.deletePreviousAsg != ProceedPreference.No) {
-                                rollback(userContext, asgDeploymentNames.get())
-                            }
+                            'full traffic')
+                    waitFor(proceedToNextStep) {
+                        if (it) {
+                            activities.deleteAsg(userContext, previousAsgName)
+                            status "Deleting ASG '${previousAsgName}'."
                         }
                         Promise.Void()
                     }
                 }
             }
-            Promise.Void()
         }
-
     }
 
-    private Promise<Boolean> scaleAsgAndWaitForDecision(UserContext userContext, String nextAsgName, int startupLimit,
-            int min, int capacity, int max, int assessmentDuration, String notificationDestination,
-            ProceedPreference continueWithNextStep, String operationDescription) {
-        status "Scaling '${nextAsgName}' to ${unit(capacity, 'instance')}."
+    private Promise<Boolean> scaleAsg(UserContext userContext, AsgDeploymentNames asgDeploymentNames,
+            int startupLimitMinutes, int min, int capacity, int max, String operationDescription) {
+        String nextAsgName = asgDeploymentNames.nextAsgName
+        status "Scaling '${nextAsgName}' to ${operationDescription} (${unit(capacity, 'instance')})."
         activities.resizeAsg(userContext, nextAsgName, min, capacity, max)
-
-        DoTry<String> repeatingHealthCheck = checkAsgHealth(userContext, nextAsgName, capacity,
-                new ExponentialRetryPolicy(180L).withMaximumRetryIntervalSeconds(60L))
-        DoTry<Void> healthCheckTimeout = cancellableTimer(minutesToSeconds(startupLimit))
-        status "Waiting up to ${unit(startupLimit, 'minute')} for ${unit(capacity, 'instance')}."
-        waitFor(anyPromises(repeatingHealthCheck.result, healthCheckTimeout.result)) {
-            if (repeatingHealthCheck.result.isReady()) {
-                status "ASG '${nextAsgName}' is at ${operationDescription}."
-                healthCheckTimeout.cancel(null)
-                return startAssessmentPeriodWaitForDecision(userContext, nextAsgName, assessmentDuration,
-                        notificationDestination, continueWithNextStep, capacity, operationDescription)
-            } else {
-                String msg = "ASG '${nextAsgName}' was not at capacity after ${unit(startupLimit, 'minute')}."
-                status msg
-                repeatingHealthCheck.cancel(new PushException(msg))
-                return promiseFor(false)
-            }
-        }
-    }
-
-    private Promise<Boolean> startAssessmentPeriodWaitForDecision(UserContext userContext, String nextAsgName,
-            int assessmentDuration, String notificationDestination, ProceedPreference continueWithNextStep, int capacity,
-            String operationDescription) {
-        if (assessmentDuration) {
-            status "ASG health will be evaluated after ${unit(assessmentDuration, 'minute')}."
-        }
-        waitFor(timer(minutesToSeconds(assessmentDuration))) {
-            // To get to this point the ASG has been seen as healthy once somewhere. Let's retry for the sake of
-            // "eventual consistency" issues like the cache.
-            DoTry<String> reasonAsgIsUnhealthy = checkAsgHealth(userContext, nextAsgName, capacity,
-                    new ExponentialRetryPolicy(5L).withMaximumAttempts(5))
-            waitFor(reasonAsgIsUnhealthy.result) {
-                String assessmentCompleteMessage =
-                    "${operationDescription.capitalize()} assessment period for ASG '${nextAsgName}' has completed."
-                status assessmentCompleteMessage
-                Map<ProceedPreference, Closure<Promise<Boolean>>> preferenceToAction = [
-                        (ProceedPreference.Yes): {
-                            if (reasonAsgIsUnhealthy.result.get()) {
-                                String subject = "Asgard deployment for '${nextAsgName}' will not proceed due to error."
-                                activities.sendNotification(notificationDestination, nextAsgName, subject,
-                                        reasonAsgIsUnhealthy.result.get())
-                                return Promise.asPromise(false)
-                            }
-                            Promise.asPromise(true)
-                        },
-                        (ProceedPreference.No): {
-                            Promise.asPromise(false)
-                        },
-                        (ProceedPreference.Ask): {
-                            status "Awaiting health decision for '${nextAsgName}'."
-                            (Promise<Boolean>) promiseFor(activities.askIfDeploymentShouldProceed(
-                                    notificationDestination, nextAsgName, assessmentCompleteMessage,
-                                    reasonAsgIsUnhealthy.result.get()))
-                        }
-                ]
-                preferenceToAction[continueWithNextStep]()
-            }
-        }
-    }
-
-    private DoTry<String> checkAsgHealth(UserContext userContext, String asgName, int expectedInstances,
-            ExponentialRetryPolicy retryPolicy) {
-        retryPolicy.withExceptionsToRetry([PushException])
-        doTry() {
+        status "Waiting up to ${unit(startupLimitMinutes, 'minute')} for ${unit(capacity, 'instance')}."
+        RetryPolicy retryPolicy = new ExponentialRetryPolicy(30L).withBackoffCoefficient(1).
+                withExceptionsToRetry([PushException])
+        DoTry<String> asgIsOperationalPromise = doTry {
             retry(retryPolicy) {
-                (Promise<String>) promiseFor(activities.reasonAsgIsUnhealthy(userContext, asgName, expectedInstances))
+                waitFor(activities.reasonAsgIsNotOperational(userContext, nextAsgName, capacity)) {
+                    if (it) {
+                        throw new PushException(it)
+                    }
+                    promiseFor(it)
+                }
             }
-        } withCatch { Throwable e ->
-            status e.message
-            if (e instanceof PushException) {
-                return Promise.asPromise(e.message)
+        }
+        DoTry<Void> startupTimeout = cancelableTimer(minutesToSeconds(startupLimitMinutes), 'startupTimeout')
+        waitFor(anyPromises(startupTimeout.result, asgIsOperationalPromise.result)) {
+            if (asgIsOperationalPromise.result.ready) {
+                startupTimeout.cancel(null)
+                promiseFor(true)
+            } else {
+                asgIsOperationalPromise.cancel(null)
+                waitFor(activities.reasonAsgIsNotOperational(userContext, nextAsgName, capacity)) {
+                    if (it) {
+                        String msg = "ASG '${asgDeploymentNames.nextAsgName}' was not at capacity after " +
+                                "${unit(startupLimitMinutes, 'minute')}."
+                        throw new PushException(msg)
+                    }
+                    promiseFor(true)
+                }
             }
-            (Promise<String>) promiseFor(null)
         }
     }
 
-    private void rollback(UserContext userContext, AsgDeploymentNames asgDeploymentNames) {
-        status "Rolling back to '${asgDeploymentNames.previousAsgName}'."
+    private Promise<Boolean> determineWhetherToProceedToNextStep(AsgDeploymentNames asgDeploymentNames,
+            int judgmentPeriodMinutes, String notificationDestination, ProceedPreference continueWithNextStep,
+            String operationDescription) {
+        String nextAsgName = asgDeploymentNames.nextAsgName
+        if (continueWithNextStep == ProceedPreference.Yes) { return promiseFor(true) }
+        if (continueWithNextStep == ProceedPreference.No) { return promiseFor(false) }
+        if (judgmentPeriodMinutes) {
+            status "ASG will be evaluated for up to ${unit(judgmentPeriodMinutes, 'minute')}."
+        }
+        String judgmentMessage =
+            "${operationDescription.capitalize()} judgment period for ASG '${nextAsgName}' has begun."
+        Promise<Boolean> proceed = promiseFor(activities.askIfDeploymentShouldProceed(notificationDestination,
+                    nextAsgName, judgmentMessage))
+        status judgmentMessage
+        status "Awaiting judgment for '${nextAsgName}'."
+        DoTry<Void> sendNotificationAtJudgmentTimeout = doTry {
+            waitFor(timer(minutesToSeconds(judgmentPeriodMinutes), 'judgmentTimeout')) {
+                String clusterName = Relationships.clusterFromGroupName(asgDeploymentNames.nextAsgName)
+                String subject = "Judgement period for ASG '${asgDeploymentNames.nextAsgName}' has ended."
+                String message = 'Please make a decision to proceed or roll back.'
+                activities.sendNotification(notificationDestination, clusterName, subject, message)
+                Promise.Void()
+            }
+        }
+        waitFor(proceed) {
+            sendNotificationAtJudgmentTimeout.cancel(null)
+            if (it) {
+                promiseFor(true)
+            } else {
+                throw new PushException("Judge decided ASG '${asgDeploymentNames.nextAsgName}' was not operational.")
+            }
+        }
+    }
+
+    private void rollback(UserContext userContext, AsgDeploymentNames asgDeploymentNames,
+            String notificationDestination, Throwable rollbackCause) {
+        String action = "Rolling back to '${asgDeploymentNames.previousAsgName}'."
+        status action
+        String clusterName = Relationships.clusterFromGroupName(asgDeploymentNames.nextAsgName)
+        String status = rollbackCause ? 'not ' : ''
+        String message = """\
+        Auto Scaling Group '${asgDeploymentNames.nextAsgName}' is ${status}operational.
+        ${rollbackCause.message}""".stripIndent()
+        activities.sendNotification(notificationDestination, clusterName, action, message)
         activities.enableAsg(userContext, asgDeploymentNames.previousAsgName)
         activities.disableAsg(userContext, asgDeploymentNames.nextAsgName)
     }
-
 }

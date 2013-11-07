@@ -187,12 +187,12 @@ ${lastGroup.loadBalancerNames}"""
 
     def result = { render view: '/common/result' }
 
-    def proceedWithDeployment(String taskToken, String taskId) {
-        completeDeployment(taskToken, taskId, true)
+    def proceedWithDeployment(String taskToken, String id) {
+        completeDeployment(taskToken, id, true)
     }
 
-    def rollbackDeployment(String taskToken, String taskId) {
-        completeDeployment(taskToken, taskId, false)
+    def rollbackDeployment(String taskToken, String id) {
+        completeDeployment(taskToken, id, false)
     }
 
     private void completeDeployment(String taskToken, String taskId, boolean shouldProceed) {
@@ -220,13 +220,12 @@ ${lastGroup.loadBalancerNames}"""
                         doCanary: Boolean.parseBoolean(params.doCanary),
                         canaryCapacity: params.canaryCount ?: 1,
                         canaryStartUpTimeoutMinutes: params.canaryStartUpTimeoutMinutes ?: 30,
-                        canaryAssessmentDurationMinutes: params.canaryAssessmentDurationMinutes ?: 60,
+                        canaryJudgmentPeriodMinutes: params.canaryJudgmentPeriodMinutes ?: 60,
                         scaleUp: ProceedPreference.parse(params.scaleUp),
                         desiredCapacityStartUpTimeoutMinutes: params.desiredCapacityStartUpTimeoutMinutes ?: 40,
-                        desiredCapacityAssessmentDurationMinutes: params.
-                                desiredCapacityAssessmentDurationMinutes ?: 120,
+                        desiredCapacityJudgmentPeriodMinutes: params.desiredCapacityJudgmentPeriodMinutes ?: 120,
                         disablePreviousAsg: ProceedPreference.parse(params.disablePreviousAsg),
-                        fullTrafficAssessmentDurationMinutes: params.fullTrafficAssessmentDurationMinutes ?: 240,
+                        fullTrafficJudgmentPeriodMinutes: params.fullTrafficJudgmentPeriodMinutes ?: 240,
                         deletePreviousAsg: ProceedPreference.parse(params.deletePreviousAsg)
                 )
         ])
@@ -304,7 +303,7 @@ ${lastGroup.loadBalancerNames}"""
                 delayDurationMinutes = 0
                 doCanary = false
                 desiredCapacityStartUpTimeoutMinutes = 30
-                desiredCapacityAssessmentDurationMinutes = 0
+                desiredCapacityJudgmentPeriodMinutes = 0
                 disablePreviousAsg = ProceedPreference.No
             }
         }

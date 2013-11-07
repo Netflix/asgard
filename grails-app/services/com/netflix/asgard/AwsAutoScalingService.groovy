@@ -746,16 +746,16 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
 
     /**
-     * Analyze an ASG and determine if it is healthy.
+     * Analyze an ASG and determine if it is operational.
      *
      * @param userContext who made the call, why, and in what region
      * @param asgName name of the ASG
      * @param expectedInstanceCount number of instances that are expected
-     * @return a String describing why the ASG is unhealthy or null if it is healthy
+     * @return textual description of the reason the ASG is not operational, or an empty String if it is
      */
-    String reasonAsgIsUnhealthy(UserContext userContext, String asgName, int expectedInstanceCount) {
+    String reasonAsgIsNotOperational(UserContext userContext, String asgName, int expectedInstanceCount) {
         if (expectedInstanceCount == 0) {
-            return null
+            return ''
         }
         AutoScalingGroup asg = getAutoScalingGroup(userContext, asgName)
         if (!asg) {
@@ -789,7 +789,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 return 'Waiting for all instances to pass ELB health checks.'
             }
         }
-        null
+        ''
     }
 
     /**

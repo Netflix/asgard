@@ -92,15 +92,15 @@
                 </tr>
                 <tr class="prop">
                   <td class="name">
-                    <label for="canaryAssessmentDurationMinutes">Assessment duration:</label>
+                    <label for="canaryJudgmentPeriodMinutes">Judgment period duration:</label>
                   </td>
                   <td class="value">
-                    <g:textField class="required" name="canaryAssessmentDurationMinutes" value="${deploymentWorkflowOptions.canaryAssessmentDurationMinutes}"/>&nbsp;minutes
+                    <g:textField class="required" name="canaryJudgmentPeriodMinutes" value="${deploymentWorkflowOptions.canaryJudgmentPeriodMinutes}"/>&nbsp;minutes
                   </td>
                 </tr>
                 <tr class="prop">
                   <td class="name">
-                    Scale to desired capacity after canary assessment:
+                    Scale to desired capacity after canary judgment period:
                   </td>
                   <td>
                     <div>
@@ -132,10 +132,10 @@
                 </tr>
                 <tr class="prop">
                   <td class="name">
-                    <label for="desiredCapacityAssessmentDurationMinutes">Assessment duration:</label>
+                    <label for="desiredCapacityJudgmentPeriodMinutes">Judgment period:</label>
                   </td>
                   <td class="value">
-                    <g:textField class="required" name="desiredCapacityAssessmentDurationMinutes" value="${deploymentWorkflowOptions.desiredCapacityAssessmentDurationMinutes}"/>&nbsp;minutes
+                    <g:textField class="required" name="desiredCapacityJudgmentPeriodMinutes" value="${deploymentWorkflowOptions.desiredCapacityJudgmentPeriodMinutes}"/>&nbsp;minutes
                   </td>
                 </tr>
                 <tr>
@@ -164,15 +164,15 @@
               <tbody class="fullTrafficOptions numbers ${deploymentWorkflowOptions.disablePreviousAsg == ProceedPreference.No ? 'concealed' : ''}">
                 <tr class="prop">
                   <td class="name">
-                    <label for="fullTrafficAssessmentDurationMinutes">Full traffic assessment duration:</label>
+                    <label for="fullTrafficJudgmentPeriodMinutes">Full traffic judgment period:</label>
                   </td>
                   <td class="value">
-                    <g:textField class="required" name="fullTrafficAssessmentDurationMinutes" value="${deploymentWorkflowOptions.fullTrafficAssessmentDurationMinutes}"/>&nbsp;minutes
+                    <g:textField class="required" name="fullTrafficJudgmentPeriodMinutes" value="${deploymentWorkflowOptions.fullTrafficJudgmentPeriodMinutes}"/>&nbsp;minutes
                   </td>
                 </tr>
                 <tr class="prop">
                   <td class="name">
-                    Delete previous ASG after full traffic assessment:
+                    Delete previous ASG after full traffic judgment period:
                   </td>
                   <td>
                     <div>

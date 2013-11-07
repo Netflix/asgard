@@ -24,7 +24,7 @@ import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 /**
  * Method contracts and annotations used for the automatic deployment SWF workflow actions.
  */
-@Activities(version = "1.6")
+@Activities(version = "1.7")
 @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = -1L,
         defaultTaskStartToCloseTimeoutSeconds = 300L)
 interface DeploymentActivities {
@@ -60,17 +60,6 @@ interface DeploymentActivities {
      */
     String createLaunchConfigForNextAsg(UserContext userContext, AutoScalingGroupBeanOptions autoScalingGroup,
             LaunchConfigurationBeanOptions launchConfiguration)
-
-    /**
-     * Creates the next ASG in the cluster.
-     *
-     * @param userContext who, where, why
-     * @param asgDeploymentNames identification for the previous and next ASGs
-     * @param inputs for attributes of the new ASG
-     * @return ASG attributes
-     */
-    AutoScalingGroupBeanOptions constructNextAsgForCluster(UserContext userContext,
-            AsgDeploymentNames asgDeploymentNames, AutoScalingGroupBeanOptions inputs)
 
     /**
      * Creates the next ASG in the cluster.
@@ -135,15 +124,14 @@ interface DeploymentActivities {
     void deleteAsg(UserContext userContext, String asgName)
 
     /**
-     * Runs multiple checks to determine the overall health of an ASG including counting the instances and checking
-     * their various health related statuses.
+     * Runs multiple checks to determine the overall readiness of an ASG.
      *
      * @param userContext who, where, why
      * @param asgName of the ASG to modify
      * @param expectedInstances the total number of instances expected in the ASG
-     * @return textual description of the reason why an ASG is not at full health, or null if it is healthy
+     * @return textual description of the reason the ASG is not operational, or an empty String if it is
      */
-    String reasonAsgIsUnhealthy(UserContext userContext, String asgName, int expectedInstances)
+    String reasonAsgIsNotOperational(UserContext userContext, String asgName, int expectedInstances)
 
     /**
      * Asks if the deployment should proceed and wait for a reply.
@@ -151,13 +139,11 @@ interface DeploymentActivities {
      * @param notificationDestination where deployment notifications will be sent
      * @param asgName of the ASG to modify
      * @param operationDescription describes the current operation of the deployment
-     * @param reasonAsgIsUnhealthy textual description of the reason why an ASG is not at full health, or null if it is
      * @return indication on whether to proceed with the deployment
      */
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = -1L,
             defaultTaskStartToCloseTimeoutSeconds = 86400L)
-    Boolean askIfDeploymentShouldProceed(String notificationDestination, String asgName, String operationDescription,
-            String reasonAsgIsUnhealthy)
+    Boolean askIfDeploymentShouldProceed(String notificationDestination, String asgName, String operationDescription)
 
     /**
      * Sends a notification about the status of the deployment.
@@ -165,7 +151,7 @@ interface DeploymentActivities {
      * @param notificationDestination where deployment notifications will be sent
      * @param asgName of the ASG to modify
      * @param subject of the notification
-     * @param reasonAsgIsUnhealthy textual description of the reason why an ASG is not at full health, or null if it is
+     * @param rollbackCause textual description of the reason why an ASG is not operational, or null if it is
      */
-    void sendNotification(String notificationDestination, String asgName, String subject, String reasonAsgIsUnhealthy)
+    void sendNotification(String notificationDestination, String asgName, String subject, String rollbackCause)
 }
