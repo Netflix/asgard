@@ -18,8 +18,6 @@ package com.netflix.asgard.model
 import groovy.transform.Canonical
 import groovy.util.slurpersupport.GPathResult
 import org.joda.time.DateTime
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 
 /**
  * Discovery API ApplicationInstance encapsulation contained within an Application.
