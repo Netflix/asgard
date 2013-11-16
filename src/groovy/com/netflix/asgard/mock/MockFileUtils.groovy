@@ -34,7 +34,7 @@ class MockFileUtils {
      * Parses a json file in the mocks package using the built in Grails parser.
      *
      * @param filename to read and parse
-     * @return parsed represenation of the json file
+     * @return parsed representation of the json file
      */
     static JSONElement parseJsonFile(String fileName) {
         if (fileNamesToJsonDocuments[fileName] == null) {
