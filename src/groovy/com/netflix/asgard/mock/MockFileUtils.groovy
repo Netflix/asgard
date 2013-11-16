@@ -15,7 +15,6 @@
  */
 package com.netflix.asgard.mock
 
-import com.netflix.asgard.format.JsonpStripper
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONElement
 
@@ -47,7 +46,7 @@ class MockFileUtils {
             }
 
             // Get the content as a string instead of a stream. Strip padding off JSONP if present.
-            String content = new JsonpStripper(stream.getText()).stripPadding()
+            String content = stream.getText()
             JSONElement data = JSON.parse(content)
             fileNamesToJsonDocuments[fileName] = data
         }

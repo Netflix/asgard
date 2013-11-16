@@ -15,7 +15,6 @@
  */
 package com.netflix.asgard
 
-import com.netflix.asgard.format.JsonpStripper
 import grails.converters.JSON
 import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
@@ -105,7 +104,7 @@ class RestClientService implements InitializingBean {
             String content = get(uri, 'application/json; charset=UTF-8', timeoutMillis)
 
             // Strip JSONP padding if needed.
-            return content ? JSON.parse(new JsonpStripper(content).stripPadding()) : null
+            return content ? JSON.parse(content) : null
         } catch (Exception e) {
             log.error "GET from ${uri} failed: ${e}"
             return null
