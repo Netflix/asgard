@@ -117,7 +117,7 @@ class Mocks {
                                             new InstanceTypeData(linuxOnDemandPrice: 145.86, hardwareProfile:
                                                     new HardwareProfile(
                                                             instanceType: 'huge.mainframe',
-                                                            architecture: '64-bit')
+                                                            arch: '64-bit')
                                             )],
                                     defaultKeyName: 'nf-test-keypair-a',
                                     defaultSecurityGroups: ['nf-datacenter', 'nf-infrastructure'],

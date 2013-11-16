@@ -18,8 +18,6 @@ package com.netflix.asgard.mock
 import com.netflix.asgard.format.JsonpStripper
 import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONElement
-import org.jsoup.nodes.Document
-import org.jsoup.Jsoup
 
 /**
  * Utility methods for parsing html and json files in the mocks folder.
@@ -27,28 +25,9 @@ import org.jsoup.Jsoup
 class MockFileUtils {
 
     private static Map<String, JSONElement> fileNamesToJsonDocuments = [:]
-    private static Map<String, Document> fileNamesToHtmlDocuments = [:]
 
     private static InputStream getFileAsStream(String fileName) {
         MockFileUtils.classLoader.getResourceAsStream("com/netflix/asgard/mock/${fileName}")
-    }
-
-    /**
-     * Parses an html file in the mocks package using the Jsoup library.
-     *
-     * @param filename to read and parse
-     * @return parsed represenation of the html file
-     */
-    static Document parseHtmlFile(String fileName) {
-        if (fileNamesToHtmlDocuments[fileName] == null) {
-            InputStream stream = getFileAsStream(fileName)
-            if (!stream) {
-                throw new IllegalStateException("Unable to read file ${fileName}.")
-            }
-            Document document = Jsoup.parse(stream, 'UTF-8', '/')
-            fileNamesToHtmlDocuments[fileName] = document
-        }
-        fileNamesToHtmlDocuments[fileName]
     }
 
     /**

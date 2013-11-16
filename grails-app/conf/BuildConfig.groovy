@@ -118,9 +118,6 @@ grails.project.dependency.resolution = {
                 // Better date API
                 'joda-time:joda-time:1.6.2',
 
-                // Delete when Amazon provides a proper instance type API. Web scraping API to parse poorly formed HTML.
-                'org.jsoup:jsoup:1.6.1',
-
                 // Static analysis for Groovy code.
                 'org.codenarc:CodeNarc:0.19',
 
