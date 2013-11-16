@@ -68,6 +68,7 @@
           </tr>
         </g:each>
       </table>
+      <div class="paginateButtons"></div>
     </div>
   </div>
 </body>
