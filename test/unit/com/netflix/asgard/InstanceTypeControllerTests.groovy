@@ -44,10 +44,5 @@ class InstanceTypeControllerTests {
         assert 'Moderate' == types.find { it.name == 'm2.xlarge' }.hardwareProfile.netPerf
 
         assert 0.065 == m1Small.linuxOnDemandPrice
-        assert 0.03 == m1Small.linuxReservedPrice
-        assert 0.007 == m1Small.linuxSpotPrice
-        assert 0.115 == m1Small.windowsOnDemandPrice
-        assert 0.05 == m1Small.windowsReservedPrice
-        assert 0.017 == m1Small.windowsSpotPrice
     }
 }

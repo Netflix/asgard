@@ -49,16 +49,14 @@ class InstanceTypeServiceSpec extends Specification {
     @SuppressWarnings("GroovyAccessibility")
     def 'instance types should include ordered combo of public and custom instance types'() {
 
-        List<InstanceProductType> products = InstanceProductType.valuesForOnDemandAndReserved()
+        List<InstanceProductType> products = InstanceProductType.values() as List
         Table<InstanceType, InstanceProductType, BigDecimal> pricesByHardwareAndProduct =
             ArrayTable.create(InstanceType.values() as List, products)
         pricesByHardwareAndProduct.put(InstanceType.M1Small, InstanceProductType.LINUX_UNIX, 0.05)
         pricesByHardwareAndProduct.put(InstanceType.M1Medium, InstanceProductType.LINUX_UNIX, 0.23)
         pricesByHardwareAndProduct.put(InstanceType.M1Large, InstanceProductType.LINUX_UNIX, 0.68)
         RegionalInstancePrices regionalInstancePrices = RegionalInstancePrices.create(pricesByHardwareAndProduct)
-        caches.allReservedPrices.regionsToRegionalPrices.put(Region.US_EAST_1, regionalInstancePrices)
         caches.allOnDemandPrices.regionsToRegionalPrices.put(Region.US_EAST_1, regionalInstancePrices)
-        caches.allSpotPrices.regionsToRegionalPrices.put(Region.US_EAST_1, regionalInstancePrices)
 
         mockHardwareProfilesCache.list() >> [
                 new HardwareProfile(instanceType: 'm1.small', size: 'Small'),

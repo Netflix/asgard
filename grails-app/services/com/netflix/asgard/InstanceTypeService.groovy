@@ -38,7 +38,6 @@ class InstanceTypeService implements CacheInitializer {
     final Map<JsonTypeSizeCombo, InstanceType> typeSizeCodesToInstanceTypes = buildTypeSizeCodesToInstanceTypes()
 
     final BigDecimal lowPrioritySpotPriceFactor = 1.0
-    final BigDecimal highPrioritySpotPriceFactor = 1.04
 
     def grailsApplication
     def awsEc2Service
@@ -50,13 +49,9 @@ class InstanceTypeService implements CacheInitializer {
     void initializeCaches() {
         // Use one thread for all these data sources. None of these need updating more than once an hour.
         caches.allOnDemandPrices.ensureSetUp({ retrieveInstanceTypeOnDemandPricing() })
-        caches.allReservedPrices.ensureSetUp({ retrieveInstanceTypeReservedPricing() })
-        caches.allSpotPrices.ensureSetUp({ retrieveInstanceTypeSpotPricing() })
         caches.allInstanceTypes.ensureSetUp({ Region region -> buildInstanceTypes(region) })
         caches.allHardwareProfiles.ensureSetUp({ retrieveHardwareProfiles() }, {
             caches.allOnDemandPrices.fill()
-            caches.allReservedPrices.fill()
-            caches.allSpotPrices.fill()
             caches.allInstanceTypes.fill()
         })
     }
@@ -65,12 +60,6 @@ class InstanceTypeService implements CacheInitializer {
     BigDecimal calculateLeisureLinuxSpotBid(UserContext userContext, String instanceTypeName) {
         InstanceTypeData instanceType = getInstanceType(userContext, instanceTypeName)
         instanceType.linuxOnDemandPrice * lowPrioritySpotPriceFactor
-    }
-
-    /** Costs more, should start soon, should terminate rarely */
-    BigDecimal calculateUrgentLinuxSpotBid(UserContext userContext, String instanceTypeName) {
-        InstanceTypeData instanceType = getInstanceType(userContext, instanceTypeName)
-        instanceType.linuxOnDemandPrice * highPrioritySpotPriceFactor
     }
 
     InstanceTypeData getInstanceType(UserContext userContext, String instanceTypeName) {
@@ -111,14 +100,6 @@ class InstanceTypeService implements CacheInitializer {
         caches.allOnDemandPrices.by(region)
     }
 
-    private RegionalInstancePrices getReservedPrices(Region region) {
-        caches.allReservedPrices.by(region)
-    }
-
-    private RegionalInstancePrices getSpotPrices(Region region) {
-        caches.allSpotPrices.by(region)
-    }
-
     private List<InstanceTypeData> buildInstanceTypes(Region region) {
 
         Map<String, InstanceTypeData> namesToInstanceTypeDatas = [:]
@@ -143,8 +124,6 @@ class InstanceTypeService implements CacheInitializer {
         try {
             Collection<HardwareProfile> hardwareProfiles = getHardwareProfiles()
             RegionalInstancePrices onDemandPrices = getOnDemandPrices(region)
-            RegionalInstancePrices reservedPrices = getReservedPrices(region)
-            RegionalInstancePrices spotPrices = getSpotPrices(region)
 
             for (InstanceType instanceType in enumInstanceTypes) {
                 String name = instanceType.toString()
@@ -153,11 +132,6 @@ class InstanceTypeService implements CacheInitializer {
                     InstanceTypeData instanceTypeData = new InstanceTypeData(
                             hardwareProfile: hardwareProfile,
                             linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
-                            linuxReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.LINUX_UNIX),
-                            linuxSpotPrice: spotPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
-                            windowsOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.WINDOWS),
-                            windowsReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.WINDOWS),
-                            windowsSpotPrice: spotPrices.get(instanceType, InstanceProductType.WINDOWS)
                     )
                     namesToInstanceTypeDatas[name] = instanceTypeData
                 } else {
@@ -248,7 +222,7 @@ class InstanceTypeService implements CacheInitializer {
         for (JSONElement regionJsonObject in regionJsonArray) {
             Region region = Region.withPricingJsonCode(regionJsonObject.region)
             List<InstanceType> instanceTypes = InstanceType.values() as List
-            List<InstanceProductType> products = InstanceProductType.valuesForOnDemandAndReserved()
+            List<InstanceProductType> products = InstanceProductType.values() as List
             Table<InstanceType, InstanceProductType, BigDecimal> pricesByHardwareAndProduct =
                     ArrayTable.create(instanceTypes, products)
             JSONArray typesJsonArray = regionJsonObject.instanceTypes
@@ -283,34 +257,9 @@ class InstanceTypeService implements CacheInitializer {
         retrieveInstanceTypePricing(InstancePriceType.ON_DEMAND)
     }
 
-    private Map<Region, RegionalInstancePrices> retrieveInstanceTypeReservedPricing() {
-        retrieveInstanceTypePricing(InstancePriceType.RESERVED)
-    }
-
-    private Map<Region, RegionalInstancePrices> retrieveInstanceTypeSpotPricing() {
-        retrieveInstanceTypePricing(InstancePriceType.SPOT)
-    }
-
     private Map<JsonTypeSizeCombo, InstanceType> buildTypeSizeCodesToInstanceTypes() {
 
         Map<JsonTypeSizeCombo, InstanceType> typeSizeCodesToInstanceTypes = [:]
-
-        // Reservation json compound code names
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdResI', 'sm'), InstanceType.M1Small)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdResI', 'lg'), InstanceType.M1Large)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdResI', 'xl'), InstanceType.M1Xlarge)
-        // Double-check and uncomment second generation M3 instance types when InstanceType enum is ready for them
-        // typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdResI', 'xl'), InstanceType.M3Xlarge)
-        // typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdResI', 'xxl'), InstanceType.M32xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('uResI', 'u'), InstanceType.T1Micro)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemResI', 'xl'), InstanceType.M2Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemResI', 'xxl'), InstanceType.M22xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemResI', 'xxxxl'), InstanceType.M24xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUResI', 'med'), InstanceType.C1Medium)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUResI', 'xl'), InstanceType.C1Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterCompResI', 'xxxxl'), InstanceType.Cc14xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterCompResI', 'xxxxxxxxl'), InstanceType.Cc28xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterGPUResI', 'xxxxl'), InstanceType.Cg14xlarge)
 
         // On-demand json compound code names
         typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdODI', 'sm'), InstanceType.M1Small)
@@ -327,23 +276,6 @@ class InstanceTypeService implements CacheInitializer {
         typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUODI', 'med'), InstanceType.C1Medium)
         typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUODI', 'xl'), InstanceType.C1Xlarge)
         typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiIoODI', 'xxxxl'), InstanceType.Hi14xlarge)
-
-        // Spot json compound code names
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdSpot', 'sm'), InstanceType.M1Small)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdSpot', 'med'), InstanceType.M1Medium)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdSpot', 'lg'), InstanceType.M1Large)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdSpot', 'xl'), InstanceType.M1Xlarge)
-        // Double-check and uncomment second generation M3 instance types when InstanceType enum is ready for them
-        // typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdSpot', 'xl'), InstanceType.M3Xlarge)
-        // typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdSpot', 'xxl'), InstanceType.M32xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('uSpot', 'u'), InstanceType.T1Micro)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemSpot', 'xl'), InstanceType.M2Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemSpot', 'xxl'), InstanceType.M22xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemSpot', 'xxxxl'), InstanceType.M24xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUSpot', 'med'), InstanceType.C1Medium)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUSpot', 'xl'), InstanceType.C1Xlarge)
-
-        // On demand and spot share these identifiers
         typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterComputeI', 'xxxxl'), InstanceType.Cc14xlarge)
         typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterComputeI', 'xxxxxxxxl'), InstanceType.Cc28xlarge)
         typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterGPUI', 'xxxxl'), InstanceType.Cg14xlarge)

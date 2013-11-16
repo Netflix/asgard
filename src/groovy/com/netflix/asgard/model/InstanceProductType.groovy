@@ -21,12 +21,7 @@ package com.netflix.asgard.model
  */
 enum InstanceProductType {
 
-    LINUX_UNIX('Linux/UNIX', 'linux'),
-    VPC_LINUX_UNIX('Linux/UNIX (Amazon VPC)'),
-    WINDOWS('Windows', 'mswin'),
-    VPC_WINDOWS('Windows (Amazon VPC)'),
-    SUSE_LINUX('SUSE Linux'),
-    VPC_SUSE_LINUX('SUSE Linux (Amazon VPC)')
+    LINUX_UNIX('Linux/UNIX', 'linux')
 
     /** The name of the product type in Amazon's spot pricing history API. */
     String spotPricingName
@@ -37,21 +32,5 @@ enum InstanceProductType {
     InstanceProductType(String spotPricingName, String jsonPricingName = null) {
         this.spotPricingName = spotPricingName
         this.jsonPricingName = jsonPricingName
-    }
-
-    static InstanceProductType byName(String name) {
-        try {
-            return (InstanceProductType) Enum.valueOf(InstanceProductType, name.toUpperCase())
-        }
-        catch (IllegalArgumentException ignored) {
-            return null
-        }
-        catch (NullPointerException ignored) {
-            return null
-        }
-    }
-
-    static List<InstanceProductType> valuesForOnDemandAndReserved() {
-        values().findAll { it.jsonPricingName } as List
     }
 }
