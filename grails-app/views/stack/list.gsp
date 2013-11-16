@@ -33,6 +33,7 @@
       <g:render template="stackList" model="${[stackNames: significantStackNames]}" />
       <h2>All Stacks</h2>
     </g:if>
+    <div class="buttons"></div>
     <g:render template="stackList" model="${[stackNames: allStackNames]}" />
   </div>
   <div class="paginateButtons">
