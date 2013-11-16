@@ -24,7 +24,6 @@ import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.InstanceProductType
 import com.netflix.asgard.model.InstanceTypeData
-import groovy.transform.Immutable
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONElement
 
@@ -34,8 +33,6 @@ import org.codehaus.groovy.grails.web.json.JSONElement
 class InstanceTypeService implements CacheInitializer {
 
     static transactional = false
-
-    final Map<JsonTypeSizeCombo, InstanceType> typeSizeCodesToInstanceTypes = buildTypeSizeCodesToInstanceTypes()
 
     final BigDecimal lowPrioritySpotPriceFactor = 1.0
 
@@ -219,11 +216,10 @@ class InstanceTypeService implements CacheInitializer {
                     ArrayTable.create(instanceTypes, products)
             JSONArray typesJsonArray = regionJsonObject.instanceTypes
             for (JSONElement typeJsonObject in typesJsonArray) {
-                String typeCode = typeJsonObject.type // Name of group of hardware instance types like hiMemODI
                 JSONArray sizes = typeJsonObject.sizes
                 for (JSONElement sizeObject in sizes) {
                     String sizeCode = sizeObject.size
-                    InstanceType instanceType = determineInstanceType(typeCode, sizeCode)
+                    InstanceType instanceType = determineInstanceType(sizeCode)
                     if (instanceType) {
                         JSONArray valueColumns = sizeObject.valueColumns
                         for (JSONElement valueColumn in valueColumns) {
@@ -249,39 +245,13 @@ class InstanceTypeService implements CacheInitializer {
         retrieveInstanceTypePricing(InstancePriceType.ON_DEMAND)
     }
 
-    private Map<JsonTypeSizeCombo, InstanceType> buildTypeSizeCodesToInstanceTypes() {
-
-        Map<JsonTypeSizeCombo, InstanceType> typeSizeCodesToInstanceTypes = [:]
-
-        // On-demand json compound code names
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdODI', 'sm'), InstanceType.M1Small)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdODI', 'med'), InstanceType.M1Medium)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdODI', 'lg'), InstanceType.M1Large)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdODI', 'xl'), InstanceType.M1Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdODI', 'xl'), InstanceType.M3Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdODI', 'xxl'), InstanceType.M32xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('uODI', 'u'), InstanceType.T1Micro)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemODI', 'xl'), InstanceType.M2Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemODI', 'xxl'), InstanceType.M22xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemODI', 'xxxxl'), InstanceType.M24xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUODI', 'med'), InstanceType.C1Medium)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUODI', 'xl'), InstanceType.C1Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiIoODI', 'xxxxl'), InstanceType.Hi14xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterComputeI', 'xxxxl'), InstanceType.Cc14xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterComputeI', 'xxxxxxxxl'), InstanceType.Cc28xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterGPUI', 'xxxxl'), InstanceType.Cg14xlarge)
-
-        return typeSizeCodesToInstanceTypes.asImmutable()
+    private InstanceType determineInstanceType(String jsonSizeCode) {
+        try {
+            return InstanceType.fromValue(jsonSizeCode)
+        } catch (IllegalArgumentException ignore) {
+            return null
+        }
     }
-
-    private InstanceType determineInstanceType(String jsonTypeCode, String jsonSizeCode) {
-        typeSizeCodesToInstanceTypes[new JsonTypeSizeCombo(jsonTypeCode, jsonSizeCode)]
-    }
-}
-
-@Immutable final class JsonTypeSizeCombo {
-    String type
-    String size
 }
 
 class RegionalInstancePrices {

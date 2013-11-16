@@ -24,7 +24,7 @@ enum InstancePriceType {
     /**
      * Pricing for instances that have not been reserved and are needed right away.
      */
-    ON_DEMAND('http://aws.amazon.com/ec2/pricing/', 'pricing-on-demand-instances.json'),
+    ON_DEMAND('http://aws.amazon.com/ec2/pricing/json/', 'linux-od.json'),
 
     /**
      * Instances priced based on the spot market for instances that are not needed right away.

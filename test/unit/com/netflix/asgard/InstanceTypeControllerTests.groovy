@@ -43,6 +43,6 @@ class InstanceTypeControllerTests {
         assert '64-bit' == types.find { it.name == 'm1.large' }.hardwareProfile.arch
         assert 'Moderate' == types.find { it.name == 'm2.xlarge' }.hardwareProfile.netPerf
 
-        assert 0.065 == m1Small.linuxOnDemandPrice
+        assert 0.060 == m1Small.linuxOnDemandPrice
     }
 }
