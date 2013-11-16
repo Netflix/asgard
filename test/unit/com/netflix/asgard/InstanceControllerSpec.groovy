@@ -47,7 +47,7 @@ class InstanceControllerSpec extends Specification {
         then:
         result.instanceList == [hello, appLess]
         1 * mergedInstanceGroupingService.getMergedInstances(_) >> [appLess, hello]
-        0 * _._
+        0 * _
     }
 
     def 'list with "noApp" should only show app-less instances'() {
@@ -59,7 +59,7 @@ class InstanceControllerSpec extends Specification {
         then:
         result.instanceList == [appLess]
         1 * mergedInstanceGroupingService.getMergedInstances(_) >> [hello, appLess]
-        0 * _._
+        0 * _
     }
 
     def 'list with multiple apps should only request a list of relevant instances, sorted by app name'() {
@@ -68,12 +68,12 @@ class InstanceControllerSpec extends Specification {
         when:
         Map result = controller.list()
 
-        then: "one method call is made for each app name, and the instances are then sorted by app name"
+        then: 'one method call is made for each app name, and the instances are then sorted by app name'
         result.instanceList == [goodbye, hello, helloAgain, sorry]
         1 * mergedInstanceGroupingService.getMergedInstances(_, 'sorry') >> [sorry]
         1 * mergedInstanceGroupingService.getMergedInstances(_, 'goodbye') >> [goodbye]
         1 * mergedInstanceGroupingService.getMergedInstances(_, 'hello') >> [hello, helloAgain]
-        0 * _._
+        0 * _
     }
 
     def 'apps should list unique sorted app names of instances'() {
@@ -85,6 +85,6 @@ class InstanceControllerSpec extends Specification {
         result.appNames == ['goodbye', 'hello', 'sorry']
         result.noAppId == '_noapp'
         1 * mergedInstanceGroupingService.getMergedInstances(_) >> [hello, goodbye, appLess, sorry, helloAgain]
-        0 * _._
+        0 * _
     }
 }
