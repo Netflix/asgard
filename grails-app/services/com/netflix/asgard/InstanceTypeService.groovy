@@ -120,29 +120,21 @@ class InstanceTypeService implements CacheInitializer {
             namesToInstanceTypeDatas[name] = customInstanceTypeData
         }
 
-        // If hardware metadata is available, replace bare-bones objects in map of namesToInstanceTypeDatas.
-        try {
-            Collection<HardwareProfile> hardwareProfiles = getHardwareProfiles()
-            RegionalInstancePrices onDemandPrices = getOnDemandPrices(region)
-
-            for (InstanceType instanceType in enumInstanceTypes) {
-                String name = instanceType.toString()
-                HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == name }
-                if (hardwareProfile) {
-                    InstanceTypeData instanceTypeData = new InstanceTypeData(
-                            hardwareProfile: hardwareProfile,
-                            linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
-                    )
-                    namesToInstanceTypeDatas[name] = instanceTypeData
-                } else {
-                    log.info "Unable to resolve ${instanceType}"
-                }
+        Collection<HardwareProfile> hardwareProfiles = getHardwareProfiles()
+        RegionalInstancePrices onDemandPrices = getOnDemandPrices(region)
+        for (InstanceType instanceType in enumInstanceTypes) {
+            String name = instanceType.toString()
+            HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == name }
+            if (hardwareProfile) {
+                InstanceTypeData instanceTypeData = new InstanceTypeData(
+                        hardwareProfile: hardwareProfile,
+                        linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
+                )
+                namesToInstanceTypeDatas[name] = instanceTypeData
+            } else {
+                log.info "Unable to resolve ${instanceType}"
             }
-        } catch (Exception e) {
-            log.error(e)
-            emailerService.sendExceptionEmail('Error parsing Amazon instance data', e)
         }
-
         // Sort based on Linux price if possible. Otherwise sort by name.
         List<InstanceTypeData> instanceTypeDatas = namesToInstanceTypeDatas.values() as List
         instanceTypeDatas.sort { a, b -> a.name <=> b.name }
