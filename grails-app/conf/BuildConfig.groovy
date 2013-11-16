@@ -22,6 +22,10 @@ grails.project.test.class.dir = 'target/test-classes'
 grails.project.test.reports.dir = 'target/test-reports'
 grails.project.war.file = "target/${appName}.war"
 
+grails.servlet.version = "3.0"
+grails.project.target.level = 1.6
+grails.project.source.level = 1.6
+
 codenarc {
     reports = {
         AsgardXmlReport('xml') {
@@ -39,11 +43,30 @@ codenarc {
     maxPriority3Violations = 0
 }
 
+grails.project.fork = [
+    // configure settings for compilation JVM, note that if you alter the Groovy version forked compilation is required
+    //  compile: [maxMemory: 256, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
+
+    // configure settings for the test-app JVM, uses the daemon by default
+    // test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
+    // configure settings for the run-app JVM
+    run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+    
+    // configure settings for the run-war JVM
+    war: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+    // configure settings for the Console UI JVM
+    console: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256]
+]
+
+grails.project.dependency.resolver = "maven" // or ivy
 grails.project.dependency.resolution = {
     // Inherit Grails' default dependencies
     inherits('global') {}
 
     log 'warn'
+
+    checksums true // Whether to verify checksums on resolve
+    legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
     repositories {
         grailsPlugins()
@@ -136,9 +159,6 @@ grails.project.dependency.resolution = {
                 // Ease of use library for AWS SWF.
                 'com.netflix.glisten:glisten:0.2',
 
-                // Groovy concurrency framework.
-                'org.codehaus.gpars:gpars:1.0.0',
-
                 // Used for JSON parsing of AWS Simple Workflow Service metadata.
                 // Previously this was an indirect depencency through Grails itself, but this caused errors in some
                 // Grails environments.
@@ -153,29 +173,19 @@ grails.project.dependency.resolution = {
             )
         }
 
-        // Spock in Grails 2.2.x http://grails.org/plugin/spock
-        test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
-
-        // Optional dependency for Spock to support mocking objects without a parameterless constructor.
-        test 'org.objenesis:objenesis:1.2'
     }
 
     plugins {
-        compile ":hibernate:$grailsVersion"
         compile ":compress:0.4"
         compile ":context-param:1.0"
         compile ':shiro:1.1.4'
         compile ":standalone:1.1.1"
 
+        runtime ':hibernate:3.6.10.2'
         runtime ":cors:1.0.4"
 
-        // Spock in Grails 2.2.x http://grails.org/plugin/spock
-        test(":spock:0.7") {
-            exclude "spock-grails-support"
-        }
+        test ':code-coverage:1.2.6'
 
-        test ':code-coverage:1.2.5'
-
-        build ":tomcat:$grailsVersion"
+        build ":tomcat:7.0.42"
     }
 }
