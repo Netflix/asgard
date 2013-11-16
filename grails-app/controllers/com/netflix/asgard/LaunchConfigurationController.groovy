@@ -132,16 +132,6 @@ class LaunchConfigurationController {
         render "<pre>${message}</pre>"
     }
 
-    // This is the old clean up endpoint. After a release, the Jenkins job can be changed to point to massDelete. Then
-    // this method can be deleted.
-    @Deprecated
-    def cleanup = {
-        UserContext userContext = UserContext.of(request)
-        Integer daysAgo = params.daysAgo as Integer
-        String message = doMassDelete(userContext, daysAgo)
-        render "<pre>${message}</pre>"
-    }
-
     private String doMassDelete(UserContext userContext, int daysAgo) {
         Check.atLeast(1, daysAgo, 'daysAgo')
         DateTime cutOffDate = new DateTime().minusDays(daysAgo)
