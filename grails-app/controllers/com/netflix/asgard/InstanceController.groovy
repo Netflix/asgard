@@ -47,11 +47,31 @@ class InstanceController {
     def discoveryService
     def mergedInstanceGroupingService
 
+    /**
+     * The special marker for looking for items that do not have an application.
+     */
+    static final String NO_APP_ID = '_noapp'
+
+    def apps = {
+        UserContext userContext = UserContext.of(request)
+        List<MergedInstance> allInstances = mergedInstanceGroupingService.getMergedInstances(userContext)
+        List<String> appNames = allInstances.findResults { it.appName?.toLowerCase() ?: null } as List<String>
+        Map result = [appNames: appNames.unique().sort(), noAppId: NO_APP_ID]
+        withFormat {
+            html { result }
+            xml { new XML(result).render(response) }
+            json { new JSON(result).render(response) }
+        }
+    }
+
     def list = {
         UserContext userContext = UserContext.of(request)
         List<MergedInstance> instances = []
         Set<String> appNames = Requests.ensureList(params.id).collect { it.split(',') }.flatten() as Set<String>
-        if (appNames) {
+        if (appNames.contains(NO_APP_ID)) {
+            instances = mergedInstanceGroupingService.getMergedInstances(userContext).findAll { !it.appName }
+        }
+        else if (appNames) {
             instances = appNames.collect { mergedInstanceGroupingService.getMergedInstances(userContext, it) }.flatten()
         } else {
             instances = mergedInstanceGroupingService.getMergedInstances(userContext)

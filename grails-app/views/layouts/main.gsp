@@ -111,9 +111,9 @@
      </li>
      <li class="menuButton"><g:link class="loadBalancers" controller="loadBalancer" action="list">ELB</g:link></li>
      <li class="menuButton">
-         <g:link class="instances" controller="instance" action="list">EC2</g:link>
+         <g:link class="instances" controller="instance" action="${discoveryExists ? 'apps' : 'list'}">EC2</g:link>
          <ul>
-           <li class="menuButton"><g:link class="instances" controller="instance" action="list">Instances</g:link></li>
+           <li class="menuButton"><g:link class="instances" controller="instance" action="${discoveryExists ? 'apps' : 'list'}">Instances</g:link></li>
            <li class="menuButton"><g:link class="instanceTypes" controller="instanceType" action="list">Instance Types</g:link></li>
            <g:if test="${spotInstancesAreAppropriate}">
              <li class="menuButton"><g:link class="spotInstanceRequest" controller="spotInstanceRequest" action="list">Spot Instance Requests</g:link></li>
