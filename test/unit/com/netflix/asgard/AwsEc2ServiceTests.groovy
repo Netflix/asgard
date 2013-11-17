@@ -179,7 +179,7 @@ class AwsEc2ServiceTests extends GrailsUnitTestCase {
         def mockAmazonEC2 = mockFor(AmazonEC2)
         awsEc2Service.awsClient = new MultiRegionAwsClient({ mockAmazonEC2.createMock() })
         mockAmazonEC2.demand.createTags(3..3) { CreateTagsRequest request ->
-            int imageIdListSize = request.resources.size
+            int imageIdListSize = request.resources.size()
             assert imageIdListSize == 250 || imageIdListSize == 100
             assert request.tags == [new Tag('tag', 'value')]
         }

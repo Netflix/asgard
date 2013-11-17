@@ -81,24 +81,16 @@ grails.project.dependency.resolution = {
     dependencies {
 
         compile(
-                // Amazon Web Services programmatic interface
-                'com.amazonaws:aws-java-sdk:1.3.32',
-        ) {
-            // AWS defines their dependencies as open-ended, which causes problems when resolving.
-            // See http://stackoverflow.com/a/7990573/869
-            transitive = false
-        }
+                // Amazon Web Services programmatic interface. Transitive dependency of glisten, but also used directly.
+                'com.amazonaws:aws-java-sdk:1.6.6',
 
-        compile(
                 // Transitive dependencies of aws-java-sdk, but also used directly.
-                // It would be great if we could upgrade httpcore and httpclient, but we can't until the AWS Java SDK
-                // upgrades its dependencies. If we simply upgrade these, then some Amazon calls fail.
-                'org.apache.httpcomponents:httpcore:4.1',
-                'org.apache.httpcomponents:httpclient:4.1.1',
+                'org.apache.httpcomponents:httpcore:4.2',
+                'org.apache.httpcomponents:httpclient:4.2.3',
 
                 // Explicitly including aws-java-sdk transitive dependencies
-                'org.codehaus.jackson:jackson-core-asl:1.8.9',
-                'org.codehaus.jackson:jackson-mapper-asl:1.8.9',
+                'com.fasterxml.jackson.core:jackson-core:2.1.1',
+                'com.fasterxml.jackson.core:jackson-annotations:2.1.1',
 
                 // Extra collection types and utilities
                 'commons-collections:commons-collections:3.2.1',
@@ -113,7 +105,7 @@ grails.project.dependency.resolution = {
                 'com.jcraft:jsch:0.1.45',
 
                 // Send emails about system errors and task completions
-                'javax.mail:mail:1.4.1',
+                'javax.mail:mail:1.4.3',
 
                 // Better date API
                 'joda-time:joda-time:1.6.2',

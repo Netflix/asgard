@@ -74,13 +74,13 @@ class InstanceTypeServiceSpec extends Specification {
         List<InstanceTypeData> instanceTypes = instanceTypeService.buildInstanceTypes(Region.defaultRegion())
 
         then:
-        ['c1.medium', 'c1.xlarge', 'cc1.4xlarge', 'cc2.8xlarge', 'cg1.4xlarge', 'hi1.4xlarge', 'm1.xlarge',
-                'm2.2xlarge', 'm2.4xlarge', 'm2.xlarge', 'm3.2xlarge', 'm3.xlarge', 't1.micro', 'm1.small', 'm1.medium',
-                'm1.large', 'superduper.4xlarge'] == instanceTypes*.name
-        [null, null, null, null, null, null, null, null, null, null, null, null, null, 'Small', 'Medium', 'Large',
-                'SSD'] == instanceTypes*.hardwareProfile*.size
-        [null, null, null, null, null, null, null, null, null, null, null, null, null, 0.05, 0.23, 0.68, 3.10
-                ] == instanceTypes*.linuxOnDemandPrice
+        ['c1.medium', 'c1.xlarge', 'cc1.4xlarge', 'cc2.8xlarge', 'cg1.4xlarge', 'cr1.8xlarge', 'hi1.4xlarge',
+                'hs1.8xlarge', 'm1.xlarge', 'm2.2xlarge', 'm2.4xlarge', 'm2.xlarge', 'm3.2xlarge', 'm3.xlarge',
+                't1.micro', 'm1.small', 'm1.medium', 'm1.large', 'superduper.4xlarge'] == instanceTypes*.name
+        [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 'Small', 'Medium',
+                'Large', 'SSD'] == instanceTypes*.hardwareProfile*.size
+        [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0.05, 0.23, 0.68,
+                3.10] == instanceTypes*.linuxOnDemandPrice
     }
 
     def 'instance types list should have unpriced types at the end'() {

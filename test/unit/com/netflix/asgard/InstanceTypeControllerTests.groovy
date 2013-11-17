@@ -32,7 +32,7 @@ class InstanceTypeControllerTests {
     void testList() {
         def attrs = controller.list()
         List<InstanceTypeData> types = attrs.instanceTypes
-        assert 17 == types.size()
+        assert 19 == types.size()
         assert 't1.micro' == types[0].name
         InstanceTypeData m1Small = types[1]
         assert 'Small (Default)' == m1Small.hardwareProfile.size
