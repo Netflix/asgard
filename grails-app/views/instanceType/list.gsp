@@ -24,6 +24,13 @@
 <body>
   <div class="body">
     <h1>Instance types and hourly prices in ${region.description}</h1>
+    <h3>
+      References:
+      <a href="http://www.ec2instances.info/">ec2instances.info</a>,
+      <a href="http://ec2pricing.iconara.info/">ec2pricing.iconara.info</a>,
+      <a href="http://aws.amazon.com/ec2/pricing/">Amazon EC2 Pricing</a>,
+      <a href="http://aws.amazon.com/ec2/instance-types/">Amazon EC2 Instances</a>
+    </h3>
     <g:if test="${flash.message}">
       <div class="message">${flash.message}</div>
     </g:if>
@@ -32,37 +39,36 @@
       <table class="sortable instanceType">
         <tr>
           <th>Name</th>
-          <th>Description</th>
-          <th class="sorttable_nosort">Mem</th>
-          <th class="sorttable_nosort">Storage</th>
-          <th class="sorttable_nosort">CPU</th>
+          <th>Family</th>
+          <th>Group</th>
+          <th>Size</th>
           <th>Arch</th>
-          <th>IO Perf</th>
+          <th>vCPU</th>
+          <th>ECU</th>
+          <th>Mem<br/>(GB)</th>
+          <th>Storage<br/>(GB)</th>
+          <th>EBS<br/>Optim<br/>Avail</th>
+          <th>Network<br/>Perf</th>
           <th>Linux<br/>On<br/>Dem</th>
-          <th>Linux<br/>Res</th>
-          <th>Linux<br/>Spot</th>
-          <th>Win<br/>On<br/>Dem</th>
-          <th>Win<br/>Res</th>
-          <th>Win<br/>Spot</th>
         </tr>
         <g:each in="${instanceTypes}" var="instanceType">
           <tr>
             <td>${instanceType.name}</td>
-            <td class="description">${instanceType.hardwareProfile?.description}</td>
-            <td>${instanceType.hardwareProfile?.memory}</td>
+            <td class="family">${instanceType.hardwareProfile?.family}</td>
+            <td class="group">${instanceType.hardwareProfile?.group}</td>
+            <td class="size">${instanceType.hardwareProfile?.size}</td>
+            <td class="architecture">${instanceType.hardwareProfile?.arch}</td>
+            <td class="cpu">${instanceType.hardwareProfile?.vCpu}</td>
+            <td>${instanceType.hardwareProfile?.ecu}</td>
+            <td>${instanceType.hardwareProfile?.mem}</td>
             <td class="storage">${instanceType.hardwareProfile?.storage}</td>
-            <td class="cpu">${instanceType.hardwareProfile?.cpuSummary}<br/>${instanceType.hardwareProfile?.cpuDetail}</td>
-            <td class="architecture">${instanceType.hardwareProfile?.architecture}</td>
-            <td class="ioPerformance">${instanceType.hardwareProfile?.ioPerformance}</td>
+            <td>${instanceType.hardwareProfile?.ebsOptim}</td>
+            <td class="netPerf">${instanceType.hardwareProfile?.netPerf}</td>
             <td><g:formatNumber number="${instanceType.linuxOnDemandPrice}" type="currency" currencyCode="USD" /></td>
-            <td><g:formatNumber number="${instanceType.linuxReservedPrice}" type="currency" currencyCode="USD" /></td>
-            <td><g:formatNumber number="${instanceType.linuxSpotPrice}" type="currency" currencyCode="USD" /></td>
-            <td><g:formatNumber number="${instanceType.windowsOnDemandPrice}" type="currency" currencyCode="USD" /></td>
-            <td><g:formatNumber number="${instanceType.windowsReservedPrice}" type="currency" currencyCode="USD" /></td>
-            <td><g:formatNumber number="${instanceType.windowsSpotPrice}" type="currency" currencyCode="USD" /></td>
           </tr>
         </g:each>
       </table>
+      <div class="paginateButtons"></div>
     </div>
   </div>
 </body>

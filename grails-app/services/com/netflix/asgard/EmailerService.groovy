@@ -89,11 +89,13 @@ class EmailerService implements InitializingBean {
                 rootProblem = rootProblem.cause
             }
 
-            String message ="${rootProblem.class.simpleName} '${rootProblem.message}'"
+            String message
             if (rootProblem instanceof AmazonServiceException) {
                 String serviceName = rootProblem.serviceName
                 String errorCode = rootProblem.errorCode
-                message = "${serviceName} ${errorCode} ${message}"
+                message = "${serviceName} ${errorCode} ${rootProblem.class.simpleName}"
+            } else {
+                message = "${rootProblem.class.simpleName} '${rootProblem.message}'"
             }
             emailSubject += ": ${StringUtils.abbreviate(message, 160)}"
 
