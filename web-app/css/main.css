@@ -289,9 +289,9 @@ form .compoundName td input + div   { color: #333; white-space: nowrap; }
 form .compoundName td input + div span { color: #999; }
 
 /* STANDARD ACTION BUTTONS */
-.buttons { color: #444; background: #FFF; border: 1px solid #DDD; font-size: 10px; overflow: hidden; padding: 0 3px; clear: both; }
-.buttons { background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #E4E4E4), color-stop(0.4, white)); }
-.buttons { background-image: -moz-linear-gradient(center bottom, #E4E4E4 0%, white 40%); }
+div.buttons, th.buttons { color: #444; background: #FFF; border: 1px solid #DDD; font-size: 10px; overflow: hidden; padding: 0 3px; clear: both; }
+div.buttons, th.buttons { background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #E4E4E4), color-stop(0.4, white)); }
+div.buttons, th.buttons { background-image: -moz-linear-gradient(center bottom, #E4E4E4 0%, white 40%); }
 .buttons button div, .buttons a  {
     color: #333; cursor: pointer; font-size: 10px; font-weight: bold; margin: 1px; overflow: visible; display: inline-block;
     line-height: 14px; border-style: solid; border-color: #DDD #BBB #BBB #DDD; border-width: 1px 2px 2px 1px;
