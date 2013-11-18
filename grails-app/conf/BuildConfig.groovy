@@ -82,7 +82,7 @@ grails.project.dependency.resolution = {
 
         compile(
                 // Ease of use library for Amazon Simple Workflow Service (SWF), e.g., WorkflowClientFactory
-                'com.netflix.glisten:glisten:0.2',
+                'com.netflix.glisten:glisten:0.3',
 
                 // Amazon Web Services programmatic interface. Transitive dependency of glisten, but also used directly.
                 'com.amazonaws:aws-java-sdk:1.6.6',
