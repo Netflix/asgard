@@ -24,13 +24,8 @@ import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.InstanceProductType
 import com.netflix.asgard.model.InstanceTypeData
-import groovy.transform.Immutable
 import org.codehaus.groovy.grails.web.json.JSONArray
 import org.codehaus.groovy.grails.web.json.JSONElement
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.nodes.Node
-import org.jsoup.select.Elements
 
 /**
  * Scrapes web pages and json feeds from Amazon to parse technical and financial information about instance types.
@@ -39,10 +34,7 @@ class InstanceTypeService implements CacheInitializer {
 
     static transactional = false
 
-    final Map<JsonTypeSizeCombo, InstanceType> typeSizeCodesToInstanceTypes = buildTypeSizeCodesToInstanceTypes()
-
     final BigDecimal lowPrioritySpotPriceFactor = 1.0
-    final BigDecimal highPrioritySpotPriceFactor = 1.04
 
     def grailsApplication
     def awsEc2Service
@@ -54,13 +46,9 @@ class InstanceTypeService implements CacheInitializer {
     void initializeCaches() {
         // Use one thread for all these data sources. None of these need updating more than once an hour.
         caches.allOnDemandPrices.ensureSetUp({ retrieveInstanceTypeOnDemandPricing() })
-        caches.allReservedPrices.ensureSetUp({ retrieveInstanceTypeReservedPricing() })
-        caches.allSpotPrices.ensureSetUp({ retrieveInstanceTypeSpotPricing() })
         caches.allInstanceTypes.ensureSetUp({ Region region -> buildInstanceTypes(region) })
         caches.allHardwareProfiles.ensureSetUp({ retrieveHardwareProfiles() }, {
             caches.allOnDemandPrices.fill()
-            caches.allReservedPrices.fill()
-            caches.allSpotPrices.fill()
             caches.allInstanceTypes.fill()
         })
     }
@@ -69,12 +57,6 @@ class InstanceTypeService implements CacheInitializer {
     BigDecimal calculateLeisureLinuxSpotBid(UserContext userContext, String instanceTypeName) {
         InstanceTypeData instanceType = getInstanceType(userContext, instanceTypeName)
         instanceType.linuxOnDemandPrice * lowPrioritySpotPriceFactor
-    }
-
-    /** Costs more, should start soon, should terminate rarely */
-    BigDecimal calculateUrgentLinuxSpotBid(UserContext userContext, String instanceTypeName) {
-        InstanceTypeData instanceType = getInstanceType(userContext, instanceTypeName)
-        instanceType.linuxOnDemandPrice * highPrioritySpotPriceFactor
     }
 
     InstanceTypeData getInstanceType(UserContext userContext, String instanceTypeName) {
@@ -115,14 +97,6 @@ class InstanceTypeService implements CacheInitializer {
         caches.allOnDemandPrices.by(region)
     }
 
-    private RegionalInstancePrices getReservedPrices(Region region) {
-        caches.allReservedPrices.by(region)
-    }
-
-    private RegionalInstancePrices getSpotPrices(Region region) {
-        caches.allSpotPrices.by(region)
-    }
-
     private List<InstanceTypeData> buildInstanceTypes(Region region) {
 
         Map<String, InstanceTypeData> namesToInstanceTypeDatas = [:]
@@ -143,102 +117,90 @@ class InstanceTypeService implements CacheInitializer {
             namesToInstanceTypeDatas[name] = customInstanceTypeData
         }
 
-        // If hardware metadata is available, replace bare-bones objects in map of namesToInstanceTypeDatas.
-        try {
-            Collection<HardwareProfile> hardwareProfiles = getHardwareProfiles()
-            RegionalInstancePrices onDemandPrices = getOnDemandPrices(region)
-            RegionalInstancePrices reservedPrices = getReservedPrices(region)
-            RegionalInstancePrices spotPrices = getSpotPrices(region)
-
-            for (InstanceType instanceType in enumInstanceTypes) {
-                String name = instanceType.toString()
-                HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == name }
-                if (hardwareProfile) {
-                    InstanceTypeData instanceTypeData = new InstanceTypeData(
-                            hardwareProfile: hardwareProfile,
-                            linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
-                            linuxReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.LINUX_UNIX),
-                            linuxSpotPrice: spotPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
-                            windowsOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.WINDOWS),
-                            windowsReservedPrice: reservedPrices?.get(instanceType, InstanceProductType.WINDOWS),
-                            windowsSpotPrice: spotPrices.get(instanceType, InstanceProductType.WINDOWS)
-                    )
-                    namesToInstanceTypeDatas[name] = instanceTypeData
-                } else {
-                    log.info "Unable to resolve ${instanceType}"
-                }
+        Collection<HardwareProfile> hardwareProfiles = getHardwareProfiles()
+        RegionalInstancePrices onDemandPrices = getOnDemandPrices(region)
+        for (InstanceType instanceType in enumInstanceTypes) {
+            String name = instanceType.toString()
+            HardwareProfile hardwareProfile = hardwareProfiles.find { it.instanceType == name }
+            if (hardwareProfile) {
+                InstanceTypeData instanceTypeData = new InstanceTypeData(
+                        hardwareProfile: hardwareProfile,
+                        linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
+                )
+                namesToInstanceTypeDatas[name] = instanceTypeData
+            } else {
+                log.info "Unable to resolve ${instanceType}"
             }
-        } catch (Exception e) {
-            log.error(e)
-            emailerService.sendExceptionEmail('Error parsing Amazon instance data', e)
         }
-
         // Sort based on Linux price if possible. Otherwise sort by name.
         List<InstanceTypeData> instanceTypeDatas = namesToInstanceTypeDatas.values() as List
         instanceTypeDatas.sort { a, b -> a.name <=> b.name }
         instanceTypeDatas.sort { a, b -> a.linuxOnDemandPrice <=> b.linuxOnDemandPrice }
     }
 
-    private Document fetchLocalInstanceTypesDocument() {
-        MockFileUtils.parseHtmlFile('instance-types.html')
-    }
-
     private List<HardwareProfile> retrieveHardwareProfiles() {
-        parseHardwareProfilesDocument(fetchLocalInstanceTypesDocument())
-    }
-
-    private List<HardwareProfile> parseHardwareProfilesDocument(Document instanceTypesDoc) {
-
-        List<HardwareProfile> hardwareProfiles = []
-
-        Elements titleParagraphs = instanceTypesDoc.select('p strong')
-        Elements paragraphsWithBreaks = instanceTypesDoc.select('p:has(br)')
-        Elements dataParagraphs = paragraphsWithBreaks.select(':matches([a-z])') // Skip the empty paragraph
-
-        // Send an alert email when Amazon edits the instance types page in a way that breaks this web scraper.
-        if (titleParagraphs.size() <= dataParagraphs.size() && titleParagraphs.size() >= InstanceType.values().size()) {
-            for (Integer i = 0; i < titleParagraphs.size(); i++) {
-                Element dataParagraph = dataParagraphs.get(i)
-                List<Node> dataChildNodes = dataParagraph.childNodes().findAll { it.nodeName() != 'br' }
-                Collection<String> textNodes = dataChildNodes.collect { it.text().trim() }
-                String name = Check.notEmpty(textNodes.find { it.startsWith('API name: ') }, 'name') - 'API name: '
-
-                // Skip any instance type Amazon has added to their web page that is not yet in their Java SDK
-                if (InstanceType.values().any { it.toString() == name }) {
-
-                    String memoryRaw = Check.notEmpty(textNodes.find { it.endsWith(' memory') }, 'memory')
-                    String memory = (memoryRaw - ' of memory' - ' memory').trim()
-
-                    String cpu = (Check.notEmpty(textNodes.find { it.contains('Compute Unit') }, 'cpu')).trim()
-
-                    String storageRaw = Check.notEmpty(textNodes.find { it.contains('storage') }, 'storage')
-                    String storage = (storageRaw - ' of instance storage' - ' instance storage' - ' storage').trim()
-
-                    String archRaw = textNodes.find { it.endsWith('platform') }
-                    String validArchRaw = Check.notEmpty(archRaw, 'architecture')
-                    String architecture = (validArchRaw - ' platform').trim()
-
-                    String ioPerfRaw = textNodes.find { it.startsWith('I/O Performance: ') }
-                    String validIoPerfRaw = Check.notEmpty(ioPerfRaw, 'ioPerformance')
-                    String ioPerformance = (validIoPerfRaw - 'I/O Performance: ').trim()
-
-                    String descriptionRaw = Check.notEmpty(titleParagraphs.get(i).text(), 'description')
-                    String description = (descriptionRaw - ' Instance').trim()
-
-                    HardwareProfile hardwareProfile = new HardwareProfile(
-                            instanceType: name,
-                            description: description,
-                            memory: memory,
-                            cpu: cpu,
-                            storage: storage,
-                            architecture: architecture,
-                            ioPerformance: ioPerformance
-                    )
-                    hardwareProfiles << hardwareProfile
-                }
-            }
-        }
-        hardwareProfiles
+        // Some day it would be nice to have a reliable API to call for this data periodically. For now, this will do.
+        String xl = 'Extra Large'
+        String xxl = 'Double Extra Large'
+        String xxxxl = 'Quadruple Extra Large'
+        String xxxxxxxxl = 'Eight Extra Large'
+        String gen = 'General purpose'
+        String second = 'Second Generation Standard'
+        String cc = 'Cluster Compute'
+        String memOpt = 'Memory optimized'
+        String hiMem = 'High-Memory'
+        String compOpt = 'Compute optimized'
+        [
+                new HardwareProfile(instanceType: 'm1.small', family: gen, group: 'Standard', size: 'Small (Default)',
+                        arch: '32-bit or 64-bit', vCpu: '1', ecu: '1', mem: '1.7', storage: '1 x 160', ebsOptim: '-',
+                        netPerf: 'Low'),
+                new HardwareProfile(instanceType: 'm1.medium', family: gen, group: 'Standard', size: 'Medium',
+                        arch: '32-bit or 64-bit', vCpu: '1', ecu: '2', mem: '3.75', storage: '1 x 410', ebsOptim: '-',
+                        netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'm1.large', family: gen, group: 'Standard', size: 'Large',
+                        arch: '64-bit', vCpu: '2', ecu: '4', mem: '7.5', storage: '2 x 420', ebsOptim: 'Yes',
+                        netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'm1.xlarge', family: gen, group: 'Standard', size: xl, arch: '64-bit',
+                        vCpu: '4', ecu: '8', mem: '15', storage: '4 x 420', ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'm3.xlarge', family: gen, group: second, size: xl, arch: '64-bit',
+                        vCpu: '4', ecu: '13', mem: '15', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'm3.2xlarge', family: gen, group: second, size: xxl, arch: '64-bit',
+                        vCpu: '8', ecu: '26', mem: '30', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'c1.medium', family: compOpt, group: 'High-CPU', size: 'Medium',
+                        arch: '32-bit or 64-bit', vCpu: '2', ecu: '5', mem: '1.7', storage: '1 x 350', ebsOptim: '-',
+                        netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'c1.xlarge', family: compOpt, group: 'High-CPU', size: xl,
+                        arch: '64-bit', vCpu: '8', ecu: '20', mem: '7', storage: '4 x 420', ebsOptim: 'Yes',
+                        netPerf: 'High'),
+                new HardwareProfile(instanceType: 'cc1.4xlarge', family: compOpt, group: cc, size: xxxxl,
+                        arch: '64-bit', vCpu: '32', ecu: '33.5', mem: '23', storage: '2 x 840', ebsOptim: '-',
+                        netPerf: '10 Gigabit'),
+                new HardwareProfile(instanceType: 'cc2.8xlarge', family: compOpt, group: cc, size: xxxxxxxxl,
+                        arch: '64-bit', vCpu: '32', ecu: '88', mem: '60.5', storage: '4 x 840', ebsOptim: '-',
+                        netPerf: '10 Gigabit'),
+                new HardwareProfile(instanceType: 'm2.xlarge', family: memOpt, group: hiMem, size: xl, arch: '64-bit',
+                        vCpu: '2', ecu: '6.5', mem: '17.1', storage: '1 x 420', ebsOptim: '-', netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'm2.2xlarge', family: memOpt, group: hiMem, size: xxl, arch: '64-bit',
+                        vCpu: '4', ecu: '13', mem: '34.2', storage: '1 x 850', ebsOptim: 'Yes', netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'm2.4xlarge', family: memOpt, group: hiMem, size: xxxxl,
+                        arch: '64-bit', vCpu: '8', ecu: '26', mem: '68.4', storage: '2 x 840', ebsOptim: 'Yes',
+                        netPerf: 'High'),
+                new HardwareProfile(instanceType: 'cr1.8xlarge', family: memOpt, group: 'High-Memory Cluster',
+                        size: xxxxxxxxl, arch: '64-bit', vCpu: '32', ecu: '88', mem: '244', storage: '2 x 120 SSD',
+                        ebsOptim: '-', netPerf: '10 Gigabit'),
+                new HardwareProfile(instanceType: 'hi1.4xlarge', family: 'Storage optimized', group: 'High-I/O',
+                        size: xxxxl, arch: '64-bit', vCpu: '16', ecu: '35', mem: '60.5', storage: '2 x 1,024 SSD',
+                        ebsOptim: '-', netPerf: '10 Gigabit'),
+                new HardwareProfile(instanceType: 'hs1.8xlarge', family: 'Storage optimized', group: 'High-Storage',
+                        size: xxxxxxxxl, arch: '64-bit', vCpu: '16', ecu: '35', mem: '117', storage: '24 x 2,048',
+                        ebsOptim: '-', netPerf: '10 Gigabit'),
+                new HardwareProfile(instanceType: 't1.micro', family: 'Micro instances', group: 'Micro', size: 'Micro',
+                        arch: '32-bit or 64-bit', vCpu: '1', ecu: 'Variable', mem: '0.615', storage: 'EBS only',
+                        ebsOptim: '-', netPerf: 'Very Low'),
+                new HardwareProfile(instanceType: 'cg1.4xlarge', family: 'GPU instances', group: 'Cluster GPU',
+                        size: xxxxl, arch: '64-bit', vCpu: '16', ecu: '33.5', mem: '22.5', storage: '2 x 840',
+                        ebsOptim: '-', netPerf: '10 Gigabit')
+        ]
     }
 
     private Map<Region, RegionalInstancePrices> retrieveInstanceTypePricing(InstancePriceType priceType) {
@@ -249,16 +211,15 @@ class InstanceTypeService implements CacheInitializer {
         for (JSONElement regionJsonObject in regionJsonArray) {
             Region region = Region.withPricingJsonCode(regionJsonObject.region)
             List<InstanceType> instanceTypes = InstanceType.values() as List
-            List<InstanceProductType> products = InstanceProductType.valuesForOnDemandAndReserved()
+            List<InstanceProductType> products = InstanceProductType.values() as List
             Table<InstanceType, InstanceProductType, BigDecimal> pricesByHardwareAndProduct =
                     ArrayTable.create(instanceTypes, products)
             JSONArray typesJsonArray = regionJsonObject.instanceTypes
             for (JSONElement typeJsonObject in typesJsonArray) {
-                String typeCode = typeJsonObject.type // Name of group of hardware instance types like hiMemODI
                 JSONArray sizes = typeJsonObject.sizes
                 for (JSONElement sizeObject in sizes) {
                     String sizeCode = sizeObject.size
-                    InstanceType instanceType = determineInstanceType(typeCode, sizeCode)
+                    InstanceType instanceType = determineInstanceType(sizeCode)
                     if (instanceType) {
                         JSONArray valueColumns = sizeObject.valueColumns
                         for (JSONElement valueColumn in valueColumns) {
@@ -284,82 +245,13 @@ class InstanceTypeService implements CacheInitializer {
         retrieveInstanceTypePricing(InstancePriceType.ON_DEMAND)
     }
 
-    private Map<Region, RegionalInstancePrices> retrieveInstanceTypeReservedPricing() {
-        retrieveInstanceTypePricing(InstancePriceType.RESERVED)
+    private InstanceType determineInstanceType(String jsonSizeCode) {
+        try {
+            return InstanceType.fromValue(jsonSizeCode)
+        } catch (IllegalArgumentException ignore) {
+            return null
+        }
     }
-
-    private Map<Region, RegionalInstancePrices> retrieveInstanceTypeSpotPricing() {
-        retrieveInstanceTypePricing(InstancePriceType.SPOT)
-    }
-
-    private Map<JsonTypeSizeCombo, InstanceType> buildTypeSizeCodesToInstanceTypes() {
-
-        Map<JsonTypeSizeCombo, InstanceType> typeSizeCodesToInstanceTypes = [:]
-
-        // Reservation json compound code names
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdResI', 'sm'), InstanceType.M1Small)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdResI', 'lg'), InstanceType.M1Large)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdResI', 'xl'), InstanceType.M1Xlarge)
-        // Double-check and uncomment second generation M3 instance types when InstanceType enum is ready for them
-        // typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdResI', 'xl'), InstanceType.M3Xlarge)
-        // typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdResI', 'xxl'), InstanceType.M32xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('uResI', 'u'), InstanceType.T1Micro)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemResI', 'xl'), InstanceType.M2Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemResI', 'xxl'), InstanceType.M22xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemResI', 'xxxxl'), InstanceType.M24xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUResI', 'med'), InstanceType.C1Medium)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUResI', 'xl'), InstanceType.C1Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterCompResI', 'xxxxl'), InstanceType.Cc14xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterCompResI', 'xxxxxxxxl'), InstanceType.Cc28xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterGPUResI', 'xxxxl'), InstanceType.Cg14xlarge)
-
-        // On-demand json compound code names
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdODI', 'sm'), InstanceType.M1Small)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdODI', 'med'), InstanceType.M1Medium)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdODI', 'lg'), InstanceType.M1Large)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdODI', 'xl'), InstanceType.M1Xlarge)
-        // Double-check and uncomment second generation M3 instance types when InstanceType enum is ready for them
-        // typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdODI', 'xl'), InstanceType.M3Xlarge)
-        // typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdODI', 'xxl'), InstanceType.M32xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('uODI', 'u'), InstanceType.T1Micro)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemODI', 'xl'), InstanceType.M2Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemODI', 'xxl'), InstanceType.M22xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemODI', 'xxxxl'), InstanceType.M24xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUODI', 'med'), InstanceType.C1Medium)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUODI', 'xl'), InstanceType.C1Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiIoODI', 'xxxxl'), InstanceType.Hi14xlarge)
-
-        // Spot json compound code names
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdSpot', 'sm'), InstanceType.M1Small)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdSpot', 'med'), InstanceType.M1Medium)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdSpot', 'lg'), InstanceType.M1Large)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('stdSpot', 'xl'), InstanceType.M1Xlarge)
-        // Double-check and uncomment second generation M3 instance types when InstanceType enum is ready for them
-        // typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdSpot', 'xl'), InstanceType.M3Xlarge)
-        // typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('secgenstdSpot', 'xxl'), InstanceType.M32xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('uSpot', 'u'), InstanceType.T1Micro)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemSpot', 'xl'), InstanceType.M2Xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemSpot', 'xxl'), InstanceType.M22xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiMemSpot', 'xxxxl'), InstanceType.M24xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUSpot', 'med'), InstanceType.C1Medium)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('hiCPUSpot', 'xl'), InstanceType.C1Xlarge)
-
-        // On demand and spot share these identifiers
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterComputeI', 'xxxxl'), InstanceType.Cc14xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterComputeI', 'xxxxxxxxl'), InstanceType.Cc28xlarge)
-        typeSizeCodesToInstanceTypes.put(new JsonTypeSizeCombo('clusterGPUI', 'xxxxl'), InstanceType.Cg14xlarge)
-
-        return typeSizeCodesToInstanceTypes.asImmutable()
-    }
-
-    private InstanceType determineInstanceType(String jsonTypeCode, String jsonSizeCode) {
-        typeSizeCodesToInstanceTypes[new JsonTypeSizeCombo(jsonTypeCode, jsonSizeCode)]
-    }
-}
-
-@Immutable final class JsonTypeSizeCombo {
-    String type
-    String size
 }
 
 class RegionalInstancePrices {

@@ -19,6 +19,7 @@ import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.regions.Region
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflow
 import com.amazonaws.services.simpleworkflow.model.ActivityTask
 import com.amazonaws.services.simpleworkflow.model.ActivityTaskStatus
@@ -222,6 +223,11 @@ class MockAmazonSimpleWorkflowClient implements AmazonSimpleWorkflow {
 
     @Override
     void setEndpoint(String endpoint) throws IllegalArgumentException {
+
+    }
+
+    @Override
+    void setRegion(Region region) throws IllegalArgumentException {
 
     }
 

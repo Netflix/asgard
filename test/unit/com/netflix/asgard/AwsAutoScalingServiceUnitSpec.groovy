@@ -39,6 +39,7 @@ import com.netflix.asgard.model.AutoScalingGroupMixin
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.EurekaStatus
 import com.netflix.asgard.model.InstanceHealth
+import com.netflix.asgard.model.InstanceStateData
 import com.netflix.asgard.model.StackAsg
 import com.netflix.asgard.model.Subnets
 import com.netflix.frigga.ami.AppVersion
@@ -369,7 +370,7 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
                 'Waiting for all instances to pass health checks.'
     }
 
-    def 'should determine healthy ASG'() {
+    def 'should determine healthy ASG without load balancer'() {
         awsAutoScalingService = Spy(AwsAutoScalingService) {
             getAutoScalingGroup(_, _) >> { new AutoScalingGroup(autoScalingGroupName: it[1], instances: [
                     new Instance(instanceId: 'i-f00dcafe', lifecycleState: LifecycleState.InService.name()) ])
@@ -383,6 +384,59 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
         }
         awsAutoScalingService.awsEc2Service = Mock(AwsEc2Service) {
             checkHostsHealth(_) >> true
+        }
+
+        expect:
+        awsAutoScalingService.reasonAsgIsUnhealthy(UserContext.auto(Region.US_WEST_1), 'service1-int-v008', 1) == null
+    }
+
+    def 'should determine unhealthy ASG with load balancer and out of service instance'() {
+        awsAutoScalingService = Spy(AwsAutoScalingService) {
+            getAutoScalingGroup(_, _) >> { new AutoScalingGroup(autoScalingGroupName: it[1], instances: [
+                    new Instance(instanceId: 'i-f00dcafe', lifecycleState: LifecycleState.InService.name()) ],
+                    loadBalancerNames: ['loadBalancer1'])
+            }
+        }
+        awsAutoScalingService.discoveryService = Mock(DiscoveryService) {
+            getAppInstancesByIds(_, _) >> [ new ApplicationInstance().with {
+                status = EurekaStatus.UP.name()
+                it
+            }]
+        }
+        awsAutoScalingService.awsEc2Service = Mock(AwsEc2Service) {
+            checkHostsHealth(_) >> true
+        }
+        awsAutoScalingService.awsLoadBalancerService = Mock(AwsLoadBalancerService) {
+            getInstanceStateDatas(_, 'loadBalancer1', _) >> [new InstanceStateData(state: 'InService',
+                    autoScalingGroupName: 'service1-int-v008'), new InstanceStateData(state: 'OutOfService',
+                    autoScalingGroupName: 'service1-int-v008')]
+        }
+
+        expect:
+        awsAutoScalingService.reasonAsgIsUnhealthy(UserContext.auto(Region.US_WEST_1), 'service1-int-v008', 1) ==
+                'Waiting for all instances to pass ELB health checks.'
+    }
+
+    def 'should determine healthy ASG with load balancer'() {
+        awsAutoScalingService = Spy(AwsAutoScalingService) {
+            getAutoScalingGroup(_, _) >> { new AutoScalingGroup(autoScalingGroupName: it[1], instances: [
+                    new Instance(instanceId: 'i-f00dcafe', lifecycleState: LifecycleState.InService.name()) ],
+                    loadBalancerNames: ['loadBalancer1'])
+            }
+        }
+        awsAutoScalingService.discoveryService = Mock(DiscoveryService) {
+            getAppInstancesByIds(_, _) >> [ new ApplicationInstance().with {
+                status = EurekaStatus.UP.name()
+                it
+            }]
+        }
+        awsAutoScalingService.awsEc2Service = Mock(AwsEc2Service) {
+            checkHostsHealth(_) >> true
+        }
+        awsAutoScalingService.awsLoadBalancerService = Mock(AwsLoadBalancerService) {
+            getInstanceStateDatas(_, 'loadBalancer1', _) >> [new InstanceStateData(state: 'InService',
+                    autoScalingGroupName: 'service1-int-v008'), new InstanceStateData(state: 'OutOfService',
+                    autoScalingGroupName: 'service1-int-v007')]
         }
 
         expect:

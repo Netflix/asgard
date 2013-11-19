@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.ec2.AmazonEC2
+import com.amazonaws.services.ec2.model.AccountAttribute
 import com.amazonaws.services.ec2.model.Address
 import com.amazonaws.services.ec2.model.AssociateAddressRequest
 import com.amazonaws.services.ec2.model.AttachVolumeRequest
@@ -141,6 +142,18 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         caches.allSnapshots.ensureSetUp({ Region region -> retrieveSnapshots(region) })
         caches.allVolumes.ensureSetUp({ Region region -> retrieveVolumes(region) })
         caches.allSubnets.ensureSetUp({ Region region -> retrieveSubnets(region) })
+    }
+
+    /**
+     * Gets all available account attributes such as resource limits, default VPC, and supported platforms.
+     *
+     * http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeAccountAttributes.html
+     *
+     * @param userContext who, where, why
+     * @return account attributes such as resource limits, default VPC, and supported platforms
+     */
+    List<AccountAttribute> getAccountAttributes(UserContext userContext) {
+        awsClient.by(userContext.region).describeAccountAttributes().accountAttributes
     }
 
     // Availability Zones

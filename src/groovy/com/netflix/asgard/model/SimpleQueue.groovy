@@ -15,12 +15,12 @@
  */
 package com.netflix.asgard.model
 
+import com.amazonaws.services.sqs.model.QueueAttributeName
 import com.netflix.asgard.Meta
-import com.netflix.asgard.Region
 import com.netflix.asgard.Time
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
+import groovy.transform.Canonical
 import java.util.regex.Matcher
+import java.util.regex.Pattern
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
@@ -28,28 +28,30 @@ import org.joda.time.Duration
  * Representation of a Simple Queue Service (SQS) object.
  * Not named Queue, because that would collide with java.util.Queue in Groovy default imports.
  */
-@EqualsAndHashCode
-@ToString
-class SimpleQueue {
-    String url
+@Canonical class SimpleQueue {
+    String region
+    String accountNumber
     String name
     Map<String, String> attributes = [:]
 
-    static final String VISIBILITY_TIMEOUT_ATTR_NAME = 'VisibilityTimeout'
-    static final String DELAY_SECONDS_ATTR_NAME = 'DelaySeconds'
-
-    private static Map<String, Closure> ATTR_NAMES_TO_HUMAN_READABILITY_METHODS = [
-            'VisibilityTimeout': { "${it} seconds" },
-            'MaximumMessageSize': { "${it} bytes" },
-            'MessageRetentionPeriod': { Time.format(Duration.standardSeconds(it as Long)) },
-            'CreatedTimestamp': { Time.format(new DateTime((it as Long) * 1000)) },
-            'LastModifiedTimestamp': { Time.format(new DateTime((it as Long) * 1000)) }
+    private static Map<QueueAttributeName, Closure<String>> ATTR_NAMES_TO_HUMAN_READABILITY_METHODS = [
+            (QueueAttributeName.VisibilityTimeout): { "${it} seconds" },
+            (QueueAttributeName.MaximumMessageSize): { "${it} bytes" },
+            (QueueAttributeName.MessageRetentionPeriod): { Time.format(Duration.standardSeconds(it as Long)) },
+            (QueueAttributeName.CreatedTimestamp): { Time.format(new DateTime((it as Long) * 1000)) },
+            (QueueAttributeName.LastModifiedTimestamp): { Time.format(new DateTime((it as Long) * 1000)) }
     ]
 
     private String humanReadableValue(String attrKey, String attrValue) {
-        Closure method = SimpleQueue.ATTR_NAMES_TO_HUMAN_READABILITY_METHODS[attrKey]
+        QueueAttributeName queueAttributeName
+        try {
+            queueAttributeName = QueueAttributeName.fromValue(attrKey)
+        } catch (IllegalArgumentException ignore) {
+            return attrValue
+        }
+        Closure<String> method = ATTR_NAMES_TO_HUMAN_READABILITY_METHODS[queueAttributeName]
         if (method) {
-            return method.call(attrValue)
+            return method(attrValue)
         }
         attrValue
     }
@@ -57,26 +59,34 @@ class SimpleQueue {
     private static String PRE_REGION = 'https://sqs.'
     private static String REGION = '[-a-z0-9]+'
     private static String POST_REGION = '.amazonaws.com/'
-    private static String ACCOUNT_NUM_DIR = '[0-9]+/'
-    private static String URL_PATTERN = /${PRE_REGION}${REGION}${POST_REGION}${ACCOUNT_NUM_DIR}(.*?)/
+    private static String ACCOUNT_NUM_DIR = '[0-9]+'
+    private static Pattern URL_PATTERN = ~/${PRE_REGION}(${REGION})${POST_REGION}(${ACCOUNT_NUM_DIR})\/(.*?)/
+    private static Pattern ARN_PATTERN = ~/arn:aws:sqs:(${REGION}):(${ACCOUNT_NUM_DIR}):(.*?)/
 
-    SimpleQueue(Region region, String accountNumber, String name) {
-        this.name = name
-        this.url = "${PRE_REGION}${region}${POST_REGION}${accountNumber}/${name}"
+    static SimpleQueue fromUrl(String url) {
+        fromPattern(URL_PATTERN, url)
     }
 
-    SimpleQueue(String url) {
-        this.url = url
-        this.name = nameFromUrl(url)
+    static SimpleQueue fromArn(String arn) {
+        fromPattern(ARN_PATTERN, arn)
     }
 
-    private String nameFromUrl(String url) {
-        Matcher matcher = (url =~ URL_PATTERN)
+    private static SimpleQueue fromPattern(Pattern pattern, String arn) {
+        Matcher matcher = (arn =~ pattern)
         if (matcher.matches()) {
-            String capturedName = matcher.group(1)
-            return capturedName
+            return new SimpleQueue(region: matcher.group(1), accountNumber: matcher.group(2), name: matcher.group(3))
         }
         null
+    }
+
+    /** @return constructed URL for queue */
+    String getUrl() {
+        "${PRE_REGION}${region}${POST_REGION}${accountNumber}/${name}"
+    }
+
+    /** @return constructed Amazon Resource Name for queue */
+    String getArn() {
+        "arn:aws:sqs:${region}:${accountNumber}:${name}"
     }
 
     Map<String, String> getHumanReadableAttributes() {

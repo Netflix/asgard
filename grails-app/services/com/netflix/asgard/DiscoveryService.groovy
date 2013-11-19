@@ -148,7 +148,7 @@ class DiscoveryService implements CacheInitializer {
 
     private Collection<ApplicationInstance> extractApplicationInstances(GPathResult xml) {
         //noinspection GroovyAccessibility
-        xml?.name ? xml.instance?.collect { new ApplicationInstance(it) } : []
+        xml?.name ? xml.instance?.collect { ApplicationInstance.fromXml(it) } : []
     }
 
     Collection<ApplicationInstance> getAppInstances(UserContext userContext) {
@@ -177,7 +177,7 @@ class DiscoveryService implements CacheInitializer {
                         log.debug(url)
                         def xml = restClientService.getAsXml(url)
                         if (xml) {
-                            appInst = new ApplicationInstance(xml)
+                            appInst = ApplicationInstance.fromXml(xml)
                         }
                         if (appInst) {
                             caches.allApplicationInstances.by(userContext.region).put(appInst.hostName, appInst)
@@ -200,7 +200,7 @@ class DiscoveryService implements CacheInitializer {
                         String url = "$baseUrl/instances/${instanceId}"
                         log.debug(url)
                         def xml = restClientService.getAsXml(url)
-                        appInst = xml ? new ApplicationInstance(xml) : null
+                        appInst = xml ? ApplicationInstance.fromXml(xml) : null
                         if (appInst) {
                             caches.allApplicationInstances.by(userContext.region).put(appInst.hostName, appInst)
                         }

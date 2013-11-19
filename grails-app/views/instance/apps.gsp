@@ -19,25 +19,39 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
-  <title>Stacks</title>
+  <title>Instance</title>
 </head>
+
 <body>
 <div class="body">
-  <h1>Stacks</h1>
+  <h1>Links to sub-lists of Instances in ${region.description}</h1>
   <g:if test="${flash.message}">
     <div class="message">${flash.message}</div>
   </g:if>
   <div class="list">
-    <g:if test="${significantStackNames}">
-      <h2>Stacks With Health Checks</h2>
-      <g:render template="stackList" model="${[stackNames: significantStackNames]}" />
-      <h2>All Stacks</h2>
-    </g:if>
     <div class="buttons"></div>
-    <g:render template="stackList" model="${[stackNames: allStackNames]}" />
+    <table class="sortable instances">
+      <thead>
+      <tr>
+        <th>Sub-List by Application</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="even">
+        <td><g:link class="instance" controller="instance" action="list">(All)</g:link></td>
+      </tr>
+      <tr class="odd">
+        <td><g:link class="instance" controller="instance" action="list" id="${noAppId}">(No App)</g:link></td>
+      </tr>
+      <g:each var="appName" in="${appNames}" status="i">
+        <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+          <td><g:link class="instance" controller="instance" action="list" id="${appName}">${appName}</g:link></td>
+        </tr>
+      </g:each>
+      </tbody>
+    </table>
   </div>
-  <div class="paginateButtons">
-  </div>
+  <div class="paginateButtons"></div>
 </div>
 </body>
 </html>

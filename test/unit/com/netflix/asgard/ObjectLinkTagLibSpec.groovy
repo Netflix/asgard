@@ -40,4 +40,19 @@ class ObjectLinkTagLibSpec extends Specification {
         output == '<a href="/fastProperty/show?name=%7Cprop%3A8888" class="fastProperty" ' +
                 'title="Show details of this Fast Property">aprop</a>'
     }
+
+    def 'should generate link for SQS subscription endpoint in same account'() {
+        grailsApplication.metaClass.getControllerNamesToContextParams = { -> ['queue': []] }
+        tagLib.configService = Mock(ConfigService) {
+            getAwsAccountNumber() >> '170000000000'
+        }
+
+        expect:
+        applyTemplate('<g:snsSubscriptionEndpoint>arn:aws:sqs:us-west-1:170000000000:testSQSWest\
+</g:snsSubscriptionEndpoint>') == '<a href="/queue/show/testSQSWest" region="us-west-1" class="queue" \
+title="Show details of this Queue">arn:aws:sqs:us-west-1:170000000000:testSQSWest</a>'
+        applyTemplate('<g:snsSubscriptionEndpoint>arn:aws:sqs:us-west-1:170000000001:testSQSWest\
+</g:snsSubscriptionEndpoint>') == 'arn:aws:sqs:us-west-1:170000000001:testSQSWest'
+        applyTemplate('<g:snsSubscriptionEndpoint>jsnow@thewall.got</g:snsSubscriptionEndpoint>') == 'jsnow@thewall.got'
+    }
 }

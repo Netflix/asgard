@@ -15,15 +15,14 @@
  */
 package com.netflix.asgard.model
 
+import groovy.transform.Canonical
+import groovy.util.slurpersupport.GPathResult
 import org.joda.time.DateTime
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 
 /**
  * Discovery API ApplicationInstance encapsulation contained within an Application.
  */
-@EqualsAndHashCode
-@ToString
+@Canonical
 class ApplicationInstance {
     String appName
     String hostName  // Always accessible hostname: ec2 public, or dc/intra private
@@ -32,7 +31,6 @@ class ApplicationInstance {
     String status
     String port
     String securePort
-    //String identifyingAttribute  // HOSTNAME / EC2_INSTANCE_ID
     Map dataCenterInfo
     Map leaseInfo
     Map metadata
@@ -40,17 +38,18 @@ class ApplicationInstance {
     String healthCheckUrl
     String vipAddress
     String instanceId
-    //Boolean isCoordinatingDiscoveryServer  // needed only by Discovery internally
 
-    ApplicationInstance() {
-        super()
-    }
-
-    ApplicationInstance(xml) {
-        if (xml.hostName) {
+    /**
+     * Converts an XML blob from Eureka into an ApplicationInstance object.
+     *
+     * @param xml the GPathResult from parsing the XML text delivered by Eureka
+     * @return a new ApplicationInstance object
+     */
+    static ApplicationInstance fromXml(GPathResult xml) {
+        ApplicationInstance appInstance = new ApplicationInstance()
+        appInstance.with {
             appName = xml.app.toString().toLowerCase()
             hostName = xml.hostName
-            //println "    appName/hostName: ${appName}/${hostName}"
             ipAddr = xml.ipAddr
             version = xml.version
             status = xml.status
@@ -70,6 +69,7 @@ class ApplicationInstance {
             }
             instanceId = dataCenterInfo?.'instance-id'
         }
+        appInstance
     }
 
     private static final Long SO_BIG_IT_MUST_BE_AN_EPOCH_TIMESTAMP = 1000L * 1000 * 1000 * 1000

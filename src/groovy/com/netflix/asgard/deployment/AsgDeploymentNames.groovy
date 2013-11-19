@@ -15,9 +15,9 @@
  */
 package com.netflix.asgard.deployment
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import groovy.transform.Immutable
-import org.codehaus.jackson.annotate.JsonCreator
-import org.codehaus.jackson.annotate.JsonProperty
 
 /**
  * Names and identification of the previous and next ASGs involved when creating a new ASG for a cluster.

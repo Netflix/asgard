@@ -37,7 +37,7 @@ class MockAmazonSqsClient extends AmazonSQSClient {
     private Collection<SimpleQueue> mockQueues
 
     private List<SimpleQueue> loadMockQueues() {
-        [new SimpleQueue('https://sqs.us-east-1.amazonaws.com/179000000000/goofy').withAttributes([
+        [SimpleQueue.fromUrl('https://sqs.us-east-1.amazonaws.com/179000000000/goofy').withAttributes([
                 ApproximateNumberOfMessages: '0',
                 ApproximateNumberOfMessagesNotVisible: '0',
                 CreatedTimestamp: '1260317889',
@@ -83,7 +83,8 @@ class MockAmazonSqsClient extends AmazonSQSClient {
         String account = Mocks.TEST_AWS_ACCOUNT_ID
         String name = createQueueRequest.queueName
         Map<String, String> attributes = createQueueRequest.attributes
-        SimpleQueue queue = new SimpleQueue(Region.US_EAST_1, account, name).withAttributes(attributes)
+        SimpleQueue queue = new SimpleQueue(region: Region.US_EAST_1, accountNumber: account, name: name).
+                withAttributes(attributes)
         mockQueues << queue
         new CreateQueueResult().withQueueUrl(queue.url)
     }

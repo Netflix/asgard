@@ -63,7 +63,7 @@ class ApplicationInstanceSpec extends Specification {
 
     def 'should parse xml and read instance id'() {
         when:
-        ApplicationInstance instance = new ApplicationInstance(XML.parse(instanceXml))
+        ApplicationInstance instance = ApplicationInstance.fromXml(XML.parse(instanceXml))
 
         then:
         'instanceId' == instance.instanceId
