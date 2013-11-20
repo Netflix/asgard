@@ -49,40 +49,38 @@ class InstanceTypeServiceSpec extends Specification {
     @SuppressWarnings("GroovyAccessibility")
     def 'instance types should include ordered combo of public and custom instance types'() {
 
-        List<InstanceProductType> products = InstanceProductType.valuesForOnDemandAndReserved()
+        List<InstanceProductType> products = InstanceProductType.values() as List
         Table<InstanceType, InstanceProductType, BigDecimal> pricesByHardwareAndProduct =
             ArrayTable.create(InstanceType.values() as List, products)
         pricesByHardwareAndProduct.put(InstanceType.M1Small, InstanceProductType.LINUX_UNIX, 0.05)
         pricesByHardwareAndProduct.put(InstanceType.M1Medium, InstanceProductType.LINUX_UNIX, 0.23)
         pricesByHardwareAndProduct.put(InstanceType.M1Large, InstanceProductType.LINUX_UNIX, 0.68)
         RegionalInstancePrices regionalInstancePrices = RegionalInstancePrices.create(pricesByHardwareAndProduct)
-        caches.allReservedPrices.regionsToRegionalPrices.put(Region.US_EAST_1, regionalInstancePrices)
         caches.allOnDemandPrices.regionsToRegionalPrices.put(Region.US_EAST_1, regionalInstancePrices)
-        caches.allSpotPrices.regionsToRegionalPrices.put(Region.US_EAST_1, regionalInstancePrices)
 
         mockHardwareProfilesCache.list() >> [
-                new HardwareProfile(instanceType: 'm1.small', description: 'Small instance'),
-                new HardwareProfile(instanceType: 'm1.medium', description: 'Medium instance'),
-                new HardwareProfile(instanceType: 'm1.large', description: 'Large instance')
+                new HardwareProfile(instanceType: 'm1.small', size: 'Small'),
+                new HardwareProfile(instanceType: 'm1.medium', size: 'Medium'),
+                new HardwareProfile(instanceType: 'm1.large', size: 'Large')
         ]
         mockConfigService.getCustomInstanceTypes() >> [
                 new InstanceTypeData(linuxOnDemandPrice: 3.10, hardwareProfile:
-                        new HardwareProfile(instanceType: 'superduper.4xlarge', description: 'SSD')),
+                        new HardwareProfile(instanceType: 'superduper.4xlarge', size: 'SSD')),
                 new InstanceTypeData(linuxOnDemandPrice: 1.00, hardwareProfile:
-                        new HardwareProfile(instanceType: 'm1.medium', description: 'Custom medium description')),
+                        new HardwareProfile(instanceType: 'm1.medium', size: 'Custom medium')),
         ]
 
         when:
         List<InstanceTypeData> instanceTypes = instanceTypeService.buildInstanceTypes(Region.defaultRegion())
 
         then:
-        ['c1.medium', 'c1.xlarge', 'cc1.4xlarge', 'cc2.8xlarge', 'cg1.4xlarge', 'hi1.4xlarge', 'm1.xlarge',
-                'm2.2xlarge', 'm2.4xlarge', 'm2.xlarge', 'm3.2xlarge', 'm3.xlarge', 't1.micro', 'm1.small', 'm1.medium',
-                'm1.large', 'superduper.4xlarge'] == instanceTypes*.name
-        [null, null, null, null, null, null, null, null, null, null, null, null, null, 'Small instance',
-                'Medium instance', 'Large instance', 'SSD'] == instanceTypes*.hardwareProfile*.description
-        [null, null, null, null, null, null, null, null, null, null, null, null, null, 0.05, 0.23, 0.68, 3.10
-                ] == instanceTypes*.linuxOnDemandPrice
+        ['c1.medium', 'c1.xlarge', 'cc1.4xlarge', 'cc2.8xlarge', 'cg1.4xlarge', 'cr1.8xlarge', 'hi1.4xlarge',
+                'hs1.8xlarge', 'm1.xlarge', 'm2.2xlarge', 'm2.4xlarge', 'm2.xlarge', 'm3.2xlarge', 'm3.xlarge',
+                't1.micro', 'm1.small', 'm1.medium', 'm1.large', 'superduper.4xlarge'] == instanceTypes*.name
+        [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 'Small', 'Medium',
+                'Large', 'SSD'] == instanceTypes*.hardwareProfile*.size
+        [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 0.05, 0.23, 0.68,
+                3.10] == instanceTypes*.linuxOnDemandPrice
     }
 
     def 'instance types list should have unpriced types at the end'() {

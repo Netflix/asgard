@@ -96,10 +96,7 @@ class Caches {
     final MultiRegionCachedMap<TopicData> allTopics
     final MultiRegionCachedMap<Volume> allVolumes
     final MultiRegionCachedMap<Vpc> allVpcs
-
     final MultiRegionInstancePrices allOnDemandPrices
-    final MultiRegionInstancePrices allReservedPrices
-    final MultiRegionInstancePrices allSpotPrices
 
     Caches(CachedMapBuilder cachedMapBuilder, ConfigService configService = null) {
 
@@ -145,8 +142,6 @@ class Caches {
         // Use one thread for all instance type and pricing caches. None of these need updating more than once an hour.
         allHardwareProfiles = cachedMapBuilder.of(EntityType.hardwareProfile, 3600).buildCachedMap()
         allOnDemandPrices = MultiRegionInstancePrices.create('On Demand Prices')
-        allReservedPrices = MultiRegionInstancePrices.create('Reserved Prices')
-        allSpotPrices = MultiRegionInstancePrices.create('Spot Prices')
         allInstanceTypes = cachedMapBuilder.of(EntityType.instanceType).buildMultiRegionCachedMap()
         allTerminationPolicyTypes = cachedMapBuilder.of(EntityType.terminationPolicyType, 3600).buildCachedMap()
     }

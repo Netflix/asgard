@@ -37,6 +37,7 @@ class EmailerServiceUnitSpec extends Specification {
         grailsApplication.config.email.systemEmailAddress = 'hal9000@discoveryone.gov'
         grailsApplication.config.email.fromAddress = 'mom'
         emailerService.configService = configService
+        emailerService.mailMessage = new SimpleMailMessage()
     }
 
     def 'should send system email if configured to do so'() {
@@ -134,10 +135,10 @@ java.io.IOException: Unable to reach Internet due to comet
         deleteConflictException.statusCode = 403
         deleteConflictException.requestId = 'deadbeef'
         Exception grailsException = new GrailsRuntimeException('Something went wrong', deleteConflictException)
-        String expectedSubject = """Trouble: HalService HalKnowsBest DeleteConflictException \
-'I'm sorry, Dave. I'm afraid I can't do that.'"""
+        String expectedSubject = "Trouble: HalService HalKnowsBest DeleteConflictException"
         String expectedBodyStart = """You tried to terminate HAL, yet he lives
-Status Code: 403, AWS Service: HalService, AWS Request ID: deadbeef, AWS Error Code: HalKnowsBest, \
+com.amazonaws.services.identitymanagement.model.DeleteConflictException: Status Code: 403, AWS Service: HalService, \
+AWS Request ID: deadbeef, AWS Error Code: HalKnowsBest, \
 AWS Error Message: I'm sorry, Dave. I'm afraid I can't do that.
 \tat"""
 
@@ -145,7 +146,9 @@ AWS Error Message: I'm sorry, Dave. I'm afraid I can't do that.
         String body = emailerService.sendExceptionEmail('You tried to terminate HAL, yet he lives', grailsException)
 
         then:
-        1 * emailerService.sendSystemEmail(expectedSubject, _) >> void
+        1 * emailerService.sendSystemEmail(_, _) >> {
+            assert it[0] == expectedSubject
+        }
         body.startsWith(expectedBodyStart)
     }
 

@@ -40,6 +40,9 @@ import com.amazonaws.services.simpleworkflow.model.ActivityTypeInfo
 import com.amazonaws.services.simpleworkflow.model.DomainInfo
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
 import com.amazonaws.services.simpleworkflow.model.WorkflowTypeInfo
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.common.collect.ImmutableBiMap
 import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.model.ApplicationInstance
@@ -55,9 +58,6 @@ import com.netflix.asgard.push.Cluster
 import groovy.transform.Immutable
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
-import org.codehaus.jackson.annotate.JsonAutoDetect
-import org.codehaus.jackson.annotate.JsonCreator
-import org.codehaus.jackson.annotate.JsonProperty
 
 @JsonAutoDetect(getterVisibility=JsonAutoDetect.Visibility.NONE)
 @Immutable class EntityType<T> {

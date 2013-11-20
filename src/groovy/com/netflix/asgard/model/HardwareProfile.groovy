@@ -16,23 +16,49 @@
 package com.netflix.asgard.model
 
 import groovy.transform.Immutable
-@Immutable final class HardwareProfile {
+
+/**
+ * Values are taken from http://aws.amazon.com/ec2/instance-types/ and http://aws.amazon.com/ec2/pricing/ because there
+ * is not yet an API for this information.
+ *
+ * The field names are terse in order for the instantiation of many hardware profiles to be more compact and readable.
+ */
+@Immutable class HardwareProfile {
+
+    /** The API name of the instance type such as "m1.medium" */
     String instanceType
-    String description
-    String memory
-    String cpu
+
+    /** The Instance Family from http://aws.amazon.com/ec2/instance-types/ such as "General purpose" */
+    String family
+
+    /** The instance type group heading from http://aws.amazon.com/ec2/pricing/ such as "Second Generation" */
+    String group
+
+    /** The description of the size within the group from http://aws.amazon.com/ec2/pricing/ such as "Extra Large" */
+    String size
+
+    /** The processor architecture such as "64-bit" or "32-bit or 64-bit" */
+    String arch
+
+    /** Number of virtual central processing units such as "2" */
+    String vCpu
+
+    /** Number of elastic compute units such as "88", "6.5", or "Variable" */
+    String ecu
+
+    /** Number of gigabytes of random access memory such as "34.2", "0.615", or "117" */
+    String mem
+
+    /** Count and capacity of storage units in gigabytes such as "4 x 420", "EBS Only" or "2 x 1,024 SSD" */
     String storage
-    String architecture
-    String ioPerformance
 
-    String getCpuSummary() {
-        cpu?.contains('(') ? cpu.substring(0, cpu.indexOf('(')).trim() : cpu
-    }
+    /** Whether the EBS Optimized feature is available, such as "Yes" or "-" */
+    String ebsOptim
 
-    String getCpuDetail() {
-        cpu?.contains('(') ? cpu.substring(cpu.indexOf('(')).trim() : null
-    }
+    /** The quality of the network performance, such as "Very Low", "Moderate", or "10 Gigabit" */
+    String netPerf
 
+    /** An alias for the instance type string is the "name" of the hardware profile */
     String getName() {
         instanceType
     }

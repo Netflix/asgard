@@ -34,31 +34,6 @@ final class InstanceTypeData {
     BigDecimal linuxOnDemandPrice
 
     /**
-     * Fixed hourly cost in dollars for a Linux machine to use promptly and which has a reservation.
-     */
-    BigDecimal linuxReservedPrice
-
-    /**
-     * Recent market-based hourly cost in dollars for a Linux machine to use eventually, not promptly.
-     */
-    BigDecimal linuxSpotPrice
-
-    /**
-     * Fixed hourly cost in dollars for a Windows machine to use promptly and for which there is no reservation.
-     */
-    BigDecimal windowsOnDemandPrice
-
-    /**
-     * Fixed hourly cost in dollars for a Windows machine to use promptly and which has a reservation.
-     */
-    BigDecimal windowsReservedPrice
-
-    /**
-     * Recent market-based hourly cost in dollars for a Windows machine to use eventually, not promptly.
-     */
-    BigDecimal windowsSpotPrice
-
-    /**
      * Gets the canonical name of the instance type.
      *
      * @return String instance type name such as m1.large

@@ -15,7 +15,6 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
@@ -43,14 +42,11 @@ class MonkeyPatcherService implements InitializingBean {
 
     static transactional = false
 
-    private static final originalASEToString = AmazonServiceException.metaClass.pickMethod('toString', [] as Class[])
-
     def grailsApplication
 
     @Override
     void afterPropertiesSet() {
         createDynamicMethods()
-        addClassNameToStringOutputForAmazonServiceException()
     }
 
     void createDynamicMethods() {
@@ -215,15 +211,6 @@ class MonkeyPatcherService implements InitializingBean {
     private void addInstanceTagGetterMethod(String getter, String key) {
         if (!(Instance.methods as List).contains(getter)) {
             Instance.metaClass[getter] = { -> delegate.getTag(key) }
-        }
-    }
-
-    /**
-     * Monkey patches AmazonServiceException to include the exception class name in the toString output
-     */
-    void addClassNameToStringOutputForAmazonServiceException() {
-        AmazonServiceException.metaClass.toString = { ->
-            "${delegate.getClass().getSimpleName()}: ${originalASEToString.invoke(delegate)}"
         }
     }
 }

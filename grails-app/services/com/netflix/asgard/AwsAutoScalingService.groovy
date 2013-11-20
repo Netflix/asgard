@@ -778,6 +778,17 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         if (!awsEc2Service.checkHostsHealth(applicationInstances*.healthCheckUrl)) {
             return 'Waiting for all instances to pass health checks.'
         }
+        if (asg.loadBalancerNames) {
+            String loadBalancerThatSeesOutOfServiceInstance = asg.loadBalancerNames.find {
+                if (asg.loadBalancerNames.size() > 1) { Time.sleepCancellably(250) }
+                awsLoadBalancerService.getInstanceStateDatas(userContext, it, [asg]).find {
+                    it.autoScalingGroupName == asg.autoScalingGroupName && it.state != LifecycleState.InService.name()
+                }
+            }
+            if (loadBalancerThatSeesOutOfServiceInstance) {
+                return 'Waiting for all instances to pass ELB health checks.'
+            }
+        }
         null
     }
 
