@@ -1,0 +1,3 @@
+# This file is in here so that the test coverage reports don't fail
+*
+!.gitignore
