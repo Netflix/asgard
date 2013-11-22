@@ -20,10 +20,17 @@ package com.netflix.asgard.model
  */
 enum MonitorBucketType {
 
-    application, cluster
+    none('none (Do not configure monitoring)'),
+    application('application (Aggregate monitoring data by application)'),
+    cluster('cluster (Aggregate monitoring data by cluster)')
 
-    String getDescription() {
-        "Aggregate monitoring data by ${name()}"
+    /**
+     * Human-readable explanation of the type for display on web pages.
+     */
+    String description
+
+    MonitorBucketType(String description) {
+        this.description = description
     }
 
     /**
@@ -36,7 +43,13 @@ enum MonitorBucketType {
         return name ? MonitorBucketType.values().find { it.name() == name } as MonitorBucketType : null
     }
 
-    static MonitorBucketType getDefaultForOldApps() { application }
+    /**
+     * @return the type that should be used if an application does not have any monitor bucket type specified
+     */
+    static MonitorBucketType getDefaultForOldApps() { none }
 
-    static MonitorBucketType getDefaultForNewApps() { cluster }
+    /**
+     * @return the type that should be prepopulated when creating a new application via a web form
+     */
+    static MonitorBucketType getDefaultForNewApps() { none }
 }

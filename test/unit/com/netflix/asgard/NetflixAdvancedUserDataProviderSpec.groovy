@@ -20,6 +20,7 @@ import com.amazonaws.services.ec2.model.Tag
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.LaunchContext
+import com.netflix.asgard.model.MonitorBucketType
 import com.netflix.asgard.plugin.UserDataProvider
 import javax.xml.bind.DatatypeConverter
 import spock.lang.Specification
@@ -97,6 +98,42 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
         10.1        | helloStandardUserData
         10          | helloStandardUserData
         111.1       | helloStandardUserData
+    }
+
+    @Unroll('monitor bucket should be "#monitorBucket" if monitor bucket type is #type')
+    def 'monitor bucket should be empty, cluster, or app name as requested'() {
+
+        String description = "blah blah blah, ancestor_version=nflx-base-2.0-12345-h24"
+        launchContext.image = new Image(description: description)
+        AppRegistration app = new AppRegistration(name: 'hi', monitorBucketType: MonitorBucketType.byName(type))
+        launchContext.application = app
+        launchContext.autoScalingGroup = new AutoScalingGroupBeanOptions(autoScalingGroupName: 'hi-dev-v001')
+        launchContext.launchConfiguration = new LaunchConfigurationBeanOptions(
+                launchConfigurationName: 'hi-dev-v001-1234567')
+        netflixAdvancedUserDataProvider.applicationService = Spy(ApplicationService) {
+            getRegisteredApplication(_, _) >> app
+        }
+
+        when:
+        String userData = decode(netflixAdvancedUserDataProvider.buildUserData(launchContext))
+
+        then:
+        userData == """\
+                export NETFLIX_ENVIRONMENT=test
+                export NETFLIX_MONITOR_BUCKET=${monitorBucket ?: ''}
+                export NETFLIX_APP=hi
+                export NETFLIX_STACK=dev
+                export NETFLIX_CLUSTER=hi-dev
+                export NETFLIX_AUTO_SCALE_GROUP=hi-dev-v001
+                export NETFLIX_LAUNCH_CONFIG=hi-dev-v001-1234567
+                export EC2_REGION=us-west-2
+                """.stripIndent()
+
+        where:
+        type          | monitorBucket
+        'none'        | ''
+        'cluster'     | 'hi-dev'
+        'application' | 'hi'
     }
 
     def 'should build user data with legacy format if AMI description does not match the standard pattern'() {

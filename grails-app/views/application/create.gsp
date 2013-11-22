@@ -100,7 +100,7 @@
             <td class="value">
               <select id="monitorBucketType" name="monitorBucketType">
                 <g:each var="bucketType" in="${MonitorBucketType.values()}">
-                  <option ${MonitorBucketType.getDefaultForNewApps() == bucketType.name() ? 'selected' : ''} value="${bucketType.name()}">${bucketType.description}</option>
+                  <option ${MonitorBucketType.getDefaultForNewApps() == bucketType ? 'selected' : ''} value="${bucketType.name()}">${bucketType.description}</option>
                 </g:each>
               </select>
             </td>

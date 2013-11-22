@@ -232,17 +232,17 @@ class ApplicationService implements CacheInitializer, InitializingBean {
     }
 
     /**
-     * Provides a string to use for monitoring bucket, either provided cluster name or app name based on the
-     * application settings. If the application is not found, the app name is returned.
+     * Provides a string to use for monitoring bucket, either provided an empty string, cluster name or app name based
+     * on the application settings.
      *
      * @param userContext who, where, why
-     * @param appName application name to lookup
+     * @param appName application name to look up, and the value to return if the bucket type is 'application'
      * @param clusterName value to return if the application's monitor bucket type is 'cluster'
-     * @return appName or clusterName parameter, based on the application's monitorBucketType
+     * @return appName or clusterName or empty string, based on the application's monitorBucketType
      */
     String getMonitorBucket(UserContext userContext, String appName, String clusterName) {
-        MonitorBucketType bucketType = getRegisteredApplication(userContext, appName)?.monitorBucketType
-        (bucketType == MonitorBucketType.cluster) ? clusterName : appName
+        MonitorBucketType type = getRegisteredApplication(userContext, appName)?.monitorBucketType
+        type == MonitorBucketType.application ? appName : type == MonitorBucketType.cluster ? clusterName : ''
     }
 }
 
