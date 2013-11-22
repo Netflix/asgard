@@ -105,10 +105,11 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
         options == null
     }
 
-    def 'should prefer closed workflow execution info by task ID'() {
+    def 'should prefer closed workflow execution info by task ID if also found as open'() {
         def matchRequest = { it.domain == 'Westeros' && it.tagFilter == new TagFilter(tag: '{"id":"123"}') }
         awsSimpleWorkflowService.simpleWorkflowClient = Mock(AmazonSimpleWorkflow) {
-            1 * listOpenWorkflowExecutions({ matchRequest(it) }) >> new WorkflowExecutionInfos(executionInfos: [
+            // open executions may not be searched since a closed execution is found (due to concurrency)
+            (0..1) * listOpenWorkflowExecutions({ matchRequest(it) }) >> new WorkflowExecutionInfos(executionInfos: [
                     new WorkflowExecutionInfo(execution: new WorkflowExecution(workflowId: 'abc', runId: 'def'),
                             executionStatus: 'OPEN')
             ])
