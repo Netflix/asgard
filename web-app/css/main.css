@@ -270,7 +270,7 @@ ul.links li { list-style: none; }
 table td.name { vertical-align: top; }
 tr.headers td { vertical-align: bottom; }
 .prop { padding: 5px; }
-.prop .name  { text-align: left; width:  1%; white-space: nowrap; }
+.prop .name  { text-align: left; width:  1%; white-space: nowrap; padding-top: 11px; }
 .prop .value { text-align: left; width: 99%; }
 form .compoundName table        { width: auto; }
 form .compoundName .guide       { float: left; }
