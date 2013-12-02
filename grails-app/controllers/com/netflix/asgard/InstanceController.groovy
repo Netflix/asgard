@@ -107,7 +107,7 @@ class InstanceController {
         withFormat {
             xml {
                 render() {
-                    apps(count: avs.size()) {
+                    applications(count: avs.size()) {
                         avs.each { Multiset.Entry<AppVersion> entry ->
                             app(name: entry.element.packageName,
                                 version: entry.element.version,
