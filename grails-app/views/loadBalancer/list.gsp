@@ -55,7 +55,7 @@
                 <div><g:availabilityZone value="${zone}"/></div>
               </g:each>
             </td>
-            <td class="lbPolicies">
+            <td class="lbPolicies longValues">
               <ul>
                 <g:each var="policy" in="${lb.policies.otherPolicies}">
                   <li>${policy}</li>

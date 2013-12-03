@@ -229,8 +229,8 @@ th.desc a                   { background-image: url(../images/skin/sorted_desc.g
 .instanceType td.size       { max-width:  73px; }
 .list td.architecture       { max-width:  50px; }
 .instanceType td.netPerf    { max-width:  56px; }
-.list .lbPolicies ul        { padding-left: 0; list-style-type: none;  }
-.list .lbPolicies li        { padding-left: 10px; text-indent: -10px;  } /* Hanging indent */
+.list .longValues ul        { padding-left: 0; list-style-type: none;  }
+.list .longValues li        { padding-left: 10px; text-indent: -10px;  } /* Hanging indent */
 .list .activities td.details          { max-width: 300px;                        }
 .list .fastProperties .var            { max-width:  60px; word-wrap: break-word; white-space: normal; }
 .list .fastProperties .propKey        { max-width: 400px; word-wrap: break-word; }
