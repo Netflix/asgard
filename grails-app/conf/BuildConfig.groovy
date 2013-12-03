@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import org.apache.ivy.plugins.resolver.FileSystemResolver
 import org.apache.ivy.plugins.resolver.URLResolver
+
 
 grails.project.work.dir = 'work'
 grails.project.class.dir = 'target/classes'
@@ -33,7 +35,7 @@ codenarc {
             title = 'Asgard CodeNarc Report'
         }
     }
-    ruleSetFiles='file:grails-app/conf/CodeNarcRuleSet.groovy'
+    ruleSetFiles = 'file:grails-app/conf/CodeNarcRuleSet.groovy'
     maxPriority1Violations = 0
     maxPriority2Violations = 0
     maxPriority3Violations = 0
@@ -152,6 +154,11 @@ grails.project.dependency.resolution = {
 
         // Optional dependency for Spock to support mocking objects without a parameterless constructor.
         test 'org.objenesis:objenesis:1.2'
+
+        test "org.seleniumhq.selenium:selenium-support:2.35.0"
+        test "org.seleniumhq.selenium:selenium-chrome-driver:2.35.0"
+        test "org.gebish:geb-spock:0.9.2"
+
     }
 
     plugins {
@@ -169,6 +176,7 @@ grails.project.dependency.resolution = {
         }
 
         test ':code-coverage:1.2.5'
+        test ':geb:0.9.2'
 
         build ":tomcat:$grailsVersion"
     }
