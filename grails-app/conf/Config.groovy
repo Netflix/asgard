@@ -64,8 +64,8 @@ log4j = {
 
     // Suppress most noise from libraries
     error 'com.amazonaws', 'grails.spring', 'net.sf.ehcache', 'org.springframework', 'org.hibernate',
-            'org.apache.catalina', 'org.apache.commons', 'org.apache.coyote', 'org.apache.jasper', 'org.apache.tomcat',
-            'org.codehaus.groovy.grails'
+            'org.apache.catalina', 'org.apache.commons', 'org.apache.coyote', 'org.apache.http.client.protocol',
+            'org.apache.jasper', 'org.apache.tomcat', 'org.codehaus.groovy.grails'
 
     environments {
         development {

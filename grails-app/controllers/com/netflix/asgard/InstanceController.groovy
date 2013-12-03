@@ -22,11 +22,9 @@ import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.Reservation
 import com.amazonaws.services.ec2.model.Tag
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
-import com.google.common.collect.Multiset
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.text.TextLink
 import com.netflix.asgard.text.TextLinkTemplate
-import com.netflix.frigga.ami.AppVersion
 import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
@@ -98,27 +96,6 @@ class InstanceController {
             html { render(view: 'list', model: ['instanceList' : matchingMergedInstances]) }
             xml { new XML(matchingMergedInstances).render(response) }
             json { new JSON(matchingMergedInstances).render(response) }
-        }
-    }
-
-    def appversions = {
-        UserContext userContext = UserContext.of(request)
-        Set<Multiset.Entry<AppVersion>> avs = awsEc2Service.getCountedAppVersions(userContext).entrySet()
-        withFormat {
-            xml {
-                render() {
-                    apps(count: avs.size()) {
-                        avs.each { Multiset.Entry<AppVersion> entry ->
-                            app(name: entry.element.packageName,
-                                version: entry.element.version,
-                                count: entry.count,
-                                cl: entry.element.commit,
-                                buildJob: entry.element.buildJobName,
-                                buildNum: entry.element.buildNumber)
-                        }
-                    }
-                }
-            }
         }
     }
 

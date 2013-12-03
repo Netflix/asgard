@@ -564,7 +564,6 @@ jQuery(document).ready(function() {
                 relaunchCount: requiredDigits,
                 concurrentRelaunches: requiredDigits,
                 afterBootWait: requiredDigits,
-                blueOutMinutes: digitsOnly,
                 '.number': digitsOnly
             }
         });
