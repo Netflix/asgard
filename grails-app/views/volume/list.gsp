@@ -69,8 +69,7 @@
           </tbody>
         </table>
       </div>
-      <div class="paginateButtons">
-      </div>
+      <div class="paginateButtons"></div>
     </g:form>
   </div>
 </body>

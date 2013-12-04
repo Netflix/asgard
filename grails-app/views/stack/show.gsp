@@ -81,8 +81,7 @@
       </tbody>
     </table>
   </div>
-  <div class="paginateButtons">
-  </div>
+  <div class="paginateButtons"></div>
 </div>
 </body>
 </html>

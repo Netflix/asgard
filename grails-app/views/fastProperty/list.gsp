@@ -57,12 +57,12 @@
             <td class="region">${fastProperty?.region}</td>
             <td class="var">${fastProperty?.stack?.encodeAsHTML()}</td>
             <td>
-              <g:writeScope 
-                cluster="${fastProperty?.cluster}" 
-                asg="${fastProperty?.asg}" 
-                zone="${fastProperty?.zone}" 
-                instanceId="${fastProperty?.serverId}" 
-                countries="${fastProperty?.countries}" 
+              <g:writeScope
+                cluster="${fastProperty?.cluster}"
+                asg="${fastProperty?.asg}"
+                zone="${fastProperty?.zone}"
+                instanceId="${fastProperty?.serverId}"
+                countries="${fastProperty?.countries}"
                 ami="${fastProperty?.ami}"/>
             </td>
             <td>
@@ -73,9 +73,7 @@
         </tbody>
       </table>
     </div>
-
-    <div class="paginateButtons">
-    </div>
+    <div class="paginateButtons"></div>
   </g:form>
 </div></body>
 </html>

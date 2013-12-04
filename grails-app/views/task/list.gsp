@@ -74,8 +74,7 @@
           </tbody>
         </table>
       </div>
-      <div class="paginateButtons">
-      </div>
+      <div class="paginateButtons"></div>
     </g:form>
   </div>
   <div class="body">
@@ -122,8 +121,7 @@
         </tbody>
       </table>
     </div>
-    <div class="paginateButtons">
-    </div>
+    <div class="paginateButtons"></div>
   </div>
 </body>
 </html>
