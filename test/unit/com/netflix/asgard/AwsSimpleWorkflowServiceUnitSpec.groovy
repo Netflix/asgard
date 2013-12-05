@@ -28,6 +28,7 @@ import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.retriever.AwsResultsRetriever
 import spock.lang.Specification
 
+@SuppressWarnings(["GroovyAssignabilityCheck", "GroovyAccessibility"])
 class AwsSimpleWorkflowServiceUnitSpec extends Specification {
 
     AwsSimpleWorkflowService awsSimpleWorkflowService = new AwsSimpleWorkflowService()
