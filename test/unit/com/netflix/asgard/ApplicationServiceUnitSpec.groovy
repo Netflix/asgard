@@ -79,7 +79,7 @@ class ApplicationServiceUnitSpec extends Specification {
 
         when:
         CreateApplicationResult result = applicationService.createRegisteredApplication(
-                UserContext.auto(Region.US_EAST_1), 'helloworld', null,
+                UserContext.auto(), 'helloworld', null,
                 'Web Application', 'Say hello', 'jsmith', 'jsmith@example.com', MonitorBucketType.application, true)
 
         then:

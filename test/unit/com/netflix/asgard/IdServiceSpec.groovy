@@ -29,7 +29,7 @@ class IdServiceSpec extends Specification {
         service.awsSimpleDbService = Mock(AwsSimpleDbService)
 
         when:
-        String result = service.nextId(UserContext.auto(Region.US_EAST_1), SimpleDbSequenceLocator.Task)
+        String result = service.nextId(UserContext.auto(), SimpleDbSequenceLocator.Task)
 
         then:
         result == '42'
@@ -41,7 +41,7 @@ class IdServiceSpec extends Specification {
         service.emailerService = Mock(EmailerService)
 
         when:
-        String result = service.nextId(UserContext.auto(Region.US_EAST_1), SimpleDbSequenceLocator.Task)
+        String result = service.nextId(UserContext.auto(), SimpleDbSequenceLocator.Task)
 
         then:
         result ==~ /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
