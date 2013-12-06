@@ -163,7 +163,7 @@ ruleset {
     BracesForIfElse
     BracesForMethod
     BracesForTryCatchFinally
-    ClassJavadoc
+//    ClassJavadoc
 //    LineLength
     SpaceAfterCatch
 //    SpaceAfterClosingBrace
