@@ -47,8 +47,7 @@
         </tbody>
       </table>
     </div>
-    <div class="paginateButtons">
-    </div>
+    <footer/>
   </g:form>
 </div>
 </body>

@@ -53,7 +53,7 @@
       </tbody>
     </table>
   </div>
-  <div class="paginateButtons"></div>
+  <footer/>
 </div>
 </body>
 </html>

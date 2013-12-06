@@ -50,7 +50,7 @@ class AwsEc2ServiceUnitSpec extends Specification {
     AwsEc2Service awsEc2Service
 
     def setup() {
-        userContext = UserContext.auto(Region.US_EAST_1)
+        userContext = UserContext.auto()
         mockAmazonEC2 = Mock(AmazonEC2)
         mockSecurityGroupCache = Mock(CachedMap)
         mockInstanceCache = Mock(CachedMap)

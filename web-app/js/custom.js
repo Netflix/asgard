@@ -587,7 +587,7 @@ jQuery(document).ready(function() {
 
         // Ignore "Enter" key on forms. It's too easy to press enter again by accident after using enter to make a
         // select2 choice. This usability flaw can cause production outages.
-        jQuery('form').not('.allowEnterKeySubmit').bind('keydown', function(e) {
+        jQuery('form').not('.allowEnterKey').bind('keydown', function(e) {
             return e.keyCode !== 13;
         });
 

@@ -93,7 +93,7 @@ class ImageServiceReplicateTagsSpec extends ImageServiceSpec {
             }
         }
         GPathResult prodImagesXml = XML.parse(sw.toString()) as GPathResult
-        awsEc2Service.getAccountImages(UserContext.auto(Region.US_EAST_1)) >> testImages
+        awsEc2Service.getAccountImages(UserContext.auto()) >> testImages
         1 * restClientService.getAsXml({ it =~ /\/us-east-1\/image\/list\.xml/ }) >> prodImagesXml
 
         restClientService.getAsText(_, _) >> InetAddress.getLocalHost().getHostName()

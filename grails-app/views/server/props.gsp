@@ -47,7 +47,7 @@
         </tbody>
       </table>
     </div>
-    <div class="paginateButtons"></div>
+    <footer/>
   </div>
   <div class="body">
     <h2>System Properties</h2>
@@ -70,7 +70,7 @@
         </tbody>
       </table>
     </div>
-    <div class="paginateButtons"></div>
+    <footer/>
   </div>
 </body>
 </html>

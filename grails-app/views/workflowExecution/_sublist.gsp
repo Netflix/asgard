@@ -47,4 +47,4 @@
     </tbody>
   </table>
 </div>
-<div class="paginateButtons"></div>
+<footer/>

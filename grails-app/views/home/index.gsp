@@ -99,7 +99,7 @@
         </ul>
       </div>
       <div class="widget">
-        <g:form controller="instance" action="show" method="get" class="instanceJump allowEnterKeySubmit">
+        <g:form controller="instance" action="show" method="get" class="instanceJump allowEnterKey">
         <h1><label for="txtInstanceId">Jump to an instance</label></h1>
         <ul>
           <li>

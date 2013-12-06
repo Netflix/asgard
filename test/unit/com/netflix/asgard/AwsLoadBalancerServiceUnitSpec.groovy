@@ -38,7 +38,7 @@ class AwsLoadBalancerServiceUnitSpec extends Specification {
     CachedMap cachedMap = Mock(CachedMap)
 
     def setup() {
-        userContext = UserContext.auto(Region.US_EAST_1)
+        userContext = UserContext.auto()
         mockAmazonElasticLoadBalancing = Mock(AmazonElasticLoadBalancing)
         MultiRegionAwsClient awsClient = new MultiRegionAwsClient({ mockAmazonElasticLoadBalancing })
         TaskService taskService = new TaskService() {

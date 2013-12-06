@@ -36,8 +36,7 @@
     <div class="buttons"></div>
     <g:render template="stackList" model="${[stackNames: allStackNames]}" />
   </div>
-  <div class="paginateButtons">
-  </div>
+  <footer/>
 </div>
 </body>
 </html>

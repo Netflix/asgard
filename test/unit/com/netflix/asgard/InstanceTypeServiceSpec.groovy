@@ -34,7 +34,7 @@ class InstanceTypeServiceSpec extends Specification {
     CachedMap mockInstanceTypesCache
 
     def setup() {
-        userContext = UserContext.auto(Region.US_EAST_1)
+        userContext = UserContext.auto()
         mockConfigService = Mock(ConfigService)
         mockHardwareProfilesCache = Mock(CachedMap)
         mockInstanceTypesCache = Mock(CachedMap)
