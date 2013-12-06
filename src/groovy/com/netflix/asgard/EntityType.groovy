@@ -118,7 +118,6 @@ import java.lang.reflect.Modifier
             { "${it.workflowType.name}-${it.workflowType.version}" as String })
     static final EntityType<DomainInfo> workflowDomain = create('Workflow Domain', { it.name })
 
-
     /**
      * Create an EntityType with specific attributes
      *

@@ -38,7 +38,6 @@ interface DeploymentActivities {
      */
     AsgDeploymentNames getAsgDeploymentNames(UserContext userContext, String clusterName)
 
-
     /**
      * Creates the launch configuration for the next ASG in the cluster.
      *

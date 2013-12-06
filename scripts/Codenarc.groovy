@@ -19,6 +19,26 @@
 import grails.util.GrailsUtil
 import org.apache.tools.ant.BuildException
 
+// Begin hack to replace CodeNarc 0.19's implementation of loadRuleScriptFile which blows up in recent Groovy.
+// Remove this hack after https://github.com/CodeNarc/CodeNarc/pull/26 gets merged and released
+// in future CodeNarc version to fix https://github.com/CodeNarc/CodeNarc/issues/25
+import org.codenarc.ruleset.RuleSetUtil
+import org.codenarc.util.io.DefaultResourceFactory
+import org.codenarc.util.io.ResourceFactory
+
+ResourceFactory RESOURCE_FACTORY = new DefaultResourceFactory()
+RuleSetUtil.metaClass.'static'.loadRuleScriptFile = { String path ->
+    def inputStream = RESOURCE_FACTORY.getResource(path).inputStream
+    Class ruleClass
+    inputStream.withStream { InputStream input ->
+        GroovyClassLoader gcl = new GroovyClassLoader(getClass().classLoader)
+        ruleClass = gcl.parseClass(input.text)
+    }
+    RuleSetUtil.assertClassImplementsRuleInterface(ruleClass)
+    ruleClass.newInstance()
+}
+// End temporary hack for compatibility between CodeNarc 0.19 and Groovy 1.8.*
+
 includeTargets << grailsScript('_GrailsCompile')
 
 target('codenarc': 'Run CodeNarc') {

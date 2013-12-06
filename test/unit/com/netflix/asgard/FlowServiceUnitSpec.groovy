@@ -31,7 +31,6 @@ class FlowServiceUnitSpec extends Specification {
     WorkflowClientFactory workflowClientFactory = new WorkflowClientFactory(Mock(AmazonSimpleWorkflow))
     FlowService flowService = new FlowService(workflowClientFactory: workflowClientFactory)
 
-
     def 'should get new workflow client'() {
         UserContext userContext = new UserContext(username: 'rtargaryen')
         Link link = new Link(type: EntityType.cluster, id: '123')
@@ -73,5 +72,4 @@ class FlowServiceUnitSpec extends Specification {
         expect:
         flowService.getManualActivityCompletionClient('123') instanceof ManualActivityCompletionClient
     }
-
 }

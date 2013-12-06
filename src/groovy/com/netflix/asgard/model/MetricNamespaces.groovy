@@ -231,7 +231,6 @@ class MetricNamespaces {
 
     private final ImmutableMap<String, MetricNamespace> allNamespacesByName
 
-
     /**
      * Construct MetricNamespaces with specified custom namespace metrics and dimensions.
      *

@@ -268,7 +268,6 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
                 autoScalingGroupName: 'service1-int-v008', minSize: 1, desiredCapacity: 2, maxSize: 3))
     }
 
-
     def 'should determine healthy ASG due to no instances'() {
         awsAutoScalingService = Spy(AwsAutoScalingService)
 
