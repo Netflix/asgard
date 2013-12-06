@@ -21,6 +21,10 @@ ruleset {
 //        description = 'Use of Spring.autowire(...) can become unstable.'
 //    }
 
+    rule('file:test/unit/com/netflix/asgard/codenarc/ConsecutiveBlankLinesRule.groovy') {
+        description = 'Consecutive blank lines are not permitted.'
+    }
+
     // rulesets/basic.xml
     AssertWithinFinallyBlock
     AssignmentInConditional
