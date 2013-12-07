@@ -19,6 +19,7 @@ import org.codenarc.rule.AbstractRuleTestCase
 import org.codenarc.rule.Rule
 import org.junit.Test
 
+@SuppressWarnings('MissingBlankLineAfterImports')
 class MissingBlankLineAfterPackageRuleTest extends AbstractRuleTestCase {
 
     @Test
