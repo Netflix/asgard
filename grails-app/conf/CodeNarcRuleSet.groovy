@@ -20,6 +20,9 @@ ruleset {
 //    rule('file:test/unit/com/netflix/asgard/codenarc/ExplicitCallToSpringAutoWire.groovy') {
 //        description = 'Use of Spring.autowire(...) can become unstable.'
 //    }
+    rule('file:test/unit/com/netflix/asgard/codenarc/MissingBlankLineAfterPackageRule.groovy') {
+        description = 'A blank line should occur after the package declaration.'
+    }
     rule('file:test/unit/com/netflix/asgard/codenarc/BlankLineBeforePackageRule.groovy') {
         description = 'No blank lines should occur before the package declaration.'
     }
