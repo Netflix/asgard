@@ -23,6 +23,9 @@ ruleset {
     rule('file:test/unit/com/netflix/asgard/codenarc/MissingBlankLineAfterPackageRule.groovy') {
         description = 'A blank line should occur after the package declaration.'
     }
+    rule('file:test/unit/com/netflix/asgard/codenarc/MissingBlankLineAfterImportsRule.groovy') {
+        description = 'A blank line should occur after the imports.'
+    }
     rule('file:test/unit/com/netflix/asgard/codenarc/BlankLineBeforePackageRule.groovy') {
         description = 'No blank lines should occur before the package declaration.'
     }
