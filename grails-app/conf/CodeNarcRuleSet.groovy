@@ -196,6 +196,11 @@ ruleset {
     IllegalClassReference
     IllegalPackageReference
     IllegalRegex
+    IllegalRegex {
+        name = 'TrailingWhitespace'
+        regex = /[^\n]*[ \t]+\n/
+        description = 'Lines must not end with whitespace characters.'
+    }
     RequiredRegex
     RequiredRegex {
         name = 'MissingCopyrightHeader'
