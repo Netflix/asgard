@@ -16,6 +16,7 @@
 package com.netflix.asgard.model
 
 import groovy.transform.Immutable
+
 /**
  * Data holder for fields from {@link com.amazonaws.services.elasticloadbalancing.model.InstanceState} plus additional
  * helpful fields for display about an instance in an Elastic Load Balancer.
