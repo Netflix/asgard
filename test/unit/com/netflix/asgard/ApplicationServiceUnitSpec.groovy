@@ -19,6 +19,7 @@ import com.amazonaws.services.simpledb.AmazonSimpleDB
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.MonitorBucketType
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @SuppressWarnings("GroovyAssignabilityCheck")
 class ApplicationServiceUnitSpec extends Specification {
@@ -85,5 +86,21 @@ class ApplicationServiceUnitSpec extends Specification {
         then:
         1 * applicationService.simpleDbClient.putAttributes(_)
         notThrown(NullPointerException)
+    }
+
+    @Unroll('monitor bucket should be "#monitorBucket" if monitor bucket type is #type')
+    def 'monitor bucket value should depend on monitor bucket type'() {
+
+        AppRegistration app = new AppRegistration(name: 'hello', monitorBucketType: MonitorBucketType.byName(type))
+        applicationService.getRegisteredApplication(_, _) >> app
+
+        expect:
+        monitorBucket == applicationService.getMonitorBucket(UserContext.auto(), 'hello', 'hello-there')
+
+        where:
+        type          | monitorBucket
+        'none'        | ''
+        'application' | 'hello'
+        'cluster'     | 'hello-there'
     }
 }
