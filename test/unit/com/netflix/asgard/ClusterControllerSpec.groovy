@@ -276,7 +276,6 @@ class ClusterControllerSpec extends Specification {
     }
 
     def 'deploy should fail on an invalid cluster name'() {
-        given:
         DeployCommand cmd = Mock(DeployCommand)
         1 * cmd.hasErrors() >> true
 
@@ -288,4 +287,42 @@ class ClusterControllerSpec extends Specification {
         response.redirectedUrl == '/cluster/prepareDeployment'
     }
 
+    def 'deploy should fail when the cluster has two autoscaling group'() {
+        DeployCommand cmd = new DeployCommand(clusterName: 'helloworld')
+        controller.awsAutoScalingService.getCluster(_, 'helloworld') >> {
+            new Cluster([
+                    AutoScalingGroupData.from(new AutoScalingGroup(autoScalingGroupName: 'helloworld-example-v014',
+                            instances: [new Instance(instanceId: 'i-8ee4eeee')]), [:], [], [:], []),
+                    AutoScalingGroupData.from(new AutoScalingGroup(autoScalingGroupName: 'helloworld-example-v015',
+                            instances: [new Instance(instanceId: 'i-6ef9f30e'), new Instance(instanceId: 'i-95fe1df6')]),
+                            [:], [], [:], [])
+            ])
+        }
+
+        when:
+        controller.deploy(cmd)
+
+        then:
+        flash.message == "Cluster 'helloworld' should only have one ASG to enable automatic deployment."
+        flash.chainModel.cmd == cmd
+        response.redirectedUrl == '/cluster/prepareDeployment'
+    }
+
+    def 'deploy should fail when the current cluster is not accepting traffic'() {
+        DeployCommand cmd = new DeployCommand(clusterName: 'helloworld')
+        Cluster cluster = Mock(Cluster)
+        AutoScalingGroupData asg = Mock(AutoScalingGroupData)
+        controller.awsAutoScalingService.getCluster(_, 'helloworld') >> cluster
+        cluster.size() >> 1
+        cluster.last() >> asg
+        asg.seemsDisabled() >> true
+
+        when:
+        controller.deploy(cmd)
+
+        then:
+        flash.message == "ASG in cluster 'helloworld' should be receiving traffic to enable automatic deployment."
+        flash.chainModel.cmd == cmd
+        response.redirectedUrl == '/cluster/prepareDeployment'
+    }
 }
