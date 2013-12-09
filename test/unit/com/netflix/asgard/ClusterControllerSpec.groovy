@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package com.netflix.asgard
-
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
@@ -30,6 +29,7 @@ import com.netflix.asgard.push.GroupCreateOperation
 import com.netflix.asgard.push.GroupCreateOptions
 import grails.test.mixin.TestFor
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @SuppressWarnings(["GroovyAssignabilityCheck"])
 @TestFor(ClusterController)
@@ -308,6 +308,7 @@ class ClusterControllerSpec extends Specification {
         response.redirectedUrl == '/cluster/prepareDeployment'
     }
 
+    @Unroll
     def 'deploy should fail when the current cluster is not accepting traffic'() {
         DeployCommand cmd = new DeployCommand(clusterName: 'helloworld')
         Cluster cluster = Mock(Cluster)
@@ -315,7 +316,9 @@ class ClusterControllerSpec extends Specification {
         controller.awsAutoScalingService.getCluster(_, 'helloworld') >> cluster
         cluster.size() >> 1
         cluster.last() >> asg
-        asg.seemsDisabled() >> true
+        asg.isLaunchingSuspended() >> launchSuspended
+        asg.isTerminatingSuspended() >> terminateSuspended
+        asg.isAddingToLoadBalancerSuspended() >> addToLoadBalancerSuspended
 
         when:
         controller.deploy(cmd)
@@ -324,5 +327,12 @@ class ClusterControllerSpec extends Specification {
         flash.message == "ASG in cluster 'helloworld' should be receiving traffic to enable automatic deployment."
         flash.chainModel.cmd == cmd
         response.redirectedUrl == '/cluster/prepareDeployment'
+
+        where:
+        launchSuspended | terminateSuspended | addToLoadBalancerSuspended
+        true            | true               | true
+        true            | false              | false
+        false           | true               | false
+        false           | false              | true
     }
 }

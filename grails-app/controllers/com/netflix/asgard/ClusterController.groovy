@@ -298,8 +298,11 @@ ${lastGroup.loadBalancerNames}"""
             chain(action: 'prepareDeployment', model: [cmd: cmd], params: params)
             return
         }
-        AutoScalingGroupData lastGroup = cluster.last()
-        if (lastGroup.seemsDisabled()) {
+        AutoScalingGroupData group = cluster.last()
+        if ( group.isLaunchingSuspended() ||
+             group.isTerminatingSuspended() ||
+             group.isAddingToLoadBalancerSuspended()
+        ) {
             flash.message = "ASG in cluster '${cmd.clusterName}' should be receiving traffic to enable automatic deployment."
             chain(action: 'prepareDeployment', model: [cmd: cmd], params: params)
             return
