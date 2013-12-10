@@ -22,7 +22,6 @@ import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.google.common.collect.Sets
-import com.netflix.asgard.deployment.DeploymentWorkflow
 import com.netflix.asgard.deployment.DeploymentWorkflowOptions
 import com.netflix.asgard.deployment.ProceedPreference
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
@@ -33,7 +32,6 @@ import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
-import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.push.CommonPushOptions
 import com.netflix.asgard.push.GroupActivateOperation
@@ -342,7 +340,7 @@ ${lastGroup.loadBalancerNames}"""
             newSuspendedProcesses << AutoScalingProcessType.AddToLoadBalancer
         }
 
-        AutoScalingGroupBeanOptions asgOverrides = new AutoScalingGroupBeanOptions(
+        AutoScalingGroupBeanOptions asgOpts = new AutoScalingGroupBeanOptions(
                 availabilityZones: Requests.ensureList(params.selectedZones),
                 loadBalancerNames: loadBalancerNames,
                 minSize: params.min as Integer,
@@ -356,7 +354,7 @@ ${lastGroup.loadBalancerNames}"""
                 suspendedProcesses: newSuspendedProcesses
         )
 
-        LaunchConfigurationBeanOptions lcOverrides = new LaunchConfigurationBeanOptions(
+        LaunchConfigurationBeanOptions lcOpts = new LaunchConfigurationBeanOptions(
                 imageId: params.imageId,
                 instanceType: params.instanceType,
                 keyName: params.keyName,
@@ -366,11 +364,8 @@ ${lastGroup.loadBalancerNames}"""
                 ebsOptimized: params.ebsOptimized?.toBoolean()
         )
 
-        def client = flowService.getNewWorkflowClient(userContext, DeploymentWorkflow,
-                new Link(EntityType.cluster, cmd.clusterName))
-        client.asWorkflow().deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
-        SwfWorkflowTags tags = (SwfWorkflowTags) client.workflowTags
-        redirect(controller: 'task', action: 'show', id: tags.id)
+        String taskId = pushService.startDeployment(userContext, cmd.clusterName, deploymentOptions, lcOpts, asgOpts)
+        redirect(controller: 'task', action: 'show', id: taskId)
     }
 
     @SuppressWarnings("GroovyAssignabilityCheck")
