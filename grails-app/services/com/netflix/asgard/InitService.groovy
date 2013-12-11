@@ -47,7 +47,7 @@ class InitService implements ApplicationContextAware {
         if (!fileCreated) {
             throw new IOException("Unable to create Config.groovy file in directory ${configService.asgardHome}")
         }
-        configFile.withWriter{ writer ->
+        configFile.withWriter { writer ->
             configObject.writeTo(writer)
         }
         grailsApplication.config.appConfigured = true

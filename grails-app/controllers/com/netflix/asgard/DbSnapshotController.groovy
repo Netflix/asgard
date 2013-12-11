@@ -96,7 +96,7 @@ class DbSnapshotController {
         def message = ""
         try {
             def deletedCount = 0
-            snapshotIds.each{
+            snapshotIds.each {
                 awsRdsService.deleteDBSnapshot(userContext, it)
                 message += (deletedCount > 0) ? ", $it" : "Snapshot(s) deleted: $it"
                 deletedCount++

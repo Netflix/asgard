@@ -75,7 +75,7 @@ class ClusterController {
                 appNames.contains(Relationships.appNameFromGroupName(cluster.name))
             }
         }
-        clusterObjects = clusterObjects.sort{ it.name.toLowerCase() }
+        clusterObjects = clusterObjects.sort { it.name.toLowerCase() }
         withFormat {
             html { [clusters: clusterObjects, appNames: appNames] }
             xml {
