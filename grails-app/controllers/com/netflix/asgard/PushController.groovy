@@ -26,7 +26,7 @@ import java.rmi.NoSuchObjectException
 @ContextParam('region')
 class PushController {
 
-    static allowedMethods = [startRolling:'POST']
+    static allowedMethods = [startRolling: 'POST']
 
     static editActions = ['editRolling']
 
@@ -36,7 +36,7 @@ class PushController {
     def pushService
     def grailsApplication
 
-    def index = { redirect(controller:"autoScaling", action:"list", params:params) }
+    def index = { redirect(controller: "autoScaling", action: "list", params: params) }
 
     def editRolling = {
         UserContext userContext = UserContext.of(request)
@@ -105,7 +105,7 @@ class PushController {
             redirect(controller: 'task', action: 'show', params: [id: pushOperation.taskId])
         } catch (Exception e) {
             flash.message = "Could not start push: ${e}"
-            redirect(controller:"autoScaling", action:"show", params:[name:params.name])
+            redirect(controller: "autoScaling", action: "show", params: [name: params.name])
         }
     }
 

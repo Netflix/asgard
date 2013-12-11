@@ -150,7 +150,7 @@ class LoadBalancerController {
                         subnetPurpose)
                 updateHealthCheck(userContext, lbName, params)
                 flash.message = "Load Balancer '${lbName}' has been created. " + configService.postElbCreationMessage
-                redirect(action: 'show', params:[name:lbName])
+                redirect(action: 'show', params: [name: lbName])
             } catch (Exception e) {
                 flash.message = "Could not create Load Balancer: ${e}"
                 chain(action: 'create', model: [cmd: cmd], params: params)
@@ -257,7 +257,7 @@ class LoadBalancerController {
 
     def addListener = { AddListenerCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action: 'prepareListener', model: [cmd:cmd], params: params)
+            chain(action: 'prepareListener', model: [cmd: cmd], params: params)
         } else {
             UserContext userContext = UserContext.of(request)
             Listener listener = new Listener(protocol: cmd.protocol, loadBalancerPort: cmd.lbPort,

@@ -20,7 +20,7 @@ import grails.converters.XML
 
 class IconController {
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     private static final String MID_PATH = 'images/tango/'
 

@@ -34,9 +34,9 @@ class LaunchConfigurationController {
     def flagService
     def instanceTypeService
 
-    static allowedMethods = [delete:'POST', save:'POST', update:'POST', cleanup: 'POST', massDelete: 'POST']
+    static allowedMethods = [delete: 'POST', save: 'POST', update: 'POST', cleanup: 'POST', massDelete: 'POST']
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)

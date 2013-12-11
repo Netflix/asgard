@@ -287,7 +287,7 @@ class AutoScalingController {
 
     def save = { GroupCreateCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action: 'create', model: [cmd:cmd], params: params) // Use chain to pass both the errors and params
+            chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass both the errors and params
         } else {
             UserContext userContext = UserContext.of(request)
             // Auto Scaling Group name

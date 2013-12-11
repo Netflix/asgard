@@ -288,7 +288,7 @@ ${lastGroup.loadBalancerNames}"""
 
     def deploy(DeployCommand cmd) {
         if (cmd.hasErrors()) {
-            chain(action: 'prepareDeployment', model: [cmd:cmd], params: params)
+            chain(action: 'prepareDeployment', model: [cmd: cmd], params: params)
             return
         }
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions()

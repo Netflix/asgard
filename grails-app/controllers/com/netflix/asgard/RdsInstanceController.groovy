@@ -68,7 +68,7 @@ class RdsInstanceController {
         log.info "trying to save new db, groups $params.selectedDBSecurityGroups"
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
-            chain(action: 'create', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
         } else {
             try {
                 boolean multiAZ = params.multiAZ == 'on'
@@ -104,7 +104,7 @@ class RdsInstanceController {
     def update = { DbUpdateCommand cmd ->
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
-            chain(action: 'edit', model:[cmd:cmd], params:params) // Use chain to pass both the errors and the params
+            chain(action: 'edit', model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
         } else {
             try {
                 boolean multiAZ = ("on" == params.multiAZ)
@@ -126,7 +126,7 @@ class RdsInstanceController {
                 redirect(action: 'show', params:['dBInstanceIdentifier':params.dBInstanceIdentifier])
             } catch (Exception e) {
                 flash.message = "Could not update DB Instance: ${e}"
-                chain(action: 'edit', params:params)
+                chain(action: 'edit', params: params)
             }
         }
     }

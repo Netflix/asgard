@@ -37,7 +37,7 @@ class InstanceController {
 
     static editActions = ['associate']
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def awsAutoScalingService
     def awsEc2Service
@@ -255,7 +255,7 @@ class InstanceController {
         awsEc2Service.rebootInstance(userContext, instanceId)
 
         flash.message = "Rebooting instance '${instanceId}'."
-        redirect(action: 'show', params:[instanceId:instanceId])
+        redirect(action: 'show', params: [instanceId: instanceId])
     }
 
     def raw = {
@@ -363,7 +363,7 @@ class InstanceController {
         } catch (Exception e) {
             flash.message = "Could not associate Elastic IP '${publicIp}' with '${instanceId}': ${e}"
         }
-        redirect(action: 'show', params:[instanceId:instanceId])
+        redirect(action: 'show', params: [instanceId: instanceId])
     }
 
     def takeOutOfService = {
@@ -388,14 +388,14 @@ class InstanceController {
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId)
         UserContext userContext = UserContext.of(request)
         awsEc2Service.createInstanceTag(userContext, [instanceId], params.name, params.value)
-        redirect(action: 'show', params:[instanceId:instanceId])
+        redirect(action: 'show', params: [instanceId: instanceId])
     }
 
     def removeTag = {
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId)
         UserContext userContext = UserContext.of(request)
         awsEc2Service.deleteInstanceTag(userContext, instanceId, params.name)
-        redirect(action: 'show', params:[instanceId:instanceId])
+        redirect(action: 'show', params: [instanceId: instanceId])
     }
 
     def userData = {
