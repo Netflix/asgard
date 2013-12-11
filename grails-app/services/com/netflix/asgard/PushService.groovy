@@ -20,6 +20,7 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
 import com.netflix.asgard.deployment.DeploymentWorkflow
 import com.netflix.asgard.deployment.DeploymentWorkflowOptions
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
@@ -225,5 +226,16 @@ class PushService {
         client.asWorkflow(updateCaches).deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
         SwfWorkflowTags tags = (SwfWorkflowTags) client.workflowTags
         tags.id
+    }
+
+    /**
+     * Checks whether the specified cluster has at least one open workflow execution.
+     *
+     * @param clusterName the name of the cluster in question
+     * @return info about the workflow execution that is currently operating on the cluster, or null if none found
+     */
+    WorkflowExecutionInfo getRunningDeploymentForCluster(String clusterName) {
+        Link link = new Link(type: EntityType.cluster, id: clusterName)
+        awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link)
     }
 }

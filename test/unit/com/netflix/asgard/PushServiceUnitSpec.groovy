@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.services.simpleworkflow.flow.StartWorkflowOptions
 import com.amazonaws.services.simpleworkflow.flow.generic.GenericWorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
+import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
 import com.amazonaws.services.simpleworkflow.model.WorkflowType
 import com.netflix.asgard.deployment.DeploymentWorkflow
 import com.netflix.asgard.deployment.DeploymentWorkflowDescriptionTemplate
@@ -65,5 +66,29 @@ class PushServiceUnitSpec extends Specification {
         1 * awsSimpleWorkflowService.getWorkflowExecutionInfoByWorkflowExecution(
                 new WorkflowExecution(workflowId: '1716231163'))
         0 * _
+    }
+
+    def 'should indicate that a workflow execution is in progress for the specified cluster'() {
+
+        Link link = Link.to(EntityType.cluster, 'helloworld-example')
+
+        when:
+        WorkflowExecutionInfo info = pushService.getRunningDeploymentForCluster('helloworld-example')
+
+        then:
+        info == new WorkflowExecutionInfo()
+        1 * awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link) >> new WorkflowExecutionInfo()
+    }
+
+    def 'should indicate that a workflow execution is not in progress for the specified cluster'() {
+
+        Link link = Link.to(EntityType.cluster, 'helloworld-example')
+
+        when:
+        WorkflowExecutionInfo info = pushService.getRunningDeploymentForCluster('helloworld-example')
+
+        then:
+        info == null
+        1 * awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link) >> null
     }
 }
