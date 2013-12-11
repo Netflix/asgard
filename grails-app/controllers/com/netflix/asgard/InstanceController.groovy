@@ -32,7 +32,7 @@ import grails.converters.XML
 @ContextParam('region')
 class InstanceController {
 
-    final static allowedMethods = [terminate: 'POST', terminateAndShrinkGroup: 'POST']
+    final static allowedMethods = ['terminate', 'terminateAndShrinkGroup'].collectEntries { [(it): 'POST'] }
 
     static editActions = ['associate']
 
