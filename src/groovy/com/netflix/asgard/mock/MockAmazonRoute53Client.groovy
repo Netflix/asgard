@@ -22,7 +22,7 @@ import com.amazonaws.services.route53.model.ListHostedZonesRequest
 import com.amazonaws.services.route53.model.ListHostedZonesResult
 
 /**
- * Used for offline mode and some integration tests.
+ * Used for offline mode.
  */
 class MockAmazonRoute53Client extends AmazonRoute53Client {
 
