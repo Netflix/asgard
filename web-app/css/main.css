@@ -71,6 +71,8 @@ input, select, textarea, button div { background-color: #FCFCFC; border: 1px sol
 input.number                     { width: 36px;  }
 .numbers input.string[type=text] { width: auto;  }
 .fastPropertyValue               { width: 500px; }
+.longInput input[type=text]      { width: 500px; }
+.longInput textarea              { width: 500px; }
 .bigValue                        { max-width: 500px; word-wrap: break-word; }
 
 .inlineInputs input             { margin-right: 10px; }
@@ -97,6 +99,7 @@ input.number                     { width: 36px;  }
 .nav .stacks              { background-image: url(../images/tango/24/tools/stack.png);                    }
 .nav .users               { background-image: url(../images/tango/24/apps/system-users.png);              }
 .nav .fastProperties      { background-image: url(../images/tango/24/categories/lightning.png);           }
+.nav .hostedZones         { background-image: url(../images/tango/24/apps/internet-web-browser.png);      }
 .nav .images              { background-image: url(../images/tango/24/mimetypes/image-x-generic.png);      }
 .nav .securityGroups      { background-image: url(../images/tango/24/status/secure.png);                  }
 .nav .launchConfigs       { background-image: url(../images/tango/24/actions/launch.png);                 }
@@ -240,6 +243,11 @@ th.desc a                   { background-image: url(../images/skin/sorted_desc.g
 .list .fastProperties .updatedBy      { max-width:  80px; word-wrap: break-word; }
 .list .fastProperties .sourceOfUpdate { max-width:  50px; word-wrap: break-word; }
 .list .fastProperties table.scopeAttribs td { border-bottom: 1px dotted #DDD; }
+.resourceRecordSets td                       { max-width:  80px; word-wrap: break-word; white-space: normal; }
+.resourceRecordSets td.resourceRecordSetName { max-width: 180px; }
+.resourceRecordSets td.resourceRecords       { max-width: 180px; }
+.resourceRecordSets td.resourceRecordSetId   { max-width: 120px; }
+.resourceRecordSets td.aliasTarget           { max-width: 100px; }
 
 .list td:first-of-type:last-of-type { min-width: 500px; } /* filter might wrap without this */
 
@@ -259,9 +267,11 @@ ul.links    { padding-left: 0; }
 ul.links li { list-style: none; }
 
 /* TABLE FOOTERS */
-.list + footer { clear: both; border: 1px solid #DDD; border-top: 0; color: #666; font-size: 10px; overflow: hidden; padding: 10px 3px;
-                 background-image: -moz-linear-gradient(center bottom, #DDD 0%, white 80%);
-                 background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #DDD), color-stop(0.8, white)); }
+.list + footer, .list > footer {
+    clear: both; border: 1px solid #DDD; border-top: 0; color: #666; font-size: 10px; overflow: hidden; padding: 10px 3px;
+    background-image: -moz-linear-gradient(center bottom, #DDD 0%, white 80%);
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #DDD), color-stop(0.8, white));
+}
 
 /* DIALOG */
 .dialog table { padding: 5px 0; }
@@ -369,6 +379,7 @@ a.alarm               { padding:  2px 2px  2px 26px; background: url(../images/t
 a.spotInstanceRequest { padding:  2px 2px  2px 26px; background: url(../images/tango/16/tools/draw-ink.png        )              transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.instance            { padding:  2px 2px  2px 26px; background: url(../images/tango/16/devices/video-display.png )              transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; white-space: nowrap; }
 a.user                { padding:  2px 2px  2px 26px; background: url(../images/tango/16/apps/system-users.png )                  transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
+a.hostedZone          { padding:  2px 2px  2px 26px; background: url(../images/tango/16/apps/internet-web-browser.png )          transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.loadBalancer        { padding:  2px 2px  2px 26px; background: url(../images/tango/16/emblems/emblem-balance.png)              transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.image               { padding:  2px 2px  2px 26px; background: url(../images/tango/16/mimetypes/image-x-generic.png)           transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 .security             { padding:  2px 2px  2px 26px; background: url(../images/tango/16/status/secure.png)                       transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }

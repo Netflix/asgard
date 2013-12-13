@@ -109,7 +109,13 @@
          <li class="menuButton"><g:link class="alarm" controller="alarm" action="list">CloudWatch Alarms</g:link></li>
        </ul>
      </li>
-     <li class="menuButton"><g:link class="loadBalancers" controller="loadBalancer" action="list">ELB</g:link></li>
+     <li class="menuButton">
+       <g:link class="loadBalancers" controller="loadBalancer" action="list">ELB</g:link>
+       <ul>
+         <li class="menuButton"><g:link class="loadBalancers" controller="loadBalancer" action="list">Elastic Load Balancers</g:link></li>
+         <li class="menuButton"><g:link class="hostedZones" controller="hostedZone" action="list">Route53 Hosted Zones</g:link></li>
+       </ul>
+     </li>
      <li class="menuButton">
          <g:link class="instances" controller="instance" action="${discoveryExists ? 'apps' : 'list'}">EC2</g:link>
          <ul>
