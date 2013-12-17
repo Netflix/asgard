@@ -137,6 +137,7 @@ import com.amazonaws.services.ec2.model.DescribeVpnGatewaysResult
 import com.amazonaws.services.ec2.model.DetachVolumeRequest
 import com.amazonaws.services.ec2.model.DetachVolumeResult
 import com.amazonaws.services.ec2.model.DetachVpnGatewayRequest
+import com.amazonaws.services.ec2.model.Filter
 import com.amazonaws.services.ec2.model.GetConsoleOutputRequest
 import com.amazonaws.services.ec2.model.GetConsoleOutputResult
 import com.amazonaws.services.ec2.model.GetPasswordDataRequest
@@ -461,6 +462,13 @@ class MockAmazonEC2Client extends AmazonEC2Client {
     DescribeSecurityGroupsResult describeSecurityGroups(DescribeSecurityGroupsRequest describeSecurityGroupsRequest) {
 
         List<String> requestedNames = describeSecurityGroupsRequest.groupNames
+        if (requestedNames.size() == 0) {
+            List<Filter> filters = describeSecurityGroupsRequest.getFilters()
+            Filter groupNameFilter = filters.find { it.getName() == 'group-name' }
+            if (groupNameFilter) {
+                requestedNames = groupNameFilter.getValues()
+            }
+        }
 
         Collection<SecurityGroup> securityGroups = mockSecurityGroups
         if (requestedNames.size() >= 1) {

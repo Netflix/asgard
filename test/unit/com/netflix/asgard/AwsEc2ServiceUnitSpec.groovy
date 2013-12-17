@@ -21,6 +21,7 @@ import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult
+import com.amazonaws.services.ec2.model.Filter
 import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.InstanceState
@@ -175,7 +176,7 @@ and groupName is #groupName""")
 
         then:
         actualSecurityGroup == expectedSecurityGroup
-        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['super_secure'])) >>
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(filters: [new Filter('group-name', ['super_secure'])])) >>
                 new DescribeSecurityGroupsResult(securityGroups: [expectedSecurityGroup])
         1 * mockSecurityGroupCache.put('super_secure', expectedSecurityGroup) >> expectedSecurityGroup
         0 * _
@@ -238,9 +239,9 @@ and groupName is #groupName""")
 
         then:
         null == actualSecurityGroup
-        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['super_secure'])) >> {
-            throw new AmazonServiceException('there is no security group like that')
-        }
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(filters: [new Filter('group-name', ['super_secure'])])) >>
+            new DescribeSecurityGroupsResult(securityGroups: [])
+        1 * mockSecurityGroupCache.get('super_secure')
         1 * mockSecurityGroupCache.put('super_secure', null)
         0 * _
     }
@@ -281,7 +282,7 @@ and groupName is #groupName""")
 
         then:
         null == actualSecurityGroup
-        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['super_secure'])) >> {
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(filters: [new Filter('group-name', ['super_secure'])])) >> {
             AmazonServiceException e = new AmazonServiceException('you cannot ask for a VPC Security Group by name')
             e.errorCode = 'InvalidParameterValue'
             throw e
@@ -290,21 +291,6 @@ and groupName is #groupName""")
         1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >>
                 new DescribeSecurityGroupsResult(securityGroups: [securityGroup])
         1 * mockSecurityGroupCache.put('super_secure', securityGroup)
-        0 * _
-    }
-
-    def 'should not try to find non cached VPC Security Group by name without specific errorCode'() {
-        when:
-        SecurityGroup actualSecurityGroup =  awsEc2Service.getSecurityGroup(userContext, 'super_secure')
-
-        then:
-        null == actualSecurityGroup
-        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['super_secure'])) >> {
-            AmazonServiceException e = new AmazonServiceException('you cannot ask for a VPC Security Group by name')
-            e.errorCode = 'NotInvalidParameterValue'
-            throw e
-        }
-        1 * mockSecurityGroupCache.put('super_secure', null)
         0 * _
     }
 
