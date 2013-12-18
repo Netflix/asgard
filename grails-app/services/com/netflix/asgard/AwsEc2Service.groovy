@@ -103,6 +103,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     static transactional = false
 
     private static Pattern SECURITY_GROUP_ID_PATTERN = ~/sg-[a-f0-9]+/
+    private static final String IP_PROTOCOL = 'tcp'
 
     MultiRegionAwsClient<AmazonEC2> awsClient
     def awsClientService
@@ -605,7 +606,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     private String bestIngressPortsFor(SecurityGroup targetGroup) {
         Map guess = ['7001' : 1]
         targetGroup.ipPermissions.each {
-            if (it.ipProtocol == 'tcp' && it.userIdGroupPairs.size() > 0) {
+            if (it.ipProtocol == IP_PROTOCOL &&  it.userIdGroupPairs.size() > 0) {
                 Integer count = it.userIdGroupPairs.size()
                 String portRange = portString(it.fromPort, it.toPort)
                 guess[portRange] = guess[portRange] ? guess[portRange] + count : count
