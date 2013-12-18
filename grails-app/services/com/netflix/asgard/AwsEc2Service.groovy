@@ -435,8 +435,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         if (name ==~ SECURITY_GROUP_ID_PATTERN) {
             groupId = name
             request.withGroupIds(groupId)
-            SecurityGroup cachedSecurityGroup = caches.allSecurityGroups.by(region).list().find { it.groupId == groupId }
-            groupName = cachedSecurityGroup?.groupName
+            SecurityGroup cachedSecGroup = caches.allSecurityGroups.by(region).list().find { it.groupId == groupId }
+            groupName = cachedSecGroup?.groupName
         } else {
             request.withGroupNames(name)
             groupName = name
@@ -778,7 +778,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         if (!instanceId) { return null }
         def result
         try {
-            result = awsClient.by(userContext.region).describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceId))
+            DescribeInstancesRequest request = new DescribeInstancesRequest(instanceId: instanceId)
+            result = awsClient.by(userContext.region).describeInstances(request)
         }
         catch (AmazonServiceException ase) {
             log.info "Request for instance ${instanceId} failed because ${ase}"
@@ -891,7 +892,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
 
     void associateAddress(UserContext userContext, String publicIp, String instanceId) {
         taskService.runTask(userContext, "Associate ${publicIp} with ${instanceId}", { task ->
-            awsClient.by(userContext.region).associateAddress(new AssociateAddressRequest().withPublicIp(publicIp).withInstanceId(instanceId))
+            AssociateAddressRequest request = new AssociateAddressRequest(publicIp: publicIp, instanceId: instanceId)
+            awsClient.by(userContext.region).associateAddress(request)
         }, Link.to(EntityType.instance, instanceId))
     }
 
