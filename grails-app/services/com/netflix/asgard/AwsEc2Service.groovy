@@ -86,13 +86,11 @@ import com.amazonaws.services.ec2.model.Vpc
 import com.google.common.collect.HashMultiset
 import com.google.common.collect.Lists
 import com.google.common.collect.Multiset
-import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.SecurityGroupOption
 import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.ZoneAvailability
-import com.netflix.frigga.ami.AppVersion
 import groovyx.gpars.GParsExecutorsPool
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -754,24 +752,6 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         }
         List<Instance> instances = getInstanceReservation(userContext, instanceId)?.instances
         instances ? instances[0] : null
-    }
-
-    Multiset<AppVersion> getCountedAppVersions(UserContext userContext) {
-        Map<String, Image> imageIdsToImages = caches.allImages.by(userContext.region).unmodifiable()
-        getCountedAppVersionsForInstancesAndImages(getInstances(userContext), imageIdsToImages)
-    }
-
-    private Multiset<AppVersion> getCountedAppVersionsForInstancesAndImages(Collection<Instance> instances,
-            Map<String, Image> images) {
-        Multiset<AppVersion> appVersions = TreeMultiset.create()
-        instances.each { Instance instance ->
-            Image image = images.get(instance.imageId)
-            AppVersion appVersion = image?.parsedAppVersion
-            if (appVersion) {
-                appVersions.add(appVersion)
-            }
-        }
-        appVersions
     }
 
     Reservation getInstanceReservation(UserContext userContext, String instanceId) {
