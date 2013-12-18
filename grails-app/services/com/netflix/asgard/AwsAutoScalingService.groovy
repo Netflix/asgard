@@ -936,7 +936,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     private void ensureUserDataIsDecodedAndTruncated(LaunchConfiguration launchConfiguration) {
         ensureUserDataIsDecoded(launchConfiguration)
-        String userData = launchConfiguration.userData
+        String userData = userData!=null?launchConfiguration.userData:""
         int maxLength = configService.cachedUserDataMaxLength
         if (userData.length() > maxLength) {
             launchConfiguration.userData = userData.substring(0, maxLength)
