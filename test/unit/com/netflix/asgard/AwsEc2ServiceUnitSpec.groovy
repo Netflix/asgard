@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
@@ -48,6 +49,8 @@ class AwsEc2ServiceUnitSpec extends Specification {
     CachedMap mockInstanceCache
     CachedMap mockReservationCache
     AwsEc2Service awsEc2Service
+    ConfigService configService
+    TaskService taskService
 
     def setup() {
         userContext = UserContext.auto()
@@ -60,13 +63,15 @@ class AwsEc2ServiceUnitSpec extends Specification {
                 (EntityType.instance): mockInstanceCache,
                 (EntityType.reservation): mockReservationCache,
         ]))
-        TaskService taskService = new TaskService() {
-            def runTask(UserContext userContext, String name, Closure work, Link link = null) {
+        taskService = Spy(TaskService) {
+            runTask(_, _, _, _) >> {
+                Closure work = it[2]
                 work(new Task())
             }
         }
+        configService = Mock(ConfigService)
         awsEc2Service = new AwsEc2Service(awsClient: new MultiRegionAwsClient({ mockAmazonEC2 }), caches: caches,
-                taskService: taskService)
+                configService: configService, taskService: taskService)
     }
 
     @Unroll("""getInstancesWithSecurityGroup should return #instanceIds when groupId is #groupId \
@@ -404,21 +409,22 @@ and groupName is #groupName""")
         1 * mockSecurityGroupCache.list() >> { simulateWarGames() }
     }
 
-    def 'should update security groups'() {
+    def 'should update security group ingress permissions with auth and revoke but only one task run'() {
         List<UserIdGroupPair> userIdGroupPairs = [new UserIdGroupPair(groupId: 'sg-s')]
-        SecurityGroup source = new SecurityGroup(groupName: 'source', groupId: 'sg-s')
-        SecurityGroup target = new SecurityGroup(groupName: 'target', groupId: 'sg-t', ipPermissions: [
-                new IpPermission(fromPort: 1, toPort: 1, userIdGroupPairs: userIdGroupPairs),
-                new IpPermission(fromPort: 2, toPort: 2, userIdGroupPairs: userIdGroupPairs),
+        SecurityGroup source = new SecurityGroup(groupId: 'sg-s')
+        SecurityGroup target = new SecurityGroup(groupId: 'sg-t', ipPermissions: [
+                new IpPermission(ipProtocol: 'tcp', fromPort: 1, toPort: 1, userIdGroupPairs: userIdGroupPairs),
+                new IpPermission(ipProtocol: 'tcp', fromPort: 2, toPort: 2, userIdGroupPairs: userIdGroupPairs),
         ])
 
         when:
         awsEc2Service.updateSecurityGroupPermissions(userContext, target, source, [
-                new IpPermission(fromPort: 2, toPort: 2),
-                new IpPermission(fromPort: 3, toPort: 3),
+                new IpPermission(ipProtocol: 'tcp', fromPort: 2, toPort: 2),
+                new IpPermission(ipProtocol: 'tcp', fromPort: 3, toPort: 3)
         ])
 
         then:
+        1 * configService.getAwsAccountNumber()
         1 * mockAmazonEC2.authorizeSecurityGroupIngress(new AuthorizeSecurityGroupIngressRequest(groupId: 'sg-t',
                 ipPermissions: [
                         new IpPermission(fromPort: 3, toPort: 3, ipProtocol: 'tcp', userIdGroupPairs: userIdGroupPairs),
@@ -429,6 +435,10 @@ and groupName is #groupName""")
                 ]))
         1 * mockAmazonEC2.describeSecurityGroups(_) >> new DescribeSecurityGroupsResult(
                 securityGroups: [new SecurityGroup()])
+        1 * taskService.runTask(_, _, _, _) >> {
+            Closure work = it[2]
+            work(new Task())
+        }
         0 * _
     }
 
