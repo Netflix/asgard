@@ -60,8 +60,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                <g:each var="g" in="${groups}">
-                  <tr>
+                <g:each var="g" in="${groups}" status="i">
+                  <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
                     <td class="checkbox"><g:checkBox name="selectedGroups" value="${g.target}" checked="${g.allowed}"/></td>
                     <td><label for="${g.target}">${g.target}</label></td>
                     <td><input type="text" id="${g.target}" name="${g.target}" value="${g.ports}"/></td>
