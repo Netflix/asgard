@@ -1,3 +1,29 @@
+1.4
+
+Features
+- Route53 interface
+- Instance sub-lists by Eureka application, where available
+- Allow editing SNS Topic MessageRetentionPeriod
+- Update SQS Queue policy automatically when the Queue gets subscribed to an SNS Topic
+- Navigation links between associated SNS Topic and SQS Queue detail screens
+- Verify ELB status for instances during auto deploy ASG health check
+- Expose AWS account attributes at /account/attributes.json
+- Monitor Bucket Type of "none" for applications
+- Show filter on Stack list screen
+
+Infrastructure
+- Many CodeNarc rules required
+- Suppress cookie warnings from remote servers in log
+- Sporadic unit test concurrency-based failure fixed
+- Don't pull in Glisten's transitive dependencies
+- Upgrade to AWS Java SDK 1.6.6
+- Update, harden, and simplify Instance Types metadata system
+- Removed jsoup dependency
+
+Bug Fixes
+- Handle badly formatted Workflow Execution tags gracefully
+
+
 1.3.1
 
 Bug Fixes
