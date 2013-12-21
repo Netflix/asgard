@@ -438,7 +438,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             SecurityGroup cachedSecurityGroup = caches.allSecurityGroups.by(region).list().find { it.groupId == groupId }
             groupName = cachedSecurityGroup?.groupName
         } else {
-            request.withGroupNames(name)
+            request.withFilters(new Filter('group-name', [name]))
             groupName = name
         }
         if (from == From.CACHE) {
@@ -447,18 +447,21 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         SecurityGroup group = null
         try {
             DescribeSecurityGroupsResult result = awsClient.by(region).describeSecurityGroups(request)
-            group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
-            groupName = group?.groupName
+            group = Check.loneOrNone(result.getSecurityGroups(), SecurityGroup)
+            if (group) {
+                groupName = group.groupName
+            }
         } catch (AmazonServiceException e) {
             // Can't find a security group with that request.
-            if (e.errorCode == 'InvalidParameterValue' && !groupId) {
-                // It's likely a VPC security group which we can't reference by name. Maybe it has an ID in the cache.
-                SecurityGroup cachedGroup = caches.allSecurityGroups.by(region).get(groupName)
-                if (cachedGroup) {
-                    request = new DescribeSecurityGroupsRequest(groupIds: [cachedGroup.groupId])
-                    DescribeSecurityGroupsResult result = awsClient.by(region).describeSecurityGroups(request)
-                    group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
-                }
+            group = null
+        }
+        if (!group && !groupId) {
+            // It's likely a VPC security group which we can't reference by name. Maybe it has an ID in the cache.
+            SecurityGroup cachedGroup = caches.allSecurityGroups.by(region).get(groupName)
+            if (cachedGroup) {
+                request = new DescribeSecurityGroupsRequest(groupIds: [cachedGroup.groupId])
+                DescribeSecurityGroupsResult result = awsClient.by(region).describeSecurityGroups(request)
+                group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
             }
         }
         if (groupName) {
