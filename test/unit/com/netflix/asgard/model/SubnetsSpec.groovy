@@ -21,6 +21,7 @@ import com.amazonaws.services.ec2.model.Tag
 import com.google.common.collect.ImmutableSet
 import spock.lang.Specification
 
+@SuppressWarnings(["GroovyAccessibility", "GroovyAssignabilityCheck"])
 class SubnetsSpec extends Specification {
 
     static SubnetData subnet(String id, String zone, String purpose, SubnetTarget target, String vpcId = 'vpc-1') {
@@ -332,6 +333,7 @@ class SubnetsSpec extends Specification {
                 (null): ['us-east-1a', 'us-east-1b'],
         ]
     }
+
     def 'should return zones grouped by purpose including extra specified zones'() {
         subnets = new Subnets([
                 subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
