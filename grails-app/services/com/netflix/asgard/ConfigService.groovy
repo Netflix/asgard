@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.server.Environment
 import com.netflix.asgard.text.TextLinkTemplate
+import java.util.Properties
 
 /**
  * Type-checked configuration access with intelligent defaults.
@@ -67,6 +68,43 @@ class ConfigService {
         grailsApplication.config.email.smtpHost ?: null
     }
 
+	/**
+	 * @return return the Simple Mail Transport Protocol (SMTP) port for connecting to the mail server
+	 */
+	int getSmtpPort() {
+			grailsApplication.config.email.smtpPort ?: 25
+	}
+	
+	/**
+	 * @return the Simple Mail Transport Protocol (SMTP) username that should be used for authenticating with the server
+	 */
+	String getSmtpUsername() {
+			grailsApplication.config.email.smtpUsername ?: null
+	}
+	
+	/**
+	 * @return the Simple Mail Transport Protocol (SMTP) password that should be used for authenticating with the server
+	 */
+	String getSmtpPassword() {
+			grailsApplication.config.email.smtpPassword ?: null
+	}
+
+	/**
+	 * @return JavaMail properties required for enabling SMTP over SSL
+	 */
+	java.util.Properties getJavaMailProperties() {
+			
+			java.util.Properties javaMailProperties = new java.util.Properties()
+			
+			if (grailsApplication.config.email.smtpSslEnabled) {
+					javaMailProperties.put("mail.smtps.auth", "true")
+					javaMailProperties.put("mail.smtp.ssl.enable", "true")
+					javaMailProperties.put("mail.transport.protocol", "smtps")
+			}
+			
+			return javaMailProperties
+	}
+	
     /**
      * @return the "from" address for sending user emails
      */

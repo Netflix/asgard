@@ -47,6 +47,18 @@ class EmailerService implements InitializingBean {
         userEmailsEnabled = configService.userEmailEnabled
         mailSender = new JavaMailSenderImpl()
         mailSender.host = configService.smtpHost
+		
+		mailSender.port = configService.smtpPort
+		
+		if (configService.javaMailProperties) {
+			mailSender.javaMailProperties = configService.javaMailProperties
+		}
+
+		if (configService.smtpUsername) {
+			mailSender.username = configService.smtpUsername
+			mailSender.password = configService.smtpPassword
+		}
+		
         mailMessage = new SimpleMailMessage()
     }
 
