@@ -18,7 +18,6 @@ package com.netflix.asgard
 import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.server.Environment
 import com.netflix.asgard.text.TextLinkTemplate
-import java.util.Properties
 
 /**
  * Type-checked configuration access with intelligent defaults.
@@ -92,9 +91,9 @@ class ConfigService {
 	/**
 	 * @return JavaMail properties required for enabling SMTP over SSL
 	 */
-	java.util.Properties getJavaMailProperties() {
+	Properties getJavaMailProperties() {
 			
-			java.util.Properties javaMailProperties = new java.util.Properties()
+			Properties javaMailProperties = new Properties()
 			
 			if (grailsApplication.config.email.smtpSslEnabled) {
 					javaMailProperties.put("mail.smtps.auth", "true")
