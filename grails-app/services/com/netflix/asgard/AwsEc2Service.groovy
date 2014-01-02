@@ -224,8 +224,18 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      * @return list of identifiers for subnets in default VPC, or empty list if no default VPC exists
      */
     List<String> getDefaultVpcSubnetIds(UserContext userContext) {
-        String defaultVpcId = getVpcs(userContext).find { it.isDefault }?.vpcId
+        String defaultVpcId = getDefaultVpcId(userContext)
         defaultVpcId ? getSubnets(userContext).findSubnetsByVpc(defaultVpcId).subnetIds : []
+    }
+
+    /**
+     * Gets the default VPC ID if available.
+     *
+     * @param userContext who, where, why
+     * @return the identifier of the default VPC, if available, or null if there is no default VPC
+     */
+    String getDefaultVpcId(UserContext userContext) {
+        getVpcs(userContext).find { it.isDefault }?.vpcId
     }
 
     private Collection<Vpc> retrieveVpcs(Region region) {
