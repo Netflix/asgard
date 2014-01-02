@@ -41,6 +41,9 @@ class SubnetsSpec extends Specification {
                 subnet('subnet-e9b0a3a4', 'us-east-1a', 'external', SubnetTarget.ELB),
                 subnet('subnet-c1e8b2b1', 'us-east-1b', 'internal', SubnetTarget.EC2),
                 subnet('subnet-c1e8b2b2', 'us-east-1b', 'external', SubnetTarget.EC2),
+                subnet('subnet-a3770585', 'us-east-1a', null, null, 'vpc-456'),
+                subnet('subnet-a3770586', 'us-east-1b', null, null, 'vpc-456'),
+                subnet('subnet-a3770587', 'us-east-1c', null, null, 'vpc-456'),
         ])
     }
 
@@ -72,6 +75,11 @@ class SubnetsSpec extends Specification {
         expect: expectedSubnets == Subnets.from(awsSubnets).allSubnets
     }
 
+    def 'should get subnet IDs'() {
+        expect: subnets.subnetIds == ['subnet-e9b0a3a1', 'subnet-e9b0a3a2', 'subnet-e9b0a3a3', 'subnet-e9b0a3a4',
+                'subnet-c1e8b2b1', 'subnet-c1e8b2b2', 'subnet-a3770585', 'subnet-a3770586', 'subnet-a3770587']
+    }
+
     def 'should find subnet by ID'() {
         SubnetData expectedSubnet = new SubnetData(subnetId: 'subnet-e9b0a3a1', availabilityZone: 'us-east-1a',
                 purpose: 'internal', target: SubnetTarget.EC2, vpcId: 'vpc-1')
@@ -84,6 +92,20 @@ class SubnetsSpec extends Specification {
 
     def 'should fail when finding subnet by null'() {
         when: subnets.findSubnetById(null)
+        then: thrown(NullPointerException)
+    }
+
+    def 'should find subnets by VPC ID'() {
+        Subnets expectedSubnets = Subnets.from([
+                new Subnet(subnetId: 'subnet-a3770585', availabilityZone: 'us-east-1a', vpcId: 'vpc-456'),
+                new Subnet(subnetId: 'subnet-a3770586', availabilityZone: 'us-east-1a', vpcId: 'vpc-456'),
+                new Subnet(subnetId: 'subnet-a3770587', availabilityZone: 'us-east-1a', vpcId: 'vpc-456'),
+        ])
+        expect: expectedSubnets == subnets.findSubnetsByVpc('vpc-456')
+    }
+
+    def 'should fail when finding subnets by null VPC ID'() {
+        when: subnets.findSubnetsByVpc(null)
         then: thrown(NullPointerException)
     }
 

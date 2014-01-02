@@ -32,6 +32,7 @@ import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Tag
 import com.amazonaws.services.ec2.model.UserIdGroupPair
+import com.amazonaws.services.ec2.model.Vpc
 import com.google.common.collect.ImmutableList
 import com.netflix.asgard.model.SecurityGroupOption
 import com.netflix.asgard.model.SubnetData
@@ -44,6 +45,8 @@ class AwsEc2ServiceUnitSpec extends Specification {
 
     UserContext userContext
     AmazonEC2 mockAmazonEC2
+    CachedMap mockVpcCache
+    CachedMap mockSubnetCache
     CachedMap mockSecurityGroupCache
     CachedMap mockInstanceCache
     CachedMap mockReservationCache
@@ -52,10 +55,14 @@ class AwsEc2ServiceUnitSpec extends Specification {
     def setup() {
         userContext = UserContext.auto()
         mockAmazonEC2 = Mock(AmazonEC2)
+        mockVpcCache = Mock(CachedMap)
+        mockSubnetCache = Mock(CachedMap)
         mockSecurityGroupCache = Mock(CachedMap)
         mockInstanceCache = Mock(CachedMap)
         mockReservationCache = Mock(CachedMap)
         Caches caches = new Caches(new MockCachedMapBuilder([
+                (EntityType.vpc): mockVpcCache,
+                (EntityType.subnet): mockSubnetCache,
                 (EntityType.security): mockSecurityGroupCache,
                 (EntityType.instance): mockInstanceCache,
                 (EntityType.reservation): mockReservationCache,
@@ -430,5 +437,32 @@ and groupName is #groupName""")
         1 * mockAmazonEC2.describeSecurityGroups(_) >> new DescribeSecurityGroupsResult(
                 securityGroups: [new SecurityGroup()])
         0 * _
+    }
+
+    def 'should get subnet IDs for default VPC'() {
+
+        when:
+        List<String> subnetIds = awsEc2Service.getDefaultVpcSubnetIds(UserContext.auto())
+
+        then:
+        subnetIds == ['subnet-luke', 'subnet-han']
+        1 * mockVpcCache.list() >> [new Vpc(vpcId: 'vpc-123'), new Vpc(vpcId: 'vpc-789', isDefault: true)]
+        1 * mockSubnetCache.list() >> [
+                new Subnet(subnetId: 'subnet-luke', vpcId: 'vpc-789'),
+                new Subnet(subnetId: 'subnet-han', vpcId: 'vpc-789'),
+                new Subnet(subnetId: 'subnet-vader', vpcId: 'vpc-123'),
+                new Subnet(subnetId: 'subnet-palpatine', vpcId: 'vpc-123')
+        ]
+    }
+
+    def 'should get zero subnet IDs for default VPC if no default VPC exists'() {
+
+        when:
+        List<String> subnetIds = awsEc2Service.getDefaultVpcSubnetIds(UserContext.auto())
+
+        then:
+        subnetIds == []
+        1 * mockVpcCache.list() >> [new Vpc(vpcId: 'vpc-123')]
+        1 * mockSubnetCache.list() >> [new Subnet(subnetId: 'subnet-luke', vpcId: 'vpc-123')]
     }
 }

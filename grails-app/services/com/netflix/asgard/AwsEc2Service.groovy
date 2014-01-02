@@ -215,6 +215,19 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         Subnets.from(caches.allSubnets.by(userContext.region).list())
     }
 
+    /**
+     * Gets all the subnet ID strings for the subnets in the default VPC of the current account-region. If the
+     * account-region predates VPC then it will not have a default VPC, in which case this method will return an empty
+     * list. It is not possible to have a default VPC with zero subnets.
+     *
+     * @param userContext who, where, why
+     * @return list of identifiers for subnets in default VPC, or empty list if no default VPC exists
+     */
+    List<String> getDefaultVpcSubnetIds(UserContext userContext) {
+        String defaultVpcId = getVpcs(userContext).find { it.isDefault }?.vpcId
+        defaultVpcId ? getSubnets(userContext).findSubnetsByVpc(defaultVpcId).subnetIds : []
+    }
+
     private Collection<Vpc> retrieveVpcs(Region region) {
         awsClient.by(region).describeVpcs().vpcs
     }

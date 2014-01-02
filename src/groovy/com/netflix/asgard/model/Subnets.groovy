@@ -47,6 +47,15 @@ import groovy.transform.Canonical
     }
 
     /**
+     * Gets the identifiers of all the subnets in this set.
+     *
+     * @return the subnet ID strings
+     */
+    List<String> getSubnetIds() {
+        allSubnets*.subnetId
+    }
+
+    /**
      * Simply find a subnet based on its ID.
      *
      * @param id of the subnet
@@ -55,6 +64,17 @@ import groovy.transform.Canonical
     SubnetData findSubnetById(String id) {
         Check.notNull(id, String)
         allSubnets.find { it.subnetId == id }
+    }
+
+    /**
+     * Finds all subnets in a given VPC.
+     *
+     * @param vpcId id of the VPC the subnet belongs to
+     * @return wrapped set of SubnetData representations of subnets associated with the specified VPC
+     */
+    Subnets findSubnetsByVpc(String vpcId) {
+        Check.notNull(vpcId, String)
+        new Subnets(allSubnets.findAll { it.vpcId == vpcId })
     }
 
     /**
