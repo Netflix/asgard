@@ -212,7 +212,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      * @return a wrapper for querying subnets
      */
     Subnets getSubnets(UserContext userContext) {
-        Subnets.from(caches.allSubnets.by(userContext.region).list())
+        Subnets.from(caches.allSubnets.by(userContext.region).list(), getDefaultVpcId(userContext))
     }
 
     /**
