@@ -106,7 +106,6 @@ class LoadBalancerController {
         Collection<String> selectedZones = awsEc2Service.preselectedZoneNames(availabilityZones,
                 Requests.ensureList(params.selectedZones))
         Subnets subnets = awsEc2Service.getSubnets(userContext)
-        Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
         [
             applications: applicationService.getRegisteredApplicationsForLoadBalancer(userContext),
             stacks: stackService.getStacks(userContext),
@@ -114,8 +113,8 @@ class LoadBalancerController {
             subnetPurposes: subnets.getPurposesForZones(availabilityZones*.zoneName, SubnetTarget.ELB).sort(),
             zonesGroupedByPurpose: subnets.groupZonesByPurpose(availabilityZones*.zoneName, SubnetTarget.ELB),
             selectedZones: selectedZones,
-            purposeToVpcId: purposeToVpcId,
-            vpcId: purposeToVpcId[params.subnetPurpose],
+            purposeToVpcId: subnets.mapPurposeToVpcId(),
+            vpcId: subnets.getVpcIdForSubnetPurpose(params.subnetPurpose),
             securityGroupsGroupedByVpcId: securityGroupsGroupedByVpcId,
             selectedSecurityGroups: Requests.ensureList(params.selectedSecurityGroups),
         ]

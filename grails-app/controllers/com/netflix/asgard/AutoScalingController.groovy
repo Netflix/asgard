@@ -294,7 +294,7 @@ class AutoScalingController {
             String groupName = Relationships.buildGroupName(params)
             Subnets subnets = awsEc2Service.getSubnets(userContext)
             String subnetPurpose = params.subnetPurpose ?: null
-            String vpcId = subnets.mapPurposeToVpcId()[subnetPurpose] ?: ''
+            String vpcId = subnets.getVpcIdForSubnetPurpose(subnetPurpose) ?: ''
 
             // Auto Scaling Group
             Integer minSize = (params.min ?: 0) as Integer

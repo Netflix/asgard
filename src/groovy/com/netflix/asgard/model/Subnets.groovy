@@ -32,7 +32,10 @@ import groovy.transform.Canonical
     /** All of the subnets contained in this object. */
     final private Collection<SubnetData> allSubnets
 
-    private Subnets(Collection<SubnetData> allSubnets) {
+    final private String defaultVpcId
+
+    private Subnets(Collection<SubnetData> allSubnets, String defaultVpcId) {
+        this.defaultVpcId = defaultVpcId
         this.allSubnets = ImmutableSet.copyOf(allSubnets)
     }
 
@@ -42,8 +45,8 @@ import groovy.transform.Canonical
      * @param  subnets the actual AWS Subnets
      * @return a new immutable Subnets based off the subnets
      */
-    public static Subnets from(Collection<Subnet> subnets) {
-        new Subnets(subnets.collect() { SubnetData.from(it) })
+    public static Subnets from(Collection<Subnet> subnets, String defaultVpcId = null) {
+        new Subnets(subnets.collect() { SubnetData.from(it) }, defaultVpcId)
     }
 
     /**
@@ -86,6 +89,11 @@ import groovy.transform.Canonical
      */
     SubnetData coerceLoneOrNoneFromIds(Collection<String> subnetIds) {
         subnetIds ? findSubnetById(subnetIds.iterator().next()?.trim()) : null
+    }
+
+    String getVpcIdForVpcZoneIdentifier(String vpcZoneIdentifier) {
+        List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(vpcZoneIdentifier)
+        coerceLoneOrNoneFromIds(subnetIds)?.vpcId ?: defaultVpcId
     }
 
     /**
@@ -160,6 +168,10 @@ import groovy.transform.Canonical
         Multimaps.index(targetSubnetsWithPurpose, { it.availabilityZone } as Function)
     }
 
+    String getVpcIdForSubnetPurpose(String subnetPurpose) {
+        mapPurposeToVpcId()[subnetPurpose ?: null]
+    }
+
     /**
      * Provides a one to one mapping from a Subnet purpose to its VPC ID. Purposes that span VPCs in the same region
      * are invalid and will be left out of the map.
@@ -171,6 +183,9 @@ import groovy.transform.Canonical
         subnetsGroupedByPurpose.inject([:]) { Map purposeToVpcId, Map.Entry entry ->
             String purpose = entry.key
             if (!purpose) {
+                if (defaultVpcId) {
+                    purposeToVpcId[null] = defaultVpcId
+                }
                 return purposeToVpcId
             }
             List<SubnetData> subnets = entry.value as List
