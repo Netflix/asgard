@@ -20,16 +20,14 @@ import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
-import com.netflix.glisten.LocalWorkflowExecuter
-import com.netflix.glisten.LocalWorkflowOperations
+import com.netflix.glisten.impl.local.LocalWorkflowOperations
 import spock.lang.Specification
 
 class DeploymentWorkflowSpec extends Specification {
 
     DeploymentActivities mockActivities = Mock(DeploymentActivities)
     LocalWorkflowOperations workflowOperations = LocalWorkflowOperations.of(mockActivities)
-    DeploymentWorkflow workflow = new DeploymentWorkflowImpl(workflow: workflowOperations)
-    def workflowExecuter = LocalWorkflowExecuter.makeLocalWorkflowExecuter(workflow, workflowOperations)
+    def workflowExecuter = workflowOperations.getExecuter(DeploymentWorkflowImpl) as DeploymentWorkflow
 
     UserContext userContext = UserContext.auto(Region.US_WEST_2)
 
@@ -101,7 +99,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == ['Waiting 10 minutes before starting deployment.'] +
+        workflowOperations.logHistory == ['Waiting 10 minutes before starting deployment.'] +
                 logForCreatingAsg + logForCanaryScaleUp + logForFullCapacityScaleUp + [
                 "Disabling ASG 'the_seaward-v002'.",
                 "Waiting 90 seconds for clients to stop using instances.",
@@ -135,7 +133,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == ['Waiting 10 minutes before starting deployment.'] +
+        workflowOperations.logHistory == ['Waiting 10 minutes before starting deployment.'] +
                 logForCreatingAsg + logForCanaryScaleUp + [
                 'ASG will be evaluated for up to 60 minutes.',
                 'Canary capacity judgment period for ASG \'the_seaward-v003\' has begun.',
@@ -176,7 +174,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
+        workflowOperations.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
                 "Disabling ASG 'the_seaward-v002'.",
                 "Waiting 90 seconds for clients to stop using instances.",
                 "Deleting ASG 'the_seaward-v002'.",
@@ -203,7 +201,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == logForCreatingAsg + logForCanaryScaleUp + [
+        workflowOperations.logHistory == logForCreatingAsg + logForCanaryScaleUp + [
                 "ASG 'the_seaward-v002' was not disabled. The new ASG is not taking full traffic.",
                 "Deployment was successful."
         ]
@@ -226,7 +224,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == logForCreatingAsg + [
+        workflowOperations.logHistory == logForCreatingAsg + [
                 "Scaling 'the_seaward-v003' to canary capacity (1 instance).",
                 'Waiting up to 30 minutes for 1 instance.',
                 "Rolling back to 'the_seaward-v002'.",
@@ -256,9 +254,10 @@ class DeploymentWorkflowSpec extends Specification {
 
         when:
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        println workflowOperations.scopedTries
 
         then:
-        workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
+        workflowOperations.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
                 "ASG 'the_seaward-v002' was not disabled. The new ASG is not taking full traffic.",
                 "Deployment was successful."
         ]
@@ -284,7 +283,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == logForCreatingAsg + logForCanaryScaleUp + [
+        workflowOperations.logHistory == logForCreatingAsg + logForCanaryScaleUp + [
                 "Rolling back to 'the_seaward-v002'.",
                 'Deployment was rolled back. ASG \'the_seaward-v003\' was not at capacity after 30 minutes.'
         ]
@@ -313,7 +312,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
+        workflowOperations.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
                 "Rolling back to 'the_seaward-v002'.",
                 'Deployment was rolled back. ASG \'the_seaward-v003\' was not at capacity after 40 minutes.'
         ]
@@ -342,7 +341,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == logForCreatingAsg + logForCanaryScaleUp + logForCanaryjudge + [
+        workflowOperations.logHistory == logForCreatingAsg + logForCanaryScaleUp + logForCanaryjudge + [
                 "Awaiting judgment for 'the_seaward-v003'.",
                 "Rolling back to 'the_seaward-v002'.",
                 'Deployment was rolled back. Judge decided ASG \'the_seaward-v003\' was not operational.'
@@ -376,7 +375,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == logForCreatingAsg + logForCanaryScaleUp + logForCanaryjudge +
+        workflowOperations.logHistory == logForCreatingAsg + logForCanaryScaleUp + logForCanaryjudge +
                 ["Awaiting judgment for 'the_seaward-v003'."] + logForFullCapacityScaleUp + [
                 "ASG 'the_seaward-v002' was not disabled. The new ASG is not taking full traffic.",
                 "Deployment was successful."
@@ -405,7 +404,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
+        workflowOperations.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
                 "Full capacity judgment period for ASG 'the_seaward-v003' has begun.",
                 "Awaiting judgment for 'the_seaward-v003'.",
                 "Rolling back to 'the_seaward-v002'.",
@@ -443,7 +442,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
+        workflowOperations.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
                 "Full capacity judgment period for ASG 'the_seaward-v003' has begun.",
                 "Awaiting judgment for 'the_seaward-v003'.",
                 "Disabling ASG 'the_seaward-v002'.",
@@ -479,7 +478,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
+        workflowOperations.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
                 "Disabling ASG 'the_seaward-v002'.",
                 "Waiting 90 seconds for clients to stop using instances.",
                 "Deployment was successful."
@@ -506,7 +505,7 @@ class DeploymentWorkflowSpec extends Specification {
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
 
         then:
-        workflow.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
+        workflowOperations.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
                 "Disabling ASG 'the_seaward-v002'.",
                 "Waiting 90 seconds for clients to stop using instances.",
                 "Full traffic judgment period for ASG 'the_seaward-v003' has begun.",

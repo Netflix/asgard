@@ -20,20 +20,21 @@ import com.amazonaws.services.simpleworkflow.flow.core.Promise
 import com.amazonaws.services.simpleworkflow.flow.interceptors.ExponentialRetryPolicy
 import com.amazonaws.services.simpleworkflow.flow.interceptors.RetryPolicy
 import com.netflix.asgard.DiscoveryService
+import com.netflix.asgard.GlobalSwfWorkflowAttributes
 import com.netflix.asgard.Relationships
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.push.PushException
 import com.netflix.glisten.DoTry
-import com.netflix.glisten.GlobalWorkflowAttributes
-import com.netflix.glisten.SwfWorkflowOperations
 import com.netflix.glisten.WorkflowOperations
+import com.netflix.glisten.WorkflowOperator
+import com.netflix.glisten.impl.swf.SwfWorkflowOperations
 
-class DeploymentWorkflowImpl implements DeploymentWorkflow {
+class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<DeploymentActivities> {
 
-    @Delegate WorkflowOperations<DeploymentActivities> workflow = SwfWorkflowOperations.of(DeploymentActivities,
-            new ActivitySchedulingOptions(taskList: GlobalWorkflowAttributes.taskList))
+    @Delegate WorkflowOperations<DeploymentActivities> workflowOperations = SwfWorkflowOperations.of(
+            DeploymentActivities, new ActivitySchedulingOptions(taskList: GlobalSwfWorkflowAttributes.taskList))
 
     Closure<String> unit = { int count, String unitName ->
         count == 1 ? "1 ${unitName}" : "${count} ${unitName}s" as String

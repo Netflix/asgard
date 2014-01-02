@@ -41,7 +41,7 @@ import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.push.AsgDeletionMode
 import com.netflix.glisten.ActivityOperations
-import com.netflix.glisten.SwfActivityOperations
+import com.netflix.glisten.impl.swf.SwfActivityOperations
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 
 class DeploymentActivitiesImpl implements DeploymentActivities {
