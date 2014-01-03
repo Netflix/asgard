@@ -16,7 +16,6 @@
 package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
