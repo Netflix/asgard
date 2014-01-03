@@ -358,6 +358,7 @@ and groupName is #groupName""")
                 new SubnetData(subnetId: 'subnet-e9b0a3a4', availabilityZone: 'us-east-1a', purpose: 'external',
                         target: SubnetTarget.ELB),
         ]
+        0 * _
     }
 
     private Collection<SecurityGroup> simulateWarGames() {
@@ -388,6 +389,7 @@ and groupName is #groupName""")
                 new SecurityGroupOption('wopr', 'joshua', false, '7001'),
         ]
         1 * mockSecurityGroupCache.list() >> { warGamesSecurityGroups }
+        0 * _
     }
 
     def 'options for source group should include all groups sorted, but only some allowed to be called by source'() {
@@ -409,6 +411,7 @@ and groupName is #groupName""")
                 new SecurityGroupOption('joshua', 'wopr', true, '7101-7102'),
         ]
         1 * mockSecurityGroupCache.list() >> { simulateWarGames() }
+        0 * _
     }
 
     def 'should update security groups'() {
@@ -453,6 +456,7 @@ and groupName is #groupName""")
                 new Subnet(subnetId: 'subnet-vader', vpcId: 'vpc-123'),
                 new Subnet(subnetId: 'subnet-palpatine', vpcId: 'vpc-123')
         ]
+        0 * _
     }
 
     def 'should get zero subnet IDs for default VPC if no default VPC exists'() {
@@ -463,5 +467,6 @@ and groupName is #groupName""")
         then:
         subnetIds == []
         1 * mockVpcCache.list() >> [new Vpc(vpcId: 'vpc-123')]
+        0 * _
     }
 }
