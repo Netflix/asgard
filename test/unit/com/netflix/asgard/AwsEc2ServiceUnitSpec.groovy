@@ -463,6 +463,5 @@ and groupName is #groupName""")
         then:
         subnetIds == []
         1 * mockVpcCache.list() >> [new Vpc(vpcId: 'vpc-123')]
-        1 * mockSubnetCache.list() >> [new Subnet(subnetId: 'subnet-luke', vpcId: 'vpc-123')]
     }
 }
