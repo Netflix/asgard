@@ -215,7 +215,8 @@ class LoadBalancerController {
         LoadBalancerDescription lb = awsLoadBalancerService.getLoadBalancer(userContext, name)
 
         List<String> zoneList = Requests.ensureList(params.selectedZones)
-        if (lb.subnets) {
+        List<String> defaultVpcSubnetIds = awsEc2Service.getDefaultVpcSubnetIds(userContext)
+        if (lb.subnets.any { !(it in defaultVpcSubnetIds) }) {
             updateLbSubnets(userContext, name, zoneList, lb.subnets)
         } else {
             updateLbZones(userContext, name, zoneList, lb.availabilityZones)
