@@ -20,16 +20,20 @@ import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing
 import com.amazonaws.services.elasticloadbalancing.model.AttachLoadBalancerToSubnetsRequest
+import com.amazonaws.services.elasticloadbalancing.model.CreateLoadBalancerListenersRequest
+import com.amazonaws.services.elasticloadbalancing.model.DeleteLoadBalancerListenersRequest
 import com.amazonaws.services.elasticloadbalancing.model.DescribeInstanceHealthResult
 import com.amazonaws.services.elasticloadbalancing.model.DescribeLoadBalancersRequest
 import com.amazonaws.services.elasticloadbalancing.model.DescribeLoadBalancersResult
 import com.amazonaws.services.elasticloadbalancing.model.DetachLoadBalancerFromSubnetsRequest
 import com.amazonaws.services.elasticloadbalancing.model.InstanceState
+import com.amazonaws.services.elasticloadbalancing.model.Listener
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.netflix.asgard.model.InstanceStateData
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class AwsLoadBalancerServiceUnitSpec extends Specification {
 
     UserContext userContext
@@ -42,7 +46,8 @@ class AwsLoadBalancerServiceUnitSpec extends Specification {
         mockAmazonElasticLoadBalancing = Mock(AmazonElasticLoadBalancing)
         MultiRegionAwsClient awsClient = new MultiRegionAwsClient({ mockAmazonElasticLoadBalancing })
         TaskService taskService = new TaskService() {
-            def runTask(UserContext userContext, String name, Closure work, Link link = null) {
+            def runTask(UserContext userContext, String name, Closure work, Link link = null,
+                        Task existingTask = null) {
                 work(new Task())
             }
         }
@@ -120,6 +125,30 @@ class AwsLoadBalancerServiceUnitSpec extends Specification {
                 [instanceId: 'i-87654321', state: 'OutOfService', reasonCode: 'Instance', description: unhealthy,
                         availabilityZone: 'us-east-1b', autoScalingGroupName: 'autocomplete-v105']
         ].collect { new InstanceStateData(it) }
+    }
+
+    def 'should add listener'() {
+
+        List<Listener> listeners = [new Listener(protocol: 'http', loadBalancerPort: 80, instancePort: 7001)]
+
+        when:
+        awsLoadBalancerService.addListeners(UserContext.auto(), 'app--frontend', listeners)
+
+        then:
+        1 * mockAmazonElasticLoadBalancing.createLoadBalancerListeners(
+                new CreateLoadBalancerListenersRequest('app--frontend', listeners))
+        0 * _
+    }
+
+    def 'should remove listener'() {
+
+        when:
+        awsLoadBalancerService.removeListeners(UserContext.auto(), 'app--frontend', [80])
+
+        then:
+        1 * mockAmazonElasticLoadBalancing.deleteLoadBalancerListeners(
+                new DeleteLoadBalancerListenersRequest('app--frontend', [80]))
+        0 * _
     }
 
     def 'should update subnets'() {

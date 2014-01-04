@@ -30,12 +30,12 @@ import groovy.transform.Canonical
  */
 @Canonical class Subnets {
     /** All of the subnets contained in this object. */
-    final private Collection<SubnetData> allSubnets
+    final Collection<SubnetData> allSubnets
 
     /** The identifier of the default VPC of the account-region, if available. */
-    final private String defaultVpcId
+    final String defaultVpcId
 
-    private Subnets(Collection<SubnetData> allSubnets, String defaultVpcId) {
+    private Subnets(Collection<SubnetData> allSubnets, String defaultVpcId = null) {
         this.defaultVpcId = defaultVpcId
         this.allSubnets = ImmutableSet.copyOf(allSubnets)
     }
