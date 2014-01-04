@@ -32,6 +32,7 @@ import groovy.transform.Canonical
     /** All of the subnets contained in this object. */
     final private Collection<SubnetData> allSubnets
 
+    /** The identifier of the default VPC of the account-region, if available. */
     final private String defaultVpcId
 
     private Subnets(Collection<SubnetData> allSubnets, String defaultVpcId) {
@@ -40,9 +41,10 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Construct Subnets from AWS Subnets
+     * Constructs Subnets from AWS Subnets.
      *
-     * @param  subnets the actual AWS Subnets
+     * @param subnets the actual AWS Subnets
+     * @param defaultVpcId the identifier of the default VPC, if available
      * @return a new immutable Subnets based off the subnets
      */
     public static Subnets from(Collection<Subnet> subnets, String defaultVpcId = null) {
@@ -91,6 +93,13 @@ import groovy.transform.Canonical
         subnetIds ? findSubnetById(subnetIds.iterator().next()?.trim()) : null
     }
 
+    /**
+     * Finds the identifier of the VPC indicated by the specified VPC Zone Identifier string.
+     *
+     * @param vpcZoneIdentifier the comma-delimited list of subnet IDs used in an ASG field as a roundabout way of
+     *      indicating which VPC where the ASG launches instances
+     * @return the identifier of the VPC where the subnets exist if available, or the default VPC if available, or null
+     */
     String getVpcIdForVpcZoneIdentifier(String vpcZoneIdentifier) {
         List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(vpcZoneIdentifier)
         coerceLoneOrNoneFromIds(subnetIds)?.vpcId ?: defaultVpcId
@@ -168,6 +177,14 @@ import groovy.transform.Canonical
         Multimaps.index(targetSubnetsWithPurpose, { it.availabilityZone } as Function)
     }
 
+    /**
+     * Finds a matching VPC identifier for the specified purpose, or null if there is no VPC ID match for that purpose.
+     * If the purpose is null or an empty string, this method looks for default VPC ID if available.
+     *
+     * @param subnetPurpose the name of the purpose of the VPC
+     * @return the identifier of the VPC that has the specified purpose, or the ID of the default VPC if the purpose
+     *          specified is null or an empty string, or null if no matching VPC exists
+     */
     String getVpcIdForSubnetPurpose(String subnetPurpose) {
         mapPurposeToVpcId()[subnetPurpose ?: null]
     }
