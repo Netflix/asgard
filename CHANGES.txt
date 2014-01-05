@@ -1,3 +1,16 @@
+1.4.1
+
+Bug Fixes
+- Support for updating load balancer in recent AWS region-accounts that have a default VPC
+- Support for creating auto scaling groups with load balancers in recent AWS region-accounts that have a default VPC
+- Only one auth-revoke task with many IP permissions for each security group pair change
+- Zebra-stripe more lists before JavaScript loads
+
+Infrastructure
+- Some code clean up
+- More unit tests
+
+
 1.4
 
 Features
