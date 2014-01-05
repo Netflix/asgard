@@ -21,6 +21,7 @@ import com.amazonaws.services.ec2.model.Tag
 import com.google.common.collect.ImmutableSet
 import spock.lang.Specification
 
+@SuppressWarnings(["GroovyAccessibility", "GroovyAssignabilityCheck"])
 class SubnetsSpec extends Specification {
 
     static SubnetData subnet(String id, String zone, String purpose, SubnetTarget target, String vpcId = 'vpc-1') {
@@ -32,19 +33,26 @@ class SubnetsSpec extends Specification {
     }
 
     Subnets subnets
+    Subnets subnetsForEc2Classic
 
     void setup() {
-        subnets = new Subnets([
-                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
-                subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2),
-                subnet('subnet-e9b0a3a3', 'us-east-1a', 'internal', SubnetTarget.ELB),
-                subnet('subnet-e9b0a3a4', 'us-east-1a', 'external', SubnetTarget.ELB),
-                subnet('subnet-c1e8b2b1', 'us-east-1b', 'internal', SubnetTarget.EC2),
-                subnet('subnet-c1e8b2b2', 'us-east-1b', 'external', SubnetTarget.EC2),
-                subnet('subnet-a3770585', 'us-east-1a', null, null, 'vpc-456'),
-                subnet('subnet-a3770586', 'us-east-1b', null, null, 'vpc-456'),
-                subnet('subnet-a3770587', 'us-east-1c', null, null, 'vpc-456'),
-        ])
+
+        List<SubnetData> subnetDatasForEc2Classic = [
+                subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2, 'vpc-abcd'),
+                subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2, 'vpc-feed'),
+                subnet('subnet-e9b0a3a3', 'us-east-1a', 'internal', SubnetTarget.ELB, 'vpc-abcd'),
+                subnet('subnet-e9b0a3a4', 'us-east-1a', 'external', SubnetTarget.ELB, 'vpc-feed'),
+                subnet('subnet-c1e8b2b1', 'us-east-1b', 'internal', SubnetTarget.EC2, 'vpc-abcd'),
+                subnet('subnet-c1e8b2b2', 'us-east-1b', 'external', SubnetTarget.EC2, 'vpc-feed'),
+        ]
+        subnetsForEc2Classic = new Subnets(subnetDatasForEc2Classic)
+
+        List<SubnetData> subnetDatas = subnetDatasForEc2Classic + [
+                subnet('subnet-a3770585', 'us-east-1a', null, null, 'vpc-def'),
+                subnet('subnet-a3770586', 'us-east-1b', null, null, 'vpc-def'),
+                subnet('subnet-a3770587', 'us-east-1c', null, null, 'vpc-def'),
+        ]
+        subnets = new Subnets(subnetDatas, 'vpc-def')
     }
 
     def 'should create Subnets from AWS objects'() {
@@ -82,7 +90,7 @@ class SubnetsSpec extends Specification {
 
     def 'should find subnet by ID'() {
         SubnetData expectedSubnet = new SubnetData(subnetId: 'subnet-e9b0a3a1', availabilityZone: 'us-east-1a',
-                purpose: 'internal', target: SubnetTarget.EC2, vpcId: 'vpc-1')
+                purpose: 'internal', target: SubnetTarget.EC2, vpcId: 'vpc-abcd')
         expect: expectedSubnet == subnets.findSubnetById('subnet-e9b0a3a1')
     }
 
@@ -97,16 +105,57 @@ class SubnetsSpec extends Specification {
 
     def 'should find subnets by VPC ID'() {
         Subnets expectedSubnets = Subnets.from([
-                new Subnet(subnetId: 'subnet-a3770585', availabilityZone: 'us-east-1a', vpcId: 'vpc-456'),
-                new Subnet(subnetId: 'subnet-a3770586', availabilityZone: 'us-east-1a', vpcId: 'vpc-456'),
-                new Subnet(subnetId: 'subnet-a3770587', availabilityZone: 'us-east-1a', vpcId: 'vpc-456'),
+                new Subnet(subnetId: 'subnet-a3770585', availabilityZone: 'us-east-1a', vpcId: 'vpc-def'),
+                new Subnet(subnetId: 'subnet-a3770586', availabilityZone: 'us-east-1b', vpcId: 'vpc-def'),
+                new Subnet(subnetId: 'subnet-a3770587', availabilityZone: 'us-east-1c', vpcId: 'vpc-def'),
         ])
-        expect: expectedSubnets == subnets.findSubnetsByVpc('vpc-456')
+
+        expect: expectedSubnets == subnets.findSubnetsByVpc('vpc-def')
     }
 
     def 'should fail when finding subnets by null VPC ID'() {
         when: subnets.findSubnetsByVpc(null)
         then: thrown(NullPointerException)
+    }
+
+    def 'should get purpose from VPC zone identifier string when default VPC exists'() {
+        expect: purpose == subnets.getPurposeFromVpcZoneIdentifier(vpcZoneIdentifier)
+
+        where:
+        vpcZoneIdentifier                 | purpose
+        'subnet-e9b0a3a1,subnet-e9b0a3b1' | 'internal'
+        'subnet-e9b0a3a4'                 | 'external'
+        'subnet-a3770585,subnet-a3770586' | null
+    }
+
+    def 'should get purpose from VPC zone identifier string when default VPC does not exist'() {
+        expect: purpose == subnetsForEc2Classic.getPurposeFromVpcZoneIdentifier(vpcZoneIdentifier)
+
+        where:
+        vpcZoneIdentifier                 | purpose
+        'subnet-e9b0a3a1,subnet-e9b0a3b1' | 'internal'
+        'subnet-e9b0a3a4'                 | 'external'
+        'subnet-a3770585,subnet-a3770586' | null
+    }
+
+    def 'should get VPC ID for VPC zone identifier when default VPC exists'() {
+        expect: vpcId == subnets.getVpcIdForVpcZoneIdentifier(vpcZoneIdentifier)
+
+        where:
+        vpcZoneIdentifier                 | vpcId
+        'subnet-e9b0a3a1,subnet-e9b0a3b1' | 'vpc-abcd'
+        'subnet-e9b0a3a4'                 | 'vpc-feed'
+        'subnet-a3770585,subnet-a3770586' | 'vpc-def'
+    }
+
+    def 'should get VPC ID for VPC zone identifier when default VPC does not exist'() {
+        expect: vpcId == subnetsForEc2Classic.getVpcIdForVpcZoneIdentifier(vpcZoneIdentifier)
+
+        where:
+        vpcZoneIdentifier                 | vpcId
+        'subnet-e9b0a3a1,subnet-e9b0a3b1' | 'vpc-abcd'
+        'subnet-e9b0a3a4'                 | 'vpc-feed'
+        'subnet-a3770585,subnet-a3770586' | null
     }
 
     def 'should return subnets for zones'() {
@@ -332,6 +381,7 @@ class SubnetsSpec extends Specification {
                 (null): ['us-east-1a', 'us-east-1b'],
         ]
     }
+
     def 'should return zones grouped by purpose including extra specified zones'() {
         subnets = new Subnets([
                 subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
@@ -379,14 +429,14 @@ class SubnetsSpec extends Specification {
     }
 
     def 'should return subnet for subnet ID'() {
-        SubnetData expectedSubnet = subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2)
+        SubnetData expectedSubnet = subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2, 'vpc-feed')
 
         expect:
         subnets.coerceLoneOrNoneFromIds(['subnet-e9b0a3a2']) == expectedSubnet
     }
 
     def 'should return subnet for first subnet ID if there are multiple'() {
-        SubnetData expectedSubnet = subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2)
+        SubnetData expectedSubnet = subnet('subnet-e9b0a3a2', 'us-east-1a', 'external', SubnetTarget.EC2, 'vpc-feed')
 
         expect: subnets.coerceLoneOrNoneFromIds(['subnet-e9b0a3a2', 'subnet-e9b0a3a1']) == expectedSubnet
     }
@@ -397,6 +447,28 @@ class SubnetsSpec extends Specification {
 
     def 'should return null if there is no subnet in cache with ID'() {
         expect: null == subnets.coerceLoneOrNoneFromIds(['subnet-deadbeef'])
+    }
+
+    def 'with default VPC, should get the VPC ID for a purpose or get the default VPC ID for empty or null purpose'() {
+        expect: vpcId == subnets.getVpcIdForSubnetPurpose(purpose)
+
+        where:
+        vpcId      | purpose
+        'vpc-feed' | 'external'
+        'vpc-abcd' | 'internal'
+        'vpc-def'  | ''
+        'vpc-def'  | null
+    }
+
+    def 'in EC2 classic, should either get the VPC ID for a subnet purpose or null'() {
+        expect: vpcId == subnetsForEc2Classic.getVpcIdForSubnetPurpose(purpose)
+
+        where:
+        vpcId      | purpose
+        'vpc-feed' | 'external'
+        'vpc-abcd' | 'internal'
+        null       | ''
+        null       | null
     }
 
     def 'should map purpose to VPC ID'() {

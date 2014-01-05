@@ -147,8 +147,7 @@ class PushService {
         Boolean imageListIsShort = images.size() < fullCount
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         List<SecurityGroup> effectiveSecurityGroups = awsEc2Service.getEffectiveSecurityGroups(userContext)
-        List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)
-        String vpcId = subnets.coerceLoneOrNoneFromIds(subnetIds)?.vpcId
+        String vpcId = subnets.getVpcIdForVpcZoneIdentifier(group.VPCZoneIdentifier)
         Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
         String pricing = lc.spotPrice ? InstancePriceType.SPOT.name() : InstancePriceType.ON_DEMAND.name()
         Map<String, Object> result = [

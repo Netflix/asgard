@@ -30,20 +30,25 @@ import groovy.transform.Canonical
  */
 @Canonical class Subnets {
     /** All of the subnets contained in this object. */
-    final private Collection<SubnetData> allSubnets
+    final Collection<SubnetData> allSubnets
 
-    private Subnets(Collection<SubnetData> allSubnets) {
+    /** The identifier of the default VPC of the account-region, if available. */
+    final String defaultVpcId
+
+    private Subnets(Collection<SubnetData> allSubnets, String defaultVpcId = null) {
+        this.defaultVpcId = defaultVpcId
         this.allSubnets = ImmutableSet.copyOf(allSubnets)
     }
 
     /**
-     * Construct Subnets from AWS Subnets
+     * Constructs Subnets from AWS Subnets.
      *
-     * @param  subnets the actual AWS Subnets
+     * @param subnets the actual AWS Subnets
+     * @param defaultVpcId the identifier of the default VPC, if available
      * @return a new immutable Subnets based off the subnets
      */
-    public static Subnets from(Collection<Subnet> subnets) {
-        new Subnets(subnets.collect() { SubnetData.from(it) })
+    public static Subnets from(Collection<Subnet> subnets, String defaultVpcId = null) {
+        new Subnets(subnets.collect() { SubnetData.from(it) }, defaultVpcId)
     }
 
     /**
@@ -56,7 +61,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Simply find a subnet based on its ID.
+     * Simply finds a subnet based on its ID.
      *
      * @param id of the subnet
      * @return the unique subnet with that ID or null
@@ -78,7 +83,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Find the subnet associated with the first Subnet ID. This is useful in cases where the attribute you care about
+     * Finds the subnet associated with the first Subnet ID. This is useful in cases where the attribute you care about
      * is guaranteed to be the same for all subnets.
      *
      * @param  subnetIds Subnet IDs
@@ -89,7 +94,19 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Find the subnet IDs that map to specific zones
+     * Finds the identifier of the VPC indicated by the specified VPC Zone Identifier string.
+     *
+     * @param vpcZoneIdentifier the comma-delimited list of subnet IDs used in an ASG field as a roundabout way of
+     *      indicating which VPC where the ASG launches instances
+     * @return the identifier of the VPC where the subnets exist if available, or the default VPC if available, or null
+     */
+    String getVpcIdForVpcZoneIdentifier(String vpcZoneIdentifier) {
+        List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(vpcZoneIdentifier)
+        coerceLoneOrNoneFromIds(subnetIds)?.vpcId ?: defaultVpcId
+    }
+
+    /**
+     * Finds the subnet IDs that map to specific zones
      *
      * @param  zones the zones in AWS that you want Subnet IDs for
      * @param  purpose only subnets with the specified purpose will be returned
@@ -114,7 +131,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Group zones by subnet purposes they contain.
+     * Groups zones by subnet purposes they contain.
      *
      * @param  allAvailabilityZones complete list of zones to group
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
@@ -136,7 +153,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Find all purposes across all specified zones for the specified target.
+     * Finds all purposes across all specified zones for the specified target.
      *
      * @param  zones the zones in AWS that you want purposes for
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
@@ -161,6 +178,18 @@ import groovy.transform.Canonical
     }
 
     /**
+     * Finds a matching VPC identifier for the specified purpose, or null if there is no VPC ID match for that purpose.
+     * If the purpose is null or an empty string, this method looks for default VPC ID if available.
+     *
+     * @param subnetPurpose the name of the purpose of the VPC
+     * @return the identifier of the VPC that has the specified purpose, or the ID of the default VPC if the purpose
+     *          specified is null or an empty string, or null if no matching VPC exists
+     */
+    String getVpcIdForSubnetPurpose(String subnetPurpose) {
+        mapPurposeToVpcId()[subnetPurpose ?: null]
+    }
+
+    /**
      * Provides a one to one mapping from a Subnet purpose to its VPC ID. Purposes that span VPCs in the same region
      * are invalid and will be left out of the map.
      *
@@ -171,6 +200,9 @@ import groovy.transform.Canonical
         subnetsGroupedByPurpose.inject([:]) { Map purposeToVpcId, Map.Entry entry ->
             String purpose = entry.key
             if (!purpose) {
+                if (defaultVpcId) {
+                    purposeToVpcId[null] = defaultVpcId
+                }
                 return purposeToVpcId
             }
             List<SubnetData> subnets = entry.value as List
@@ -185,7 +217,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Construct a new VPC Zone Identifier based on an existing VPC Zone Identifier and a list of zones.
+     * Constructs a new VPC Zone Identifier based on an existing VPC Zone Identifier and a list of zones.
      * A VPC Zone Identifier is really just a comma delimited list of subnet IDs.
      * I'm not happy that this method has to exist. It's just a wrapper around other methods that operate on a cleaner
      * abstraction without knowledge of the unfortunate structure of VPC Zone Identifier.
@@ -204,7 +236,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Figure out the subnet purpose given a VPC zone identifier.
+     * Figures out the subnet purpose given a VPC zone identifier.
      *
      * @param  vpcZoneIdentifier is used to derive a subnet purpose from
      * @return the subnet purpose indicated by the vpcZoneIdentifier
@@ -216,7 +248,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Construct a new VPC Zone Identifier based on a subnet purpose and a list of zones.
+     * Constructs a new VPC Zone Identifier based on a subnet purpose and a list of zones.
      *
      * @param  purpose is used to derive a subnet purpose from
      * @param  zones which the new VPC Zone Identifier will contain

@@ -41,6 +41,7 @@ import com.netflix.asgard.model.ZoneAvailability
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class AwsEc2ServiceUnitSpec extends Specification {
 
     UserContext userContext
@@ -458,7 +459,7 @@ and groupName is #groupName""")
 
         then:
         subnetIds == ['subnet-luke', 'subnet-han']
-        1 * mockVpcCache.list() >> [new Vpc(vpcId: 'vpc-123'), new Vpc(vpcId: 'vpc-789', isDefault: true)]
+        2 * mockVpcCache.list() >> [new Vpc(vpcId: 'vpc-123'), new Vpc(vpcId: 'vpc-789', isDefault: true)]
         1 * mockSubnetCache.list() >> [
                 new Subnet(subnetId: 'subnet-luke', vpcId: 'vpc-789'),
                 new Subnet(subnetId: 'subnet-han', vpcId: 'vpc-789'),
