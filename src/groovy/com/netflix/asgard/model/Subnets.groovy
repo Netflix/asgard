@@ -56,7 +56,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Simply find a subnet based on its ID.
+     * Simply finds a subnet based on its ID.
      *
      * @param id of the subnet
      * @return the unique subnet with that ID or null
@@ -78,7 +78,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Find the subnet associated with the first Subnet ID. This is useful in cases where the attribute you care about
+     * Finds the subnet associated with the first Subnet ID. This is useful in cases where the attribute you care about
      * is guaranteed to be the same for all subnets.
      *
      * @param  subnetIds Subnet IDs
@@ -89,7 +89,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Find the subnet IDs that map to specific zones
+     * Finds the subnet IDs that map to specific zones
      *
      * @param  zones the zones in AWS that you want Subnet IDs for
      * @param  purpose only subnets with the specified purpose will be returned
@@ -114,7 +114,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Group zones by subnet purposes they contain.
+     * Groups zones by subnet purposes they contain.
      *
      * @param  allAvailabilityZones complete list of zones to group
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
@@ -136,7 +136,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Find all purposes across all specified zones for the specified target.
+     * Finds all purposes across all specified zones for the specified target.
      *
      * @param  zones the zones in AWS that you want purposes for
      * @param  target is the type of AWS object the subnet applies to (null means any object type)
@@ -185,7 +185,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Construct a new VPC Zone Identifier based on an existing VPC Zone Identifier and a list of zones.
+     * Constructs a new VPC Zone Identifier based on an existing VPC Zone Identifier and a list of zones.
      * A VPC Zone Identifier is really just a comma delimited list of subnet IDs.
      * I'm not happy that this method has to exist. It's just a wrapper around other methods that operate on a cleaner
      * abstraction without knowledge of the unfortunate structure of VPC Zone Identifier.
@@ -204,7 +204,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Figure out the subnet purpose given a VPC zone identifier.
+     * Figures out the subnet purpose given a VPC zone identifier.
      *
      * @param  vpcZoneIdentifier is used to derive a subnet purpose from
      * @return the subnet purpose indicated by the vpcZoneIdentifier
@@ -216,7 +216,7 @@ import groovy.transform.Canonical
     }
 
     /**
-     * Construct a new VPC Zone Identifier based on a subnet purpose and a list of zones.
+     * Constructs a new VPC Zone Identifier based on a subnet purpose and a list of zones.
      *
      * @param  purpose is used to derive a subnet purpose from
      * @param  zones which the new VPC Zone Identifier will contain
