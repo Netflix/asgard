@@ -27,7 +27,7 @@ class DeploymentWorkflowSpec extends Specification {
 
     DeploymentActivities mockActivities = Mock(DeploymentActivities)
     LocalWorkflowOperations workflowOperations = LocalWorkflowOperations.of(mockActivities)
-    def workflowExecuter = workflowOperations.getExecuter(DeploymentWorkflowImpl) as DeploymentWorkflow
+    def workflowExecuter = workflowOperations.getExecuter(DeploymentWorkflowImpl).&deploy as DeploymentWorkflow
 
     UserContext userContext = UserContext.auto(Region.US_WEST_2)
 
