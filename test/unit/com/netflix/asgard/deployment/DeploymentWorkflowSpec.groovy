@@ -254,7 +254,6 @@ class DeploymentWorkflowSpec extends Specification {
 
         when:
         workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
-        println workflowOperations.scopedTries
 
         then:
         workflowOperations.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
