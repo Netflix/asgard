@@ -824,7 +824,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         if (!instanceId) { return null }
         def result
         try {
-            DescribeInstancesRequest request = new DescribeInstancesRequest(instanceId: instanceId)
+            DescribeInstancesRequest request = new DescribeInstancesRequest(instanceIds: [instanceId])
             result = awsClient.by(userContext.region).describeInstances(request)
         }
         catch (AmazonServiceException ase) {
