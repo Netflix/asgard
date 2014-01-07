@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit
 import org.apache.http.HttpEntity
 import org.apache.http.HttpHost
 import org.apache.http.HttpResponse
+import org.apache.http.NameValuePair
 import org.apache.http.client.HttpClient
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.HttpDelete
@@ -160,6 +161,27 @@ class RestClientService implements InitializingBean {
         } finally {
             // Save memory per http://stackoverflow.com/questions/4999708/httpclient-memory-management
             connectionManager.closeIdleConnections(60, TimeUnit.SECONDS)
+        }
+    }
+
+    /**
+     * Posts to the URI with a Map of name-value pairs.
+     *
+     * @param uriPath the remote destination
+     * @param nameValuePairs the name-value pairs to pass in the post body
+     * @return int the HTTP response code
+     */
+    RestResponse postAsNameValuePairs(String uriPath, Map<String, String> nameValuePairs) {
+        HttpPost httpPost = new HttpPost(uriPath)
+        if (nameValuePairs) {
+            List<NameValuePair> data = nameValuePairs.collect { new BasicNameValuePair(it.key, it.value) }
+            httpPost.setEntity(new UrlEncodedFormEntity(data))
+        }
+        executeAndProcessResponse(httpPost) {
+            logErrors(httpPost, it)
+            int statusCode = it.statusLine.statusCode
+            String content = it.entity.content.getText()
+            new RestResponse(statusCode, content)
         }
     }
 
