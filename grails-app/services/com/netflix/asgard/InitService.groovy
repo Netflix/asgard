@@ -77,7 +77,14 @@ class InitService implements ApplicationContextAware {
      * @return true if all caches have completed their initial load, false otherwise
      */
     boolean cachesFilled() {
-        Collection<Fillable> fillableCaches = caches.properties*.value.findAll { it instanceof Fillable }
+        Map<String, Object> allBlockingCaches = caches.properties
+        // Do not wait on optional caches to fill.
+        // Waiting on an unimportant cache due to AWS issues should not keep all of Asgard from starting.
+        List<String> optionalCacheNames = ['allVolumes']
+        optionalCacheNames.each {
+            allBlockingCaches.remove(it)
+        }
+        Collection<Fillable> fillableCaches = allBlockingCaches*.value.findAll { it instanceof Fillable }
         !fillableCaches.find { !it.filled }
     }
 }
