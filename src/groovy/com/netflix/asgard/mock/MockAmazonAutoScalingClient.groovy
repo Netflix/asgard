@@ -91,7 +91,7 @@ class MockAmazonAutoScalingClient extends AmazonAutoScalingClient {
                     withSuspendedProcesses(it.suspendedProcesses.collect { def suspendedProcess ->
                         new SuspendedProcess().withProcessName(suspendedProcess.processName).
                                 withSuspensionReason(suspendedProcess.suspensionReason)
-                    })
+                    }).withTags(it.tags)
         }
 
     }

@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.autoscaling.model.Tag
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingGroupMixin
@@ -45,12 +46,15 @@ class ClusterControllerSpec extends Specification {
             subnet('subnet-3', 'us-east-1e', 'internal'),
             subnet('subnet-4', 'us-east-1e', 'external'),
     ])
+	
+	
     final AutoScalingGroup asg = new AutoScalingGroup(autoScalingGroupName: 'helloworld-example-v015',
         minSize: 3, desiredCapacity: 5, maxSize: 7, healthCheckGracePeriod: 42, defaultCooldown: 360,
         launchConfigurationName: 'helloworld-lc', healthCheckType: AutoScalingGroupHealthCheckType.EC2,
         instances: [new Instance(instanceId: 'i-6ef9f30e'), new Instance(instanceId: 'i-95fe1df6')],
         availabilityZones: ['us-east-1c'], loadBalancerNames: ['hello-elb'], terminationPolicies: ['hello-tp'],
-        vPCZoneIdentifier: 'subnet-1')
+        vPCZoneIdentifier: 'subnet-1',
+		tags: [new Tag(resourceType:'auto-scaling-group', resourceId:'helloworld-example-v015',key:'test',value:'lastTag')])
     final LaunchConfiguration launchConfiguration = new LaunchConfiguration(imageId: 'lastImageId',
             instanceType: 'lastInstanceType', keyName: 'lastKeyName', securityGroups: ['sg-123', 'sg-456'],
             iamInstanceProfile: 'lastIamProfile', spotPrice: '1.23')
@@ -165,6 +169,7 @@ class ClusterControllerSpec extends Specification {
                 assert vpcZoneIdentifier == 'subnet-1'
                 assert iamInstanceProfile == 'lastIamProfile'
                 assert spotPrice == '1.23'
+				assert tags["value"] == ['lastTag']
             }
             true
         }) >> { args ->
@@ -222,6 +227,7 @@ class ClusterControllerSpec extends Specification {
         controller.awsAutoScalingService.getLaunchConfiguration(_, 'helloworld-lc') >> launchConfiguration
         controller.params.with() {
             name = 'helloworld-example'
+			noOptionalDefaults = 'true'
             selectedSecurityGroups = 'sg-789'
             selectedZones = 'us-east-1e'
             terminationPolicy = 'hello-tp2'
@@ -239,6 +245,7 @@ class ClusterControllerSpec extends Specification {
             keyName = 'newKeyName'
             subnetPurpose = 'external'
             pricing = InstancePriceType.ON_DEMAND.name()
+			tags = [value:[test:'newTag']]
         }
 
         when:
@@ -265,6 +272,7 @@ class ClusterControllerSpec extends Specification {
                 assert vpcZoneIdentifier == 'subnet-4'
                 assert iamInstanceProfile == 'newIamProfile'
                 assert spotPrice == null
+				assert tags["value"] == ['newTag']
             }
             true
         }) >> { args ->

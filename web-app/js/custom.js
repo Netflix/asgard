@@ -1058,6 +1058,23 @@ jQuery(document).ready(function() {
 
     // Auto Scaling Group edit page
     var setUpGroupEditScreen = function() {
+        var normalForms, tagValueInputs, tagNameInputs, formSubmitInterceptor;       
+        normalForms = jQuery('form').has('button[type="submit"]');
+
+        formSubmitInterceptor = function(event) {
+        	tagValueInputs = normalForms.find('input.tagValue');          
+            // Dynamically name tag input
+            tagValueInputs.each(function() {
+                var jInput, name;
+                jInput = jQuery(this);
+                row = jInput.closest('tr')
+                name = row.find('input.tagName').val();                 
+                row.find('input.tagValue').attr('name', 'tags.value.' + name);
+                row.find('input.tagProps').attr('name', 'tags.props.' + name);                
+            });            
+            return true;
+        };
+    	
         var showAndEnableDesiredSize, jDesiredCapacityContainer = jQuery('.desiredCapacityContainer');;
         if (jDesiredCapacityContainer.exists()) {
             showAndEnableDesiredSize = function() {
@@ -1066,6 +1083,88 @@ jQuery(document).ready(function() {
             };
             jQuery(document).on('click', '.enableManualDesiredCapacityOverride', showAndEnableDesiredSize);
         }
+        
+        clearDisable = function(){
+	    	if (normalForms.find('input[type="text"].error').length == 0){
+	    		jQuery('button[type="submit"]').attr('disabled', false);
+	    	}
+        }
+        
+        uniqueName = function(event){             	
+            var current = jQuery(event);
+            
+            tagNameInputs = normalForms.find('input.tagName');          
+            tagNameInputs.each(function() {               
+            	if (jQuery(this).val() == current.val() && jQuery(this).attr('id') != current.attr('id'))
+                {
+                    alert('Tag names must be unique!');
+                    current.addClass('error').focus().parent().yellowFade();
+                    jQuery('button[type="submit"]').attr('disabled', true);
+                    return false;
+                }
+
+            	current.removeClass('error');
+            	clearDisable();
+            });
+        }
+        
+        uniqueValue = function(event){  
+            var current = jQuery(event);            
+            
+            tagValueInputs = normalForms.find('input.tagValue');          
+            tagValueInputs.each(function() {
+            	if (jQuery(this).val() == current.val() && jQuery(this).attr('id') != current.attr('id'))
+                {
+                    alert('Tag values must be unique!');
+                    current.addClass('error').focus().parent().yellowFade();
+                    jQuery('button[type="submit"]').attr('disabled', true);
+                    return false;
+                }
+
+            	current.removeClass('error');
+            	clearDisable();
+            });
+        }
+        
+        addRow = function(){        	 
+            counter = jQuery('#tags tr').length - 1;
+
+            var newRow = jQuery("<tr>");
+            var cols = "";
+
+            cols += '<td><input type="text" id="tags.name.' + counter + '" class="tagName"  maxlength="128" required onchange="uniqueName(jQuery(this))"/></td>';
+            cols += '<td><input type="text" id="tags.value.' + counter + '" class="tagValue" maxlength="256" required onchange="uniqueValue(jQuery(this))"/></td>';
+            cols += '<td><input type="checkbox" class="tagProps" /></td>';
+
+            cols += '<td><input type="button" class="ibtnDel"  value="Delete"></td>';
+            jQuery(newRow).append(cols);
+            if (counter == 9) jQuery('#addrow').attr('disabled', true).prop('value', "You've reached the limit");
+            jQuery('table[id="tags"]').append(newRow);
+            counter++;
+        };
+        
+        delRow = function(){
+        	jQuery(this).closest("tr").remove();
+        	
+        	counter -= 1
+            jQuery('#addrow').attr('disabled', false).prop('value', "Add Tag");        	
+        	
+        	clearDisable();
+        }      
+        
+        jQuery(document).on('click', '#addrow', addRow);
+        jQuery(document).on('click', '.ibtnDel', delRow);
+        
+        normalForms.find('.tagsDel').change(function (){
+        	if(jQuery(this).is(':checked')){
+        		jQuery(this).closest("tr").css({backgroundColor: "#FF0000"});
+        	  }
+        	else {
+        		jQuery(this).closest("tr").css({backgroundColor: ""});
+        	}
+        });             
+        
+        normalForms.submit(formSubmitInterceptor);	
     };
     setUpGroupEditScreen();
 
