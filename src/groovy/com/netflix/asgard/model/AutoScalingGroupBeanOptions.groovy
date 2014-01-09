@@ -97,7 +97,7 @@ import groovy.transform.Canonical
     private static Set<Tag> copyTags(Collection tags) {
         if (tags == null) { return null }
         tags.collect {
-            new Tag(resourceId: it.resourceId, resourceType: it.resourceType, key: it.key, value: it.value)
+            new Tag(resourceId: it.resourceId, resourceType: it.resourceType, key: it.key, value: it.value, propagateAtLaunch: it.propagateAtLaunch)
         } as Set
     }
 

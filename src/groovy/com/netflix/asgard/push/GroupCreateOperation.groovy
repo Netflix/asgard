@@ -67,14 +67,15 @@ class GroupCreateOperation extends AbstractPushOperation {
             task.email = applicationService.getEmailFromApp(options.common.userContext, options.common.appName)
             thisOperation.task = task
             task.log("Group '${options.common.groupName}' will start with 0 instances")
-
+			
             AutoScalingGroup groupTemplate = new AutoScalingGroup().withAutoScalingGroupName(options.common.groupName).
                     withAvailabilityZones(options.availabilityZones).withLoadBalancerNames(options.loadBalancerNames).
                     withMinSize(0).withDesiredCapacity(0).withMaxSize(options.maxSize).
                     withDefaultCooldown(options.defaultCooldown).withHealthCheckType(options.healthCheckType).
                     withHealthCheckGracePeriod(options.healthCheckGracePeriod).
                     withTerminationPolicies(options.terminationPolicies).
-                    withVPCZoneIdentifier(options.vpcZoneIdentifier)
+                    withVPCZoneIdentifier(options.vpcZoneIdentifier).
+					withTags(options.tags)
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(options.common.imageId).
                     withKernelId(options.kernelId).withInstanceType(options.common.instanceType).
                     withKeyName(options.keyName).withRamdiskId(options.ramdiskId).
@@ -98,7 +99,7 @@ ${groupTemplate.loadBalancerNames} and result ${result}"""
             if (result.succeeded()) {
                 // Add scalingPolicies to ASG. In the future this might need to be its own operation for reuse.
                 awsAutoScalingService.createScalingPolicies(options.common.userContext, options.scalingPolicies, task)
-                awsAutoScalingService.createScheduledActions(options.common.userContext, options.scheduledActions, task)
+                awsAutoScalingService.createScheduledActions(options.common.userContext, options.scheduledActions, task)				
 
                 // If the user wanted any instances then start a resize operation.
                 if (options.minSize > 0 || options.desiredCapacity > 0) {
