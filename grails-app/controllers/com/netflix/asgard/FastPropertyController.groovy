@@ -111,7 +111,7 @@ class FastPropertyController {
 
     def save = { FastPropertySaveCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action: 'create', model: [cmd:cmd], params: params)
+            chain(action: 'create', model: [cmd: cmd], params: params)
             return
         }
         UserContext userContext = UserContext.of(request)

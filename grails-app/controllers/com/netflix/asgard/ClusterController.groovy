@@ -75,7 +75,7 @@ class ClusterController {
                 appNames.contains(Relationships.appNameFromGroupName(cluster.name))
             }
         }
-        clusterObjects = clusterObjects.sort{ it.name.toLowerCase() }
+        clusterObjects = clusterObjects.sort { it.name.toLowerCase() }
         withFormat {
             html { [clusters: clusterObjects, appNames: appNames] }
             xml {
@@ -288,7 +288,7 @@ ${lastGroup.loadBalancerNames}"""
 
     def deploy(DeployCommand cmd) {
         if (cmd.hasErrors()) {
-            chain(action: 'prepareDeployment', model: [cmd:cmd], params: params)
+            chain(action: 'prepareDeployment', model: [cmd: cmd], params: params)
             return
         }
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions()

@@ -127,7 +127,7 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
         getDBInstance(userContext, templateDbInstance.DBInstanceIdentifier)
     }
 
-    static List getDBInstanceClasses(){
+    static List getDBInstanceClasses() {
         [SMALL, LARGE, EXTRA_LARGE, DOUBLE_EXTRA_LARGE, QUADRUPLE_EXTRA_LARGE]
     }
 

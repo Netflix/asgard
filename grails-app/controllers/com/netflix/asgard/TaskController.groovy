@@ -24,7 +24,7 @@ class TaskController {
 
     static allowedMethods = [cancel: 'POST']
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         Collection<Task> runningTasks = taskService.getAllRunning()

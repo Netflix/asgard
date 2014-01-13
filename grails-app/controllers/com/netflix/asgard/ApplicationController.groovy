@@ -129,7 +129,7 @@ class ApplicationController {
                 log.debug "In show, name=${app.name} type=${app.type} description=${app.description}"
             }
             List<AutoScalingGroup> groups =
-                    awsAutoScalingService.getAutoScalingGroupsForApp(userContext, name).sort{ it.autoScalingGroupName }
+                    awsAutoScalingService.getAutoScalingGroupsForApp(userContext, name).sort { it.autoScalingGroupName }
             List<String> clusterNames =
                     groups.collect { Relationships.clusterFromGroupName(it.autoScalingGroupName) }.unique()
             request.alertingServiceConfigUrl = configService.alertingServiceConfigUrl

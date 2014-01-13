@@ -104,14 +104,14 @@ class SecurityCreateCommandTests {
 
     @Test
     void testDetailIsValid() {
-        def cmd = validateParams(appName: "abcache", detail:"iphone")
+        def cmd = validateParams(appName: "abcache", detail: "iphone")
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
     @Test
     void testDetailIsInvalid() {
-        def cmd = validateParams(appName: "abcache", detail:"iphone/and/ipad")
+        def cmd = validateParams(appName: "abcache", detail: "iphone/and/ipad")
         assert cmd.hasErrors()
         assert 1 == cmd.errors.errorCount
         assert "The detail must be empty or consist of alphanumeric characters and hyphens" == cmd.errors.detail
@@ -119,8 +119,10 @@ class SecurityCreateCommandTests {
 
     @Test
     void testTotalNameIsTooLong() {
+        String tooLong = "integration-240-usa-iphone-ipad-ios5-even-numbered-days-except-weekends-and-" +
+                "excluding-when-the-moon-is-full"
         def cmd = validateParams(appName: "videometadata",
-                detail:"integration-240-usa-iphone-ipad-ios5-even-numbered-days-except-weekends-and-excluding-when-the-moon-is-full")
+                detail: tooLong)
         assert cmd.hasErrors()
         assert 1 == cmd.errors.errorCount
         assert "The complete name cannot exceed 96 characters" == cmd.errors.appName

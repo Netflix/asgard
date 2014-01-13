@@ -20,7 +20,7 @@ import grails.converters.XML
 
 class IconController {
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     private static final String MID_PATH = 'images/tango/'
 
@@ -36,7 +36,7 @@ class IconController {
         new File(tangoPath).eachDirRecurse { File dir ->
             if (dir.list().size() > 0) {
                 def icons = []
-                dir.eachFile{ file ->
+                dir.eachFile { file ->
                     if (file.name.endsWith(".png")) {
                         icons.push(new Expando(name: file.name, path: makeUri(file, tangoPath)))
                     }

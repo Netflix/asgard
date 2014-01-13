@@ -47,7 +47,7 @@ class ImageController {
 
     static editActions = ['prelaunch']
 
-    def index = { redirect(action: 'list', params:params) }
+    def index = { redirect(action: 'list', params: params) }
 
     def list = {
         UserContext userContext = UserContext.of(request)

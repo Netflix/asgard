@@ -69,7 +69,7 @@ class SnapshotController {
     def create = {
         UserContext userContext = UserContext.of(request)
         def snapshot = awsEc2Service.createSnapshot(userContext, params.volumeId, params.description)
-        redirect(action: 'show', params:[id:snapshot?.snapshotId])
+        redirect(action: 'show', params: [id: snapshot?.snapshotId])
     }
 
     def delete = {
@@ -107,7 +107,7 @@ class SnapshotController {
     def restore = { SnapshotCommand cmd ->
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
-            chain(action:'show', model:[snapshotCommand:cmd])
+            chain(action: 'show', model: [snapshotCommand: cmd])
         } else {
             String snapshotId = EntityType.snapshot.ensurePrefix(params.snapshotId ?: params.id)
             try {
@@ -117,7 +117,7 @@ class SnapshotController {
                     params.zone,
                     snapshotId
                 )
-                redirect(controller:"volume", action:'show', params:[id:volume.volumeId])
+                redirect(controller: "volume", action: 'show', params: [id: volume.volumeId])
             } catch (Exception e) {
                 flash.message = "Could not restore from EBS Snapshot: ${e}"
                 redirect(action: 'show', params:[id:snapshotId])
