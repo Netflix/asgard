@@ -53,7 +53,10 @@ class QueueControllerTests {
         assert humanReadableAttributes['Created Timestamp'] ==~ /2009-12-0(8|9)\ \d{2}:\d{2}:\d{2}\ [A-Z]{3,4}/
         assert humanReadableAttributes['Last Modified Timestamp'] ==~ /2011-07-2(5|6)\ \d{2}:\d{2}:\d{2}\ [A-Z]{3,4}/
         assert '8192 bytes' == humanReadableAttributes['Maximum Message Size']
-        assert humanReadableAttributes['Message Retention Period'] in ['4d', '96h'] // TODO why are these format results different in Jenkins and IntelliJ?
+
+        // TODO why are these format results different in Jenkins and IntelliJ?
+        assert humanReadableAttributes['Message Retention Period'] in ['4d', '96h']
+
         assert 'arn:aws:sqs:us-east-1:179000000000:goofy' == humanReadableAttributes['Queue Arn']
         assert '3600 seconds' == humanReadableAttributes['Visibility Timeout']
     }

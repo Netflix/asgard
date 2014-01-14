@@ -110,7 +110,8 @@ class AlarmControllerSpec extends Specification {
         0 * awsSnsService.getTopic(_, _)
 
         1 * awsAutoScalingService.getScalingPolicy(_, 'nflx_newton_client-v003-17') >> {
-            new ScalingPolicy(policyARN: 'arn:aws:autoscaling:policyArn', autoScalingGroupName: 'nflx_newton_client-v003')
+            new ScalingPolicy(policyARN: 'arn:aws:autoscaling:policyArn',
+                    autoScalingGroupName: 'nflx_newton_client-v003')
         }
         0 * awsAutoScalingService.getScalingPolicy(_, _)
 
@@ -212,7 +213,8 @@ class AlarmControllerSpec extends Specification {
                         alarmName: 'scale-up-alarm-helloworld--scalingtest-v000-CPUUtilization-87',
                         comparisonOperator: 'GreaterThanThreshold', evaluationPeriods: 1, metricName: 'CPUUtilization',
                         namespace: 'AWS/EC2', period: 300, statistic: 'Average', threshold: 87, alarmActions: [],
-                        dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG, value: 'helloworld--scalingtest-v000')]
+                        dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG,
+                                value: 'helloworld--scalingtest-v000')]
                 )]
         ) }
 

@@ -78,7 +78,8 @@ class BeanStateSpec extends Specification {
 
     def "should not copy state to immutable fields" () {
         when:
-            final ImmutableBean targetBean = originalState.injectState(new ImmutableBean("def", 7, ["John", "Paul", "Ringo", "George"]))
+            final ImmutableBean targetBean = originalState.injectState(new ImmutableBean("def", 7,
+                    ["John", "Paul", "Ringo", "George"]))
         then:
             "def" == targetBean.string1
             7 == targetBean.int1

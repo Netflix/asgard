@@ -91,7 +91,9 @@ class ScalingPolicyDataSpec extends Specification {
                 evaluationPeriods: 3,
                 threshold: 32,
                 alarmActions: ['arn:aws:sns:us-east-1:149000000000:sE-auto-scale-alert-topic',
-                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
+                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                                'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:' +
+                                'autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
                 dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG, value: 'spectacular-Encoder-v031')],
         )
         final MetricAlarm alarm2 = new MetricAlarm(
@@ -104,12 +106,14 @@ class ScalingPolicyDataSpec extends Specification {
                 evaluationPeriods: 3,
                 threshold: 67,
                 alarmActions: ['arn:aws:sns:us-east-1:149000000000:sE-auto-scale-alert-topic',
-                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
+                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                                'cf25d568-7d55-4fa7-80c8-c6ee6b088a81' +
+                                ':autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
                 dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG, value: 'spectacular-Encoder-v031')],
         )
 
         when:
-        final ScalingPolicyData scalingPolicyForAlarmAndPolicy = ScalingPolicyData.fromPolicyAndAlarms(policy, [alarm1, alarm2])
+        ScalingPolicyData policyWithAlarm = ScalingPolicyData.fromPolicyAndAlarms(policy, [alarm1, alarm2])
 
         then:
         new ScalingPolicyData(
@@ -129,7 +133,9 @@ class ScalingPolicyDataSpec extends Specification {
                             evaluationPeriods: 3,
                             threshold: 32,
                             actionArns: ['arn:aws:sns:us-east-1:149000000000:sE-auto-scale-alert-topic',
-                                    'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
+                                    'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                                            'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/' +
+                                            'realtimerouter:policyName/scale-down-realtimerouter-10-600'],
                             autoScalingGroupName: 'spectacular-Encoder-v031',
                             policyNames: ['scale-down-realtimerouter-10-600'],
                             topicNames: ['sE-auto-scale-alert-topic'],
@@ -145,14 +151,16 @@ class ScalingPolicyDataSpec extends Specification {
                             evaluationPeriods: 3,
                             threshold: 67,
                             actionArns: ['arn:aws:sns:us-east-1:149000000000:sE-auto-scale-alert-topic',
-                                    'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
+                                    'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                                            'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/' +
+                                            'realtimerouter:policyName/scale-down-realtimerouter-10-600'],
                             autoScalingGroupName: 'spectacular-Encoder-v031',
                             policyNames: ['scale-down-realtimerouter-10-600'],
                             topicNames: ['sE-auto-scale-alert-topic'],
                             dimensions: [AutoScalingGroupName: 'spectacular-Encoder-v031']
                     )
             ]
-        ) == scalingPolicyForAlarmAndPolicy
+        ) == policyWithAlarm
 
     }
 

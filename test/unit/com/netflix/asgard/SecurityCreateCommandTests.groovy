@@ -119,8 +119,8 @@ class SecurityCreateCommandTests {
 
     @Test
     void testTotalNameIsTooLong() {
-        def cmd = validateParams(appName: "videometadata",
-                detail:"integration-240-usa-iphone-ipad-ios5-even-numbered-days-except-weekends-and-excluding-when-the-moon-is-full")
+        def cmd = validateParams(appName: "videometadata", detail:
+                "int-240-usa-iphone-ipad-ios5-even-numbered-days-except-weekends-and-excluding-when-the-moon-is-full")
         assert cmd.hasErrors()
         assert 1 == cmd.errors.errorCount
         assert "The complete name cannot exceed 96 characters" == cmd.errors.appName
