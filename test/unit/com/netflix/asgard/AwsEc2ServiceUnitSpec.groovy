@@ -18,6 +18,8 @@ package com.netflix.asgard
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.ec2.model.AuthorizeSecurityGroupIngressRequest
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest
+import com.amazonaws.services.ec2.model.DescribeInstancesResult
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
 import com.amazonaws.services.ec2.model.DescribeSecurityGroupsResult
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult
@@ -26,6 +28,7 @@ import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.InstanceState
 import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.Placement
+import com.amazonaws.services.ec2.model.Reservation
 import com.amazonaws.services.ec2.model.ReservedInstances
 import com.amazonaws.services.ec2.model.RevokeSecurityGroupIngressRequest
 import com.amazonaws.services.ec2.model.SecurityGroup
@@ -128,6 +131,22 @@ and groupName is #groupName""")
 
         then:
         instances*.instanceId.sort() == ['i-grouchy', 'i-papa', 'i-smurfette']
+    }
+
+    def 'should get instance reservation'() {
+
+        DescribeInstancesRequest request = new DescribeInstancesRequest().withInstanceIds('i-deadbeef')
+        Instance instance = new Instance(instanceId: 'i-deadbeef')
+        Reservation expectedRes = new Reservation(instances: [instance])
+
+        when:
+        Reservation resultRes = awsEc2Service.getInstanceReservation(userContext, 'i-deadbeef')
+
+        then:
+        resultRes == expectedRes
+        1 * mockAmazonEC2.describeInstances(request) >> new DescribeInstancesResult(reservations: [expectedRes])
+        1 * mockInstanceCache.put('i-deadbeef', instance)
+        0 * _
     }
 
     def 'zone availabilities should sum, group, and filter reservation counts and instance counts'() {
