@@ -96,7 +96,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
         Promise<Void> asgCreated = waitFor(activities.createLaunchConfigForNextAsg(userContext,
                 nextAsgTemplate, nextLcTemplate)) {
             status "Creating Auto Scaling Group '${asgDeploymentNames.nextAsgName}' initially with 0 instances."
-            waitFor(activities.createNextAsgForCluster(userContext, nextAsgTemplate)) {
+            waitFor(activities.createNextAsgForClusterWithoutInstances(userContext, nextAsgTemplate)) {
                 status 'Copying Scaling Policies and Scheduled Actions.'
                 Promise<Integer> scalingPolicyCount = promiseFor(
                         activities.copyScalingPolicies(userContext, asgDeploymentNames))

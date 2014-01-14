@@ -62,13 +62,13 @@ interface DeploymentActivities {
             LaunchConfigurationBeanOptions launchConfiguration)
 
     /**
-     * Creates the next ASG in the cluster.
+     * Creates the next ASG in the cluster based on the asgOptions but without instances.
      *
      * @param userContext who, where, why
-     * @param autoScalingGroup attributes for the new ASG
+     * @param asgOptions attributes for the new ASG
      * @return name of the ASG
      */
-    String createNextAsgForCluster(UserContext userContext, AutoScalingGroupBeanOptions autoScalingGroup)
+    String createNextAsgForClusterWithoutInstances(UserContext userContext, AutoScalingGroupBeanOptions asgOptions)
 
     /**
      * Copies scaling policies from the previous ASG to the next ASG.

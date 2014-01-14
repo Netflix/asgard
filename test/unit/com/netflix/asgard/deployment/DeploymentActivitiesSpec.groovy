@@ -119,7 +119,7 @@ class DeploymentActivitiesSpec extends Specification {
 
     def 'should create next ASG'() {
         when:
-        deploymentActivities.createNextAsgForCluster(userContext, new AutoScalingGroupBeanOptions(
+        deploymentActivities.createNextAsgForClusterWithoutInstances(userContext, new AutoScalingGroupBeanOptions(
                 autoScalingGroupName: 'rearden_metal_pourer-v002',
                 launchConfigurationName: 'rearden_metal_pourer-20130718090004',
                 minSize: 4, desiredCapacity: 5, maxSize: 6, defaultCooldown: 200, healthCheckGracePeriod: 60,
@@ -130,7 +130,7 @@ class DeploymentActivitiesSpec extends Specification {
             1 * createAutoScalingGroup(_, new AutoScalingGroupBeanOptions(
                     autoScalingGroupName: 'rearden_metal_pourer-v002',
                     launchConfigurationName: 'rearden_metal_pourer-20130718090004',
-                    minSize: 4, desiredCapacity: 5, maxSize: 6, defaultCooldown: 200, healthCheckGracePeriod: 60,
+                    minSize: 0, desiredCapacity: 0, maxSize: 6, defaultCooldown: 200, healthCheckGracePeriod: 60,
                     suspendedProcesses: [AutoScalingProcessType.Launch]
             ), _) >> new AutoScalingGroup(autoScalingGroupName: 'rearden_metal_pourer-v002')
         }

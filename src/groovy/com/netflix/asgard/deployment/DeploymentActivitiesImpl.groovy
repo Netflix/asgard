@@ -94,10 +94,10 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     }
 
     @Override
-    String createNextAsgForCluster(UserContext userContext, AutoScalingGroupBeanOptions autoScalingGroup) {
+    String createNextAsgForClusterWithoutInstances(UserContext userContext, AutoScalingGroupBeanOptions asgOptions) {
         Task task = new Task()
-        AutoScalingGroupBeanOptions autoScalingGroupWithNoInstances = AutoScalingGroupBeanOptions.from(autoScalingGroup)
-        autoScalingGroup.with {
+        AutoScalingGroupBeanOptions autoScalingGroupWithNoInstances = AutoScalingGroupBeanOptions.from(asgOptions)
+        autoScalingGroupWithNoInstances.with {
             minSize = 0
             desiredCapacity = 0
         }
