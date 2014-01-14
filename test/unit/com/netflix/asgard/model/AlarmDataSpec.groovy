@@ -100,7 +100,7 @@ class AlarmDataSpec extends Specification {
             evaluationPeriods: 3,
             threshold: 32,
             actionArns: ['arn:aws:sns:us-east-1:149000000000:sE-auto-scale-alert-topic',
-                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +'' +
+                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
                                 'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:' +
                                 'policyName/scale-down-realtimerouter-10-600'],
             policyNames: ['scale-down-realtimerouter-10-600'],
