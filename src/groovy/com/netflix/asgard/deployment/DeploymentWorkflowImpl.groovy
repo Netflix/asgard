@@ -171,9 +171,9 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
 
     private Promise<Boolean> scaleAsg(UserContext userContext, String asgName,
             int startupLimitMinutes, int min, int capacity, int max, String operationDescription) {
-        status "Scaling '${asgName}' to ${operationDescription} (${unit(capacity, 'instance')})."
+        status "Scaling new ASG to ${operationDescription}. " +
+                "Waiting up to ${unit(startupLimitMinutes, 'minute')} for ${unit(capacity, 'instance')}."
         activities.resizeAsg(userContext, asgName, min, capacity, max)
-        status "Waiting up to ${unit(startupLimitMinutes, 'minute')} for ${unit(capacity, 'instance')}."
         RetryPolicy retryPolicy = new ExponentialRetryPolicy(30L).withBackoffCoefficient(1).
                 withExceptionsToRetry([PushException])
         DoTry<Void> asgIsOperational = doTry {
@@ -209,18 +209,16 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
             String notificationDestination, ProceedPreference continueWithNextStep, String operationDescription) {
         if (continueWithNextStep == ProceedPreference.Yes) { return promiseFor(true) }
         if (continueWithNextStep == ProceedPreference.No) { return promiseFor(false) }
-        if (judgmentPeriodMinutes) {
-            status "ASG will be evaluated for up to ${unit(judgmentPeriodMinutes, 'minute')}."
-        }
-        String judgmentMessage = "${operationDescription.capitalize()} judgment period for ASG '${asgName}' has begun."
+        String judgmentMessage = "ASG will now be evaluated for up to ${unit(judgmentPeriodMinutes, 'minute')}" +
+                " during the ${operationDescription} judgment period."
+        status judgmentMessage
         Promise<Boolean> proceed = promiseFor(activities.askIfDeploymentShouldProceed(notificationDestination,
                     asgName, judgmentMessage))
-        status judgmentMessage
         DoTry<Void> sendNotificationAtJudgmentTimeout = doTry {
             Promise<Void> judgmentTimeout = timer(minutesToSeconds(judgmentPeriodMinutes), 'judgmentTimeout')
             waitFor(judgmentTimeout) {
                 String clusterName = Relationships.clusterFromGroupName(asgName)
-                String subject = "Judgement period for ASG '${asgName}' has ended."
+                String subject = "${operationDescription.capitalize()} judgement period for ASG '${asgName}' has ended."
                 String message = 'Please make a decision to proceed or roll back.'
                 activities.sendNotification(notificationDestination, clusterName, subject, message)
                 Promise.Void()
