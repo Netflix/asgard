@@ -68,20 +68,26 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                 }
             } withCatch { Throwable e ->
                 rollbackCause = e
-                rollback(userContext, asgDeploymentNames, deploymentOptions.notificationDestination, rollbackCause)
-                promiseFor(false)
+                rollback(userContext, asgDeploymentNames)
+                Promise.Void()
             } result
         }
         waitFor(deploymentComplete) {
+            String notificationDestination  = deploymentOptions.notificationDestination
+            AsgDeploymentNames asgDeploymentNames = asgDeploymentNamesPromise.get()
+            String clusterName = Relationships.clusterFromGroupName(asgDeploymentNames.nextAsgName)
+            String deploymentCompleteMessage = 'Deployment was successful.'
+            String subject = "Deployment succeeded for ASG '${asgDeploymentNames.nextAsgName}'."
             if (rollbackCause) {
                 if (rollbackCause.getClass() == PushException) {
-                    status "Deployment was rolled back. ${rollbackCause.message}"
+                    deploymentCompleteMessage = "Deployment was rolled back. ${rollbackCause.message}"
                 } else {
-                    status "Deployment was rolled back due to error: ${rollbackCause}"
+                    deploymentCompleteMessage = "Deployment was rolled back due to error: ${rollbackCause}"
                 }
-            } else {
-                status 'Deployment was successful.'
+                subject = "Deployment failed for ASG '${asgDeploymentNames.nextAsgName}'."
             }
+            activities.sendNotification(notificationDestination, clusterName, subject, deploymentCompleteMessage)
+            status deploymentCompleteMessage
         }
     }
 
@@ -229,20 +235,12 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
             if (it) {
                 promiseFor(true)
             } else {
-                throw new PushException("Judge decided ASG '${asgName}' was not operational.")
+                throw new PushException("Judge decided ASG '${asgName}' was not viable.")
             }
         }
     }
 
-    private void rollback(UserContext userContext, AsgDeploymentNames asgDeploymentNames,
-            String notificationDestination, Throwable rollbackCause) {
-        String action = "Rolling back to '${asgDeploymentNames.previousAsgName}'."
-        status action
-        String clusterName = Relationships.clusterFromGroupName(asgDeploymentNames.nextAsgName)
-        String message = """\
-        Auto Scaling Group '${asgDeploymentNames.nextAsgName}' is ${rollbackCause ? 'not ' : ''}operational.
-        ${rollbackCause.message}""".stripIndent()
-        activities.sendNotification(notificationDestination, clusterName, action, message)
+    private void rollback(UserContext userContext, AsgDeploymentNames asgDeploymentNames) {
         activities.enableAsg(userContext, asgDeploymentNames.previousAsgName)
         activities.disableAsg(userContext, asgDeploymentNames.nextAsgName)
     }
