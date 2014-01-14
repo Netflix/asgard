@@ -87,7 +87,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should execute full deployment'() {
-        workflowOperations.addFiredTimerNames(['delay', 'secondsToWaitAfterEurekaChange'])
+        workflowOperations.addFiredTimerNames(['delay', 'waitAfterEurekaChange'])
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(
                 clusterName: 'the_seaward', delayDurationMinutes: 10, doCanary: true,
                 canaryCapacity: 1, canaryStartUpTimeoutMinutes: 30, canaryJudgmentPeriodMinutes: 60,
@@ -135,11 +135,10 @@ class DeploymentWorkflowSpec extends Specification {
         then:
         workflowOperations.logHistory == ['Waiting 10 minutes before starting deployment.'] +
                 logForCreatingAsg + logForCanaryScaleUp + [
-                'ASG will be evaluated for up to 60 minutes.',
-                'Canary capacity judgment period for ASG \'the_seaward-v003\' has begun.',
-                'Awaiting judgment for \'the_seaward-v003\'.',
+                "ASG will be evaluated for up to 60 minutes.",
+                "Canary capacity judgment period for ASG 'the_seaward-v003' has begun.",
                 "Rolling back to 'the_seaward-v002'.",
-                'Deployment was rolled back. Judge decided ASG \'the_seaward-v003\' was not operational.'
+                "Deployment was rolled back. Judge decided ASG 'the_seaward-v003' was not operational."
         ]
 
         interaction {
@@ -153,17 +152,18 @@ class DeploymentWorkflowSpec extends Specification {
                 "Canary capacity judgment period for ASG 'the_seaward-v003' has begun.") >> false
         then:
         1 * mockActivities.sendNotification('gob@bluth.com', 'the_seaward',
-                'Judgement period for ASG \'the_seaward-v003\' has ended.',
-                'Please make a decision to proceed or roll back.')
+                "Judgement period for ASG 'the_seaward-v003' has ended.",
+                "Please make a decision to proceed or roll back.")
         1 * mockActivities.sendNotification('gob@bluth.com', 'the_seaward',
-                'Rolling back to \'the_seaward-v002\'.',
-                'Auto Scaling Group \'the_seaward-v003\' is not operational.\nJudge decided ASG \'the_seaward-v003\' was not operational.')
+                "Rolling back to 'the_seaward-v002'.",
+                "Auto Scaling Group 'the_seaward-v003' is not operational.\n" +
+                        "Judge decided ASG 'the_seaward-v003' was not operational.")
         then: 1 * mockActivities.enableAsg(userContext, 'the_seaward-v002')
         then: 1 * mockActivities.disableAsg(userContext, 'the_seaward-v003')
     }
 
     def 'should execute deployment without canary or delay'() {
-        workflowOperations.addFiredTimerNames(['secondsToWaitAfterEurekaChange'])
+        workflowOperations.addFiredTimerNames(['waitAfterEurekaChange'])
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 doCanary: false, desiredCapacityStartUpTimeoutMinutes: 40,
                 desiredCapacityJudgmentPeriodMinutes: 120, fullTrafficJudgmentPeriodMinutes: 240,
@@ -228,7 +228,7 @@ class DeploymentWorkflowSpec extends Specification {
                 "Scaling 'the_seaward-v003' to canary capacity (1 instance).",
                 'Waiting up to 30 minutes for 1 instance.',
                 "Rolling back to 'the_seaward-v002'.",
-                'Deployment was rolled back due to error: Something really went wrong!'
+                'Deployment was rolled back due to error: java.lang.IllegalStateException: Something really went wrong!'
         ]
         interaction {
             createAsgInteractions()
@@ -240,8 +240,8 @@ class DeploymentWorkflowSpec extends Specification {
             throw new IllegalStateException('Something really went wrong!')
         }
         then: 1 * mockActivities.sendNotification('gob@bluth.com', 'the_seaward',
-                'Rolling back to \'the_seaward-v002\'.',
-                'Auto Scaling Group \'the_seaward-v003\' is not operational.\nSomething really went wrong!')
+                "Rolling back to 'the_seaward-v002'.",
+                "Auto Scaling Group 'the_seaward-v003' is not operational.\nSomething really went wrong!")
         then: 1 * mockActivities.enableAsg(userContext, 'the_seaward-v002')
         then: 1 * mockActivities.disableAsg(userContext, 'the_seaward-v003')
     }
@@ -284,7 +284,7 @@ class DeploymentWorkflowSpec extends Specification {
         then:
         workflowOperations.logHistory == logForCreatingAsg + logForCanaryScaleUp + [
                 "Rolling back to 'the_seaward-v002'.",
-                'Deployment was rolled back. ASG \'the_seaward-v003\' was not at capacity after 30 minutes.'
+                "Deployment was rolled back. ASG 'the_seaward-v003' was not at capacity after 30 minutes."
         ]
 
         interaction {
@@ -313,7 +313,7 @@ class DeploymentWorkflowSpec extends Specification {
         then:
         workflowOperations.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
                 "Rolling back to 'the_seaward-v002'.",
-                'Deployment was rolled back. ASG \'the_seaward-v003\' was not at capacity after 40 minutes.'
+                "Deployment was rolled back. ASG 'the_seaward-v003' was not at capacity after 40 minutes."
         ]
 
         interaction {
@@ -324,7 +324,7 @@ class DeploymentWorkflowSpec extends Specification {
         then: 1 * mockActivities.resizeAsg(userContext, 'the_seaward-v003', 2, 3, 4)
         then: (1.._) * mockActivities.reasonAsgIsNotOperational(userContext, 'the_seaward-v003', 3) >> 'Not healthy Yet'
         then: 1 * mockActivities.sendNotification('gob@bluth.com', 'the_seaward',
-                "Rolling back to 'the_seaward-v002'.", "Auto Scaling Group \'the_seaward-v003\' is not operational.\n" +
+                "Rolling back to 'the_seaward-v002'.", "Auto Scaling Group 'the_seaward-v003' is not operational.\n" +
                 "ASG 'the_seaward-v003' was not at capacity after 40 minutes.")
         then: 1 * mockActivities.enableAsg(userContext, 'the_seaward-v002')
         then: 1 * mockActivities.disableAsg(userContext, 'the_seaward-v003')
@@ -341,9 +341,8 @@ class DeploymentWorkflowSpec extends Specification {
 
         then:
         workflowOperations.logHistory == logForCreatingAsg + logForCanaryScaleUp + logForCanaryjudge + [
-                "Awaiting judgment for 'the_seaward-v003'.",
                 "Rolling back to 'the_seaward-v002'.",
-                'Deployment was rolled back. Judge decided ASG \'the_seaward-v003\' was not operational.'
+                "Deployment was rolled back. Judge decided ASG 'the_seaward-v003' was not operational."
         ]
 
         interaction {
@@ -356,9 +355,9 @@ class DeploymentWorkflowSpec extends Specification {
         then: 1 * mockActivities.askIfDeploymentShouldProceed('gob@bluth.com', 'the_seaward-v003',
                 "Canary capacity judgment period for ASG 'the_seaward-v003' has begun.") >> false
         then: 1 * mockActivities.sendNotification('gob@bluth.com', 'the_seaward',
-                'Rolling back to \'the_seaward-v002\'.',
-                'Auto Scaling Group \'the_seaward-v003\' is not operational.\n' +
-                'Judge decided ASG \'the_seaward-v003\' was not operational.')
+                "Rolling back to 'the_seaward-v002'.",
+                "Auto Scaling Group 'the_seaward-v003' is not operational.\n" +
+                "Judge decided ASG 'the_seaward-v003' was not operational.")
         then: 1 * mockActivities.enableAsg(userContext, 'the_seaward-v002')
         then: 1 * mockActivities.disableAsg(userContext, 'the_seaward-v003')
     }
@@ -375,7 +374,7 @@ class DeploymentWorkflowSpec extends Specification {
 
         then:
         workflowOperations.logHistory == logForCreatingAsg + logForCanaryScaleUp + logForCanaryjudge +
-                ["Awaiting judgment for 'the_seaward-v003'."] + logForFullCapacityScaleUp + [
+                logForFullCapacityScaleUp + [
                 "ASG 'the_seaward-v002' was not disabled. The new ASG is not taking full traffic.",
                 "Deployment was successful."
         ]
@@ -405,9 +404,8 @@ class DeploymentWorkflowSpec extends Specification {
         then:
         workflowOperations.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
                 "Full capacity judgment period for ASG 'the_seaward-v003' has begun.",
-                "Awaiting judgment for 'the_seaward-v003'.",
                 "Rolling back to 'the_seaward-v002'.",
-                'Deployment was rolled back. Judge decided ASG \'the_seaward-v003\' was not operational.'
+                "Deployment was rolled back. Judge decided ASG 'the_seaward-v003' was not operational."
         ]
 
         interaction {
@@ -420,18 +418,18 @@ class DeploymentWorkflowSpec extends Specification {
         then: 1 * mockActivities.askIfDeploymentShouldProceed('gob@bluth.com', 'the_seaward-v003',
                 "Full capacity judgment period for ASG 'the_seaward-v003' has begun.") >> false
         then: 1 * mockActivities.sendNotification('gob@bluth.com', 'the_seaward',
-                'Judgement period for ASG \'the_seaward-v003\' has ended.',
-                'Please make a decision to proceed or roll back.')
+                "Judgement period for ASG 'the_seaward-v003' has ended.",
+                "Please make a decision to proceed or roll back.")
         then: 1 * mockActivities.sendNotification('gob@bluth.com', 'the_seaward',
-                'Rolling back to \'the_seaward-v002\'.',
-                'Auto Scaling Group \'the_seaward-v003\' is not operational.\n' +
-                        'Judge decided ASG \'the_seaward-v003\' was not operational.')
+                "Rolling back to 'the_seaward-v002'.",
+                "Auto Scaling Group 'the_seaward-v003' is not operational.\n" +
+                        "Judge decided ASG 'the_seaward-v003' was not operational.")
         then: 1 * mockActivities.enableAsg(userContext, 'the_seaward-v002')
         then: 1 * mockActivities.disableAsg(userContext, 'the_seaward-v003')
     }
 
     def 'should continue with full capacity decision to proceed'() {
-        workflowOperations.addFiredTimerNames(['secondsToWaitAfterEurekaChange'])
+        workflowOperations.addFiredTimerNames(['waitAfterEurekaChange'])
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com', doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Ask,
@@ -443,7 +441,6 @@ class DeploymentWorkflowSpec extends Specification {
         then:
         workflowOperations.logHistory == logForCreatingAsg + logForFullCapacityScaleUp + [
                 "Full capacity judgment period for ASG 'the_seaward-v003' has begun.",
-                "Awaiting judgment for 'the_seaward-v003'.",
                 "Disabling ASG 'the_seaward-v002'.",
                 "Waiting 90 seconds for clients to stop using instances.",
                 "Deleting ASG 'the_seaward-v002'.",
@@ -460,14 +457,14 @@ class DeploymentWorkflowSpec extends Specification {
         then: 1 * mockActivities.askIfDeploymentShouldProceed('gob@bluth.com', 'the_seaward-v003',
                 "Full capacity judgment period for ASG 'the_seaward-v003' has begun.") >> true
         then: 1 * mockActivities.sendNotification('gob@bluth.com', 'the_seaward',
-                'Judgement period for ASG \'the_seaward-v003\' has ended.',
-                'Please make a decision to proceed or roll back.')
+                "Judgement period for ASG 'the_seaward-v003' has ended.",
+                "Please make a decision to proceed or roll back.")
         then: 1 * mockActivities.disableAsg(userContext, 'the_seaward-v002')
         then: 1 * mockActivities.deleteAsg(userContext, 'the_seaward-v002')
     }
 
     def 'should not delete previous ASG if specified not to'() {
-        workflowOperations.addFiredTimerNames(['secondsToWaitAfterEurekaChange'])
+        workflowOperations.addFiredTimerNames(['waitAfterEurekaChange'])
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com', doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Yes,
@@ -494,7 +491,7 @@ class DeploymentWorkflowSpec extends Specification {
     }
 
     def 'should rollback deployment for full traffic decision to not proceed'() {
-        workflowOperations.addFiredTimerNames(['secondsToWaitAfterEurekaChange'])
+        workflowOperations.addFiredTimerNames(['waitAfterEurekaChange'])
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
                 notificationDestination: 'gob@bluth.com', doCanary: false,
                 scaleUp: ProceedPreference.Yes, disablePreviousAsg: ProceedPreference.Yes,
@@ -508,9 +505,8 @@ class DeploymentWorkflowSpec extends Specification {
                 "Disabling ASG 'the_seaward-v002'.",
                 "Waiting 90 seconds for clients to stop using instances.",
                 "Full traffic judgment period for ASG 'the_seaward-v003' has begun.",
-                "Awaiting judgment for 'the_seaward-v003'.",
                 "Rolling back to 'the_seaward-v002'.",
-                'Deployment was rolled back. Judge decided ASG \'the_seaward-v003\' was not operational.'
+                "Deployment was rolled back. Judge decided ASG 'the_seaward-v003' was not operational."
         ]
 
         interaction {
@@ -524,12 +520,12 @@ class DeploymentWorkflowSpec extends Specification {
         then: 1 * mockActivities.askIfDeploymentShouldProceed('gob@bluth.com', 'the_seaward-v003',
                 "Full traffic judgment period for ASG 'the_seaward-v003' has begun.") >> false
         then: 1 * mockActivities.sendNotification('gob@bluth.com', 'the_seaward',
-                'Judgement period for ASG \'the_seaward-v003\' has ended.',
-                'Please make a decision to proceed or roll back.')
+                "Judgement period for ASG 'the_seaward-v003' has ended.",
+                "Please make a decision to proceed or roll back.")
         then: 1 * mockActivities.sendNotification('gob@bluth.com', 'the_seaward',
-                'Rolling back to \'the_seaward-v002\'.',
-                'Auto Scaling Group \'the_seaward-v003\' is not operational.\n' +
-                        'Judge decided ASG \'the_seaward-v003\' was not operational.')
+                "Rolling back to 'the_seaward-v002'.",
+                "Auto Scaling Group 'the_seaward-v003' is not operational.\n" +
+                        "Judge decided ASG 'the_seaward-v003' was not operational.")
         then: 1 * mockActivities.enableAsg(userContext, 'the_seaward-v002')
         then: 1 * mockActivities.disableAsg(userContext, 'the_seaward-v003')
     }
