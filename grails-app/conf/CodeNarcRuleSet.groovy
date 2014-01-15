@@ -20,7 +20,15 @@ ruleset {
 //    rule('file:test/unit/com/netflix/asgard/codenarc/ExplicitCallToSpringAutoWire.groovy') {
 //        description = 'Use of Spring.autowire(...) can become unstable.'
 //    }
-
+    rule('file:test/unit/com/netflix/asgard/codenarc/MissingBlankLineAfterPackageRule.groovy') {
+        description = 'A blank line should occur after the package declaration.'
+    }
+    rule('file:test/unit/com/netflix/asgard/codenarc/MissingBlankLineAfterImportsRule.groovy') {
+        description = 'A blank line should occur after the imports.'
+    }
+    rule('file:test/unit/com/netflix/asgard/codenarc/BlankLineBeforePackageRule.groovy') {
+        description = 'No blank lines should occur before the package declaration.'
+    }
     rule('file:test/unit/com/netflix/asgard/codenarc/ConsecutiveBlankLinesRule.groovy') {
         description = 'Consecutive blank lines are not permitted.'
     }
@@ -188,7 +196,33 @@ ruleset {
     IllegalClassReference
     IllegalPackageReference
     IllegalRegex
+    IllegalRegex {
+        name = 'TrailingWhitespace'
+        regex = /[^\n]*[ \t]+\n/
+        description = 'Lines must not end with whitespace characters.'
+    }
     RequiredRegex
+    RequiredRegex {
+        name = 'MissingCopyrightHeader'
+        regex = '''\
+                [/][*]
+                 [*] Copyright 20\\d\\d Netflix, Inc[.]
+                 [*]
+                 [*] Licensed under the Apache License, Version 2[.]0 [(]the "License"[)];
+                 [*] you may not use this file except in compliance with the License[.]
+                 [*] You may obtain a copy of the License at
+                 [*]
+                 [*]     http:[/][/]www[.]apache[.]org[/]licenses[/]LICENSE-2[.]0
+                 [*]
+                 [*] Unless required by applicable law or agreed to in writing, software
+                 [*] distributed under the License is distributed on an "AS IS" BASIS,
+                 [*] WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied[.]
+                 [*] See the License for the specific language governing permissions and
+                 [*] limitations under the License[.]
+                 [*][/]
+                '''.stripIndent()
+        description = 'Source files must start with standard copyright header.'
+    }
     RequiredString
     StatelessClass
 
