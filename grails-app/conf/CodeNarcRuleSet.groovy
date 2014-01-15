@@ -170,7 +170,7 @@ ruleset {
 //    ClassJavadoc
 //    LineLength
     SpaceAfterCatch
-//    SpaceAfterClosingBrace
+//    SpaceAfterClosingBrace // Good but needs option to accept [{ ok() }] and items.collect { it.key }[0]
     SpaceAfterComma
     SpaceAfterFor
     SpaceAfterIf
@@ -181,7 +181,7 @@ ruleset {
     SpaceAroundClosureArrow
     SpaceAroundOperator
     SpaceBeforeClosingBrace
-//    SpaceBeforeOpeningBrace
+//    SpaceBeforeOpeningBrace // Good but needs new option to accept call({ go() }, 4) and [{ okie() }, { dokie() }]
 
     // rulesets/generic.xml
     IllegalClassMember

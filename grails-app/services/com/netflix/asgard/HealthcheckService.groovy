@@ -70,7 +70,7 @@ class HealthcheckService implements BackgroundProcessInitializer {
                     if (findProblem(multiRegionCachedMap, recentTime, threshold)) {
                         cachesHealthy = false
                     }
-                } catch (Exception e){
+                } catch (Exception e) {
                     log.error "Error checking health for ${cacheName}", e
                     cachesHealthy = false
                     cacheNamesToProblems[cacheName] = e.message

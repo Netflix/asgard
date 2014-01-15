@@ -104,14 +104,14 @@ class SecurityCreateCommandTests {
 
     @Test
     void testDetailIsValid() {
-        def cmd = validateParams(appName: "abcache", detail:"iphone")
+        def cmd = validateParams(appName: "abcache", detail: "iphone")
         assert !cmd.hasErrors()
         assert 0 == cmd.errors.errorCount
     }
 
     @Test
     void testDetailIsInvalid() {
-        def cmd = validateParams(appName: "abcache", detail:"iphone/and/ipad")
+        def cmd = validateParams(appName: "abcache", detail: "iphone/and/ipad")
         assert cmd.hasErrors()
         assert 1 == cmd.errors.errorCount
         assert "The detail must be empty or consist of alphanumeric characters and hyphens" == cmd.errors.detail
