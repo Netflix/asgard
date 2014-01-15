@@ -27,13 +27,11 @@ import spock.lang.Unroll
 class ApiTokenControllerSpec extends Specification {
 
     def configService = Mock(ConfigService)
-    def secretService = Mock(SecretService)
 
     Subject subject = Mock(Subject)
 
     def setup() {
         controller.configService = configService
-        controller.secretService = secretService
         MockUtils.prepareForConstraintsTests(GenerateApiTokenCommand)
 
         subject.principal >> 'testUser@netflix.com'
@@ -68,7 +66,7 @@ class ApiTokenControllerSpec extends Specification {
     }
 
     def 'should return api token for valid request'() {
-        secretService.currentApiEncryptionKey >> 'key'
+        configService.currentApiEncryptionKey >> 'key'
         configService.apiTokenExpirationDays >> 90
         subject.principal >> 'test@netflix.com'
         GenerateApiTokenCommand command = new GenerateApiTokenCommand(purpose: 'ThisPurpose',

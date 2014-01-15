@@ -21,7 +21,6 @@ import org.apache.shiro.SecurityUtils
 class ApiTokenController {
 
     def configService
-    def secretService
 
     static allowedMethods = [generate: 'POST']
 
@@ -45,7 +44,7 @@ class ApiTokenController {
             chain(action: 'create', model:[cmd: cmd], params: params)
         } else {
             flash.apiToken = new ApiToken(cmd.purpose, cmd.email, configService.apiTokenExpirationDays,
-                    secretService.currentApiEncryptionKey)
+                    configService.currentApiEncryptionKey)
             redirect(action: 'show')
         }
     }

@@ -136,47 +136,6 @@ class SecretServiceUnitSpec extends Specification {
         e.message == "ERROR: Illegal empty string for ${ACCESS_ID_FILENAME}"
     }
 
-    def 'should not set apiEncryptionKeys if api token is not enabled'() {
-        setupKeysInConfig()
-        configService.apiTokenEnabled >> false
-
-        when:
-        secretService.afterPropertiesSet()
-
-        then:
-        secretService.apiEncryptionKeys == []
-        secretService.currentApiEncryptionKey == null
-    }
-
-    def 'should grab encryption keys from configService if set'() {
-        setupKeysInConfig()
-        configService.apiTokenEnabled >> true
-        List<String> keys = ['key1', 'key2']
-        configService.apiEncryptionKeys >> keys
-
-        when:
-        secretService.afterPropertiesSet()
-
-        then:
-        secretService.apiEncryptionKeys == keys
-        secretService.currentApiEncryptionKey == 'key1'
-    }
-
-    def 'should grab encryption keys from file'() {
-        setupKeysInConfig()
-        setupRemoteServerInfo()
-        configService.apiTokenEnabled >> true
-        configService.apiEncryptionKeyFileName >> 'encryptionkeys'
-        mockFetchRemote('encryptionkeys', 'key1\nkey2')
-
-        when:
-        secretService.afterPropertiesSet()
-
-        then:
-        secretService.apiEncryptionKeys == ['key1', 'key2']
-        secretService.currentApiEncryptionKey == 'key1'
-    }
-
     private setupKeysInConfig() {
         configService.online >> true
         configService.accessId >> ACCESS_ID
