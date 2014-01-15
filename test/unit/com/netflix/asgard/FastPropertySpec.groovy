@@ -31,8 +31,8 @@ class FastPropertySpec extends Specification {
 
     def 'should fail to validate for invalid values used in ID'() {
         when:
-        new FastProperty(key: '_dial_', value: 'value', env: 'test:', appId: '*tap*', region: 'eu-west-1', stack: '!spinal!',
-                countries: 'UK').validate()
+        new FastProperty(key: '_dial_', value: 'value', env: 'test:', appId: '*tap*', region: 'eu-west-1',
+                stack: '!spinal!', countries: 'UK').validate()
 
         then:
         IllegalStateException e = thrown()

@@ -18,7 +18,8 @@ package com.netflix.asgard
 class TaskTests extends GroovyTestCase {
 
     void testGetDurationString() {
-        Task task = new Task(startTime: new Date(1290061831444), updateTime: new Date(1290066308555), status: "completed")
+        Task task = new Task(startTime: new Date(1290061831444), updateTime: new Date(1290066308555),
+                status: "completed")
         assert "1h 14m 37s" == task.durationString
 
         task = new Task(startTime: new Date(1290066320888), updateTime: new Date(1290066324475), status: "completed")

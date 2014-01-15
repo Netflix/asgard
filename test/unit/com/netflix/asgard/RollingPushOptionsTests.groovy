@@ -21,12 +21,19 @@ import com.netflix.asgard.push.RollingPushOptions
 class RollingPushOptionsTests extends GroovyTestCase {
 
     void testShouldWaitAfterBoot() {
-        assert new RollingPushOptions(common: new CommonPushOptions(afterBootWait: 30, checkHealth: false)).shouldWaitAfterBoot()
-        assert new RollingPushOptions(common: new CommonPushOptions(afterBootWait: 1, checkHealth: false)).shouldWaitAfterBoot()
-        assert !new RollingPushOptions(common: new CommonPushOptions(afterBootWait: 30, checkHealth: true)).shouldWaitAfterBoot()
-        assert !new RollingPushOptions(common: new CommonPushOptions(afterBootWait: 0, checkHealth: false)).shouldWaitAfterBoot()
-        assert !new RollingPushOptions(common: new CommonPushOptions(afterBootWait: 0, checkHealth: true)).shouldWaitAfterBoot()
-        assert !new RollingPushOptions(common: new CommonPushOptions(afterBootWait: -5, checkHealth: false)).shouldWaitAfterBoot()
-        assert !new RollingPushOptions(common: new CommonPushOptions(afterBootWait: -5, checkHealth: true)).shouldWaitAfterBoot()
+        assert new RollingPushOptions(common: new CommonPushOptions(afterBootWait: 30, checkHealth: false)).
+                shouldWaitAfterBoot()
+        assert new RollingPushOptions(common: new CommonPushOptions(afterBootWait: 1, checkHealth: false)).
+                shouldWaitAfterBoot()
+        assert !new RollingPushOptions(common: new CommonPushOptions(afterBootWait: 30, checkHealth: true)).
+                shouldWaitAfterBoot()
+        assert !new RollingPushOptions(common: new CommonPushOptions(afterBootWait: 0, checkHealth: false)).
+                shouldWaitAfterBoot()
+        assert !new RollingPushOptions(common: new CommonPushOptions(afterBootWait: 0, checkHealth: true)).
+                shouldWaitAfterBoot()
+        assert !new RollingPushOptions(common: new CommonPushOptions(afterBootWait: -5, checkHealth: false)).
+                shouldWaitAfterBoot()
+        assert !new RollingPushOptions(common: new CommonPushOptions(afterBootWait: -5, checkHealth: true)).
+                shouldWaitAfterBoot()
     }
 }

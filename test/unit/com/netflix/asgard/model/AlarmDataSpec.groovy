@@ -52,20 +52,20 @@ class AlarmDataSpec extends Specification {
     }
 
     def 'should build AlarmData with defaults'() {
-        final AlarmData expectedDefaultsAlarmData = new AlarmData(
+        final AlarmData expectedDefaultsAlarm = new AlarmData(
             alarmName: 'scale-up-alarm-fantasticService-v003-AvailabilityService_completedTasks-73'
         )
 
         expect:
-        'scale-up-alarm-fantasticService-v003-AvailabilityService_completedTasks-73' == expectedDefaultsAlarmData.alarmName
-        null == expectedDefaultsAlarmData.autoScalingGroupName
-        null == expectedDefaultsAlarmData.comparisonOperator
-        'CPUUtilization' == expectedDefaultsAlarmData.metricName
-        'AWS/EC2' == expectedDefaultsAlarmData.namespace
-        Statistic.Average == expectedDefaultsAlarmData.statistic
-        300 == expectedDefaultsAlarmData.period
-        1 == expectedDefaultsAlarmData.evaluationPeriods
-        0 == expectedDefaultsAlarmData.threshold
+        'scale-up-alarm-fantasticService-v003-AvailabilityService_completedTasks-73' == expectedDefaultsAlarm.alarmName
+        null == expectedDefaultsAlarm.autoScalingGroupName
+        null == expectedDefaultsAlarm.comparisonOperator
+        'CPUUtilization' == expectedDefaultsAlarm.metricName
+        'AWS/EC2' == expectedDefaultsAlarm.namespace
+        Statistic.Average == expectedDefaultsAlarm.statistic
+        300 == expectedDefaultsAlarm.period
+        1 == expectedDefaultsAlarm.evaluationPeriods
+        0 == expectedDefaultsAlarm.threshold
     }
 
     def 'should build AlarmData from AWS metric alarm'() {
@@ -79,7 +79,9 @@ class AlarmDataSpec extends Specification {
                 evaluationPeriods: 3,
                 threshold: 32,
                 alarmActions: ['arn:aws:sns:us-east-1:149000000000:sE-auto-scale-alert-topic',
-                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
+                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                                'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:' +
+                                'policyName/scale-down-realtimerouter-10-600'],
                 dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG, value: 'spectacular-Encoder-v031')],
         )
 
@@ -98,7 +100,9 @@ class AlarmDataSpec extends Specification {
             evaluationPeriods: 3,
             threshold: 32,
             actionArns: ['arn:aws:sns:us-east-1:149000000000:sE-auto-scale-alert-topic',
-                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
+                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                                'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:' +
+                                'policyName/scale-down-realtimerouter-10-600'],
             policyNames: ['scale-down-realtimerouter-10-600'],
             topicNames: ['sE-auto-scale-alert-topic'],
             dimensions: [AutoScalingGroupName: 'spectacular-Encoder-v031']
@@ -116,7 +120,9 @@ class AlarmDataSpec extends Specification {
                 evaluationPeriods: 3,
                 threshold: 32,
                 alarmActions: ['arn:aws:sns:us-east-1:149000000000:sE-auto-scale-alert-topic',
-                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
+                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                                'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:' +
+                                'policyName/scale-down-realtimerouter-10-600'],
                 dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG, value: 'spectacular-Encoder-v031')],
         )
 
@@ -136,7 +142,9 @@ class AlarmDataSpec extends Specification {
                 evaluationPeriods: 3,
                 threshold: 32,
                 actionArns: ['arn:aws:sns:us-east-1:149000000000:sE-auto-scale-alert-topic2',
-                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
+                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                                'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:' +
+                                'policyName/scale-down-realtimerouter-10-600'],
                 policyNames: ['scale-down-realtimerouter-10-600'],
                 topicNames: ['sE-auto-scale-alert-topic2'],
                 dimensions: [AutoScalingGroupName: 'spectacular-Encoder-v031']
@@ -154,7 +162,9 @@ class AlarmDataSpec extends Specification {
                 evaluationPeriods: 3,
                 threshold: 32,
                 alarmActions: ['arn:aws:sns:us-east-1:149000000000:sE-auto-scale-alert-topic',
-                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
+                        'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                                'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:' +
+                                'policyName/scale-down-realtimerouter-10-600'],
                 dimensions: [new Dimension(name: AlarmData.DIMENSION_NAME_FOR_ASG, value: 'spectacular-Encoder-v031')],
         )
 
@@ -172,7 +182,9 @@ class AlarmDataSpec extends Specification {
                 period: 222,
                 evaluationPeriods: 3,
                 threshold: 32,
-                actionArns: ['arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'],
+                actionArns: ['arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                        'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/' +
+                        'scale-down-realtimerouter-10-600'],
                 policyNames: ['scale-down-realtimerouter-10-600'],
                 topicNames: [],
                 dimensions: [AutoScalingGroupName: 'spectacular-Encoder-v031']
@@ -201,7 +213,9 @@ class AlarmDataSpec extends Specification {
     def 'should create put alarm request'() {
         when:
         final PutMetricAlarmRequest alarm = alarmData.
-                toPutMetricAlarmRequest('arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600')
+                toPutMetricAlarmRequest('arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                        'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:' +
+                        'policyName/scale-down-realtimerouter-10-600')
 
         then:
         'scale-up-alarm-fantasticService-v003-AvailabilityService_completedTasks-73' == alarm.alarmName
@@ -209,7 +223,9 @@ class AlarmDataSpec extends Specification {
         alarm.actionsEnabled
         ['arn:aws:sns:us-east-1:149000000000:nccp-wii-auto-scale-alert-topic'] == alarm.OKActions
         ['arn:aws:sns:us-east-1:149000000000:nccp-wii-auto-scale-alert-topic',
-                'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:policyName/scale-down-realtimerouter-10-600'] as Set == alarm.alarmActions as Set
+                'arn:aws:autoscaling:us-east-1:149000000000:scalingPolicy:' +
+                        'cf25d568-7d55-4fa7-80c8-c6ee6b088a81:autoScalingGroupName/realtimerouter:' +
+                        'policyName/scale-down-realtimerouter-10-600'] as Set == alarm.alarmActions as Set
         ['arn:aws:sns:us-east-1:149000000000:nccp-wii-auto-scale-alert-topic'] == alarm.insufficientDataActions
         'AvailabilityService_completedTasks' == alarm.metricName
         'NFLX/Epic' == alarm.namespace
