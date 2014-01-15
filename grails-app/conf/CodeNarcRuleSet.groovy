@@ -32,6 +32,9 @@ ruleset {
     rule('file:test/unit/com/netflix/asgard/codenarc/ConsecutiveBlankLinesRule.groovy') {
         description = 'Consecutive blank lines are not permitted.'
     }
+    rule('file:test/unit/com/netflix/asgard/codenarc/FileEndsWithoutNewlineRule.groovy') {
+        description = 'Each source code file should end with a newline character.'
+    }
 
     // rulesets/basic.xml
     AssertWithinFinallyBlock
