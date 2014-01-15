@@ -30,7 +30,6 @@ import com.netflix.asgard.deployment.DeploymentWorkflowDescriptionTemplate
 import com.netflix.asgard.deployment.DeploymentWorkflowImpl
 import com.netflix.asgard.model.SimpleDbSequenceLocator
 import com.netflix.asgard.model.SwfWorkflowTags
-import com.netflix.glisten.GlobalWorkflowAttributes
 import com.netflix.glisten.InterfaceBasedWorkflowClient
 import com.netflix.glisten.WorkflowClientFactory
 import com.netflix.glisten.WorkflowDescriptionTemplate
@@ -69,7 +68,7 @@ class FlowService implements InitializingBean {
 
         String domain = configService.simpleWorkflowDomain
         String taskList = configService.simpleWorkflowTaskList
-        GlobalWorkflowAttributes.taskList = taskList
+        GlobalSwfWorkflowAttributes.taskList = taskList
         AmazonSimpleWorkflow simpleWorkflow = awsClientService.create(AmazonSimpleWorkflow)
         workflowClientFactory = new WorkflowClientFactory(simpleWorkflow, domain, taskList)
         workflowWorker = new WorkflowWorker(simpleWorkflow, domain, taskList)

@@ -41,7 +41,7 @@ import groovy.transform.Canonical
     int canaryStartUpTimeoutMinutes
 
     /** Time allowed for the canary test */
-    int canaryAssessmentDurationMinutes
+    int canaryJudgmentPeriodMinutes
 
     /** How to proceed after the canary test */
     ProceedPreference scaleUp
@@ -50,13 +50,13 @@ import groovy.transform.Canonical
     int desiredCapacityStartUpTimeoutMinutes
 
     /** Time allowed for the desired capacity assessment */
-    int desiredCapacityAssessmentDurationMinutes
+    int desiredCapacityJudgmentPeriodMinutes
 
     /** How to proceed after the desired capacity assessment */
     ProceedPreference disablePreviousAsg
 
     /** Time allowed for the full traffic assessment */
-    int fullTrafficAssessmentDurationMinutes
+    int fullTrafficJudgmentPeriodMinutes
 
     /** How to proceed after the full traffic assessment */
     ProceedPreference deletePreviousAsg

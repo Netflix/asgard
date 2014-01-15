@@ -38,7 +38,7 @@ interface DeploymentWorkflow {
      * @param lcOverrides specify changes to the template launch configuration
      * @param asgOverrides specify changes to the template auto scaling group
      */
-    @Execute(version = "1.3")
+    @Execute(version = "1.4")
     void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
                 LaunchConfigurationBeanOptions lcOverrides, AutoScalingGroupBeanOptions asgOverrides)
 

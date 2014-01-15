@@ -30,4 +30,15 @@ public class PushException extends RuntimeException implements NonAlertable {
     public PushException(String message) {
         super(message);
     }
+
+    /**
+     * Constructor with error message and cause.
+     *
+     * @param message the explanation of what went wrong
+     * @param cause root exception that caused this one
+     */
+    public PushException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }
