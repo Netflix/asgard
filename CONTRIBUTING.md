@@ -8,6 +8,7 @@ There are many ways to contribute to Asgard:
 * Fixing open issues listed in the [issue tracker](https://github.com/Netflix/asgard/issues)
 * Proposing, discussing, and implementing new features
 * [Join us at Netflix](http://jobs.netflix.com/) and work on Asgard fulltime! 
+Participating in the [Asgard Show on Google Hangouts](http://www.youtube.com/user/TheAsgardShow)
 * Suprising us with some other form of contribution!
 
 All forms of contribution are very much appreciated.
@@ -40,23 +41,10 @@ The following are some general guide lines to observe when contributing code:
 
 1. Everything needs to be tested
 1. All source files must have the appropriate ASLv2 license header
-1. All source files use an indent of 2 spaces
+1. 4 spaces for Groovy and Java and JavaScript. 2 spaces for GSP and HTML. When in doubt, make your spacing look identical to the code nearby. And no tab characters.
+1. Please run Asgard's CodeNarc task (`grails codenarc`)
+1. Groovydoc all classes and public methods
 1. Everything needs to be tested (see point #1)
-
-The build processes checks that most of the above conditions have been met.
-
-
-### What Makes a Good Pull Request
-
-When reviewing pull requests, we value the following qualities (in no particular order):
-
-* Carefully crafted, clean and concise code
-* Small, focused commits that tackle one thing at a time
-* New code blends in well with existing code, respecting established coding standards and practices
-* Tests are updated/added along with the code, communicate intent and cover important cases (see [Tests](#tests) for additional information)
-* Documentation (Javadoc, Groovydoc, reference documentation) is updated/added along with the code
-
-Don't be intimidated by these words. Pull requests that satisfy Asgard's overall direction and goals (see above), are crafted carefully, and aren't aiming too high, have a good chance of getting accepted. Before doing so, we may ask for some concrete improvements to be made, in which case we hope for your cooperation.
 
 ### Compatibility
 
