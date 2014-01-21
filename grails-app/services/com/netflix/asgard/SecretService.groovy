@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.amazonaws.auth.BasicAWSCredentials
+import com.netflix.asgard.cred.LocalFileReader
 import com.netflix.asgard.cred.SshRemoteFileReader
 import org.springframework.beans.factory.InitializingBean
 
@@ -24,6 +25,7 @@ class SecretService implements InitializingBean {
     static transactional = false
     def configService
     SshRemoteFileReader sshRemoteFileReader
+    LocalFileReader localFileReader
 
     BasicAWSCredentials awsCredentials
     String loadBalancerUserName
@@ -32,6 +34,7 @@ class SecretService implements InitializingBean {
     void afterPropertiesSet() {
         if (configService.online) {
             sshRemoteFileReader = sshRemoteFileReader ?: new SshRemoteFileReader()
+            localFileReader = localFileReader ?: new LocalFileReader()
             String awsAccessId = configService.accessId ?: fetch(configService.accessIdFileName)
             String awsSecretKey = configService.secretKey ?: fetch(configService.secretKeyFileName)
             awsCredentials = new BasicAWSCredentials(awsAccessId, awsSecretKey)
@@ -45,7 +48,7 @@ class SecretService implements InitializingBean {
     private String fetch(String fileName) {
         def localSecretsDirectory = configService.secretLocalDirectory
         if (localSecretsDirectory) {
-            String secretValue = new File("${localSecretsDirectory}/${fileName}").readLines()[0]
+            String secretValue = localFileReader.readFirstLine(localSecretsDirectory, fileName)
             return Check.notEmpty(secretValue as String, fileName)
         }
 

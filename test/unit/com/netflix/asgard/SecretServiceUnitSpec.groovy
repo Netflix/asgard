@@ -15,8 +15,8 @@
  */
 package com.netflix.asgard
 
+import com.netflix.asgard.cred.LocalFileReader
 import com.netflix.asgard.cred.SshRemoteFileReader
-import spock.lang.AutoCleanup
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyAccessibility")
@@ -35,28 +35,11 @@ class SecretServiceUnitSpec extends Specification {
     static final String LOAD_BALANCER_PASSWORD_FILE = 'lbpassfile'
     static final String LOAD_BALANCER_PASSWORD = 'lbpass'
 
-    @AutoCleanup('delete')
-    File secretDir = new File(SECRET_DIR)
-    @AutoCleanup('delete')
-    File accessKeyFile = new File(SECRET_DIR, ACCESS_ID_FILENAME)
-    @AutoCleanup('delete')
-    File secretKeyFile = new File(SECRET_DIR, SECRET_KEY_FILENAME)
-
     def configService = Mock(ConfigService)
+    LocalFileReader localFileReader = Mock(LocalFileReader)
     SshRemoteFileReader remoteFileReader = Mock(SshRemoteFileReader)
-    SecretService secretService = new SecretService(configService: configService, sshRemoteFileReader: remoteFileReader)
-
-    def setup() {
-        secretDir.mkdir()
-        accessKeyFile << ACCESS_ID
-        secretKeyFile << SECRET_KEY
-    }
-
-    def cleanup() {
-        new File(SECRET_DIR, ACCESS_ID_FILENAME).delete()
-        new File(SECRET_DIR, SECRET_KEY_FILENAME).delete()
-        new File(SECRET_DIR).delete()
-    }
+    SecretService secretService = new SecretService(configService: configService, localFileReader: localFileReader,
+            sshRemoteFileReader: remoteFileReader)
 
     def 'should not initialize if offline'() {
         configService.online >> false
@@ -89,12 +72,13 @@ class SecretServiceUnitSpec extends Specification {
         then:
         secretService.awsCredentials.accessKey == ACCESS_ID
         secretService.awsCredentials.secretKey == SECRET_KEY
+        1 * localFileReader.readFirstLine(SECRET_DIR, ACCESS_ID_FILENAME) >> ACCESS_ID
+        1 * localFileReader.readFirstLine(SECRET_DIR, SECRET_KEY_FILENAME) >> SECRET_KEY
     }
 
     def 'should throw exception if local file contents empty'() {
         setupKeyFilenames()
         configService.secretLocalDirectory >> SECRET_DIR
-        new File(SECRET_DIR, ACCESS_ID_FILENAME).withWriter { it << '' }
 
         when:
         secretService.afterPropertiesSet()
@@ -102,6 +86,8 @@ class SecretServiceUnitSpec extends Specification {
         then:
         NullPointerException e = thrown()
         e.message == "ERROR: Trying to use String with null ${ACCESS_ID_FILENAME}"
+        localFileReader.readFirstLine(SECRET_DIR, ACCESS_ID_FILENAME) >> null
+        localFileReader.readFirstLine(SECRET_DIR, SECRET_KEY_FILENAME) >> null
     }
 
     def 'should retrieve values from remote server'() {
