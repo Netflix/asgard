@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.netflix.asgard.cred.SshRemoteFileReader
 import spock.lang.AutoCleanup
 import spock.lang.Specification
 
@@ -42,8 +43,8 @@ class SecretServiceUnitSpec extends Specification {
     File secretKeyFile = new File(SECRET_DIR, SECRET_KEY_FILENAME)
 
     def configService = Mock(ConfigService)
-    def sshService = Mock(SshService)
-    SecretService secretService = new SecretService(configService: configService, sshService: sshService)
+    SshRemoteFileReader remoteFileReader = Mock(SshRemoteFileReader)
+    SecretService secretService = new SecretService(configService: configService, sshRemoteFileReader: remoteFileReader)
 
     def setup() {
         secretDir.mkdir()
@@ -155,6 +156,6 @@ class SecretServiceUnitSpec extends Specification {
     }
 
     private mockFetchRemote(String filename, String contents) {
-        sshService.call(USER, SERVER, "cat ${REMOTE_DIR}/${filename}") >> contents
+        remoteFileReader.fetch(USER, SERVER, REMOTE_DIR, filename) >> contents
     }
 }
