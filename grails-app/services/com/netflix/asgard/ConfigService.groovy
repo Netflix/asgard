@@ -416,6 +416,34 @@ class ConfigService {
     }
 
     /**
+     * @return the endpoint to call for fetching secret keys for AWS access, or null by default
+     */
+    String getKeyManagementServiceEndpoint() {
+        grailsApplication.config.secret?.keyManagement?.endpoint ?: null
+    }
+
+    /**
+     * @return the port to use when establishing a secure SSL connection to a key management service, or null by default
+     */
+    Integer getKeyManagementServicePort() {
+        grailsApplication.config.secret?.keyManagement?.servicePort ?: null
+    }
+
+    /**
+     * @return the path to the local keystore file to use for SSL connections to a key management service
+     */
+    String getKeyManagementSslKeyStoreFilePath() {
+        grailsApplication.config.secret?.keyManagement?.keyStoreFilePath ?: null
+    }
+
+    /**
+     * @return the password for the keystore file used for SSL connections to a key management service
+     */
+    String getKeyManagementSslKeystorePassword() {
+        grailsApplication.config.secret?.keyManagement?.password ?: 'changeit'
+    }
+
+    /**
      * @return name of the current cloud account, such as "test" or "prod", with a default of null
      */
     String getAccountName() {
