@@ -173,10 +173,6 @@ class ConfigService {
         grailsApplication.config.ticket?.fullLabel ?: 'Ticket'
     }
 
-    List<String> getPromotionTargetServers() {
-        grailsApplication.config.promote?.targetServers ?: []
-    }
-
     Collection<String> getExcludedLaunchPermissionsForMassDelete() {
         List<String> excludedLaunchPermissions = grailsApplication.config.cloud?.massDeleteExcludedLaunchPermissions
         Map matches = grailsApplication.config.grails.awsAccountNames.findAll { k, v ->
