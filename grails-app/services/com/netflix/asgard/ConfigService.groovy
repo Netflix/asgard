@@ -175,7 +175,7 @@ class ConfigService {
 
     Collection<String> getExcludedLaunchPermissionsForMassDelete() {
         List<String> excludedLaunchPermissions = grailsApplication.config.cloud?.massDeleteExcludedLaunchPermissions
-        Map matches = grailsApplication.config.grails.awsAccountNames.findAll { k, v ->
+        Map matches = awsAccountNames.findAll { k, v ->
             excludedLaunchPermissions?.contains(v)
         } as Map
         matches.keySet()
