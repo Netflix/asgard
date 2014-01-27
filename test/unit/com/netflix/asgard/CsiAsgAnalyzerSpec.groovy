@@ -37,6 +37,7 @@ class CsiAsgAnalyzerSpec extends Specification {
         1 * mockApplicationService.getEmailFromApp(_, 'fakeblock') >> 'gmaharis@fakeblock.com'
         1 * mockRestClientService.postAsNameValuePairs(
                 'http://csi.netflix.com/jr/csi/json_canaries/canary-launcher?cache=false', [
+                type: 'asgard',
                 cluster: 'fakeblock',
                 redblack: 'true',
                 username: 'gmaharis',
@@ -55,6 +56,7 @@ class CsiAsgAnalyzerSpec extends Specification {
         1 * mockApplicationService.getEmailFromApp(_, 'fakeblock') >> 'gmaharis@fakeblock.com'
         1 * mockRestClientService.postAsNameValuePairs(
                 'http://csi.netflix.com/jr/csi/json_canaries/canary-launcher?cache=false', [
+                type: 'asgard',
                 cluster: 'fakeblock',
                 redblack: 'true',
                 username: 'gmaharis',
@@ -78,6 +80,7 @@ canary-launcher?cache=false.'
         1 * mockApplicationService.getEmailFromApp(_, 'fakeblock') >> 'gmaharis@fakeblock.com'
         1 * mockRestClientService.postAsNameValuePairs(
                 'http://csi.netflix.com/jr/csi/json_canaries/canary-launcher?cache=false', [
+                type: 'asgard',
                 cluster: 'fakeblock',
                 redblack: 'true',
                 username: 'gmaharis',
