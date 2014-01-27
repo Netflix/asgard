@@ -38,6 +38,7 @@ class CsiAsgAnalyzer implements AsgAnalyzer {
     @Autowired
     CsiScheduledAnalysisFactory csiScheduledAnalysisFactory
 
+    @Override
     ScheduledAsgAnalysis startAnalysis(String clusterName) {
         String appName = Relationships.appNameFromGroupName(clusterName)
         String email = applicationService.getEmailFromApp(null, appName)
@@ -58,6 +59,7 @@ Got response ${response.statusCode} - ${response.content} from ${url}.")
         csiScheduledAnalysisFactory.fromJson(response.content)
     }
 
+    @Override
     void stopAnalysis(String name) {
         toggleState(name, 'paused')
     }
