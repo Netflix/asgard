@@ -26,9 +26,10 @@ interface AsgAnalyzer {
      * Starts the analysis of Auto Scaling Groups in a cluster.
      *
      * @param clusterName for the ASGs to be analyzed
+     * @param notificationDestination where deployment notifications will be sent
      * @return attributes about the analysis that was started
      */
-    ScheduledAsgAnalysis startAnalysis(String clusterName)
+    ScheduledAsgAnalysis startAnalysis(String clusterName, String notificationDestination)
 
     /**
      * Stops the analysis of Auto Scaling Groups in a cluster.

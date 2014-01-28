@@ -39,9 +39,8 @@ class CsiAsgAnalyzer implements AsgAnalyzer {
     CsiScheduledAnalysisFactory csiScheduledAnalysisFactory
 
     @Override
-    ScheduledAsgAnalysis startAnalysis(String clusterName) {
-        String appName = Relationships.appNameFromGroupName(clusterName)
-        String email = applicationService.getEmailFromApp(null, appName)
+    ScheduledAsgAnalysis startAnalysis(String clusterName, String notificationDestination) {
+        String email = notificationDestination // TODO: Currently we only support e-mail, but will soon handle SNS too.
         String username = email.substring(0, email.indexOf('@'))
         Map<String, String> data = [
                 type: 'asgard',

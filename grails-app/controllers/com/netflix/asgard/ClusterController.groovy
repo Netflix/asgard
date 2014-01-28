@@ -293,11 +293,11 @@ ${lastGroup.loadBalancerNames}"""
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions()
         bindData(deploymentOptions, params)
         deploymentOptions.clusterName = cmd.clusterName
-
         UserContext userContext = UserContext.of(request)
-        String appName = Relationships.appNameFromGroupName(cmd.clusterName)
-        String email = applicationService.getEmailFromApp(userContext, appName)
+
         if (params.createAsgOnly) {
+            String appName = Relationships.appNameFromGroupName(cmd.clusterName)
+            String email = applicationService.getEmailFromApp(userContext, appName)
             deploymentOptions.with {
                 notificationDestination = email
                 delayDurationMinutes = 0

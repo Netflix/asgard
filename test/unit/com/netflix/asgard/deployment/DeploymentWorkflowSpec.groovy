@@ -76,8 +76,8 @@ class DeploymentWorkflowSpec extends Specification {
             1 * createNextAsgForClusterWithoutInstances(userContext, asgTemplate) >> 'the_seaward-v003'
             1 * copyScalingPolicies(userContext, asgDeploymentNames) >> 0
             1 * copyScheduledActions(userContext, asgDeploymentNames) >> 0
-            1 * startAsgAnalysis('the_seaward') >> new ScheduledAsgAnalysis("ASG analysis for 'the_seaward' cluster.",
-                    new DateTime())
+            1 * startAsgAnalysis('the_seaward', 'gob@bluth.com') >> new ScheduledAsgAnalysis(
+                    "ASG analysis for 'the_seaward' cluster.", new DateTime())
         }
     }
 

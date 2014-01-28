@@ -222,8 +222,8 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     }
 
     @Override
-    ScheduledAsgAnalysis startAsgAnalysis(String clusterName) {
-        pluginService.asgAnalyzer.startAnalysis(clusterName)
+    ScheduledAsgAnalysis startAsgAnalysis(String clusterName, String notificationDestination) {
+        pluginService.asgAnalyzer.startAnalysis(clusterName, notificationDestination)
     }
 
     @Override
