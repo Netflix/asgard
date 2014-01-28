@@ -767,16 +767,18 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         if (asg.instances.find { it.lifecycleState != LifecycleState.InService.name() }) {
             return 'Waiting for instances to be in service.'
         }
-        List<ApplicationInstance> applicationInstances = discoveryService.getAppInstancesByIds(userContext,
-                asg.instances*.instanceId)
-        if (applicationInstances.size() < expectedInstanceCount) {
-            return 'Waiting for Eureka data about instances.'
-        }
-        if (applicationInstances.find { it.status != EurekaStatus.UP.name() }) {
-            return 'Waiting for all instances to be available in Eureka.'
-        }
-        if (!awsEc2Service.checkHostsHealth(applicationInstances*.healthCheckUrl)) {
-            return 'Waiting for all instances to pass health checks.'
+        if (configService.getRegionalDiscoveryServer(userContext.region)) {
+            List<ApplicationInstance> applicationInstances = discoveryService.getAppInstancesByIds(userContext,
+                    asg.instances*.instanceId)
+            if (applicationInstances.size() < expectedInstanceCount) {
+                return 'Waiting for Eureka data about instances.'
+            }
+            if (applicationInstances.find { it.status != EurekaStatus.UP.name() }) {
+                return 'Waiting for all instances to be available in Eureka.'
+            }
+            if (!awsEc2Service.checkHostsHealth(applicationInstances*.healthCheckUrl)) {
+                return 'Waiting for all instances to pass health checks.'
+            }
         }
         if (asg.loadBalancerNames) {
             String loadBalancerThatSeesOutOfServiceInstance = asg.loadBalancerNames.find {
