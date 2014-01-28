@@ -24,7 +24,7 @@ import com.netflix.asgard.plugin.AsgAnalyzer
 class NoOpAsgAnalyzer implements AsgAnalyzer {
 
     @Override
-    ScheduledAsgAnalysis startAnalysis(String clusterName) {
+    ScheduledAsgAnalysis startAnalysis(String clusterName, String notificationDestination) {
         return null
     }
 

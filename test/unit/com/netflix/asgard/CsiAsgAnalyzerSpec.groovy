@@ -30,11 +30,10 @@ class CsiAsgAnalyzerSpec extends Specification {
 
     void 'should start analysis'() {
         when:
-        csiAsgAnalyzer.startAnalysis('fakeblock')
+        csiAsgAnalyzer.startAnalysis('fakeblock', 'gmaharis@faceblock.com')
 
         then:
         1 * mockConfigService.getAsgAnalyzerBaseUrl() >> 'http://csi.netflix.com'
-        1 * mockApplicationService.getEmailFromApp(_, 'fakeblock') >> 'gmaharis@fakeblock.com'
         1 * mockRestClientService.postAsNameValuePairs(
                 'http://csi.netflix.com/jr/csi/json_canaries/canary-launcher?cache=false', [
                 type: 'asgard',
@@ -49,11 +48,10 @@ class CsiAsgAnalyzerSpec extends Specification {
 
     void 'should error on start if CSI is unavailable'() {
         when:
-        csiAsgAnalyzer.startAnalysis('fakeblock')
+        csiAsgAnalyzer.startAnalysis('fakeblock', 'gmaharis@faceblock.com')
 
         then:
         1 * mockConfigService.getAsgAnalyzerBaseUrl() >> 'http://csi.netflix.com'
-        1 * mockApplicationService.getEmailFromApp(_, 'fakeblock') >> 'gmaharis@fakeblock.com'
         1 * mockRestClientService.postAsNameValuePairs(
                 'http://csi.netflix.com/jr/csi/json_canaries/canary-launcher?cache=false', [
                 type: 'asgard',
@@ -73,11 +71,10 @@ canary-launcher?cache=false.'
 
     void 'should error propagate error'() {
         when:
-        csiAsgAnalyzer.startAnalysis('fakeblock')
+        csiAsgAnalyzer.startAnalysis('fakeblock', 'gmaharis@faceblock.com')
 
         then:
         1 * mockConfigService.getAsgAnalyzerBaseUrl() >> 'http://csi.netflix.com'
-        1 * mockApplicationService.getEmailFromApp(_, 'fakeblock') >> 'gmaharis@fakeblock.com'
         1 * mockRestClientService.postAsNameValuePairs(
                 'http://csi.netflix.com/jr/csi/json_canaries/canary-launcher?cache=false', [
                 type: 'asgard',

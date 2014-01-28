@@ -334,11 +334,11 @@ class DeploymentActivitiesSpec extends Specification {
         AsgAnalyzer asgAnalyzer = Spy(NoOpAsgAnalyzer)
 
         when:
-        deploymentActivities.startAsgAnalysis('fakeblock')
+        deploymentActivities.startAsgAnalysis('fakeblock', 'gmaharis@faceblock.com')
 
         then:
         1 * mockPluginService.getAsgAnalyzer() >> asgAnalyzer
-        1 * asgAnalyzer.startAnalysis('fakeblock')
+        1 * asgAnalyzer.startAnalysis('fakeblock', 'gmaharis@faceblock.com')
     }
 
     void 'should stop ASG Analysis'() {

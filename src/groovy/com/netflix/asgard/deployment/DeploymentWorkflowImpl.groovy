@@ -118,7 +118,8 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
         }
 
         String clusterName = deploymentOptions.clusterName
-        DoTry<ScheduledAsgAnalysis> startAsgAnalysis = startScheduledAsgAnalysis(asgCreated, clusterName)
+        DoTry<ScheduledAsgAnalysis> startAsgAnalysis = startScheduledAsgAnalysis(asgCreated, clusterName,
+                deploymentOptions.notificationDestination)
         runningAsgAnalyses << startAsgAnalysis
 
         Promise<Boolean> scaleToDesiredCapacity = waitFor(asgCreated) {
@@ -189,11 +190,12 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
         }
     }
 
-    private DoTry<ScheduledAsgAnalysis> startScheduledAsgAnalysis(Promise<?> trigger, String clusterName) {
+    private DoTry<ScheduledAsgAnalysis> startScheduledAsgAnalysis(Promise<?> trigger, String clusterName,
+            String notificationDestination) {
         doTry {
             waitFor(trigger) {
                 retry(getRemoteServiceRetryPolicy()) {
-                    promiseFor(activities.startAsgAnalysis(clusterName))
+                    promiseFor(activities.startAsgAnalysis(clusterName, notificationDestination))
                 }
             }
         } withCatch { Throwable t ->
