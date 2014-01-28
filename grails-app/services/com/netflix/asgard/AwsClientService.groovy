@@ -47,7 +47,6 @@ class AwsClientService implements InitializingBean {
 
     static transactional = false
 
-    def grailsApplication
     def secretService
     def serverService
     def configService
@@ -91,6 +90,6 @@ class AwsClientService implements InitializingBean {
     }
 
     Class concrete(Class real, Class fake) {
-        grailsApplication.config.server.online ? real : fake
+        configService.online ? real : fake
     }
 }
