@@ -15,8 +15,6 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.auth.BasicAWSCredentials
-import com.netflix.asgard.cred.LocalFileReader
 import com.netflix.asgard.cred.SshRemoteFileReader
 import org.springframework.beans.factory.InitializingBean
 
@@ -25,34 +23,18 @@ class SecretService implements InitializingBean {
     static transactional = false
     def configService
     SshRemoteFileReader sshRemoteFileReader
-    LocalFileReader localFileReader
 
-    BasicAWSCredentials awsCredentials
     String loadBalancerUserName
     String loadBalancerPassword
 
     void afterPropertiesSet() {
         if (configService.online) {
             sshRemoteFileReader = sshRemoteFileReader ?: new SshRemoteFileReader()
-            localFileReader = localFileReader ?: new LocalFileReader()
-            String awsAccessId = configService.accessId ?: fetch(configService.accessIdFileName)
-            String awsSecretKey = configService.secretKey ?: fetch(configService.secretKeyFileName)
-            awsCredentials = new BasicAWSCredentials(awsAccessId, awsSecretKey)
             if (configService.loadBalancerUsernameFile && configService.loadBalancerPasswordFile) {
                 loadBalancerUserName = fetchRemote(configService.loadBalancerUsernameFile)
                 loadBalancerPassword = fetchRemote(configService.loadBalancerPasswordFile)
             }
         }
-    }
-
-    private String fetch(String fileName) {
-        def localSecretsDirectory = configService.secretLocalDirectory
-        if (localSecretsDirectory) {
-            String secretValue = localFileReader.readFirstLine(localSecretsDirectory, fileName)
-            return Check.notEmpty(secretValue as String, fileName)
-        }
-
-        fetchRemote(fileName)
     }
 
     private String fetchRemote(String fileName) {

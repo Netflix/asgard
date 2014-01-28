@@ -18,7 +18,7 @@ package com.netflix.asgard.mock
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.ResponseMetadata
-import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient
 import com.amazonaws.services.elasticloadbalancing.model.ConfigureHealthCheckRequest
 import com.amazonaws.services.elasticloadbalancing.model.ConfigureHealthCheckResult
@@ -96,8 +96,8 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
         }
     }
 
-    MockAmazonElasticLoadBalancingClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
-        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
+    MockAmazonElasticLoadBalancingClient(AWSCredentialsProvider provider, ClientConfiguration clientConfiguration) {
+        super(provider, clientConfiguration)
         mockLoadBalancers = loadMockLoadBalancers()
     }
 

@@ -53,7 +53,6 @@ import com.netflix.asgard.MultiRegionAwsClient
 import com.netflix.asgard.PushService
 import com.netflix.asgard.Region
 import com.netflix.asgard.RestClientService
-import com.netflix.asgard.SecretService
 import com.netflix.asgard.ServerService
 import com.netflix.asgard.SimpleDbDomainService
 import com.netflix.asgard.StackService
@@ -330,8 +329,6 @@ class Mocks {
         if (awsClientService == null) {
             MockUtils.mockLogging(AwsClientService, false)
             awsClientService = new AwsClientService()
-            awsClientService.grailsApplication = grailsApplication()
-            awsClientService.secretService = new SecretService()
             awsClientService.configService = configService()
             awsClientService.serverService = serverService()
             awsClientService.afterPropertiesSet()

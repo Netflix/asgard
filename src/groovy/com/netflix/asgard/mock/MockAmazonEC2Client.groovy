@@ -19,7 +19,7 @@ import com.amazonaws.AmazonServiceException
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.ResponseMetadata
-import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.ec2.AmazonEC2Client
 import com.amazonaws.services.ec2.model.ActivateLicenseRequest
 import com.amazonaws.services.ec2.model.AllocateAddressRequest
@@ -323,8 +323,8 @@ class MockAmazonEC2Client extends AmazonEC2Client {
         }
     }
 
-    MockAmazonEC2Client(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
-        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
+    MockAmazonEC2Client(AWSCredentialsProvider credentialsProvider, ClientConfiguration clientConfiguration) {
+        super(credentialsProvider, clientConfiguration)
         mockImages = loadMockImages()
         mockInstances = loadMockInstances()
         mockSpotInstanceRequests = loadMockSpotInstanceRequests()

@@ -16,7 +16,7 @@
 package com.netflix.asgard.mock
 
 import com.amazonaws.ClientConfiguration
-import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.route53.AmazonRoute53Client
 import com.amazonaws.services.route53.model.ListHostedZonesRequest
 import com.amazonaws.services.route53.model.ListHostedZonesResult
@@ -26,8 +26,8 @@ import com.amazonaws.services.route53.model.ListHostedZonesResult
  */
 class MockAmazonRoute53Client extends AmazonRoute53Client {
 
-    MockAmazonRoute53Client(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
-        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
+    MockAmazonRoute53Client(AWSCredentialsProvider credentialsProvider, ClientConfiguration clientConfiguration) {
+        super(credentialsProvider, clientConfiguration)
     }
 
     @Override
