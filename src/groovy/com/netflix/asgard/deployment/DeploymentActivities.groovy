@@ -20,6 +20,7 @@ import com.amazonaws.services.simpleworkflow.flow.annotations.ActivityRegistrati
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
+import com.netflix.asgard.model.ScheduledAsgAnalysis
 
 /**
  * Method contracts and annotations used for the automatic deployment SWF workflow actions.
@@ -154,4 +155,19 @@ interface DeploymentActivities {
      * @param rollbackCause textual description of the reason why an ASG is not operational, or null if it is
      */
     void sendNotification(String notificationDestination, String asgName, String subject, String rollbackCause)
+
+    /**
+     * Starts the analysis of Auto Scaling Groups in a cluster.
+     *
+     * @param clusterName for the ASGs to be analyzed
+     * @return attributes about the analysis that was started
+     */
+    ScheduledAsgAnalysis startAsgAnalysis(String clusterName)
+
+    /**
+     * Stops the analysis of Auto Scaling Groups in a cluster.
+     *
+     * @param name used to identify the scheduled analysis
+     */
+    void stopAsgAnalysis(String name)
 }

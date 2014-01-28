@@ -28,6 +28,7 @@ import com.netflix.asgard.ConfigService
 import com.netflix.asgard.DiscoveryService
 import com.netflix.asgard.EmailerService
 import com.netflix.asgard.LaunchTemplateService
+import com.netflix.asgard.PluginService
 import com.netflix.asgard.Relationships
 import com.netflix.asgard.Task
 import com.netflix.asgard.Time
@@ -37,6 +38,7 @@ import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScalingPolicyData
+import com.netflix.asgard.model.ScheduledAsgAnalysis
 import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.push.AsgDeletionMode
@@ -58,6 +60,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     DiscoveryService discoveryService
     EmailerService emailerService
     LaunchTemplateService launchTemplateService
+    PluginService pluginService
     LinkGenerator grailsLinkGenerator
 
     @Override
@@ -216,6 +219,16 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         ${grailsLinkGenerator.link(base: configService.linkCanonicalServerUrl, controller: 'cluster', action: 'show',
                 id: clusterName)}""".stripIndent()
         emailerService.sendUserEmail(notificationDestination, subject, messageWithLink)
+    }
+
+    @Override
+    ScheduledAsgAnalysis startAsgAnalysis(String clusterName) {
+        pluginService.asgAnalyzer.startAnalysis(clusterName)
+    }
+
+    @Override
+    void stopAsgAnalysis(String name) {
+        pluginService.asgAnalyzer.stopAnalysis(name)
     }
 
 }

@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.netflix.asgard.plugin.AsgAnalyzer
 import com.netflix.asgard.plugin.AuthenticationProvider
 import com.netflix.asgard.plugin.AuthorizationProvider
 import com.netflix.asgard.plugin.TaskFinishedListener
@@ -34,6 +35,7 @@ class PluginService implements ApplicationContextAware {
     static final String TASK_FINISHED_LISTENERS = 'taskFinishedListeners'
     static final String USER_DATA_PROVIDER = 'userDataProvider'
     static final String ADVANCED_USER_DATA_PROVIDER = 'advancedUserDataProvider'
+    static final String ASG_ANALYZER = 'asgAnalyzer'
 
     ApplicationContext applicationContext
     ConfigService configService
@@ -99,6 +101,14 @@ class PluginService implements ApplicationContextAware {
         }
         List<String> beanNames = configService.getBeanNamesForPlugin(AUTHORIZATION_PROVIDERS) ?: []
         beanNames.collect { applicationContext.getBean(it) as AuthorizationProvider }
+    }
+
+    /**
+     * @return the configured {@link AsgAnalyzer} Spring bean, or NoOpAsgAnalyzer if not configured
+     */
+    AsgAnalyzer getAsgAnalyzer() {
+        String beanName = configService.getBeanNamesForPlugin(ASG_ANALYZER) ?: 'noOpAsgAnalyzer'
+        applicationContext.getBean(beanName) as AsgAnalyzer
     }
 
 }

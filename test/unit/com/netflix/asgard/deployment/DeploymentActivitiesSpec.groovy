@@ -27,6 +27,8 @@ import com.netflix.asgard.ConfigService
 import com.netflix.asgard.DiscoveryService
 import com.netflix.asgard.EmailerService
 import com.netflix.asgard.LaunchTemplateService
+import com.netflix.asgard.NoOpAsgAnalyzer
+import com.netflix.asgard.PluginService
 import com.netflix.asgard.Region
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
@@ -36,6 +38,7 @@ import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
+import com.netflix.asgard.plugin.AsgAnalyzer
 import com.netflix.asgard.push.Cluster
 import com.netflix.glisten.ActivityOperations
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
@@ -55,12 +58,14 @@ class DeploymentActivitiesSpec extends Specification {
     ActivityOperations mockActivityOperations = Mock(ActivityOperations)
     LinkGenerator mockLinkGenerator = Mock(LinkGenerator)
     AwsSimpleWorkflowService mockAwsSimpleWorkflowService = Mock(AwsSimpleWorkflowService)
+    PluginService mockPluginService = Mock(PluginService)
     DeploymentActivities deploymentActivities = new DeploymentActivitiesImpl(
             awsAutoScalingService: mockAwsAutoScalingService, awsEc2Service: mockAwsEc2Service,
             launchTemplateService: mockLaunchTemplateService, configService: mockConfigService,
             discoveryService: mockDiscoveryService, awsLoadBalancerService: mockAwsLoadBalancerService,
             emailerService: mockEmailerService, activity: mockActivityOperations,
-            grailsLinkGenerator: mockLinkGenerator, awsSimpleWorkflowService: mockAwsSimpleWorkflowService)
+            grailsLinkGenerator: mockLinkGenerator, awsSimpleWorkflowService: mockAwsSimpleWorkflowService,
+            pluginService: mockPluginService)
 
     AsgDeploymentNames asgDeploymentNames = new AsgDeploymentNames(
             previousAsgName: 'rearden_metal_pourer-v001',
@@ -323,6 +328,28 @@ class DeploymentActivitiesSpec extends Specification {
             1 * getLinkCanonicalServerUrl() >> 'http://asgard'
         }
         0 * _
+    }
+
+    void 'should start ASG Analysis'() {
+        AsgAnalyzer asgAnalyzer = Spy(NoOpAsgAnalyzer)
+
+        when:
+        deploymentActivities.startAsgAnalysis('fakeblock')
+
+        then:
+        1 * mockPluginService.getAsgAnalyzer() >> asgAnalyzer
+        1 * asgAnalyzer.startAnalysis('fakeblock')
+    }
+
+    void 'should stop ASG Analysis'() {
+        AsgAnalyzer asgAnalyzer = Spy(NoOpAsgAnalyzer)
+
+        when:
+        deploymentActivities.stopAsgAnalysis('fakeblock')
+
+        then:
+        1 * mockPluginService.getAsgAnalyzer() >> asgAnalyzer
+        1 * asgAnalyzer.stopAnalysis('fakeblock')
     }
 
 }

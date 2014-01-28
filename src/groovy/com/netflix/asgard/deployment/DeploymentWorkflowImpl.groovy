@@ -22,9 +22,11 @@ import com.amazonaws.services.simpleworkflow.flow.interceptors.RetryPolicy
 import com.netflix.asgard.DiscoveryService
 import com.netflix.asgard.GlobalSwfWorkflowAttributes
 import com.netflix.asgard.Relationships
+import com.netflix.asgard.ServiceUnavailableException
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
+import com.netflix.asgard.model.ScheduledAsgAnalysis
 import com.netflix.asgard.push.PushException
 import com.netflix.glisten.DoTry
 import com.netflix.glisten.WorkflowOperations
@@ -42,6 +44,9 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
 
     Closure<Integer> minutesToSeconds = { it * 60 }
 
+    RetryPolicy remoteServiceRetryPolicy = new ExponentialRetryPolicy(5).withMaximumAttempts(3).
+            withExceptionsToRetry([ServiceUnavailableException])
+
     @Override
     void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
                 LaunchConfigurationBeanOptions lcInputs, AutoScalingGroupBeanOptions asgInputs) {
@@ -49,12 +54,14 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
             status "Waiting ${unit(deploymentOptions.delayDurationMinutes, 'minute')} before starting deployment."
         }
         Promise<Void> delay = timer(minutesToSeconds(deploymentOptions.delayDurationMinutes), 'delay')
+        String clusterName = deploymentOptions.clusterName
         Promise<AsgDeploymentNames> asgDeploymentNamesPromise = waitFor(delay) {
-            promiseFor(activities.getAsgDeploymentNames(userContext, deploymentOptions.clusterName))
+            promiseFor(activities.getAsgDeploymentNames(userContext, clusterName))
         }
         Throwable rollbackCause = null
+        List<DoTry<ScheduledAsgAnalysis>> runningAsgAnalyses = []
         Promise<Void> deploymentComplete = waitFor(asgDeploymentNamesPromise) { AsgDeploymentNames asgDeploymentNames ->
-            status "Starting deployment for Cluster '${deploymentOptions.clusterName}'."
+            status "Starting deployment for Cluster '${clusterName}'."
             doTry {
                 AutoScalingGroupBeanOptions nextAsgTemplate = AutoScalingGroupBeanOptions.from(asgInputs)
                 nextAsgTemplate.with {
@@ -64,7 +71,8 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                 Promise<LaunchConfigurationBeanOptions> nextLcTemplateConstructed = promiseFor(activities.
                         constructLaunchConfigForNextAsg(userContext, nextAsgTemplate, lcInputs))
                 waitFor(nextLcTemplateConstructed) { LaunchConfigurationBeanOptions nextLcTemplate ->
-                    startDeployment(userContext, deploymentOptions, asgDeploymentNames, nextAsgTemplate, nextLcTemplate)
+                    startDeployment(userContext, deploymentOptions, asgDeploymentNames, nextAsgTemplate, nextLcTemplate,
+                            runningAsgAnalyses)
                 }
             } withCatch { Throwable e ->
                 rollbackCause = e
@@ -73,9 +81,9 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
             } result
         }
         waitFor(deploymentComplete) {
+            runningAsgAnalyses.each { stopScheduledAsgAnalysis(it) } // ensure that ASG Analysis is stopped
             String notificationDestination  = deploymentOptions.notificationDestination
             AsgDeploymentNames asgDeploymentNames = asgDeploymentNamesPromise.get()
-            String clusterName = Relationships.clusterFromGroupName(asgDeploymentNames.nextAsgName)
             String deploymentCompleteMessage = 'Deployment was successful.'
             String subject = "Deployment succeeded for ASG '${asgDeploymentNames.nextAsgName}'."
             if (rollbackCause) {
@@ -93,7 +101,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
 
     private Promise<Void> startDeployment(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
             AsgDeploymentNames asgDeploymentNames, AutoScalingGroupBeanOptions nextAsgTemplate,
-            LaunchConfigurationBeanOptions nextLcTemplate) {
+            LaunchConfigurationBeanOptions nextLcTemplate, List<DoTry<ScheduledAsgAnalysis>> runningAsgAnalyses) {
         status "Creating Launch Configuration '${asgDeploymentNames.nextLaunchConfigName}'."
         Promise<String> launchConfigCreated = promiseFor(activities.createLaunchConfigForNextAsg(userContext,
                 nextAsgTemplate, nextLcTemplate))
@@ -108,6 +116,10 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                 allPromises(scalingPolicyCount, scheduledActionCount)
             }
         }
+
+        String clusterName = deploymentOptions.clusterName
+        DoTry<ScheduledAsgAnalysis> startAsgAnalysis = startScheduledAsgAnalysis(asgCreated, clusterName)
+        runningAsgAnalyses << startAsgAnalysis
 
         Promise<Boolean> scaleToDesiredCapacity = waitFor(asgCreated) {
             status "New ASG '${asgDeploymentNames.nextAsgName}' was successfully created."
@@ -141,6 +153,8 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
         }
 
         Promise<Boolean> isPreviousAsgDisabled = waitFor(disablePreviousAsg) {
+            stopScheduledAsgAnalysis(startAsgAnalysis)
+            runningAsgAnalyses.remove(startAsgAnalysis)
             if (!it) { return promiseFor(false) }
             if (deploymentOptions.disablePreviousAsg) {
                 String previousAsgName = asgDeploymentNames.previousAsgName
@@ -172,6 +186,33 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                     }
                 }
             }
+        }
+    }
+
+    private DoTry<ScheduledAsgAnalysis> startScheduledAsgAnalysis(Promise<?> trigger, String clusterName) {
+        doTry {
+            waitFor(trigger) {
+                retry(getRemoteServiceRetryPolicy()) {
+                    promiseFor(activities.startAsgAnalysis(clusterName))
+                }
+            }
+        } withCatch { Throwable t ->
+            status "Error starting ASG analyzer: ${t}"
+        }
+    }
+
+    private void stopScheduledAsgAnalysis(DoTry<ScheduledAsgAnalysis> startAsgAnalysis) {
+        if (null == startAsgAnalysis) { return }
+        startAsgAnalysis.cancel(null) // cancel analysis launch in case it is still trying to start
+        waitFor(startAsgAnalysis.result) { ScheduledAsgAnalysis scheduledAnalysis ->
+            doTry {
+                retry(getRemoteServiceRetryPolicy()) {
+                    activities.stopAsgAnalysis(scheduledAnalysis?.name)
+                    Promise.Void()
+                }
+            } withCatch { Throwable t ->
+                status "Error stopping ASG analyzer: ${t}"
+            } result
         }
     }
 
