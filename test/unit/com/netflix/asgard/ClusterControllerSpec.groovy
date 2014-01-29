@@ -306,7 +306,7 @@ class ClusterControllerSpec extends Specification {
         then:
         flash.message == "Cluster 'helloworld' should only have one ASG to enable automatic deployment."
         flash.chainModel.cmd == cmd
-        response.redirectedUrl == '/cluster/prepareDeployment'
+        response.redirectedUrl == '/cluster/prepareDeployment/helloworld'
     }
 
     @Unroll
@@ -327,7 +327,7 @@ class ClusterControllerSpec extends Specification {
         then:
         flash.message == "ASG in cluster 'helloworld' should be receiving traffic to enable automatic deployment."
         flash.chainModel.cmd == cmd
-        response.redirectedUrl == '/cluster/prepareDeployment'
+        response.redirectedUrl == '/cluster/prepareDeployment/helloworld'
 
         where:
         launchSuspended | terminateSuspended | addToLoadBalancerSuspended

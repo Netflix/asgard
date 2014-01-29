@@ -310,7 +310,6 @@ ${lastGroup.loadBalancerNames}"""
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions()
         bindData(deploymentOptions, params)
         deploymentOptions.clusterName = cmd.clusterName
-        UserContext userContext = UserContext.of(request)
 
         if (params.createAsgOnly) {
             String appName = Relationships.appNameFromGroupName(cmd.clusterName)
