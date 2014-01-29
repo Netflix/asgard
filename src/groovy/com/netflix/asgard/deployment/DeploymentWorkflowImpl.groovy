@@ -81,7 +81,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
             } result
         }
         waitFor(deploymentComplete) {
-            for(DoTry runningAsgAnalysis : runningAsgAnalyses) {
+            for (DoTry runningAsgAnalysis : runningAsgAnalyses) {
                 stopScheduledAsgAnalysis(runningAsgAnalysis) // ensure that ASG Analysis is stopped
             }
             String notificationDestination  = deploymentOptions.notificationDestination
