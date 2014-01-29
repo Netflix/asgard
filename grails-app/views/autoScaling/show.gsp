@@ -125,15 +125,15 @@
         </tr>
         <tr class="prop">
           <td class="name">New Instance Launching:</td>
-          <td class="value'}">${launchStatus}</td>
+          <td class="value'}" id="launchStatus">${launchStatus}</td>
         </tr>
         <tr class="prop">
           <td class="name">Instance Terminating:</td>
-          <td class="value'}">${terminateStatus}</td>
+          <td class="value'}" id="terminateStatus">${terminateStatus}</td>
         </tr>
         <tr class="prop">
           <td class="name">Adding to Load Balancer:</td>
-          <td class="value'}">${addToLoadBalancerStatus}</td>
+          <td class="value'}" id="addToLoadBalancerStatus">${addToLoadBalancerStatus}</td>
         </tr>
         <g:if test="${isChaosMonkeyActive}">
           <tr class="prop">

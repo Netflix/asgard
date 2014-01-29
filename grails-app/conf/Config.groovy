@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstanceTypeData
 import org.apache.log4j.DailyRollingFileAppender
+
 
 // http://grails.org/doc/latest/guide/3.%20Configuration.html#3.1.2 Logging
 log4j = {
@@ -173,14 +175,20 @@ server {
 environments {
     development {
         server.online = !System.getProperty('offline')
-        if (!server.online) { println 'Config: working offline' }
+        if (!server.online) {
+            println 'Config: working offline'
+        }
         plugin {
             refreshDelay = 5000
         }
         workflow.taskList = "asgard_${System.getProperty('user.name')}"
     }
     test {
-        server.online = false
+        if (System.getProperty('regressionSuite') == 'true') {
+            server.online = true
+        } else {
+            server.online = false
+        }
     }
     production {
         cloud {
