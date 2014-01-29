@@ -7,9 +7,10 @@ There are many ways to contribute to Asgard:
 * Improving and extending our [wiki](https://github.com/Netflix/asgard/wiki)
 * Fixing open issues listed in the [issue tracker](https://github.com/Netflix/asgard/issues)
 * Proposing, discussing, and implementing new features
+* Participating in the [Asgard Show on Google Hangouts](http://www.youtube.com/user/TheAsgardShow)
 * [Join us at Netflix](http://jobs.netflix.com/) and work on Asgard fulltime! 
-Participating in the [Asgard Show on Google Hangouts](http://www.youtube.com/user/TheAsgardShow)
 * Suprising us with some other form of contribution!
+
 
 All forms of contribution are very much appreciated.
 
