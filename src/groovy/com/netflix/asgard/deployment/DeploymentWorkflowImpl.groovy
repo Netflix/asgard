@@ -81,7 +81,9 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
             } result
         }
         waitFor(deploymentComplete) {
-            runningAsgAnalyses.each { stopScheduledAsgAnalysis(it) } // ensure that ASG Analysis is stopped
+            for(DoTry runningAsgAnalysis : runningAsgAnalyses) {
+                stopScheduledAsgAnalysis(runningAsgAnalysis) // ensure that ASG Analysis is stopped
+            }
             String notificationDestination  = deploymentOptions.notificationDestination
             AsgDeploymentNames asgDeploymentNames = asgDeploymentNamesPromise.get()
             String deploymentCompleteMessage = 'Deployment was successful.'
