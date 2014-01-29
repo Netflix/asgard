@@ -216,16 +216,16 @@ ${lastGroup.loadBalancerNames}"""
         attributes?.putAll([
                 deploymentWorkflowOptions: new DeploymentWorkflowOptions(
                         notificationDestination: params.notificationDestination ?: email,
-                        delayDurationMinutes: params.delayDurationMinutes ?: 0,
+                        delayDurationMinutes: params.int('delayDurationMinutes') ?: 0,
                         doCanary: Boolean.parseBoolean(params.doCanary),
-                        canaryCapacity: params.canaryCount ?: 1,
-                        canaryStartUpTimeoutMinutes: params.canaryStartUpTimeoutMinutes ?: 30,
-                        canaryJudgmentPeriodMinutes: params.canaryJudgmentPeriodMinutes ?: 60,
+                        canaryCapacity: params.int('canaryCount') ?: 1,
+                        canaryStartUpTimeoutMinutes: params.int('canaryStartUpTimeoutMinutes') ?: 30,
+                        canaryJudgmentPeriodMinutes: params.int('canaryJudgmentPeriodMinutes') ?: 60,
                         scaleUp: ProceedPreference.parse(params.scaleUp),
-                        desiredCapacityStartUpTimeoutMinutes: params.desiredCapacityStartUpTimeoutMinutes ?: 40,
-                        desiredCapacityJudgmentPeriodMinutes: params.desiredCapacityJudgmentPeriodMinutes ?: 120,
+                        desiredCapacityStartUpTimeoutMinutes: params.int('desiredCapacityStartUpTimeoutMinutes') ?: 40,
+                        desiredCapacityJudgmentPeriodMinutes: params.int('desiredCapacityJudgmentPeriodMinutes') ?: 120,
                         disablePreviousAsg: ProceedPreference.parse(params.disablePreviousAsg),
-                        fullTrafficJudgmentPeriodMinutes: params.fullTrafficJudgmentPeriodMinutes ?: 240,
+                        fullTrafficJudgmentPeriodMinutes: params.int('fullTrafficJudgmentPeriodMinutes') ?: 240,
                         deletePreviousAsg: ProceedPreference.parse(params.deletePreviousAsg)
                 )
         ])
@@ -286,14 +286,30 @@ ${lastGroup.loadBalancerNames}"""
     }
 
     def deploy(DeployCommand cmd) {
+        UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
+            flash.message = "Cluster '${cmd.clusterName}' is invalid."
             chain(action: 'prepareDeployment', model: [cmd: cmd], params: params)
+            return
+        }
+        Cluster cluster = awsAutoScalingService.getCluster(userContext, cmd.clusterName)
+        if (cluster.size() != 1) {
+            flash.message = "Cluster '${cmd.clusterName}' should only have one ASG to enable automatic deployment."
+            chain(action: 'prepareDeployment', model: [cmd: cmd], params: params, id: cmd.clusterName)
+            return
+        }
+        AutoScalingGroupData group = cluster.last()
+        if ( group.isLaunchingSuspended() ||
+             group.isTerminatingSuspended() ||
+             group.isAddingToLoadBalancerSuspended()
+        ) {
+            flash.message = "ASG in cluster '${cmd.clusterName}' should be receiving traffic to enable automatic deployment."
+            chain(action: 'prepareDeployment', model: [cmd: cmd], params: params, id: cmd.clusterName)
             return
         }
         DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions()
         bindData(deploymentOptions, params)
         deploymentOptions.clusterName = cmd.clusterName
-        UserContext userContext = UserContext.of(request)
 
         if (params.createAsgOnly) {
             String appName = Relationships.appNameFromGroupName(cmd.clusterName)
