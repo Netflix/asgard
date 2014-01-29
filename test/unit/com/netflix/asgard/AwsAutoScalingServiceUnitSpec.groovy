@@ -319,6 +319,9 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
         awsAutoScalingService.discoveryService = Mock(DiscoveryService) {
             getAppInstancesByIds(_, _) >> []
         }
+        awsAutoScalingService.configService = Mock(ConfigService) {
+            getRegionalDiscoveryServer(_) >> 'eureka_url'
+        }
 
         expect:
         awsAutoScalingService.reasonAsgIsNotOperational(UserContext.auto(Region.US_WEST_1), 'service1-int-v008', 1) ==
@@ -336,6 +339,9 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
                 status = EurekaStatus.DOWN.name()
                 it
             }]
+        }
+        awsAutoScalingService.configService = Mock(ConfigService) {
+            getRegionalDiscoveryServer(_) >> 'eureka_url'
         }
 
         expect:
@@ -363,6 +369,9 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
         awsAutoScalingService.awsEc2Service = Mock(AwsEc2Service) {
             checkHostsHealth(_) >> false
         }
+        awsAutoScalingService.configService = Mock(ConfigService) {
+            getRegionalDiscoveryServer(_) >> 'eureka_url'
+        }
 
         expect:
         awsAutoScalingService.reasonAsgIsNotOperational(UserContext.auto(Region.US_WEST_1), 'service1-int-v008', 1) ==
@@ -383,6 +392,9 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
         }
         awsAutoScalingService.awsEc2Service = Mock(AwsEc2Service) {
             checkHostsHealth(_) >> true
+        }
+        awsAutoScalingService.configService = Mock(ConfigService) {
+            getRegionalDiscoveryServer(_) >> 'eureka_url'
         }
 
         expect:
@@ -409,6 +421,9 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
             getInstanceStateDatas(_, 'loadBalancer1', _) >> [new InstanceStateData(state: 'InService',
                     autoScalingGroupName: 'service1-int-v008'), new InstanceStateData(state: 'OutOfService',
                     autoScalingGroupName: 'service1-int-v008')]
+        }
+        awsAutoScalingService.configService = Mock(ConfigService) {
+            getRegionalDiscoveryServer(_) >> 'eureka_url'
         }
 
         expect:
@@ -437,9 +452,36 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
                     autoScalingGroupName: 'service1-int-v008'), new InstanceStateData(state: 'OutOfService',
                     autoScalingGroupName: 'service1-int-v007')]
         }
+        awsAutoScalingService.configService = Mock(ConfigService) {
+            getRegionalDiscoveryServer(_) >> 'eureka_url'
+        }
 
         expect:
         awsAutoScalingService.reasonAsgIsNotOperational(UserContext.auto(Region.US_WEST_1), 'service1-int-v008', 1) == ''
+    }
+
+    def 'should determine healthy ASG when Eureka is not configured'() {
+        awsAutoScalingService = Spy(AwsAutoScalingService) {
+            getAutoScalingGroup(_, _) >> { new AutoScalingGroup(autoScalingGroupName: it[1], instances: [
+                    new Instance(instanceId: 'i-f00dcafe', lifecycleState: LifecycleState.InService.name()) ],
+                    loadBalancerNames: ['loadBalancer1'])
+            }
+        }
+        awsAutoScalingService.awsLoadBalancerService = Mock(AwsLoadBalancerService) {
+            getInstanceStateDatas(_, 'loadBalancer1', _) >> [new InstanceStateData(state: 'InService',
+                    autoScalingGroupName: 'service1-int-v008'), new InstanceStateData(state: 'OutOfService',
+                    autoScalingGroupName: 'service1-int-v007')]
+        }
+        awsAutoScalingService.configService = Mock(ConfigService)
+
+        when:
+        String reason = awsAutoScalingService.reasonAsgIsNotOperational(UserContext.auto(Region.US_WEST_1),
+                'service1-int-v008', 1)
+
+        then:
+        reason == ''
+        0 * awsAutoScalingService.discoveryService
+        1 * awsAutoScalingService.configService.getRegionalDiscoveryServer(_)
     }
 
     def 'should update ASG and change everything'() {
