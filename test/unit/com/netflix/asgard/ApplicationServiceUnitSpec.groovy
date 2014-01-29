@@ -16,7 +16,6 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.simpledb.AmazonSimpleDB
-import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.MonitorBucketType
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -49,7 +48,7 @@ class ApplicationServiceUnitSpec extends Specification {
         mockApplications()
 
         when:
-        def appsForLoadBalancer = applicationService.getRegisteredApplicationsForLoadBalancer(Mocks.userContext())
+        def appsForLoadBalancer = applicationService.getRegisteredApplicationsForLoadBalancer(UserContext.auto())
 
         then:
         4 == appsForLoadBalancer.size()
@@ -63,7 +62,7 @@ class ApplicationServiceUnitSpec extends Specification {
         mockApplications()
 
         when:
-        def allApps = applicationService.getRegisteredApplications(Mocks.userContext())
+        def allApps = applicationService.getRegisteredApplications(UserContext.auto())
 
         then:
         5 == allApps.size()

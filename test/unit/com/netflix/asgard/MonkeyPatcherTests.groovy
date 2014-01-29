@@ -17,7 +17,6 @@ package com.netflix.asgard
 
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.Tag
-import com.netflix.asgard.mock.Mocks
 import org.junit.Before
 import org.junit.Test
 
@@ -25,7 +24,7 @@ class MonkeyPatcherTests {
 
     @Before
     void setUp() {
-        Mocks.monkeyPatcherService().afterPropertiesSet()
+        new MonkeyPatcherService().createDynamicMethods()
     }
 
     @Test
