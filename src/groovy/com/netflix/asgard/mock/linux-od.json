@@ -293,6 +293,50 @@
                                         }
                                     }
                                 ]
+                            },
+                            {
+                                "size": "i2.xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.853"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.705"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.410"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "6.820"
+                                        }
+                                    }
+                                ]
                             }
                         ]
                     },
@@ -580,6 +624,50 @@
                                         }
                                     }
                                 ]
+                            },
+                            {
+                                "size": "i2.xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.853"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.705"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.410"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "6.820"
+                                        }
+                                    }
+                                ]
                             }
                         ]
                     },
@@ -755,6 +843,55 @@
                                         "name": "linux",
                                         "prices": {
                                             "USD": "1.840"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "storageCurrentGen",
+                        "sizes": [
+                            {
+                                "size": "i2.xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.938"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.876"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.751"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "7.502"
                                         }
                                     }
                                 ]
@@ -1061,6 +1198,50 @@
                                         }
                                     }
                                 ]
+                            },
+                            {
+                                "size": "i2.xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.938"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.876"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.751"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "7.502"
+                                        }
+                                    }
+                                ]
                             }
                         ]
                     },
@@ -1296,6 +1477,50 @@
                                         "name": "linux",
                                         "prices": {
                                             "USD": "5.570"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.018"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.035"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "4.070"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "8.140"
                                         }
                                     }
                                 ]
@@ -1570,6 +1795,50 @@
                                         }
                                     }
                                 ]
+                            },
+                            {
+                                "size": "i2.xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.051"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.101"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "4.202"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "8.404"
+                                        }
+                                    }
+                                ]
                             }
                         ]
                     },
@@ -1805,6 +2074,50 @@
                                         "name": "linux",
                                         "prices": {
                                             "USD": "5.570"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.018"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.035"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "4.070"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "8.140"
                                         }
                                     }
                                 ]
