@@ -32,7 +32,7 @@ class InstanceTypeControllerTests {
     void testList() {
         def attrs = controller.list()
         List<InstanceTypeData> types = attrs.instanceTypes
-        assert 19 == types.size()
+        assert 19 < types.size()
         assert 't1.micro' == types[0].name
         InstanceTypeData m1Small = types[1]
         assert 'Small (Default)' == m1Small.hardwareProfile.size
@@ -42,7 +42,8 @@ class InstanceTypeControllerTests {
         assert '2' == c1medium.hardwareProfile.vCpu
         assert '64-bit' == types.find { it.name == 'm1.large' }.hardwareProfile.arch
         assert 'Moderate' == types.find { it.name == 'm2.xlarge' }.hardwareProfile.netPerf
-
         assert 0.060 == m1Small.linuxOnDemandPrice
+
+        assert 4 <= types.findAll{ it.name =~ /i2./ }.size
     }
 }
