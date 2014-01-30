@@ -199,7 +199,19 @@ class InstanceTypeService implements CacheInitializer {
                         ebsOptim: '-', netPerf: 'Very Low'),
                 new HardwareProfile(instanceType: 'cg1.4xlarge', family: 'GPU instances', group: 'Cluster GPU',
                         size: xxxxl, arch: '64-bit', vCpu: '16', ecu: '33.5', mem: '22.5', storage: '2 x 840',
-                        ebsOptim: '-', netPerf: '10 Gigabit')
+                        ebsOptim: '-', netPerf: '10 Gigabit'),
+                new HardwareProfile(instanceType: 'i2.xlarge', family: 'Storage optimized', group: 'High-Storage',
+                        size: xl, arch: '64-bit', vCpu: '4', ecu: '14', mem: '30.5', storage: '1 x 800 SSD',
+                        ebsOptim: 'Yes', netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'i2.2xlarge', family: 'Storage optimized', group: 'High-Storage',
+                        size: xxl, arch: '64-bit', vCpu: '8', ecu: '27', mem: '61', storage: '2 x 800 SSD',
+                        ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'i2.4xlarge', family: 'Storage optimized', group: 'High-Storage',
+                        size: xxxxl, arch: '64-bit', vCpu: '16', ecu: '53', mem: '122', storage: '4 x 800 SSD',
+                        ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'i2.8xlarge', family: 'Storage optimized', group: 'High-Storage',
+                        size: xxxxxxxxl, arch: '64-bit', vCpu: '32', ecu: '104', mem: '244', storage: '8 x 800 SSD',
+                        ebsOptim: 'Yes', netPerf: '10 Gigabit')
         ]
     }
 
