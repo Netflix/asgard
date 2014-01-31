@@ -24,6 +24,7 @@ import com.netflix.asgard.Link
 import com.netflix.asgard.Relationships
 import com.netflix.asgard.Spring
 import com.netflix.asgard.Task
+import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.AutoScalingProcessType
 import org.apache.commons.logging.LogFactory
 
@@ -116,7 +117,8 @@ ${groupTemplate.loadBalancerNames} and result ${result}"""
                 if (options.initialTraffic == InitialTraffic.PREVENTED) {
                     // Prevent Discovery traffic from going to newly launched instances.
                     AutoScalingProcessType.getPrimaryProcesses().each {
-                        awsAutoScalingService.suspendProcess(options.common.userContext, it, options.common.groupName, task)
+                        UserContext userContext = options.common.userContext
+                        awsAutoScalingService.suspendProcess(userContext, it, options.common.groupName, task)
                     }
                 }
 

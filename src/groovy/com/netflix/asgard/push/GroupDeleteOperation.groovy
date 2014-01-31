@@ -100,8 +100,8 @@ class GroupDeleteOperation extends AbstractPushOperation {
             if (!group) {
                 asgStillExists = false
             } else if (new Duration(terminationStartTime, Time.now()).isLongerThan(MAX_TIME_FOR_DELETION)) {
-                throw new PushException("Timeout waiting ${Time.format(MAX_TIME_FOR_DELETION)} for auto scaling group " +
-                        "'${autoScalingGroup.autoScalingGroupName}' to disappear from AWS.")
+                throw new PushException("Timeout waiting ${Time.format(MAX_TIME_FOR_DELETION)} for auto scaling " +
+                        "group '${autoScalingGroup.autoScalingGroupName}' to disappear from AWS.")
             }
         }
     }

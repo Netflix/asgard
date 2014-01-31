@@ -27,9 +27,9 @@ class AutoScalingGroupTests extends GroovyTestCase {
         Date start = new Date()
         Collection<Instance> instances = [new Instance().withInstanceId("id-blahblah")]
         AutoScalingGroup original = new AutoScalingGroup().withAutoScalingGroupName("name")
-                .withAvailabilityZones(["one", "two"]).withDefaultCooldown(10).withDesiredCapacity(2).withCreatedTime(start)
-                .withMaxSize(4).withMinSize(4).withLoadBalancerNames([]).withLaunchConfigurationName("lcname")
-                .withInstances(instances)
+                .withAvailabilityZones(["one", "two"]).withDefaultCooldown(10).withDesiredCapacity(2)
+                .withCreatedTime(start).withMaxSize(4).withMinSize(4).withLoadBalancerNames([])
+                .withLaunchConfigurationName("lcname").withInstances(instances)
         AutoScalingGroup copy = original.copy()
 
         assert !copy.is(original)

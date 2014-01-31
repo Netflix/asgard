@@ -303,7 +303,8 @@ ${lastGroup.loadBalancerNames}"""
              group.isTerminatingSuspended() ||
              group.isAddingToLoadBalancerSuspended()
         ) {
-            flash.message = "ASG in cluster '${cmd.clusterName}' should be receiving traffic to enable automatic deployment."
+            flash.message = "ASG in cluster '${cmd.clusterName}' should be receiving traffic to enable automatic " +
+                    "deployment."
             chain(action: 'prepareDeployment', model: [cmd: cmd], params: params, id: cmd.clusterName)
             return
         }

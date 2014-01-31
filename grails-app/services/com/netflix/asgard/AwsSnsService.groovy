@@ -153,7 +153,8 @@ class AwsSnsService implements CacheInitializer, InitializingBean {
         }, Link.to(EntityType.topic, subscription.topicName), existingTask)
     }
 
-    void deleteSubscription(UserContext userContext, String topicName, String subscriptionArn, Task existingTask = null) {
+    void deleteSubscription(UserContext userContext, String topicName, String subscriptionArn,
+                            Task existingTask = null) {
         taskService.runTask(userContext, "Delete Subscription '${subscriptionArn}'", { Task task ->
             awsClient.by(userContext.region).unsubscribe(new UnsubscribeRequest(subscriptionArn: subscriptionArn))
         }, Link.to(EntityType.topic, topicName), existingTask)

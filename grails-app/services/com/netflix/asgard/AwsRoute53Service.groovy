@@ -221,7 +221,8 @@ class AwsRoute53Service implements CacheInitializer, InitializingBean {
         }, Link.to(EntityType.hostedZone, hostedZoneId)) as ChangeInfo
     }
 
-    private ChangeInfo changeResourceRecordSet(UserContext userContext, String hostedZoneId, Change change, String comment) {
+    private ChangeInfo changeResourceRecordSet(UserContext userContext, String hostedZoneId, Change change,
+                                               String comment) {
         ChangeBatch changeBatch = new ChangeBatch(comment: comment, changes: [change])
         def request = new ChangeResourceRecordSetsRequest(hostedZoneId: hostedZoneId, changeBatch: changeBatch)
         String action = GrailsNameUtils.getNaturalName(change.action.toLowerCase())

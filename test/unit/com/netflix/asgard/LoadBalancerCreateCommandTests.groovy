@@ -20,7 +20,7 @@ import grails.test.mixin.TestFor
 import org.junit.Before
 import org.junit.Test
 
-// http://stackoverflow.com/questions/1703952/grails-how-do-you-unit-test-a-command-object-with-a-service-injected-into-it
+// http://stackoverflow.com/questions/1703952/grails-how-do-you-unit-test-a-command-object-with-a-service-injected
 @TestFor(LoadBalancerController)
 class LoadBalancerCreateCommandTests {
 
@@ -163,7 +163,8 @@ class LoadBalancerCreateCommandTests {
 
     @Test
     void testNewStackWithReservedFormatIsNotValid() {
-        LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", newStack:"v293")
+        LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache",
+                newStack:"v293")
         assert cmd.hasErrors()
         assert 1 == cmd.errors.errorCount
         assert "name.usesReservedFormat" == cmd.errors.newStack
@@ -189,7 +190,8 @@ class LoadBalancerCreateCommandTests {
 
     @Test
     void testDetailWithReservedFormatIsInvalid() {
-        LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache", detail: "v021")
+        LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache",
+                detail: "v021")
         assert cmd.hasErrors()
         assert 1 == cmd.errors.errorCount
         assert "name.usesReservedFormat" == cmd.errors.detail
@@ -214,8 +216,9 @@ class LoadBalancerCreateCommandTests {
 
     @Test
     void testTotalNameIsTooLong() {
+        def deets = "integration-24-usa-iphone-ios5-even-numbered-days-except-weekends-and-except-when-the-moon-is-full"
         LoadBalancerCreateCommand cmd = validateParams(applicationService: appService, appName: "abcache",
-                stack: "navigator", detail: "integration-240-usa-iphone-ipad-ios5-even-numbered-days-except-weekends-and-excluding-when-the-moon-is-full")
+                stack: "navigator", detail: deets)
         assert cmd.hasErrors()
         assert 1 == cmd.errors.errorCount
         assert "The complete load balancer name cannot exceed 96 characters" == cmd.errors.appName

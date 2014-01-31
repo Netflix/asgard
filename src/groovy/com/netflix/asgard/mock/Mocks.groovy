@@ -133,7 +133,8 @@ class Mocks {
                             ],
                             email: [:],
                             grails: [
-                                    awsAccountNames: [(TEST_AWS_ACCOUNT_ID): 'test', (PROD_AWS_ACCOUNT_ID): 'prod', (SEG_AWS_ACCOUNT_ID): 'seg'],
+                                    awsAccountNames: [(TEST_AWS_ACCOUNT_ID): 'test', (PROD_AWS_ACCOUNT_ID): 'prod',
+                                            (SEG_AWS_ACCOUNT_ID): 'seg'],
                                     awsAccounts: [TEST_AWS_ACCOUNT_ID, PROD_AWS_ACCOUNT_ID]
                             ],
                             promote: [
@@ -190,7 +191,9 @@ class Mocks {
             namesToApps = namesToApps.asImmutable()
 
             applicationService.metaClass.getRegisteredApplications = { UserContext userContext -> apps }
-            applicationService.metaClass.getRegisteredApplication = { UserContext userContext, String name -> namesToApps[name] }
+            applicationService.metaClass.getRegisteredApplication = { UserContext userContext, String name ->
+                namesToApps[name]
+            }
 
             applicationService.afterPropertiesSet()
             applicationService.initializeCaches()
@@ -272,7 +275,9 @@ class Mocks {
             discoveryService.eurekaAddressCollectorService = eurekaAddressCollectorService()
             discoveryService.configService = configService()
             discoveryService.taskService = taskService()
-            discoveryService.metaClass.getAppInstancesByIds = { UserContext userContext, List<String> instanceIds -> [] }
+            discoveryService.metaClass.getAppInstancesByIds = { UserContext userContext, List<String> instanceIds ->
+                []
+            }
             discoveryService.initializeCaches()
         }
         discoveryService

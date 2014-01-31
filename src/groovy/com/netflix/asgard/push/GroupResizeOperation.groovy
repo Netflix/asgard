@@ -152,8 +152,8 @@ class GroupResizeOperation extends AbstractPushOperation {
             Integer secondsToWait = Math.max(1L,
                     secondsToWaitBetweenBatches - batchDuration.getStandardSeconds() as Integer)
             Duration durationToWait = Duration.standardSeconds(secondsToWait)
-            String durationToWaitString = Time.format(durationToWait)
-            task.log("Waiting another ${durationToWaitString} for external monitoring systems to be ready for more instances")
+            String waitTime = Time.format(durationToWait)
+            task.log("Waiting another ${waitTime} for external monitoring systems to be ready for more instances")
             Time.sleepCancellably(secondsToWait * 1000)
         }
     }
@@ -350,9 +350,9 @@ class GroupResizeOperation extends AbstractPushOperation {
                 task.log("Group '${autoScalingGroupName}' instance count ${currentCount} is within new " +
                         "bounds ${newMin} to ${newMax}")
             } else if (new Duration(terminationStartTime, Time.now()).isLongerThan(calculateMaxTimePerBatch())) {
-                throw new PushException("Timeout waiting ${Time.format(calculateMaxTimePerBatch())} for auto scaling group " +
-                        "'${autoScalingGroupName}' to shrink to size ${newMax}. Group still has ${currentCount} " +
-                        "instance${currentCount == 1 ? '' : 's'}.")
+                throw new PushException("Timeout waiting ${Time.format(calculateMaxTimePerBatch())} for auto scaling " +
+                        "group '${autoScalingGroupName}' to shrink to size ${newMax}. Group still has " +
+                        "${currentCount} instance${currentCount == 1 ? '' : 's'}.")
             }
         }
     }

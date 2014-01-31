@@ -130,8 +130,8 @@ import java.lang.reflect.Modifier
      * @param entitySpecificLinkGeneration link generation attribute modification specific to this type of object
      * @return constructed EntityType
      */
-    static <T> EntityType<T> create(String displayName, Closure<String> keyer, String idPrefix = '', String linkPurpose = '',
-            Closure entitySpecificLinkGeneration = { Map attrs, String objectId ->  }) {
+    static <T> EntityType<T> create(String displayName, Closure<String> keyer, String idPrefix = '',
+            String linkPurpose = '', Closure entitySpecificLinkGeneration = { Map attrs, String objectId ->  }) {
         new EntityType<T>(displayName, keyer, idPrefix, linkPurpose ?: "Show details of this ${displayName}",
                 entitySpecificLinkGeneration)
     }

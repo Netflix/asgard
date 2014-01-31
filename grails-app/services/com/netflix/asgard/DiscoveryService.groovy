@@ -211,7 +211,7 @@ class DiscoveryService implements CacheInitializer {
         ).performWithRetries()
     }
 
-    /** Disables one or more application instances with a given app and host names by setting status to OUT_OF_SERVICE */
+    /** Disables one or more application instances with given app and host names by setting status to OUT_OF_SERVICE */
     void disableAppInstances(UserContext userContext, String appName, List<String> hostNames,
                              Task existingTask = null) {
         taskService.runTask(userContext, "Disable '${hostNames}' in Eureka", { task ->

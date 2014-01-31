@@ -204,7 +204,7 @@ class FastPropertyService implements CacheInitializer {
                     Time.sleepCancellably(500)
                 }
 
-                // Update target regional cache. Also update user's current context regional cache if different from target.
+                // Update target regional cache. Also update user context's regional cache if different from target.
                 if (userContext.region != userContextThatDelivered.region) {
                     get(userContext, id)
                 }
@@ -233,7 +233,8 @@ class FastPropertyService implements CacheInitializer {
     List<String> collectFastPropertyAppNames(UserContext userContext) {
         List<String> itemAppNames = getAll(userContext)*.appId
         Bag<String> countedAppNames = new HashBag(itemAppNames)
-        List<String> appNames = applicationService.getRegisteredApplications(userContext).collect { AppRegistration app ->
+        List<AppRegistration> applications = applicationService.getRegisteredApplications(userContext)
+        List<String> appNames = applications.collect { AppRegistration app ->
             Collection<String> itemAppNameMatches = countedAppNames.uniqueSet().findAll { String countedAppName ->
                 app.name.equalsIgnoreCase(countedAppName)
             }

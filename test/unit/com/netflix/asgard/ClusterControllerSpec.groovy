@@ -295,7 +295,8 @@ class ClusterControllerSpec extends Specification {
                     AutoScalingGroupData.from(new AutoScalingGroup(autoScalingGroupName: 'helloworld-example-v014',
                             instances: [new Instance(instanceId: 'i-8ee4eeee')]), [:], [], [:], []),
                     AutoScalingGroupData.from(new AutoScalingGroup(autoScalingGroupName: 'helloworld-example-v015',
-                            instances: [new Instance(instanceId: 'i-6ef9f30e'), new Instance(instanceId: 'i-95fe1df6')]),
+                            instances: [new Instance(instanceId: 'i-6ef9f30e'),
+                                    new Instance(instanceId: 'i-95fe1df6')]),
                             [:], [], [:], [])
             ])
         }

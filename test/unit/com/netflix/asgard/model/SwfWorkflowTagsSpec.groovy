@@ -35,7 +35,8 @@ class SwfWorkflowTagsSpec extends Specification {
         expect:
         workflowTags.constructTags() as Set == [
                 '{"desc":"doing a thing"}',
-                '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing","clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing",' +
+                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
                 '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
         ] as Set
     }
@@ -43,7 +44,8 @@ class SwfWorkflowTagsSpec extends Specification {
     def 'should be constructed from swf tags'() {
         workflowTags.withTags([
                 '{"desc":"doing a thing"}',
-                '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing","clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing",' +
+                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
                 '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
         ])
 
@@ -57,7 +59,8 @@ class SwfWorkflowTagsSpec extends Specification {
     def 'should be able to modify tags without changing original'() {
         List<String> originalTags = [
                 '{"desc":"doing a thing"}',
-                '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing","clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing",' +
+                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
                 '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
         ]
         workflowTags.withTags(originalTags)
@@ -70,19 +73,22 @@ class SwfWorkflowTagsSpec extends Specification {
         expect:
         workflowTags.constructTags() as Set == [
                 '{"desc":"doing a different thing"}',
-                '{"user":{"ticket":"jira-456","username":"rtargaryen","clientHostName":"King\'s Landing","clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                '{"user":{"ticket":"jira-456","username":"rtargaryen","clientHostName":"King\'s Landing",' +
+                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
                 '{"link":{"type":{"name":"cluster"},"id":"hizzouse-targaryen"}}'
         ] as Set
         originalTags == [
                 '{"desc":"doing a thing"}',
-                '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing","clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing",' +
+                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
                 '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
         ]
     }
 
     def 'should handle tags in any order'() {
         workflowTags.withTags([
-                '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing","clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing",' +
+                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
                 '{"desc":"doing a thing"}',
                 '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
         ])

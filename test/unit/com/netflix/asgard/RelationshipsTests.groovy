@@ -285,17 +285,17 @@ class RelationshipsTests extends GrailsUnitTestCase {
         assert null == names.zone
 
         names = Relationships.dissectCompoundName(
-                'cass-nccpintegration-random-junk-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-w0A-z0useast1a-v003')
-        assert 'cass-nccpintegration-random-junk-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-w0A-z0useast1a-v003' == names.group
-        assert 'cass-nccpintegration-random-junk-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-w0A-z0useast1a' == names.cluster
+                'cass-nccpint-random-junk-c0america-d0prod-h0xbox-p0vizio-r027-u0nccp-w0A-z0useast1a-v003')
+        assert 'cass-nccpint-random-junk-c0america-d0prod-h0xbox-p0vizio-r027-u0nccp-w0A-z0useast1a-v003' == names.group
+        assert 'cass-nccpint-random-junk-c0america-d0prod-h0xbox-p0vizio-r027-u0nccp-w0A-z0useast1a' == names.cluster
         assert 'cass' == names.app
-        assert 'nccpintegration' == names.stack
+        assert 'nccpint' == names.stack
         assert 'random-junk' == names.detail
         assert 'v003' == names.push
         assert 3 == names.sequence
-        assert 'northamerica' == names.countries
+        assert 'america' == names.countries
         assert 'prod' == names.devPhase
-        assert 'gamesystems' == names.hardware
+        assert 'xbox' == names.hardware
         assert 'vizio' == names.partners
         assert '27' == names.revision
         assert 'nccp' == names.usedBy
@@ -424,7 +424,8 @@ class RelationshipsTests extends GrailsUnitTestCase {
     }
 
     void testPackageFromAppVersion() {
-        assert 'helloworld' == Relationships.packageFromAppVersion('helloworld-1.0.0-592112.h154/WE-WAPP-helloworld/154')
+        assert 'helloworld' == Relationships.packageFromAppVersion(
+                'helloworld-1.0.0-592112.h154/WE-WAPP-helloworld/154')
         assert null == Relationships.packageFromAppVersion(null)
         assert null == Relationships.packageFromAppVersion('')
         assert null == Relationships.packageFromAppVersion('dfjsdfkjsdfkjsd fkjsdf kljsdf ksjdf klsdjf sd')
@@ -453,7 +454,8 @@ class RelationshipsTests extends GrailsUnitTestCase {
         assert "discovery" == Relationships.appNameFromLaunchConfigName("discovery-us-east-1d-201010231745")
         assert "evcache" == Relationships.appNameFromLaunchConfigName("evcache-us-east-1d-0-201010231745")
         assert "evcache" == Relationships.appNameFromLaunchConfigName("evcache-us----east-1d-0-201010231745")
-        assert "videometadata" == Relationships.appNameFromLaunchConfigName("videometadata-navigator-integration-240-CAN-201010231745")
+        assert "videometadata" == Relationships.appNameFromLaunchConfigName(
+                "videometadata-navigator-integration-240-CAN-201010231745")
     }
 
     void testAppNameFromLoadBalancerName() {
@@ -466,7 +468,8 @@ class RelationshipsTests extends GrailsUnitTestCase {
         assert "discovery" == Relationships.appNameFromLoadBalancerName("discovery-us-east-1d-frontend")
         assert "evcache" == Relationships.appNameFromLoadBalancerName("evcache-us-east-1d-0-frontend")
         assert "evcache" == Relationships.appNameFromLoadBalancerName("evcache-us----east-1d-0-frontend")
-        assert "videometadata" == Relationships.appNameFromLoadBalancerName("videometadata-navigator-integration-240-CAN-frontend")
+        assert "videometadata" == Relationships.appNameFromLoadBalancerName(
+                "videometadata-navigator-integration-240-CAN-frontend")
     }
 
     void testStackNameFromGroupName() {
@@ -495,7 +498,8 @@ class RelationshipsTests extends GrailsUnitTestCase {
         assert "api-test-A" == Relationships.clusterFromGroupName("api-test-A")
         assert "evcache-us-east-1d-0" == Relationships.clusterFromGroupName("evcache-us-east-1d-0")
         assert "evcache-us----east-1d-0" == Relationships.clusterFromGroupName("evcache-us----east-1d-0")
-        assert "videometadata-navigator-integration-240-CAN" == Relationships.clusterFromGroupName("videometadata-navigator-integration-240-CAN")
+        assert "videometadata-navigator-integration-240-CAN" == Relationships.clusterFromGroupName(
+                "videometadata-navigator-integration-240-CAN")
     }
 
     void testAvoidsReservedFormat() {
@@ -506,7 +510,8 @@ class RelationshipsTests extends GrailsUnitTestCase {
         assert !Relationships.usesReservedFormat("integration-240-usa-iphone-v22")
 
         assert Relationships.usesReservedFormat("integration-v001-usa-iphone")
-        assert Relationships.usesReservedFormat('cass-nccpintegration-random-junk-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a-v003')
+        assert Relationships.usesReservedFormat(
+                'cass-nccpint-random-junk-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-x0A-z0useast1a-v003')
         assert Relationships.usesReservedFormat('c0northamerica')
         assert Relationships.usesReservedFormat('junk-c0northamerica')
         assert Relationships.usesReservedFormat('c0northamerica')
@@ -560,29 +565,46 @@ class RelationshipsTests extends GrailsUnitTestCase {
 
     void testBuildAutoScalingGroupName() {
 
-        assert "helloworld-asgardtest" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest", detail: null])
-        assert "helloworld-asgardtest" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest", detail: ""])
-        assert "helloworld-asgardtest-2" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest", detail: "2"])
+        assert "helloworld-asgardtest" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest",
+                detail: null])
+        assert "helloworld-asgardtest" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest",
+                detail: ""])
+        assert "helloworld-asgardtest-2" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest",
+                detail: "2"])
         assert "helloworld" == Relationships.buildGroupName([appName: "helloworld", stack: "", detail: ""])
         assert "helloworld" == Relationships.buildGroupName([appName: "helloworld", stack: null, detail: null])
-        assert "discovery-us-east-1d" == Relationships.buildGroupName([appName: "discovery", stack: "us", detail: "east-1d"])
-        assert "discovery--us-east-1d" == Relationships.buildGroupName([appName: "discovery", stack: "", detail: "us-east-1d"])
-        assert "discovery--us-east-1d" == Relationships.buildGroupName([appName: "discovery", stack: null, detail: "us-east-1d"])
-        assert "merchweb--loadtest" == Relationships.buildGroupName([appName: "merchweb", stack: "", detail: "loadtest"])
-        assert "merchweb--loadtest" == Relationships.buildGroupName([appName: "merchweb", stack: null, detail: "loadtest"])
+        assert "discovery-us-east-1d" == Relationships.buildGroupName([appName: "discovery", stack: "us",
+                detail: "east-1d"])
+        assert "discovery--us-east-1d" == Relationships.buildGroupName([appName: "discovery", stack: "",
+                detail: "us-east-1d"])
+        assert "discovery--us-east-1d" == Relationships.buildGroupName([appName: "discovery", stack: null,
+                detail: "us-east-1d"])
+        assert "merchweb--loadtest" == Relationships.buildGroupName([appName: "merchweb", stack: "",
+                detail: "loadtest"])
+        assert "merchweb--loadtest" == Relationships.buildGroupName([appName: "merchweb", stack: null,
+                detail: "loadtest"])
 
         def exceptionThrown = false
-        try { Relationships.buildGroupName([appName: "", stack: "asgardtest", detail: "2"]) } catch (IllegalArgumentException ignored) { exceptionThrown = true }
+        try {
+            Relationships.buildGroupName([appName: "", stack: "asgardtest", detail: "2"])
+        } catch (IllegalArgumentException ignored) {
+            exceptionThrown = true
+        }
         assert exceptionThrown
 
         def npeThrown = false
-        try { Relationships.buildGroupName([appName: null, stack: "asgardtest", detail: "2"]) } catch (NullPointerException ignored) { npeThrown = true }
+        try {
+            Relationships.buildGroupName([appName: null, stack: "asgardtest", detail: "2"])
+        } catch (NullPointerException ignored) {
+            npeThrown = true
+        }
         assert npeThrown
 
-        assert "helloworld-asgardtest" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest", detail: null])
+        assert "helloworld-asgardtest" == Relationships.buildGroupName([appName: "helloworld", stack: "asgardtest",
+                detail: null])
 
-        assert 'cass-nccpintegration-random-junk-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-w0A-z0useast1a' ==
-                Relationships.buildGroupName(appName: "cass", stack: "nccpintegration",
+        assert 'cass-nccpint-random-junk-c0northamerica-d0prod-h0gamesystems-p0vizio-r027-u0nccp-w0A-z0useast1a' ==
+                Relationships.buildGroupName(appName: "cass", stack: "nccpint",
                         detail: "random-junk", countries: "northamerica", devPhase: "prod",
                         hardware: "gamesystems", partners: "vizio", revision: "27", usedBy: "nccp", redBlackSwap: "A",
                         zoneVar: "useast1a")
@@ -599,13 +621,15 @@ class RelationshipsTests extends GrailsUnitTestCase {
 
     void testBuildLaunchConfigurationName() {
         assert Relationships.buildLaunchConfigurationName("helloworld") ==~ ~/helloworld-[0-9]{14}/
-        assert Relationships.buildLaunchConfigurationName("integration-240-usa-iphone") ==~ ~/integration-240-usa-iphone-[0-9]{14}/
+        assert Relationships.buildLaunchConfigurationName("integration-240-usa-iphone") ==~
+                ~/integration-240-usa-iphone-[0-9]{14}/
     }
 
     void testBuildLoadBalancerName() {
         assert "helloworld-asgardtest" == Relationships.buildLoadBalancerName("helloworld", "asgardtest", null)
         assert "helloworld-asgardtest" == Relationships.buildLoadBalancerName("helloworld", "asgardtest", "")
-        assert "helloworld-asgardtest-frontend" == Relationships.buildLoadBalancerName("helloworld", "asgardtest", "frontend")
+        assert "helloworld-asgardtest-frontend" == Relationships.buildLoadBalancerName("helloworld", "asgardtest",
+                "frontend")
         assert "helloworld" == Relationships.buildLoadBalancerName("helloworld", "", "")
         assert "helloworld" == Relationships.buildLoadBalancerName("helloworld", null, null)
         assert "discovery-us-east-1d" == Relationships.buildLoadBalancerName("discovery", "us", "east-1d")
@@ -615,35 +639,55 @@ class RelationshipsTests extends GrailsUnitTestCase {
         assert "merchweb--frontend" == Relationships.buildLoadBalancerName("merchweb", null, "frontend")
 
         def exceptionThrown = false
-        try { Relationships.buildLoadBalancerName("", "asgardtest", "frontend") } catch (IllegalArgumentException ignored) { exceptionThrown = true }
+        try {
+            Relationships.buildLoadBalancerName("", "asgardtest", "frontend")
+        } catch (IllegalArgumentException ignored) {
+            exceptionThrown = true
+        }
         assert exceptionThrown
 
         def npeThrown = false
-        try { Relationships.buildLoadBalancerName(null, "asgardtest", "frontend") } catch (NullPointerException ignored) { npeThrown = true }
+        try {
+            Relationships.buildLoadBalancerName(null, "asgardtest", "frontend")
+        } catch (NullPointerException ignored) {
+            npeThrown = true
+        }
         assert npeThrown
     }
 
     void testBaseAmiIdFromDescription() {
         assertNull Relationships.baseAmiIdFromDescription('')
         assertNull Relationships.baseAmiIdFromDescription(null)
-        assert 'ami-50886239' == Relationships.baseAmiIdFromDescription('base_ami_id=ami-50886239,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
-        assert 'ami-1eb75c77' == Relationships.baseAmiIdFromDescription('base_ami_id=ami-1eb75c77,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
-        assert 'ami-1eb75c77' == Relationships.baseAmiIdFromDescription('base_ami_name=servicenet-roku-qadd.dc.81210.10.44,base_ami_id=ami-1eb75c77')
-        assert 'ami-7b4eb912' == Relationships.baseAmiIdFromDescription('store=ebs,ancestor_name=ebs-centosbase-x86_64-20101124,ancestor_id=ami-7b4eb912')
+        assert 'ami-50886239' == Relationships.baseAmiIdFromDescription(
+                'base_ami_id=ami-50886239,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
+        assert 'ami-1eb75c77' == Relationships.baseAmiIdFromDescription(
+                'base_ami_id=ami-1eb75c77,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
+        assert 'ami-1eb75c77' == Relationships.baseAmiIdFromDescription(
+                'base_ami_name=servicenet-roku-qadd.dc.81210.10.44,base_ami_id=ami-1eb75c77')
+        assert 'ami-7b4eb912' == Relationships.baseAmiIdFromDescription(
+                'store=ebs,ancestor_name=ebs-centosbase-x86_64-20101124,ancestor_id=ami-7b4eb912')
     }
 
     void testBaseAmiNameFromDescription() {
-        assert 'servicenet-roku-qadd.dc.81210.10.44' == Relationships.baseAmiNameFromDescription('base_ami_id=ami-50886239,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
-        assert 'servicenet-roku-qadd.dc.81210.10.44' == Relationships.baseAmiNameFromDescription('base_ami_id=ami-1eb75c77,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
-        assert 'servicenet-roku-qadd.dc.81210.10.44' == Relationships.baseAmiNameFromDescription('base_ami_name=servicenet-roku-qadd.dc.81210.10.44,base_ami_id=ami-1eb75c77')
-        assert 'ebs-centosbase-x86_64-20101124' == Relationships.baseAmiNameFromDescription('store=ebs,ancestor_name=ebs-centosbase-x86_64-20101124,ancestor_id=ami-7b4eb912')
+        assert 'servicenet-roku-qadd.dc.81210.10.44' == Relationships.baseAmiNameFromDescription(
+                'base_ami_id=ami-50886239,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
+        assert 'servicenet-roku-qadd.dc.81210.10.44' == Relationships.baseAmiNameFromDescription(
+                'base_ami_id=ami-1eb75c77,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
+        assert 'servicenet-roku-qadd.dc.81210.10.44' == Relationships.baseAmiNameFromDescription(
+                'base_ami_name=servicenet-roku-qadd.dc.81210.10.44,base_ami_id=ami-1eb75c77')
+        assert 'ebs-centosbase-x86_64-20101124' == Relationships.baseAmiNameFromDescription(
+                'store=ebs,ancestor_name=ebs-centosbase-x86_64-20101124,ancestor_id=ami-7b4eb912')
     }
 
     void testBaseAmiDateFromDescription() {
-        assertNull Relationships.baseAmiDateFromDescription('base_ami_id=ami-50886239,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
-        assertNull Relationships.baseAmiDateFromDescription('base_ami_id=ami-1eb75c77,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
-        assertNull Relationships.baseAmiDateFromDescription('base_ami_name=servicenet-roku-qadd.dc.81210.10.44,base_ami_id=ami-1eb75c77')
-        assert new DateTime(2010, 11, 24, 0, 0, 0, 0) == Relationships.baseAmiDateFromDescription('store=ebs,ancestor_name=ebs-centosbase-x86_64-20101124,ancestor_id=ami-7b4eb912')
+        assertNull Relationships.baseAmiDateFromDescription(
+                'base_ami_id=ami-50886239,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
+        assertNull Relationships.baseAmiDateFromDescription(
+                'base_ami_id=ami-1eb75c77,base_ami_name=servicenet-roku-qadd.dc.81210.10.44')
+        assertNull Relationships.baseAmiDateFromDescription(
+                'base_ami_name=servicenet-roku-qadd.dc.81210.10.44,base_ami_id=ami-1eb75c77')
+        assert new DateTime(2010, 11, 24, 0, 0, 0, 0) == Relationships.baseAmiDateFromDescription(
+                'store=ebs,ancestor_name=ebs-centosbase-x86_64-20101124,ancestor_id=ami-7b4eb912')
     }
 
     void testBuildAlarmNameForScalingPolicy() {

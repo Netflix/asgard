@@ -94,9 +94,10 @@ class MergedInstanceGroupingService {
         }
     }
 
-    private List<MergedInstance> injectGroupNames(UserContext userContext, List<MergedInstance> instances, String appName) {
+    private List<MergedInstance> injectGroupNames(UserContext userContext, List<MergedInstance> instances,
+                                                  String appName) {
 
-        // TODO: This is a good spot to look up all the apps and mark which instances have valid app names. Rename this method.
+        // TODO: Good spot to look up all the apps and mark which instances have valid app names. Rename this method.
         Map<String, AutoScalingGroup> instanceIdsToGroups = [:]
         Collection<AutoScalingGroup> groups = appName ?
             awsAutoScalingService.getAutoScalingGroupsForApp(userContext, appName) :

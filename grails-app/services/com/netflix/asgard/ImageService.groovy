@@ -217,7 +217,8 @@ class ImageService implements BackgroundProcessInitializer {
         // String here then the falsy value becomes "{}" which is a truthy value and breaks the if expression.
         Boolean imageTagPromotionEnabled = grailsApplication.config.promote.imageTags ?: false
         String promotionTargetServer = grailsApplication.config.promote.targetServer ?: ''
-        String canonicalServerForBakeEnvironment = grailsApplication.config.promote.canonicalServerForBakeEnvironment ?: ''
+        String canonicalServerForBakeEnvironment =
+                grailsApplication.config.promote.canonicalServerForBakeEnvironment ?: ''
         if (!imageTagPromotionEnabled || !promotionTargetServer || !canonicalServerForBakeEnvironment) {
             log.debug 'Environment not configured for tag replication.'
             return false

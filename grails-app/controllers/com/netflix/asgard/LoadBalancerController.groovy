@@ -122,7 +122,7 @@ class LoadBalancerController {
 
     def save = { LoadBalancerCreateCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass both errors and params
         } else {
 
             // Load Balancer name
@@ -142,7 +142,8 @@ class LoadBalancerController {
                 if (params.protocol2) {
                     listeners.add(new Listener()
                             .withProtocol(params.protocol2)
-                            .withLoadBalancerPort(params.lbPort2.toInteger()).withInstancePort(params.instancePort2.toInteger()))
+                            .withLoadBalancerPort(params.lbPort2.toInteger())
+                            .withInstancePort(params.instancePort2.toInteger()))
                 }
                 String subnetPurpose = params.subnetPurpose ?: null
                 awsLoadBalancerService.createLoadBalancer(userContext, lbName, zoneList, listeners, securityGroups,
@@ -328,7 +329,8 @@ class LoadBalancerCreateCommand {
             if (!command.applicationService.getRegisteredApplicationForLoadBalancer(userContext, value)) {
                 return "application.name.nonexistent"
             }
-            if ("${value}-${command.stack}${command.newStack}-${command.detail}".length() > Relationships.GROUP_NAME_MAX_LENGTH) {
+            if ("${value}-${command.stack}${command.newStack}-${command.detail}".length() >
+                    Relationships.GROUP_NAME_MAX_LENGTH) {
                 return "The complete load balancer name cannot exceed ${Relationships.GROUP_NAME_MAX_LENGTH} characters"
             }
         })

@@ -51,7 +51,8 @@ class ImageControllerTests {
         controller.params.mode = 'DRYRUN'
         controller.imageService = [massDelete: { UserContext userContext, MassDeleteRequest request -> [new Image()] }]
         controller.massDelete()
-        assert controller.response.contentAsString =~ 'Dry run mode. If executed, this job would delete 1 images in us-east-1:'
+        assert controller.response.contentAsString =~
+                'Dry run mode. If executed, this job would delete 1 images in us-east-1:'
     }
 
     void testMassDeleteExecute() {

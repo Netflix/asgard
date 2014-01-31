@@ -42,19 +42,23 @@ class AwsLoadBalancerServiceTests extends GrailsUnitTestCase {
         String i44004400 = 'i-44004400'
         String i10101010 = 'i-10101010'
         String i00000000 = 'i-00000000'
-        List<String> instanceIds = [ideadbeef, i1234beef, idead5678, i34343434, i33333333, i44004400, i10101010, i00000000]
+        List<String> instanceIds = [ideadbeef, i1234beef, idead5678, i34343434, i33333333, i44004400, i10101010,
+                i00000000]
 
-        LoadBalancerDescription helloworldLoadBalancer = new LoadBalancerDescription().withLoadBalancerName("helloworld-frontend").withInstances([
+        LoadBalancerDescription helloworldLoadBalancer = new LoadBalancerDescription().
+                withLoadBalancerName("helloworld-frontend").withInstances([
             new Instance().withInstanceId(ideadbeef),
             new Instance().withInstanceId(i1234beef),
             new Instance().withInstanceId(idead5678)
         ])
-        LoadBalancerDescription apiLoadBalancer = new LoadBalancerDescription().withLoadBalancerName("api-frontend").withInstances([
+        LoadBalancerDescription apiLoadBalancer = new LoadBalancerDescription().withLoadBalancerName("api-frontend").
+                withInstances([
             new Instance().withInstanceId(i34343434),
             new Instance().withInstanceId(i33333333),
             new Instance().withInstanceId(i44004400)
         ])
-        LoadBalancerDescription apiProxyLoadBalancer = new LoadBalancerDescription().withLoadBalancerName("api-proxy-frontend").withInstances([
+        LoadBalancerDescription apiProxyLoadBalancer = new LoadBalancerDescription().
+                withLoadBalancerName("api-proxy-frontend").withInstances([
             new Instance().withInstanceId(i34343434),
             new Instance().withInstanceId(i1234beef),
             new Instance().withInstanceId(i10101010)
