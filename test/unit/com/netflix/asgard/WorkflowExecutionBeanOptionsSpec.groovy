@@ -19,6 +19,7 @@ import com.amazonaws.services.simpleworkflow.model.DecisionTaskCompletedEventAtt
 import com.amazonaws.services.simpleworkflow.model.HistoryEvent
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
+import com.netflix.asgard.model.Deployment
 import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.glisten.LogMessage
@@ -36,7 +37,7 @@ class WorkflowExecutionBeanOptionsSpec extends Specification {
             tagList: [
                     '{"id":"42"}',
                     '{"desc":"Give it away give it away give it away give it away now"}',
-                    '{"user":{"region":"US_WEST_2","internalAutomation":true}}',
+                    '{"user":{"region":"US_WEST_2","username":"akiedis"}}',
                     '{"link":{"type":{"name":"cluster"},"id":"123"}}'
             ],
             startTimestamp: new Date(1372230630000)
@@ -58,7 +59,7 @@ class WorkflowExecutionBeanOptionsSpec extends Specification {
         then:
         tags.id == '42'
         tags.link == Link.to(EntityType.cluster, '123')
-        tags.user == UserContext.auto(Region.US_WEST_2)
+        tags.user == new UserContext(region: Region.US_WEST_2, username: 'akiedis')
         tags.desc == 'Give it away give it away give it away give it away now'
     }
 
@@ -70,7 +71,7 @@ class WorkflowExecutionBeanOptionsSpec extends Specification {
         actualTask.id == '42'
         actualTask.workflowExecution == new WorkflowExecution(runId: 'abc', workflowId: 'def')
         actualTask.name == 'Give it away give it away give it away give it away now'
-        actualTask.userContext == UserContext.auto(Region.US_WEST_2)
+        actualTask.userContext == new UserContext(region: Region.US_WEST_2, username: 'akiedis')
         actualTask.status == 'running'
         actualTask.startTime == new Date(1372230630000)
         actualTask.updateTime == new Date(1372230633000)
@@ -83,5 +84,18 @@ class WorkflowExecutionBeanOptionsSpec extends Specification {
         actualTask.objectId == '123'
         // Cannot simply compare two Tasks because making an EntityType from the tags makes the closures unequal
         actualTask.objectType.name() == EntityType.cluster.name()
+    }
+
+    void 'should populate Deployment from SWF workflow'() {
+        when:
+        Deployment actualDeployment = new WorkflowExecutionBeanOptions(executionInfo, history).asDeployment()
+
+        then:
+        actualDeployment == new Deployment('42', '123', Region.US_WEST_2,
+                new WorkflowExecution(workflowId: 'def', runId: 'abc'),
+                'Give it away give it away give it away give it away now', 'akiedis', new Date(1372230630000),
+                new Date(1372230633000), 'running', ['2013-06-26_00:10:31 starting task',
+                '2013-06-26_00:10:32 doing task', '2013-06-26_00:10:33 finished'])
+
     }
 }

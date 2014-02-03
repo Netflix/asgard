@@ -34,7 +34,7 @@
       <g:renderErrors bean="${cmd}" as="list"/>
     </div>
   </g:hasErrors>
-  <g:form action="deploy" method="post" class="validate">
+  <g:form controller="deployment" action="deploy" method="post" class="validate">
     <div class="dialog">
       <ul class="groupReplacingPush">
       <g:if test="${deploymentWorkflowOptions}">
@@ -227,7 +227,7 @@
     </div>
     <div class="buttons">
       <g:hiddenField name="clusterName" value="${clusterName}"/>
-      <g:buttonSubmit class="deploy" value="deploy">Deploy '${nextGroupName}'</g:buttonSubmit>
+      <g:buttonSubmit controller="deployment" class="deploy" value="deploy">Deploy '${nextGroupName}'</g:buttonSubmit>
     </div>
   </g:form>
 </div>

@@ -34,14 +34,6 @@
           <input type="hidden" name="id" value="${task.id}"/>
           <g:buttonSubmit class="stop" data-warning="Really stop task ${StringEscapeUtils.escapeJavaScript(task.name)} ?" action="cancel" value="Stop Task"/>
         </g:form>
-        <g:if test="${params.taskToken}">
-          <g:form method="post" controller="cluster">
-            <input type="hidden" name="id" value="${task.id}"/>
-            <input type="hidden" name="taskToken" value="${params.taskToken}"/>
-            <g:buttonSubmit class="rollback" action="rollbackDeployment" value="Rollback Deployment"/>
-            <g:buttonSubmit class="proceed" action="proceedWithDeployment" value="Proceed With Deployment"/>
-          </g:form>
-        </g:if>
       </div>
     </g:if>
     <div class="task">
