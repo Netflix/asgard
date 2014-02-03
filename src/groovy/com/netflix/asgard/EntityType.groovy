@@ -47,6 +47,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.common.collect.ImmutableBiMap
 import com.google.common.collect.ImmutableSet
 import com.netflix.asgard.model.ApplicationInstance
+import com.netflix.asgard.model.Deployment
 import com.netflix.asgard.model.HardwareProfile
 import com.netflix.asgard.model.InstanceHealth
 import com.netflix.asgard.model.InstanceTypeData
@@ -115,7 +116,7 @@ import java.lang.reflect.Modifier
     static final EntityType<Vpc> vpc = create('VPC', { it.vpcId }, 'vpc-')
     static final EntityType<WorkflowExecutionInfo> workflowExecution = create('Workflow Execution',
             { new SwfWorkflowTags().withTags(it.tagList).id ?: it.execution.runId })
-    // TODO remove the runId reference above when we are sure there are no longer workflow executions without a run ID
+    static final EntityType<Deployment> deployment = create('Deployment', { it.id})
     static final EntityType<WorkflowTypeInfo> workflowType = create('Workflow Type',
             { "${it.workflowType.name}-${it.workflowType.version}" as String })
     static final EntityType<DomainInfo> workflowDomain = create('Workflow Domain', { it.name })

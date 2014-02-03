@@ -19,15 +19,8 @@ import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.SecurityGroup
-import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
-import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
-import com.netflix.asgard.deployment.DeploymentWorkflow
-import com.netflix.asgard.deployment.DeploymentWorkflowOptions
-import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.InstancePriceType
-import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.Subnets
-import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.ZoneAvailability
 import com.netflix.asgard.push.GroupActivateOperation
 import com.netflix.asgard.push.GroupCreateOperation
@@ -38,8 +31,6 @@ import com.netflix.asgard.push.GroupResizeOperation
 import com.netflix.asgard.push.InitialTraffic
 import com.netflix.asgard.push.RollingPushOperation
 import com.netflix.asgard.push.RollingPushOptions
-import com.netflix.glisten.InterfaceBasedWorkflowClient
-import com.netflix.glisten.WorkflowExecutionCreationCallback
 import java.rmi.NoSuchObjectException
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -134,7 +125,7 @@ class PushService {
     }
 
     /** Run processing that is common to multiple edit screens for preparing a push. */
-    Map<String, Object> prepareEdit(UserContext userContext, String groupName, boolean showAllImages, String actionName,
+    Map<String, Object> prepareEdit(UserContext userContext, String groupName, boolean showAllImages,
                     Collection<String> selectedSecurityGroups) {
         String name = groupName
 
@@ -166,7 +157,6 @@ class PushService {
                 name: name,
                 cluster: Relationships.clusterFromGroupName(name),
                 variables: Relationships.parts(name),
-                actionName: actionName,
                 allTerminationPolicies: awsAutoScalingService.terminationPolicyTypes,
                 terminationPolicy: group.terminationPolicies[0],
 
@@ -194,48 +184,5 @@ class PushService {
                 spotUrl: configService.spotUrl
         ]
         result
-    }
-
-    /**
-     * The callback for Glisten to call after creating a WorkflowExecution, in order to update Asgard's
-     * WorkflowExecution caches.
-     */
-    private WorkflowExecutionCreationCallback updateCaches = new WorkflowExecutionCreationCallback() {
-        @Override
-        void call(WorkflowExecution workflowExecution) {
-            awsSimpleWorkflowService.getWorkflowExecutionInfoByWorkflowExecution(workflowExecution) // Update caches
-        }
-    }
-
-    /**
-     * Starts the deployment of a new Auto Scaling Group in an existing cluster.
-     *
-     * @param userContext who, where, why
-     * @param clusterName the name of the cluster where the next ASG should be created
-     * @param deploymentOptions dictate what the deployment will do
-     * @param lcOverrides specify changes to the template launch configuration
-     * @param asgOverrides specify changes to the template auto scaling group
-     * @return the unique ID of the workflow execution that is starting
-     */
-    public String startDeployment(UserContext userContext, String clusterName,
-            DeploymentWorkflowOptions deploymentOptions, LaunchConfigurationBeanOptions lcOverrides,
-            AutoScalingGroupBeanOptions asgOverrides) {
-
-        InterfaceBasedWorkflowClient<DeploymentWorkflow> client = flowService.getNewWorkflowClient(userContext,
-                DeploymentWorkflow, new Link(EntityType.cluster, clusterName))
-        client.asWorkflow(updateCaches).deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
-        SwfWorkflowTags tags = (SwfWorkflowTags) client.workflowTags
-        tags.id
-    }
-
-    /**
-     * Checks whether the specified cluster has at least one open workflow execution.
-     *
-     * @param clusterName the name of the cluster in question
-     * @return info about the workflow execution that is currently operating on the cluster, or null if none found
-     */
-    WorkflowExecutionInfo getRunningDeploymentForCluster(String clusterName) {
-        Link link = new Link(type: EntityType.cluster, id: clusterName)
-        awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link)
     }
 }

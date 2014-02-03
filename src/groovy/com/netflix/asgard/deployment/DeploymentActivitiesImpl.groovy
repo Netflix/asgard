@@ -204,8 +204,8 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
         ${operationDescription}
         Please determine if the deployment should proceed.
 
-        ${grailsLinkGenerator.link(base: configService.linkCanonicalServerUrl, controller: 'task', action: 'show',
-                params: [id: tags.id, taskToken: activity.taskToken])}
+        ${grailsLinkGenerator.link(base: configService.linkCanonicalServerUrl, controller: 'deployment', action: 'show',
+                params: [id: tags.id, token: activity.taskToken])}
         """.stripIndent()
         String subject = "Asgard deployment response requested for '${asgName}'."
         emailerService.sendUserEmail(notificationDestination, subject, message)
