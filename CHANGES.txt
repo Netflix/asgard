@@ -1,3 +1,21 @@
+1.4.2
+
+Features
+- Stop entire workflow if exception happens at any time during long auto deployment
+- Auto deploy should still work even without Eureka configured
+
+Infrastructure
+- In-browser functional regression test suite with Geb
+- Updated to Glisten 0.3
+- Contributing guidelines document
+- More unit tests
+- More CodeNarc rules
+
+Bug Fixes
+- Fixed error on instance detail screen and rolling push
+- Made Volume cache loading optional for initialization, since it fails often and isn't very important
+
+
 1.4.1
 
 Bug Fixes
