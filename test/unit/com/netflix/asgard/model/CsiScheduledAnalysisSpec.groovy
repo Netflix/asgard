@@ -41,9 +41,9 @@ Tue Jan 21 17:29:33 GMT 2014",
     def 'should construct running ScheduledAnalysis from JSON'() {
         ScheduledAsgAnalysis expectedScheduledAnalysis = new ScheduledAsgAnalysis('cmccoy: us-east-1.prod: \
 helloclay--test_instance_count-canary-analysis Tue Jan 21 17:29:33 GMT 2014', new DateTime(DateTimeZone.UTC).
-                withDate(2014, 1, 21).withTime(17, 29, 33, 0))
+                withDate(2014, 1, 21).withTime(17, 29, 32, 0))
 
-        String json = jsonConstructor('running', 'Jan 21, 2014 5:29:33 PM')
+        String json = jsonConstructor('running', 'Tue Jan 21 17:29:32 GMT 2014')
 
         expect:
         new CsiScheduledAnalysisFactory().fromJson(json) == expectedScheduledAnalysis
@@ -54,7 +54,7 @@ helloclay--test_instance_count-canary-analysis Tue Jan 21 17:29:33 GMT 2014', ne
 helloclay--test_instance_count-canary-analysis Tue Jan 21 17:29:33 GMT 2014', new DateTime(DateTimeZone.UTC).
                 withDate(2013, 11, 1).withTime(3, 1, 55, 0))
 
-        String json = jsonConstructor('paused', 'Nov 01, 2013 3:01:55 AM')
+        String json = jsonConstructor('paused', 'Fri Nov 01 3:01:55 GMT 2013')
 
         expect:
         new CsiScheduledAnalysisFactory().fromJson(json) == expectedScheduledAnalysis

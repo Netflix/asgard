@@ -17,17 +17,11 @@ package com.netflix.asgard.model
 
 import groovy.json.JsonSlurper
 import org.joda.time.DateTime
-import org.joda.time.DateTimeZone
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 
 /**
  * Used to create a ScheduledAsgAnalysis from JSON returned by the Critical Systems Inspector (CSI).
  */
 class CsiScheduledAnalysisFactory {
-
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern('MMM dd, yyyy hh:mm:ss a').
-            withZone(DateTimeZone.UTC)
 
     /**
      * Creates a ScheduledAsgAnalysis from JSON.
@@ -38,7 +32,8 @@ class CsiScheduledAnalysisFactory {
     ScheduledAsgAnalysis fromJson(String json) {
         def parameters = new JsonSlurper().parseText(json).parameters
         String name = parameters.schedulername
-        DateTime created = dateTimeFormatter.parseDateTime(parameters.created)
+        Date createdDate = new Date((String) parameters.created)
+        DateTime created = new DateTime(createdDate)
         new ScheduledAsgAnalysis(name, created)
     }
 }
