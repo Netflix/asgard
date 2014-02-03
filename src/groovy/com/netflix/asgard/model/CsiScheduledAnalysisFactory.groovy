@@ -17,6 +17,7 @@ package com.netflix.asgard.model
 
 import groovy.json.JsonSlurper
 import org.joda.time.DateTime
+
 /**
  * Used to create a ScheduledAsgAnalysis from JSON returned by the Critical Systems Inspector (CSI).
  */
