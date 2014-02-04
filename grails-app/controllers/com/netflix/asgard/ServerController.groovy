@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.SDKGlobalConfiguration
 import com.netflix.asgard.server.ServerState
 import com.netflix.asgard.server.SwitchAttemptResult
 import grails.converters.JSON
@@ -89,6 +90,19 @@ class ServerController {
             [it, sysProps.getProperty(it)]
         }
         Map<String, String> envVars = serverService.environmentVariables.sort { it.key.toLowerCase() }
+        // Hide known sensitive info such as AWS credentials
+        List<String> keysToHide = [
+            SDKGlobalConfiguration.ACCESS_KEY_ENV_VAR, SDKGlobalConfiguration.ACCESS_KEY_SYSTEM_PROPERTY,
+            SDKGlobalConfiguration.ALTERNATE_ACCESS_KEY_ENV_VAR, SDKGlobalConfiguration.SECRET_KEY_ENV_VAR,
+            SDKGlobalConfiguration.SECRET_KEY_SYSTEM_PROPERTY, SDKGlobalConfiguration.ALTERNATE_SECRET_KEY_ENV_VAR
+        ]
+        for (String key in keysToHide) {
+            for (Map map in [envVars, propsMap]) {
+                if (map[key]) {
+                    map[key] = '[hidden]'
+                }
+            }
+        }
         Map<String, Map<String, String>> output = [environmentVariables: envVars, systemProperties: propsMap]
         withFormat {
             html { output }
