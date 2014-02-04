@@ -39,13 +39,7 @@ class MockSecurityGroups {
         [
           {
             "class": "com.amazonaws.services.ec2.model.UserIdGroupPair",
-            "groupId": "sg-0cfe0765",
-            "groupName": "ElasticMapReduce-master",
-            "userId": "219382154434"
-          },
-          {
-            "class": "com.amazonaws.services.ec2.model.UserIdGroupPair",
-            "groupId": "sg-7fcd0716",
+            "groupId": "sg-4eab0428",
             "groupName": "nf-infrastructure",
             "userId": "179000000000"
           }

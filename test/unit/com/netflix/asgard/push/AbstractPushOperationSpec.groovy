@@ -19,14 +19,13 @@ import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.netflix.asgard.AwsAutoScalingService
 import com.netflix.asgard.From
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.mock.Mocks
 import spock.lang.Specification
 
 class AbstractPushOperationSpec extends Specification {
 
     def awsAutoScalingService = Mock(AwsAutoScalingService)
     AbstractPushOperation pushOperation = new AbstractPushOperation() { }
-    UserContext userContext = Mocks.userContext()
+    UserContext userContext = UserContext.auto()
 
     void setup() {
         pushOperation.awsAutoScalingService = awsAutoScalingService
