@@ -84,12 +84,12 @@ class ServerController {
      * Displays all environment variables and system properties for debugging.
      */
     def props = {
-        Map<String, String> envVars = System.getenv().sort { it.key.toLowerCase() }
-        Map<String, String> systemProperties = [:]
-        for (String name in System.properties.stringPropertyNames().sort { it.toLowerCase() }) {
-            systemProperties.put(name, System.getProperty(name))
+        Properties sysProps = serverService.systemProperties
+        Map<String, String> propsMap = sysProps.stringPropertyNames().sort { it.toLowerCase() }.collectEntries {
+            [it, sysProps.getProperty(it)]
         }
-        Map<String, Map<String, String>> output = [environmentVariables: envVars, systemProperties: systemProperties]
+        Map<String, String> envVars = serverService.environmentVariables.sort { it.key.toLowerCase() }
+        Map<String, Map<String, String>> output = [environmentVariables: envVars, systemProperties: propsMap]
         withFormat {
             html { output }
             json { new JSON(output).render(response) }
