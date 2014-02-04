@@ -179,7 +179,7 @@ ruleset {
     BracesForMethod
     BracesForTryCatchFinally
 //    ClassJavadoc
-//    LineLength
+    LineLength
     SpaceAfterCatch
 //    SpaceAfterClosingBrace // Good but needs option to accept [{ ok() }] and items.collect { it.key }[0]
     SpaceAfterComma
