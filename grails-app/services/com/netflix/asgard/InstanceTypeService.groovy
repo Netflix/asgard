@@ -15,7 +15,7 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.ec2.model.InstanceType
+import com.netflix.asgard.model.InstanceType
 import com.google.common.collect.ArrayTable
 import com.google.common.collect.Table
 import com.netflix.asgard.cache.CacheInitializer
@@ -166,6 +166,10 @@ class InstanceTypeService implements CacheInitializer {
                         vCpu: '4', ecu: '13', mem: '15', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'Moderate'),
                 new HardwareProfile(instanceType: 'm3.2xlarge', family: gen, group: second, size: xxl, arch: '64-bit',
                         vCpu: '8', ecu: '26', mem: '30', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'm3.medium', family: gen, group: second, size: 'Medium', arch: '64-bit',
+                        vCpu: '1', ecu: '3', mem: '3', storage: 'EBS only', ebsOptim: '-', netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'm3.large', family: gen, group: second, size: 'Large', arch: '64-bit',
+                        vCpu: '2', ecu: '6.5', mem: '7.5', storage: 'EBS only', ebsOptim: '-', netPerf: 'Moderate'),
                 new HardwareProfile(instanceType: 'c1.medium', family: compOpt, group: 'High-CPU', size: 'Medium',
                         arch: '32-bit or 64-bit', vCpu: '2', ecu: '5', mem: '1.7', storage: '1 x 350', ebsOptim: '-',
                         netPerf: 'Moderate'),

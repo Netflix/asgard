@@ -15,7 +15,6 @@
  */
 package com.netflix.asgard.model
 
-import com.amazonaws.services.ec2.model.InstanceType
 import java.text.NumberFormat
 
 /**
