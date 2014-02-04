@@ -16,12 +16,13 @@
 package com.netflix.asgard
 
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicInteger
 import spock.lang.Specification
 
 class CachedMapSpec extends Specification {
 
-    Integer retrievalCallCount
-    Integer permitAcquisitionAttemptCount
+    AtomicInteger retrievalCallCount
+    AtomicInteger permitAcquisitionAttemptCount
     List<List<String>> stoogesCastListsOverTime = [
             ['curly', 'larry', 'moe'],
             ['larry', 'moe', 'shemp'],
@@ -32,8 +33,8 @@ class CachedMapSpec extends Specification {
     Thread userThread
 
     void setup() {
-        retrievalCallCount = 0
-        permitAcquisitionAttemptCount = 0
+        retrievalCallCount = new AtomicInteger(0)
+        permitAcquisitionAttemptCount = new AtomicInteger(0)
         Runnable runnableFillProcess = new Runnable() {
             void run() {
                 cachedMap.fill()
@@ -48,8 +49,8 @@ class CachedMapSpec extends Specification {
         CountDownLatch backgroundIsRetrieving = new CountDownLatch(1)
         CountDownLatch userThreadHasTriedPermitAcquisition = new CountDownLatch(1)
         Closure retriever = {
-            List<String> stooges = stoogesCastListsOverTime[retrievalCallCount]
-            retrievalCallCount++
+            List<String> stooges = stoogesCastListsOverTime[retrievalCallCount.get()]
+            retrievalCallCount.incrementAndGet()
 
             // For this test, now is the time to signal the user thread to start
             backgroundIsRetrieving.countDown()
@@ -61,11 +62,11 @@ class CachedMapSpec extends Specification {
         }
 
         Closure waitForProperTestingState = {
-            if (permitAcquisitionAttemptCount >= 1) {
+            if (permitAcquisitionAttemptCount.get() >= 1) {
                 // Must be a user thread
                 userThreadHasTriedPermitAcquisition.countDown()
             }
-            permitAcquisitionAttemptCount++
+            permitAcquisitionAttemptCount.incrementAndGet()
         }
 
         cachedMap = new MultithreadedTestingCachedMap(Region.EU_WEST_1, EntityType.domain,
@@ -85,15 +86,15 @@ class CachedMapSpec extends Specification {
         then:
         ['curly', 'larry', 'moe'] == resultAfterBackgroundFill
         ['curly', 'larry', 'moe'] == resultAfterUserFill
-        1 == retrievalCallCount
-        2 == permitAcquisitionAttemptCount
+        1 == retrievalCallCount.get()
+        2 == permitAcquisitionAttemptCount.get()
     }
 
     def 'if user thread starts fill after background thread finishes, user result should override older result'() {
 
         Closure retriever = {
-            List<String> stooges = stoogesCastListsOverTime[retrievalCallCount]
-            retrievalCallCount++
+            List<String> stooges = stoogesCastListsOverTime[retrievalCallCount.get()]
+            retrievalCallCount.incrementAndGet()
             return stooges
         }
         cachedMap = new CachedMap(Region.EU_WEST_1, EntityType.domain, null, null)
@@ -110,7 +111,7 @@ class CachedMapSpec extends Specification {
         then:
         ['curly', 'larry', 'moe'] == resultAfterBackgroundFill
         ['larry', 'moe', 'shemp'] == resultAfterUserFill
-        2 == retrievalCallCount
+        2 == retrievalCallCount.get()
     }
 }
 
