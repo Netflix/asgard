@@ -2,7 +2,7 @@
 
 There are many ways to contribute to Asgard:
 
-* Spreading the word by talking, tweeting, blogging, presenting, submitting talks, writing tutorials or articles (or a book!), sharing success stories, adding your project/company to [Who is Using Asgard](some_link), etc.
+* Spreading the word by talking, tweeting, blogging, presenting, submitting talks, writing tutorials or articles (or a book!), sharing success stories, adding your project/company to [Who is Using Asgard](https://github.com/Netflix/asgard/wiki/Who%27s-using-Asgard%3F), etc.
 * Helping other users by participating in [Asgard Users Google Group](https://groups.google.com/forum/#!forum/AsgardUsers)
 * Improving and extending our [wiki](https://github.com/Netflix/asgard/wiki)
 * Fixing open issues listed in the [issue tracker](https://github.com/Netflix/asgard/issues)
