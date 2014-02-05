@@ -631,7 +631,7 @@ class ConfigService {
      * @return list of encryption keys, starting with the current key for new API tokens
      */
     List<String> getApiEncryptionKeys() {
-        grailsApplication.config.security?.apiToken?.encryptionKeys ?: ['t4U8e3iRC9Uf989yZz18skqk1d5PAf5k']
+        grailsApplication.config.security?.apiToken?.encryptionKeys ?: []
     }
 
     /**
