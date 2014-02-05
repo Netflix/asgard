@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2014 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 package com.netflix.asgard.model
 
-/**
- * Created by aglover on 1/31/14.
- */
 enum InstanceType {
 
     T1Micro("t1.micro"),
@@ -51,7 +48,7 @@ enum InstanceType {
     G22xlarge("g2.2xlarge"),
     Cg14xlarge("cg1.4xlarge")
 
-    String value
+    private String value
 
     InstanceType(String value) {
         this.value = value
@@ -59,11 +56,11 @@ enum InstanceType {
 
     @Override
     String toString() {
-        return this.value
+        this.value
     }
 
     /**
-     * @param value as String (i.e. t1.mico, etc)
+     * @param value as String (i.e. t1.micro, etc)
      * @return InstanceType enum
      */
     static InstanceType fromValue(String value) {

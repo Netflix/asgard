@@ -81,7 +81,7 @@ class InstanceTypeServiceSpec extends Specification {
         ] == instanceTypes*.name.sort()
         //each list contains mostly nulls
         def allSizes = instanceTypes*.hardwareProfile*.size
-        allSizes.removeAll{ it == null }
+        allSizes.removeAll { it == null }
         ['Large', 'Medium', 'SSD', 'Small'] == allSizes.sort()
         [0.05, 0.23, 0.68, 3.10] == instanceTypes*.linuxOnDemandPrice[-4..-1]
     }

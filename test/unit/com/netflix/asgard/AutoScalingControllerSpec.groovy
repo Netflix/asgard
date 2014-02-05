@@ -217,8 +217,9 @@ class AutoScalingControllerSpec extends Specification {
         def attrs = controller.create()
 
         then:
-        ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot',
-                'videometadata'] == attrs['applications']*.name
+        [
+                'abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot', 'videometadata'
+        ] == attrs['applications']*.name
         ['', 'example'] == attrs['stacks']*.name
         ['us-east-1a', 'us-east-1c', 'us-east-1d'] == attrs['zonesGroupedByPurpose'][null]
         ['helloworld--frontend', 'ntsuiboot--frontend'] == attrs.loadBalancersGroupedByVpcId[null]*.loadBalancerName
@@ -226,15 +227,17 @@ class AutoScalingControllerSpec extends Specification {
         'nf-test-keypair-a' == attrs['defKey']
         ['amzn-linux', 'hadoop', 'nf-support', 'nf-test-keypair-a'] == attrs['keys']*.keyName
         List<String> securityGroupNames = attrs.securityGroupsGroupedByVpcId[null]*.groupName
-        assert securityGroupNames.containsAll(['akms', 'helloworld', 'helloworld-frontend', 'helloworld-asgardtest',
-                'helloworld-tmp', 'ntsuiboot'])
+        assert securityGroupNames.containsAll(
+                ['akms', 'helloworld', 'helloworld-frontend', 'helloworld-asgardtest', 'helloworld-tmp', 'ntsuiboot'])
 
-        ['c1.medium', 'c1.xlarge', 'c3.2xlarge', 'c3.4xlarge', 'c3.8xlarge', 'c3.large', 'c3.xlarge', 'cc1.4xlarge',
-                'cc2.8xlarge', 'cg1.4xlarge', 'cr1.8xlarge', 'g2.2xlarge', 'hi1.4xlarge', 'hs1.8xlarge',
-                'huge.mainframe', 'i2.2xlarge', 'i2.4xlarge', 'i2.8xlarge', 'i2.xlarge', 'm1.large', 'm1.medium',
-                'm1.small', 'm1.xlarge', 'm2.2xlarge', 'm2.4xlarge', 'm2.xlarge', 'm3.2xlarge', 'm3.large',
-                'm3.medium', 'm3.xlarge', 't1.micro'
-        ] == attrs['instanceTypes']*.name.sort()
+        //note: attrs['instanceTypes'] is sorted by price - cheapest to most expensive
+        attrs['instanceTypes'][0].getMonthlyLinuxOnDemandPrice() == '$14.40'
+        ['t1.micro', 'm1.small', 'm3.medium', 'm1.medium', 'c1.medium', 'm3.large', 'm1.large', 'm2.xlarge',
+                'm3.xlarge', 'm1.xlarge', 'c1.xlarge', 'm2.2xlarge', 'i2.xlarge', 'm3.2xlarge', 'm2.4xlarge',
+                'i2.2xlarge', 'cg1.4xlarge', 'cc2.8xlarge', 'hi1.4xlarge', 'i2.4xlarge', 'cr1.8xlarge', 'hs1.8xlarge',
+                'i2.8xlarge', 'huge.mainframe', 'c3.2xlarge', 'c3.4xlarge', 'c3.8xlarge', 'c3.large', 'c3.xlarge',
+                'cc1.4xlarge', 'g2.2xlarge'
+        ] == attrs['instanceTypes']*.name
     }
 
     def "create should handle invalid inputs"() {

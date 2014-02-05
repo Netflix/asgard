@@ -17,26 +17,26 @@ package com.netflix.asgard.model
 
 import spock.lang.Specification
 
-/**
- * Created by aglover on 1/31/14.
- */
-class InstanceTypeSpec extends Specification{
+class InstanceTypeSpec extends Specification {
 
-    def 'this spec serves as test for switching imports of base aws-sdk class - validate .values() call'(){
+    def 'should work as list like it did before'(){
+
         when:
         List<InstanceType> instanceTypes = InstanceType.values() as List
         then:
-        assert instanceTypes.size() >= 28
+        instanceTypes.size() >= 28
     }
 
-    def 'this spec serves as test for switching imports of base aws-sdk class - validate .fromValue() call'(){
+    def 'should work w/fromValue like it did before'(){
+
         when:
         InstanceType type = InstanceType.fromValue('c3.8xlarge')
         then:
-        assert type.toString() == 'c3.8xlarge'
+        type.toString() == 'c3.8xlarge'
     }
 
     def 'validate .fromValue() call with blank or null value or bad string'(){
+
         when:
         InstanceType.fromValue('')
         then:
@@ -52,13 +52,14 @@ class InstanceTypeSpec extends Specification{
     }
 
     def 'validate .fromValue() with valid values'(){
+
         when:
         InstanceType type = InstanceType.fromValue('m3.large')
         then:
-        assert type.toString() == 'm3.large'
+        type.toString() == 'm3.large'
         when:
         InstanceType type2 = InstanceType.fromValue('m1.xlarge')
         then:
-        assert type2.toString() == 'm1.xlarge'
+        type2.toString() == 'm1.xlarge'
     }
 }
