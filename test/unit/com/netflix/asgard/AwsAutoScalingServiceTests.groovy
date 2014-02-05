@@ -61,7 +61,8 @@ class AwsAutoScalingServiceTests extends GroovyTestCase {
 
     void testGetAutoScalingGroupForInstanceId() {
         AwsAutoScalingService asgService = Mocks.awsAutoScalingService()
-        assert 'helloworld-example-v015' == asgService.getAutoScalingGroupFor(userContext, "i-8ee4eeee").autoScalingGroupName
+        assert 'helloworld-example-v015' ==
+                asgService.getAutoScalingGroupFor(userContext, "i-8ee4eeee").autoScalingGroupName
     }
 
     void testGetLaunchConfigurationNullName() {
@@ -162,14 +163,20 @@ class AwsAutoScalingServiceTests extends GroovyTestCase {
         Mocks.awsAutoScalingService()
         assert "actiondrainer" == new AutoScalingGroup().withAutoScalingGroupName("actiondrainer").clusterName
         assert "actiondrainer" == new AutoScalingGroup().withAutoScalingGroupName("actiondrainer").getClusterName()
-        assert "merchweb--loadtest" == new AutoScalingGroup().withAutoScalingGroupName("merchweb--loadtest").clusterName
-        assert "discovery--us-east-1d" == new AutoScalingGroup().withAutoScalingGroupName("discovery--us-east-1d").clusterName
-        assert "discovery-us-east-1d" == new AutoScalingGroup().withAutoScalingGroupName("discovery-us-east-1d").clusterName
+        assert "merchweb--loadtest" ==
+                new AutoScalingGroup().withAutoScalingGroupName("merchweb--loadtest").clusterName
+        assert "discovery--us-east-1d" ==
+                new AutoScalingGroup().withAutoScalingGroupName("discovery--us-east-1d").clusterName
+        assert "discovery-us-east-1d" ==
+                new AutoScalingGroup().withAutoScalingGroupName("discovery-us-east-1d").clusterName
         assert "merchweb-loadtest" == new AutoScalingGroup().withAutoScalingGroupName("merchweb-loadtest").clusterName
-        assert "merchweb-loadtest" == new AutoScalingGroup().withAutoScalingGroupName("merchweb-loadtest-v001").getClusterName()
+        assert "merchweb-loadtest" ==
+                new AutoScalingGroup().withAutoScalingGroupName("merchweb-loadtest-v001").getClusterName()
         assert "api-test-A" == new AutoScalingGroup().withAutoScalingGroupName("api-test-A-v304").clusterName
-        assert "evcache-us-east-1d-0" == new AutoScalingGroup().withAutoScalingGroupName("evcache-us-east-1d-0").clusterName
-        assert "evcache-us-east-1d-0" == new AutoScalingGroup().withAutoScalingGroupName("evcache-us-east-1d-0").getClusterName()
+        assert "evcache-us-east-1d-0" ==
+                new AutoScalingGroup().withAutoScalingGroupName("evcache-us-east-1d-0").clusterName
+        assert "evcache-us-east-1d-0" ==
+                new AutoScalingGroup().withAutoScalingGroupName("evcache-us-east-1d-0").getClusterName()
     }
 
     void testAvailabilityZoneShouldBePreselected() {

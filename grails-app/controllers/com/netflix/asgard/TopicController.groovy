@@ -28,7 +28,8 @@ class TopicController {
     def configService
     def applicationService
 
-    def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', subscribe: 'POST', unsubscribe: 'POST', publish: 'POST']
+    def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', subscribe: 'POST', unsubscribe: 'POST',
+            publish: 'POST']
 
     static editActions = ['prepareSubscribe', 'preparePublish']
 

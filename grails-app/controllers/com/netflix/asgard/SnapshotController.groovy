@@ -93,7 +93,8 @@ class SnapshotController {
                 message += "Snapshot${deletedSnapshotIds.size() == 1 ? '' : 's'} deleted: ${deletedSnapshotIds}. "
             }
             if (nonexistentSnapshotIds) {
-                message += "Snapshot${nonexistentSnapshotIds.size() == 1 ? '' : 's'} not found: ${nonexistentSnapshotIds}. "
+                int count = nonexistentSnapshotIds.size()
+                message += "Snapshot${count == 1 ? '' : 's'} not found: ${nonexistentSnapshotIds}. "
             }
         } catch (Exception e) {
             message = "Error deleting snapshot${snapshotIds.size() == 1 ? '' : 's'} ${snapshotIds}: ${e}"

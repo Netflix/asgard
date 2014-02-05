@@ -115,7 +115,8 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
         }, Link.to(EntityType.rdsInstance, dbInstanceId))
     }
 
-    DBInstance createDBInstance(UserContext userContext, DBInstance templateDbInstance, String masterUserPassword, Integer port) {
+    DBInstance createDBInstance(UserContext userContext, DBInstance templateDbInstance, String masterUserPassword,
+                                Integer port) {
         final BeanState templateDbInstanceState = BeanState.ofSourceBean(templateDbInstance)
         final CreateDBInstanceRequest request = templateDbInstanceState.injectState(new CreateDBInstanceRequest())
         request.masterUserPassword = masterUserPassword
@@ -187,8 +188,8 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
 
     DBSecurityGroup createDBSecurityGroup(UserContext userContext, String name, String description) {
         taskService.runTask(userContext, "Create DB Security Group '${name}'", { task ->
-            awsClient.by(userContext.region).createDBSecurityGroup(
-                new CreateDBSecurityGroupRequest().withDBSecurityGroupName(name).withDBSecurityGroupDescription(description))
+            awsClient.by(userContext.region).createDBSecurityGroup(new CreateDBSecurityGroupRequest().
+                    withDBSecurityGroupName(name).withDBSecurityGroupDescription(description))
         }, Link.to(EntityType.dbSecurity, name))
         getDBSecurityGroup(userContext, name)
     }
@@ -210,7 +211,8 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
             createDBSecurityGroup(userContext, newName, description)
             group.ipPermissions.each { perm ->
                 perm.userIdGroupPairs.each { pair ->
-                    authorizeDBSecurityGroupIngress(newName, pair.groupName, perm.ipProtocol, perm.fromPort, perm.toPort)
+                    authorizeDBSecurityGroupIngress(newName, pair.groupName, perm.ipProtocol, perm.fromPort,
+                            perm.toPort)
                 }
             }
         }, Link.to(EntityType.dbSecurity, newName))
@@ -220,7 +222,8 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
     DBSecurityGroup authorizeDBSecurityGroupIngressForGroup(UserContext userContext, String groupName,
                                                             String ec2SecurityGroupName) {
         String sourceSecurityGroupOwnerId = accounts[0]
-        taskService.runTask(userContext, "Authorize DB Security Group Ingress for '${ec2SecurityGroupName}'", { Task task ->
+        String taskName = "Authorize DB Security Group Ingress for '${ec2SecurityGroupName}'"
+        taskService.runTask(userContext, taskName, { Task task ->
             awsClient.by(userContext.region).authorizeDBSecurityGroupIngress(
                 new AuthorizeDBSecurityGroupIngressRequest()
                     .withDBSecurityGroupName(groupName)

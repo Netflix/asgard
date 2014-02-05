@@ -109,7 +109,8 @@ class Requests {
         if (stringParam instanceof String) { return [ stringParam ] }
         if (stringParam instanceof List) { return stringParam }
         if (stringParam instanceof String[]) { return stringParam as List }
-        throw new IllegalArgumentException("Expected a string or a list for ${stringParam} but got a ${stringParam.class.name}")
+        String msg = "Expected a string or a list for ${stringParam} but got a ${stringParam.class.name}"
+        throw new IllegalArgumentException(msg)
     }
 
     /**
@@ -119,7 +120,9 @@ class Requests {
      */
     static void preventCaching(HttpServletResponse response) {
         response.setHeader('Cache-Control', 'no-cache') // HTTP 1.1
-        response.addHeader('Cache-Control', "no-store") // http://stackoverflow.com/questions/866822/why-both-no-cache-and-no-store-should-be-used-in-http-response
+
+        // http://stackoverflow.com/questions/866822/why-both-no-cache-and-no-store-should-be-used-in-http-response
+        response.addHeader('Cache-Control', "no-store")
         response.setHeader('Pragma', 'no-cache') // HTTP 1.0
         response.setDateHeader ('Expires', 0) // Prevent caching at the proxy server
     }

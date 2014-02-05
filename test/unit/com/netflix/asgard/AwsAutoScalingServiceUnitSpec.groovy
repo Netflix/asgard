@@ -197,8 +197,10 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
                 (EntityType.autoScaling): mockAutoScalingCache
         ]))
         awsAutoScalingService = Spy(AwsAutoScalingService) {
-            1 * getLaunchConfiguration(_, 'lc-service1-int-v007', From.CACHE) >> new LaunchConfiguration(imageId: 'ami-service1')
-            1 * getLaunchConfiguration(_, 'lc-service5-int-v042', From.CACHE) >> new LaunchConfiguration(imageId: 'ami-service5')
+            1 * getLaunchConfiguration(_, 'lc-service1-int-v007', From.CACHE) >>
+                    new LaunchConfiguration(imageId: 'ami-service1')
+            1 * getLaunchConfiguration(_, 'lc-service5-int-v042', From.CACHE) >>
+                    new LaunchConfiguration(imageId: 'ami-service5')
             0 * getLaunchConfiguration(_, _, _)
         }
         AwsEc2Service mockAwsEc2Service = Mock {
@@ -457,7 +459,8 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
         }
 
         expect:
-        awsAutoScalingService.reasonAsgIsNotOperational(UserContext.auto(Region.US_WEST_1), 'service1-int-v008', 1) == ''
+        awsAutoScalingService.reasonAsgIsNotOperational(UserContext.auto(Region.US_WEST_1), 'service1-int-v008', 1) ==
+                ''
     }
 
     def 'should determine healthy ASG when Eureka is not configured'() {
@@ -604,9 +607,11 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
         awsAutoScalingService = Spy(AwsAutoScalingService)
         awsAutoScalingService.awsEc2Service = Mock(AwsEc2Service)
         awsAutoScalingService.awsClient = new MultiRegionAwsClient({ mockAmazonAutoScalingClient })
+        UserContext userContext = UserContext.auto(Region.US_WEST_1)
 
         when:
-        AutoScalingGroupBeanOptions options = awsAutoScalingService.updateAutoScalingGroup(UserContext.auto(Region.US_WEST_1), 'autoScalingGroupName1') {
+        AutoScalingGroupBeanOptions options = awsAutoScalingService.updateAutoScalingGroup(userContext,
+                'autoScalingGroupName1') {
             AutoScalingGroupBeanOptions options ->
         }
 

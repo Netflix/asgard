@@ -76,7 +76,9 @@ class MonkeyPatcherService implements InitializingBean {
 
         if (!(AutoScalingGroup.methods as List).contains("findInServiceInstanceIds")) {
             AutoScalingGroup.metaClass.findInServiceInstanceIds = { ->
-                new TreeSet<String>(delegate.instances.findAll { it.lifecycleState == 'InService' }.collect { it.instanceId })
+                new TreeSet<String>(delegate.instances.findAll { it.lifecycleState == 'InService' }.collect {
+                    it.instanceId
+                })
             }
         }
         // autoscaling Instances

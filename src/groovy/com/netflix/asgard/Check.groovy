@@ -52,7 +52,8 @@ class Check {
      */
     static <T> T lone(Collection<T> collection, def type) {
         if (notNull(collection, type).size() != 1) {
-            throw new IllegalStateException(message("Found ${collection.size()} ${Meta.pretty(type)} items instead of 1"))
+            String detail = "Found ${collection.size()} ${Meta.pretty(type)} items instead of 1"
+            throw new IllegalStateException(message(detail))
         }
         collection.iterator().next()
     }

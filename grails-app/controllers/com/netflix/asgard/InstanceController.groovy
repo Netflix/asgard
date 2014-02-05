@@ -327,7 +327,8 @@ class InstanceController {
                             "load balancer${elbNames.size() == 1 ? '' : 's'} ${elbNames}"
                 }
             } else {
-                flash.message = "Error: Not all instances '${instanceIds}' are in group '${group?.autoScalingGroupName}'"
+                String groupName = group?.autoScalingGroupName
+                flash.message = "Error: Not all instances '${instanceIds}' are in group '${groupName}'"
             }
         }
 

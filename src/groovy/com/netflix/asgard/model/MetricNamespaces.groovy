@@ -244,7 +244,8 @@ class MetricNamespaces {
             List<String> metricNames = namespacesToMetricIds[it].collect { it.metricName }
             MetricNamespace.of(it, metricNames, customNamespacesToDimensions[it])
         } ?: []
-        allNamespacesByName = ImmutableMap.copyOf(AWS_NAMESPACES_BY_NAME + customMetricNamespace.collectEntries { [ it.namespace, it] })
+        Map<String, MetricNamespace> customByName = customMetricNamespace.collectEntries { [it.namespace, it] }
+        allNamespacesByName = ImmutableMap.copyOf(AWS_NAMESPACES_BY_NAME + customByName)
     }
 
     /**

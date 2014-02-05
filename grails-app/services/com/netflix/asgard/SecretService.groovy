@@ -29,9 +29,9 @@ class SecretService implements InitializingBean {
     String loadBalancerPassword
 
     /**
-     * A list of keys used for encrypting {@link ApiToken} objects. The first item in the list is the one used for encrypting
-     * newly generated API Token. Subsequent items in the list are keys used in the past that should be retired
-     * eventually.
+     * A list of keys used for encrypting {@link ApiToken} objects. The first item in the list is the one used for
+     * encrypting newly generated API Token. Subsequent items in the list are keys used in the past that should be
+     * retired eventually.
      */
     List<String> apiEncryptionKeys = []
 

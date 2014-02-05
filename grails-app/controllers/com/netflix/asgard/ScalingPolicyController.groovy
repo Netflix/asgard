@@ -173,7 +173,8 @@ class ScalingPolicyController {
                 flash.message = "Scaling Policy '${policyName}' has been created."
                 redirect(action: 'show', params: [id: policyName])
             } catch (Exception e) {
-                flash.message = "Could not create Scaling Policy for Auto Scaling Group '${scalingPolicyData.autoScalingGroupName}': ${e}"
+                flash.message = "Could not create Scaling Policy for Auto Scaling Group " +
+                        "'${scalingPolicyData.autoScalingGroupName}': ${e}"
                 chain(action: 'create', model: [cmd: cmd], params: params)
             }
         }

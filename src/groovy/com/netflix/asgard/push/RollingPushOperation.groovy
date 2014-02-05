@@ -108,7 +108,8 @@ class RollingPushOperation extends AbstractPushOperation {
         Time.sleepCancellably 100 // tiny pause before LC create to avoid rate limiting
         Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(options.securityGroups,
                 group.VPCZoneIdentifier as boolean, options.userContext.region)
-        task.log("Updating launch from ${oldLaunch.launchConfigurationName} with ${options.imageId} into ${newLaunchName}")
+        String oldLaunchName = oldLaunch.launchConfigurationName
+        task.log("Updating launch from ${oldLaunchName} with ${options.imageId} into ${newLaunchName}")
         String iamInstanceProfile = options.iamInstanceProfile ?: null
         LaunchConfigurationBeanOptions launchConfig = new LaunchConfigurationBeanOptions(
                 launchConfigurationName: newLaunchName, imageId: options.imageId, keyName: options.keyName,
@@ -193,14 +194,16 @@ class RollingPushOperation extends AbstractPushOperation {
 
         // If a change should have happened by now then something is wrong so stop the push.
         if (timeoutsEnabled && timeSinceChange.isLongerThan(instanceInfo.state.timeOutToExitState)) {
-            String err = "${reportSummary()} Timeout waiting ${Time.format(timeSinceChange)} for ${instanceInfo.id} to progress "
+            String duration = Time.format(timeSinceChange)
+            String err = "${reportSummary()} Timeout waiting ${duration} for ${instanceInfo.id} to progress "
             err += "from ${instanceInfo.state?.name()} state. "
             err += "(Maximum ${Time.format(instanceInfo.state.timeOutToExitState)} allowed)."
             fail(err)
         }
     }
 
-    private void handleInitialPhase(InstanceMetaData instanceInfo, UserContext userContext, boolean discoveryExists, Duration afterDiscovery) {
+    private void handleInitialPhase(InstanceMetaData instanceInfo, UserContext userContext, boolean discoveryExists,
+                                    Duration afterDiscovery) {
         // Disable the app in discovery and ELBs so that clients don't try to talk to it
         String appName = options.common.appName
         String appInstanceId = "${appName} / ${instanceInfo.id}"
@@ -221,7 +224,8 @@ class RollingPushOperation extends AbstractPushOperation {
         instanceInfo.state = InstanceState.unregistered
     }
 
-    private void handleUnregisteredPhase(Duration timeSinceChange, Duration afterDiscovery, InstanceMetaData instanceInfo, UserContext userContext) {
+    private void handleUnregisteredPhase(Duration timeSinceChange, Duration afterDiscovery,
+                                         InstanceMetaData instanceInfo, UserContext userContext) {
         if (options.rudeShutdown || timeSinceChange.isLongerThan(afterDiscovery)) {
             task.log("Terminating instance ${instanceInfo.id}")
             if (awsEc2Service.terminateInstances(userContext, [instanceInfo.id], task) == null) {
@@ -247,23 +251,28 @@ class RollingPushOperation extends AbstractPushOperation {
         }
         if (newInst) {
             // Get the EC2 Instance object based on the ASG Instance object
-            com.amazonaws.services.ec2.model.Instance instance = awsEc2Service.getInstance(userContext, newInst.instanceId)
+            com.amazonaws.services.ec2.model.Instance instance = awsEc2Service.getInstance(userContext,
+                    newInst.instanceId)
             if (instance) {
-                task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance ${instanceInfo.id} to terminate and be replaced by ${instance.instanceId}")
+                task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance ${instanceInfo.id} to " +
+                        "terminate and be replaced by ${instance.instanceId}")
                 slot.fresh.instance = instance
                 slot.fresh.state = InstanceState.pending
-                task.log("Waiting up to ${Time.format(InstanceState.pending.timeOutToExitState)} for Pending ${instance.instanceId} to go InService.")
+                task.log("Waiting up to ${Time.format(InstanceState.pending.timeOutToExitState)} for " +
+                        "Pending ${instance.instanceId} to go InService.")
             }
         }
     }
 
-    private void handlePendingPhase(UserContext userContext, InstanceMetaData instanceInfo, boolean timeForPeriodicLogging, Slot slot) {
+    private void handlePendingPhase(UserContext userContext, InstanceMetaData instanceInfo,
+                                    boolean timeForPeriodicLogging, Slot slot) {
         def freshGroup = checkGroupStillExists(userContext, options.groupName, From.AWS_NOCACHE)
         def newInst = freshGroup.instances.find { it.instanceId == instanceInfo.id }
         String lifecycleState = newInst?.lifecycleState
         Boolean freshInstanceFailed = !newInst || "Terminated" == lifecycleState
         if (timeForPeriodicLogging || freshInstanceFailed) {
-            task.log("Instance of ${options.appName} on ${instanceInfo.id} is in lifecycle state ${lifecycleState ?: 'Not Found'}")
+            String state = lifecycleState ?: 'Not Found'
+            task.log("Instance of ${options.appName} on ${instanceInfo.id} is in lifecycle state ${state}")
         }
 
         if (freshInstanceFailed) {
@@ -272,16 +281,19 @@ class RollingPushOperation extends AbstractPushOperation {
                 fail("${reportSummary()} Startup failed ${startupTriesDone} times for one slot. " +
                         "Max ${options.maxStartupRetries} tries allowed. Aborting push.")
             } else {
-                task.log("Startup failed on ${instanceInfo.id} so Amazon terminated it. Waiting up to ${Time.format(InstanceState.terminated.timeOutToExitState)} for another instance.")
+                task.log("Startup failed on ${instanceInfo.id} so Amazon terminated it. Waiting up to " +
+                        "${Time.format(InstanceState.terminated.timeOutToExitState)} for another instance.")
             }
         }
 
         // If no longer pending, change state
         if (newInst?.lifecycleState?.equals("InService")) {
-            task.log("It took ${Time.format(instanceInfo.timeSinceChange)} for instance ${instanceInfo.id} to go from Pending to InService")
+            String duration = Time.format(instanceInfo.timeSinceChange)
+            task.log("It took ${duration} for instance ${instanceInfo.id} to go from Pending to InService")
             instanceInfo.state = InstanceState.running
             if (options.checkHealth) {
-                task.log("Waiting up to ${Time.format(InstanceState.running.timeOutToExitState)} for Eureka registration of ${options.appName} on ${instanceInfo.id}")
+                String timeout = Time.format(InstanceState.running.timeOutToExitState)
+                task.log("Waiting up to ${timeout} for Eureka registration of ${options.appName} on ${instanceInfo.id}")
             }
         }
     }
@@ -301,7 +313,8 @@ class RollingPushOperation extends AbstractPushOperation {
                 def healthCheckUrl = appInst.healthCheckUrl
                 if (healthCheckUrl) {
                     instanceInfo.healthCheckUrl = healthCheckUrl
-                    task.log("Waiting up to ${Time.format(InstanceState.registered.timeOutToExitState)} for health check pass at ${healthCheckUrl}")
+                    String timeout = Time.format(InstanceState.registered.timeOutToExitState)
+                    task.log("Waiting up to ${timeout} for health check pass at ${healthCheckUrl}")
                 }
             }
         }
@@ -315,7 +328,8 @@ class RollingPushOperation extends AbstractPushOperation {
         // If there's a health check URL then check it before preparing for final wait
         if (instanceInfo.healthCheckUrl) {
             Integer responseCode = restClientService.getRepeatedResponseCode(instanceInfo.healthCheckUrl)
-            String message = "Health check response code is ${responseCode} for application ${options.appName} on instance ${instanceInfo.id}"
+            String message = "Health check response code is ${responseCode} for application ${options.appName} on " +
+                    "instance ${instanceInfo.id}"
             if (responseCode >= 400) {
                 fail("${reportSummary()} ${message}. Push was aborted because ${instanceInfo.healthCheckUrl} " +
                         "shows a sick instance. See http://go/healthcheck for guidelines.")
@@ -362,7 +376,8 @@ class RollingPushOperation extends AbstractPushOperation {
 
     private void startSnoozing(InstanceMetaData instanceInfo) {
         if (options.shouldWaitAfterBoot()) {
-            task.log("Waiting ${options.afterBootWait} second${options.afterBootWait == 1 ? "" : "s"} for ${options.appName} on ${instanceInfo.id} to be ready.")
+            task.log("Waiting ${options.afterBootWait} second${options.afterBootWait == 1 ? "" : "s"} " +
+                    "for ${options.appName} on ${instanceInfo.id} to be ready.")
         }
         instanceInfo.state = InstanceState.snoozing
     }

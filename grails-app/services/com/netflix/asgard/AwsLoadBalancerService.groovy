@@ -292,7 +292,7 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
                                          Task existingTask = null) {
         // Limit rate of instance changes to avoid Amazon limitation.
         taskService.runTask(userContext, "Add instances ${instanceIds} to Load Balancer ${name}", { Task task ->
-            def instances = instanceIds.collect { new Instance().withInstanceId(it) } // elasticloadbalancing.model.Instance type
+            def instances = instanceIds.collect { new Instance().withInstanceId(it) }
             RegisterInstancesWithLoadBalancerRequest request = new RegisterInstancesWithLoadBalancerRequest()
                     .withLoadBalancerName(name)
                     .withInstances(instances)
@@ -314,7 +314,7 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
             if (!instanceIdsToDeregister) {
                 return
             }
-            List<Instance> instances = instanceIdsToDeregister.collect { new Instance().withInstanceId(it) } // elasticloadbalancing.model.Instance type
+            List<Instance> instances = instanceIdsToDeregister.collect { new Instance().withInstanceId(it) }
             DeregisterInstancesFromLoadBalancerRequest request = new DeregisterInstancesFromLoadBalancerRequest()
             request.withLoadBalancerName(name).withInstances(instances)
             task.tryUntilSuccessful(

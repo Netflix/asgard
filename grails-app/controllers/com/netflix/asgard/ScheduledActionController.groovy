@@ -33,7 +33,8 @@ class ScheduledActionController {
 
     def list = {
         UserContext userContext = UserContext.of(request)
-        List<ScheduledUpdateGroupAction> scheduledActions = awsAutoScalingService.getAllScheduledActions(userContext).sort { it.scheduledActionName }
+        Collection<ScheduledUpdateGroupAction> unsorted = awsAutoScalingService.getAllScheduledActions(userContext)
+        List<ScheduledUpdateGroupAction> scheduledActions = unsorted.sort { it.scheduledActionName }
         withFormat {
             html {
                 [

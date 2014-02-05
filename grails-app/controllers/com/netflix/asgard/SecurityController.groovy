@@ -113,14 +113,15 @@ class SecurityController {
 
     def save = { SecurityCreateCommand cmd ->
         if (cmd.hasErrors()) {
-            chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
+            chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass both errors and params
         } else {
             UserContext userContext = UserContext.of(request)
             String name = Relationships.buildAppDetailName(params.appName, params.detail)
             try {
                 SecurityGroup securityGroup = awsEc2Service.getSecurityGroup(userContext, name)
                 if (!securityGroup) {
-                    securityGroup = awsEc2Service.createSecurityGroup(userContext, name, params.description, params.vpcId)
+                    securityGroup = awsEc2Service.createSecurityGroup(userContext, name, params.description,
+                            params.vpcId)
                     flash.message = "Security Group '${name}' has been created."
                 } else {
                     flash.message = "Security Group '${name}' already exists."
@@ -173,7 +174,8 @@ class SecurityController {
         }
     }
 
-    private void updateSecurityIngress(UserContext userContext, SecurityGroup targetGroup, List<String> selectedGroups, Map portMap) {
+    private void updateSecurityIngress(UserContext userContext, SecurityGroup targetGroup, List<String> selectedGroups,
+                                       Map portMap) {
         awsEc2Service.getSecurityGroups(userContext).each { srcGroup ->
             boolean wantAccess = selectedGroups.any { it == srcGroup.groupName } && portMap[srcGroup.groupName] != ''
             String wantPorts = wantAccess ? portMap[srcGroup.groupName] : null

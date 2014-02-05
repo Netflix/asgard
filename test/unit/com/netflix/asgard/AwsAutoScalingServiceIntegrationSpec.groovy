@@ -157,8 +157,8 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
         !result.launchConfigDeleted
         result.launchConfigCreated
         result.autoScalingGroupCreated
-        result.toString() =~
-                /Launch Config 'helloworld-example-20[0-9]{12}' has been created. Auto Scaling Group 'helloworld-example' has been created. /
+        result.toString() =~ "Launch Config 'helloworld-example-20[0-9]{12}' has been created. Auto Scaling Group" +
+                " 'helloworld-example' has been created. "
 
         1 * mockAmazonAutoScalingClient.suspendProcesses({ SuspendProcessesRequest request ->
             [AutoScalingProcessType.Terminate.name()] == request.scalingProcesses &&

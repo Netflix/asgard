@@ -24,7 +24,8 @@ class AsgInstanceTests extends GroovyTestCase {
 
         new MonkeyPatcherService().createDynamicMethods()
 
-        Instance original = new Instance().withInstanceId("i-test").withAvailabilityZone("us-east-1d").withLifecycleState("running")
+        Instance original = new Instance().withInstanceId("i-test").withAvailabilityZone("us-east-1d").
+                withLifecycleState("running")
 
         Instance copy = original.copy()
 

@@ -155,10 +155,10 @@ class AutoScalingGroupData {
 
         List<GroupedInstance> groupedInstances = instances.collect { Instance inst ->
             String instanceId = inst.instanceId
-            Collection<LoadBalancerDescription> loadBalancersForInstance = instanceIdsToLoadBalancerLists?.get(instanceId)
+            Collection<LoadBalancerDescription> lbsForInstance = instanceIdsToLoadBalancerLists?.get(instanceId)
             MergedInstance mergedInstance = mergedInstances?.find { it.instanceId == instanceId }
             Image image = imageIdsToImages?.get(mergedInstance?.amiId)
-            GroupedInstance.from(inst, loadBalancersForInstance, mergedInstance, image)
+            GroupedInstance.from(inst, lbsForInstance, mergedInstance, image)
         }.sort { GroupedInstance inst -> inst.launchTime }
         this.instances = Collections.unmodifiableList(groupedInstances)
 

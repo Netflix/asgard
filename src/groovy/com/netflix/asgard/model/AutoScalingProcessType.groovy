@@ -16,7 +16,7 @@
 package com.netflix.asgard.model
 
 /**
- * http://docs.amazonwebservices.com/AWSJavaSDK/latest/javadoc/index.html?com/amazonaws/services/autoscaling/model/ProcessType.html
+ * http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/services/autoscaling/model/ProcessType.html
  *
  * There are two primary Auto Scaling process types-- Launch and Terminate.
  * The Launch process creates a new Amazon EC2 instance for an Auto Scaling group, and the Terminate process

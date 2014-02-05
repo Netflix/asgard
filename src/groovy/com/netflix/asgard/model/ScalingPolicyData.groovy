@@ -40,7 +40,7 @@ final class ScalingPolicyData {
 
     static ScalingPolicyData fromPolicyAndAlarms(ScalingPolicy scalingPolicy, Collection<MetricAlarm> alarms = []) {
         Check.notNull(scalingPolicy, ScalingPolicy)
-        final AdjustmentType adjustmentType = Enum.valueOf(ScalingPolicyData.AdjustmentType, scalingPolicy.adjustmentType)
+        AdjustmentType adjustmentType = Enum.valueOf(ScalingPolicyData.AdjustmentType, scalingPolicy.adjustmentType)
         final List<AlarmData> alarmDatas = alarms.collect { AlarmData.fromMetricAlarm(it) }
         new ScalingPolicyData(
                 arn: scalingPolicy.policyARN,

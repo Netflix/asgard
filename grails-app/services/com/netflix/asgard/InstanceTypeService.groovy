@@ -86,7 +86,8 @@ class InstanceTypeService implements CacheInitializer {
     private JSONElement fetchPricingJsonData(InstancePriceType instancePriceType) {
         Boolean online = grailsApplication.config.server.online
         String pricingJsonUrl = instancePriceType.url
-        online ? restClientService.getAsJson(pricingJsonUrl) : MockFileUtils.parseJsonFile(instancePriceType.dataSourceFileName)
+        String fileName = instancePriceType.dataSourceFileName
+        online ? restClientService.getAsJson(pricingJsonUrl) : MockFileUtils.parseJsonFile(fileName)
     }
 
     private Collection<HardwareProfile> getHardwareProfiles() {
