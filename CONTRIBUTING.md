@@ -42,7 +42,7 @@ The following are some general guide lines to observe when contributing code:
 
 1. Everything needs to be tested
 1. All source files must have the appropriate ASLv2 license header
-1. 4 spaces for Groovy and Java and JavaScript. 2 spaces for GSP and HTML. When in doubt, make your spacing look identical to the code nearby. And no tab characters.
+1. 4 spaces for Groovy and Java and JavaScript. 2 spaces for GSP and HTML. When in doubt, make your spacing look identical to the code nearby. And no tab characters. Just to be sure, you might want to also check the Groovy code style guide)[http://groovy.codehaus.org/Groovy+style+and+language+feature+guidelines+for+Java+developers]
 1. Please run Asgard's CodeNarc task (`grails codenarc`)
 1. Groovydoc all classes and public methods
 1. Everything needs to be tested (see point #1)
