@@ -18,7 +18,7 @@ package com.netflix.asgard.mock
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.ResponseMetadata
-import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.rds.AmazonRDSClient
 import com.amazonaws.services.rds.model.AuthorizeDBSecurityGroupIngressRequest
 import com.amazonaws.services.rds.model.CreateDBInstanceReadReplicaRequest
@@ -85,8 +85,8 @@ class MockAmazonRDSClient extends AmazonRDSClient {
         [new DBSnapshot().withDBSnapshotIdentifier('mickeymouse')]
     }
 
-    MockAmazonRDSClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
-        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
+    MockAmazonRDSClient(AWSCredentialsProvider credentialsProvider, ClientConfiguration clientConfiguration) {
+        super(credentialsProvider, clientConfiguration)
         mockDbInstances = loadMockDbInstances()
         mockDbSecurityGroups = loadMockDbSecurityGroups()
         mockDbSnapshots = loadMockDbSnapshots()

@@ -165,17 +165,31 @@ class ConfigService {
         getRegionalDiscoveryServer(region) ? true : false
     }
 
+    /**
+     * @return the short label that should be displayed in reference to the change control ticket for cloud changes
+     */
     String getTicketLabel() {
         grailsApplication.config.ticket?.label ?: 'Ticket'
     }
 
+    /**
+     * @return the verbose label for documentation that defines the change control ticket for cloud changes
+     */
     String getFullTicketLabel() {
         grailsApplication.config.ticket?.fullLabel ?: 'Ticket'
     }
 
+    /**
+     * Gets the list of AWS account numbers which, if an AMI has launch permissions to launch into that account, we
+     * should assume that the AMI is in use by that account and therefore the AMI should not be automatically deleted
+     * even if it satisfies all other rules that define an old, unused AMI.
+     *
+     * @return account numbers of the AWS accounts that cannot be inspected for AMI usage, meaning that the AMIs that
+     *          can launch into those accounts should never be deleted through mass deletion
+     */
     Collection<String> getExcludedLaunchPermissionsForMassDelete() {
         List<String> excludedLaunchPermissions = grailsApplication.config.cloud?.massDeleteExcludedLaunchPermissions
-        Map matches = grailsApplication.config.grails.awsAccountNames.findAll { k, v ->
+        Map matches = awsAccountNames.findAll { k, v ->
             excludedLaunchPermissions?.contains(v)
         } as Map
         matches.keySet()
@@ -195,6 +209,11 @@ class ConfigService {
         grailsApplication.config.appConfigured
     }
 
+    /**
+     * @return a list of maps each describing one offsite link, with url, text, and image keys, such as
+     *          [url: 'mailto:help@example.com', text: 'Email Support',
+     *              image: '/images/tango/16/actions/mail-message-new.png']
+     */
     List<Map<String,String>> getExternalLinks() {
         grailsApplication.config.link?.externalLinks?.sort { it.text } ?: []
     }
@@ -274,6 +293,9 @@ class ConfigService {
         grailsApplication.config.cloud?.discouragedAvailabilityZones ?: []
     }
 
+    /**
+     * @return map of section names to list of templates for creating links to other applications
+     */
     Map<String, List<TextLinkTemplate>> getInstanceLinkGroupingsToLinkTemplateLists() {
         grailsApplication.config.link?.instanceLinkGroupingsToLinkTemplateLists ?: [:]
     }
@@ -321,44 +343,104 @@ class ConfigService {
         grailsApplication.config.server.online
     }
 
+    /**
+     * @return the AWS account access ID stored in the local configuration file, or null if not configured
+     */
     String getAccessId() {
         grailsApplication.config.secret?.accessId ?: null
     }
 
+    /**
+     * @return the AWS secret key stored in the local configuration file, or null if not configured
+     */
     String getSecretKey() {
         grailsApplication.config.secret?.secretKey ?: null
     }
 
+    /**
+     * @return the name of the local or remote file containing the AWS access ID, or null if not configured
+     */
     String getAccessIdFileName() {
         grailsApplication.config.secret?.accessIdFileName ?: null
     }
 
+    /**
+     * @return the name of the local or remote file containing the AWS secret key, or null if not configured
+     */
     String getSecretKeyFileName() {
         grailsApplication.config.secret?.secretKeyFileName ?: null
     }
 
+    /**
+     * @return the name of the file that contains the username needed for accessing a load balancer over SSH, for
+     *      switching traffic between different Asgard servers
+     */
     String getLoadBalancerUsernameFile() {
         grailsApplication.config.secret?.loadBalancerUsernameFileName ?: null
     }
 
+    /**
+     * @return the name of the file that contains the password needed for accessing a load balancer over SSH, for
+     *      switching traffic between different Asgard servers
+     */
     String getLoadBalancerPasswordFile() {
         grailsApplication.config.secret?.loadBalancerPasswordFileName ?: null
     }
 
+    /**
+     * @return the path to the local machine's directory that contains files with sensitive credentials
+     */
     String getSecretLocalDirectory() {
         grailsApplication.config.secret?.localDirectory ?: null
     }
 
+    /**
+     * @return the username for SSH access to the remote server that contains secret files such as credentials
+     */
     String getSecretRemoteUser() {
         grailsApplication.config.secret?.remoteUser ?: null
     }
 
+    /**
+     * @return the name of the remote server containing secret files such as credentials to be accessed over SSH
+     */
     String getSecretRemoteServer() {
         grailsApplication.config.secret?.remoteServer ?: null
     }
 
+    /**
+     * @return the path to the directory containing secret files on a remote server to be accessed over SSH
+     */
     String getSecretRemoteDirectory() {
         grailsApplication.config.secret?.remoteDirectory ?: null
+    }
+
+    /**
+     * @return the endpoint to call for fetching secret keys for AWS access, or null by default
+     */
+    String getKeyManagementServiceEndpoint() {
+        grailsApplication.config.secret?.keyManagement?.endpoint ?: null
+    }
+
+    /**
+     * @return the port to use when establishing a secure SSL connection to a key management service, or null by default
+     */
+    Integer getKeyManagementServicePort() {
+        grailsApplication.config.secret?.keyManagement?.servicePort ?: null
+    }
+
+    /**
+     * @return the path to the local keystore file to use for SSL connections to a key management service
+     */
+    String getKeyManagementSslKeyStoreFilePath() {
+        grailsApplication.config.secret?.keyManagement?.keyStoreFilePath ?: null
+    }
+
+    /**
+     * @return the password for the keystore file used for SSL connections to a key management service
+     */
+    String getKeyManagementSslKeystorePassword() {
+        grailsApplication.config.secret?.keyManagement?.password ?: 'changeit'
     }
 
     /**
@@ -530,7 +612,7 @@ class ConfigService {
         Math.max(0, maxLength)
     }
 
-    /*
+    /**
      * @return true if api token based authentication is active, false otherwise
      */
     boolean isApiTokenEnabled() {
@@ -538,19 +620,25 @@ class ConfigService {
     }
 
     /**
-     * @return List of encryption keys for hashing api keys. The first item is used as the current key for new requests.
-     *         The remaining keys in the list are used to validate tokens that are already in circulation. This provides
-     *         a way to gracefully retire keys.
+     * Gets a list of encryption keys for hashing api keys. The first item is used as the current key for new requests.
+     * The remaining keys in the list are used to validate tokens that are already in circulation. This provides a way
+     * to gracefully retire keys.
+     *
+     * If no encryption keys are configured for use, then a default key is used because this isn't meant to be a
+     * serious security roadblock by any means. It's just a minor hoop to jump through in order to spoof a different
+     * user. We'll replace this lame auth system with a better one later.
+     *
+     * @return list of encryption keys, starting with the current key for new API tokens
      */
     List<String> getApiEncryptionKeys() {
         grailsApplication.config.security?.apiToken?.encryptionKeys ?: []
     }
 
     /**
-     * @return file name containing a list of keys to use for hashing api keys
+     * @return the current in use encryption key for Asgard API token generation
      */
-    String getApiEncryptionKeyFileName() {
-        grailsApplication.config.secret?.apiEncryptionKeyFileName ?: null
+    String getCurrentApiEncryptionKey() {
+        apiEncryptionKeys[0]
     }
 
     /**

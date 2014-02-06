@@ -16,6 +16,9 @@
 package com.netflix.asgard
 
 import com.amazonaws.ClientConfiguration
+import com.amazonaws.auth.AWSCredentialsProvider
+import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.internal.StaticCredentialsProvider
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient
 import com.amazonaws.services.ec2.AmazonEC2Client
@@ -27,6 +30,7 @@ import com.amazonaws.services.simpledb.AmazonSimpleDBClient
 import com.amazonaws.services.simpleworkflow.AmazonSimpleWorkflowClient
 import com.amazonaws.services.sns.AmazonSNSClient
 import com.amazonaws.services.sqs.AmazonSQSClient
+import com.netflix.asgard.cred.AsgardAWSCredentialsProviderChain
 import com.netflix.asgard.mock.MockAmazonAutoScalingClient
 import com.netflix.asgard.mock.MockAmazonCloudWatchClient
 import com.netflix.asgard.mock.MockAmazonEC2Client
@@ -47,10 +51,9 @@ class AwsClientService implements InitializingBean {
 
     static transactional = false
 
-    def grailsApplication
-    def secretService
-    def serverService
     def configService
+    def serverService
+    def restClientService
 
     /**
      * Interface names mapped to ClientTypes wrapper objects. For each interface name, a real and fake concrete class
@@ -59,6 +62,7 @@ class AwsClientService implements InitializingBean {
     private Map<String, Class> interfaceSimpleNamesToAwsClientClasses
 
     private ClientConfiguration clientConfiguration
+    private AWSCredentialsProvider providerChain
 
     void afterPropertiesSet() {
         interfaceSimpleNamesToAwsClientClasses = [
@@ -79,6 +83,11 @@ class AwsClientService implements InitializingBean {
         clientConfiguration.proxyHost = configService.proxyHost
         clientConfiguration.proxyPort = configService.proxyPort
         clientConfiguration.userAgent = 'asgard-' + serverService.version
+        if (configService.online) {
+            providerChain = new AsgardAWSCredentialsProviderChain(configService, restClientService)
+        } else {
+            providerChain = new StaticCredentialsProvider(new BasicAWSCredentials('a', 'b'))
+        }
     }
 
     public <T> T create(Class<T> interfaceType) {
@@ -87,10 +96,10 @@ class AwsClientService implements InitializingBean {
     }
 
     public <T> T createImpl(Class<T> implementationType) {
-        implementationType.newInstance(secretService.awsCredentials, clientConfiguration) as T
+        implementationType.newInstance(providerChain, clientConfiguration) as T
     }
 
     Class concrete(Class real, Class fake) {
-        grailsApplication.config.server.online ? real : fake
+        configService.online ? real : fake
     }
 }

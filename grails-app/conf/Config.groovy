@@ -69,6 +69,9 @@ log4j = {
             'org.apache.catalina', 'org.apache.commons', 'org.apache.coyote', 'org.apache.http.client.protocol',
             'org.apache.jasper', 'org.apache.tomcat', 'org.codehaus.groovy.grails'
 
+    // Avoid odd extra log4j error message during grails test-app initialization
+    error 'com.amazonaws.services.simpleworkflow.flow.worker.DecisionTaskPoller'
+
     environments {
         development {
             console name: 'stdout', layout: pattern(conversionPattern: '[%d{ISO8601}] %c{4}    %m%n')

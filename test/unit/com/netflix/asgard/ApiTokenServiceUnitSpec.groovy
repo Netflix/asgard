@@ -25,9 +25,7 @@ class ApiTokenServiceUnitSpec extends Specification {
     ApiToken apiToken
     def configService = Mock(ConfigService)
     def emailerService = Mock(EmailerService)
-    def secretService = Mock(SecretService)
-    ApiTokenService apiTokenService = new ApiTokenService(configService: configService, emailerService: emailerService,
-            secretService: secretService)
+    ApiTokenService apiTokenService = new ApiTokenService(configService: configService, emailerService: emailerService)
 
     def setup() {
         Subject subject = Mock(Subject)
@@ -41,13 +39,13 @@ class ApiTokenServiceUnitSpec extends Specification {
     }
 
     def 'should validate a valid token'() {
-        given: secretService.apiEncryptionKeys >> ['key']
+        given: configService.apiEncryptionKeys >> ['key']
         when: boolean valid = apiTokenService.tokenValid(apiToken)
         then: valid
     }
 
     def 'should fail on an invalid token'() {
-        given: secretService.apiEncryptionKeys >> ['otherKey']
+        given: configService.apiEncryptionKeys >> ['otherKey']
         when: boolean valid = apiTokenService.tokenValid(apiToken)
         then: !valid
     }
@@ -61,7 +59,7 @@ class ApiTokenServiceUnitSpec extends Specification {
     def 'should send email when token is near expiration'() {
         configService.apiTokenExpiryWarningThresholdDays >> 100
         configService.canonicalServerName >> 'asgardtest'
-        secretService.apiEncryptionKeys >> ['key']
+        configService.apiEncryptionKeys >> ['key']
 
         // initialize cache
         configService.apiTokenExpiryWarningIntervalMinutes >> 360

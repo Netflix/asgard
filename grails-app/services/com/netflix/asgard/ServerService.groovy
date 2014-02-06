@@ -283,6 +283,21 @@ class ServerService implements InitializingBean {
         grailsApplication.metadata['app.version']
     }
 
+    /**
+     * @return the system properties of the running JVM, abstracted into a service class for easier unit test mocking
+     */
+    Properties getSystemProperties() {
+        System.properties
+    }
+
+    /**
+     * @return the environment variables of the machine where the JVM is running, abstracted into a service class for
+     *          easier unit test mocking
+     */
+    Map<String, String> getEnvironmentVariables() {
+        System.getenv()
+    }
+
     private String determineActiveServerName(Environment env) {
         restClientService.getAsText("http://${env.canonicalDnsName}${serverSuffix}/server", 1000)
     }

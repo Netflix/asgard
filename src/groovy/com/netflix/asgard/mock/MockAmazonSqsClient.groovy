@@ -18,7 +18,7 @@ package com.netflix.asgard.mock
 import com.amazonaws.AmazonClientException
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.ClientConfiguration
-import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model.CreateQueueRequest
 import com.amazonaws.services.sqs.model.CreateQueueResult
@@ -49,8 +49,8 @@ class MockAmazonSqsClient extends AmazonSQSClient {
         ])]
     }
 
-    MockAmazonSqsClient(BasicAWSCredentials awsCredentials, ClientConfiguration clientConfiguration) {
-        super(awsCredentials as BasicAWSCredentials, clientConfiguration)
+    MockAmazonSqsClient(AWSCredentialsProvider credentialsProvider, ClientConfiguration clientConfiguration) {
+        super(credentialsProvider, clientConfiguration)
         mockQueues = loadMockQueues()
     }
 

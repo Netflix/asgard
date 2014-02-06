@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2014 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.mock
+package com.netflix.asgard.cred
 
-import com.amazonaws.ClientConfiguration
-import com.amazonaws.auth.AWSCredentialsProvider
-import com.amazonaws.services.s3.AmazonS3Client
+/**
+ * Wrapper around time-checking functions, to enable mocking of this behavior in unit tests.
+ */
+class Clock {
 
-class MockAmazonS3Client extends AmazonS3Client {
-
-    MockAmazonS3Client(AWSCredentialsProvider credentialsProvider, ClientConfiguration clientConfiguration) {
-        super(credentialsProvider, clientConfiguration)
-    }
-
-    void setEndpoint(String endpoint) {
-
+    /**
+     * @return the difference, measured in milliseconds, between the current time and midnight, January 1, 1970 UTC
+     */
+    long currentTimeMillis() {
+        System.currentTimeMillis()
     }
 }
