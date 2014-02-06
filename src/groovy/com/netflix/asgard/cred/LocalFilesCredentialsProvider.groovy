@@ -20,7 +20,7 @@ import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.auth.BasicAWSCredentials
 import com.netflix.asgard.Check
 import com.netflix.asgard.ConfigService
-import com.netflix.asgard.Time
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Semaphore
 import org.apache.commons.logging.LogFactory
 
@@ -40,6 +40,11 @@ class LocalFilesCredentialsProvider extends AbstractCredentialsProvider {
      * credentials provider, so there's no need to overload the credentials source multiple times.
      */
     private final Semaphore permitToFetchCredentials = new Semaphore(1)
+
+    /**
+     * The thread-safe indicator of whether the credentials have been fetched yet.
+     */
+    private final CountDownLatch credentialsAreFetched = new CountDownLatch(1)
 
     /**
      * Credentials are cached in this provider object forever, with the assumption that credentials read from a local
@@ -92,13 +97,12 @@ class LocalFilesCredentialsProvider extends AbstractCredentialsProvider {
                     credentials = fetchCredentials(directory, accessIdFileName, secretKeyFileName)
                 } finally {
                     permitToFetchCredentials.release()
+                    credentialsAreFetched.countDown()
                 }
             } else {
                 // Some other thread must be fetching the credentials. This thread should wait until the fetch is done.
                 // Then assume the first thread was successful in fetching credentials.
-                while (permitToFetchCredentials.availablePermits() < 1) {
-                    Time.sleepCancellably(1)
-                }
+                credentialsAreFetched.await()
             }
         } else {
             throw new AmazonClientException("Unable to load AWS credentials from local files")
