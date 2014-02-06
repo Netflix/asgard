@@ -16,7 +16,6 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.mock.MockKeyStoreFileBinaryContents
-import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.HttpVersion
 import org.apache.http.client.HttpClient
@@ -32,7 +31,6 @@ class RestClientServiceUnitSpec extends Specification {
 
     HttpClient httpClient = Mock(HttpClient)
     HttpResponse httpResponse = Mock(HttpResponse)
-    HttpEntity entity = Mock(HttpEntity)
     ClientConnectionManager clientConnectionManager = Mock(ClientConnectionManager)
     SchemeRegistry schemeRegistry = new SchemeRegistry() // Final class is hard to mock, and not necessary this time
     RestClientService restClientService = new RestClientService(httpClient: httpClient)
@@ -91,11 +89,7 @@ class RestClientServiceUnitSpec extends Specification {
         1 * httpClient.connectionManager >> clientConnectionManager
         1 * clientConnectionManager.schemeRegistry >> schemeRegistry
         1 * httpClient.execute({ it.method == 'GET' && it.getURI() == new URI(endpoint) }) >> httpResponse
-        2 * httpResponse.entity >> entity
-        1 * entity.isStreaming() >> true
-        2 * entity.content >> new ByteArrayInputStream(responseBody.bytes)
-        2 * entity.contentLength >> responseBody.length()
-        1 * entity.contentType
+        2 * httpResponse.entity >> new StringEntity(responseBody)
         result == responseBody
     }
 }
