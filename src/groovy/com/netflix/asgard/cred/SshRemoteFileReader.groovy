@@ -40,7 +40,7 @@ class SshRemoteFileReader {
      * @param server the name of the remote server to access
      * @param directoryPath the path to the remote file whose contents should be read
      * @param fileName the name of the file whose contents are needed
-     * @return
+     * @return contents of the remote file
      */
     String fetch(String user, String server, String directoryPath, String fileName) {
         String command = "cat ${directoryPath}/${fileName}"
