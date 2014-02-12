@@ -78,6 +78,11 @@ input.number                     { width: 36px;  }
 .inlineInputs input             { margin-right: 10px; }
 .inlineInputs input:last-child  { margin-right: 0; }
 
+span.label                      { background-color: #999999; border-radius: 3px; padding: 4px; font-weight: bold; margin-right: 2px; font-size: 9px; letter-spacing: 1px }
+span.label a                    { color: #ffffff }
+span.label a:hover              { text-decoration: underline }
+
+
 /* NAVIGATION MENU */
 .nav      { border-color: #AAA; padding: 0;          border-style: solid; border-width: 1px 0; float: left; width: 100%; min-width: 838px; }
 .nav li   { border-color: #AAA; padding: 0 0 10px 0; border-style: solid; border-width: 0 1px 0 0; font-size: 10px; margin: 0; white-space: nowrap; display: block; float: left; height: 25px; position: relative; z-index: 2; }
@@ -173,6 +178,7 @@ td.health a            { display: none; height: 16px; width: 16px; }
 td.pass a, td.fail a   { display: block; background: transparent no-repeat; }
 td.pass a              { background-image: url(../images/tango/16/status/weather-clear.png); }
 td.fail a              { background-image: url(../images/tango/16/status/weather-storm.png); }
+td.tags                { max-width: 150px !important; }
 div.pass, div.fail, div.incomplete, div.empty   { display: block; background: transparent no-repeat; padding: 2px 2px 2px 35px; }
 div.pass               { background-image: url(../images/tango/24/status/weather-clear.png); }
 div.fail               { background-image: url(../images/tango/24/status/weather-storm.png); }
@@ -227,6 +233,8 @@ th.desc a                   { background-image: url(../images/skin/sorted_desc.g
 .list td.description        { max-width:  76px; }
 .list td.storage            { max-width:  70px; }
 .list td.cpu                { max-width: 130px; }
+.list td.group-row          { font-size: 18px; font-style: italic; color: #cccccc; background-color: #ffffff; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; }
+.list td.group-row:hover    { background-color: #ffffff; }
 .instanceType td.family     { max-width:  60px; }
 .instanceType td.group      { max-width: 110px; }
 .instanceType td.size       { max-width:  73px; }

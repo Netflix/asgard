@@ -90,6 +90,16 @@
           <td class="name">Update Time:</td>
           <td class="value"><g:formatDate date="${app.updateTime}"/></td>
         </tr>
+        <tr class="prop">
+          <td class="name">Tags:</td>
+          <td class="value">
+            <g:each in="${app.tags}" var="tag">
+              <span class="label">
+                <g:link action="list" params="[id: tag]">${tag}</g:link>
+              </span>
+            </g:each>
+          </td>
+        </tr>
         <g:if test="${alertingServiceConfigUrl}">
           <tr class="prop">
             <td class="name">
