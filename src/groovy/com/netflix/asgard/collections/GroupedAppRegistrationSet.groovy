@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.netflix.asgard.collections
 
 import com.netflix.asgard.AppRegistration
-
 
 /**
  * Created by danw on 2/11/14.
@@ -43,8 +41,9 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
             appGroups[app.group] << app
         }
         app.tags.each { String tag ->
-            if (!tags[tag])
+            if (!tags[tag]) {
                 tags[tag] = []
+            }
             tags[tag] << app
         }
         super.add app
@@ -52,13 +51,15 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
 
     @Override
     boolean remove(Object obj) {
-        if (!(obj instanceof AppRegistration))
+        if (!(obj instanceof AppRegistration)) {
             super.remove obj
+        }
 
         def app = (AppRegistration)obj
 
-        if (app.group)
+        if (app.group) {
             removeFromList appGroups[app.group], app
+        }
 
         app.tags.each { String tag ->
             removeFromList tags[tag], app
@@ -68,8 +69,9 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
     }
 
     private static void removeFromList(List<AppRegistration> apps, AppRegistration app) {
-        if (apps.contains(app))
+        if (apps.contains(app)) {
             apps.remove app
+        }
     }
 
     Map<String, List<AppRegistration>> groups() {

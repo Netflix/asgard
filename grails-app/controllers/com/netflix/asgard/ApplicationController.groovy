@@ -223,10 +223,11 @@ class ApplicationController {
     }
 
     private static String parseTags(String tags) {
-        if (tags.contains(","))
+        if (tags.contains(",")) {
             tags.split(',')*.trim().join(',')
-        else
+        } else {
             tags.split()*.trim().join(',')
+        }
     }
 
     def delete = {
@@ -291,22 +292,6 @@ class ApplicationController {
             List<IpPermission> wantPerms = awsEc2Service.permissionsFromString(wantPorts)
             awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, srcGroup, wantPerms)
         }
-    }
-
-    private static Map<String, List<AppRegistration>> groupApplicationsByAppGroup(List<AppRegistration> apps) {
-        apps.groupBy { it.group ?: "none" }.sort()
-    }
-
-    private static Map<String, AppRegistration> groupApplicationsByAppTags(List<AppRegistration> apps) {
-        def map = [:]
-        apps.each { AppRegistration app ->
-            app.tags.each { String tag ->
-                if (!map[tag])
-                    map[tag] = []
-                map[tag] << app
-            }
-        }
-        map.sort()
     }
 }
 
