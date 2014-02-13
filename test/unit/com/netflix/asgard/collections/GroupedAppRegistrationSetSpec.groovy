@@ -18,7 +18,6 @@ package com.netflix.asgard.collections
 import com.netflix.asgard.AppRegistration
 import spock.lang.Specification
 
-
 /**
  * Created by danw on 2/11/14.
  */

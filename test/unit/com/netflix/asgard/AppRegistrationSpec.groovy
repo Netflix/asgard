@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.netflix.asgard
 
 import com.amazonaws.services.simpledb.model.Attribute
@@ -42,7 +41,7 @@ class AppRegistrationSpec extends Specification {
                     owner: "EngTools",
                     email: "em@il.com",
                     monitorBucketType: "application",
-                    createTs: "${(now-10).time}",
+                    createTs: "${(now - 10).time}",
                     updateTs: "${now.time}",
                     tags: "Foo,Bar,Baz,Blah"
             ]
@@ -65,14 +64,14 @@ class AppRegistrationSpec extends Specification {
     }
 
     class ItemBuilder {
-        private ItemBuilder() {}
+        private ItemBuilder() { }
 
         static class Builder {
             private String name
             private final List<Attribute> attrs = []
 
             def attrs(Map<String, String> map) {
-                map.each {k, v ->
+                map.each { k, v ->
                     attrs.add new Attribute(k, v)
                 }
                 this
