@@ -179,7 +179,7 @@ class ApplicationController {
             String owner = params.owner
             String email = params.email
             String monitorBucketTypeString = params.monitorBucketType
-            String tags = parseTags(params.tags)
+            String tags = normalizeTagDelimiter(params.tags)
             boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
             MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
             CreateApplicationResult result = applicationService.createRegisteredApplication(userContext, name, group,
@@ -209,7 +209,7 @@ class ApplicationController {
         String desc = params.description
         String owner = params.owner
         String email = params.email
-        String tags = parseTags(params.tags)
+        String tags = normalizeTagDelimiter(params.tags)
         String monitorBucketTypeString = params.monitorBucketType
         try {
             MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
@@ -220,14 +220,6 @@ class ApplicationController {
             flash.message = "Could not update Application: ${e}"
         }
         redirect(action: 'show', params: [id: name])
-    }
-
-    private static String parseTags(String tags) {
-        if (tags.contains(",")) {
-            tags.split(',')*.trim().join(',')
-        } else {
-            tags.split()*.trim().join(',')
-        }
     }
 
     def delete = {
@@ -291,6 +283,14 @@ class ApplicationController {
             String wantPorts = wantAccess ? portMap[targetGroup.groupName] : null
             List<IpPermission> wantPerms = awsEc2Service.permissionsFromString(wantPorts)
             awsEc2Service.updateSecurityGroupPermissions(userContext, targetGroup, srcGroup, wantPerms)
+        }
+    }
+
+    private static String normalizeTagDelimiter(String tags) {
+        if (tags.contains(",")) {
+            tags.split(',')*.trim().join(',')
+        } else {
+            tags.split()*.trim().join(',')
         }
     }
 }

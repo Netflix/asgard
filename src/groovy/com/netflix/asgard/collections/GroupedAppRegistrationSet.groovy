@@ -18,12 +18,17 @@ package com.netflix.asgard.collections
 import com.netflix.asgard.AppRegistration
 
 /**
- * Created by danw on 2/11/14.
+ * This data structure is responsible for providing a name-based grouping of {@link AppRegistration} objects.
+ * Upon being added to the set, a grouping of AppRegistration objects by appGroup
  */
 class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
     private final Map<String, List<AppRegistration>> appGroups = [:]
     private final Map<String, List<AppRegistration>> tags = [:]
 
+    /**
+     * Constructs a new TreeSet, containing a list of provided @{link AppRegistration} objects. This Set will sort
+     * AppRegistration objects on the "name" property.
+     */
     GroupedAppRegistrationSet(final List<AppRegistration> apps) {
         super({ AppRegistration a, AppRegistration b ->
             a.name <=> b.name
@@ -68,17 +73,28 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
         super.remove app
     }
 
-    private static void removeFromList(List<AppRegistration> apps, AppRegistration app) {
-        if (apps.contains(app)) {
-            apps.remove app
-        }
-    }
-
+    /**
+     * This method returns a Map, which contains a list of @{link AppRegistration} objects, keyed by application group
+     * name.
+     *
+     * @return Map
+     */
     Map<String, List<AppRegistration>> groups() {
         appGroups
     }
 
+    /**
+     * This method returns a Map, which contains a list of @{link AppRegistration} objects, keyed by tag
+     *
+     * @return Map
+     */
     Map<String, List<AppRegistration>> tags() {
         tags
+    }
+
+    private static void removeFromList(List<AppRegistration> apps, AppRegistration app) {
+        if (apps.contains(app)) {
+            apps.remove app
+        }
     }
 }
