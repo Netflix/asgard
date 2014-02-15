@@ -16,7 +16,9 @@
 package com.netflix.asgard.push
 
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
+import com.amazonaws.services.autoscaling.model.TagDescription
 import com.netflix.asgard.model.ScalingPolicyData
+
 import groovy.transform.Immutable
 
 @Immutable final class GroupCreateOptions {
@@ -35,6 +37,7 @@ import groovy.transform.Immutable
     boolean zoneRebalancingSuspended
     Collection<ScalingPolicyData> scalingPolicies
     Collection<ScheduledUpdateGroupAction> scheduledActions
+    Collection<TagDescription> tags
     String spotPrice
     boolean ebsOptimized
 

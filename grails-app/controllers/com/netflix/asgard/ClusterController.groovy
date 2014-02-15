@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
+import com.amazonaws.services.autoscaling.model.TagDescription
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
@@ -43,6 +44,7 @@ import com.netflix.asgard.push.GroupDeleteOperation
 import com.netflix.asgard.push.GroupResizeOperation
 import com.netflix.asgard.push.InitialTraffic
 import com.netflix.grails.contextParam.ContextParam
+
 import grails.converters.JSON
 import grails.converters.XML
 
@@ -423,6 +425,8 @@ ${lastGroup.loadBalancerNames}"""
             List<ScheduledUpdateGroupAction> newScheduledActions = awsAutoScalingService.copyScheduledActionsForNewAsg(
                     userContext, nextGroupName, lastScheduledActions)
 
+            List<TagDescription> tags = getCopyForwardTags(lastGroup)
+
             Integer lastGracePeriod = lastGroup.healthCheckGracePeriod
             String vpcZoneIdentifier = subnets.constructNewVpcZoneIdentifierForPurposeAndZones(subnetPurpose,
                     selectedZones)
@@ -474,13 +478,19 @@ Group: ${loadBalancerNames}"""
                     scheduledActions: newScheduledActions,
                     vpcZoneIdentifier: vpcZoneIdentifier,
                     spotPrice: spotPrice,
-                    ebsOptimized: ebsOptimized
+                    ebsOptimized: ebsOptimized,
+                    tags: tags
             )
             def operation = pushService.startGroupCreate(options)
             flash.message = "${operation.task.name} has been started."
             redirectToTask(operation.taskId)
         }
     }
+
+    private List<TagDescription> getCopyForwardTags(AutoScalingGroupData asg) {
+        //Tag keys starting with the String aws are reserved.
+        List<TagDescription> copyForwardTags = asg?.tags.findAll{ ! it?.key.startsWith("aws") }
+	}
 
     private int convertToIntOrUseDefault(String value, Integer defaultValue) {
         value?.toInteger() ?: defaultValue

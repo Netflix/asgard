@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.autoscaling.model.TagDescription
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingGroupMixin
@@ -28,6 +29,7 @@ import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.push.GroupCreateOperation
 import com.netflix.asgard.push.GroupCreateOptions
+
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -46,12 +48,18 @@ class ClusterControllerSpec extends Specification {
             subnet('subnet-3', 'us-east-1e', 'internal'),
             subnet('subnet-4', 'us-east-1e', 'external'),
     ])
+
+    // Two tags are defined here to ensure that tags beginning with aws are not copied forward as
+    // they are reserved for AWS internal use, e.g., aws:autoscaling:groupName
+    final allowedTag = new TagDescription(propagateAtLaunch: true, key: "deployment", value: "test")
+    final forbiddenTag = new TagDescription(propagateAtLaunch: true, key: "aws:test", value: "aws")
+
     final AutoScalingGroup asg = new AutoScalingGroup(autoScalingGroupName: 'helloworld-example-v015',
         minSize: 3, desiredCapacity: 5, maxSize: 7, healthCheckGracePeriod: 42, defaultCooldown: 360,
         launchConfigurationName: 'helloworld-lc', healthCheckType: AutoScalingGroupHealthCheckType.EC2,
         instances: [new Instance(instanceId: 'i-6ef9f30e'), new Instance(instanceId: 'i-95fe1df6')],
         availabilityZones: ['us-east-1c'], loadBalancerNames: ['hello-elb'], terminationPolicies: ['hello-tp'],
-        vPCZoneIdentifier: 'subnet-1')
+        vPCZoneIdentifier: 'subnet-1', tags: [allowedTag, forbiddenTag])
     final LaunchConfiguration launchConfiguration = new LaunchConfiguration(imageId: 'lastImageId',
             instanceType: 'lastInstanceType', keyName: 'lastKeyName', securityGroups: ['sg-123', 'sg-456'],
             iamInstanceProfile: 'lastIamProfile', spotPrice: '1.23')
@@ -166,6 +174,7 @@ class ClusterControllerSpec extends Specification {
                 assert vpcZoneIdentifier == 'subnet-1'
                 assert iamInstanceProfile == 'lastIamProfile'
                 assert spotPrice == '1.23'
+                assert tags == [allowedTag]
             }
             true
         }) >> { args ->

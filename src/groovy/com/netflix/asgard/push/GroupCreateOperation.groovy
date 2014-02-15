@@ -75,7 +75,9 @@ class GroupCreateOperation extends AbstractPushOperation {
                     withDefaultCooldown(options.defaultCooldown).withHealthCheckType(options.healthCheckType).
                     withHealthCheckGracePeriod(options.healthCheckGracePeriod).
                     withTerminationPolicies(options.terminationPolicies).
-                    withVPCZoneIdentifier(options.vpcZoneIdentifier)
+                    withVPCZoneIdentifier(options.vpcZoneIdentifier).
+                    withTags(options.tags)
+
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(options.common.imageId).
                     withKernelId(options.kernelId).withInstanceType(options.common.instanceType).
                     withKeyName(options.keyName).withRamdiskId(options.ramdiskId).
