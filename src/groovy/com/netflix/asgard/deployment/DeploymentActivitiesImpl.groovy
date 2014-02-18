@@ -65,8 +65,11 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
 
     @Override
     AsgDeploymentNames getAsgDeploymentNames(UserContext userContext, String clusterName) {
+        final maxSequenceNumber = configService.getMaximumClusterSequence()
+
         AutoScalingGroupData lastAsg = awsAutoScalingService.getCluster(userContext, clusterName).last()
-        String nextAsgName = Relationships.buildNextAutoScalingGroupName(lastAsg.autoScalingGroupName)
+        String nextAsgName = Relationships.buildNextAutoScalingGroupName(lastAsg.autoScalingGroupName,
+                maxSequenceNumber)
         new AsgDeploymentNames(
                 previousAsgName: lastAsg.autoScalingGroupName,
                 previousLaunchConfigName: lastAsg.launchConfigurationName,

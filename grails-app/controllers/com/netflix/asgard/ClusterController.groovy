@@ -115,10 +115,14 @@ class ClusterController {
         } else if (name == cluster.name) {
             withFormat {
                 html {
+                    final maxClusterGroups = configService.getMaximumClusterSize()
+                    final maxSequenceNumber = configService.getMaximumClusterSequence()
+
                     AutoScalingGroupData lastGroup = cluster.last()
-                    String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
-                    Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
-                    String recommendedNextStep = cluster.size() >= Relationships.CLUSTER_MAX_GROUPS ?
+                    String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName,
+                            maxSequenceNumber)
+                    Boolean okayToCreateGroup = cluster.size() < maxClusterGroups
+                    String recommendedNextStep = cluster.size() >= maxClusterGroups ?
                         'Delete an old group before pushing to a new group.' :
                         cluster.size() <= 1 ? 'Create a new group and switch traffic to it' :
                         'Switch traffic to the preferred group, then delete legacy group'
@@ -240,19 +244,23 @@ ${lastGroup.loadBalancerNames}"""
     }
 
     private Map<String, Object> commonNextAsgPreparation(UserContext userContext, Cluster cluster) {
+        final maxClusterGroups = configService.getMaximumClusterSize()
+        final maxSequenceNumber = configService.getMaximumClusterSequence()
+
         if (!cluster) {
             flash.message = "No auto scaling groups exist with cluster name ${cluster.name}"
             redirect(action: 'result')
             return [:]
         }
-        Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
+        Boolean okayToCreateGroup = cluster.size() < maxClusterGroups
         if (!okayToCreateGroup) {
             flash.message = "Cluster '${cluster.name}' already contains too many ASGs."
             redirect([action: 'show', params: [id: cluster.name]])
             return [:]
         }
         AutoScalingGroupData lastGroup = cluster.last()
-        String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
+        String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName,
+                maxSequenceNumber)
         boolean showAllImages = params.allImages ? true : false
         Map<String, Object> attributes = pushService.prepareEdit(userContext, lastGroup.autoScalingGroupName,
                 showAllImages, actionName, Requests.ensureList(params.selectedSecurityGroups))
@@ -381,7 +389,10 @@ ${lastGroup.loadBalancerNames}"""
             return
         }
 
-        Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
+        final maxClusterGroups = configService.getMaximumClusterSize()
+        final maxSequenceNumber = configService.getMaximumClusterSequence()
+
+        Boolean okayToCreateGroup = cluster.size() < maxClusterGroups
         if (okayToCreateGroup) {
             AutoScalingGroupData lastGroup = cluster.last()
             String lcName = lastGroup.launchConfigurationName
@@ -407,7 +418,8 @@ ${lastGroup.loadBalancerNames}"""
             String instanceType = params.instanceType ?: lastLaunchConfig.instanceType
             String spotPrice = determineSpotPrice(lastLaunchConfig, userContext, instanceType)
 
-            final String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
+            final String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName,
+                    maxSequenceNumber)
             List<ScalingPolicyData> lastScalingPolicies = awsAutoScalingService.getScalingPolicyDatas(userContext,
                     lastGroup.autoScalingGroupName)
             List<ScalingPolicyData> newScalingPolicies = lastScalingPolicies.collect { ScalingPolicyData policy ->

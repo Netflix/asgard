@@ -43,12 +43,6 @@ class Relationships {
      */
     static final Integer GROUP_NAME_MAX_LENGTH = 96
 
-    /** The maximum number of auto scaling groups allowed in a cluster spanning multiple push sequence numbers. */
-    static final Integer CLUSTER_MAX_GROUPS = 10
-
-    /** The maximum sequence number for an auto scaling group in a sequenced cluster before rolling over to 0. */
-    static final Integer CLUSTER_MAX_SEQUENCE_NUMBER = 999
-
     static String appNameFromLoadBalancerName(String loadBalancerName) {
         dissectCompoundName(loadBalancerName).app ?: ''
     }
@@ -160,10 +154,10 @@ class Relationships {
         return "${autoScalingGroupName}-${new Date().format("yyyyMMddHHmmss")}"
     }
 
-    static String buildNextAutoScalingGroupName(String previousGroupNameInCluster) {
+    static String buildNextAutoScalingGroupName(String previousGroupNameInCluster, int maxSequenceNumber) {
         Names names = dissectCompoundName(previousGroupNameInCluster)
         Integer previous = names.sequence
-        Integer next = (previous == null || previous >= CLUSTER_MAX_SEQUENCE_NUMBER) ? 0 : previous + 1
+        Integer next = (previous == null || previous >= maxSequenceNumber) ? 0 : previous + 1
         String threeDigitNextNumber = String.format("%03d", next)
         "${names.cluster}-v${threeDigitNextNumber}"
     }
