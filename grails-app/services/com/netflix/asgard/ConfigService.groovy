@@ -820,4 +820,18 @@ class ConfigService {
     String getAsgAnalyzerBaseUrl() {
         grailsApplication.config.cloud?.asgAnalyzerBaseUrl ?: ''
     }
+
+    /**
+     * @return the configured maximum number of ASGs in a Cluster
+     */
+    Integer getMaximumClusterSize() {
+        grailsApplication.config.cluster?.maxSize ?: 3
+    }
+
+    /**
+     * @return the maximum sequence number for a named ASG in a cluster
+     */
+    Integer getMaximumClusterSequence() {
+        grailsApplication.config.cluster?.maxClusterSequence ?: 999
+    }
 }
