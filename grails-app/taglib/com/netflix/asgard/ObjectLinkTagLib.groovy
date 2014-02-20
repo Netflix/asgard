@@ -28,12 +28,12 @@ class ObjectLinkTagLib extends ApplicationTagLib {
         String objectType = attrs.remove('type')
         EntityType type = objectType ? EntityType.fromName(objectType) : EntityType.fromId(objectId)
         type?.entitySpecificLinkGeneration(attrs, objectId)
-        attrs['class'] = type.name()
-        attrs.controller = type.name()
         attrs.action = attrs.action ?: 'show'
         attrs.params = attrs.params ?: [id: objectId]
         def compact = attrs.compact ? attrs.remove('compact') : null
-        attrs.title = compact ? "${objectId} ${type.displayName}" : type.linkPurpose
+        attrs.title = attrs.title ?: compact ? "${objectId} ${type.displayName}" : type.linkPurpose
+        attrs['class'] = type.name()
+        attrs.controller = type.name()
         String displayName = body() ?: objectId
 
         String linkText = compact ? '' : displayName
@@ -95,5 +95,24 @@ class ObjectLinkTagLib extends ApplicationTagLib {
         } else {
             out << endpoint
         }
+    }
+
+    /**
+     * Renders a security group link which often includes both an id and a name. This is distinct from most object link
+     * types, especially because a full object gets passed in rather than just a bunch of strings.
+     *
+     * @attr group an object with fields groupId and groupName, such as SecurityGroup, GroupIdentifier, UserIdGroupPair
+     */
+    def securityGroup = { attrs, body ->
+        def securityGroup = attrs.remove('group')
+        String id = securityGroup.groupId
+        String name = securityGroup.groupName
+        attrs['name'] = id
+        attrs['type'] = 'security'
+        String text = id ? "${name} (${id})" : name
+        def compact = attrs.compact ? attrs.get('compact') : null
+        attrs.title = compact ? "${text} security group" : EntityType.security.linkPurpose
+        def writer = getOut()
+        writer << linkObject(attrs, text)
     }
 }
