@@ -35,9 +35,9 @@ import com.netflix.asgard.RestClientService
  *   <li>~/.asgard/Config.groovy - secret.accessId and secret.secretKey</li>
  *   <li>Local files in configured secret.localDirectory with names configured as secret.accessIdFileName and
  *          secret.secretKeyFileName</li>
- *   <li>Key management service via SSL REST call using local keystore file</li>
  *   <li>SSH calls as configured secret.remoteUser to secret.remoteServer in secret.remoteDirectory to read
  *          secret.accessIdFileName and secret.secretKeyFileName</li>
+ *   <li>Key management service via SSL REST call using local keystore file</li>
  *   <li>Instance profile credentials delivered through the Amazon EC2 metadata service</li>
  * </ul>
  *
@@ -46,8 +46,8 @@ import com.netflix.asgard.RestClientService
  * @see com.amazonaws.auth.InstanceProfileCredentialsProvider
  * @see ConfigCredentialsProvider
  * @see LocalFilesCredentialsProvider
- * @see KeyManagementServiceCredentialsProvider
  * @see SshCredentialsProvider
+ * @see KeyManagementServiceCredentialsProvider
  */
 class AsgardAWSCredentialsProviderChain extends AWSCredentialsProviderChain {
     public AsgardAWSCredentialsProviderChain(ConfigService configService, RestClientService restClientService) {
@@ -58,8 +58,8 @@ class AsgardAWSCredentialsProviderChain extends AWSCredentialsProviderChain {
                         new SystemPropertiesCredentialsProvider(),
                         new ConfigCredentialsProvider(configService),
                         new LocalFilesCredentialsProvider(configService),
-                        new KeyManagementServiceCredentialsProvider(configService, restClientService),
                         new SshCredentialsProvider(configService),
+                        new KeyManagementServiceCredentialsProvider(configService, restClientService),
 
                         // Should be at the end because it's about where Asgard is running, not how it's configured.
                         new InstanceProfileCredentialsProvider()
