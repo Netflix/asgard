@@ -362,19 +362,19 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     AutoScalingGroup getAutoScalingGroupFor(UserContext userContext, String instanceId) {
         if (!instanceId) { return null }
         def groups = getAutoScalingGroups(userContext)
-        //println "Looking for group for instance " + instanceId
+        log.debug "Looking for group for instance ${instanceId}"
         groups.find { it.instances.any { it.instanceId == instanceId } }
     }
 
     List<AutoScalingGroup> getAutoScalingGroupsForLB(UserContext userContext, String lbName) {
         def groups = getAutoScalingGroups(userContext)
-        //println "Looking for group for LB " + lbName
+        log.debug "Looking for group for LB ${lbName}"
         groups.findAll { it.loadBalancerNames.any { it == lbName } }
     }
 
     AutoScalingGroup getAutoScalingGroupForLaunchConfig(UserContext userContext, String lcName) {
         def groups = getAutoScalingGroups(userContext)
-        //println "Looking for group for " + lcName
+        log.debug "Looking for group for ${lcName}"
         groups.find { it.launchConfigurationName == lcName }
     }
 

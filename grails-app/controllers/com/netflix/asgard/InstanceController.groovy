@@ -354,7 +354,7 @@ class InstanceController {
     }
 
     def associateDo = {
-        //println "associateDo: ${params}"
+        log.debug "associateDo: ${params}"
         String publicIp = params.publicIp
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId)
         UserContext userContext = UserContext.of(request)
