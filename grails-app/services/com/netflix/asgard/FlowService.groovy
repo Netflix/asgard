@@ -41,6 +41,8 @@ import org.springframework.beans.factory.InitializingBean
  */
 class FlowService implements InitializingBean {
 
+    static transactional = false
+
     def awsClientService
     def awsSimpleWorkflowService
     def configService

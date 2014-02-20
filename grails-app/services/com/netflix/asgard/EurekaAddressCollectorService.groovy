@@ -24,6 +24,8 @@ import org.apache.http.HttpStatus
  */
 class EurekaAddressCollectorService implements CacheInitializer {
 
+    static transactional = false
+
     Caches caches
     def configService
     def dnsService

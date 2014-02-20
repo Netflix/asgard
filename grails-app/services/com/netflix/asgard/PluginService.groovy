@@ -30,6 +30,8 @@ import org.springframework.context.ApplicationContextAware
  */
 class PluginService implements ApplicationContextAware {
 
+    static transactional = false
+
     static final String AUTHENTICATION_PROVIDER = 'authenticationProvider'
     static final String AUTHORIZATION_PROVIDERS = 'authorizationProviders'
     static final String TASK_FINISHED_LISTENERS = 'taskFinishedListeners'

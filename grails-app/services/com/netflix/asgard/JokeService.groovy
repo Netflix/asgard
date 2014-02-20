@@ -22,6 +22,8 @@ import java.security.SecureRandom
 
 class JokeService {
 
+    static transactional = false
+
     def configService
 
     private static final Random RANDOM = new SecureRandom()
