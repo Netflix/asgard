@@ -72,6 +72,16 @@
           <td class="name">Subnets:</td>
           <td class="value">${loadBalancer.subnets}</td>
         </tr>
+        <g:if test="${securityGroups}">
+          <tr class="prop">
+            <td class="name">Security Groups:</td>
+            <td class="value">
+              <g:each in="${securityGroups}" var="securityGroup">
+                  <div><g:securityGroup group="${securityGroup}"/></div>
+              </g:each>
+            </td>
+          </tr>
+        </g:if>
         <tr class="prop">
           <td class="name">Listeners:</td>
           <td>
