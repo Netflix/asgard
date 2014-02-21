@@ -154,7 +154,7 @@
             <table>
               <g:each var="s" in="${securities}">
                 <tr>
-                  <td><g:linkObject type="security" name="${s.groupId}">${s.groupName}</g:linkObject></td>
+                  <td><g:securityGroup group="${s}"/></td>
                 </tr>
               </g:each>
             </table>

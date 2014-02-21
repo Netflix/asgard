@@ -71,12 +71,8 @@
                     ${perm.ipProtocol} ${perm.fromPort}-${perm.toPort}
                     [<g:each var="pair" in="${perm.userIdGroupPairs}" status="j">
                       <g:if test="${j>0}">, </g:if>
-                      <g:if test="${pair.userId == group.ownerId}">
-                        <g:linkObject type="security" name="${pair.groupId}">${pair.groupName}</g:linkObject>
-                      </g:if>
-                      <g:else>
-                        <div class="security">${pair.groupName} (${accountNames[pair.userId] ?: pair.userId} ${pair.groupId})</div>
-                      </g:else>
+                      <g:if test="${pair.userId == group.ownerId}"><g:securityGroup group="${pair}"/></g:if>
+                      <g:else><div class="security">${pair.groupName} (${accountNames[pair.userId] ?: pair.userId} ${pair.groupId})</div></g:else>
                     </g:each>]
                     ${perm.ipRanges}
                   </td>
