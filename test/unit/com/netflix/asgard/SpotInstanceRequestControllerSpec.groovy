@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.ec2.model.GroupIdentifier
+import com.amazonaws.services.ec2.model.LaunchSpecification
 import com.amazonaws.services.ec2.model.SpotInstanceRequest
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -34,7 +36,13 @@ class SpotInstanceRequestControllerSpec extends Specification {
     def 'should show info about a spot instance request'() {
 
         String id = 'sir-1234'
-        SpotInstanceRequest sir = new SpotInstanceRequest(spotInstanceRequestId: id)
+        List<String> securityGroupIdStrings = ['sg-1234', 'vamp']
+        List<GroupIdentifier> securityGroupIdObjects = [
+                new GroupIdentifier(groupId: 'sg-1234', groupName: 'wolf'),
+                new GroupIdentifier(groupId: 'sg-5678', groupName: 'vamp'),
+        ]
+        SpotInstanceRequest sir = new SpotInstanceRequest(spotInstanceRequestId: id, launchSpecification:
+                new LaunchSpecification(securityGroups: securityGroupIdStrings))
         params.id = id
 
         when:
@@ -42,7 +50,8 @@ class SpotInstanceRequestControllerSpec extends Specification {
 
         then:
         1 * spotInstanceRequestService.getSpotInstanceRequest(_, id) >> sir
+        1 * awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(_, securityGroupIdStrings) >> securityGroupIdObjects
         0 * _
-        attrs == [spotInstanceRequest: sir]
+        attrs == [spotInstanceRequest: sir, securityGroups: securityGroupIdObjects]
     }
 }
