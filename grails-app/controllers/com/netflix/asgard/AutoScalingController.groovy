@@ -24,6 +24,7 @@ import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.autoscaling.model.SuspendedProcess
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.AvailabilityZone
+import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
@@ -160,6 +161,8 @@ class AutoScalingController {
             String lcName = groupData?.launchConfigurationName
             LaunchConfiguration launchConfig = awsAutoScalingService.getLaunchConfiguration(userContext, lcName)
             Image image = awsEc2Service.getImage(userContext, launchConfig?.imageId, From.CACHE)
+            List<GroupIdentifier> securityGroups = awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(userContext,
+                    launchConfig?.securityGroups)
 
             Collection<String> alarmNames = scalingPolicies.collect { it.alarms*.alarmName }.flatten()
             List<MetricAlarm> alarms = awsCloudWatchService.getAlarms(userContext, alarmNames)
@@ -177,6 +180,7 @@ class AutoScalingController {
                     zonesWithInstanceCounts: zonesWithInstanceCounts,
                     mismatchedElbNamesToZoneLists: mismatchedElbNamesToZoneLists,
                     launchConfiguration: launchConfig,
+                    securityGroups: securityGroups,
                     image: image,
                     clusterName: clusterName,
                     variables: Relationships.dissectCompoundName(name),

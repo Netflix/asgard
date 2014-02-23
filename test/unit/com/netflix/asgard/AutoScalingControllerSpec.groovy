@@ -21,7 +21,9 @@ import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
+import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.Image
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Multiset
@@ -78,6 +80,7 @@ class AutoScalingControllerSpec extends Specification {
         String lcName = 'helloworld-example-v015-123456'
         String imageId = 'amy-deadbeef'
         String appName = 'helloworld'
+        String sgName = 'helloworld'
         String chaosLink = 'http://chaoseditor'
         String buildLink = 'http://builds'
         String instanceId = 'i-abcdefgh'
@@ -96,10 +99,12 @@ class AutoScalingControllerSpec extends Specification {
         AutoScalingGroup asg = new AutoScalingGroup(autoScalingGroupName: name, launchConfigurationName: lcName,
                 instances: [instance], loadBalancerNames: [lbName1, lbName2], availabilityZones: asgZones)
         AutoScalingGroupData asgData = AutoScalingGroupData.from(asg, [:], [], [:], [])
-        LaunchConfiguration launchConfig = new LaunchConfiguration(launchConfigurationName: lcName, imageId: imageId)
+        LaunchConfiguration launchConfig = new LaunchConfiguration(launchConfigurationName: lcName, imageId: imageId,
+                securityGroups: [sgName])
         Image image = new Image(imageId: imageId)
         AppRegistration app = new AppRegistration(name: appName, email: 'test@examle.com')
         Multiset<String> zonesWithInstanceCounts = TreeMultiset.create([zoneA])
+        List<GroupIdentifier> securityGroupIdObjects = [new GroupIdentifier(groupId: 'sg-123', groupName: sgName)]
 
         params.id = name
 
@@ -117,6 +122,7 @@ class AutoScalingControllerSpec extends Specification {
         1 * awsEc2Service.getSubnets(_) >> Subnets.from([])
         1 * awsAutoScalingService.getLaunchConfiguration(_, lcName) >> launchConfig
         1 * awsEc2Service.getImage(_, imageId, From.CACHE) >> image
+        1 * awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(_, [sgName]) >> securityGroupIdObjects
         1 * awsCloudWatchService.getAlarms(_, []) >> []
         1 * cloudReadyService.isChaosMonkeyActive(_) >> true
         1 * applicationService.getRegisteredApplication(_, 'helloworld') >> app
@@ -146,6 +152,7 @@ class AutoScalingControllerSpec extends Specification {
                 runHealthChecks: true,
                 scalingPolicies: [],
                 scheduledActions: [],
+                securityGroups: securityGroupIdObjects,
                 showPostponeButton: false,
                 subnetPurpose: null,
                 terminateStatus: 'Enabled',
