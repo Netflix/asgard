@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.Image
 import grails.test.mixin.TestFor
 import spock.lang.Specification
@@ -42,10 +43,13 @@ class LaunchConfigurationControllerSpec extends Specification {
 
         String name = 'helloworld-1234567890'
         String imageId = 'ami-deadfeed'
-        LaunchConfiguration launchConfig = new LaunchConfiguration(launchConfigurationName: name, imageId: imageId)
+        String sgName = 'helloworld'
+        LaunchConfiguration launchConfig = new LaunchConfiguration(launchConfigurationName: name, imageId: imageId,
+                securityGroups: [sgName])
         AutoScalingGroup asg = new AutoScalingGroup(autoScalingGroupName: 'helloworld', launchConfigurationName: name)
         AppRegistration app = new AppRegistration(name: 'helloworld')
         Image image = new Image(imageId: imageId)
+        List<GroupIdentifier> securityGroupIdObjects = [new GroupIdentifier(groupId: 'sg-123', groupName: sgName)]
         params.id = name
 
         when:
@@ -54,6 +58,7 @@ class LaunchConfigurationControllerSpec extends Specification {
         then:
         1 * awsAutoScalingService.getLaunchConfiguration(_, name) >> launchConfig
         1 * awsAutoScalingService.getAutoScalingGroupForLaunchConfig(_, name) >> asg
+        1 * awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(_, [sgName]) >> securityGroupIdObjects
         1 * awsEc2Service.getImage(_, imageId) >> image
         1 * applicationService.getRegisteredApplication(_, 'helloworld') >> app
         0 * _
@@ -63,6 +68,7 @@ class LaunchConfigurationControllerSpec extends Specification {
                 group: asg,
                 image: image,
                 lc: launchConfig,
+                securityGroups: securityGroupIdObjects,
         ]
     }
 }

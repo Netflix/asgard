@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.netflix.asgard.model.JanitorMode
 import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
@@ -90,12 +91,15 @@ class LaunchConfigurationController {
             String appName = Relationships.appNameFromLaunchConfigName(name)
             AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroupForLaunchConfig(userContext, name)
             String clusterName = Relationships.clusterFromGroupName(group?.autoScalingGroupName)
-            def details = [
-                    'lc': lc,
-                    'image': awsEc2Service.getImage(userContext, lc.imageId),
-                    'app': applicationService.getRegisteredApplication(userContext, appName),
-                    'group': group,
-                    'cluster': clusterName
+            List<GroupIdentifier> securityGroups = awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(userContext,
+                    lc.securityGroups)
+            Map details = [
+                    lc: lc,
+                    image: awsEc2Service.getImage(userContext, lc.imageId),
+                    app: applicationService.getRegisteredApplication(userContext, appName),
+                    group: group,
+                    cluster: clusterName,
+                    securityGroups: securityGroups
             ]
             withFormat {
                 html { return details }
