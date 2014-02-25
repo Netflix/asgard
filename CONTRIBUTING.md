@@ -1,6 +1,6 @@
 ## Ways to Contribute
 
-There are many ways to contribute to Asgard:
+There's a plethora of ways to contribute to Asgard!
 
 * Spreading the word by talking, tweeting, blogging, presenting, submitting talks, writing tutorials or articles (or a book!), sharing success stories, adding your project/company to [Who is Using Asgard](https://github.com/Netflix/asgard/wiki/Who%27s-using-Asgard%3F), etc.
 * Helping other users by participating in [Asgard Users Google Group](https://groups.google.com/forum/#!forum/AsgardUsers)
@@ -9,7 +9,7 @@ There are many ways to contribute to Asgard:
 * Proposing, discussing, and implementing new features
 * Participating in the [Asgard Show on Google Hangouts](http://www.youtube.com/user/TheAsgardShow)
 * [Join us at Netflix](http://jobs.netflix.com/) and work on Asgard fulltime! 
-* Suprising us with some other form of contribution!
+* Surprising us with some other form of contribution!
 
 
 All forms of contribution are very much appreciated.
