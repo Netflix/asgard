@@ -37,7 +37,8 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
             instanceMonitoring: null,
             instancePriceType: InstancePriceType.ON_DEMAND,
             iamInstanceProfile: 'iamInstanceProfile1',
-            ebsOptimized: false
+            ebsOptimized: false,
+	    associatePublicIpAddress: true
     )
 
     LaunchConfiguration awsLaunchConfiguration = new LaunchConfiguration(
@@ -52,7 +53,8 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
             blockDeviceMappings: [new BlockDeviceMapping(deviceName: 'deviceName1', ebs: new Ebs(volumeSize: 256))],
             instanceMonitoring: null,
             iamInstanceProfile: 'iamInstanceProfile1',
-            ebsOptimized: false
+            ebsOptimized: false,
+	    associatePublicIpAddress: true
     )
     CreateLaunchConfigurationRequest createLaunchConfigurationRequest = new CreateLaunchConfigurationRequest(
             launchConfigurationName: 'launchConfigurationName1',
@@ -66,7 +68,8 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
             blockDeviceMappings: [new BlockDeviceMapping(deviceName: 'deviceName1', ebs: new Ebs(volumeSize: 256))],
             instanceMonitoring: null,
             iamInstanceProfile: 'iamInstanceProfile1',
-            ebsOptimized: false
+            ebsOptimized: false,
+	    associatePublicIpAddress: true
     )
 
     def 'should deep copy'() {

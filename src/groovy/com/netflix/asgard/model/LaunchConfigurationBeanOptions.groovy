@@ -68,6 +68,9 @@ import groovy.transform.Canonical
 
     /** @see LaunchConfiguration#ebsOptimized */
     Boolean ebsOptimized
+    
+    /** @see LaunchConfiguration#associatePublicIpAddress */
+    Boolean associatePublicIpAddress 
 
     void setSecurityGroups(Collection<String> securityGroups) {
         this.securityGroups = copyNonNullToSet(securityGroups)
@@ -95,6 +98,7 @@ import groovy.transform.Canonical
     static LaunchConfigurationBeanOptions from(LaunchConfigurationBeanOptions source) {
         new LaunchConfigurationBeanOptions(
                 launchConfigurationName: source.launchConfigurationName,
+		associatePublicIpAddress: source.associatePublicIpAddress,
                 imageId: source.imageId,
                 keyName: source.keyName,
                 securityGroups: copyNonNullToSet(source.securityGroups),
@@ -120,6 +124,7 @@ import groovy.transform.Canonical
         launchConfiguration.with {
             new LaunchConfigurationBeanOptions(
                     launchConfigurationName: launchConfigurationName,
+		    associatePublicIpAddress: associatePublicIpAddress,
                     imageId: imageId,
                     keyName: keyName,
                     securityGroups: copyNonNullToSet(securityGroups),
@@ -151,6 +156,7 @@ import groovy.transform.Canonical
         }
         new CreateLaunchConfigurationRequest(
                 launchConfigurationName: launchConfigurationName,
+		associatePublicIpAddress: associatePublicIpAddress,
                 imageId: imageId,
                 keyName: keyName,
                 securityGroups: copyNonNullToSet(securityGroups),

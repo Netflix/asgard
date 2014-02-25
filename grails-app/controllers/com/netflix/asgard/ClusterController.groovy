@@ -116,6 +116,8 @@ class ClusterController {
             withFormat {
                 html {
                     AutoScalingGroupData lastGroup = cluster.last()
+		    String lastGroupNameName = lastGroup.launchConfigurationName
+		    LaunchConfiguration lastLaunchConfig = awsAutoScalingService.getLaunchConfiguration(userContext, lastGroupNameName, From.CACHE)
                     String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
                     Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
                     String recommendedNextStep = cluster.size() >= Relationships.CLUSTER_MAX_GROUPS ?
@@ -161,7 +163,9 @@ ${lastGroup.loadBalancerNames}"""
                             loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
                             selectedLoadBalancers: selectedLoadBalancers,
                             spotUrl: configService.spotUrl,
-                            pricing: params.pricing ?: attributes.pricing
+			    associatePublicIpAddress: lastLaunchConfig.getAssociatePublicIpAddress(),
+                            pricing: params.pricing ?: attributes.pricing,
+			    
                     ])
                     attributes
                 }
@@ -430,6 +434,8 @@ ${loadBalancerNames}"""
 Group: ${lastGroup.loadBalancerNames}"""
             boolean ebsOptimized = params.containsKey('ebsOptimized') ? params.ebsOptimized?.toBoolean() :
                 lastLaunchConfig.ebsOptimized
+	    boolean associatePublicIpAddress = params.containsKey('associatePublicIpAddress') ? params.associatePublicIpAddress?.toBoolean() :
+                lastLaunchConfig.associatePublicIpAddress
             if (params.noOptionalDefaults != 'true') {
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
@@ -440,7 +446,7 @@ Group: ${lastGroup.loadBalancerNames}"""
             log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers for next \
 Group: ${loadBalancerNames}"""
             GroupCreateOptions options = new GroupCreateOptions(
-                    common: new CommonPushOptions(
+                    common: new CommonPushOptions(				
                             userContext: userContext,
                             checkHealth: checkHealth,
                             afterBootWait: convertToIntOrUseDefault(params.afterBootWait, 30),
@@ -450,7 +456,7 @@ Group: ${loadBalancerNames}"""
                             instanceType: instanceType,
                             groupName: nextGroupName,
                             securityGroups: securityGroups,
-                            maxStartupRetries: convertToIntOrUseDefault(params.maxStartupRetries, 5)
+                            maxStartupRetries: convertToIntOrUseDefault(params.maxStartupRetries, 5)			    
                     ),
                     initialTraffic: initialTraffic,
                     minSize: minSize,
@@ -470,7 +476,8 @@ Group: ${loadBalancerNames}"""
                     scheduledActions: newScheduledActions,
                     vpcZoneIdentifier: vpcZoneIdentifier,
                     spotPrice: spotPrice,
-                    ebsOptimized: ebsOptimized
+                    ebsOptimized: ebsOptimized,
+		    associatePublicIpAddress: associatePublicIpAddress
             )
             def operation = pushService.startGroupCreate(options)
             flash.message = "${operation.task.name} has been started."

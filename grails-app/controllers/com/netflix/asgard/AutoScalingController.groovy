@@ -294,7 +294,7 @@ class AutoScalingController {
             String groupName = Relationships.buildGroupName(params)
             Subnets subnets = awsEc2Service.getSubnets(userContext)
             String subnetPurpose = params.subnetPurpose ?: null
-            String vpcId = subnets.getVpcIdForSubnetPurpose(subnetPurpose) ?: ''
+            String vpcId = subnets.getVpcIdForSubnetPurpose(subnetPurpose) ?: ''	    
 
             // Auto Scaling Group
             Integer minSize = (params.min ?: 0) as Integer
@@ -336,10 +336,11 @@ class AutoScalingController {
             String ramdiskId = params.ramdiskId ?: null
             String iamInstanceProfile = params.iamInstanceProfile ?: configService.defaultIamRole
             boolean ebsOptimized = params.ebsOptimized?.toBoolean()
+	    boolean associatePublicIpAddress = params.associatePublicIpAddress ?: false
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(imageId).
                     withKernelId(kernelId).withInstanceType(instType).withKeyName(keyName).withRamdiskId(ramdiskId).
                     withSecurityGroups(securityGroups).withIamInstanceProfile(iamInstanceProfile).
-                    withEbsOptimized(ebsOptimized)
+                    withEbsOptimized(ebsOptimized).withAssociatePublicIpAddress(associatePublicIpAddress)
             if (params.pricing == InstancePriceType.SPOT.name()) {
                 launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instType)
             }
