@@ -44,11 +44,13 @@ class GroupedAppRegistrationSetSpec extends Specification {
             app2.getGroup() >> "group1"
             def app3 = Mock(AppRegistration)
             app3.getGroup() >> "group2"
-            def appGroups = new GroupedAppRegistrationSet([app1,app2,app3]).groups()
+            def app4 = new AppRegistration()
+            def appGroups = new GroupedAppRegistrationSet([app1,app2,app3,app4]).groups()
 
         expect:
-            appGroups.keySet().toList() == ['group1', 'group2']
+            appGroups.keySet().toList() == ['group1', 'group2', 'none']
             appGroups.group1 == [app1, app2]
+            appGroups.none == [app4]
     }
 
     void "apps are sorted by tags"() {

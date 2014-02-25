@@ -22,6 +22,8 @@ import com.netflix.asgard.AppRegistration
  * Upon being added to the set, a grouping of AppRegistration objects by appGroup
  */
 class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
+    static final String DEFAULT_BLANK_GROUP_NAME = "none"
+
     private final Map<String, List<AppRegistration>> appGroups = [:]
     private final Map<String, List<AppRegistration>> tags = [:]
 
@@ -31,7 +33,7 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
      */
     GroupedAppRegistrationSet(final List<AppRegistration> apps) {
         super({ AppRegistration a, AppRegistration b ->
-            a.name <=> b.name
+            getGroupForApp(a) <=> getGroupForApp(b)
         } as Comparator<AppRegistration>)
 
         apps.each { add it }
@@ -39,12 +41,12 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
 
     @Override
     boolean add(AppRegistration app) {
-        if (app.group && !appGroups[app.group]) {
-            appGroups[app.group] = []
-            appGroups[app.group] << app
-        } else if (app.group && appGroups[app.group]) {
-            appGroups[app.group] << app
+        def group = getGroupForApp(app)
+        if (!appGroups[group]) {
+            appGroups[group] = []
         }
+        appGroups[group] << app
+
         app.tags.each { String tag ->
             if (!tags[tag]) {
                 tags[tag] = []
@@ -61,9 +63,9 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
         }
 
         def app = (AppRegistration)obj
-
-        if (app.group) {
-            removeFromList appGroups[app.group], app
+        def group = getGroupForApp(app)
+        if (group) {
+            removeFromList appGroups[group], app
         }
 
         app.tags.each { String tag ->
@@ -96,5 +98,9 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
         if (apps.contains(app)) {
             apps.remove app
         }
+    }
+
+    private static String getGroupForApp(AppRegistration app) {
+        app.group ?: DEFAULT_BLANK_GROUP_NAME
     }
 }
