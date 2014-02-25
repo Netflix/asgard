@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.SecurityGroup
+import com.netflix.asgard.collections.GroupedAppRegistrationSet
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.MonitorBucketType
 import com.netflix.asgard.model.Owner
@@ -44,7 +45,7 @@ class ApplicationController {
 
     def list = {
         UserContext userContext = UserContext.of(request)
-        List<AppRegistration> apps = applicationService.getRegisteredApplications(userContext)
+        GroupedAppRegistrationSet apps = applicationService.getGroupedRegisteredApplications(userContext)
 
         Bag groupCountsPerAppName = groupCountsPerAppName(userContext)
         Bag instanceCountsPerAppName = instanceCountsPerAppName(userContext)
@@ -55,8 +56,10 @@ class ApplicationController {
             apps = apps.findAll { AppRegistration app ->
                     app.name.toLowerCase() in lowercaseTerms ||
                     app.owner?.toLowerCase() in lowercaseTerms ||
-                    app.email?.toLowerCase() in lowercaseTerms
-            }
+                    app.email?.toLowerCase() in lowercaseTerms ||
+                    app.group?.toLowerCase() in lowercaseTerms ||
+                    app.tags*.toLowerCase().any { lowercaseTerms }
+            } as GroupedAppRegistrationSet
         }
         withFormat {
             html {
@@ -64,7 +67,7 @@ class ApplicationController {
                         applications: apps,
                         terms: terms,
                         groupCountsPerAppName: groupCountsPerAppName,
-                        instanceCountsPerAppName: instanceCountsPerAppName
+                        instanceCountsPerAppName: instanceCountsPerAppName,
                 ]
             }
             xml { new XML(apps).render(response) }
@@ -176,10 +179,11 @@ class ApplicationController {
             String owner = params.owner
             String email = params.email
             String monitorBucketTypeString = params.monitorBucketType
+            String tags = normalizeTagDelimiter(params.tags)
             boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
             MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
             CreateApplicationResult result = applicationService.createRegisteredApplication(userContext, name, group,
-                    type, desc, owner, email, bucketType, enableChaosMonkey)
+                    type, desc, owner, email, bucketType, tags, enableChaosMonkey)
             flash.message = result.toString()
             if (result.succeeded()) {
                 redirect(action: 'show', params: [id: name])
@@ -205,10 +209,11 @@ class ApplicationController {
         String desc = params.description
         String owner = params.owner
         String email = params.email
+        String tags = normalizeTagDelimiter(params.tags)
         String monitorBucketTypeString = params.monitorBucketType
         try {
             MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
-            applicationService.updateRegisteredApplication(userContext, name, group, type, desc, owner, email,
+            applicationService.updateRegisteredApplication(userContext, name, group, type, desc, owner, email, tags,
                     bucketType)
             flash.message = "Application '${name}' has been updated."
         } catch (Exception e) {
@@ -281,6 +286,13 @@ class ApplicationController {
         }
     }
 
+    private static String normalizeTagDelimiter(String tags) {
+        if (tags.contains(",")) {
+            tags.split(',')*.trim().join(',')
+        } else {
+            tags.split()*.trim().join(',')
+        }
+    }
 }
 
 class ApplicationCreateCommand {
@@ -293,6 +305,7 @@ class ApplicationCreateCommand {
     String description
     String owner
     String chaosMonkey
+    String tags
     boolean requestedFromGui
 
     static constraints = {
@@ -318,5 +331,6 @@ class ApplicationCreateCommand {
                 }
             }
         })
+        tags(nullable: true, blank: true)
     }
 }

@@ -25,6 +25,7 @@ import com.amazonaws.services.simpledb.model.ReplaceableAttribute
 import com.amazonaws.services.simpledb.model.SelectRequest
 import com.amazonaws.services.simpledb.model.SelectResult
 import com.netflix.asgard.cache.CacheInitializer
+import com.netflix.asgard.collections.GroupedAppRegistrationSet
 import com.netflix.asgard.model.MonitorBucketType
 import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
@@ -108,6 +109,10 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         })
     }
 
+    GroupedAppRegistrationSet getGroupedRegisteredApplications(UserContext ctx) {
+        new GroupedAppRegistrationSet(getRegisteredApplications(ctx))
+    }
+
     AppRegistration getRegisteredApplication(UserContext userContext, String nameInput, From from = From.AWS) {
         if (!nameInput) { return null }
         String name = nameInput.toLowerCase()
@@ -128,7 +133,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
 
     CreateApplicationResult createRegisteredApplication(UserContext userContext, String nameInput, String group,
             String type, String description, String owner, String email, MonitorBucketType monitorBucketType,
-            boolean enableChaosMonkey) {
+            String tags, boolean enableChaosMonkey) {
         String name = nameInput.toLowerCase()
         CreateApplicationResult result = new CreateApplicationResult()
         result.appName = name
@@ -138,7 +143,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         }
         String nowEpoch = new DateTime().millis as String
         Collection<ReplaceableAttribute> attributes = buildAttributesList(group, type, description, owner, email,
-                monitorBucketType, false)
+                monitorBucketType, tags, false)
         attributes << new ReplaceableAttribute('createTs', nowEpoch, false)
         String creationLogMessage = "Create registered app ${name}, type ${type}, owner ${owner}, email ${email}"
         taskService.runTask(userContext, creationLogMessage, { task ->
@@ -158,8 +163,9 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         result
     }
 
-    private Collection<ReplaceableAttribute> buildAttributesList(String group, String type, String description,
-            String owner, String email, MonitorBucketType monitorBucketType, Boolean replaceExistingValues) {
+    private static Collection<ReplaceableAttribute> buildAttributesList(String group, String type, String description,
+            String owner, String email, MonitorBucketType monitorBucketType, String tags,
+            Boolean replaceExistingValues) {
 
         Check.notNull(monitorBucketType, MonitorBucketType, 'monitorBucketType')
         String nowEpoch = new DateTime().millis as String
@@ -171,13 +177,14 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         attributes << new ReplaceableAttribute('email', Check.notEmpty(email), replaceExistingValues)
         attributes << new ReplaceableAttribute('monitorBucketType', monitorBucketType.name(), replaceExistingValues)
         attributes << new ReplaceableAttribute('updateTs', nowEpoch, replaceExistingValues)
+        attributes << new ReplaceableAttribute('tags', tags, replaceExistingValues)
         return attributes
     }
 
     void updateRegisteredApplication(UserContext userContext, String name, String group, String type, String desc,
-                                     String owner, String email, MonitorBucketType bucketType) {
+                                     String owner, String email, String tags, MonitorBucketType bucketType) {
         Collection<ReplaceableAttribute> attributes = buildAttributesList(group, type, desc, owner, email,
-                bucketType, true)
+                bucketType, tags, true)
         taskService.runTask(userContext,
                 "Update registered app ${name}, type ${type}, owner ${owner}, email ${email}", { task ->
             simpleDbClient.putAttributes(new PutAttributesRequest().withDomainName(domainName).

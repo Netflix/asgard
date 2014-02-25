@@ -80,7 +80,8 @@ class ApplicationServiceUnitSpec extends Specification {
         when:
         CreateApplicationResult result = applicationService.createRegisteredApplication(
                 UserContext.auto(), 'helloworld', null,
-                'Web Application', 'Say hello', 'jsmith', 'jsmith@example.com', MonitorBucketType.application, true)
+                'Web Application', 'Say hello', 'jsmith', 'jsmith@example.com',
+                MonitorBucketType.application, 'a,b,c', true)
 
         then:
         1 * applicationService.simpleDbClient.putAttributes(_)

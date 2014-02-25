@@ -91,6 +91,14 @@
           </tr>
           <tr class="prop">
             <td class="name">
+              <label for="tags">Tags:</label>
+            </td>
+            <td class="value">
+              <input type="text" id="tags" name="tags" value="${app.tags.join(',') ?: ''}"/>
+            </td>
+          </tr>
+          <tr class="prop">
+            <td class="name">
               <label for="monitorBucketType">Monitor<br/>Bucket Type:</label>
             </td>
             <td class="value">
