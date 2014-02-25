@@ -15,7 +15,7 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.ec2.model.InstanceType
+import com.netflix.asgard.model.InstanceType
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.InstanceProductType
 import com.netflix.asgard.model.InstanceTypeData
@@ -27,7 +27,8 @@ class InstanceTypeServiceTests extends GroovyTestCase {
         InstanceTypeService instanceTypeService = Mocks.instanceTypeService()
         List<InstanceTypeData> instanceTypes = instanceTypeService.getInstanceTypes(Mocks.userContext())
         assert instanceTypes.any { it.name == 'm1.large' }
-
+        assert instanceTypes.any { it.name == 'i2.xlarge' }
+        assert instanceTypes.any { it.name == 'm3.medium' }
         // Custom instance type from config is included
         assert instanceTypes.any { it.name == 'huge.mainframe' }
     }

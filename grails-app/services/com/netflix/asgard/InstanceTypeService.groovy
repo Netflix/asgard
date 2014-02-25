@@ -15,7 +15,7 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.ec2.model.InstanceType
+import com.netflix.asgard.model.InstanceType
 import com.google.common.collect.ArrayTable
 import com.google.common.collect.Table
 import com.netflix.asgard.cache.CacheInitializer
@@ -151,56 +151,82 @@ class InstanceTypeService implements CacheInitializer {
         String memOpt = 'Memory optimized'
         String hiMem = 'High-Memory'
         String compOpt = 'Compute optimized'
+        String six4 = '64-bit'
+        String three2OrSix4 = '32-bit or 64-bit'
         [
+                new HardwareProfile(instanceType: 't1.micro', family: 'Micro instances', group: 'Micro', size: 'Micro',
+                        arch: three2OrSix4, vCpu: '1', ecu: 'Variable', mem: '0.615', storage: 'EBS only',
+                        ebsOptim: '-', netPerf: 'Very Low'),
+
                 new HardwareProfile(instanceType: 'm1.small', family: gen, group: 'Standard', size: 'Small (Default)',
-                        arch: '32-bit or 64-bit', vCpu: '1', ecu: '1', mem: '1.7', storage: '1 x 160', ebsOptim: '-',
+                        arch: three2OrSix4, vCpu: '1', ecu: '1', mem: '1.7', storage: '1 x 160', ebsOptim: '-',
                         netPerf: 'Low'),
                 new HardwareProfile(instanceType: 'm1.medium', family: gen, group: 'Standard', size: 'Medium',
-                        arch: '32-bit or 64-bit', vCpu: '1', ecu: '2', mem: '3.75', storage: '1 x 410', ebsOptim: '-',
+                        arch: three2OrSix4, vCpu: '1', ecu: '2', mem: '3.75', storage: '1 x 410', ebsOptim: '-',
                         netPerf: 'Moderate'),
-                new HardwareProfile(instanceType: 'm1.large', family: gen, group: 'Standard', size: 'Large',
-                        arch: '64-bit', vCpu: '2', ecu: '4', mem: '7.5', storage: '2 x 420', ebsOptim: 'Yes',
-                        netPerf: 'Moderate'),
-                new HardwareProfile(instanceType: 'm1.xlarge', family: gen, group: 'Standard', size: xl, arch: '64-bit',
+
+                new HardwareProfile(instanceType: 'm1.large', family: gen, group: 'Standard', size: 'Large', arch: six4,
+                        vCpu: '2', ecu: '4', mem: '7.5', storage: '2 x 420', ebsOptim: 'Yes', netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'm1.xlarge', family: gen, group: 'Standard', size: xl, arch: six4,
                         vCpu: '4', ecu: '8', mem: '15', storage: '4 x 420', ebsOptim: 'Yes', netPerf: 'High'),
-                new HardwareProfile(instanceType: 'm3.xlarge', family: gen, group: second, size: xl, arch: '64-bit',
+
+                new HardwareProfile(instanceType: 'm3.medium', family: gen, group: second, size: 'Medium', arch: six4,
+                        vCpu: '1', ecu: '3', mem: '3', storage: 'EBS only', ebsOptim: '-', netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'm3.large', family: gen, group: second, size: 'Large', arch: six4,
+                        vCpu: '2', ecu: '6.5', mem: '7.5', storage: 'EBS only', ebsOptim: '-', netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'm3.xlarge', family: gen, group: second, size: xl, arch: six4,
                         vCpu: '4', ecu: '13', mem: '15', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'Moderate'),
-                new HardwareProfile(instanceType: 'm3.2xlarge', family: gen, group: second, size: xxl, arch: '64-bit',
+                new HardwareProfile(instanceType: 'm3.2xlarge', family: gen, group: second, size: xxl, arch: six4,
                         vCpu: '8', ecu: '26', mem: '30', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'High'),
+
                 new HardwareProfile(instanceType: 'c1.medium', family: compOpt, group: 'High-CPU', size: 'Medium',
-                        arch: '32-bit or 64-bit', vCpu: '2', ecu: '5', mem: '1.7', storage: '1 x 350', ebsOptim: '-',
+                        arch: three2OrSix4, vCpu: '2', ecu: '5', mem: '1.7', storage: '1 x 350', ebsOptim: '-',
                         netPerf: 'Moderate'),
                 new HardwareProfile(instanceType: 'c1.xlarge', family: compOpt, group: 'High-CPU', size: xl,
-                        arch: '64-bit', vCpu: '8', ecu: '20', mem: '7', storage: '4 x 420', ebsOptim: 'Yes',
+                        arch: six4, vCpu: '8', ecu: '20', mem: '7', storage: '4 x 420', ebsOptim: 'Yes',
                         netPerf: 'High'),
                 new HardwareProfile(instanceType: 'cc1.4xlarge', family: compOpt, group: cc, size: xxxxl,
-                        arch: '64-bit', vCpu: '32', ecu: '33.5', mem: '23', storage: '2 x 840', ebsOptim: '-',
+                        arch: six4, vCpu: '32', ecu: '33.5', mem: '23', storage: '2 x 840', ebsOptim: '-',
                         netPerf: '10 Gigabit'),
                 new HardwareProfile(instanceType: 'cc2.8xlarge', family: compOpt, group: cc, size: xxxxxxxxl,
-                        arch: '64-bit', vCpu: '32', ecu: '88', mem: '60.5', storage: '4 x 840', ebsOptim: '-',
+                        arch: six4, vCpu: '32', ecu: '88', mem: '60.5', storage: '4 x 840', ebsOptim: '-',
                         netPerf: '10 Gigabit'),
-                new HardwareProfile(instanceType: 'm2.xlarge', family: memOpt, group: hiMem, size: xl, arch: '64-bit',
+
+                new HardwareProfile(instanceType: 'm2.xlarge', family: memOpt, group: hiMem, size: xl, arch: six4,
                         vCpu: '2', ecu: '6.5', mem: '17.1', storage: '1 x 420', ebsOptim: '-', netPerf: 'Moderate'),
-                new HardwareProfile(instanceType: 'm2.2xlarge', family: memOpt, group: hiMem, size: xxl, arch: '64-bit',
+                new HardwareProfile(instanceType: 'm2.2xlarge', family: memOpt, group: hiMem, size: xxl, arch: six4,
                         vCpu: '4', ecu: '13', mem: '34.2', storage: '1 x 850', ebsOptim: 'Yes', netPerf: 'Moderate'),
                 new HardwareProfile(instanceType: 'm2.4xlarge', family: memOpt, group: hiMem, size: xxxxl,
-                        arch: '64-bit', vCpu: '8', ecu: '26', mem: '68.4', storage: '2 x 840', ebsOptim: 'Yes',
+                        arch: six4, vCpu: '8', ecu: '26', mem: '68.4', storage: '2 x 840', ebsOptim: 'Yes',
                         netPerf: 'High'),
+
                 new HardwareProfile(instanceType: 'cr1.8xlarge', family: memOpt, group: 'High-Memory Cluster',
-                        size: xxxxxxxxl, arch: '64-bit', vCpu: '32', ecu: '88', mem: '244', storage: '2 x 120 SSD',
+                        size: xxxxxxxxl, arch: six4, vCpu: '32', ecu: '88', mem: '244', storage: '2 x 120 SSD',
                         ebsOptim: '-', netPerf: '10 Gigabit'),
+
+                new HardwareProfile(instanceType: 'cg1.4xlarge', family: 'GPU instances', group: 'Cluster GPU',
+                        size: xxxxl, arch: six4, vCpu: '16', ecu: '33.5', mem: '22.5', storage: '2 x 840',
+                        ebsOptim: '-', netPerf: '10 Gigabit'),
+
                 new HardwareProfile(instanceType: 'hi1.4xlarge', family: 'Storage optimized', group: 'High-I/O',
-                        size: xxxxl, arch: '64-bit', vCpu: '16', ecu: '35', mem: '60.5', storage: '2 x 1,024 SSD',
+                        size: xxxxl, arch: six4, vCpu: '16', ecu: '35', mem: '60.5', storage: '2 x 1,024 SSD',
                         ebsOptim: '-', netPerf: '10 Gigabit'),
                 new HardwareProfile(instanceType: 'hs1.8xlarge', family: 'Storage optimized', group: 'High-Storage',
-                        size: xxxxxxxxl, arch: '64-bit', vCpu: '16', ecu: '35', mem: '117', storage: '24 x 2,048',
+                        size: xxxxxxxxl, arch: six4, vCpu: '16', ecu: '35', mem: '117', storage: '24 x 2,048',
                         ebsOptim: '-', netPerf: '10 Gigabit'),
-                new HardwareProfile(instanceType: 't1.micro', family: 'Micro instances', group: 'Micro', size: 'Micro',
-                        arch: '32-bit or 64-bit', vCpu: '1', ecu: 'Variable', mem: '0.615', storage: 'EBS only',
-                        ebsOptim: '-', netPerf: 'Very Low'),
-                new HardwareProfile(instanceType: 'cg1.4xlarge', family: 'GPU instances', group: 'Cluster GPU',
-                        size: xxxxl, arch: '64-bit', vCpu: '16', ecu: '33.5', mem: '22.5', storage: '2 x 840',
-                        ebsOptim: '-', netPerf: '10 Gigabit')
+
+                new HardwareProfile(instanceType: 'i2.xlarge', family: 'Storage optimized', group: 'High-Storage',
+                        size: xl, arch: six4, vCpu: '4', ecu: '14', mem: '30.5', storage: '1 x 800 SSD',
+                        ebsOptim: 'Yes', netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'i2.2xlarge', family: 'Storage optimized', group: 'High-Storage',
+                        size: xxl, arch: six4, vCpu: '8', ecu: '27', mem: '61', storage: '2 x 800 SSD',
+                        ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'i2.4xlarge', family: 'Storage optimized', group: 'High-Storage',
+                        size: xxxxl, arch: six4, vCpu: '16', ecu: '53', mem: '122', storage: '4 x 800 SSD',
+                        ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'i2.8xlarge', family: 'Storage optimized', group: 'High-Storage',
+                        size: xxxxxxxxl, arch: six4, vCpu: '32', ecu: '104', mem: '244', storage: '8 x 800 SSD',
+                        ebsOptim: 'Yes', netPerf: '10 Gigabit')
         ]
     }
 

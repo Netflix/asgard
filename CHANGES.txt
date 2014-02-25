@@ -59,7 +59,7 @@ Bug Fixes
 
 Bug Fixes
 - Fixed startup error for new Asgard installations that lack an existing Config.groovy file
-- Fixed startup error for AWS accounts that don't yet have an asgard SWF domain
+- Fixed startup error for AWS accounts that don't yet have an Asgard SWF domain
 
 
 1.3

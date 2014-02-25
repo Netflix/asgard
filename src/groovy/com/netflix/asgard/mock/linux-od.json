@@ -1,10 +1,12 @@
-
-
-  {
+{
     "vers": 0.01,
     "config": {
         "rate": "perhr",
         "valueColumns": [
+            "vCPU",
+            "ECU",
+            "memoryGiB",
+            "storageGB",
             "linux"
         ],
         "currencies": [
@@ -18,7 +20,41 @@
                         "type": "generalCurrentGen",
                         "sizes": [
                             {
+                                "size": "m3.medium",
+                                "vCPU": "1",
+                                "ECU": "3",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 4 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.113"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "m3.large",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "7.5",
+                                "storageGB": "1 x 32 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.225"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
                                 "size": "m3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -30,6 +66,10 @@
                             },
                             {
                                 "size": "m3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -46,6 +86,10 @@
                         "sizes": [
                             {
                                 "size": "m1.small",
+                                "vCPU": "1",
+                                "ECU": "1",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 160",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -57,6 +101,10 @@
                             },
                             {
                                 "size": "m1.medium",
+                                "vCPU": "1",
+                                "ECU": "2",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 410",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -68,6 +116,10 @@
                             },
                             {
                                 "size": "m1.large",
+                                "vCPU": "2",
+                                "ECU": "4",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -79,6 +131,10 @@
                             },
                             {
                                 "size": "m1.xlarge",
+                                "vCPU": "4",
+                                "ECU": "8",
+                                "memoryGiB": "15",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -95,6 +151,10 @@
                         "sizes": [
                             {
                                 "size": "c3.large",
+                                "vCPU": "2",
+                                "ECU": "7",
+                                "memoryGiB": "3.75",
+                                "storageGB": "2 x 16 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -106,6 +166,10 @@
                             },
                             {
                                 "size": "c3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -117,6 +181,10 @@
                             },
                             {
                                 "size": "c3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "28",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -128,6 +196,10 @@
                             },
                             {
                                 "size": "c3.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "55",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 160 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -139,6 +211,10 @@
                             },
                             {
                                 "size": "c3.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "108",
+                                "memoryGiB": "60",
+                                "storageGB": "2 x 320 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -155,6 +231,10 @@
                         "sizes": [
                             {
                                 "size": "c1.medium",
+                                "vCPU": "2",
+                                "ECU": "5",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 350",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -166,6 +246,10 @@
                             },
                             {
                                 "size": "c1.xlarge",
+                                "vCPU": "8",
+                                "ECU": "20",
+                                "memoryGiB": "7",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -177,6 +261,10 @@
                             },
                             {
                                 "size": "cc2.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "88",
+                                "memoryGiB": "60.5",
+                                "storageGB": "4 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -193,6 +281,10 @@
                         "sizes": [
                             {
                                 "size": "g2.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "15",
+                                "storageGB": "60 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -209,6 +301,10 @@
                         "sizes": [
                             {
                                 "size": "cg1.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "33.5",
+                                "memoryGiB": "22.5",
+                                "storageGB": "2 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -225,6 +321,10 @@
                         "sizes": [
                             {
                                 "size": "m2.xlarge",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "17.1",
+                                "storageGB": "1 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -236,6 +336,10 @@
                             },
                             {
                                 "size": "m2.2xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "34.2",
+                                "storageGB": "1 x 850",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -247,6 +351,10 @@
                             },
                             {
                                 "size": "m2.4xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "68.4",
+                                "storageGB": "2 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -258,6 +366,10 @@
                             },
                             {
                                 "size": "cr1.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "88",
+                                "memoryGiB": "244",
+                                "storageGB": "2 x 120 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -273,18 +385,71 @@
                         "type": "storageCurrentGen",
                         "sizes": [
                             {
-                                "size": "hi1.4xlarge",
+                                "size": "i2.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "30.5",
+                                "storageGB": "1 x 800 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
                                         "prices": {
-                                            "USD": "3.100"
+                                            "USD": "0.853"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "27",
+                                "memoryGiB": "61",
+                                "storageGB": "2 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.705"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "53",
+                                "memoryGiB": "122",
+                                "storageGB": "4 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.410"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "104",
+                                "memoryGiB": "244",
+                                "storageGB": "8 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "6.820"
                                         }
                                     }
                                 ]
                             },
                             {
                                 "size": "hs1.8xlarge",
+                                "vCPU": "16",
+                                "ECU": "35",
+                                "memoryGiB": "117",
+                                "storageGB": "24 x 2048",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -297,10 +462,34 @@
                         ]
                     },
                     {
+                        "type": "storagePreviousGen",
+                        "sizes": [
+                            {
+                                "size": "hi1.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "35",
+                                "memoryGiB": "60.5",
+                                "storageGB": "2 x 1024 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.100"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "type": "uI",
                         "sizes": [
                             {
                                 "size": "t1.micro",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "0.615",
+                                "storageGB": "ebsonly",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -321,7 +510,41 @@
                         "type": "generalCurrentGen",
                         "sizes": [
                             {
+                                "size": "m3.medium",
+                                "vCPU": "1",
+                                "ECU": "3",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 4 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.113"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "m3.large",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "7.5",
+                                "storageGB": "1 x 32 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.225"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
                                 "size": "m3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -333,6 +556,10 @@
                             },
                             {
                                 "size": "m3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -349,6 +576,10 @@
                         "sizes": [
                             {
                                 "size": "m1.small",
+                                "vCPU": "1",
+                                "ECU": "1",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 160",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -360,6 +591,10 @@
                             },
                             {
                                 "size": "m1.medium",
+                                "vCPU": "1",
+                                "ECU": "2",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 410",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -371,6 +606,10 @@
                             },
                             {
                                 "size": "m1.large",
+                                "vCPU": "2",
+                                "ECU": "4",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -382,6 +621,10 @@
                             },
                             {
                                 "size": "m1.xlarge",
+                                "vCPU": "4",
+                                "ECU": "8",
+                                "memoryGiB": "15",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -398,6 +641,10 @@
                         "sizes": [
                             {
                                 "size": "c3.large",
+                                "vCPU": "2",
+                                "ECU": "7",
+                                "memoryGiB": "3.75",
+                                "storageGB": "2 x 16 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -409,6 +656,10 @@
                             },
                             {
                                 "size": "c3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -420,6 +671,10 @@
                             },
                             {
                                 "size": "c3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "28",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -431,6 +686,10 @@
                             },
                             {
                                 "size": "c3.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "55",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 160 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -442,6 +701,10 @@
                             },
                             {
                                 "size": "c3.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "108",
+                                "memoryGiB": "60",
+                                "storageGB": "2 x 320 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -458,6 +721,10 @@
                         "sizes": [
                             {
                                 "size": "c1.medium",
+                                "vCPU": "2",
+                                "ECU": "5",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 350",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -469,6 +736,10 @@
                             },
                             {
                                 "size": "c1.xlarge",
+                                "vCPU": "8",
+                                "ECU": "20",
+                                "memoryGiB": "7",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -480,6 +751,10 @@
                             },
                             {
                                 "size": "cc2.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "88",
+                                "memoryGiB": "60.5",
+                                "storageGB": "4 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -496,6 +771,10 @@
                         "sizes": [
                             {
                                 "size": "g2.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "15",
+                                "storageGB": "60 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -512,6 +791,10 @@
                         "sizes": [
                             {
                                 "size": "m2.xlarge",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "17.1",
+                                "storageGB": "1 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -523,6 +806,10 @@
                             },
                             {
                                 "size": "m2.2xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "34.2",
+                                "storageGB": "1 x 850",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -534,6 +821,10 @@
                             },
                             {
                                 "size": "m2.4xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "68.4",
+                                "storageGB": "2 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -545,6 +836,10 @@
                             },
                             {
                                 "size": "cr1.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "88",
+                                "memoryGiB": "244",
+                                "storageGB": "2 x 120 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -560,18 +855,71 @@
                         "type": "storageCurrentGen",
                         "sizes": [
                             {
-                                "size": "hi1.4xlarge",
+                                "size": "i2.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "30.5",
+                                "storageGB": "1 x 800 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
                                         "prices": {
-                                            "USD": "3.100"
+                                            "USD": "0.853"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "27",
+                                "memoryGiB": "61",
+                                "storageGB": "2 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.705"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "53",
+                                "memoryGiB": "122",
+                                "storageGB": "4 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.410"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "104",
+                                "memoryGiB": "244",
+                                "storageGB": "8 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "6.820"
                                         }
                                     }
                                 ]
                             },
                             {
                                 "size": "hs1.8xlarge",
+                                "vCPU": "16",
+                                "ECU": "35",
+                                "memoryGiB": "117",
+                                "storageGB": "24 x 2048",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -584,10 +932,34 @@
                         ]
                     },
                     {
+                        "type": "storagePreviousGen",
+                        "sizes": [
+                            {
+                                "size": "hi1.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "35",
+                                "memoryGiB": "60.5",
+                                "storageGB": "2 x 1024 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.100"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "type": "uI",
                         "sizes": [
                             {
                                 "size": "t1.micro",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "0.615",
+                                "storageGB": "ebsonly",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -608,7 +980,41 @@
                         "type": "generalCurrentGen",
                         "sizes": [
                             {
+                                "size": "m3.medium",
+                                "vCPU": "1",
+                                "ECU": "3",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 4 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.124"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "m3.large",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "7.5",
+                                "storageGB": "1 x 32 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.248"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
                                 "size": "m3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -620,6 +1026,10 @@
                             },
                             {
                                 "size": "m3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -636,6 +1046,10 @@
                         "sizes": [
                             {
                                 "size": "m1.small",
+                                "vCPU": "1",
+                                "ECU": "1",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 160",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -647,6 +1061,10 @@
                             },
                             {
                                 "size": "m1.medium",
+                                "vCPU": "1",
+                                "ECU": "2",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 410",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -658,6 +1076,10 @@
                             },
                             {
                                 "size": "m1.large",
+                                "vCPU": "2",
+                                "ECU": "4",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -669,6 +1091,10 @@
                             },
                             {
                                 "size": "m1.xlarge",
+                                "vCPU": "4",
+                                "ECU": "8",
+                                "memoryGiB": "15",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -681,10 +1107,94 @@
                         ]
                     },
                     {
+                        "type": "computeCurrentGen",
+                        "sizes": [
+                            {
+                                "size": "c3.large",
+                                "vCPU": "2",
+                                "ECU": "7",
+                                "memoryGiB": "3.75",
+                                "storageGB": "2 x 16 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.171"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "c3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 40 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.342"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "c3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "28",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 80 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.683"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "c3.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "55",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 160 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.366"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "c3.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "108",
+                                "memoryGiB": "60",
+                                "storageGB": "2 x 320 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.732"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "type": "computePreviousGen",
                         "sizes": [
                             {
                                 "size": "c1.medium",
+                                "vCPU": "2",
+                                "ECU": "5",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 350",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -696,6 +1206,10 @@
                             },
                             {
                                 "size": "c1.xlarge",
+                                "vCPU": "8",
+                                "ECU": "20",
+                                "memoryGiB": "7",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -712,6 +1226,10 @@
                         "sizes": [
                             {
                                 "size": "g2.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "15",
+                                "storageGB": "60 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -721,13 +1239,17 @@
                                     }
                                 ]
                             }
-						]
-					},
+                        ]
+                    },
                     {
                         "type": "hiMemCurrentGen",
                         "sizes": [
                             {
                                 "size": "m2.xlarge",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "17.1",
+                                "storageGB": "1 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -739,6 +1261,10 @@
                             },
                             {
                                 "size": "m2.2xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "34.2",
+                                "storageGB": "1 x 850",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -750,6 +1276,10 @@
                             },
                             {
                                 "size": "m2.4xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "68.4",
+                                "storageGB": "2 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -762,10 +1292,79 @@
                         ]
                     },
                     {
+                        "type": "storageCurrentGen",
+                        "sizes": [
+                            {
+                                "size": "i2.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "30.5",
+                                "storageGB": "1 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.938"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "27",
+                                "memoryGiB": "61",
+                                "storageGB": "2 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.876"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "53",
+                                "memoryGiB": "122",
+                                "storageGB": "4 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.751"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "104",
+                                "memoryGiB": "244",
+                                "storageGB": "8 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "7.502"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "type": "uI",
                         "sizes": [
                             {
                                 "size": "t1.micro",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "0.615",
+                                "storageGB": "ebsonly",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -786,7 +1385,41 @@
                         "type": "generalCurrentGen",
                         "sizes": [
                             {
+                                "size": "m3.medium",
+                                "vCPU": "1",
+                                "ECU": "3",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 4 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.124"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "m3.large",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "7.5",
+                                "storageGB": "1 x 32 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.248"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
                                 "size": "m3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -798,6 +1431,10 @@
                             },
                             {
                                 "size": "m3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -814,6 +1451,10 @@
                         "sizes": [
                             {
                                 "size": "m1.small",
+                                "vCPU": "1",
+                                "ECU": "1",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 160",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -825,6 +1466,10 @@
                             },
                             {
                                 "size": "m1.medium",
+                                "vCPU": "1",
+                                "ECU": "2",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 410",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -836,6 +1481,10 @@
                             },
                             {
                                 "size": "m1.large",
+                                "vCPU": "2",
+                                "ECU": "4",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -847,6 +1496,10 @@
                             },
                             {
                                 "size": "m1.xlarge",
+                                "vCPU": "4",
+                                "ECU": "8",
+                                "memoryGiB": "15",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -863,6 +1516,10 @@
                         "sizes": [
                             {
                                 "size": "c3.large",
+                                "vCPU": "2",
+                                "ECU": "7",
+                                "memoryGiB": "3.75",
+                                "storageGB": "2 x 16 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -874,6 +1531,10 @@
                             },
                             {
                                 "size": "c3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -885,6 +1546,10 @@
                             },
                             {
                                 "size": "c3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "28",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -896,6 +1561,10 @@
                             },
                             {
                                 "size": "c3.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "55",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 160 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -907,6 +1576,10 @@
                             },
                             {
                                 "size": "c3.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "108",
+                                "memoryGiB": "60",
+                                "storageGB": "2 x 320 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -923,6 +1596,10 @@
                         "sizes": [
                             {
                                 "size": "c1.medium",
+                                "vCPU": "2",
+                                "ECU": "5",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 350",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -934,6 +1611,10 @@
                             },
                             {
                                 "size": "c1.xlarge",
+                                "vCPU": "8",
+                                "ECU": "20",
+                                "memoryGiB": "7",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -945,6 +1626,10 @@
                             },
                             {
                                 "size": "cc2.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "88",
+                                "memoryGiB": "60.5",
+                                "storageGB": "4 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -956,11 +1641,15 @@
                             }
                         ]
                     },
-    				{
+                    {
                         "type": "gpuCurrentGen",
                         "sizes": [
                             {
                                 "size": "g2.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "15",
+                                "storageGB": "60 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -977,6 +1666,10 @@
                         "sizes": [
                             {
                                 "size": "cg1.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "33.5",
+                                "memoryGiB": "22.5",
+                                "storageGB": "2 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -993,6 +1686,10 @@
                         "sizes": [
                             {
                                 "size": "m2.xlarge",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "17.1",
+                                "storageGB": "1 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1004,6 +1701,10 @@
                             },
                             {
                                 "size": "m2.2xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "34.2",
+                                "storageGB": "1 x 850",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1015,6 +1716,10 @@
                             },
                             {
                                 "size": "m2.4xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "68.4",
+                                "storageGB": "2 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1026,9 +1731,13 @@
                             },
                             {
                                 "size": "cr1.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "88",
+                                "memoryGiB": "244",
+                                "storageGB": "2 x 120 SSD",
                                 "valueColumns": [
                                     {
-                                       "name": "linux",
+                                        "name": "linux",
                                         "prices": {
                                             "USD": "3.750"
                                         }
@@ -1041,18 +1750,71 @@
                         "type": "storageCurrentGen",
                         "sizes": [
                             {
-                                "size": "hi1.4xlarge",
+                                "size": "i2.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "30.5",
+                                "storageGB": "1 x 800 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
                                         "prices": {
-                                            "USD": "3.410"
+                                            "USD": "0.938"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "27",
+                                "memoryGiB": "61",
+                                "storageGB": "2 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.876"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "53",
+                                "memoryGiB": "122",
+                                "storageGB": "4 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.751"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "104",
+                                "memoryGiB": "244",
+                                "storageGB": "8 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "7.502"
                                         }
                                     }
                                 ]
                             },
                             {
                                 "size": "hs1.8xlarge",
+                                "vCPU": "16",
+                                "ECU": "35",
+                                "memoryGiB": "117",
+                                "storageGB": "24 x 2048",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1065,10 +1827,34 @@
                         ]
                     },
                     {
+                        "type": "storagePreviousGen",
+                        "sizes": [
+                            {
+                                "size": "hi1.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "35",
+                                "memoryGiB": "60.5",
+                                "storageGB": "2 x 1024 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.100"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "type": "uI",
                         "sizes": [
                             {
                                 "size": "t1.micro",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "0.615",
+                                "storageGB": "ebsonly",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1089,7 +1875,41 @@
                         "type": "generalCurrentGen",
                         "sizes": [
                             {
+                                "size": "m3.medium",
+                                "vCPU": "1",
+                                "ECU": "3",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 4 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.158"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "m3.large",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "7.5",
+                                "storageGB": "1 x 32 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.315"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
                                 "size": "m3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1101,6 +1921,10 @@
                             },
                             {
                                 "size": "m3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1117,6 +1941,10 @@
                         "sizes": [
                             {
                                 "size": "m1.small",
+                                "vCPU": "1",
+                                "ECU": "1",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 160",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1128,6 +1956,10 @@
                             },
                             {
                                 "size": "m1.medium",
+                                "vCPU": "1",
+                                "ECU": "2",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 410",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1139,6 +1971,10 @@
                             },
                             {
                                 "size": "m1.large",
+                                "vCPU": "2",
+                                "ECU": "4",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1150,6 +1986,10 @@
                             },
                             {
                                 "size": "m1.xlarge",
+                                "vCPU": "4",
+                                "ECU": "8",
+                                "memoryGiB": "15",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1166,6 +2006,10 @@
                         "sizes": [
                             {
                                 "size": "c3.large",
+                                "vCPU": "2",
+                                "ECU": "7",
+                                "memoryGiB": "3.75",
+                                "storageGB": "2 x 16 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1177,6 +2021,10 @@
                             },
                             {
                                 "size": "c3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1188,6 +2036,10 @@
                             },
                             {
                                 "size": "c3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "28",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1199,6 +2051,10 @@
                             },
                             {
                                 "size": "c3.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "55",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 160 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1210,6 +2066,10 @@
                             },
                             {
                                 "size": "c3.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "108",
+                                "memoryGiB": "60",
+                                "storageGB": "2 x 320 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1226,6 +2086,10 @@
                         "sizes": [
                             {
                                 "size": "c1.medium",
+                                "vCPU": "2",
+                                "ECU": "5",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 350",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1237,6 +2101,10 @@
                             },
                             {
                                 "size": "c1.xlarge",
+                                "vCPU": "8",
+                                "ECU": "20",
+                                "memoryGiB": "7",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1253,6 +2121,10 @@
                         "sizes": [
                             {
                                 "size": "m2.xlarge",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "17.1",
+                                "storageGB": "1 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1264,6 +2136,10 @@
                             },
                             {
                                 "size": "m2.2xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "34.2",
+                                "storageGB": "1 x 850",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1275,6 +2151,10 @@
                             },
                             {
                                 "size": "m2.4xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "68.4",
+                                "storageGB": "2 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1290,7 +2170,71 @@
                         "type": "storageCurrentGen",
                         "sizes": [
                             {
+                                "size": "i2.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "30.5",
+                                "storageGB": "1 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.018"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "27",
+                                "memoryGiB": "61",
+                                "storageGB": "2 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.035"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "53",
+                                "memoryGiB": "122",
+                                "storageGB": "4 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "4.070"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "104",
+                                "memoryGiB": "244",
+                                "storageGB": "8 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "8.140"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
                                 "size": "hs1.8xlarge",
+                                "vCPU": "16",
+                                "ECU": "35",
+                                "memoryGiB": "117",
+                                "storageGB": "24 x 2048",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1307,6 +2251,10 @@
                         "sizes": [
                             {
                                 "size": "t1.micro",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "0.615",
+                                "storageGB": "ebsonly",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1327,7 +2275,41 @@
                         "type": "generalCurrentGen",
                         "sizes": [
                             {
+                                "size": "m3.medium",
+                                "vCPU": "1",
+                                "ECU": "3",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 4 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.171"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "m3.large",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "7.5",
+                                "storageGB": "1 x 32 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.342"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
                                 "size": "m3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1339,6 +2321,10 @@
                             },
                             {
                                 "size": "m3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1355,6 +2341,10 @@
                         "sizes": [
                             {
                                 "size": "m1.small",
+                                "vCPU": "1",
+                                "ECU": "1",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 160",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1366,6 +2356,10 @@
                             },
                             {
                                 "size": "m1.medium",
+                                "vCPU": "1",
+                                "ECU": "2",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 410",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1377,6 +2371,10 @@
                             },
                             {
                                 "size": "m1.large",
+                                "vCPU": "2",
+                                "ECU": "4",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1388,6 +2386,10 @@
                             },
                             {
                                 "size": "m1.xlarge",
+                                "vCPU": "4",
+                                "ECU": "8",
+                                "memoryGiB": "15",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1404,6 +2406,10 @@
                         "sizes": [
                             {
                                 "size": "c3.large",
+                                "vCPU": "2",
+                                "ECU": "7",
+                                "memoryGiB": "3.75",
+                                "storageGB": "2 x 16 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1415,6 +2421,10 @@
                             },
                             {
                                 "size": "c3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1426,6 +2436,10 @@
                             },
                             {
                                 "size": "c3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "28",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1437,6 +2451,10 @@
                             },
                             {
                                 "size": "c3.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "55",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 160 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1448,6 +2466,10 @@
                             },
                             {
                                 "size": "c3.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "108",
+                                "memoryGiB": "60",
+                                "storageGB": "2 x 320 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1464,6 +2486,10 @@
                         "sizes": [
                             {
                                 "size": "c1.medium",
+                                "vCPU": "2",
+                                "ECU": "5",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 350",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1475,6 +2501,10 @@
                             },
                             {
                                 "size": "c1.xlarge",
+                                "vCPU": "8",
+                                "ECU": "20",
+                                "memoryGiB": "7",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1486,6 +2516,10 @@
                             },
                             {
                                 "size": "cc2.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "88",
+                                "memoryGiB": "60.5",
+                                "storageGB": "4 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1502,6 +2536,10 @@
                         "sizes": [
                             {
                                 "size": "m2.xlarge",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "17.1",
+                                "storageGB": "1 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1513,6 +2551,10 @@
                             },
                             {
                                 "size": "m2.2xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "34.2",
+                                "storageGB": "1 x 850",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1524,6 +2566,10 @@
                             },
                             {
                                 "size": "m2.4xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "68.4",
+                                "storageGB": "2 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1535,6 +2581,10 @@
                             },
                             {
                                 "size": "cr1.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "88",
+                                "memoryGiB": "244",
+                                "storageGB": "2 x 120 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1550,18 +2600,71 @@
                         "type": "storageCurrentGen",
                         "sizes": [
                             {
-                                "size": "hi1.4xlarge",
+                                "size": "i2.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "30.5",
+                                "storageGB": "1 x 800 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
                                         "prices": {
-                                            "USD": "3.820"
+                                            "USD": "1.051"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "27",
+                                "memoryGiB": "61",
+                                "storageGB": "2 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.101"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "53",
+                                "memoryGiB": "122",
+                                "storageGB": "4 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "4.202"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "104",
+                                "memoryGiB": "244",
+                                "storageGB": "8 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "8.404"
                                         }
                                     }
                                 ]
                             },
                             {
                                 "size": "hs1.8xlarge",
+                                "vCPU": "16",
+                                "ECU": "35",
+                                "memoryGiB": "117",
+                                "storageGB": "24 x 2048",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1574,10 +2677,34 @@
                         ]
                     },
                     {
+                        "type": "storagePreviousGen",
+                        "sizes": [
+                            {
+                                "size": "hi1.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "35",
+                                "memoryGiB": "60.5",
+                                "storageGB": "2 x 1024 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "3.440"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "type": "uI",
                         "sizes": [
                             {
                                 "size": "t1.micro",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "0.615",
+                                "storageGB": "ebsonly",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1598,7 +2725,41 @@
                         "type": "generalCurrentGen",
                         "sizes": [
                             {
+                                "size": "m3.medium",
+                                "vCPU": "1",
+                                "ECU": "3",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 4 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.158"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "m3.large",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "7.5",
+                                "storageGB": "1 x 32 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.315"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
                                 "size": "m3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1610,6 +2771,10 @@
                             },
                             {
                                 "size": "m3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1626,6 +2791,10 @@
                         "sizes": [
                             {
                                 "size": "m1.small",
+                                "vCPU": "1",
+                                "ECU": "1",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 160",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1637,6 +2806,10 @@
                             },
                             {
                                 "size": "m1.medium",
+                                "vCPU": "1",
+                                "ECU": "2",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 410",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1648,6 +2821,10 @@
                             },
                             {
                                 "size": "m1.large",
+                                "vCPU": "2",
+                                "ECU": "4",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1659,6 +2836,10 @@
                             },
                             {
                                 "size": "m1.xlarge",
+                                "vCPU": "4",
+                                "ECU": "8",
+                                "memoryGiB": "15",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1675,6 +2856,10 @@
                         "sizes": [
                             {
                                 "size": "c3.large",
+                                "vCPU": "2",
+                                "ECU": "7",
+                                "memoryGiB": "3.75",
+                                "storageGB": "2 x 16 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1686,6 +2871,10 @@
                             },
                             {
                                 "size": "c3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1697,6 +2886,10 @@
                             },
                             {
                                 "size": "c3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "28",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1708,6 +2901,10 @@
                             },
                             {
                                 "size": "c3.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "55",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 160 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1719,6 +2916,10 @@
                             },
                             {
                                 "size": "c3.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "108",
+                                "memoryGiB": "60",
+                                "storageGB": "2 x 320 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1735,6 +2936,10 @@
                         "sizes": [
                             {
                                 "size": "c1.medium",
+                                "vCPU": "2",
+                                "ECU": "5",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 350",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1746,6 +2951,10 @@
                             },
                             {
                                 "size": "c1.xlarge",
+                                "vCPU": "8",
+                                "ECU": "20",
+                                "memoryGiB": "7",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1762,6 +2971,10 @@
                         "sizes": [
                             {
                                 "size": "m2.xlarge",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "17.1",
+                                "storageGB": "1 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1773,6 +2986,10 @@
                             },
                             {
                                 "size": "m2.2xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "34.2",
+                                "storageGB": "1 x 850",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1784,6 +3001,10 @@
                             },
                             {
                                 "size": "m2.4xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "68.4",
+                                "storageGB": "2 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1799,7 +3020,71 @@
                         "type": "storageCurrentGen",
                         "sizes": [
                             {
+                                "size": "i2.xlarge",
+                                "vCPU": "4",
+                                "ECU": "14",
+                                "memoryGiB": "30.5",
+                                "storageGB": "1 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "1.018"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "27",
+                                "memoryGiB": "61",
+                                "storageGB": "2 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "2.035"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.4xlarge",
+                                "vCPU": "16",
+                                "ECU": "53",
+                                "memoryGiB": "122",
+                                "storageGB": "4 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "4.070"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "i2.8xlarge",
+                                "vCPU": "32",
+                                "ECU": "104",
+                                "memoryGiB": "244",
+                                "storageGB": "8 x 800 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "8.140"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
                                 "size": "hs1.8xlarge",
+                                "vCPU": "16",
+                                "ECU": "35",
+                                "memoryGiB": "117",
+                                "storageGB": "24 x 2048",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1816,6 +3101,10 @@
                         "sizes": [
                             {
                                 "size": "t1.micro",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "0.615",
+                                "storageGB": "ebsonly",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1836,7 +3125,41 @@
                         "type": "generalCurrentGen",
                         "sizes": [
                             {
+                                "size": "m3.medium",
+                                "vCPU": "1",
+                                "ECU": "3",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 4 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.153"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "m3.large",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "7.5",
+                                "storageGB": "1 x 32 SSD",
+                                "valueColumns": [
+                                    {
+                                        "name": "linux",
+                                        "prices": {
+                                            "USD": "0.306"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
                                 "size": "m3.xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "15",
+                                "storageGB": "2 x 40 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1848,6 +3171,10 @@
                             },
                             {
                                 "size": "m3.2xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "30",
+                                "storageGB": "2 x 80 SSD",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1864,6 +3191,10 @@
                         "sizes": [
                             {
                                 "size": "m1.small",
+                                "vCPU": "1",
+                                "ECU": "1",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 160",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1875,6 +3206,10 @@
                             },
                             {
                                 "size": "m1.medium",
+                                "vCPU": "1",
+                                "ECU": "2",
+                                "memoryGiB": "3.75",
+                                "storageGB": "1 x 410",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1886,6 +3221,10 @@
                             },
                             {
                                 "size": "m1.large",
+                                "vCPU": "2",
+                                "ECU": "4",
+                                "memoryGiB": "7.5",
+                                "storageGB": "2 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1897,6 +3236,10 @@
                             },
                             {
                                 "size": "m1.xlarge",
+                                "vCPU": "4",
+                                "ECU": "8",
+                                "memoryGiB": "15",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1913,6 +3256,10 @@
                         "sizes": [
                             {
                                 "size": "c1.medium",
+                                "vCPU": "2",
+                                "ECU": "5",
+                                "memoryGiB": "1.7",
+                                "storageGB": "1 x 350",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1924,6 +3271,10 @@
                             },
                             {
                                 "size": "c1.xlarge",
+                                "vCPU": "8",
+                                "ECU": "20",
+                                "memoryGiB": "7",
+                                "storageGB": "4 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1940,6 +3291,10 @@
                         "sizes": [
                             {
                                 "size": "m2.xlarge",
+                                "vCPU": "2",
+                                "ECU": "6.5",
+                                "memoryGiB": "17.1",
+                                "storageGB": "1 x 420",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1951,6 +3306,10 @@
                             },
                             {
                                 "size": "m2.2xlarge",
+                                "vCPU": "4",
+                                "ECU": "13",
+                                "memoryGiB": "34.2",
+                                "storageGB": "1 x 850",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1962,6 +3321,10 @@
                             },
                             {
                                 "size": "m2.4xlarge",
+                                "vCPU": "8",
+                                "ECU": "26",
+                                "memoryGiB": "68.4",
+                                "storageGB": "2 x 840",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1978,6 +3341,10 @@
                         "sizes": [
                             {
                                 "size": "t1.micro",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "0.615",
+                                "storageGB": "ebsonly",
                                 "valueColumns": [
                                     {
                                         "name": "linux",
@@ -1994,6 +3361,3 @@
         ]
     }
 }
-
-
-
