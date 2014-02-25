@@ -788,9 +788,7 @@ class ConfigService {
      * @return a Closure that determines if EBS volumes are needed for launch configurations based on instance type
      */
     Closure<Boolean> getInstanceTypeNeedsEbsVolumes() {
-        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.instanceTypeNeeds ?: { String instanceType ->
-            instanceType.startsWith('m3.')
-        }
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.instanceTypeNeeds ?: { false }
     }
 
     /**

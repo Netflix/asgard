@@ -27,6 +27,11 @@ class ConfigServiceSpec extends Specification {
         configService.getExcludedLaunchPermissionsForMassDelete() == [Mocks.SEG_AWS_ACCOUNT_ID] as Set
     }
 
+    def 'should return false for m3 getInstanceTypeNeedsEbsVolumes'(){
+        expect:
+        configService.instanceTypeNeedsEbsVolumes('m3.') == false
+    }
+
     def 'cachedUserDataMaxLength should be huge by default'() {
         expect:
         configService.getCachedUserDataMaxLength() == Integer.MAX_VALUE
