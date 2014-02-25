@@ -63,10 +63,8 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
         }
 
         def app = (AppRegistration)obj
-        def group = getGroupForApp(app)
-        if (group) {
-            removeFromList appGroups[group], app
-        }
+        
+        removeFromList appGroups[getGroupForApp(app)], app
 
         app.tags.each { String tag ->
             removeFromList tags[tag], app
@@ -95,7 +93,7 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
     }
 
     private static void removeFromList(List<AppRegistration> apps, AppRegistration app) {
-        if (apps.contains(app)) {
+        if (apps?.contains(app)) {
             apps.remove app
         }
     }
