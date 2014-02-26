@@ -22,6 +22,8 @@ import com.netflix.asgard.AppRegistration
  * Upon being added to the set, a grouping of AppRegistration objects by appGroup
  */
 class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
+    static final String DEFAULT_BLANK_GROUP_NAME = ""
+
     private final Map<String, List<AppRegistration>> appGroups = [:]
     private final Map<String, List<AppRegistration>> tags = [:]
 
@@ -39,12 +41,12 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
 
     @Override
     boolean add(AppRegistration app) {
-        if (app.group && !appGroups[app.group]) {
-            appGroups[app.group] = []
-            appGroups[app.group] << app
-        } else if (app.group && appGroups[app.group]) {
-            appGroups[app.group] << app
+        def group = app.group ?: DEFAULT_BLANK_GROUP_NAME
+        if (!appGroups[group]) {
+            appGroups[group] = []
         }
+        appGroups[group] << app
+
         app.tags.each { String tag ->
             if (!tags[tag]) {
                 tags[tag] = []
@@ -62,9 +64,7 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
 
         def app = (AppRegistration)obj
 
-        if (app.group) {
-            removeFromList appGroups[app.group], app
-        }
+        removeFromList appGroups[app.group ?: DEFAULT_BLANK_GROUP_NAME], app
 
         app.tags.each { String tag ->
             removeFromList tags[tag], app
@@ -93,7 +93,7 @@ class GroupedAppRegistrationSet extends TreeSet<AppRegistration> {
     }
 
     private static void removeFromList(List<AppRegistration> apps, AppRegistration app) {
-        if (apps.contains(app)) {
+        if (apps?.contains(app)) {
             apps.remove app
         }
     }
