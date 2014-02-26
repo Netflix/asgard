@@ -1223,14 +1223,6 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         Check.notNull(launchConfiguration.instanceType, LaunchConfiguration, "instanceType")
         taskService.runTask(userContext, "Create Launch Configuration '${name}' with image '${imageId}'", { Task task ->
             List<BlockDeviceMapping> blockDeviceMappings = []
-            if (configService.instanceTypeNeedsEbsVolumes(launchConfiguration.instanceType)) {
-                List<String> deviceNames = configService.ebsVolumeDeviceNamesForLaunchConfigs
-                for (deviceName in deviceNames) {
-                    blockDeviceMappings << new BlockDeviceMapping(
-                            deviceName: deviceName,
-                            ebs: new Ebs(volumeSize: configService.sizeOfEbsVolumesAddedToLaunchConfigs))
-                }
-            }
             launchConfiguration.blockDeviceMappings = blockDeviceMappings
             awsClient.by(userContext.region).createLaunchConfiguration(launchConfiguration.
                     getCreateLaunchConfigurationRequest(userContext, spotInstanceRequestService))
