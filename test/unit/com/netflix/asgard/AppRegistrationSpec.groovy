@@ -32,19 +32,8 @@ class AppRegistrationSpec extends Specification {
 
     void "simpledb items are properly coerced"() {
         setup:
-            def now = new Date()
             def appName = "test"
-            Map<String, String> attrs = [
-                    group: "myGroup",
-                    type: "web application",
-                    description: "test app",
-                    owner: "EngTools",
-                    email: "em@il.com",
-                    monitorBucketType: "application",
-                    createTs: "${(now - 10).time}",
-                    updateTs: "${now.time}",
-                    tags: "Foo,Bar,Baz,Blah"
-            ]
+            def attrs = getDefaultItemAttrs()
             def item = new ItemBuilder.Builder().name appName attrs attrs build()
 
         when:
@@ -61,6 +50,21 @@ class AppRegistrationSpec extends Specification {
             appReg.createTime.time == Long.parseLong(attrs.createTs)
             appReg.updateTime.time == Long.parseLong(attrs.updateTs)
             appReg.tags == attrs.tags.split(',').collect { it.trim() }
+    }
+
+    Map<String, String> getDefaultItemAttrs() {
+        def now = new Date()
+        [
+                group: "myGroup",
+                type: "web application",
+                description: "test app",
+                owner: "EngTools",
+                email: "em@il.com",
+                monitorBucketType: "application",
+                createTs: "${(now - 10).time}",
+                updateTs: "${now.time}",
+                tags: "Foo,Bar,Baz,Blah"
+        ]
     }
 
     class ItemBuilder {
