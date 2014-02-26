@@ -785,29 +785,6 @@ class ConfigService {
     }
 
     /**
-     * @return a Closure that determines if EBS volumes are needed for launch configurations based on instance type
-     */
-    Closure<Boolean> getInstanceTypeNeedsEbsVolumes() {
-        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.instanceTypeNeeds ?: { String instanceType ->
-            instanceType.startsWith('m3.')
-        }
-    }
-
-    /**
-     * @return the size of EBS volumes added to launch configurations for specific instance types
-     */
-    int getSizeOfEbsVolumesAddedToLaunchConfigs() {
-        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.size ?: 125
-    }
-
-    /**
-     * @return device names for the EBS volumes added to launch configurations for specific instance types
-     */
-    List<String> getEbsVolumeDeviceNamesForLaunchConfigs() {
-        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.deviceNames ?: ['/dev/sdb', '/dev/sdc']
-    }
-
-    /**
      * @return fast property console url based on accountName
      */
     String getFastPropertiesConsoleUrl() {
