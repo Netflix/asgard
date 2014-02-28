@@ -19,7 +19,6 @@ import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.server.Environment
 import com.netflix.asgard.text.TextLinkTemplate
 
-
 /**
  * Type-checked configuration access with intelligent defaults.
  */
