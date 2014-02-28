@@ -287,6 +287,11 @@ class ApplicationController {
     }
 
     private static String normalizeTagDelimiter(String tags) {
+        // Fail early & means we can support null parameters
+        if (!tags) {
+            return
+        }
+
         if (tags.contains(",")) {
             tags.split(',')*.trim().join(',')
         } else {
@@ -306,6 +311,7 @@ class ApplicationCreateCommand {
     String owner
     String chaosMonkey
     String tags
+    String monitorBucketType
     boolean requestedFromGui
 
     static constraints = {
@@ -321,6 +327,7 @@ class ApplicationCreateCommand {
         email(nullable: false, blank: false, email: true)
         type(nullable: false, blank: false)
         description(nullable: false, blank: false)
+        monitorBucketType(nullable: false, blank: false)
         owner(nullable: false, blank: false)
         chaosMonkey(nullable: true, validator: { value, command ->
             if (!command.chaosMonkey) {
