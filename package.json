@@ -40,7 +40,9 @@
     "karma-requirejs": "^0.2.1",
     "karma-phantomjs-launcher": "^0.1.2",
     "karma": "^0.10.9",
-    "karma-ng-html2js-preprocessor": "^0.1.0"
+    "karma-ng-html2js-preprocessor": "^0.1.0",
+    "karma-junit-reporter": "^0.2.1"
+
   },
   "engines": {
     "node": ">=0.8.0"

@@ -30,7 +30,8 @@
   <link rel="shortcut icon" href="${resource(dir: '/', file: 'favicon.ico')}" type="image/x-icon"/>
   <g:layoutHead/>
 </head>
-<body class="${envStyle} ${occasion.styleClass}">
+<body ng-app="asgardApp" class="${envStyle} ${occasion.styleClass}">
+
 <g:if test="${ieWithoutChromeFrame}">
 <!--[if IE]>
   <script type="text/javascript" src="${resource(dir: 'js', file: 'chromeframeinstall.js')}?v=${build}"></script>
