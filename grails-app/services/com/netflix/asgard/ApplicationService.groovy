@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.simpledb.AmazonSimpleDB
+import com.amazonaws.services.simpledb.model.Attribute
 import com.amazonaws.services.simpledb.model.CreateDomainRequest
 import com.amazonaws.services.simpledb.model.DeleteAttributesRequest
 import com.amazonaws.services.simpledb.model.Item
@@ -177,7 +178,9 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         attributes << new ReplaceableAttribute('email', Check.notEmpty(email), replaceExistingValues)
         attributes << new ReplaceableAttribute('monitorBucketType', monitorBucketType.name(), replaceExistingValues)
         attributes << new ReplaceableAttribute('updateTs', nowEpoch, replaceExistingValues)
-        attributes << new ReplaceableAttribute('tags', tags, replaceExistingValues)
+        if (tags) {
+            attributes << new ReplaceableAttribute('tags', tags, replaceExistingValues)
+        }
         return attributes
     }
 
@@ -189,6 +192,11 @@ class ApplicationService implements CacheInitializer, InitializingBean {
                 "Update registered app ${name}, type ${type}, owner ${owner}, email ${email}", { task ->
             simpleDbClient.putAttributes(new PutAttributesRequest().withDomainName(domainName).
                     withItemName(name.toUpperCase()).withAttributes(attributes))
+            if (!tags) {
+                def deleteAttrs = new DeleteAttributesRequest(domainName, name.toUpperCase(),
+                        [new Attribute().withName('tags')])
+                simpleDbClient.deleteAttributes(deleteAttrs)
+            }
         }, Link.to(EntityType.application, name))
         getRegisteredApplication(userContext, name)
     }
