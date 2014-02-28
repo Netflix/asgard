@@ -15,12 +15,19 @@
  */
 package com.netflix.asgard
 
-import spock.lang.Specification
 import com.netflix.asgard.mock.Mocks
+import spock.lang.Specification
 
 class ConfigServiceSpec extends Specification {
 
     ConfigService configService = new ConfigService(grailsApplication: Mocks.grailsApplication())
+
+    def 'should return true for m3 instance EBS check'() {
+        expect:
+        configService.instanceTypeNeedsEbsVolumes('m3.') == true
+        configService.getSizeOfEbsVolumesAddedToLaunchConfigs() == 125
+        configService.getEbsVolumeDeviceNamesForLaunchConfigs() == ['/dev/sdb', '/dev/sdc']
+    }
 
     def 'should return correct excluded launch permissions for mass delete'() {
         expect:
@@ -35,7 +42,7 @@ class ConfigServiceSpec extends Specification {
     def 'cachedUserDataMaxLength should be at least zero'() {
         when:
         ConfigService configService = new ConfigService(grailsApplication: [
-            config: [ cloud: [ cachedUserDataMaxLength: -5 ] ]
+                config: [cloud: [cachedUserDataMaxLength: -5]]
         ])
         then:
         configService.getCachedUserDataMaxLength() == 0
@@ -44,7 +51,7 @@ class ConfigServiceSpec extends Specification {
     def 'cachedUserDataMaxLength can be overridden'() {
         when:
         ConfigService configService = new ConfigService(grailsApplication: [
-            config: [ cloud: [ cachedUserDataMaxLength: 20 ] ]
+                config: [cloud: [cachedUserDataMaxLength: 20]]
         ])
         then:
         configService.getCachedUserDataMaxLength() == 20
