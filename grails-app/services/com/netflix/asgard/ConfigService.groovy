@@ -19,6 +19,7 @@ import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.server.Environment
 import com.netflix.asgard.text.TextLinkTemplate
 
+
 /**
  * Type-checked configuration access with intelligent defaults.
  */
@@ -214,7 +215,7 @@ class ConfigService {
      *          [url: 'mailto:help@example.com', text: 'Email Support',
      *              image: '/images/tango/16/actions/mail-message-new.png']
      */
-    List<Map<String,String>> getExternalLinks() {
+    List<Map<String, String>> getExternalLinks() {
         grailsApplication.config.link?.externalLinks?.sort { it.text } ?: []
     }
 
@@ -740,6 +741,29 @@ class ConfigService {
      */
     String getSpotUrl() {
         grailsApplication.config.cloud?.spot?.infoUrl ?: ''
+    }
+
+    /**
+     * @return a Closure that determines if EBS volumes are needed for launch configurations based on instance type
+     */
+    Closure<Boolean> getInstanceTypeNeedsEbsVolumes() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.instanceTypeNeeds ?: { String instanceType ->
+            instanceType.startsWith('m3.')
+        }
+    }
+
+    /**
+     * @return the size of EBS volumes added to launch configurations for specific instance types
+     */
+    int getSizeOfEbsVolumesAddedToLaunchConfigs() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.size ?: 125
+    }
+
+    /**
+     * @return device names for the EBS volumes added to launch configurations for specific instance types
+     */
+    List<String> getEbsVolumeDeviceNamesForLaunchConfigs() {
+        grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.deviceNames ?: ['/dev/sdb', '/dev/sdc']
     }
 
     /**
