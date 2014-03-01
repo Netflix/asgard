@@ -909,8 +909,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     void setExpirationTime(UserContext userContext, String autoScalingGroupName, DateTime expirationTime,
                            Task existingTask = null) {
-        Map<String, String> tagNameValuePairs = [(TagNames.EXPIRATION_TIME): Time.format(expirationTime)]
-        createOrUpdateAutoScalingGroupTags(userContext, autoScalingGroupName, tagNameValuePairs, existingTask)
+        List<Tag> tags = []
+		tags.add(new Tag(key:TagNames.EXPIRATION_TIME, value:Time.format(expirationTime), propagateAtLaunch:false, resourceId:autoScalingGroupName, resourceType:"auto-scaling-group"))
+		updateTags(userContext, tags, autoScalingGroupName,  existingTask)        
     }
 
     void postponeExpirationTime(UserContext userContext, String autoScalingGroupName, Duration extraTime,
@@ -930,7 +931,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
 
     void removeExpirationTime(UserContext userContext, String autoScalingGroupName, Task existingTask = null) {
-        deleteAutoScalingGroupTags(userContext, autoScalingGroupName, [TagNames.EXPIRATION_TIME], existingTask)
+		List<Tag> tags = []
+		tags.add(new Tag(key:TagNames.EXPIRATION_TIME, resourceId:autoScalingGroupName, resourceType:"auto-scaling-group"))
+		deleteTags(userContext, tags, autoScalingGroupName,  existingTask)
     }
 
     void createOrUpdateAutoScalingGroupTags(UserContext userContext, String autoScalingGroupName, Map<String,

@@ -1,7 +1,6 @@
 <tr class="prop">
 	<td class="name">Tags:</td>
 	<td>
-
 		<div class="list">
 			<table id="tags">
 				<thead>
@@ -15,7 +14,7 @@
 				<g:each var="tag" in="${tags}" status="i">
 					<tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
 						<td>
-							${tag.key}<input type="hidden" id="tags.name.${tag.key}"
+							<input type="text" id="tags.name.${tag.key}"
 							class="tagName" value="${tag.key}" />
 						</td>
 						<td><input type="text" id="tags.value.${tag.key}"

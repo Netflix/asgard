@@ -433,13 +433,9 @@ ${loadBalancerNames}"""
 Group: ${lastGroup.loadBalancerNames}"""
             boolean ebsOptimized = params.containsKey('ebsOptimized') ? params.ebsOptimized?.toBoolean() :
                 lastLaunchConfig.ebsOptimized
-			List<Tag> tags = new ArrayList<Tag>()
-			if (params.tags) {
-				params.tags.value.each { key, value ->
-					Tag t = new Tag(key:key, value:value, propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:nextGroupName, resourceType:"auto-scaling-group")
-					tags.add(t)
-				}
-			}
+				
+			List<Tag> tags = convertTags(nextGroupName)
+
             if (params.noOptionalDefaults != 'true') {
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
@@ -490,6 +486,17 @@ Group: ${loadBalancerNames}"""
             flash.message = "${operation.task.name} has been started."
             redirectToTask(operation.taskId)
         }
+    }
+	
+	private List<Tag> convertTags(String nextGroupName){
+		List<Tag> tags = []
+		if (params.tags) {
+			params.tags.value.each { key, value ->
+				Tag t = new Tag(key:key, value:value, propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:nextGroupName, resourceType:"auto-scaling-group")
+				tags.add(t)
+			}
+		}
+		tags
     }
 
     private int convertToIntOrUseDefault(String value, Integer defaultValue) {

@@ -243,8 +243,7 @@ class AutoScalingController {
                 healthCheckType: params.healthCheckType,
                 healthCheckGracePeriod: tryParse(params.healthCheckGracePeriod),
                 availabilityZones: selectedZones,
-                suspendedProcesses: processes,
-				tags: params.tags
+                suspendedProcesses: processes
         )
         List<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
             it.groupName?.toLowerCase()
@@ -262,6 +261,26 @@ class AutoScalingController {
                         'Chaos Monkey settings directly in Cloudready after ASG creation.'
             }
         }
+		// Auto Scaling Group Tags
+		List<Tag> asgTags = []
+			
+		if (params.tags) {
+			Map tags = [:]		
+
+			// The tags get funky when passed by the save chain
+			params.entrySet().findAll {
+				it.key.startsWith('tags.value')
+			}.each {
+				tags.put(it.key.tokenize('.')[2], it.value)				
+			}
+		
+			if (tags.size() > 0){
+					tags.each { key, value ->
+						Tag t = new Tag(key:key, value:value, propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false)
+						asgTags.add(t)
+				}
+			}									
+		}
         [
                 applications: applicationService.getRegisteredApplications(userContext),
                 group: group,
@@ -285,7 +304,8 @@ class AutoScalingController {
                 iamInstanceProfile: configService.defaultIamRole,
                 spotUrl: configService.spotUrl,
                 isChaosMonkeyActive: cloudReadyService.isChaosMonkeyActive(userContext.region),
-                appsWithClusterOptLevel: appsWithClusterOptLevel ?: []
+                appsWithClusterOptLevel: appsWithClusterOptLevel ?: [],
+				tags: asgTags
         ]
     }
 
@@ -305,12 +325,12 @@ class AutoScalingController {
             String vpcId = subnets.getVpcIdForSubnetPurpose(subnetPurpose) ?: ''
 
 			// Auto Scaling Group Tags
-			List<Tag> tags = new ArrayList<Tag>()
+			List<Tag> asgTags = []
 			
 			if (params.tags) {
 				params.tags.value.each { key, value ->
 					Tag t = new Tag(key:key, value:value, propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:groupName, resourceType:"auto-scaling-group")
-					tags.add(t)
+					asgTags.add(t)
 				}
 			}
 
@@ -331,7 +351,7 @@ class AutoScalingController {
                     withMinSize(minSize).withDesiredCapacity(desiredCapacity).
                     withMaxSize(maxSize).withDefaultCooldown(defaultCooldown).
                     withHealthCheckType(healthCheckType).withHealthCheckGracePeriod(healthCheckGracePeriod).
-                    withTerminationPolicies(terminationPolicies).withTags(tags)
+                    withTerminationPolicies(terminationPolicies).withTags(asgTags)
 
             // If this ASG lauches VPC instances, we must find the proper subnets and add them.
             if (subnetPurpose) {
@@ -448,7 +468,7 @@ class AutoScalingController {
                 resumeProcesses << processType
             }
         }
-			List<Tag> tags = new ArrayList<Tag>()
+			List<Tag> tags = []
 			
 			if (params.tags) {
 				params.tags.value.each { key, value ->
@@ -460,7 +480,7 @@ class AutoScalingController {
 					awsAutoScalingService.updateTags(userContext, tags, name)
 				}
 			
-				tags = new ArrayList<Tag>()
+				tags = []
 				params.tags.delete.each { key, value ->
 					if (value == 'on'){
 						Tag t = new Tag(key:key, value:params['tags.values.' + key], propagateAtLaunch:params['tags.props.' + key] == 'on' ? true:false, resourceId:name, resourceType:"auto-scaling-group")
