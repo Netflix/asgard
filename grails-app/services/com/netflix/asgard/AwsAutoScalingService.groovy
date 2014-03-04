@@ -1233,7 +1233,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     List<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType) {
         if (configService.instanceTypeNeedsCustomVolumes(instanceType)) {
             Map<String, String> mapping = configService.getDeviceNameVirtualNameMapping()
-            return mapping.collect{ new BlockDeviceMapping(deviceName: it.key, virtualName: it.value) }
+            return mapping.collect { new BlockDeviceMapping(deviceName: it.key, virtualName: it.value) }
         }else{
             return []
         }
