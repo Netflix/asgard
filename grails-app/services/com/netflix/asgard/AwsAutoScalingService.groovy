@@ -36,7 +36,6 @@ import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult
 import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsRequest
 import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsResult
-import com.amazonaws.services.autoscaling.model.Ebs
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.LifecycleState
@@ -1231,7 +1230,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         getLaunchConfiguration(userContext, name)
     }
 
-    ArrayList<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType) {
+    List<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType) {
         if (configService.instanceTypeNeedsCustomVolumes(instanceType)) {
             Map<String, String> mapping = configService.getDeviceNameVirtualNameMapping()
             return mapping.collect{ new BlockDeviceMapping(deviceName: it.key, virtualName: it.value) }

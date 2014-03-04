@@ -19,7 +19,6 @@ import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.server.Environment
 import com.netflix.asgard.text.TextLinkTemplate
 
-
 /**
  * Type-checked configuration access with intelligent defaults.
  */
@@ -753,7 +752,8 @@ class ConfigService {
     }
 
     /**
-     * @return device name - virtual name mapping for custom volumes added to launch configurations for specific instance types
+     * @return device name - virtual name mapping for custom volumes added to launch configurations for specific
+     * instance types
      */
     Map<String, String> getDeviceNameVirtualNameMapping() {
         grailsApplication.config.cloud?.launchConfig?.customVolumes?.deviceNameVirtualNameMapping ?:
