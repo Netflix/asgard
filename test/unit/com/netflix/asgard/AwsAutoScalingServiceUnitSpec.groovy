@@ -32,6 +32,7 @@ import com.amazonaws.services.autoscaling.model.TagDescription
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.SecurityGroup
+import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
@@ -625,5 +626,27 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
             0 * resumeProcesses(_)
             0 * updateAutoScalingGroup(_)
         }
+    }
+
+    def 'should build a custom launch configuration for m3 types'(){
+        ConfigService configService = new ConfigService(grailsApplication: Mocks.grailsApplication())
+        awsAutoScalingService = new AwsAutoScalingService()
+        awsAutoScalingService.configService = configService
+        def mappings = awsAutoScalingService.buildBlockDeviceMappings('m3.')
+        def block = mappings.find{ it.deviceName == '/dev/sdb' }
+
+        expect:
+        mappings.size() == 2
+        block.virtualName == 'ephemeral0'
+    }
+
+    def 'should not build a custom launch configuration for other types'(){
+        ConfigService configService = new ConfigService(grailsApplication: Mocks.grailsApplication())
+        awsAutoScalingService = new AwsAutoScalingService()
+        awsAutoScalingService.configService = configService
+        def mappings = awsAutoScalingService.buildBlockDeviceMappings('some other type')
+
+        expect:
+        mappings.size() == 0
     }
 }
