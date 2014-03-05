@@ -16,9 +16,11 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
+import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.SecurityGroup
+import com.amazonaws.services.ec2.model.UserIdGroupPair
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import com.netflix.grails.contextParam.ContextParam
@@ -66,8 +68,18 @@ class SecurityController {
             Requests.renderNotFound('Security Group', name, this)
             return
         }
+        for (IpPermission ipPermission in group.ipPermissions) {
+            List<UserIdGroupPair> pairs = ipPermission.userIdGroupPairs
+            List<String> ids = pairs*.groupId
+            List<GroupIdentifier> groups = awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(userContext, ids)
+            for (UserIdGroupPair pair in pairs) {
+                if (!pair.groupName) {
+                    pair.groupName = groups.find { it.groupId == pair.groupId }?.groupName
+                }
+            }
+            pairs.sort { a, b -> a.groupName?.compareToIgnoreCase b.groupName }
+        }
         group.ipPermissions.sort { it.userIdGroupPairs ? it.userIdGroupPairs[0].groupName : it.fromPort }
-        group.ipPermissions.each { it.userIdGroupPairs.sort { it.groupName } }
 
         List<LaunchConfiguration> launchConfigs = awsAutoScalingService.getLaunchConfigurationsForSecurityGroup(
                 userContext, group)
