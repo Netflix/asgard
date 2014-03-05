@@ -681,7 +681,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         if (portsStr) {
             portsStr.split(',').each { rangeStr ->
                 Matcher m = rangeStr =~ /(-?\d+)(-(-?\d+))?/
-                log.debug "permissionsFromString: ${portStr} => ${m[0]}"
+                log.debug "permissionsFromString: ${portsStr} => ${m[0]}"
                 if (m.matches()) {
                     def rangeParts = m[0]  // 0:all 1:from 2:dashAndTo 3:to
                     String fromPort = rangeParts[1]
