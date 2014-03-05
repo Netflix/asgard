@@ -86,7 +86,7 @@ class InstanceTypeServiceSpec extends Specification {
         [0.05, 0.23, 0.68, 3.10] == instanceTypes*.linuxOnDemandPrice[-4..-1]
     }
 
-    def 'instance types list should have unpriced types at the end'() {
+    def 'instance types list should be sorted by price ascending with unpriced types at the end'() {
 
         UserContext userContext = UserContext.auto(Region.defaultRegion())
         Closure type = { BigDecimal linuxOnDemandPrice, String instanceType ->

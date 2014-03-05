@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.ec2.model.GroupIdentifier
+import com.amazonaws.services.ec2.model.SecurityGroup
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
@@ -27,8 +29,8 @@ class ObjectLinkTagLibSpec extends Specification {
         String output = applyTemplate('<g:linkObject type="instance" name="i-12345678">aprop</g:linkObject>')
 
         then:
-        output == '<a href="/instance/show/i-12345678" class="instance" ' +
-                'title="Show details of this Instance">aprop</a>'
+        output == '<a href="/instance/show/i-12345678" ' +
+                'title="Show details of this Instance" class="instance">aprop</a>'
     }
 
     def 'should generate fast property link'() {
@@ -37,8 +39,8 @@ class ObjectLinkTagLibSpec extends Specification {
         String output = applyTemplate('<g:linkObject type="fastProperty" name="|prop:8888">aprop</g:linkObject>')
 
         then:
-        output == '<a href="/fastProperty/show?name=%7Cprop%3A8888" class="fastProperty" ' +
-                'title="Show details of this Fast Property">aprop</a>'
+        output == '<a href="/fastProperty/show?name=%7Cprop%3A8888" ' +
+                'title="Show details of this Fast Property" class="fastProperty">aprop</a>'
     }
 
     def 'should generate link for SQS subscription endpoint in same account'() {
@@ -48,11 +50,35 @@ class ObjectLinkTagLibSpec extends Specification {
         }
 
         expect:
-        applyTemplate('<g:snsSubscriptionEndpoint>arn:aws:sqs:us-west-1:170000000000:testSQSWest\
-</g:snsSubscriptionEndpoint>') == '<a href="/queue/show/testSQSWest" region="us-west-1" class="queue" \
-title="Show details of this Queue">arn:aws:sqs:us-west-1:170000000000:testSQSWest</a>'
-        applyTemplate('<g:snsSubscriptionEndpoint>arn:aws:sqs:us-west-1:170000000001:testSQSWest\
-</g:snsSubscriptionEndpoint>') == 'arn:aws:sqs:us-west-1:170000000001:testSQSWest'
-        applyTemplate('<g:snsSubscriptionEndpoint>jsnow@thewall.got</g:snsSubscriptionEndpoint>') == 'jsnow@thewall.got'
+        applyTemplate(template) == result
+
+        where:
+        template                                                                                                | result
+        '<g:snsSubscriptionEndpoint>jsnow@thewall.got</g:snsSubscriptionEndpoint>'                              |
+                'jsnow@thewall.got'
+        '<g:snsSubscriptionEndpoint>arn:aws:sqs:us-west-1:170000000001:testSQSWest</g:snsSubscriptionEndpoint>' |
+                'arn:aws:sqs:us-west-1:170000000001:testSQSWest'
+        '<g:snsSubscriptionEndpoint>arn:aws:sqs:us-west-1:170000000000:testSQSWest</g:snsSubscriptionEndpoint>' |
+                '<a href="/queue/show/testSQSWest" region="us-west-1" title="Show details of this Queue" ' +
+                'class="queue">arn:aws:sqs:us-west-1:170000000000:testSQSWest</a>'
+    }
+
+    def 'should generate security group link with name and id displayed using duck typing of security object'() {
+
+        grailsApplication.metaClass.getControllerNamesToContextParams = { -> ['security': []] }
+
+        when:
+        String output = applyTemplate('<g:securityGroup group="${securityGroup}"/>', [securityGroup: input])
+
+        then:
+        output == '<a href="/security/show/sg-1234" title="Show details of this Security Group" ' +
+                'class="security">vampire (sg-1234)</a>'
+
+        where:
+        input << [
+                new SecurityGroup(groupName: 'vampire', groupId: 'sg-1234'),
+                new GroupIdentifier(groupName: 'vampire', groupId: 'sg-1234'),
+                [groupName: 'vampire', groupId: 'sg-1234'],
+        ]
     }
 }

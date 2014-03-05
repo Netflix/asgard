@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.ec2.model.AvailabilityZone
+import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.HealthCheck
 import com.amazonaws.services.elasticloadbalancing.model.Listener
@@ -79,6 +80,8 @@ class LoadBalancerController {
             List<InstanceStateData> instanceStateDatas = awsLoadBalancerService.getInstanceStateDatas(
                     userContext, name, groups)
             String subnetPurpose = awsEc2Service.getSubnets(userContext).coerceLoneOrNoneFromIds(lb.subnets)?.purpose
+            List<GroupIdentifier> securityGroups = awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(userContext,
+                    lb.securityGroups)
             Map details = [
                     loadBalancer: lb,
                     app: applicationService.getRegisteredApplication(userContext, appName),
@@ -86,6 +89,7 @@ class LoadBalancerController {
                     groups: groups,
                     instanceStates: instanceStateDatas,
                     subnetPurpose: subnetPurpose ?: '',
+                    securityGroups: securityGroups,
             ]
             withFormat {
                 html { return details }

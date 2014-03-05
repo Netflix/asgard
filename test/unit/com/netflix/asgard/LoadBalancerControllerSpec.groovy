@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.Subnet
 import com.amazonaws.services.ec2.model.Tag
 import com.amazonaws.services.elasticloadbalancing.model.HealthCheck
@@ -34,6 +35,8 @@ class LoadBalancerControllerSpec extends Specification {
     AmazonElasticLoadBalancing mockElb = Mock(AmazonElasticLoadBalancing)
     AwsLoadBalancerService awsLoadBalancerService = Mock(AwsLoadBalancerService)
     AwsEc2Service awsEc2Service = Mock(AwsEc2Service)
+    AwsAutoScalingService awsAutoScalingService = Mock(AwsAutoScalingService)
+    ApplicationService applicationService = Mock(ApplicationService)
 
     void setup() {
         TestUtils.setUpMockRequest()
@@ -44,6 +47,8 @@ class LoadBalancerControllerSpec extends Specification {
         controller.awsLoadBalancerService = awsLoadBalancerService
         awsLoadBalancerService.awsClient = new MultiRegionAwsClient({ mockElb })
         controller.awsEc2Service = awsEc2Service
+        controller.awsAutoScalingService = awsAutoScalingService
+        controller.applicationService = applicationService
         mockElb.describeLoadBalancers(_) >> { [] }
     }
 
@@ -53,6 +58,36 @@ class LoadBalancerControllerSpec extends Specification {
         params.timeout = '10'
         params.unhealthy = '3'
         params.healthy = '4'
+    }
+
+    def 'should show info about a load balancer'() {
+
+        List<String> securityGroupIds = ['sg-1234', 'sg-abcd']
+        List<GroupIdentifier> groupIdObjects = [new GroupIdentifier(groupId: 'sg-1234', groupName: 'vamp'),
+                new GroupIdentifier(groupId: 'sg-abcd', groupName: 'wolf')]
+        LoadBalancerDescription lb = new LoadBalancerDescription(loadBalancerName: 'helloworld--frontend',
+                securityGroups: securityGroupIds)
+        AppRegistration app = new AppRegistration(name: 'helloworld')
+
+        params.id = 'helloworld--frontend'
+
+        when:
+        Map attrs = controller.show()
+
+        then:
+        1 * awsLoadBalancerService.getAppNameForLoadBalancer('helloworld--frontend') >> 'helloworld'
+        1 * awsLoadBalancerService.getLoadBalancer(_, 'helloworld--frontend') >> lb
+        1 * awsAutoScalingService.getAutoScalingGroupsForLB(_, 'helloworld--frontend') >> []
+        1 * awsEc2Service.getSubnets(_) >> Subnets.from([])
+        1 * applicationService.getRegisteredApplication(_, 'helloworld') >> app
+        1 * awsLoadBalancerService.getInstanceStateDatas(_, 'helloworld--frontend', []) >> []
+        1 * awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(_, securityGroupIds) >> groupIdObjects
+        0 * _
+        response.status == 200
+        attrs == [
+                app: app, clusters: [], groups: [], instanceStates: [], loadBalancer: lb,
+                securityGroups: groupIdObjects, subnetPurpose: ''
+        ]
     }
 
     @Unroll('update should change zones but not subnets when default VPC subnets #defaultVpcSubnetsCondition')

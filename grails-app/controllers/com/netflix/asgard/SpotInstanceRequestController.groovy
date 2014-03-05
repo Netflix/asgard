@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.ec2.model.CancelledSpotInstanceRequest
+import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.SpotInstanceRequest
 import com.netflix.asgard.model.SpotInstanceRequestListType
 import com.netflix.grails.contextParam.ContextParam
@@ -48,7 +49,9 @@ class SpotInstanceRequestController {
         UserContext userContext = UserContext.of(request)
         String spotInstanceRequestId = params.id
         SpotInstanceRequest sir = spotInstanceRequestService.getSpotInstanceRequest(userContext, spotInstanceRequestId)
-        Map details = [spotInstanceRequest: sir]
+        List<GroupIdentifier> securityGroups = awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(userContext,
+                sir.launchSpecification.securityGroups)
+        Map details = [spotInstanceRequest: sir, securityGroups: securityGroups]
         withFormat {
             html { details }
             xml { new XML(details).render(response) }

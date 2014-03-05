@@ -17,27 +17,51 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.Alarm
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
+import com.amazonaws.services.ec2.model.GroupIdentifier
+import com.amazonaws.services.ec2.model.Image
+import com.amazonaws.services.ec2.model.SecurityGroup
+import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.google.common.collect.ImmutableSet
+import com.google.common.collect.Multiset
+import com.google.common.collect.TreeMultiset
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AutoScalingGroupData
+import com.netflix.asgard.model.AutoScalingGroupMixin
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.Subnets
+import com.netflix.frigga.Names
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 @TestFor(AutoScalingController)
 class AutoScalingControllerSpec extends Specification {
 
+    ApplicationService applicationService = Mock(ApplicationService)
+    AwsAutoScalingService awsAutoScalingService = Mock(AwsAutoScalingService)
+    AwsEc2Service awsEc2Service = Mock(AwsEc2Service)
+    AwsCloudWatchService awsCloudWatchService = Mock(AwsCloudWatchService)
+    AwsLoadBalancerService awsLoadBalancerService = Mock(AwsLoadBalancerService)
+    CloudReadyService cloudReadyService = Mock(CloudReadyService)
+    ConfigService configService = Mock(ConfigService)
+
     void setup() {
         TestUtils.setUpMockRequest()
-        controller.cloudReadyService = Mock(CloudReadyService)
+        controller.applicationService = applicationService
+        controller.awsAutoScalingService = awsAutoScalingService
+        controller.awsEc2Service = awsEc2Service
+        controller.awsCloudWatchService = awsCloudWatchService
+        controller.awsLoadBalancerService = awsLoadBalancerService
+        controller.cloudReadyService = cloudReadyService
+        controller.configService = configService
     }
 
-    void setupMocks() {
+    void setupHeavyWeightMocks() {
         Mocks.createDynamicMethods()
         controller.grailsApplication = Mocks.grailsApplication()
         controller.applicationService = Mocks.applicationService()
@@ -51,24 +75,95 @@ class AutoScalingControllerSpec extends Specification {
     }
 
     def 'show should return ASG info'() {
-        setupMocks()
-        controller.params.name = 'helloworld-example-v015'
+        AutoScalingGroup.mixin AutoScalingGroupMixin
+        String name = 'helloworld-example-v015'
+        String lcName = 'helloworld-example-v015-123456'
+        String imageId = 'amy-deadbeef'
+        String appName = 'helloworld'
+        String sgName = 'helloworld'
+        String chaosLink = 'http://chaoseditor'
+        String buildLink = 'http://builds'
+        String instanceId = 'i-abcdefgh'
+        String zoneA = 'us-east-1a'
+        String zoneB = 'us-east-1b'
+        Instance instance = new Instance(instanceId: instanceId, availabilityZone: zoneA)
+        String lbName1 = 'helloworld--frontend'
+        String lbName2 = 'helloworld--frontend2'
+
+        given: "one of the ELBs has a zone list that doesn't match the ASG's zone list"
+        LoadBalancerDescription lb1 = new LoadBalancerDescription(loadBalancerName: lbName1, availabilityZones: [zoneB])
+        LoadBalancerDescription lb2 = new LoadBalancerDescription(loadBalancerName: lbName2, availabilityZones: [zoneA])
+        List<String> asgZones = [zoneA]
+
+        and: 'the rest of the ASG is set up pretty conventionally, but without scaling policies or scheduled actions'
+        AutoScalingGroup asg = new AutoScalingGroup(autoScalingGroupName: name, launchConfigurationName: lcName,
+                instances: [instance], loadBalancerNames: [lbName1, lbName2], availabilityZones: asgZones)
+        AutoScalingGroupData asgData = AutoScalingGroupData.from(asg, [:], [], [:], [])
+        LaunchConfiguration launchConfig = new LaunchConfiguration(launchConfigurationName: lcName, imageId: imageId,
+                securityGroups: [sgName])
+        Image image = new Image(imageId: imageId)
+        AppRegistration app = new AppRegistration(name: appName, email: 'test@examle.com')
+        Multiset<String> zonesWithInstanceCounts = TreeMultiset.create([zoneA])
+        List<GroupIdentifier> securityGroupIdObjects = [new GroupIdentifier(groupId: 'sg-123', groupName: sgName)]
+
+        params.id = name
 
         when:
-        final attrs = controller.show()
+        Map attrs = controller.show()
 
         then:
-        'helloworld' == attrs['app'].name
-        0 == attrs['activities'].size()
-        3 == attrs['instanceCount']
-        attrs['group'].with {
-            'helloworld-example-v015' == autoScalingGroupName
-            'i-8ee4eeee' == instances[0].instanceId
-        }
-     }
+        1 * awsAutoScalingService.getAutoScalingGroup(_, name) >> asg
+        1 * awsAutoScalingService.buildAutoScalingGroupData(_, asg) >> asgData
+        1 * awsLoadBalancerService.getLoadBalancer(_, 'helloworld--frontend', From.CACHE) >> lb1
+        1 * awsLoadBalancerService.getLoadBalancer(_, 'helloworld--frontend2', From.CACHE) >> lb2
+        1 * awsAutoScalingService.getAutoScalingGroupActivities(_, 'helloworld-example-v015', 20) >> []
+        1 * awsAutoScalingService.getScalingPoliciesForGroup(_, 'helloworld-example-v015') >> []
+        1 * awsAutoScalingService.getScheduledActionsForGroup(_, 'helloworld-example-v015') >> []
+        1 * awsEc2Service.getSubnets(_) >> Subnets.from([])
+        1 * awsAutoScalingService.getLaunchConfiguration(_, lcName) >> launchConfig
+        1 * awsEc2Service.getImage(_, imageId, From.CACHE) >> image
+        1 * awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(_, [sgName]) >> securityGroupIdObjects
+        1 * awsCloudWatchService.getAlarms(_, []) >> []
+        1 * cloudReadyService.isChaosMonkeyActive(_) >> true
+        1 * applicationService.getRegisteredApplication(_, 'helloworld') >> app
+        1 * configService.buildServerUrl >> buildLink
+        1 * cloudReadyService.constructChaosMonkeyEditLink(_, 'helloworld') >> chaosLink
+        0 * _
+        response.status == 200
+
+        and: "one of the ELBs has a zone list that doesn't match the ASG's zone list, so a zone mismatch gets reported"
+        Map<String, ArrayList<String>> mismatchedElbsToZones = [(lbName1): [zoneB]]
+
+        attrs == [activities: [],
+                addToLoadBalancerStatus: 'Enabled',
+                alarmsByName: [:],
+                app: app,
+                azRebalanceStatus: 'Enabled',
+                buildServer: buildLink,
+                chaosMonkeyEditLink: chaosLink,
+                clusterName: 'helloworld-example',
+                group: asgData,
+                image: image,
+                instanceCount: 1,
+                isChaosMonkeyActive: true,
+                launchConfiguration: launchConfig,
+                launchStatus: 'Enabled',
+                mismatchedElbNamesToZoneLists: mismatchedElbsToZones,
+                runHealthChecks: true,
+                scalingPolicies: [],
+                scheduledActions: [],
+                securityGroups: securityGroupIdObjects,
+                showPostponeButton: false,
+                subnetPurpose: null,
+                terminateStatus: 'Enabled',
+                variables: Names.parseName(name),
+                vpcZoneIdentifier: null,
+                zonesWithInstanceCounts: zonesWithInstanceCounts
+        ]
+    }
 
     def 'show should return Alarm info'() {
-        setupMocks()
+        setupHeavyWeightMocks()
         controller.params.name = 'helloworld-example-v015'
         AwsAutoScalingService mockAwsAutoScalingService = Mock(AwsAutoScalingService)
         controller.awsAutoScalingService = mockAwsAutoScalingService
@@ -99,7 +194,7 @@ class AutoScalingControllerSpec extends Specification {
     }
 
     def 'show should indicate nonexistent ASG'() {
-        setupMocks()
+        setupHeavyWeightMocks()
         controller.params.name = 'doesntexist'
 
         when:
@@ -111,7 +206,7 @@ class AutoScalingControllerSpec extends Specification {
     }
 
     def 'show should indicate nonexistent ASG if invalid characters are used'() {
-        setupMocks()
+        setupHeavyWeightMocks()
         controller.params.name = 'nccp-moviecontrol%27'
 
         when:
@@ -211,7 +306,7 @@ class AutoScalingControllerSpec extends Specification {
     }
 
     void "create should populate model"() {
-        setupMocks()
+        setupHeavyWeightMocks()
 
         when:
         def attrs = controller.create()
@@ -241,7 +336,7 @@ class AutoScalingControllerSpec extends Specification {
     }
 
     def "create should handle invalid inputs"() {
-        setupMocks()
+        setupHeavyWeightMocks()
 
         controller.params.with {
             min = ''

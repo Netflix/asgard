@@ -115,6 +115,34 @@ and groupName is #groupName""")
         null          | 'cass'    | ['i-cafebabe', 'i-ca55e77e']
     }
 
+    def 'should get unique sorted security group name-ID combos from repetitive unsorted IDs and names'() {
+        String vampId = 'sg-1234'
+        String wolfId = 'sg-8765'
+        String ghostId = 'sg-1111'
+        String demonId = 'sg-6666'
+        awsEc2Service = Spy(AwsEc2Service) {
+            getSecurityGroups(userContext) >> {
+                [
+                        new SecurityGroup(groupName: 'vampire', groupId: vampId),
+                        new SecurityGroup(groupName: 'werewolf', groupId: wolfId),
+                        new SecurityGroup(groupName: 'demon', groupId: demonId),
+                        new SecurityGroup(groupName: 'ghost', groupId: ghostId),
+                ]
+            }
+        }
+
+        when:
+        List<String> ids = [ghostId, demonId, 'sg-abcd', 'vampire', ghostId]
+        Collection<GroupIdentifier> idObjects = awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(userContext, ids)
+
+        then:
+        idObjects == [
+                new GroupIdentifier(groupName: 'demon', groupId: demonId),
+                new GroupIdentifier(groupName: 'ghost', groupId: ghostId),
+                new GroupIdentifier(groupName: 'vampire', groupId: vampId),
+        ]
+    }
+
     def 'active instances should only include pending and running states'() {
         mockInstanceCache.list() >> [
                 new Instance(instanceId: 'i-papa', state: new InstanceState(name: 'pending')),

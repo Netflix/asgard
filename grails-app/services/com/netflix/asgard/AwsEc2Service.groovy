@@ -57,6 +57,7 @@ import com.amazonaws.services.ec2.model.DetachVolumeRequest
 import com.amazonaws.services.ec2.model.Filter
 import com.amazonaws.services.ec2.model.GetConsoleOutputRequest
 import com.amazonaws.services.ec2.model.GetConsoleOutputResult
+import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.ec2.model.InstanceStateChange
@@ -446,6 +447,24 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
     List<SecurityGroup> getSecurityGroupsForApp(UserContext userContext, String appName) {
         def pat = ~"^${appName.toLowerCase()}(-frontend)?\$"
         getSecurityGroups(userContext).findAll { it.groupName ==~ pat }
+    }
+
+    /**
+     * Looks up security groups by a set of group names or IDs and returns a collection of unique compound identifier
+     * objects containing the group name and group ID of each matching security group.
+     *
+     * @param userContext who, where, why
+     * @param namesOrIds the group names or IDs of the security groups to find
+     * @return the GroupIdentifier objects matching the requested names or IDs
+     */
+    List<GroupIdentifier> getSecurityGroupNameIdPairsByNamesOrIds(UserContext userContext,
+                                                                        Collection<String> namesOrIds) {
+        Collection<SecurityGroup> all = getSecurityGroups(userContext)
+        List<SecurityGroup> securityGroups = all.findAll { it.groupId in namesOrIds || it.groupName in namesOrIds }
+        List<GroupIdentifier> matches = securityGroups.collect {
+            new GroupIdentifier(groupName: it.groupName, groupId: it.groupId)
+        }
+        matches.unique().sort { it.groupName }
     }
 
     SecurityGroup getSecurityGroup(UserContext userContext, String name, From from = From.AWS) {
