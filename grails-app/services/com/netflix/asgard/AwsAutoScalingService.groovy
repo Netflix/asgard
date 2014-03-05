@@ -36,7 +36,6 @@ import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult
 import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsRequest
 import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsResult
-import com.amazonaws.services.autoscaling.model.Ebs
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.LifecycleState
@@ -1222,22 +1221,22 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         Check.notNull(launchConfiguration.keyName, LaunchConfiguration, "keyName")
         Check.notNull(launchConfiguration.instanceType, LaunchConfiguration, "instanceType")
         taskService.runTask(userContext, "Create Launch Configuration '${name}' with image '${imageId}'", { Task task ->
-            List<BlockDeviceMapping> blockDeviceMappings = []
-            if (configService.instanceTypeNeedsEbsVolumes(launchConfiguration.instanceType)) {
-                List<String> deviceNames = configService.ebsVolumeDeviceNamesForLaunchConfigs
-                for (deviceName in deviceNames) {
-                    blockDeviceMappings << new BlockDeviceMapping(
-                            deviceName: deviceName,
-                            ebs: new Ebs(volumeSize: configService.sizeOfEbsVolumesAddedToLaunchConfigs))
-                }
-            }
-            launchConfiguration.blockDeviceMappings = blockDeviceMappings
+            launchConfiguration.blockDeviceMappings = buildBlockDeviceMappings(launchConfiguration.instanceType)
             awsClient.by(userContext.region).createLaunchConfiguration(launchConfiguration.
                     getCreateLaunchConfigurationRequest(userContext, spotInstanceRequestService))
             pushService.addAccountsForImage(userContext, imageId, task)
 
         }, Link.to(EntityType.launchConfiguration, name), existingTask)
         getLaunchConfiguration(userContext, name)
+    }
+
+    List<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType) {
+        if (configService.instanceTypeNeedsCustomVolumes(instanceType)) {
+            Map<String, String> mapping = configService.getDeviceNameVirtualNameMapping()
+            return mapping.collect { new BlockDeviceMapping(deviceName: it.key, virtualName: it.value) }
+        }else{
+            return []
+        }
     }
 
     def deleteLaunchConfiguration(UserContext userContext, String name, Task existingTask = null) {
