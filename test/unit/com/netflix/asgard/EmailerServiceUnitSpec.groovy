@@ -110,50 +110,50 @@ class EmailerServiceUnitSpec extends Specification {
         emailerService.mailSender.host == 'oogabooga.com'
     }
 
-	def 'smtp port should be set'() {
-		grailsApplication.config.email.smtpPort = 25
-		
-		when:
-		emailerService.afterPropertiesSet()
+    def 'smtp port should be set'() {
+        grailsApplication.config.email.smtpPort = 25
 
-		then:
-		emailerService.mailSender.port == 25
-	}
+        when:
+        emailerService.afterPropertiesSet()
 
-	def 'smtp username may be set'() {
-		
-		grailsApplication.config.email.smtpUsername = 'smtp_user'
-		
-		when:
-		emailerService.afterPropertiesSet()
+        then:
+        emailerService.mailSender.port == 25
+    }
 
-		then:
-		emailerService.mailSender.username == 'smtp_user'
-	}
+    def 'smtp username may be set'() {
 
-	def 'smtp password may be set'() {
-		
-		grailsApplication.config.email.smtpPassword = 'p4ssw0rd!'
-		
-		when:
-		emailerService.afterPropertiesSet()
+        grailsApplication.config.email.smtpUsername = 'smtp_user'
 
-		then:
-		emailerService.mailSender.password == 'p4ssw0rd!'
-	}
+        when:
+        emailerService.afterPropertiesSet()
 
-	def 'properties enable SSL when smtpSslEnabled is true'() {
-		
-		grailsApplication.config.email.smtpSslEnabled = true
-		
-		when:
-		emailerService.afterPropertiesSet()
+        then:
+        emailerService.mailSender.username == 'smtp_user'
+    }
 
-		then:
-		emailerService.mailSender.javaMailProperties.getProperty("mail.transport.protocol") == 'smtps'
-		emailerService.mailSender.javaMailProperties.getProperty("mail.smtps.auth") == "true"
-		emailerService.mailSender.javaMailProperties.getProperty("mail.smtp.ssl.enable") == "true"
-	}
+    def 'smtp password may be set'() {
+        grailsApplication.config.email.smtpUsername = 'smtp_user'
+        grailsApplication.config.email.smtpPassword = 'p4ssw0rd!'
+
+        when:
+        emailerService.afterPropertiesSet()
+
+        then:
+        emailerService.mailSender.password == 'p4ssw0rd!'
+    }
+
+    def 'properties enable SSL when smtpSslEnabled is true'() {
+
+        grailsApplication.config.email.smtpSslEnabled = true
+
+        when:
+        emailerService.afterPropertiesSet()
+
+        then:
+        emailerService.mailSender.javaMailProperties.getProperty("mail.transport.protocol") == 'smtps'
+        emailerService.mailSender.javaMailProperties.getProperty("mail.smtps.auth") == "true"
+        emailerService.mailSender.javaMailProperties.getProperty("mail.smtp.ssl.enable") == "true"
+    }
 
     def 'non-Amazon error email subject should get to the point'() {
 

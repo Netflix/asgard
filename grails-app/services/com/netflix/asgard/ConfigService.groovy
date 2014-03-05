@@ -67,43 +67,43 @@ class ConfigService {
         grailsApplication.config.email.smtpHost ?: null
     }
 
-	/**
-	 * @return return the Simple Mail Transport Protocol (SMTP) port for connecting to the mail server
-	 */
-	int getSmtpPort() {
-			grailsApplication.config.email.smtpPort ?: 25
-	}
-	
-	/**
-	 * @return the Simple Mail Transport Protocol (SMTP) username that should be used for authenticating with the server
-	 */
-	String getSmtpUsername() {
-			grailsApplication.config.email.smtpUsername ?: null
-	}
-	
-	/**
-	 * @return the Simple Mail Transport Protocol (SMTP) password that should be used for authenticating with the server
-	 */
-	String getSmtpPassword() {
-			grailsApplication.config.email.smtpPassword ?: null
-	}
+    /**
+     * @return return the Simple Mail Transport Protocol (SMTP) port for connecting to the mail server
+     */
+    int getSmtpPort() {
+        grailsApplication.config.email.smtpPort ?: 25
+    }
 
-	/**
-	 * @return JavaMail properties required for enabling SMTP over SSL
-	 */
-	Properties getJavaMailProperties() {
-			
-			Properties javaMailProperties = new Properties()
-			
-			if (grailsApplication.config.email.smtpSslEnabled) {
-					javaMailProperties.put("mail.smtps.auth", "true")
-					javaMailProperties.put("mail.smtp.ssl.enable", "true")
-					javaMailProperties.put("mail.transport.protocol", "smtps")
-			}
-			
-			return javaMailProperties
-	}
-	
+    /**
+     * @return the Simple Mail Transport Protocol (SMTP) username that should be used for authenticating with the server
+     */
+    String getSmtpUsername() {
+        grailsApplication.config.email.smtpUsername ?: null
+    }
+
+    /**
+     * @return the Simple Mail Transport Protocol (SMTP) password that should be used for authenticating with the server
+     */
+    String getSmtpPassword() {
+        grailsApplication.config.email.smtpPassword ?: null
+    }
+
+    /**
+     * @return JavaMail properties required for enabling SMTP over SSL
+     */
+    Properties getJavaMailProperties() {
+
+        Properties javaMailProperties = new Properties()
+
+        if (grailsApplication.config.email.smtpSslEnabled) {
+            javaMailProperties.put("mail.smtps.auth", "true")
+            javaMailProperties.put("mail.smtp.ssl.enable", "true")
+            javaMailProperties.put("mail.transport.protocol", "smtps")
+        }
+
+        return javaMailProperties
+    }
+
     /**
      * @return the "from" address for sending user emails
      */
@@ -251,7 +251,7 @@ class ConfigService {
      *          [url: 'mailto:help@example.com', text: 'Email Support',
      *              image: '/images/tango/16/actions/mail-message-new.png']
      */
-    List<Map<String,String>> getExternalLinks() {
+    List<Map<String, String>> getExternalLinks() {
         grailsApplication.config.link?.externalLinks?.sort { it.text } ?: []
     }
 
