@@ -34,6 +34,8 @@ import com.netflix.asgard.model.InstanceTypeData
 
 class SpotInstanceRequestService implements CacheInitializer {
 
+    static transactional = false
+
     def awsEc2Service
     Caches caches
     def instanceTypeService

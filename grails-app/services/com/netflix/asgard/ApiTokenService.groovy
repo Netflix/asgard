@@ -27,6 +27,8 @@ import org.springframework.beans.factory.InitializingBean
  */
 class ApiTokenService implements InitializingBean {
 
+    static transactional = false
+
     def configService
     def emailerService
 

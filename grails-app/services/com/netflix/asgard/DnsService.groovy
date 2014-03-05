@@ -20,6 +20,8 @@ package com.netflix.asgard
  */
 class DnsService {
 
+    static transactional = false
+
     /**
      * Performs a single, simple DNS lookup of the "canonical host names" for a DNS entry. The results are usually
      * IP addresses.
