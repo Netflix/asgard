@@ -110,6 +110,51 @@ class EmailerServiceUnitSpec extends Specification {
         emailerService.mailSender.host == 'oogabooga.com'
     }
 
+	def 'smtp port should be set'() {
+		grailsApplication.config.email.smtpPort = 25
+		
+		when:
+		emailerService.afterPropertiesSet()
+
+		then:
+		emailerService.mailSender.port == 25
+	}
+
+	def 'smtp username may be set'() {
+		
+		grailsApplication.config.email.smtpUsername = 'smtp_user'
+		
+		when:
+		emailerService.afterPropertiesSet()
+
+		then:
+		emailerService.mailSender.username == 'smtp_user'
+	}
+
+	def 'smtp password may be set'() {
+		
+		grailsApplication.config.email.smtpPassword = 'p4ssw0rd!'
+		
+		when:
+		emailerService.afterPropertiesSet()
+
+		then:
+		emailerService.mailSender.password == 'p4ssw0rd!'
+	}
+
+	def 'properties enable SSL when smtpSslEnabled is true'() {
+		
+		grailsApplication.config.email.smtpSslEnabled = true
+		
+		when:
+		emailerService.afterPropertiesSet()
+
+		then:
+		emailerService.mailSender.javaMailProperties.getProperty("mail.transport.protocol") == 'smtps'
+		emailerService.mailSender.javaMailProperties.getProperty("mail.smtps.auth") == "true"
+		emailerService.mailSender.javaMailProperties.getProperty("mail.smtp.ssl.enable") == "true"
+	}
+
     def 'non-Amazon error email subject should get to the point'() {
 
         Exception exception = new IOException('Unable to reach Internet due to comet')
