@@ -54,8 +54,8 @@ class TaskService {
         Task task = newTask(userContext, name, link)
         log.debug "Starting task '${name}'(${work.getParameterTypes()}) from ${Thread.currentThread().name} ..."
         Thread.start("Task:${task.name}") {
-            log.debug "Running task '${task.name}' in thread ${task.thread.name} ..."
             started(task)
+            log.debug "Running task '${task.name}' in thread ${task.thread.name} ..."
             doWork(work, task)
             if (task.status != 'failed') {
                 completed(task)
