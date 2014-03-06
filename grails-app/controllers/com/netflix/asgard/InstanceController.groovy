@@ -33,11 +33,9 @@ import grails.converters.XML
 class InstanceController {
 
     final static allowedMethods = ['terminate', 'terminateAndShrinkGroup', 'reboot', 'deregister', 'register',
-            'associateDo', 'takeOutOfService', 'putInService', 'addTag', 'removeTag'].collectEntries { [(it): 'POST'] }
+        'associateDo', 'takeOutOfService', 'putInService', 'addTag', 'removeTag'].collectEntries { [(it): 'POST'] }
 
     static editActions = ['associate']
-
-    def index = { redirect(action: 'list', params: params) }
 
     def awsAutoScalingService
     def awsEc2Service
@@ -51,7 +49,11 @@ class InstanceController {
      */
     static final String NO_APP_ID = '_noapp'
 
-    def apps = {
+    def index() {
+        redirect(action: 'list', params: params)
+    }
+
+    def apps() {
         UserContext userContext = UserContext.of(request)
         List<MergedInstance> allInstances = mergedInstanceGroupingService.getMergedInstances(userContext)
         List<String> appNames = allInstances.findResults { it.appName?.toLowerCase() ?: null } as List<String>
@@ -63,7 +65,7 @@ class InstanceController {
         }
     }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         List<MergedInstance> instances = []
         Set<String> appNames = Requests.ensureList(params.id).collect { it.split(',') }.flatten() as Set<String>
@@ -83,7 +85,7 @@ class InstanceController {
         }
     }
 
-    def find = {
+    def find() {
         UserContext userContext = UserContext.of(request)
         String fieldName = params.by
         List<String> fieldValues = Requests.ensureList(params.value).collect { it.split(',') }.flatten()
@@ -100,7 +102,7 @@ class InstanceController {
         }
     }
 
-    def audit = {
+    def audit() {
         UserContext userContext = UserContext.of(request)
         String filter = params.id
         List<MergedInstance> instances = mergedInstanceGroupingService.getMergedInstances(userContext, '')
@@ -127,7 +129,7 @@ class InstanceController {
         }
     }
 
-    def diagnose = {
+    def diagnose() {
         UserContext userContext = UserContext.of(request)
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId ?: params.id)
         ApplicationInstance appInst = discoveryService.getAppInstance(userContext, instanceId)
@@ -143,7 +145,7 @@ class InstanceController {
     }
 
     /* can show instance info given: instanceId, appName+instanceId, appName+hostName */
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId ?: params.id)
         String appName
@@ -202,7 +204,7 @@ class InstanceController {
         }
     }
 
-    def terminate = {
+    def terminate() {
         UserContext userContext = UserContext.of(request)
         List<String> instanceIds = Requests.ensureList(params.selectedInstances ?: params.instanceId)
 
@@ -229,7 +231,7 @@ class InstanceController {
         chooseRedirect(params.autoScalingGroupName, instanceIds, params.appNames)
     }
 
-    def terminateAndShrinkGroup = {
+    def terminateAndShrinkGroup() {
         UserContext userContext = UserContext.of(request)
         String instanceId = params.instanceId
         try {
@@ -249,7 +251,7 @@ class InstanceController {
         redirect(action: 'show', params:[instanceId: instanceId])
     }
 
-    def reboot = {
+    def reboot() {
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId)
         UserContext userContext = UserContext.of(request)
         awsEc2Service.rebootInstance(userContext, instanceId)
@@ -258,7 +260,7 @@ class InstanceController {
         redirect(action: 'show', params: [instanceId: instanceId])
     }
 
-    def raw = {
+    def raw() {
         UserContext userContext = UserContext.of(request)
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId ?: params.id)
         try {
@@ -283,7 +285,7 @@ class InstanceController {
         redirect destination
     }
 
-    def deregister = {
+    def deregister() {
         UserContext userContext = UserContext.of(request)
         List<String> instanceIds = Requests.ensureList(params.instanceId)
         String autoScalingGroupName = params.autoScalingGroupName
@@ -304,7 +306,7 @@ class InstanceController {
         chooseRedirect(autoScalingGroupName, instanceIds)
     }
 
-    def register = {
+    def register() {
         UserContext userContext = UserContext.of(request)
         List<String> instanceIds = Requests.ensureList(params.instanceId)
         String autoScalingGroupName = params.autoScalingGroupName
@@ -335,7 +337,7 @@ class InstanceController {
         chooseRedirect(autoScalingGroupName, instanceIds)
     }
 
-    def associate = {
+    def associate() {
         UserContext userContext = UserContext.of(request)
         Instance instance = awsEc2Service.getInstance(userContext, EntityType.instance.ensurePrefix(params.instanceId))
         if (!instance) {
@@ -353,7 +355,7 @@ class InstanceController {
         }
     }
 
-    def associateDo = {
+    def associateDo() {
         log.debug "associateDo: ${params}"
         String publicIp = params.publicIp
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId)
@@ -367,7 +369,7 @@ class InstanceController {
         redirect(action: 'show', params: [instanceId: instanceId])
     }
 
-    def takeOutOfService = {
+    def takeOutOfService() {
         UserContext userContext = UserContext.of(request)
         String autoScalingGroupName = params.autoScalingGroupName
         List<String> instanceIds = Requests.ensureList(params.instanceId)
@@ -376,7 +378,7 @@ class InstanceController {
         chooseRedirect(autoScalingGroupName, instanceIds)
     }
 
-    def putInService = {
+    def putInService() {
         UserContext userContext = UserContext.of(request)
         String autoScalingGroupName = params.autoScalingGroupName
         List<String> instanceIds = Requests.ensureList(params.instanceId)
@@ -385,27 +387,27 @@ class InstanceController {
         chooseRedirect(autoScalingGroupName, instanceIds)
     }
 
-    def addTag = {
+    def addTag() {
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId)
         UserContext userContext = UserContext.of(request)
         awsEc2Service.createInstanceTag(userContext, [instanceId], params.name, params.value)
         redirect(action: 'show', params: [instanceId: instanceId])
     }
 
-    def removeTag = {
+    def removeTag() {
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId)
         UserContext userContext = UserContext.of(request)
         awsEc2Service.deleteInstanceTag(userContext, instanceId, params.name)
         redirect(action: 'show', params: [instanceId: instanceId])
     }
 
-    def userData = {
+    def userData() {
         UserContext userContext = UserContext.of(request)
         String instanceId = EntityType.instance.ensurePrefix(params.id ?: params.instanceId)
         render awsEc2Service.getUserDataForInstance(userContext, instanceId)
     }
 
-    def userDataHtml = {
+    def userDataHtml() {
         UserContext userContext = UserContext.of(request)
         String instanceId = EntityType.instance.ensurePrefix(params.id ?: params.instanceId)
         render "<pre>${awsEc2Service.getUserDataForInstance(userContext, instanceId).encodeAsHTML()}</pre>"

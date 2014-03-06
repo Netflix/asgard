@@ -33,9 +33,11 @@ class TopicController {
 
     static editActions = ['prepareSubscribe', 'preparePublish']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         List<TopicData> topics = (awsSnsService.getTopics(userContext) as List).sort { it.name?.toLowerCase() }
         Map details = ['topics': topics]
@@ -46,7 +48,7 @@ class TopicController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String topicName = params.id
         TopicData topic = awsSnsService.getTopic(userContext, topicName)
@@ -65,7 +67,7 @@ class TopicController {
         }
     }
 
-    def create = {
+    def create() {
         String appName = params.appName
         String detail = params.detail
         [
@@ -74,7 +76,7 @@ class TopicController {
         ]
     }
 
-    def save = { SaveTopicCommand cmd ->
+    def save(SaveTopicCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd: cmd], params: params)
             return
@@ -90,7 +92,7 @@ class TopicController {
         }
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         String topicArn = params.id
         TopicData topic = new TopicData(topicArn)
@@ -99,14 +101,14 @@ class TopicController {
         redirect(action: 'result')
     }
 
-    def prepareSubscribe = {
+    def prepareSubscribe() {
         String topic = params.id ?: params.topic
         String endpoint = params.endpoint
         String protocol = params.protocol ?: SubscriptionData.Protocol.default.value
         [topic: topic, endpoint: endpoint, protocol: protocol, protocols: SubscriptionData.Protocol.values()]
     }
 
-    def subscribe = { SubscribeCommand cmd ->
+    def subscribe(SubscribeCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'prepareSubscribe', model: [cmd: cmd], params: params)
             return
@@ -125,7 +127,7 @@ class TopicController {
         }
     }
 
-    def unsubscribe = { UnsubscribeCommand cmd ->
+    def unsubscribe(UnsubscribeCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'show', model: [cmd: cmd], params: params)
             return
@@ -140,14 +142,14 @@ class TopicController {
         redirect(action: 'show', params: [id: cmd.topic])
     }
 
-    def preparePublish = {
+    def preparePublish() {
         String topic = params.id ?: params.topic
         String subject = params.subject
         String message = params.message
         [topic: topic, subject: subject, message: message]
     }
 
-    def publish = { PublishCommand cmd ->
+    def publish(PublishCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'preparePublish', model: [cmd: cmd], params: params)
             return
@@ -164,7 +166,9 @@ class TopicController {
         }
     }
 
-    def result = { render view: '/common/result' }
+    def result() {
+        render view: '/common/result'
+    }
 }
 
 class SaveTopicCommand {

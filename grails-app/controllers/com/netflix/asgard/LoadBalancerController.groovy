@@ -46,9 +46,11 @@ class LoadBalancerController {
 
     static editActions = ['prepareListener']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         Set<String> appNames = Requests.ensureList(params.id).collect { it.split(',') }.flatten() as Set<String>
         Collection<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext)
@@ -65,7 +67,7 @@ class LoadBalancerController {
         }
     }
 
-    def show = {
+    def show() {
         String name = params.name ?: params.id
         UserContext userContext = UserContext.of(request)
         LoadBalancerDescription lb = awsLoadBalancerService.getLoadBalancer(userContext, name)
@@ -99,7 +101,7 @@ class LoadBalancerController {
         }
     }
 
-    def create = {
+    def create() {
         UserContext userContext = UserContext.of(request)
         List<SecurityGroup> effectiveGroups = awsEc2Service.getEffectiveSecurityGroups(userContext).sort {
             it.groupName?.toLowerCase()
@@ -124,7 +126,7 @@ class LoadBalancerController {
         ]
     }
 
-    def save = { LoadBalancerCreateCommand cmd ->
+    def save(LoadBalancerCreateCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass both errors and params
         } else {
@@ -162,7 +164,7 @@ class LoadBalancerController {
         }
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         String name = params.name
         try {
@@ -175,7 +177,7 @@ class LoadBalancerController {
         }
     }
 
-    def edit = {
+    def edit() {
         String name = params.name ?: params.id
         UserContext userContext = UserContext.of(request)
         [
@@ -214,7 +216,7 @@ class LoadBalancerController {
         }
     }
 
-    def update = {
+    def update() {
         String name = params.name
         UserContext userContext = UserContext.of(request)
         LoadBalancerDescription lb = awsLoadBalancerService.getLoadBalancer(userContext, name)
@@ -252,7 +254,7 @@ class LoadBalancerController {
                 withUnhealthyThreshold(params.unhealthy.toInteger()).withHealthyThreshold(params.healthy.toInteger()))
     }
 
-    def prepareListener = {
+    def prepareListener() {
         String loadBalancer = params.id ?: params.name
         String protocol = params.protocol
         String lbPort = params.lbPort
@@ -260,7 +262,7 @@ class LoadBalancerController {
         [loadBalancer: loadBalancer, protocol: protocol, lbPort: lbPort, instancePort: instancePort]
     }
 
-    def addListener = { AddListenerCommand cmd ->
+    def addListener(AddListenerCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'prepareListener', model: [cmd: cmd], params: params)
         } else {
@@ -278,7 +280,7 @@ class LoadBalancerController {
         }
     }
 
-    def removeListener = { RemoveListenerCommand cmd ->
+    def removeListener(RemoveListenerCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'show', model: [cmd: cmd], params: params)
         } else {
@@ -294,7 +296,9 @@ class LoadBalancerController {
         }
     }
 
-    def result = { render view: '/common/result' }
+    def result() {
+        render view: '/common/result'
+    }
 }
 
 class LoadBalancerCreateCommand {

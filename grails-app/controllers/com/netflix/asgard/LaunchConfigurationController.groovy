@@ -37,9 +37,11 @@ class LaunchConfigurationController {
 
     static allowedMethods = [delete: 'POST', save: 'POST', update: 'POST', cleanup: 'POST', massDelete: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         Set<String> appNames = Requests.ensureList(params.id).collect { it.split(',') }.flatten() as Set<String>
         Collection<LaunchConfiguration> launchConfigs = awsAutoScalingService.getLaunchConfigurations(userContext)
@@ -61,7 +63,7 @@ class LaunchConfigurationController {
         }
     }
 
-    def terse = {
+    def terse() {
         UserContext userContext = UserContext.of(request)
         List<String> columns = Requests.ensureList(params.columns).collect { it.split(',') }.flatten().sort()
         columns = columns ?: ['launchConfigurationName', 'imageId']
@@ -81,7 +83,7 @@ class LaunchConfigurationController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String name = params.name ?: params.id
         LaunchConfiguration lc = awsAutoScalingService.getLaunchConfiguration(userContext, name)
@@ -109,7 +111,7 @@ class LaunchConfigurationController {
         }
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         def name = params.name
         def matchingGroup = awsAutoScalingService.getAutoScalingGroups(userContext).find {
@@ -129,7 +131,7 @@ class LaunchConfigurationController {
         redirect(action: 'list')
     }
 
-    def massDelete = {
+    def massDelete() {
         UserContext userContext = UserContext.of(request)
         Integer daysAgo = params.daysAgo as Integer
         String message = doMassDelete(userContext, daysAgo)

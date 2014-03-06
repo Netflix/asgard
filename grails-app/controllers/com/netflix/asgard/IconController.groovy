@@ -25,7 +25,7 @@ class IconController {
     private static final String MID_PATH = 'images/tango/'
 
     @SuppressWarnings('GrailsServletContextReference')
-    def list = {
+    def list() {
         // Get all the png files within web-app/images/tango/ on a Mac workstation or Linux server
         List iconSets = []
         String tangoPath = "${servletContext.getRealPath('/')}${MID_PATH}"

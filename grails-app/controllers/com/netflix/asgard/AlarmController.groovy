@@ -36,9 +36,11 @@ class AlarmController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         List<MetricAlarm> alarms =
                 (awsCloudWatchService.getAllAlarms(userContext) as List).sort { it.alarmName?.toLowerCase() }
@@ -50,7 +52,7 @@ class AlarmController {
         }
     }
 
-    def create = {
+    def create() {
         String policyName = params.id ?: params.policy
         UserContext userContext = UserContext.of(request)
         ScalingPolicy policy = awsAutoScalingService.getScalingPolicy(userContext, policyName)
@@ -63,7 +65,7 @@ class AlarmController {
                 [ policy: policyName ]
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String alarmName = params.id
         MetricAlarm alarm = awsCloudWatchService.getAlarm(userContext, alarmName)
@@ -83,7 +85,7 @@ class AlarmController {
         }
     }
 
-    def edit = {
+    def edit() {
         UserContext userContext = UserContext.of(request)
         String alarmName = params.id ?: params.alarmName
         MetricAlarm alarm = awsCloudWatchService.getAlarm(userContext, alarmName)
@@ -97,7 +99,7 @@ class AlarmController {
                 [ policy: params.policy, alarmName: alarmName ]
     }
 
-    def delete = {
+    def delete() {
         final UserContext userContext = UserContext.of(request)
         final String alarmName = params.id
         final MetricAlarm alarm = awsCloudWatchService.getAlarm(userContext, alarmName)
@@ -119,9 +121,11 @@ class AlarmController {
         redirect destination
     }
 
-    def result = { render view: '/common/result' }
+    def result() {
+        render view: '/common/result'
+    }
 
-    def save = { AlarmValidationCommand cmd ->
+    def save (AlarmValidationCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd: cmd], params: params)
         } else {
@@ -168,7 +172,7 @@ class AlarmController {
         }
     }
 
-    def update = { AlarmValidationCommand cmd ->
+    def update(AlarmValidationCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'edit', model: [cmd: cmd], params: params)
         } else {
@@ -210,7 +214,7 @@ class AlarmController {
         }
     }
 
-    def setState = {
+    def setState() {
         String alarm = params.alarm
         String state = params.state
         UserContext userContext = UserContext.of(request)

@@ -50,7 +50,7 @@ import grails.converters.XML
 class ClusterController {
 
     static allowedMethods = [createNextGroup: 'POST', resize: 'POST', delete: 'POST', activate: 'POST',
-            deactivate: 'POST', deploy: 'POST', proceedWithDeployment: 'POST', rollbackDeployment: 'POST']
+        deactivate: 'POST', deploy: 'POST', proceedWithDeployment: 'POST', rollbackDeployment: 'POST']
 
     def grailsApplication
     def applicationService
@@ -64,9 +64,11 @@ class ClusterController {
     def spotInstanceRequestService
     def taskService
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         Collection<Cluster> clusterObjects = awsAutoScalingService.getClusters(userContext)
         Set<String> appNames = Requests.ensureList(params.id).collect { it.split(',') }.flatten() as Set<String>
@@ -106,7 +108,7 @@ class ClusterController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String name = params.id ?: params.name
         Cluster cluster = awsAutoScalingService.getCluster(userContext, name)
@@ -174,7 +176,7 @@ ${lastGroup.loadBalancerNames}"""
         }
     }
 
-    def showLastGroup = {
+    def showLastGroup() {
         UserContext userContext = UserContext.of(request)
         String name = params.id ?: params.name
         Cluster cluster = awsAutoScalingService.getCluster(userContext, name)
@@ -185,7 +187,9 @@ ${lastGroup.loadBalancerNames}"""
         }
     }
 
-    def result = { render view: '/common/result' }
+    def result() {
+        render view: '/common/result'
+    }
 
     def proceedWithDeployment(String taskToken, String id) {
         completeDeployment(taskToken, id, true)
@@ -370,7 +374,7 @@ ${lastGroup.loadBalancerNames}"""
     }
 
     @SuppressWarnings("GroovyAssignabilityCheck")
-    def createNextGroup = {
+    def createNextGroup() {
         UserContext userContext = UserContext.of(request)
         String name = params.name
         Cluster cluster = awsAutoScalingService.getCluster(userContext, name)
@@ -497,7 +501,7 @@ Group: ${loadBalancerNames}"""
         spotPrice
     }
 
-    def resize = {
+    def resize() {
         UserContext userContext = UserContext.of(request)
         Integer newMin = (params.minSize ?: params.minAndMaxSize) as Integer
         Integer newMax = (params.maxSize ?: params.minAndMaxSize) as Integer
@@ -507,7 +511,7 @@ Group: ${loadBalancerNames}"""
         redirectToTask(operation.taskId)
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         def name = params.name
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, name)
@@ -519,19 +523,19 @@ Group: ${loadBalancerNames}"""
         }
     }
 
-    def activate = {
+    def activate() {
         UserContext userContext = UserContext.of(request)
         GroupActivateOperation operation = pushService.startGroupActivate(userContext, params.name)
         redirectToTask(operation.taskId)
     }
 
-    def deactivate = {
+    def deactivate() {
         UserContext userContext = UserContext.of(request)
         GroupDeactivateOperation operation = pushService.startGroupDeactivate(userContext, params.name)
         redirectToTask(operation.taskId)
     }
 
-    def anyInstance = {
+    def anyInstance() {
         UserContext userContext = UserContext.of(request)
         String name = params.id
         String field = params.field

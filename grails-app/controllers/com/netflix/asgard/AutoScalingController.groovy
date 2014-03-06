@@ -63,9 +63,11 @@ class AutoScalingController {
 
     static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST', postpone: 'POST', pushStart: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         Collection<AutoScalingGroup> groups = awsAutoScalingService.getAutoScalingGroups(userContext)
 
@@ -111,7 +113,7 @@ class AutoScalingController {
 
     static final Integer DEFAULT_ACTIVITIES = 20
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String name = params.name ?: params.id
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, name)
@@ -207,7 +209,7 @@ class AutoScalingController {
         }
     }
 
-    def activities = {
+    def activities() {
         UserContext userContext = UserContext.of(request)
         String groupName = params.id
         Integer count = params.activityCount as Integer
@@ -220,7 +222,7 @@ class AutoScalingController {
         }
     }
 
-    def create = {
+    def create() {
         UserContext userContext = UserContext.of(request)
         List<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext).
                 sort { it.loadBalancerName.toLowerCase() }
@@ -289,7 +291,7 @@ class AutoScalingController {
         s?.isInteger() ? s.toInteger() : null
     }
 
-    def save = { GroupCreateCommand cmd ->
+    def save(GroupCreateCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass both the errors and params
         } else {
@@ -359,7 +361,7 @@ class AutoScalingController {
         }
     }
 
-    def edit = {
+    def edit() {
         UserContext userContext = UserContext.of(request)
         String name = params.name ?: params.id
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, name)
@@ -394,7 +396,7 @@ class AutoScalingController {
         ]
     }
 
-    def update = {
+    def update() {
         Map<String, AutoScalingProcessType> processes = AutoScalingProcessType.with { [
                 azRebalance: AZRebalance,
                 launch: Launch,
@@ -448,7 +450,7 @@ class AutoScalingController {
         redirect(action: nextAction, params: [id: name])
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         String name = params.name
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, name)
@@ -473,14 +475,14 @@ class AutoScalingController {
         showGroupNext ? redirect(action: 'show', params: [id: name]) : redirect(action: 'list')
     }
 
-    def postpone = {
+    def postpone() {
         UserContext userContext = UserContext.of(request)
         String name = params.name
         awsAutoScalingService.postponeExpirationTime(userContext, name, Duration.standardDays(1))
         redirect(action: 'show', id: name)
     }
 
-    def generateName = {
+    def generateName() {
         withFormat {
             json {
                 if (params.appName) {
@@ -502,7 +504,7 @@ class AutoScalingController {
         }
     }
 
-    def anyInstance = {
+    def anyInstance() {
         UserContext userContext = UserContext.of(request)
         String name = params.name ?: params.id
         String field = params.field
@@ -528,7 +530,7 @@ class AutoScalingController {
     /**
      * TODO: This endpoint can be removed when ASG tagging is stable and more trusted
      */
-    def removeExpirationTime = {
+    def removeExpirationTime() {
         UserContext userContext = UserContext.of(request)
         String name = params.id ?: params.name
         awsAutoScalingService.removeExpirationTime(userContext, name)
@@ -536,7 +538,7 @@ class AutoScalingController {
         redirect(action: 'show', id: name)
     }
 
-    def imageless = {
+    def imageless() {
         UserContext userContext = UserContext.of(request)
         List<AppRegistration> allApps = applicationService.getRegisteredApplications(userContext)
         Collection<AutoScalingGroup> allGroups = awsAutoScalingService.getAutoScalingGroups(userContext)

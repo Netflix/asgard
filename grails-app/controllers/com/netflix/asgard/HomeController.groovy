@@ -21,7 +21,7 @@ class HomeController {
     def configService
     def discoveryService
 
-    def index = {
+    def index() {
         Region region = request.region
         String discoveryBaseApiUrl = discoveryService.findCanonicalBaseApiUrl(region)
         [

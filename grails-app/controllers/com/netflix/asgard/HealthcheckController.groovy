@@ -19,11 +19,11 @@ class HealthcheckController {
 
     def healthcheckService
 
-    def index = {
+    def index() {
         render 'Healthy'
     }
 
-    def caches = {
+    def caches() {
         if (healthcheckService.isHealthy) {
             render 'Healthy'
         } else {

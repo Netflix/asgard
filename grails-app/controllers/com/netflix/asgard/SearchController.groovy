@@ -25,7 +25,7 @@ class SearchController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = {
+    def index() {
         UserContext userContext = UserContext.of(request)
         String query = params.q ?: ''
         Map<Region, Map<EntityType, List>> results = searchService.findResults(userContext, query)

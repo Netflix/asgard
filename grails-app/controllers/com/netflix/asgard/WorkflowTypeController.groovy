@@ -24,9 +24,11 @@ class WorkflowTypeController {
 
     def awsSimpleWorkflowService
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         List<WorkflowTypeInfo> workflowTypes =
                 awsSimpleWorkflowService.getWorkflowTypes(userContext).sort { it.workflowType.name }

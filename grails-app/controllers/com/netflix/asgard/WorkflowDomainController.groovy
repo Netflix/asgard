@@ -23,9 +23,11 @@ class WorkflowDomainController {
 
     def awsSimpleWorkflowService
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         List<DomainInfo> domainInfos = awsSimpleWorkflowService.getDomains(userContext).sort { it.name }
         withFormat {
@@ -35,7 +37,7 @@ class WorkflowDomainController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String name = params.id
         DomainInfo domain = awsSimpleWorkflowService.getDomain(userContext, name)

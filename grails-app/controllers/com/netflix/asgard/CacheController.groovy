@@ -30,9 +30,11 @@ class CacheController {
 
     def allowedMethods = [fill: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() { 
+        redirect(action: 'list', params: params) 
+    }
 
-    def list = {
+    def list() {
         Map<String, ? extends List> result = analyzeCaches()
         withFormat {
             html { result }
@@ -41,7 +43,7 @@ class CacheController {
         }
     }
 
-    def remaining = {
+    def remaining() {
         List<String> unfilled = analyzeCaches().unfilled
         withFormat {
             html { unfilled }
@@ -92,7 +94,7 @@ class CacheController {
     /**
      * Fills a single top-level cache object on demand.
      */
-    def fill = {
+    def fill() {
         String name = params.id
         caches.properties*.value.find { it.name == name }.fill()
         render "Filling cache ${name}"

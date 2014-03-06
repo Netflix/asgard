@@ -29,9 +29,11 @@ class WorkflowExecutionController {
 
     def awsSimpleWorkflowService
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         List<WorkflowExecutionInfo> closedExecutions =
             awsSimpleWorkflowService.closedWorkflowExecutions.sort { it.closeTimestamp }.reverse()
         List<WorkflowExecutionInfo> openExecutions =
@@ -47,7 +49,7 @@ class WorkflowExecutionController {
         }
     }
 
-    def show = {
+    def show() {
         String runId = params.runId
         String workflowId = params.workflowId
         WorkflowExecution workflowExecution = new WorkflowExecution(workflowId: workflowId, runId: runId)
@@ -73,5 +75,4 @@ class WorkflowExecutionController {
             }
         }
     }
-
 }

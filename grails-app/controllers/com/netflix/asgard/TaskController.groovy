@@ -24,9 +24,11 @@ class TaskController {
 
     static allowedMethods = [cancel: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         Collection<Task> runningTasks = taskService.getAllRunning()
         Collection<Task> completedTasks = taskService.getAllCompleted()
 
@@ -48,7 +50,7 @@ class TaskController {
         }
     }
 
-    def show = {
+    def show() {
         String id = params.id ?: params.runId
         // TODO remove the params.runId when we are sure there are no longer workflow executions without a run ID
         Task task = taskService.getTaskById(id)
@@ -74,7 +76,7 @@ class TaskController {
         }
     }
 
-    def cancel = {
+    def cancel() {
         String id = params.id
         UserContext userContext = UserContext.of(request)
         Task task = taskService.getTaskById(id)
@@ -92,7 +94,7 @@ class TaskController {
         }
     }
 
-    def runningCount = {
+    def runningCount() {
         render taskService.getRunningInMemory().size().toString()
     }
 }

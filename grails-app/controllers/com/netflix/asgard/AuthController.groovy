@@ -25,7 +25,9 @@ class AuthController {
 
     def pluginService
 
-    def index = { redirect(action: 'login', params: params) }
+    def index() {
+        redirect(action: 'login', params: params)
+    }
 
     def beforeInterceptor = {
         if (!pluginService.authenticationProvider) {
@@ -34,12 +36,12 @@ class AuthController {
         }
     }
 
-    def login = {
+    def login() {
         session[AUTH_TARGET_URL] = params.targetUri
         redirect(url: pluginService.authenticationProvider.loginUrl(request))
     }
 
-    def signIn = {
+    def signIn() {
         AuthenticationToken authToken = pluginService.authenticationProvider.tokenFromRequest(request)
         String targetUri = session[AUTH_TARGET_URL] ?: '/'
         session.removeAttribute(AUTH_TARGET_URL)
@@ -53,7 +55,7 @@ class AuthController {
         }
     }
 
-    def signOut = {
+    def signOut() {
         def principal = SecurityUtils.subject?.principal
         SecurityUtils.subject?.logout()
         ConfigUtils.removePrincipal(principal)
@@ -62,7 +64,7 @@ class AuthController {
         redirect(uri: redirectUri)
     }
 
-    def unauthorized = {
+    def unauthorized() {
         forward action: 'login'
     }
 }

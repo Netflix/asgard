@@ -29,16 +29,18 @@ class ScheduledActionController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         Collection<ScheduledUpdateGroupAction> unsorted = awsAutoScalingService.getAllScheduledActions(userContext)
         List<ScheduledUpdateGroupAction> scheduledActions = unsorted.sort { it.scheduledActionName }
         withFormat {
             html {
                 [
-                        scheduledActions: scheduledActions,
+                    scheduledActions: scheduledActions,
                 ]
             }
             xml { new XML(scheduledActions).render(response) }
@@ -46,7 +48,7 @@ class ScheduledActionController {
         }
     }
 
-    def create = {
+    def create() {
         String groupName = params.id ?: params.group
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(UserContext.of(request), groupName)
         if (group) {
@@ -65,7 +67,7 @@ class ScheduledActionController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String name = params.id
         ScheduledUpdateGroupAction scheduledAction = awsAutoScalingService.getScheduledAction(userContext, name)
@@ -81,7 +83,7 @@ class ScheduledActionController {
         }
     }
 
-    def edit = {
+    def edit() {
         UserContext userContext = UserContext.of(request)
         String name = params.id ?: params.actionName
         ScheduledUpdateGroupAction scheduledAction = awsAutoScalingService.getScheduledAction(userContext, name)
@@ -100,7 +102,7 @@ class ScheduledActionController {
         }
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         String name = params.id
         ScheduledUpdateGroupAction scheduledAction = awsAutoScalingService.getScheduledAction(userContext, name)
@@ -113,7 +115,7 @@ class ScheduledActionController {
         }
     }
 
-    def save = { ScheduledActionCommand cmd ->
+    def save(ScheduledActionCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd: cmd], params: params)
         } else {
@@ -140,7 +142,7 @@ class ScheduledActionController {
         }
     }
 
-    def update = { ScheduledActionCommand cmd ->
+    def update(ScheduledActionCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'edit', model: [cmd: cmd], params: params)
         } else {
@@ -165,7 +167,9 @@ class ScheduledActionController {
         }
     }
 
-    def result = { render view: '/common/result' }
+    def result() {
+        render view: '/common/result'
+    }
 }
 
 class ScheduledActionCommand {

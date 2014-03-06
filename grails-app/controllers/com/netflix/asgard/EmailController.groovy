@@ -22,7 +22,7 @@ class EmailController {
     /**
      * Hit /email?to=me@somewhere.com&subject=hello+world&body=This+is+a+test to send an email to yourself
      */
-    def index = {
+    def index() {
         // Each "email" is a simple Map
         def email = [
             to: [ params.to ], // "to" expects a List, NOT a single email address
@@ -34,14 +34,13 @@ class EmailController {
         render("done")
     }
 
-    def disable = {
+    def disable() {
         emailerService.disable()
         render("System emails disabled")
     }
 
-    def enable = {
+    def enable() {
         emailerService.enable()
         render("System emails enabled")
     }
 }
-

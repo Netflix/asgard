@@ -28,9 +28,11 @@ class DbSecurityController {
 
     static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         def dbSecurityGroups = awsRdsService.getDBSecurityGroups(userContext).sort {
                 it.getDBSecurityGroupName().toLowerCase() }
@@ -46,7 +48,7 @@ class DbSecurityController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         def name = params.name ?: params.id
         def group = awsRdsService.getDBSecurityGroup(userContext, name)
@@ -66,11 +68,11 @@ class DbSecurityController {
         }
     }
 
-    def create = {
+    def create() {
         [ ]
     }
 
-    def save = {
+    def save() {
         UserContext userContext = UserContext.of(request)
         try {
             awsRdsService.createDBSecurityGroup(userContext, params.name, params.description)
@@ -96,7 +98,7 @@ class DbSecurityController {
         }
     }
 
-    def update = {
+    def update() {
         String name = params.name
         String newName = params.newName
         String description = params.description
@@ -144,7 +146,7 @@ class DbSecurityController {
                 targetGroup.getDBSecurityGroupName(), it) }
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         try {
             awsRdsService.removeDBSecurityGroup(userContext, params.name)

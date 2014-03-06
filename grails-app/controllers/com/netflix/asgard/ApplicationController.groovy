@@ -41,9 +41,11 @@ class ApplicationController {
 
     static editActions = ['security']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         GroupedAppRegistrationSet apps = applicationService.getGroupedRegisteredApplications(userContext)
 
@@ -75,7 +77,7 @@ class ApplicationController {
         }
     }
 
-    def owner = {
+    def owner() {
         UserContext userContext = UserContext.of(request)
         List<AppRegistration> apps = applicationService.getRegisteredApplications(userContext)
         Bag groupCountsPerAppName = groupCountsPerAppName(userContext)
@@ -121,7 +123,7 @@ class ApplicationController {
         instanceCountsPerAppName
     }
 
-    def show = {
+    def show() {
         String name = params.name ?: params.id
         UserContext userContext = UserContext.of(request)
         AppRegistration app = applicationService.getRegisteredApplication(userContext, name)
@@ -167,7 +169,7 @@ class ApplicationController {
         ]
     }
 
-    def save = { ApplicationCreateCommand cmd ->
+    def save(ApplicationCreateCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd: cmd], params: params)
         } else {
@@ -193,7 +195,7 @@ class ApplicationController {
         }
     }
 
-    def edit = {
+    def edit() {
         UserContext userContext = UserContext.of(request)
         String name = params.name ?: params.id
         log.debug "Edit App: ${name}"
@@ -201,7 +203,7 @@ class ApplicationController {
         ['app': app, 'typeList': typeList]
     }
 
-    def update = {
+    def update() {
         String name = params.name
         UserContext userContext = UserContext.of(request)
         String group = params.group
@@ -222,7 +224,7 @@ class ApplicationController {
         redirect(action: 'show', params: [id: name])
     }
 
-    def delete = {
+    def delete() {
         String name = params.name
         UserContext userContext = UserContext.of(request)
         log.info "Delete App: ${name}"
@@ -239,7 +241,7 @@ class ApplicationController {
         redirect(action: 'list')
     }
 
-    def security = {
+    def security() {
         String name = params.name
         String securityGroupId = params.securityGroupId
         UserContext userContext = UserContext.of(request)
@@ -263,7 +265,7 @@ class ApplicationController {
         ]
     }
 
-    def securityUpdate = {
+    def securityUpdate() {
         String name = params.name
         UserContext userContext = UserContext.of(request)
         List<String> selectedGroups = Requests.ensureList(params.selectedGroups)
