@@ -15,123 +15,31 @@
  */
 package com.netflix.asgard
 
-import grails.test.MockUtils
-import org.joda.time.DateTime
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyAccessibility")
 class HealthcheckServiceSpec extends Specification {
 
-    HealthcheckService healthcheckService
-    ConfigService configService = Mock(ConfigService)
-    Caches caches = Mock(Caches)
-    def initService = Mock(InitService)
-    CachedMap asgCachedMap = new CachedMapBuilder(null).of(EntityType.autoScaling).buildCachedMap()
-    MultiRegionCachedMap asgMultiRegionCachedMap = Mock(MultiRegionCachedMap)
-    String asgCacheName = EntityType.autoScaling.displayName
+    ServerService serverService = Mock(ServerService)
+    HealthcheckService healthcheckService = new HealthcheckService(serverService: serverService)
 
-    def setup() {
-        MockUtils.mockLogging(HealthcheckService)
-        healthcheckService = new HealthcheckService(
-                configService: configService,
-                caches: caches,
-                initService: initService)
-    }
-
-    def 'should be unhealthy if caches empty'() {
-        initializeMocks()
+    def 'should be unhealthy if server is not ready for traffic'() {
 
         when:
-        healthcheckService.checkCaches()
+        boolean isHealthy = healthcheckService.checkHealth()
 
         then:
-        !healthcheckService.isHealthy
-        healthcheckService.cacheNamesToProblems.size() == 1
-        healthcheckService.cacheNamesToProblems[asgCacheName] == 'Cache size is 0 which is below minimum size 1'
+        !isHealthy
+        serverService.shouldCacheLoadingBlockUserRequests() >> true
     }
 
-    def 'should recover from failure'() {
-        initializeMocks()
+    def 'should be healthy if server is ready for traffic'() {
 
         when:
-        healthcheckService.checkCaches()
+        boolean isHealthy = healthcheckService.checkHealth()
 
         then:
-        !healthcheckService.isHealthy
-        healthcheckService.cacheNamesToProblems.size() == 1
-        healthcheckService.cacheNamesToProblems[asgCacheName] == 'Cache size is 0 which is below minimum size 1'
-
-        when:
-        asgCachedMap.map['id'] = new Object()
-        healthcheckService.checkCaches()
-
-        then:
-        healthcheckService.isHealthy
-        healthcheckService.cacheNamesToProblems.size() == 0
-    }
-
-    def 'should be unhealthy if cache is stale'() {
-        initializeMocks()
-        DateTime oneDayAgo = new DateTime().minusDays(1)
-        asgCachedMap.active = true
-        asgCachedMap.lastActiveTime = oneDayAgo
-        asgCachedMap.lastFillTime = oneDayAgo
-
-        when:
-        healthcheckService.checkCaches()
-
-        then:
-        !healthcheckService.isHealthy
-        healthcheckService.cacheNamesToProblems.size() == 1
-        healthcheckService.cacheNamesToProblems[asgCacheName].startsWith("Cache is actively used but last " +
-            "fill time is ${oneDayAgo} which is before 10 minutes ago")
-    }
-
-    def 'should fail on bad cache name'() {
-        initService.cachesFilled() >> true
-        configService.healthCheckMinimumCounts >> [blah: 1]
-        caches.getProperty('blah') >> { throw new MissingPropertyException('') }
-
-        when:
-        healthcheckService.checkCaches()
-
-        then:
-        !healthcheckService.isHealthy
-        healthcheckService.cacheNamesToProblems.size() == 1
-        healthcheckService.cacheNamesToProblems['blah'].startsWith('Invalid cache name')
-    }
-
-    def 'should fail on error with checking cache'() {
-        initService.cachesFilled() >> true
-        // Leaving this without data so it throws a NPE
-        caches.getProperty('allAutoScalingGroups') >> asgMultiRegionCachedMap
-        asgMultiRegionCachedMap.by(Region.defaultRegion()) >> { throw new IOException('This error') }
-        configService.healthCheckMinimumCounts >> [allAutoScalingGroups: 1]
-
-        when:
-        healthcheckService.checkCaches()
-
-        then:
-        !healthcheckService.isHealthy
-        healthcheckService.cacheNamesToProblems == [allAutoScalingGroups: 'This error']
-    }
-
-    def 'should fail on error with config service'() {
-        initService.cachesFilled() >> true
-        configService.healthCheckMinimumCounts >> { throw new NullPointerException() }
-
-        when:
-        healthcheckService.checkCaches()
-
-        then:
-        !healthcheckService.isHealthy
-        healthcheckService.cacheNamesToProblems.size() == 0
-    }
-
-    private initializeMocks() {
-        initService.cachesFilled() >> true
-        asgMultiRegionCachedMap.by(Region.defaultRegion()) >> asgCachedMap
-        caches.getProperty('allAutoScalingGroups') >> asgMultiRegionCachedMap
-        configService.healthCheckMinimumCounts >> [allAutoScalingGroups: 1]
+        isHealthy
+        serverService.shouldCacheLoadingBlockUserRequests() >> false
     }
 }

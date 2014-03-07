@@ -366,13 +366,6 @@ class ConfigService {
     }
 
     /**
-     * @return Map of a property name in {@link Caches} to minimum size for that cache to be considered 'healthy'
-     */
-    Map<String, Integer> getHealthCheckMinimumCounts() {
-        grailsApplication.config.healthCheck?.minimumCounts ?: [:]
-    }
-
-    /**
      * @return true if the current server is meant to be running online to interact with the cloud, false if working
      *          in offline development mode
      */
