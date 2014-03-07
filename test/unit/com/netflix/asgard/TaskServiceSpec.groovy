@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
+import java.util.concurrent.CountDownLatch
 import spock.lang.Specification
 
 class TaskServiceSpec extends Specification {
@@ -58,5 +59,25 @@ class TaskServiceSpec extends Specification {
 
         then:
         3 * service.awsSimpleWorkflowService.getWorkflowExecutionInfoByTaskId('123') >> null
+    }
+
+    def 'should run an asynchronous task thread'() {
+
+        CountDownLatch workHasStarted = new CountDownLatch(1)
+
+        List<String> thingToChange = []
+        service.idService = Mock(IdService)
+        service.grailsApplication = [config: [cloud: [accountName: 'test']]]
+
+        when:
+        Task task = service.startTask(UserContext.auto(), 'test task', {
+            thingToChange << 'hello'
+            workHasStarted.countDown()
+        })
+
+        then:
+        workHasStarted.await()
+        task.thread.join()
+        thingToChange == ['hello']
     }
 }
