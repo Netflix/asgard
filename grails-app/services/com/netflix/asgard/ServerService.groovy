@@ -32,6 +32,7 @@ class ServerService implements InitializingBean {
 
     def grailsApplication
     def emailerService
+    def flagService
     def initService
     def restClientService
     def secretService
@@ -305,10 +306,10 @@ class ServerService implements InitializingBean {
 
     /**
      * @return true if the system is not ready to accept most user requests because caches still need to load, false if
-     *          enough caches are loaded or if a startup flag indicates that an administrator has decided to
+     *          enough caches are loaded or if a startup or runtime flag indicates that an administrator has decided to
      *          allow traffic without waiting for caches to fill
      */
     Boolean shouldCacheLoadingBlockUserRequests() {
-        !initService.cachesFilled() && !System.getProperty('skipCacheFill')
+        !initService.cachesFilled() && !System.getProperty('skipCacheFill') && flagService.isOff(Flag.SKIP_CACHE_FILL)
     }
 }

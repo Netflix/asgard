@@ -20,22 +20,26 @@ import spock.lang.Unroll
 
 class ServerServiceSpec extends Specification {
 
+    FlagService flagService = Mock(FlagService)
     InitService initService = Mock(InitService)
-    ServerService serverService = new ServerService(initService: initService)
+    ServerService serverService = new ServerService(initService: initService, flagService: flagService)
 
-    @Unroll("it's #blocked that traffic gets blocked iff caches are filled is #filled")
-    void 'should indicate that user requests should be blocked only if caches are empty'() {
+    @Unroll("it's #blocked that traffic gets blocked iff caches are filled is #filled and skip flag is off is #flagOff")
+    void 'should indicate that user requests should be blocked only if caches are empty and skip flag is off'() {
 
         when:
         Boolean shouldBlock = serverService.shouldCacheLoadingBlockUserRequests()
 
         then:
         initService.cachesFilled() >> filled
+        flagService.isOff(Flag.SKIP_CACHE_FILL) >> flagOff
         shouldBlock == blocked
 
         where:
-        filled | blocked
-        true   | false
-        false  | true
+        filled | flagOff | blocked
+        true   | true    | false
+        false  | true    | true
+        true   | false   | false
+        false  | false   | false
     }
 }
