@@ -361,13 +361,14 @@ class AutoScalingController {
         }
     }
 
+    @SuppressWarnings("ReturnsNullInsteadOfEmptyCollection")
     def edit() {
         UserContext userContext = UserContext.of(request)
         String name = params.name ?: params.id
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, name)
         if (!group) {
             Requests.renderNotFound('Auto Scaling Group', name, this)
-            return []
+            return
         }
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)

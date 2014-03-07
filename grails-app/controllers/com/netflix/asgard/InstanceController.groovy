@@ -260,6 +260,7 @@ class InstanceController {
         redirect(action: 'show', params: [instanceId: instanceId])
     }
 
+    @SuppressWarnings("ReturnsNullInsteadOfEmptyCollection")
     def raw() {
         UserContext userContext = UserContext.of(request)
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId ?: params.id)
@@ -268,7 +269,7 @@ class InstanceController {
             return [ 'instanceId': instanceId, 'consoleOutput' : consoleOutput, 'now': new Date() ]
         } catch (AmazonServiceException ase) {
             Requests.renderNotFound('Instance', instanceId, this, ase.toString())
-            return []
+            return
         }
     }
 
