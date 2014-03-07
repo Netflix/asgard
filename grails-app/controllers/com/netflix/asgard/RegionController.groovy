@@ -22,11 +22,11 @@ class RegionController {
 
     def configService
 
-    def index = {
+    def index() {
         chain(action: 'list', params: [format: request.format])
     }
 
-    def list = {
+    def list() {
         List<Map> details = []
         for (Region reg in Region.values()) {
 

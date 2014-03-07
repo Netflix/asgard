@@ -25,7 +25,7 @@ class SourceSecurityController {
 
     def awsLoadBalancerService
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         Collection<SourceSecurityGroup> groups = awsLoadBalancerService.getSourceSecurityGroups(userContext)
         groups = groups.sort { it.groupName }
@@ -37,4 +37,3 @@ class SourceSecurityController {
         }
     }
 }
-

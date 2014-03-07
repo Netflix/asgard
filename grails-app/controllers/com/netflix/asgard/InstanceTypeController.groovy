@@ -25,9 +25,11 @@ class InstanceTypeController {
 
     def instanceTypeService
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         List<InstanceTypeData> instanceTypes = instanceTypeService.getInstanceTypes(userContext)
         Map details = [instanceTypes: instanceTypes]

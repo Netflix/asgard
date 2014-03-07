@@ -26,9 +26,11 @@ class ServerController {
     def serverService
     def taskService
 
-    def index = { render InetAddress.localHost.hostName }
+    def index() {
+        render InetAddress.localHost.hostName
+    }
 
-    def all = {
+    def all() {
         List<ServerState> serverStates = serverService.generateAllServersReport()
         List<Map> report = serverStates.collect { Meta.toMap(it) }
         def output = flash.messages ? [result: flash.messages, servers: report] : report
@@ -39,25 +41,43 @@ class ServerController {
         }
     }
 
-    def ip = { render InetAddress.localHost.hostAddress }
+    def ip() {
+        render InetAddress.localHost.hostAddress
+    }
 
-    def version = { render serverService.version }
+    def version() {
+        render serverService.version
+    }
 
-    def build = { render "${grailsApplication.config.build.number}" }
+    def build() {
+        render "${grailsApplication.config.build.number}"
+    }
 
-    def change = { render "${grailsApplication.config.scm.commit}" }
+    def change() {
+        render "${grailsApplication.config.scm.commit}"
+    }
 
-    def waitingToMoveTraffic = { render "${serverService.isThisServerWaitingToMoveTraffic()}" }
+    def waitingToMoveTraffic() {
+        render "${serverService.isThisServerWaitingToMoveTraffic()}"
+    }
 
-    def env = { render "${grailsApplication.config.cloud.accountName}" }
+    def env() {
+        render "${grailsApplication.config.cloud.accountName}"
+    }
 
-    def hoursSinceStartup = { render "${serverService.getHoursSinceStartup()}" }
+    def hoursSinceStartup() {
+        render "${serverService.getHoursSinceStartup()}"
+    }
 
-    def minutesSinceStartup = { render "${serverService.getMinutesSinceStartup()}" }
+    def minutesSinceStartup() {
+        render "${serverService.getMinutesSinceStartup()}"
+    }
 
-    def uptime = { render "${serverService.getUptimeString()}" }
+    def uptime() {
+        render "${serverService.getUptimeString()}"
+    }
 
-    def moveTraffic = {
+    def moveTraffic() {
         String targetServer = pickServer(params)
         String forceNowValue = params.forceNow
         SwitchAttemptResult switchAttemptResult = serverService.moveTrafficTo(targetServer, forceNowValue)
@@ -65,26 +85,26 @@ class ServerController {
         redirect(action: 'all', params: [format: 'json'])
     }
 
-    def startTrafficMover = {
+    def startTrafficMover() {
         String targetServer = pickServer(params)
         serverService.startTrafficMover(targetServer)
         flash.messages = ['Started thread to move traffic after tasks finish on sister server']
         redirect(action: 'all', params: [format: 'json'])
     }
 
-    def cancelTrafficMover = {
+    def cancelTrafficMover() {
         flash.messages = serverService.cancelTrafficMover()
         redirect(action: 'all', params: [format: 'json'])
     }
 
-    def runningTaskCount = {
+    def runningTaskCount() {
         render taskService.getRunningInMemory().size() as String
     }
 
     /**
      * Displays all environment variables and system properties for debugging.
      */
-    def props = {
+    def props() {
         Properties sysProps = serverService.systemProperties
         Map<String, String> propsMap = sysProps.stringPropertyNames().sort { it.toLowerCase() }.collectEntries {
             [it, sysProps.getProperty(it)]

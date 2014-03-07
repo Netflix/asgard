@@ -31,9 +31,11 @@ class SpotInstanceRequestController {
 
     final static allowedMethods = [cancel: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         SpotInstanceRequestListType type = SpotInstanceRequestListType.of(params.type)
         List<SpotInstanceRequest> sirs = spotInstanceRequestService.getSpotInstanceRequests(userContext, type)
@@ -45,7 +47,7 @@ class SpotInstanceRequestController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String spotInstanceRequestId = params.id
         SpotInstanceRequest sir = spotInstanceRequestService.getSpotInstanceRequest(userContext, spotInstanceRequestId)
@@ -59,7 +61,7 @@ class SpotInstanceRequestController {
         }
     }
 
-    def cancel = {
+    def cancel() {
         UserContext userContext = UserContext.of(request)
         List<String> sirIds = Requests.ensureList(params.selectedSpotInstanceRequests ?: params.spotInstanceRequestId)
         List<CancelledSpotInstanceRequest> cancelledSirs = spotInstanceRequestService.cancelSpotInstanceRequests(
@@ -68,6 +70,8 @@ class SpotInstanceRequestController {
         redirect(action: 'result')
     }
 
-    def result = { render view: '/common/result' }
+    def result() {
+        render view: '/common/result'
+    }
 
 }

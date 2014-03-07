@@ -47,9 +47,11 @@ class ImageController {
 
     static editActions = ['prelaunch']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         Collection<Image> images = []
         Set<String> packageNames = Requests.ensureList(params.id).collect { it.split(',') }.flatten() as Set<String>
@@ -67,7 +69,7 @@ class ImageController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String imageId = EntityType.image.ensurePrefix(params.imageId ?: params.id)
         Image image = imageId ? awsEc2Service.getImage(userContext, imageId) : null
@@ -96,7 +98,7 @@ class ImageController {
         }
     }
 
-    def edit = {
+    def edit() {
         UserContext userContext = UserContext.of(request)
         def launchUsers = []
         def imageId = EntityType.image.ensurePrefix(params.imageId ?: params.id)
@@ -114,7 +116,7 @@ class ImageController {
         ]
     }
 
-    def update = {
+    def update() {
         def imageId = EntityType.image.ensurePrefix(params.imageId)
         UserContext userContext = UserContext.of(request)
         List<String> launchPermissions = Requests.ensureList(params.launchPermissions)
@@ -127,7 +129,7 @@ class ImageController {
         redirect(action: 'show', params: [id: imageId])
     }
 
-    def delete = { ImageDeleteCommand cmd ->
+    def delete(ImageDeleteCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'show', model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
         } else {
@@ -146,7 +148,7 @@ class ImageController {
         }
     }
 
-    def prelaunch = {
+    def prelaunch() {
         UserContext userContext = UserContext.of(request)
         String imageId = EntityType.image.ensurePrefix(params.id)
         Collection<InstanceTypeData> instanceTypes = instanceTypeService.getInstanceTypes(userContext)
@@ -160,7 +162,7 @@ class ImageController {
         ]
     }
 
-    def launch = {
+    def launch() {
 
         String message = ''
         Closure output = { }
@@ -213,9 +215,11 @@ class ImageController {
         }
     }
 
-    def result = { render view: '/common/result' }
+    def result() {
+        render view: '/common/result'
+    }
 
-    def references = {
+    def references() {
         UserContext userContext = UserContext.of(request)
         String imageId = EntityType.image.ensurePrefix(params.imageId ?: params.id)
         Collection<Instance> instances = awsEc2Service.getInstancesUsingImageId(userContext, imageId)
@@ -227,7 +231,7 @@ class ImageController {
         render result as JSON
     }
 
-    def used = {
+    def used() {
         UserContext userContext = UserContext.of(request)
         Collection<String> imageIdsInUse = imageService.getLocalImageIdsInUse(userContext)
         withFormat {
@@ -243,7 +247,7 @@ class ImageController {
      *         name - the key of the tag to add or replace
      *         value - the value of the tag to add or replace
      */
-    def addTag = {
+    def addTag() {
         String imageId = params.imageId ?: params.id
         Check.notEmpty(imageId, 'imageId')
         performAddTags([imageId])
@@ -255,7 +259,7 @@ class ImageController {
      *         name - the key of the tag to add or replace
      *         value - the value of the tag to add or replace
      */
-    def addTags = {
+    def addTags() {
         performAddTags(params.imageIds?.tokenize(','))
     }
 
@@ -276,7 +280,7 @@ class ImageController {
      *         imageId (in the POST data) or id (on URL) - the id of the image to remove the tag on
      *         name - the key of the tag to remove on the image
      */
-    def removeTag = {
+    def removeTag() {
         String imageId = params.imageId ?: params.id
         Check.notEmpty(imageId, 'imageId')
         performRemoveTags([imageId])
@@ -287,7 +291,7 @@ class ImageController {
      *         imageIds - comma separated list of image ids to remove tags on
      *         name - the key of the tag to remove on the image
      */
-    def removeTags = {
+    def removeTags() {
         performRemoveTags(params.imageIds?.tokenize(','))
     }
 
@@ -301,13 +305,13 @@ class ImageController {
         render "Tag ${name} removed from image${imageIds.size() > 1 ? 's' : ''} ${imageIds.join(', ')}"
     }
 
-    def replicateTags = {
+    def replicateTags() {
         log.info 'image/replicateTags called. Starting unscheduled image tag replication.'
         imageService.replicateImageTags()
         render 'done'
     }
 
-    def massDelete = {
+    def massDelete() {
         UserContext userContext = UserContext.of(request)
         MassDeleteRequest massDeleteRequest = new MassDeleteRequest()
         DataBindingUtils.bindObjectToInstance(massDeleteRequest, params)
@@ -322,7 +326,7 @@ class ImageController {
         render "<pre>\n${message}</pre>\n"
     }
 
-    def analyze = {
+    def analyze() {
         UserContext userContext = UserContext.of(request)
         Collection<Image> allImages = awsEc2Service.getAccountImages(userContext)
         List<Image> dateless = []
@@ -401,7 +405,7 @@ class ImageController {
         }
     }
 
-    def tagAmiLastReferencedTime = {
+    def tagAmiLastReferencedTime() {
         UserContext userContext = UserContext.of(request)
         String imageTagMasterAccount = grailsApplication.config.cloud.imageTagMasterAccount
         if (grailsApplication.config.cloud.accountName == imageTagMasterAccount) {

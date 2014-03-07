@@ -38,9 +38,11 @@ class SecurityController {
 
     static allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         Set<String> appNames = Requests.ensureList(params.id).collect { it.split(',') }.flatten() as Set<String>
         Collection<SecurityGroup> securityGroups = awsEc2Service.getSecurityGroups(userContext)
@@ -60,7 +62,7 @@ class SecurityController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         def name = params.name ?: params.id
         SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, name)
@@ -102,7 +104,7 @@ class SecurityController {
         }
     }
 
-    def create = {
+    def create() {
         UserContext userContext = UserContext.of(request)
         String name = params.id ?: params.name
         String description = ''
@@ -123,7 +125,7 @@ class SecurityController {
         ]
     }
 
-    def save = { SecurityCreateCommand cmd ->
+    def save(SecurityCreateCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd: cmd], params: params) // Use chain to pass both errors and params
         } else {
@@ -146,7 +148,7 @@ class SecurityController {
         }
     }
 
-    def edit = {
+    def edit() {
         UserContext userContext = UserContext.of(request)
         String id = params.id
         SecurityGroup group = awsEc2Service.getSecurityGroup(userContext, id)
@@ -161,7 +163,7 @@ class SecurityController {
         ]
     }
 
-    def update = {
+    def update() {
         String name = params.name ?: params.id
         List<String> selectedGroups = Requests.ensureList(params.selectedGroups)
         UserContext userContext = UserContext.of(request)
@@ -196,7 +198,7 @@ class SecurityController {
         }
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         String name = params.name ?: params.id
         String msg
@@ -216,7 +218,9 @@ class SecurityController {
         }
     }
 
-    def result = { render view: '/common/result' }
+    def result() {
+        render view: '/common/result'
+    }
 }
 
 class SecurityCreateCommand {

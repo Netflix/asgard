@@ -36,9 +36,11 @@ class PushController {
     def pushService
     def grailsApplication
 
-    def index = { redirect(controller: "autoScaling", action: "list", params: params) }
+    def index() {
+        redirect(controller: "autoScaling", action: "list", params: params)
+    }
 
-    def editRolling = {
+    def editRolling() {
         UserContext userContext = UserContext.of(request)
         String name = params.id ?: params.name
         boolean showAllImages = params.allImages ? true : false
@@ -62,7 +64,7 @@ class PushController {
         attrs
     }
 
-    def startRolling = {
+    def startRolling() {
         UserContext userContext = UserContext.of(request)
         List<String> selectedSecurityGroups = Requests.ensureList(params.selectedSecurityGroups)
 
@@ -109,14 +111,16 @@ class PushController {
         }
     }
 
-    def result = { render view: '/common/result' }
+    def result() {
+        render view: '/common/result'
+    }
 
-    def enableTimeouts = {
+    def enableTimeouts() {
         RollingPushOperation.timeoutsEnabled = true
         render "Push timeouts disabled"
     }
 
-    def disableTimeouts = {
+    def disableTimeouts() {
         RollingPushOperation.timeoutsEnabled = false
         render "Push timeouts enabled"
     }

@@ -27,9 +27,11 @@ class DomainController {
 
     def allowedMethods = [save: 'POST', delete: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         List<String> domains = (simpleDbDomainService.getDomains(userContext) as List).sort { it.toLowerCase() }
         Map details = ['domains': domains]
@@ -40,11 +42,11 @@ class DomainController {
         }
     }
 
-    def create = {
+    def create() {
         [simpleDbUsageMessage: grailsApplication.config.cloud.simpleDbUsageMessage]
     }
 
-    def save = {
+    def save() {
         UserContext userContext = UserContext.of(request)
         String domainName = params.name
         try {
@@ -62,7 +64,7 @@ class DomainController {
         }
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         String domainName = params.name ?: params.id
         try {
@@ -73,7 +75,7 @@ class DomainController {
         redirect(action: 'list')
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String domainName = params.id
         DomainMetadataResult result = simpleDbDomainService.getDomainMetadata(userContext, domainName)

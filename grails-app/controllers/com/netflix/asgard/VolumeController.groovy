@@ -24,11 +24,13 @@ import grails.converters.XML
 @ContextParam('region')
 class VolumeController {
 
-    def index = { redirect(action: 'list', params: params) }
-
     def awsEc2Service
 
-    def list = {
+    def index() {
+        redirect(action: 'list', params: params)
+    }
+
+    def list() {
         UserContext userContext = UserContext.of(request)
         def volumes = (awsEc2Service.getVolumes(userContext) as List).sort { it.volumeId.toLowerCase() }
         def details = ['volumes': volumes, 'zoneList': awsEc2Service.getAvailabilityZones(userContext)]
@@ -39,7 +41,7 @@ class VolumeController {
         }
     }
 
-    def save = {
+    def save() {
         UserContext userContext = UserContext.of(request)
         try {
             Volume volume = awsEc2Service.createVolume(userContext, params.volumeSize as Integer,
@@ -52,7 +54,7 @@ class VolumeController {
         }
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         def volumeIds = []
         if (params.volumeId) { volumeIds << params.volumeId }
@@ -75,7 +77,7 @@ class VolumeController {
         redirect(action: 'list')
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String volumeId = EntityType.volume.ensurePrefix(params.volumeId ?: params.id)
         Volume volume = awsEc2Service.getVolume(userContext, volumeId)
@@ -91,7 +93,7 @@ class VolumeController {
         }
     }
 
-    def detach = {
+    def detach() {
         String volumeId = EntityType.volume.ensurePrefix(params.volumeId ?: params.id)
         UserContext userContext = UserContext.of(request)
         try {

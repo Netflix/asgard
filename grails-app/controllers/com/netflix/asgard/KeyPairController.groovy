@@ -29,7 +29,7 @@ class KeyPairController {
     /**
      * Display all the key pairs registered in the current account-region via REST calls.
      */
-    def list = {
+    def list() {
         Collection<KeyPairInfo> keys = awsEc2Service.getKeys(UserContext.of(request))
         withFormat {
             xml { new XML(keys).render(response) }

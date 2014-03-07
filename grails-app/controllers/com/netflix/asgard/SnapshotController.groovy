@@ -26,9 +26,11 @@ class SnapshotController {
 
     def awsEc2Service
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         List<Snapshot> snapshots = awsEc2Service.getSnapshots(userContext).sort { it.snapshotId.toLowerCase() }
         Set<String> appNames = Requests.ensureList(params.id).collect { it.split(',') }.flatten() as Set<String>
@@ -44,7 +46,7 @@ class SnapshotController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String snapshotId = EntityType.snapshot.ensurePrefix(params.snapshotId ?: params.id)
         def snapshot = awsEc2Service.getSnapshot(userContext, snapshotId)
@@ -66,13 +68,13 @@ class SnapshotController {
         }
     }
 
-    def create = {
+    def create() {
         UserContext userContext = UserContext.of(request)
         def snapshot = awsEc2Service.createSnapshot(userContext, params.volumeId, params.description)
         redirect(action: 'show', params: [id: snapshot?.snapshotId])
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
 
         List<String> snapshotIds = Requests.ensureList(params.snapshotId ?: params.selectedSnapshots)
@@ -103,9 +105,11 @@ class SnapshotController {
         redirect(action: 'result')
     }
 
-    def result = { render view: '/common/result' }
+    def result() {
+        render view: '/common/result'
+    }
 
-    def restore = { SnapshotCommand cmd ->
+    def restore(SnapshotCommand cmd) {
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
             chain(action: 'show', model: [snapshotCommand: cmd])

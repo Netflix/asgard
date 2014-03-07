@@ -27,9 +27,11 @@ class QueueController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         List<SimpleQueue> queues = (awsSqsService.getQueues(userContext) as List).sort { it.name?.toLowerCase() }
         Map details = ['queues': queues]
@@ -40,11 +42,11 @@ class QueueController {
         }
     }
 
-    def create = {
+    def create() {
         [:]
     }
 
-    def save = {
+    def save() {
         UserContext userContext = UserContext.of(request)
         String queueName = params.id
         Integer visibilityTimeout = params.visibilityTimeout as Integer
@@ -59,7 +61,7 @@ class QueueController {
         }
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         String queueName = params.id
         try {
@@ -71,7 +73,7 @@ class QueueController {
         redirect(action: 'list')
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String queueName = params.id
         SimpleQueue queue = awsSqsService.getQueue(userContext, queueName)
@@ -87,14 +89,14 @@ class QueueController {
         }
     }
 
-    def edit = {
+    def edit() {
         UserContext userContext = UserContext.of(request)
         String queueName = params.id
         SimpleQueue queue = awsSqsService.getQueue(userContext, queueName)
         [queue: queue]
     }
 
-    def update = {
+    def update() {
         String queueName = params.name
         Integer visibilityTimeout = params.visibilityTimeout as Integer
         Integer delay = params.delay as Integer

@@ -39,9 +39,11 @@ class ScalingPolicyController {
 
     def allowedMethods = [save: 'POST', update: 'POST', delete: 'POST']
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         List<ScalingPolicy> policies = awsAutoScalingService.getAllScalingPolicies(userContext).sort { it.policyName }
         Map<String, MetricAlarm> alarmsByName = caches.allAlarms.by(userContext.region).unmodifiable()
@@ -57,7 +59,7 @@ class ScalingPolicyController {
         }
     }
 
-    def create = {
+    def create() {
         String groupName = params.id ?: params.group
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(UserContext.of(request), groupName)
         String adjustmentType = params.adjustmentType ?: ScalingPolicyData.AdjustmentType.default.name()
@@ -75,7 +77,7 @@ class ScalingPolicyController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         String scalingPolicyName = params.id
         ScalingPolicy scalingPolicy = awsAutoScalingService.getScalingPolicy(userContext, scalingPolicyName)
@@ -92,7 +94,7 @@ class ScalingPolicyController {
         }
     }
 
-    def edit = {
+    def edit() {
         UserContext userContext = UserContext.of(request)
         String policyName = params.id ?: params.policyName
         ScalingPolicy policy = awsAutoScalingService.getScalingPolicy(userContext, policyName)
@@ -112,7 +114,7 @@ class ScalingPolicyController {
         }
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         String scalingPolicyName = params.id
         ScalingPolicy scalingPolicy = awsAutoScalingService.getScalingPolicy(userContext, scalingPolicyName)
@@ -125,7 +127,7 @@ class ScalingPolicyController {
         }
     }
 
-    def save = { ScalingPolicyCreateCommand cmd ->
+    def save(ScalingPolicyCreateCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd: cmd], params: params)
         } else {
@@ -180,7 +182,7 @@ class ScalingPolicyController {
         }
     }
 
-    def update = { ScalingPolicyUpdateCommand cmd ->
+    def update(ScalingPolicyUpdateCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'edit', model: [cmd: cmd], params: params)
         } else {
@@ -205,7 +207,9 @@ class ScalingPolicyController {
         }
     }
 
-    def result = { render view: '/common/result' }
+    def result() {
+        render view: '/common/result'
+    }
 
 }
 

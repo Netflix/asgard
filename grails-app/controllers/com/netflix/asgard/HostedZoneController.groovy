@@ -104,7 +104,7 @@ class HostedZoneController {
     /**
      * Deletes a Route53 DNS hosted zone, including all of its resource record sets.
      */
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         String id = params.id
         HostedZone hostedZone = awsRoute53Service.getHostedZone(userContext, id)

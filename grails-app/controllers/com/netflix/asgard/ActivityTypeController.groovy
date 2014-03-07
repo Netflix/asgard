@@ -24,9 +24,11 @@ class ActivityTypeController {
 
     def awsSimpleWorkflowService
 
-    def index = { redirect(action: 'list', params: params) }
+    def index()  {
+        redirect(action: 'list', params: params)
+    }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         Collection<ActivityTypeInfo> activityTypeInfos = awsSimpleWorkflowService.getActivityTypes(userContext)
         withFormat {

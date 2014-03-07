@@ -35,11 +35,14 @@ class ApiTokenController {
         }
     }
 
-    def index = { redirect(action: 'create', params: params) }
+    def index() {
+        redirect(action: 'create', params: params)
+    }
 
-    def create = { }
+    def create() {
+    }
 
-    def generate = { GenerateApiTokenCommand cmd ->
+    def generate(GenerateApiTokenCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'create', model:[cmd: cmd], params: params)
         } else {
@@ -49,7 +52,9 @@ class ApiTokenController {
         }
     }
 
-    def show = { }
+    def show() {
+
+    }
 
 }
 

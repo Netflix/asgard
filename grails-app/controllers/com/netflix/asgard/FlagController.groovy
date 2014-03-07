@@ -21,11 +21,17 @@ class FlagController {
 
     def flagService
 
-    def index = { render flagService.getState() as JSON }
+    def index() {
+        render flagService.getState() as JSON
+    }
 
-    def on = { flip(params.id, true) }
+    def on() {
+        flip(params.id, true)
+    }
 
-    def off = { flip(params.id, false) }
+    def off() {
+        flip(params.id, false)
+    }
 
     private void flip(String name, Boolean setting) {
         render flagService.setFlag(name, setting) as JSON

@@ -32,9 +32,11 @@ class FastPropertyController {
     def configService
     def fastPropertyService
 
-    def index = { redirect(action: 'list', params: params) }
+    def index() {
+        redirect(action: 'list', params: params)
+    }
 
-    def apps = {
+    def apps() {
         UserContext userContext = UserContext.of(request)
         List<FastProperty> allProperties = fastPropertyService.getAll(userContext)
         List<String> appNames = allProperties.findResults { it.appId ? it.appId?.toLowerCase() : null }.unique().sort()
@@ -46,7 +48,7 @@ class FastPropertyController {
         }
     }
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         Collection<String> appNames = Requests.ensureList(params.id).collect { it.split(',') }.flatten()
         appNames = appNames.findResults { it.toLowerCase() }.unique()
@@ -63,7 +65,7 @@ class FastPropertyController {
         }
     }
 
-    def show = {
+    def show() {
         String id = params.id ?: params.name
         UserContext userContext = UserContext.of(request)
         FastProperty fastProperty = fastPropertyService.get(userContext, id)
@@ -82,7 +84,7 @@ class FastPropertyController {
         }
     }
 
-    def create = {
+    def create() {
         final UserContext userContext = UserContext.of(request)
         List<String> appNames = fastPropertyService.collectFastPropertyAppNames(userContext)
         Collection regionOptions = Region.values()
@@ -109,7 +111,7 @@ class FastPropertyController {
         }
     }
 
-    def save = { FastPropertySaveCommand cmd ->
+    def save(FastPropertySaveCommand cmd) {
         if (cmd.hasErrors()) {
             chain(action: 'create', model: [cmd: cmd], params: params)
             return
@@ -150,7 +152,7 @@ propagate."
         }
     }
 
-    def edit = {
+    def edit() {
         UserContext userContext = UserContext.of(request)
         String id = params.id
         FastProperty fastProperty = fastPropertyService.get(userContext, id)
@@ -170,7 +172,7 @@ propagate."
         }
     }
 
-    def update = {
+    def update() {
         String id = params.id
         String updatedBy = params.updatedBy?.trim()?.decodeHTML()
         String value = params.value?.trim()?.decodeHTML()
@@ -185,7 +187,7 @@ propagate."
         }
     }
 
-    def delete = {
+    def delete() {
         UserContext userContext = UserContext.of(request)
         String id = params.id
         String fastPropertyRegion = params.fastPropertyRegion

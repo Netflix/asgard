@@ -31,7 +31,7 @@ class AccountController {
      *
      * http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeAccountAttributes.html
      */
-    def attributes = {
+    def attributes() {
         List<AccountAttribute> attributes = awsEc2Service.getAccountAttributes(UserContext.of(request))
         withFormat {
             html { [attributes: attributes] }

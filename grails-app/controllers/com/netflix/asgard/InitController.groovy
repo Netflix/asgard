@@ -32,14 +32,14 @@ class InitController {
         }
     }
 
-    def index = {
+    def index() {
         [asgardHome: configService.asgardHome]
     }
 
     /**
      * Creates the Config.groovy file from the supplied parameters and redirects to the home page if successful
      */
-    def save = { InitializeCommand cmd ->
+    def save(InitializeCommand cmd) {
         if (cmd.hasErrors()) {
             render(view: 'index', model: [cmd: cmd])
             return

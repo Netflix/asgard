@@ -32,7 +32,7 @@ class RdsInstanceController {
     def awsRdsService
     def awsEc2Service
 
-    def list = {
+    def list() {
         UserContext userContext = UserContext.of(request)
         def dbInstances = (awsRdsService.getDBInstances(userContext) as List).sort {
             it.getDBInstanceIdentifier().toLowerCase()
@@ -44,7 +44,7 @@ class RdsInstanceController {
         }
     }
 
-    def edit = {
+    def edit() {
         UserContext userContext = UserContext.of(request)
         DBInstance dbInstance = awsRdsService.getDBInstance(userContext, params.dBInstanceIdentifier)
         [
@@ -55,7 +55,7 @@ class RdsInstanceController {
         ]
     }
 
-    def create = {
+    def create() {
         UserContext userContext = UserContext.of(request)
         [
             'allDBSecurityGroups' : awsRdsService.getDBSecurityGroups(userContext),
@@ -66,7 +66,7 @@ class RdsInstanceController {
         ]
     }
 
-    def save = { DbCreateCommand cmd ->
+    def save(DbCreateCommand cmd) {
         log.info "trying to save new db, groups $params.selectedDBSecurityGroups"
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
@@ -105,7 +105,7 @@ class RdsInstanceController {
         }
     }
 
-    def update = { DbUpdateCommand cmd ->
+    def update(DbUpdateCommand cmd) {
         UserContext userContext = UserContext.of(request)
         if (cmd.hasErrors()) {
             chain(action: 'edit', model: [cmd: cmd], params: params) // Use chain to pass both the errors and the params
@@ -136,7 +136,7 @@ class RdsInstanceController {
         }
     }
 
-    def show = {
+    def show() {
         UserContext userContext = UserContext.of(request)
         def dbInstanceId = params.dBInstanceIdentifier ?: params.id
 
@@ -160,7 +160,7 @@ class RdsInstanceController {
         }
     }
 
-    def delete = {
+    def delete() {
         def id = ""
         UserContext userContext = UserContext.of(request)
         try {
