@@ -52,6 +52,9 @@ class Cluster extends AbstractList<AutoScalingGroupData> {
         groups.size()
     }
 
+    /**
+     * @return Returns the Asgard representation of the AWS instances in this cluster
+     */
     List<GroupedInstance> getInstances() {
         groups*.instances.flatten()
     }
