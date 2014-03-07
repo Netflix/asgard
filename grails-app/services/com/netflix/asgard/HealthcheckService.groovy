@@ -17,6 +17,9 @@ package com.netflix.asgard
 
 import org.joda.time.DateTime
 
+/**
+ * Logic for determining whether the system is currently in a state good enough to accept user traffic.
+ */
 class HealthcheckService implements BackgroundProcessInitializer {
 
     static transactional = false

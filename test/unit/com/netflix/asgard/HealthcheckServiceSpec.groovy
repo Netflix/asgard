@@ -103,7 +103,7 @@ class HealthcheckServiceSpec extends Specification {
 
     def 'should fail on error with checking cache'() {
         initService.cachesFilled() >> true
-        // leaving this without data so it throws a NPE
+        // Leaving this without data so it throws a NPE
         caches.getProperty('allAutoScalingGroups') >> asgMultiRegionCachedMap
         asgMultiRegionCachedMap.by(Region.defaultRegion()) >> { throw new IOException('This error') }
         configService.healthCheckMinimumCounts >> [allAutoScalingGroups: 1]
@@ -134,5 +134,4 @@ class HealthcheckServiceSpec extends Specification {
         caches.getProperty('allAutoScalingGroups') >> asgMultiRegionCachedMap
         configService.healthCheckMinimumCounts >> [allAutoScalingGroups: 1]
     }
-
 }
