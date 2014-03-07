@@ -32,6 +32,7 @@ class ServerService implements InitializingBean {
 
     def grailsApplication
     def emailerService
+    def initService
     def restClientService
     def secretService
     def sshService
@@ -300,5 +301,14 @@ class ServerService implements InitializingBean {
 
     private String determineActiveServerName(Environment env) {
         restClientService.getAsText("http://${env.canonicalDnsName}${serverSuffix}/server", 1000)
+    }
+
+    /**
+     * @return true if the system is not ready to accept most user requests because caches still need to load, false if
+     *          enough caches are loaded or if a startup flag indicates that an administrator has decided to
+     *          allow traffic without waiting for caches to fill
+     */
+    Boolean shouldCacheLoadingBlockUserRequests() {
+        !initService.cachesFilled() && !System.getProperty('skipCacheFill')
     }
 }

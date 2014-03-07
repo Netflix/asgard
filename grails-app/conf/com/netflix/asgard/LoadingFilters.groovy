@@ -21,12 +21,12 @@ class LoadingFilters {
 
     def dependsOn = [InitFilters]
 
-    def initService
+    def serverService
 
     def filters = {
         all(controller: '(cache|init|healthcheck|server)', invert: true) {
             before = {
-                if (!initService.cachesFilled() && !System.getProperty('skipCacheFill')) {
+                if (serverService.shouldCacheLoadingBlockUserRequests()) {
                     render(status: HttpServletResponse.SC_SERVICE_UNAVAILABLE, view: '/loading')
                     return false
                 }
