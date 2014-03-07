@@ -56,7 +56,7 @@ class TaskController {
         Task task = taskService.getTaskById(id)
         if (!task) {
             Requests.renderNotFound('Task', id, this)
-            return
+            return []
         } else {
             String updateTime = task.updateTime ? Time.format(task.updateTime) : ''
             withFormat {

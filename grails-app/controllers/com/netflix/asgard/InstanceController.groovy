@@ -268,7 +268,7 @@ class InstanceController {
             return [ 'instanceId': instanceId, 'consoleOutput' : consoleOutput, 'now': new Date() ]
         } catch (AmazonServiceException ase) {
             Requests.renderNotFound('Instance', instanceId, this, ase.toString())
-            return
+            return []
         }
     }
 
@@ -343,7 +343,7 @@ class InstanceController {
         if (!instance) {
             flash.message = "EC2 Instance ${params.instanceId} not found."
             redirect(action: 'list')
-            return
+            return []
         } else {
             Map<String, String> publicIps = awsEc2Service.describeAddresses(userContext)
             log.debug "describeAddresses: ${publicIps}"

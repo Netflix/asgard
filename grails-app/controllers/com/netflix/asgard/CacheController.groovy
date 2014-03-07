@@ -30,8 +30,8 @@ class CacheController {
 
     def allowedMethods = [fill: 'POST']
 
-    def index() { 
-        redirect(action: 'list', params: params) 
+    def index() {
+        redirect(action: 'list', params: params)
     }
 
     def list() {

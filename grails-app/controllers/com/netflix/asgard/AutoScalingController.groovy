@@ -367,7 +367,7 @@ class AutoScalingController {
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, name)
         if (!group) {
             Requests.renderNotFound('Auto Scaling Group', name, this)
-            return
+            return []
         }
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         List<String> subnetIds = Relationships.subnetIdsFromVpcZoneIdentifier(group.VPCZoneIdentifier)

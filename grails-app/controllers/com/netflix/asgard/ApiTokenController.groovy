@@ -39,8 +39,7 @@ class ApiTokenController {
         redirect(action: 'create', params: params)
     }
 
-    def create() { 
-        
+    def create() {
     }
 
     def generate(GenerateApiTokenCommand cmd) {

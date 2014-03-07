@@ -111,8 +111,8 @@ class PushController {
         }
     }
 
-    def result() { 
-        render view: '/common/result' 
+    def result() {
+        render view: '/common/result'
     }
 
     def enableTimeouts() {
