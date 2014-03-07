@@ -76,6 +76,6 @@ class ServerControllerSpec extends Specification {
 
         then:
         response.contentAsString == '3'
-        taskService.getRunningInMemory() >> [new Task(), new Task(), new Task()]
+        taskService.getLocalRunningInMemory() >> [new Task(), new Task(), new Task()]
     }
 }

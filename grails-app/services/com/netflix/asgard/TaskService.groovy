@@ -177,9 +177,9 @@ class TaskService {
     }
 
     /**
-     * @return only in-memory running tasks (no SWF workflow executions)
+     * @return only in-memory running tasks on the local system (no SWF workflow executions)
      */
-    List<Task> getRunningInMemory() {
+    List<Task> getLocalRunningInMemory() {
         Lists.newArrayList(running)
     }
 

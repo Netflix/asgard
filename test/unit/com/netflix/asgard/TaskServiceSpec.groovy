@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.google.common.collect.Queues
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import java.util.concurrent.CountDownLatch
 import spock.lang.Specification
@@ -79,5 +80,21 @@ class TaskServiceSpec extends Specification {
         workHasStarted.await()
         task.thread.join()
         thingToChange == ['hello']
+    }
+
+    def 'should list local in-memory tasks'() {
+
+        Queue<Task> runningTasks = Queues.newConcurrentLinkedQueue()
+        Task taskA = new Task(name: 'a')
+        Task taskB = new Task(name: 'b')
+        runningTasks.add(taskA)
+        runningTasks.add(taskB)
+        TaskService taskService = new TaskService(running: runningTasks)
+
+        when:
+        List<Task> result = taskService.getLocalRunningInMemory()
+
+        then:
+        result == [taskA, taskB]
     }
 }

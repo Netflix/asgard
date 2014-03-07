@@ -93,6 +93,6 @@ class TaskController {
     }
 
     def runningCount() {
-        render taskService.getRunningInMemory().size().toString()
+        render taskService.getLocalRunningInMemory().size().toString()
     }
 }
