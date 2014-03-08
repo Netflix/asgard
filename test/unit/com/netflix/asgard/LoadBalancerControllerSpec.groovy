@@ -228,7 +228,8 @@ class LoadBalancerControllerSpec extends Specification {
         controller.addListener(cmd)
 
         then:
-        controller.flash.message == "Could not add listener: java.lang.Exception: Missing cloud.default_elb_ssl_certificate_id value in Config.groovy"
+        controller.flash.message == "Could not add listener: java.lang.Exception:" +
+                "Missing cloud.default_elb_ssl_certificate_id value in Config.groovy"
         response.redirectUrl == '/loadBalancer/prepareListener'
         1 * mockConfigService.getDefaultElbSslCertificateId() >> null
         0 * _._
@@ -280,10 +281,12 @@ class LoadBalancerControllerSpec extends Specification {
         controller.flash.message == "Load Balancer 'helloworld-unittest-frontend' has been created. null"
         2 * mockConfigService.getDefaultElbSslCertificateId() >> "default_elb_ssl_certificate_id"
         1 * mockConfigService._
-        1 * controller.awsLoadBalancerService.createLoadBalancer(_, _, _, [new Listener(protocol: 'HTTPS', loadBalancerPort: 443, instancePort: 7001).
-                withSSLCertificateId("default_elb_ssl_certificate_id"), new Listener(protocol: 'HTTPS', loadBalancerPort: 80, instancePort: 7001).
+        1 * controller.awsLoadBalancerService.createLoadBalancer(_, _, _, [
+                    new Listener(protocol: 'HTTPS', loadBalancerPort: 443, instancePort: 7001).
+                        withSSLCertificateId("default_elb_ssl_certificate_id"),
+                    new Listener(protocol: 'HTTPS', loadBalancerPort: 80, instancePort: 7001).
                         withSSLCertificateId("default_elb_ssl_certificate_id")
-        ], _,_)
+        ], _, _)
         1 * controller.awsLoadBalancerService.configureHealthCheck(_, _, _)
         0 * _._
     }

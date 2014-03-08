@@ -99,5 +99,4 @@ class LoadBalancerControllerTests {
         assert ['HTTP', 'HTTPS', 'TCP'] == controller.protocols
     }
 
-
 }

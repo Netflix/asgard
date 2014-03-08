@@ -277,7 +277,6 @@ class ConfigService {
         grailsApplication.config.cloud?.defaultElbSslCertificateId ?: ""
     }
 
-
     /**
      * @return the list of regions in which platformservice is available for fast property reading and writing
      */
