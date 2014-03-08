@@ -323,7 +323,7 @@ class LoadBalancerController {
             if (cert && !cert.allWhitespace) {
                     return listener.withSSLCertificateId(cert)
                 }
-            throw new IllegalStateException("Missing cloud.default_elb_ssl_certificate_id value in Config.groovy")
+            throw new IllegalStateException("Missing cloud.defaultElbSslCertificateId value in Config.groovy")
         }
         return listener
      }

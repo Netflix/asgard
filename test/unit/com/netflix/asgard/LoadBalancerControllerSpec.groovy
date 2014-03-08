@@ -228,8 +228,8 @@ class LoadBalancerControllerSpec extends Specification {
         controller.addListener(cmd)
 
         then:
-        controller.flash.message == "Could not add listener: java.lang.Exception:" +
-                "Missing cloud.default_elb_ssl_certificate_id value in Config.groovy"
+        controller.flash.message == "Could not add listener: java.lang.IllegalStateException: " +
+                "Missing cloud.defaultElbSslCertificateId value in Config.groovy"
         response.redirectUrl == '/loadBalancer/prepareListener'
         1 * mockConfigService.getDefaultElbSslCertificateId() >> null
         0 * _._
