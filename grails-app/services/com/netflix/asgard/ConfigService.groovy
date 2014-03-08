@@ -271,6 +271,14 @@ class ConfigService {
     }
 
     /**
+     * @return The SSL certificate id to use when creating HTTPS listener for an elastic load balancer
+     */
+    String getDefaultElbSslCertificateId() {
+        grailsApplication.config.cloud?.defaultElbSslCertificateId ?: ""
+    }
+
+
+    /**
      * @return the list of regions in which platformservice is available for fast property reading and writing
      */
     List<Region> getPlatformServiceRegions() {

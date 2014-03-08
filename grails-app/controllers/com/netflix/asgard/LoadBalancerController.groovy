@@ -123,6 +123,7 @@ class LoadBalancerController {
             vpcId: subnets.getVpcIdForSubnetPurpose(params.subnetPurpose),
             securityGroupsGroupedByVpcId: securityGroupsGroupedByVpcId,
             selectedSecurityGroups: Requests.ensureList(params.selectedSecurityGroups),
+            protocols: protocols,
         ]
     }
 
@@ -144,12 +145,12 @@ class LoadBalancerController {
                 Listener listener1 = new Listener().withProtocol(params.protocol1).
                         withLoadBalancerPort(params.lbPort1.toInteger()).
                         withInstancePort(params.instancePort1.toInteger())
-                List<Listener> listeners = [listener1]
+                List<Listener> listeners = [handleHttpsListener(listener1)]
                 if (params.protocol2) {
-                    listeners.add(new Listener()
+                    listeners.add(handleHttpsListener(new Listener()
                             .withProtocol(params.protocol2)
                             .withLoadBalancerPort(params.lbPort2.toInteger())
-                            .withInstancePort(params.instancePort2.toInteger()))
+                            .withInstancePort(params.instancePort2.toInteger())))
                 }
                 String subnetPurpose = params.subnetPurpose ?: null
                 awsLoadBalancerService.createLoadBalancer(userContext, lbName, zoneList, listeners, securityGroups,
@@ -259,7 +260,7 @@ class LoadBalancerController {
         String protocol = params.protocol
         String lbPort = params.lbPort
         String instancePort = params.instancePort
-        [loadBalancer: loadBalancer, protocol: protocol, lbPort: lbPort, instancePort: instancePort]
+        [loadBalancer: loadBalancer, protocol: protocol, lbPort: lbPort, instancePort: instancePort, protocols: protocols]
     }
 
     def addListener(AddListenerCommand cmd) {
@@ -268,8 +269,10 @@ class LoadBalancerController {
         } else {
             UserContext userContext = UserContext.of(request)
             Listener listener = new Listener(protocol: cmd.protocol, loadBalancerPort: cmd.lbPort,
-                    instancePort: cmd.instancePort)
+                    instancePort: cmd.instancePort);
+
             try {
+                listener = handleHttpsListener(listener);
                 awsLoadBalancerService.addListeners(userContext, cmd.name, [listener])
                 flash.message = "Listener has been added to port ${listener.loadBalancerPort}."
                 redirect(action: 'show', params: [id: cmd.name])
@@ -299,6 +302,25 @@ class LoadBalancerController {
     def result() {
         render view: '/common/result'
     }
+
+    private def getProtocols() {
+        if (configService.defaultElbSslCertificateId) {
+            ['HTTP', 'HTTPS', 'TCP']
+        } else {
+            ['HTTP', 'TCP']
+        }
+    }
+
+    private Listener handleHttpsListener(listener) {
+        if (listener.getProtocol().equalsIgnoreCase("https")) {
+            def cert = configService.defaultElbSslCertificateId
+            if (cert && !cert.allWhitespace) {
+                    return listener.withSSLCertificateId(cert);
+                }
+            throw new Exception("Missing cloud.default_elb_ssl_certificate_id value in Config.groovy");
+        }
+        return listener;
+     }
 }
 
 class LoadBalancerCreateCommand {
