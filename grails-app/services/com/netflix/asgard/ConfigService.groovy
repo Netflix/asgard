@@ -736,6 +736,20 @@ class ConfigService {
     }
 
     /**
+     * @return the server names and ports of the other Asgard instances that should share in-memory task lists
+     */
+    List<String> getOtherServerNamePortCombos() {
+        grailsApplication.config.server?.otherServerNamePortCombos ?: []
+    }
+
+    /**
+     * @return port to use when calling other Asgard instances in the same cluster, if ports are unavailable from Eureka
+     */
+    String getPortForOtherServersInCluster() {
+        grailsApplication.config.server?.portForOtherServersInCluster ?: null
+    }
+
+    /**
      * @return details of server configurations.
      */
     List<Environment> getServerEnvironments() {
