@@ -32,6 +32,10 @@ class GroupedInstanceSpec extends Specification {
 
     def 'should include fields from input objects including app instance from Eureka'() {
         Date launchTime = new Date(1394486241000)
+        String publicDnsName = 'ec2-102-33-120-162.compute-1.amazonaws.com'
+        String publicIpAddress = '102.33.120.162'
+        String privateDnsName = 'ip-10-200-33-222.example.com'
+        String privateIpAddress = '10.200.33.222'
         String instanceId = 'i-deadbeef'
         String appVersion = 'helloworld-1.4.0-1140443.h420/build-huxtable/420'
         String healthCheckUrl = 'http://amihealthy'
@@ -39,9 +43,13 @@ class GroupedInstanceSpec extends Specification {
         String launchConfigName = 'helloworld-v031-20131013103142'
         String imageId = 'ami-deadbeef'
         String lifeCycleState = 'InService'
+        String port = '7001'
         Collection<LoadBalancerDescription> lbs = [new LoadBalancerDescription(loadBalancerName: 'hello-frontend')]
-        Instance ec2Instance = new Instance(instanceId: instanceId, launchTime: launchTime)
-        ApplicationInstance appInstance = new ApplicationInstance(status: 'UP', healthCheckUrl: healthCheckUrl)
+        Instance ec2Instance = new Instance(instanceId: instanceId, publicDnsName: publicDnsName,
+                publicIpAddress: publicIpAddress, privateDnsName: privateDnsName, privateIpAddress: privateIpAddress,
+                launchTime: launchTime)
+        ApplicationInstance appInstance = new ApplicationInstance(hostName: publicDnsName, status: 'UP',
+                healthCheckUrl: healthCheckUrl, port: port)
         MergedInstance mergedInstance = new MergedInstance(ec2Instance, appInstance)
         Image image = new Image(imageId: imageId, tags: [new Tag(key: 'appversion', value: appVersion)])
         def asgInstance = new com.amazonaws.services.autoscaling.model.Instance(instanceId: instanceId,
@@ -59,11 +67,17 @@ class GroupedInstanceSpec extends Specification {
         result.discoveryStatus == 'UP'
         result.healthCheckUrl == healthCheckUrl
         result.healthStatus == 'Healthy'
+        result.hostName == publicDnsName
         result.imageId == imageId
         result.instanceId == instanceId
         result.launchConfigurationName == launchConfigName
         result.launchTime.time == launchTime.time
         result.lifecycleState == lifeCycleState
         result.loadBalancers == ['hello-frontend']
+        result.port == port
+        result.publicDnsName == publicDnsName
+        result.publicIpAddress == publicIpAddress
+        result.privateDnsName == privateDnsName
+        result.privateIpAddress == privateIpAddress
     }
 }
