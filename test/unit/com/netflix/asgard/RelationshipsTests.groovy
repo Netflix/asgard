@@ -85,14 +85,14 @@ class RelationshipsTests extends GrailsUnitTestCase {
     }
 
     void testBuildNextAutoScalingGroupName() {
-        assert "discovery-dev-v000" == Relationships.buildNextAutoScalingGroupName("discovery-dev")
-        assert "discovery-dev-v000" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v999")
-        assert "discovery-dev-v999" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v998")
-        assert "discovery-dev-v998" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v997")
-        assert "discovery-dev-v001" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v000")
-        assert "discovery-dev-v002" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v001")
-        assert "discovery-dev-v003" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v002")
-        assert "discovery-dev-v522" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v521")
+        assert "discovery-dev-v000" == Relationships.buildNextAutoScalingGroupName("discovery-dev", 999)
+        assert "discovery-dev-v000" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v999", 999)
+        assert "discovery-dev-v999" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v998", 999)
+        assert "discovery-dev-v998" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v997", 999)
+        assert "discovery-dev-v001" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v000", 999)
+        assert "discovery-dev-v002" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v001", 999)
+        assert "discovery-dev-v003" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v002", 999)
+        assert "discovery-dev-v522" == Relationships.buildNextAutoScalingGroupName("discovery-dev-v521", 999)
     }
 
     void testDissectGroupNameWithDot() {

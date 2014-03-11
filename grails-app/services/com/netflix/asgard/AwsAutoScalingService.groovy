@@ -252,7 +252,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                 AutoScalingGroupData.from(asg, instanceIdsToLoadBalancerLists, mergedInstances, imageIdsToImages, [])
             }
 
-            return new Cluster(clusterGroups)
+            return new Cluster(clusterGroups, configService.maximumClusterSize, configService.maximumClusterSequence)
         }
         null
     }

@@ -26,6 +26,7 @@ import com.netflix.asgard.MergedInstance
 import com.netflix.asgard.Relationships
 import com.netflix.asgard.TagNames
 import com.netflix.asgard.Time
+import com.netflix.frigga.Names
 import com.netflix.frigga.ami.AppVersion
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -259,5 +260,12 @@ class AutoScalingGroupData {
 
     boolean isAddingToLoadBalancerSuspended() {
         isProcessSuspended(AutoScalingProcessType.AddToLoadBalancer)
+    }
+
+    /**
+     * @return the embedded object graph meta data from the ASG's name
+     */
+    Names getNames() {
+        Relationships.dissectCompoundName this.autoScalingGroupName
     }
 }
