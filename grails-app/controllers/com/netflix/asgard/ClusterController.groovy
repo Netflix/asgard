@@ -51,7 +51,7 @@ import grails.converters.XML
 class ClusterController {
 
     static allowedMethods = [createNextGroup: 'POST', resize: 'POST', delete: 'POST', activate: 'POST',
-        deactivate: 'POST', deploy: 'POST', proceedWithDeployment: 'POST', rollbackDeployment: 'POST']
+            deactivate: 'POST', deploy: 'POST', proceedWithDeployment: 'POST', rollbackDeployment: 'POST']
 
     def grailsApplication
     def applicationService
@@ -122,9 +122,9 @@ class ClusterController {
                     String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
                     Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
                     String recommendedNextStep = cluster.size() >= Relationships.CLUSTER_MAX_GROUPS ?
-                        'Delete an old group before pushing to a new group.' :
-                        cluster.size() <= 1 ? 'Create a new group and switch traffic to it' :
-                        'Switch traffic to the preferred group, then delete legacy group'
+                            'Delete an old group before pushing to a new group.' :
+                            cluster.size() <= 1 ? 'Create a new group and switch traffic to it' :
+                                    'Switch traffic to the preferred group, then delete legacy group'
                     Collection<Task> runningTasks = taskService.getRunningTasksByObject(Link.to(EntityType.cluster,
                             cluster.name), userContext.region)
 
@@ -304,9 +304,9 @@ ${lastGroup.loadBalancerNames}"""
             return
         }
         AutoScalingGroupData group = cluster.last()
-        if ( group.isLaunchingSuspended() ||
-             group.isTerminatingSuspended() ||
-             group.isAddingToLoadBalancerSuspended()
+        if (group.isLaunchingSuspended() ||
+                group.isTerminatingSuspended() ||
+                group.isAddingToLoadBalancerSuspended()
         ) {
             flash.message = "ASG in cluster '${cmd.clusterName}' should be receiving traffic to enable automatic " +
                     "deployment."
@@ -333,7 +333,7 @@ ${lastGroup.loadBalancerNames}"""
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         String vpcId = subnets.getVpcIdForSubnetPurpose(subnetPurpose) ?: ''
         List<String> loadBalancerNames = Requests.ensureList(params["selectedLoadBalancersForVpcId${vpcId}"] ?:
-            params["selectedLoadBalancers"])
+                params["selectedLoadBalancers"])
 
         Collection<AutoScalingProcessType> newSuspendedProcesses = Sets.newHashSet()
         if (params.azRebalance == 'disabled') {
@@ -365,18 +365,12 @@ ${lastGroup.loadBalancerNames}"""
         redirect(controller: 'task', action: 'show', id: tags.id)
     }
 
-    protected LaunchConfigurationBeanOptions buildLaunchOptions(params){
-        new LaunchConfigurationBeanOptions(
-                imageId: params.imageId,
-                instanceMonitoring: (params.instanceMonitoring ?
-                        new InstanceMonitoring().withEnabled(params.instanceMonitoring.toBoolean()) :
-                        new InstanceMonitoring().withEnabled(configService.enableInstanceMonitoring)),
-                instanceType: params.instanceType,
-                keyName: params.keyName,
+    protected LaunchConfigurationBeanOptions buildLaunchOptions(params) {
+        LaunchConfigurationBeanOptions.from(params + [
                 securityGroups: Requests.ensureList(params.selectedSecurityGroups),
-                iamInstanceProfile: params.iamInstanceProfile,
-                instancePriceType: InstancePriceType.parse(params.pricing),
-                ebsOptimized: params.ebsOptimized?.toBoolean())
+                instancePriceType: params.pricing,
+                instanceMonitoring: params.instanceMonitoring ?: configService.enableInstanceMonitoring
+        ])
     }
 
     @SuppressWarnings("GroovyAssignabilityCheck")
@@ -439,7 +433,7 @@ ${loadBalancerNames}"""
             log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers from last \
 Group: ${lastGroup.loadBalancerNames}"""
             boolean ebsOptimized = params.containsKey('ebsOptimized') ? params.ebsOptimized?.toBoolean() :
-                lastLaunchConfig.ebsOptimized
+                    lastLaunchConfig.ebsOptimized
             if (params.noOptionalDefaults != 'true') {
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
@@ -547,8 +541,12 @@ Group: ${loadBalancerNames}"""
         String field = params.field
         if (!name || !field) {
             response.status = 400
-            if (!name) { render 'name is a required parameter' }
-            if (!field) { render 'field is a required parameter' }
+            if (!name) {
+                render 'name is a required parameter'
+            }
+            if (!field) {
+                render 'field is a required parameter'
+            }
             return
         }
         Cluster cluster = awsAutoScalingService.getCluster(userContext, name)
@@ -557,9 +555,13 @@ Group: ${loadBalancerNames}"""
         String result = mergedInstance?.getFieldValue(field)
         if (!result) {
             response.status = 404
-            if (!cluster) { result = "No cluster found with name '$name'" }
-            else if (!mergedInstance) { result = "No instances found for cluster '$name'" }
-            else { result = "'$field' not found. Valid fields: ${mergedInstance.listFieldNames()}" }
+            if (!cluster) {
+                result = "No cluster found with name '$name'"
+            } else if (!mergedInstance) {
+                result = "No instances found for cluster '$name'"
+            } else {
+                result = "'$field' not found. Valid fields: ${mergedInstance.listFieldNames()}"
+            }
         }
         render result
     }

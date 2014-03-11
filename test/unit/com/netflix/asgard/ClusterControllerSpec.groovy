@@ -292,8 +292,10 @@ class ClusterControllerSpec extends Specification {
     }
 
     def 'controller should build options from params'() {
-        def params = [imageId: 'test1', keyName: 'testkey', securityGroups: 'sec', iamInstanceProfile: 'aim',
-                pricing: '11', ebsOptimized: false]
+        def params = [imageId: 'test1', keyName: 'testkey',
+                selectedSecurityGroups: 'sec',
+                iamInstanceProfile: 'aim',
+                pricing: '11', ebsOptimized: 'false']
         LaunchConfigurationBeanOptions options = controller.buildLaunchOptions(params)
 
         expect:
@@ -302,6 +304,8 @@ class ClusterControllerSpec extends Specification {
         options.ebsOptimized == false
         options.instanceMonitoring != null
         options.instanceMonitoring == new InstanceMonitoring().withEnabled(false)
+        options.instancePriceType == InstancePriceType.parse('11')
+        options.securityGroups == new HashSet<String>(['sec'])
     }
 
     def 'controller should build options from params including instance monitoring if set to true'() {

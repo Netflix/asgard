@@ -120,6 +120,25 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
         request.instanceMonitoring != null
     }
 
+    def 'should create LaunchConfigurationBeanOptions from an arbitrary map'(){
+        def params = [imageId: 'test1',
+                keyName: 'testkey',
+                securityGroups: ["sec"],
+                iamInstanceProfile: 'aim',
+                instancePriceType: '11',
+                ebsOptimized: false,
+                instanceMonitoring: true]
+
+        def opts = LaunchConfigurationBeanOptions.from(params)
+
+        expect:
+        opts != null
+        opts.instanceMonitoring == new InstanceMonitoring().withEnabled(true)
+        opts.ebsOptimized == false
+        opts.securityGroups == new HashSet<String>(["sec"])
+        opts.instancePriceType == InstancePriceType.parse('11')
+
+    }
     def 'should create CreateLaunchConfigurationRequest'() {
         expect:
         lcOptions.getCreateLaunchConfigurationRequest(null, null) == createLaunchConfigurationRequest
