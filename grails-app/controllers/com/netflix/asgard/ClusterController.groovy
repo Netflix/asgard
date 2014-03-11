@@ -121,9 +121,7 @@ class ClusterController {
 		    		boolean associatePublicIpAddress = false
 		    		if (lastLaunchConfig) {
 						associatePublicIpAddress = lastLaunchConfig.isAssociatePublicIpAddress()
-		    		}
-		    		String lastGroupNameName = lastGroup.launchConfigurationName
-		    		LaunchConfiguration lastLaunchConfig = awsAutoScalingService.getLaunchConfiguration(userContext, lastGroupNameName, From.CACHE)
+		    		}		    				    		
                     String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
                     Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
                     String recommendedNextStep = cluster.size() >= Relationships.CLUSTER_MAX_GROUPS ?
