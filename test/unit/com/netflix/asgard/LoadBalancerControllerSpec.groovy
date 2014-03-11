@@ -33,6 +33,7 @@ import spock.lang.Unroll
 class LoadBalancerControllerSpec extends Specification {
 
     AmazonElasticLoadBalancing mockElb = Mock(AmazonElasticLoadBalancing)
+    ConfigService mockConfigService = Mock(ConfigService)
     AwsLoadBalancerService awsLoadBalancerService = Mock(AwsLoadBalancerService)
     AwsEc2Service awsEc2Service = Mock(AwsEc2Service)
     AwsAutoScalingService awsAutoScalingService = Mock(AwsAutoScalingService)
@@ -48,6 +49,7 @@ class LoadBalancerControllerSpec extends Specification {
         awsLoadBalancerService.awsClient = new MultiRegionAwsClient({ mockElb })
         controller.awsEc2Service = awsEc2Service
         controller.awsAutoScalingService = awsAutoScalingService
+        controller.configService = mockConfigService
         controller.applicationService = applicationService
         mockElb.describeLoadBalancers(_) >> { [] }
     }
@@ -185,7 +187,7 @@ class LoadBalancerControllerSpec extends Specification {
         response.redirectUrl == '/loadBalancer/prepareListener'
     }
 
-    def 'addListener should create listener'() {
+    def 'addListener should create http listener'() {
         final cmd = new AddListenerCommand(name: 'app--test', protocol: 'http', lbPort: 80, instancePort: 7001)
         cmd.validate()
 
@@ -200,6 +202,39 @@ class LoadBalancerControllerSpec extends Specification {
         0 * _._
     }
 
+    def 'addListener should create https listener'() {
+        final cmd = new AddListenerCommand(name: 'app--test', protocol: 'https', lbPort: 443, instancePort: 7001)
+        cmd.validate()
+
+        when:
+        controller.addListener(cmd)
+
+        then:
+        response.redirectUrl == '/loadBalancer/show/app--test'
+        controller.flash.message == "Listener has been added to port 443."
+        1 * mockConfigService.getDefaultElbSslCertificateId() >> "default_elb_ssl_certificate_id"
+        1 * controller.awsLoadBalancerService.addListeners(_, 'app--test',
+                [new Listener(protocol: 'https', loadBalancerPort: 443, instancePort: 7001).
+                        withSSLCertificateId("default_elb_ssl_certificate_id")
+                ])
+        0 * _._
+    }
+
+    def 'addListener should fail for create https listener when no defaultElbSslCertificateId'() {
+        final cmd = new AddListenerCommand(name: 'app--test', protocol: 'https', lbPort: 443, instancePort: 7001)
+        cmd.validate()
+
+        when:
+        controller.addListener(cmd)
+
+        then:
+        controller.flash.message == "Could not add listener: java.lang.IllegalStateException: " +
+                "Missing cloud.defaultElbSslCertificateId value in Config.groovy"
+        response.redirectUrl == '/loadBalancer/prepareListener'
+        1 * mockConfigService.getDefaultElbSslCertificateId() >> null
+        0 * _._
+    }
+
     def 'removeListener should delete Listener'() {
         final cmd = new RemoveListenerCommand(name: 'app--test', lbPort: 80)
         cmd.validate()
@@ -211,6 +246,48 @@ class LoadBalancerControllerSpec extends Specification {
         response.redirectUrl == '/loadBalancer/show/app--test'
         controller.flash.message == "Listener on port 80 has been removed."
         1 * controller.awsLoadBalancerService.removeListeners(_, 'app--test', [80])
+        0 * _._
+    }
+
+    def 'when creating load balancer with HTTPS listeners should add ssl certificate'() {
+        request.method = 'POST'
+        def p = controller.params
+        p.appName = 'helloworld'
+        p.stack = 'unittest'
+        p.detail = 'frontend'
+        p.protocol1 = 'HTTPS'
+        p.lbPort1 = '443'
+        p.instancePort1 = '7001'
+        p.protocol2 = 'HTTPS'
+        p.lbPort2 = '80'
+        p.instancePort2 = '7001'
+        p.target = 'HTTP:7001/healthcheck'
+        p.interval = '40'
+        p.timeout = '40'
+        p.unhealthy = '40'
+        p.healthy = '40'
+        LoadBalancerCreateCommand cmd = new LoadBalancerCreateCommand(appName: p.appName, stack: p.stack,
+                detail: p.detail, protocol1: p.protocol1, lbPort1: p.lbPort1 as Integer,
+                instancePort1: p.instancePort1 as Integer, target: p.target, interval: p.interval as Integer,
+                timeout: p.timeout as Integer, unhealthy: p.unhealthy as Integer, healthy: p.healthy as Integer)
+        cmd.applicationService = applicationService
+
+        when:
+        controller.save(cmd)
+
+        then:
+
+        response.redirectUrl == '/loadBalancer/show?name=helloworld-unittest-frontend'
+        controller.flash.message == "Load Balancer 'helloworld-unittest-frontend' has been created. null"
+        2 * mockConfigService.getDefaultElbSslCertificateId() >> "default_elb_ssl_certificate_id"
+        1 * mockConfigService._
+        1 * controller.awsLoadBalancerService.createLoadBalancer(_, _, _, [
+                    new Listener(protocol: 'HTTPS', loadBalancerPort: 443, instancePort: 7001).
+                        withSSLCertificateId("default_elb_ssl_certificate_id"),
+                    new Listener(protocol: 'HTTPS', loadBalancerPort: 80, instancePort: 7001).
+                        withSSLCertificateId("default_elb_ssl_certificate_id")
+        ], _, _)
+        1 * controller.awsLoadBalancerService.configureHealthCheck(_, _, _)
         0 * _._
     }
 }

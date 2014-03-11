@@ -90,4 +90,13 @@ class LoadBalancerControllerTests {
         assert flash.message.startsWith("Load Balancer 'helloworld-unittest-frontend' has been created.")
     }
 
+    void testProtocols() {
+        assert ['HTTP', 'TCP'] == controller.protocols
+    }
+
+    void testProtocolsWhenCertificateIdIsConfigured() {
+        controller.configService.grailsApplication.config.cloud.defaultElbSslCertificateId = "certificateId"
+        assert ['HTTP', 'HTTPS', 'TCP'] == controller.protocols
+    }
+
 }
