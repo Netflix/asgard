@@ -27,7 +27,7 @@ class TaskControllerSpec extends Specification {
         TestUtils.setUpMockRequest()
     }
 
-    def 'non-existent task should render a "not found" response'() {
+    void 'non-existent task should render a "not found" response'() {
         controller.taskService = Mock(TaskService) {
             getTaskById(_) >> null
         }

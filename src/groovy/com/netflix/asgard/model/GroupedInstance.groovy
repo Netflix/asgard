@@ -47,7 +47,7 @@ class GroupedInstance {
 
     static GroupedInstance from(Instance asgInstance, Collection<LoadBalancerDescription> loadBalancersForInstance,
                                    MergedInstance mergedInstance, Image image) {
-        AppVersion appVersion = Relationships.dissectAppVersion(image?.appVersion)
+        AppVersion appVersion = Relationships.dissectAppVersion(image?.appVersion as String)
         new GroupedInstance(
                 asgInstance.instanceId,
                 asgInstance.availabilityZone,

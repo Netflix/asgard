@@ -39,6 +39,11 @@ import org.joda.time.DateTime
     String objectId
     List<String> log = new CopyOnWriteArrayList<String>()
 
+    /**
+     * Adds a string to the task's log of recorded operations.
+     *
+     * @param op the operation message to log
+     */
     def log(String op) {
         updateTime = new Date()
         operation = op
@@ -50,20 +55,33 @@ import org.joda.time.DateTime
                 "{Region: ${userContext?.region}} [${name}] ${operation}"
     }
 
-    def getDurationString() {
+    /**
+     * @return how long the task has been running, or how long it took to run, in abbreviated human readable form such
+     *          as '1h 14m 37s'
+     */
+    String getDurationString() {
         DateTime endTime = isDone() ? new DateTime(updateTime) : Time.now()
         Time.format(new DateTime(startTime), endTime)
     }
 
+    /**
+     * @return human-readable summary of the state of the task
+     */
     String getSummary() {
         "Asgard task ${status} in ${env} ${userContext?.region} by " +
                 "${userContext?.username ?: userContext?.clientHostName}: ${name}"
     }
 
+    /**
+     * @return the log of operations completed, concatenated into a single newline-delimited string
+     */
     String getLogAsString() {
         log.join("\n")
     }
 
+    /**
+     * @return true if the status field is an expected successful or failed value
+     */
     Boolean isDone() {
         'completed'.equalsIgnoreCase(status) || 'failed'.equalsIgnoreCase(status) || 'TIMED_OUT'.
                 equalsIgnoreCase(status)
