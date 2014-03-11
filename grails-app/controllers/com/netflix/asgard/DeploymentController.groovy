@@ -149,7 +149,8 @@ class DeploymentController {
                 group.isTerminatingSuspended() ||
                 group.isAddingToLoadBalancerSuspended()
         ) {
-            flash.message = "ASG in cluster '${clusterName}' should be receiving traffic to enable automatic deployment."
+            flash.message =
+                    "ASG in cluster '${clusterName}' should be receiving traffic to enable automatic deployment."
             chain(controller: 'cluster', action: 'prepareDeployment', model: [cmd: cmd], params: params,
                     id: clusterName)
             return

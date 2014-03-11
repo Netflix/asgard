@@ -20,7 +20,7 @@ import com.amazonaws.services.simpleworkflow.flow.DynamicWorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
-import com.netflix.glisten.InterfaceBasedWorkflowClient
+import com.netflix.asgard.model.SwfWorkflow
 import com.netflix.glisten.WorkflowClientFactory
 import com.netflix.glisten.example.trip.BayAreaTripWorkflow
 import com.netflix.glisten.impl.swf.WorkflowClientExternalToWorkflowInterfaceAdapter
@@ -29,9 +29,12 @@ import spock.lang.Specification
 class FlowServiceUnitSpec extends Specification {
 
     WorkflowClientFactory workflowClientFactory = new WorkflowClientFactory(Mock(AmazonSimpleWorkflow))
-    FlowService flowService = new FlowService(workflowClientFactory: workflowClientFactory)
+    AwsSimpleWorkflowService awsSimpleWorkflowService = Spy(AwsSimpleWorkflowService)
+    FlowService flowService = new FlowService(workflowClientFactory: workflowClientFactory,
+            awsSimpleWorkflowService: awsSimpleWorkflowService)
 
     def 'should get new workflow client'() {
+        given: 'an initialized FlowService'
         UserContext userContext = new UserContext(username: 'rtargaryen')
         Link link = new Link(type: EntityType.cluster, id: '123')
         DynamicWorkflowClientExternal dynamicWorkflowClient = Mock(DynamicWorkflowClientExternal)
@@ -42,25 +45,31 @@ class FlowServiceUnitSpec extends Specification {
         ]
         flowService.idService = Mock(IdService)
 
-        when:
-        def client = flowService.getNewWorkflowClient(userContext, BayAreaTripWorkflow, link)
+        when: 'workflow is constructed'
+        def workflow = flowService.getNewWorkflowClient(userContext, BayAreaTripWorkflow, link)
 
-        then:
-        client instanceof InterfaceBasedWorkflowClient
-        client.workflowExecution != null
-        client.schedulingOptions.tagList == expectedTagList
+        then: 'it is constructed properly'
+        workflow instanceof SwfWorkflow
+        workflow.tags.constructTags() == expectedTagList
 
-        when:
-        def workflow = client.asWorkflow(null, dynamicWorkflowClient)
+        when: 'workflow client is asked for'
+        def client = workflow.getClient(dynamicWorkflowClient)
 
-        then:
-        workflow instanceof WorkflowClientExternalToWorkflowInterfaceAdapter
+        then: 'client is the right type'
+        client instanceof WorkflowClientExternalToWorkflowInterfaceAdapter
 
-        when:
-        workflow.start('John Snow', [])
+        when: 'workflow is called'
+        client.start('John Snow', [])
 
-        then:
+        then: 'client starts workflow'
         1 * dynamicWorkflowClient.startWorkflowExecution(['John Snow', []] as Object[], _)
+        1 * dynamicWorkflowClient.getSchedulingOptions()
+        1 * dynamicWorkflowClient.getWorkflowExecution() >> new WorkflowExecution(workflowId: 'abc')
+        0 * dynamicWorkflowClient._
+
+        and: 'cache is updated'
+        1 * awsSimpleWorkflowService.getWorkflowExecutionInfoByWorkflowExecution(
+                new WorkflowExecution(workflowId: 'abc')) >> null
     }
 
     def 'should get an existing workflow client'() {

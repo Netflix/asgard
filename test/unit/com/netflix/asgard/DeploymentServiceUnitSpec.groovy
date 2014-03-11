@@ -28,6 +28,7 @@ import com.netflix.asgard.deployment.DeploymentWorkflowOptions
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.Deployment
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
+import com.netflix.asgard.model.SwfWorkflow
 import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.glisten.InterfaceBasedWorkflowClient
@@ -151,12 +152,11 @@ class DeploymentServiceUnitSpec extends Specification {
             GenericWorkflowClientExternal genericClient = Mock(GenericWorkflowClientExternal) {
                 startWorkflow(_) >> workflowExecution
             }
-            new InterfaceBasedWorkflowClient(DeploymentWorkflow, new DeploymentWorkflowDescriptionTemplate(),
+            new SwfWorkflow(new InterfaceBasedWorkflowClient(DeploymentWorkflow,
+                    new DeploymentWorkflowDescriptionTemplate(),
                     workflowExecution, new WorkflowType(), new StartWorkflowOptions(), null,
-                    genericClient, new SwfWorkflowTags(id: '07700900461'))
+                    genericClient, new SwfWorkflowTags(id: '07700900461')))
         }
-        1 * awsSimpleWorkflowService.getWorkflowExecutionInfoByWorkflowExecution(
-                new WorkflowExecution(workflowId: '1716231163'))
         0 * _
     }
 
