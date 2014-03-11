@@ -116,7 +116,7 @@ import java.lang.reflect.Modifier
     static final EntityType<Vpc> vpc = create('VPC', { it.vpcId }, 'vpc-')
     static final EntityType<WorkflowExecutionInfo> workflowExecution = create('Workflow Execution',
             { new SwfWorkflowTags().withTags(it.tagList).id ?: it.execution.runId })
-    static final EntityType<Deployment> deployment = create('Deployment', { it.id})
+    static final EntityType<Deployment> deployment = create('Deployment', { it.id })
     static final EntityType<WorkflowTypeInfo> workflowType = create('Workflow Type',
             { "${it.workflowType.name}-${it.workflowType.version}" as String })
     static final EntityType<DomainInfo> workflowDomain = create('Workflow Domain', { it.name })

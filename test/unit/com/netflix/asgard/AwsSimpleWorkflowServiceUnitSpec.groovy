@@ -20,7 +20,6 @@ import com.amazonaws.services.simpleworkflow.model.DescribeWorkflowExecutionRequ
 import com.amazonaws.services.simpleworkflow.model.DomainInfo
 import com.amazonaws.services.simpleworkflow.model.ExecutionTimeFilter
 import com.amazonaws.services.simpleworkflow.model.History
-import com.amazonaws.services.simpleworkflow.model.ListOpenWorkflowExecutionsRequest
 import com.amazonaws.services.simpleworkflow.model.TagFilter
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionDetail
@@ -55,6 +54,7 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
             '{"link":{"type":{"name":"cluster"},"id":"gus-fring"}}',
             '{"id":"1005"}'
     ])
+    AmazonSimpleWorkflow mockAmazonSimpleWorkflow = Mock(AmazonSimpleWorkflow)
 
     def setup() {
         awsSimpleWorkflowService.caches = new Caches(new MockCachedMapBuilder([:], { Mock(CachedMap) }))
@@ -62,7 +62,7 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
             getSimpleWorkflowDomain() >> 'Westeros'
             getWorkflowExecutionRetentionPeriodInDays() >> 10
         }
-        awsSimpleWorkflowService.simpleWorkflowClient = Mock(AmazonSimpleWorkflow)
+        awsSimpleWorkflowService.simpleWorkflowClient = mockAmazonSimpleWorkflow
     }
 
     def 'should retrieve domains'() {
@@ -239,6 +239,9 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
         result == deployGusFring1
         1 * awsSimpleWorkflowService.caches.allOpenWorkflowExecutions.list() >>
                 [deployGusFring1, deployWalterWhite1, deployGusFring2]
+        1 * awsSimpleWorkflowService.configService.getSimpleWorkflowDomain() >> 'Albuquerque'
+        1 * mockAmazonSimpleWorkflow.describeWorkflowExecution(
+                new DescribeWorkflowExecutionRequest(domain: 'Albuquerque')) >> new WorkflowExecutionDetail()
         0 * _
     }
 
@@ -257,13 +260,6 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
         then:
         result == null
         1 * awsSimpleWorkflowService.caches.allOpenWorkflowExecutions.list() >> []
-        1 * awsSimpleWorkflowService.configService.getSimpleWorkflowDomain() >> 'Westeros'
-        1 * awsSimpleWorkflowService.configService.getWorkflowExecutionRetentionPeriodInDays() >> 10
-        1 * awsSimpleWorkflowService.simpleWorkflowClient.listOpenWorkflowExecutions(
-                new ListOpenWorkflowExecutionsRequest(domain: 'Westeros',
-                        tagFilter: new TagFilter(tag: '{"link":{"type":{"name":"cluster"},"id":"this-isnt-running"}}'),
-                        startTimeFilter: timeFilter)
-        ) >> new WorkflowExecutionInfos()
         0 * _
     }
 }

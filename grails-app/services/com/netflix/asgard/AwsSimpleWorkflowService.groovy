@@ -50,6 +50,7 @@ import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.retriever.AwsResultsRetriever
+import com.netflix.glisten.WorkflowExecutionCreationCallback
 import groovyx.gpars.dataflow.Dataflow
 import groovyx.gpars.dataflow.Promise
 import org.joda.time.DateTime
@@ -323,24 +324,39 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     }
 
     /**
-     * Looks first in the cache and then in AWS for an open workflow execution tagged with a link (name and object type)
-     * to a cloud object that the execution is acting upon.
+     * The callback for Glisten to call after creating a WorkflowExecution, in order to update Asgard's
+     * WorkflowExecution caches.
+     */
+    WorkflowExecutionCreationCallback updateCaches = new WorkflowExecutionCreationCallback() {
+        @Override
+        void call(WorkflowExecution workflowExecution) {
+            getWorkflowExecutionInfoByWorkflowExecution(workflowExecution) // Update caches
+        }
+    }
+
+    /**
+     * Looks for an open workflow execution tagged with a link (name and object type)to a cloud object that the
+     * execution is acting upon.
+     * Because we invoke updateCaches on each workflow execution, we first look in the cache to see if there is an open
+     * workflow. If we find one, we then check AWS to make sure it has not closed yet. Note that we only have
+     * notification of updated cache when an execution starts (not when it closes), and this cache is local.
      *
      * @param link the object that describes the type and name of the cloud object for which to find an execution
-     * @return any single WorkflowExecutionInfo tagged with the specified link, or null if no match found
+     * @return any single open WorkflowExecutionInfo tagged with the specified link, or null if no match found
      */
     WorkflowExecutionInfo getOpenWorkflowExecutionForObjectLink(Link link) {
         String linkTag = new SwfWorkflowTags(link: link).constructTag('link')
-        WorkflowExecutionInfo workflowExecution = openWorkflowExecutions.find {
+        WorkflowExecutionInfo workflowExecutionInfo = openWorkflowExecutions.find {
             it.tagList.contains(linkTag)
         }
-        if (!workflowExecution) {
-            List<WorkflowExecutionInfo> matches = getOpenWorkflowExecutionsForTag(linkTag)
-            if (matches) {
-                workflowExecution = matches[0]
+        if (workflowExecutionInfo) {
+            WorkflowExecutionBeanOptions workflowExecutionBeanOptions =
+                    getWorkflowExecutionInfoByWorkflowExecution(workflowExecutionInfo.execution)
+            if (workflowExecutionBeanOptions) {
+                workflowExecutionInfo = workflowExecutionBeanOptions.executionInfo
             }
         }
-        workflowExecution
+        workflowExecutionInfo
     }
 
     // Closed workflow executions

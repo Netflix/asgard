@@ -1,17 +1,30 @@
+/*
+ * Copyright 2014 Netflix, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.netflix.asgard
+
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.model.ChildPolicy
-import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
 import com.netflix.asgard.deployment.DeploymentWorkflow
 import com.netflix.asgard.deployment.DeploymentWorkflowOptions
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.Deployment
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
-import com.netflix.asgard.model.SwfWorkflowTags
+import com.netflix.asgard.model.SwfWorkflow
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
-import com.netflix.glisten.InterfaceBasedWorkflowClient
-import com.netflix.glisten.WorkflowExecutionCreationCallback
 
 /**
  * Manages workflows that automate the deployment of a new ASG to an existing controller.
@@ -81,17 +94,6 @@ class DeploymentService {
     }
 
     /**
-     * The callback for Glisten to call after creating a WorkflowExecution, in order to update Asgard's
-     * WorkflowExecution caches.
-     */
-    private WorkflowExecutionCreationCallback updateCaches = new WorkflowExecutionCreationCallback() {
-        @Override
-        void call(WorkflowExecution workflowExecution) {
-            awsSimpleWorkflowService.getWorkflowExecutionInfoByWorkflowExecution(workflowExecution) // Update caches
-        }
-    }
-
-    /**
      * Starts the deployment of a new Auto Scaling Group in an existing cluster.
      *
      * @param userContext who, where, why
@@ -105,11 +107,10 @@ class DeploymentService {
             DeploymentWorkflowOptions deploymentOptions, LaunchConfigurationBeanOptions lcOverrides,
             AutoScalingGroupBeanOptions asgOverrides) {
 
-        InterfaceBasedWorkflowClient<DeploymentWorkflow> client = flowService.getNewWorkflowClient(userContext,
+        SwfWorkflow<DeploymentWorkflow> workflow = flowService.getNewWorkflowClient(userContext,
                 DeploymentWorkflow, new Link(EntityType.cluster, clusterName))
-        client.asWorkflow(updateCaches).deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
-        SwfWorkflowTags tags = (SwfWorkflowTags) client.workflowTags
-        tags.id
+        workflow.client.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.tags.id
     }
 
     /**
