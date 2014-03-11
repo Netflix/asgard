@@ -18,6 +18,7 @@ package com.netflix.asgard.model
 import com.amazonaws.services.autoscaling.model.BlockDeviceMapping
 import com.amazonaws.services.autoscaling.model.CreateLaunchConfigurationRequest
 import com.amazonaws.services.autoscaling.model.Ebs
+import com.amazonaws.services.autoscaling.model.InstanceMonitoring
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.netflix.asgard.SpotInstanceRequestService
 import spock.lang.Specification
@@ -64,7 +65,7 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
             kernelId: 'kernelId1',
             ramdiskId: 'ramdiskId1',
             blockDeviceMappings: [new BlockDeviceMapping(deviceName: 'deviceName1', ebs: new Ebs(volumeSize: 256))],
-            instanceMonitoring: null,
+            instanceMonitoring: new InstanceMonitoring().withEnabled(false),
             iamInstanceProfile: 'iamInstanceProfile1',
             ebsOptimized: false
     )
@@ -110,6 +111,13 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
 
         expect:
         LaunchConfigurationBeanOptions.from(awsLaunchConfiguration) == lcOptions
+    }
+
+    def 'getCreateLaunchConfigurationRequest should have instance monitoring turned off by default'(){
+        def request = lcOptions.getCreateLaunchConfigurationRequest(null, null)
+
+        expect:
+        request.instanceMonitoring != null
     }
 
     def 'should create CreateLaunchConfigurationRequest'() {

@@ -16,6 +16,7 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
+import com.amazonaws.services.autoscaling.model.InstanceMonitoring
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.ec2.model.AvailabilityZone
@@ -356,21 +357,26 @@ ${lastGroup.loadBalancerNames}"""
                 suspendedProcesses: newSuspendedProcesses
         )
 
-        LaunchConfigurationBeanOptions lcOverrides = new LaunchConfigurationBeanOptions(
-                imageId: params.imageId,
-                instanceType: params.instanceType,
-                keyName: params.keyName,
-                securityGroups: Requests.ensureList(params.selectedSecurityGroups),
-                iamInstanceProfile: params.iamInstanceProfile,
-                instancePriceType: InstancePriceType.parse(params.pricing),
-                ebsOptimized: params.ebsOptimized?.toBoolean()
-        )
-
+        LaunchConfigurationBeanOptions lcOverrides = buildLaunchOptions(params)
         def client = flowService.getNewWorkflowClient(userContext, DeploymentWorkflow,
                 new Link(EntityType.cluster, cmd.clusterName))
         client.asWorkflow().deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
         SwfWorkflowTags tags = (SwfWorkflowTags) client.workflowTags
         redirect(controller: 'task', action: 'show', id: tags.id)
+    }
+
+    protected LaunchConfigurationBeanOptions buildLaunchOptions(params){
+        new LaunchConfigurationBeanOptions(
+                imageId: params.imageId,
+                instanceMonitoring: (params.instanceMonitoring ?
+                        new InstanceMonitoring().withEnabled(params.instanceMonitoring.toBoolean()) :
+                        new InstanceMonitoring().withEnabled(configService.enableInstanceMonitoring)),
+                instanceType: params.instanceType,
+                keyName: params.keyName,
+                securityGroups: Requests.ensureList(params.selectedSecurityGroups),
+                iamInstanceProfile: params.iamInstanceProfile,
+                instancePriceType: InstancePriceType.parse(params.pricing),
+                ebsOptimized: params.ebsOptimized?.toBoolean())
     }
 
     @SuppressWarnings("GroovyAssignabilityCheck")
