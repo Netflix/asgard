@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.frigga.NameValidation
 import com.netflix.frigga.Names
 import com.netflix.frigga.ami.AppVersion
@@ -42,6 +43,32 @@ class Relationships {
      * such as scaling policy and alarm.
      */
     static final Integer GROUP_NAME_MAX_LENGTH = 96
+
+    /** The maximum number of auto scaling groups allowed in a cluster spanning multiple push sequence numbers. */
+    static final Integer CLUSTER_MAX_GROUPS = 3
+
+    /** The maximum sequence number for an auto scaling group in a sequenced cluster before rolling over to 0. */
+    static final Integer CLUSTER_MAX_SEQUENCE_NUMBER = 999
+
+    static final Comparator<AutoScalingGroupData> PUSH_SEQUENCE_COMPARATOR = new Comparator<AutoScalingGroupData>() {
+        int compare(AutoScalingGroupData a, AutoScalingGroupData b) {
+            Names aNames = dissectCompoundName(a.autoScalingGroupName)
+            Names bNames = dissectCompoundName(b.autoScalingGroupName)
+            Check.equal(aNames.cluster, bNames.cluster)
+            Integer aSequence = aNames.sequence
+            Integer bSequence = bNames.sequence
+
+            // The group with no push sequence number goes first
+            if (aSequence == null) { return -1 }
+            if (bSequence == null) { return 1 }
+
+            // If a and b are very far apart then greater number goes first, to achieve 997, 998, 999, 000, 001, 002
+            if (Math.abs(aSequence - bSequence) > CLUSTER_MAX_SEQUENCE_NUMBER - CLUSTER_MAX_GROUPS * 2) {
+                return bSequence - aSequence
+            }
+            aSequence - bSequence
+        }
+    }
 
     static String appNameFromLoadBalancerName(String loadBalancerName) {
         dissectCompoundName(loadBalancerName).app ?: ''
@@ -154,10 +181,10 @@ class Relationships {
         return "${autoScalingGroupName}-${new Date().format("yyyyMMddHHmmss")}"
     }
 
-    static String buildNextAutoScalingGroupName(String previousGroupNameInCluster, int maxSequenceNumber) {
+    static String buildNextAutoScalingGroupName(String previousGroupNameInCluster) {
         Names names = dissectCompoundName(previousGroupNameInCluster)
         Integer previous = names.sequence
-        Integer next = (previous == null || previous >= maxSequenceNumber) ? 0 : previous + 1
+        Integer next = (previous == null || previous >= CLUSTER_MAX_SEQUENCE_NUMBER) ? 0 : previous + 1
         String threeDigitNextNumber = String.format("%03d", next)
         "${names.cluster}-v${threeDigitNextNumber}"
     }

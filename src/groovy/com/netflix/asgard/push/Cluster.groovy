@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard.push
 
+import com.netflix.asgard.Check
+import com.netflix.asgard.Relationships
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.GroupedInstance
 
@@ -24,82 +26,29 @@ import com.netflix.asgard.model.GroupedInstance
  */
 class Cluster extends AbstractList<AutoScalingGroupData> {
 
+    final String name
     final List<AutoScalingGroupData> groups
 
-    Cluster(List<AutoScalingGroupData> groups, int clusterMax, int sequenceMax) {
-        if (!groups.size()) {
-            throw new IllegalArgumentException("No AutoScalingGroupData was provided!")
+    Cluster(List<AutoScalingGroupData> groups) {
+
+        // Ensure there are some groups and they all belong in the same cluster
+        Check.positive(groups?.size(), 'group size')
+        name = Relationships.clusterFromGroupName(groups[0].autoScalingGroupName)
+        for (AutoScalingGroupData group : groups) {
+            Check.equal(name, Relationships.clusterFromGroupName(group.autoScalingGroupName))
         }
-        def clusterNames = groups*.getNames().cluster.unique()
-        if (clusterNames.size() != 1) {
-            throw new IllegalArgumentException("AutoScalingGroupData belongs to different clusters!")
-        }
-        def sorted = new PushSequenceComparator(clusterNames.first(), clusterMax, sequenceMax).sort(groups)
-        this.groups = Collections.unmodifiableList(sorted)
+
+        // Sort the groups into push order and store them in this Cluster object
+        this.groups = Collections.unmodifiableList(groups.sort(Relationships.PUSH_SEQUENCE_COMPARATOR))
     }
 
-    AutoScalingGroupData last() {
-        groups.size() >= 1 ? groups[size() - 1] : null
-    }
+    AutoScalingGroupData last() { groups.size() >= 1 ? groups[size() - 1] : null }
 
     @Override
-    AutoScalingGroupData get(int i) {
-        groups[i]
-    }
+    AutoScalingGroupData get(int i) { groups[i] }
 
     @Override
-    int size() {
-        groups.size()
-    }
+    int size() { groups.size() }
 
-    /**
-     * @return Returns the Asgard representation of the AWS instances in this cluster
-     */
-    List<GroupedInstance> getInstances() {
-        groups*.instances.flatten()
-    }
-
-    static class PushSequenceComparator implements Comparator<AutoScalingGroupData> {
-
-        private final String name
-        private final Integer clusterMax
-        private final Integer sequenceMax
-        private final Integer sequenceDistanceMax
-
-        PushSequenceComparator(String name, Integer clusterMax, Integer sequenceMax) {
-            this.name = name
-            this.clusterMax = clusterMax
-            this.sequenceMax = sequenceMax
-            this.sequenceDistanceMax = sequenceMax - clusterMax * 2
-        }
-
-        @Override
-        int compare(AutoScalingGroupData a, AutoScalingGroupData b) {
-            final aNames = a.names
-            final bNames = b.names
-            if (aNames.cluster != bNames.cluster) {
-                clusterNotTheSame a, b
-            }
-            final aSeq = aNames.sequence
-            final bSeq = bNames.sequence
-            if (!aSeq || !bSeq) {
-                aSeq ? 1 : -1
-            } else {
-                // If a and b are very far apart then greater number goes first, to achieve 997, 998, 999, 000, 001, 002
-                (aSeq - bSeq).abs() > sequenceDistanceMax ? bSeq - aSeq : aSeq - bSeq
-            }
-        }
-
-        static void clusterNotTheSame(AutoScalingGroupData a, AutoScalingGroupData b) {
-            throw new IllegalArgumentException(
-                    """\
-                        |AutoScalingGroup ${a.autoScalingGroupName} is not in the same cluster as\
-                        |${b.autoScalingGroupName}
-                        |""".stripMargin())
-        }
-
-        List<AutoScalingGroupData> sort(List<AutoScalingGroupData> groups) {
-            groups.sort this
-        }
-    }
+    List<GroupedInstance> getInstances() { groups.collect { it.instances }.flatten() }
 }
