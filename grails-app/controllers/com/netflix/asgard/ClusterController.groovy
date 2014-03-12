@@ -117,8 +117,8 @@ class ClusterController {
         } else if (name == cluster.name) {
             withFormat {
                 html {
-                    int maxClusterGroups = configService.getMaximumClusterSize()
-                    int maxSequenceNumber = configService.getMaximumClusterSequence()
+                    final maxClusterGroups = configService.getMaximumClusterSize()
+                    final maxSequenceNumber = configService.getMaximumClusterSequence()
 
                     AutoScalingGroupData lastGroup = cluster.last()
                     String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName,
@@ -248,8 +248,8 @@ ${lastGroup.loadBalancerNames}"""
     }
 
     private Map<String, Object> commonNextAsgPreparation(UserContext userContext, Cluster cluster) {
-        int maxClusterGroups = configService.getMaximumClusterSize()
-        int maxSequenceNumber = configService.getMaximumClusterSequence()
+        final maxClusterGroups = configService.getMaximumClusterSize()
+        final maxSequenceNumber = configService.getMaximumClusterSequence()
 
         if (!cluster) {
             flash.message = "No auto scaling groups exist with cluster name ${cluster.name}"
@@ -393,8 +393,8 @@ ${lastGroup.loadBalancerNames}"""
             return
         }
 
-        int maxClusterGroups = configService.getMaximumClusterSize()
-        int maxSequenceNumber = configService.getMaximumClusterSequence()
+        final maxClusterGroups = configService.getMaximumClusterSize()
+        final maxSequenceNumber = configService.getMaximumClusterSequence()
 
         Boolean okayToCreateGroup = cluster.size() < maxClusterGroups
         if (okayToCreateGroup) {

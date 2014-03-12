@@ -262,9 +262,6 @@ class AutoScalingGroupData {
         isProcessSuspended(AutoScalingProcessType.AddToLoadBalancer)
     }
 
-    /**
-     * @return the embedded object graph meta data from the ASG's name
-     */
     Names getNames() {
         Relationships.dissectCompoundName this.autoScalingGroupName
     }
