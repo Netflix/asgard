@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.ClientConfiguration
 import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.server.Environment
 import com.netflix.asgard.text.TextLinkTemplate
@@ -566,6 +567,13 @@ class ConfigService {
      */
     int getHttpConnPoolMaxForRoute() {
         grailsApplication.config.httpConnPool?.maxSize ?: 5
+    }
+
+    /**
+     * @return number of milliseconds
+     */
+    int getSocketTimeout() {
+        grailsApplication.config.cloud?.socketTimeout ?: ClientConfiguration.DEFAULT_SOCKET_TIMEOUT
     }
 
     /**
