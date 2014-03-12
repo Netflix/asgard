@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.frigga.NameValidation
 import com.netflix.frigga.Names
 import com.netflix.frigga.ami.AppVersion
@@ -48,6 +49,26 @@ class Relationships {
 
     /** The maximum sequence number for an auto scaling group in a sequenced cluster before rolling over to 0. */
     static final Integer CLUSTER_MAX_SEQUENCE_NUMBER = 999
+
+    static final Comparator<AutoScalingGroupData> PUSH_SEQUENCE_COMPARATOR = new Comparator<AutoScalingGroupData>() {
+        int compare(AutoScalingGroupData a, AutoScalingGroupData b) {
+            Names aNames = dissectCompoundName(a.autoScalingGroupName)
+            Names bNames = dissectCompoundName(b.autoScalingGroupName)
+            Check.equal(aNames.cluster, bNames.cluster)
+            Integer aSequence = aNames.sequence
+            Integer bSequence = bNames.sequence
+
+            // The group with no push sequence number goes first
+            if (aSequence == null) { return -1 }
+            if (bSequence == null) { return 1 }
+
+            // If a and b are very far apart then greater number goes first, to achieve 997, 998, 999, 000, 001, 002
+            if (Math.abs(aSequence - bSequence) > CLUSTER_MAX_SEQUENCE_NUMBER - CLUSTER_MAX_GROUPS * 2) {
+                return bSequence - aSequence
+            }
+            aSequence - bSequence
+        }
+    }
 
     static String appNameFromLoadBalancerName(String loadBalancerName) {
         dissectCompoundName(loadBalancerName).app ?: ''
