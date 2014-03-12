@@ -82,6 +82,7 @@ class AwsClientService implements InitializingBean {
         clientConfiguration = new ClientConfiguration()
         clientConfiguration.proxyHost = configService.proxyHost
         clientConfiguration.proxyPort = configService.proxyPort
+        clientConfiguration.socketTimeout = configService.socketTimeout
         clientConfiguration.userAgent = 'asgard-' + serverService.version
         if (configService.online) {
             providerChain = new AsgardAWSCredentialsProviderChain(configService, restClientService)
