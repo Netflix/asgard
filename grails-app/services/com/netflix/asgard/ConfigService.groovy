@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.ClientConfiguration
 import com.netflix.asgard.model.InstanceTypeData
 import com.netflix.asgard.server.Environment
 import com.netflix.asgard.text.TextLinkTemplate
@@ -271,6 +272,13 @@ class ConfigService {
     }
 
     /**
+     * @return The SSL certificate id to use when creating HTTPS listener for an elastic load balancer
+     */
+    String getDefaultElbSslCertificateId() {
+        grailsApplication.config.cloud?.defaultElbSslCertificateId ?: ""
+    }
+
+    /**
      * @return the list of regions in which platformservice is available for fast property reading and writing
      */
     List<Region> getPlatformServiceRegions() {
@@ -363,13 +371,6 @@ class ConfigService {
      */
     Integer getWorkflowExecutionRetentionPeriodInDays() {
         grailsApplication.config?.workflow?.workflowExecutionRetentionPeriodInDays ?: 90
-    }
-
-    /**
-     * @return Map of a property name in {@link Caches} to minimum size for that cache to be considered 'healthy'
-     */
-    Map<String, Integer> getHealthCheckMinimumCounts() {
-        grailsApplication.config.healthCheck?.minimumCounts ?: [:]
     }
 
     /**
@@ -566,6 +567,13 @@ class ConfigService {
      */
     int getHttpConnPoolMaxForRoute() {
         grailsApplication.config.httpConnPool?.maxSize ?: 5
+    }
+
+    /**
+     * @return number of milliseconds
+     */
+    int getSocketTimeout() {
+        grailsApplication.config.cloud?.socketTimeout ?: ClientConfiguration.DEFAULT_SOCKET_TIMEOUT
     }
 
     /**

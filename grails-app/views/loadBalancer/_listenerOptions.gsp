@@ -16,6 +16,6 @@
 
 --%>
 <label for="protocol${index}">Protocol:</label>
-<g:select name="protocol${index}" value="${protocol}" from="${['HTTP', 'TCP']}" noSelection="['':'']" />
+<g:select name="protocol${index}" value="${protocol}" from="${protocols}" noSelection="['':'']" />
 <label for="lbPort${index}">Load Balancer Port:</label><g:textField name="lbPort${index}" value="${lbPort}"/>
 <label for="instancePort${index}">Instance Port:</label><g:textField name="instancePort${index}" value="${instancePort}"/>

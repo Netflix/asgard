@@ -86,7 +86,18 @@ class AwsRdsService implements CacheInitializer, InitializingBean {
     // Instances
 
     private List<DBInstance> retrieveDBInstances(Region region) {
-        awsClient.by(region).describeDBInstances(new DescribeDBInstancesRequest()).getDBInstances()
+        def result = awsClient.by(region).describeDBInstances(new DescribeDBInstancesRequest())
+        def dbInstances = []
+        while (true) {
+            dbInstances.addAll result.DBInstances
+            if (result.marker) {
+                result = awsClient.by(region)
+                        .describeDBInstances(new DescribeDBInstancesRequest().withMarker(result.marker))
+            } else {
+                break
+            }
+        }
+        dbInstances
     }
 
     Collection<DBInstance> getDBInstances(UserContext userContext) {
