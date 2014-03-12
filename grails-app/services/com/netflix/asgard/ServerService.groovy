@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard
 
+import com.netflix.asgard.model.GroupedInstance
+import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.server.Environment
 import com.netflix.asgard.server.Server
 import com.netflix.asgard.server.ServerState
@@ -30,8 +32,11 @@ class ServerService implements InitializingBean {
 
     static transactional = false
 
+    def awsAutoScalingService
     def grailsApplication
+    def configService
     def emailerService
+    def environmentService
     def flagService
     def initService
     def restClientService
@@ -311,5 +316,60 @@ class ServerService implements InitializingBean {
      */
     Boolean shouldCacheLoadingBlockUserRequests() {
         !initService.cachesFilled() && !System.getProperty('skipCacheFill') && flagService.isOff(Flag.SKIP_CACHE_FILL)
+    }
+
+    /**
+     * Gets the server name and port combinations for all the other Asgard instances that are supposed to share state
+     * with this Asgard instance. For example, an in-memory task list should be shared by all Asgard instances. The
+     * other instances may be in the same cloud cluster as the current system, or they may be specified via
+     * configuration if running on a developer workstation or in a data center.
+     * <p>
+     * If an Asgard instance is by itself in a cloud cluster, or is running elsewhere, without any other server
+     * configured, then this method returns an empty list.
+     * <p>
+     * Examples of possible return values:
+     * ['localhost:8081', 'localhost:8082']
+     * ['ec2-238-45-22-11.amazonaws.com:7001']
+     *
+     * @return server name and port combinations of other Asgard instances that should share state
+     */
+    List<String> listRemoteServerNamesAndPorts() {
+
+        List<String> otherServers = configService.otherServerNamePortCombos
+        if (otherServers) {
+            return otherServers
+        }
+
+        String regionName = environmentService.getEnvironmentVariable(DefaultUserDataProvider.REGION_ENV_KEY)
+        String prefix = configService.userDataVarPrefix
+        String clusterName = environmentService.getEnvironmentVariable("${prefix}CLUSTER")
+
+        if (regionName && clusterName) {
+            String port = configService.portForOtherServersInCluster
+            return listRemoteServerNamesInCloudCluster(regionName, clusterName, port)
+        }
+
+        []
+    }
+
+    private List<String> listRemoteServerNamesInCloudCluster(String regionName, String clusterName,
+                                                             String configuredPort) {
+        Cluster cluster = awsAutoScalingService.getCluster(UserContext.auto(Region.withCode(regionName)), clusterName)
+        List<GroupedInstance> instances = cluster.instances
+        String localInstanceId = environmentService.instanceId
+
+        instances.findResults {
+            // Skip the instance that this thread is running on.
+            if (localInstanceId == it.instanceId) {
+                return null
+            }
+            String server = it.hostName ?: it.publicDnsName ?: it.publicIpAddress ?: it.privateDnsName ?:
+                    it.privateIpAddress
+            String port = configuredPort ?: it.port
+            if (server && port) {
+                return "${server}:${port}"
+            }
+            null
+        } as List<String>
     }
 }
