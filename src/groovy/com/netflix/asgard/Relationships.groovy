@@ -45,7 +45,7 @@ class Relationships {
     static final Integer GROUP_NAME_MAX_LENGTH = 96
 
     /** The maximum number of auto scaling groups allowed in a cluster spanning multiple push sequence numbers. */
-    static final Integer CLUSTER_MAX_GROUPS = 10
+    static final Integer CLUSTER_MAX_GROUPS = 3
 
     /** The maximum sequence number for an auto scaling group in a sequenced cluster before rolling over to 0. */
     static final Integer CLUSTER_MAX_SEQUENCE_NUMBER = 999
