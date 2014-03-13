@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.netflix.asgard.mock.Mocks
 import javax.servlet.http.HttpServletRequest
 import org.springframework.mock.web.MockHttpServletRequest
@@ -51,5 +52,19 @@ class UserContextSpec extends Specification {
 
         then: 'original is unchanged'
         userContext.region == Region.US_EAST_1
+    }
+
+    void 'Jackson should be able to make a UserContext from a JSON string'() {
+        String json = '\
+                {"ticket":"CMC-123","username":"hsimpson","clientHostName":"laptop-hsimpson",\
+                "clientIpAddress":"1.2.3.4","region":"US_WEST_2"}'.stripIndent()
+
+        when:
+        ObjectMapper mapper = new ObjectMapper()
+        UserContext userContext = mapper.readValue(json, UserContext)
+
+        then:
+        userContext == new UserContext(ticket: 'CMC-123', region: Region.US_WEST_2, username: 'hsimpson',
+                clientHostName: 'laptop-hsimpson', clientIpAddress: '1.2.3.4')
     }
 }
