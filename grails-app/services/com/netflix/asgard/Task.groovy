@@ -16,20 +16,26 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
-import groovy.transform.ToString
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import groovy.transform.Canonical
 import java.util.concurrent.CopyOnWriteArrayList
 import org.apache.commons.logging.LogFactory
 import org.joda.time.DateTime
 
-@ToString class Task {
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility=Visibility.ANY, getterVisibility=Visibility.NONE, isGetterVisibility=Visibility.NONE)
+@Canonical class Task {
     private static final logger = LogFactory.getLog(this)
 
     String id
-    WorkflowExecution workflowExecution
+    @JsonIgnore WorkflowExecution workflowExecution
     UserContext userContext
     String env
     String name
-    Thread thread
+    @JsonIgnore Thread thread
     String status
     Date startTime
     Date updateTime
@@ -124,5 +130,4 @@ import org.joda.time.DateTime
             attemptNumber++
         }
     }
-
 }

@@ -16,12 +16,14 @@
 package com.netflix.asgard
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import groovy.transform.Immutable
 import javax.servlet.http.HttpServletRequest
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.UnavailableSecurityManagerException
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Immutable final class UserContext {
 
     /** The unique identifier of the issue tracker ticket for external recording of system changes. */
