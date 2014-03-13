@@ -58,11 +58,12 @@ import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.TopicData
 import com.netflix.asgard.push.Cluster
 import groovy.transform.Immutable
+import groovy.transform.ToString
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 
 @JsonAutoDetect(getterVisibility=JsonAutoDetect.Visibility.NONE)
-@Immutable class EntityType<T> {
+@Immutable @ToString(excludes="keyer,entitySpecificLinkGeneration") class EntityType<T> {
 
     // By convention, entity names match corresponding controller names.
     static final EntityType<ActivityTypeInfo> activityType = create('Activity Type',
