@@ -36,7 +36,7 @@ class SwfWorkflowTagsSpec extends Specification {
         workflowTags.constructTags() as Set == [
                 '{"desc":"doing a thing"}',
                 '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing",' +
-                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                        '"clientIpAddress":"1.2.3.4","region":"eu-west-1","internalAutomation":true}}',
                 '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
         ] as Set
     }
@@ -45,7 +45,7 @@ class SwfWorkflowTagsSpec extends Specification {
         workflowTags.withTags([
                 '{"desc":"doing a thing"}',
                 '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing",' +
-                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                        '"clientIpAddress":"1.2.3.4","region":"' + region + '","internalAutomation":true}}',
                 '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
         ])
 
@@ -54,13 +54,18 @@ class SwfWorkflowTagsSpec extends Specification {
         workflowTags.user == UserContext.of('jira-123', 'rtargaryen', "King's Landing", '1.2.3.4',
                 Region.EU_WEST_1, true)
         workflowTags.link == Link.to(EntityType.cluster, 'house-targaryen')
+
+        where:
+        region      | explanation
+        'EU_WEST_1' | 'legacy tags with Region enum names are still supported'
+        'eu-west-1' | 'newer tags with Region code values are preferred'
     }
 
     def 'should be able to modify tags without changing original'() {
         List<String> originalTags = [
                 '{"desc":"doing a thing"}',
                 '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing",' +
-                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                        '"clientIpAddress":"1.2.3.4","region":"eu-west-1","internalAutomation":true}}',
                 '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
         ]
         workflowTags.withTags(originalTags)
@@ -74,13 +79,13 @@ class SwfWorkflowTagsSpec extends Specification {
         workflowTags.constructTags() as Set == [
                 '{"desc":"doing a different thing"}',
                 '{"user":{"ticket":"jira-456","username":"rtargaryen","clientHostName":"King\'s Landing",' +
-                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                        '"clientIpAddress":"1.2.3.4","region":"eu-west-1","internalAutomation":true}}',
                 '{"link":{"type":{"name":"cluster"},"id":"hizzouse-targaryen"}}'
         ] as Set
         originalTags == [
                 '{"desc":"doing a thing"}',
                 '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing",' +
-                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                        '"clientIpAddress":"1.2.3.4","region":"eu-west-1","internalAutomation":true}}',
                 '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
         ]
     }
@@ -88,7 +93,7 @@ class SwfWorkflowTagsSpec extends Specification {
     def 'should handle tags in any order'() {
         workflowTags.withTags([
                 '{"user":{"ticket":"jira-123","username":"rtargaryen","clientHostName":"King\'s Landing",' +
-                        '"clientIpAddress":"1.2.3.4","region":"EU_WEST_1","internalAutomation":true}}',
+                        '"clientIpAddress":"1.2.3.4","region":"eu-west-1","internalAutomation":true}}',
                 '{"desc":"doing a thing"}',
                 '{"link":{"type":{"name":"cluster"},"id":"house-targaryen"}}'
         ])
@@ -110,7 +115,7 @@ class SwfWorkflowTagsSpec extends Specification {
     }
 
     def 'should quietly handle unserializable data'() {
-        workflowTags.withTags(['', '', null ])
+        workflowTags.withTags(['', '', null])
 
         expect:
         workflowTags.constructTags() == []

@@ -16,7 +16,6 @@
 package com.netflix.asgard
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.netflix.asgard.mock.Mocks
 import javax.servlet.http.HttpServletRequest
 import org.springframework.mock.web.MockHttpServletRequest
 import spock.lang.Specification
@@ -57,7 +56,7 @@ class UserContextSpec extends Specification {
     void 'Jackson should be able to make a UserContext from a JSON string'() {
         String json = '\
                 {"ticket":"CMC-123","username":"hsimpson","clientHostName":"laptop-hsimpson",\
-                "clientIpAddress":"1.2.3.4","region":"US_WEST_2"}'.stripIndent()
+                "clientIpAddress":"1.2.3.4","region":"' + region + '"}'.stripIndent()
 
         when:
         ObjectMapper mapper = new ObjectMapper()
@@ -66,5 +65,10 @@ class UserContextSpec extends Specification {
         then:
         userContext == new UserContext(ticket: 'CMC-123', region: Region.US_WEST_2, username: 'hsimpson',
                 clientHostName: 'laptop-hsimpson', clientIpAddress: '1.2.3.4')
+
+        where:
+        region      | explanation
+        'US_WEST_2' | 'legacy json blobs with Region enum names are still supported'
+        'us-west-2' | 'newer json blobs with Region code values are preferred'
     }
 }

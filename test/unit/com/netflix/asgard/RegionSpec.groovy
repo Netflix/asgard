@@ -15,36 +15,56 @@
  */
 package com.netflix.asgard
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import spock.lang.Specification
 
 class RegionSpec extends Specification {
 
-    void 'should get the Region for the specified code'() {
+    void 'should get the Region for the specified code or enum name'() {
         expect:
-        Region.US_EAST_1 == Region.withCode('us-east-1')
-        Region.US_WEST_1 == Region.withCode('us-west-1')
-        'us-west-1' == Region.withCode('us-west-1').code
-        'eu-west-1' == Region.withCode('eu-west-1').code
-        Region.withCode('us-east') == null
-        Region.withCode('blah') == null
-        Region.withCode('') == null
-        Region.withCode(null) == null
-        Region.withCode('  us-east-1  ') == null
+        Region.withCode(code) == region
+
+        where:
+        code            | region
+        'us-east-1'     | Region.US_EAST_1
+        'US_EAST_1'     | Region.US_EAST_1
+        'us-west-1'     | Region.US_WEST_1
+        'US_WEST_1'     | Region.US_WEST_1
+        'us-east'       | null
+        'blah'          | null
+        ''              | null
+        null            | null
+        '  us-east-1  ' | null
+        '  US_EAST_1  ' | null
     }
 
     void 'should get the Region for the specified code used by ec2 pricing json files'() {
         expect:
-        Region.US_EAST_1 == Region.withPricingJsonCode('us-east')
-        Region.US_WEST_1 == Region.withPricingJsonCode('us-west')
-        Region.EU_WEST_1 == Region.withPricingJsonCode('eu-ireland')
-        Region.AP_NORTHEAST_1 == Region.withPricingJsonCode('apac-tokyo')
-        Region.AP_SOUTHEAST_1 == Region.withPricingJsonCode('apac-sin')
-        'us-west-1' == Region.withPricingJsonCode('us-west').code
-        'eu-west-1' == Region.withPricingJsonCode('eu-ireland').code
-        Region.withPricingJsonCode('us-east-1') == null
-        Region.withPricingJsonCode('blah') == null
-        Region.withPricingJsonCode('') == null
-        Region.withPricingJsonCode(null) == null
-        Region.withPricingJsonCode('  us-east  ') == null
+        Region.withPricingJsonCode(pricingJsonCode) == region
+
+        where:
+        pricingJsonCode | region
+        'us-east'       | Region.US_EAST_1
+        'us-west'       | Region.US_WEST_1
+        'eu-ireland'    | Region.EU_WEST_1
+        'apac-tokyo'    | Region.AP_NORTHEAST_1
+        'apac-sin'      | Region.AP_SOUTHEAST_1
+        'us-east-1'     | null
+        'blah'          | null
+        ''              | null
+        null            | null
+        '  us-east  '   | null
+    }
+
+    void 'Jackson should be able to get a Region from a JSON string using Jackson'() {
+
+        expect:
+        new ObjectMapper().readValue(json, Region) == region
+
+        where:
+        json          | region
+        '"us-west-2"' | Region.US_WEST_2
+        '"US_WEST_2"' | Region.US_WEST_2
+        '"us-west"'   | null
     }
 }
