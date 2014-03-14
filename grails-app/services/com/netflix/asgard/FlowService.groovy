@@ -29,8 +29,8 @@ import com.netflix.asgard.deployment.DeploymentWorkflow
 import com.netflix.asgard.deployment.DeploymentWorkflowDescriptionTemplate
 import com.netflix.asgard.deployment.DeploymentWorkflowImpl
 import com.netflix.asgard.model.SimpleDbSequenceLocator
+import com.netflix.asgard.model.SwfWorkflow
 import com.netflix.asgard.model.SwfWorkflowTags
-import com.netflix.glisten.InterfaceBasedWorkflowClient
 import com.netflix.glisten.WorkflowClientFactory
 import com.netflix.glisten.WorkflowDescriptionTemplate
 import org.springframework.beans.factory.InitializingBean
@@ -96,12 +96,13 @@ class FlowService implements InitializingBean {
      * @param link to the relevant object
      * @return the workflow client
      */
-    public <T> InterfaceBasedWorkflowClient<T> getNewWorkflowClient(UserContext userContext,
+    public <T> SwfWorkflow<T> getNewWorkflowClient(UserContext userContext,
             Class<T> workflow, Link link = null) {
         WorkflowDescriptionTemplate workflowDescriptionTemplate = workflowToDescriptionTemplate[workflow]
         String id = idService.nextId(userContext, SimpleDbSequenceLocator.Task)
         SwfWorkflowTags tags = new SwfWorkflowTags(id: id, user: userContext, link: link)
-        workflowClientFactory.getNewWorkflowClient(workflow, workflowDescriptionTemplate, tags)
+        new SwfWorkflow(workflowClientFactory.getNewWorkflowClient(workflow, workflowDescriptionTemplate, tags),
+                awsSimpleWorkflowService.updateCaches)
     }
 
     /**

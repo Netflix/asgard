@@ -40,7 +40,9 @@ class PushService {
 
     def awsAutoScalingService
     def awsEc2Service
+    def awsSimpleWorkflowService
     def configService
+    def flowService
     def imageService
     def instanceTypeService
     def restClientService
@@ -123,7 +125,7 @@ class PushService {
     }
 
     /** Run processing that is common to multiple edit screens for preparing a push. */
-    Map<String, Object> prepareEdit(UserContext userContext, String groupName, boolean showAllImages, String actionName,
+    Map<String, Object> prepareEdit(UserContext userContext, String groupName, boolean showAllImages,
                     Collection<String> selectedSecurityGroups) {
         String name = groupName
 
@@ -155,7 +157,6 @@ class PushService {
                 name: name,
                 cluster: Relationships.clusterFromGroupName(name),
                 variables: Relationships.parts(name),
-                actionName: actionName,
                 allTerminationPolicies: awsAutoScalingService.terminationPolicyTypes,
                 terminationPolicy: group.terminationPolicies[0],
 
