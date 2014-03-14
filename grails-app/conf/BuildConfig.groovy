@@ -154,11 +154,6 @@ grails.project.dependency.resolution = {
 
         // Optional dependency for Spock to support mocking objects without a parameterless constructor.
         test 'org.objenesis:objenesis:1.2'
-
-        test "org.seleniumhq.selenium:selenium-support:2.35.0"
-        test "org.seleniumhq.selenium:selenium-chrome-driver:2.35.0"
-        test "org.gebish:geb-spock:0.9.2"
-
     }
 
     plugins {
@@ -176,7 +171,6 @@ grails.project.dependency.resolution = {
         }
 
         test ':code-coverage:1.2.5'
-        test ':geb:0.9.2'
 
         build ":tomcat:$grailsVersion"
     }
