@@ -117,10 +117,12 @@ class DeploymentService {
      * Checks whether the specified cluster has at least one open workflow execution.
      *
      * @param clusterName the name of the cluster in question
-     * @return info about the workflow execution that is currently operating on the cluster, or null if none found
+     * @return deployment that is currently operating on the cluster, or null if none found
      */
-    WorkflowExecutionInfo getRunningDeploymentForCluster(String clusterName) {
+    Deployment getRunningDeploymentForCluster(String clusterName) {
         Link link = new Link(type: EntityType.cluster, id: clusterName)
-        awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link)
+        WorkflowExecutionInfo executionInfo = awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link)
+        if (executionInfo == null) { return null }
+        new WorkflowExecutionBeanOptions(executionInfo).asDeployment()
     }
 }

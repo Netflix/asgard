@@ -161,26 +161,25 @@ class DeploymentServiceUnitSpec extends Specification {
     }
 
     def 'should indicate that a workflow execution is in progress for the specified cluster'() {
-
         Link link = Link.to(EntityType.cluster, 'helloworld-example')
 
         when:
-        WorkflowExecutionInfo info = deploymentService.getRunningDeploymentForCluster('helloworld-example')
+        Deployment deployment = deploymentService.getRunningDeploymentForCluster('helloworld-example')
 
         then:
-        info == new WorkflowExecutionInfo()
-        1 * awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link) >> new WorkflowExecutionInfo()
+        deployment == new Deployment('123', null, null, null, null, null, null, null, 'running', [])
+        1 * awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link) >> new WorkflowExecutionInfo(
+                tagList: new SwfWorkflowTags(id: '123').constructTags())
     }
 
     def 'should indicate that a workflow execution is not in progress for the specified cluster'() {
-
         Link link = Link.to(EntityType.cluster, 'helloworld-example')
 
         when:
-        WorkflowExecutionInfo info = deploymentService.getRunningDeploymentForCluster('helloworld-example')
+        Deployment deployment = deploymentService.getRunningDeploymentForCluster('helloworld-example')
 
         then:
-        info == null
+        deployment == null
         1 * awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link) >> null
     }
 }
