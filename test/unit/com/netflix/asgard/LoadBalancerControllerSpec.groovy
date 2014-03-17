@@ -249,6 +249,25 @@ class LoadBalancerControllerSpec extends Specification {
         0 * _._
     }
 
+    def 'by default should not show HTTPS'() {
+        when:
+        final protocols = controller.getProtocols()
+
+        then:
+        protocols == ['HTTP', 'TCP']
+    }
+
+    def 'when SSL certificate is configured should show HTTPS'() {
+        given:
+        1 * mockConfigService.getDefaultElbSslCertificateId() >> "default_elb_ssl_certificate_id"
+
+        when:
+        final protocols = controller.getProtocols()
+
+        then:
+        protocols == ['HTTP', 'HTTPS', 'TCP']
+    }
+
     def 'when creating load balancer with HTTPS listeners should add ssl certificate'() {
         request.method = 'POST'
         def p = controller.params
