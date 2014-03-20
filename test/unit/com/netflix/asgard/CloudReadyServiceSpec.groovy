@@ -15,8 +15,10 @@
  */
 package com.netflix.asgard
 
+import org.codehaus.groovy.grails.web.json.JSONObject
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class CloudReadyServiceSpec extends Specification {
 
     CloudReadyService cloudReadyService = new CloudReadyService()
@@ -48,10 +50,10 @@ class CloudReadyServiceSpec extends Specification {
         String chaosMonkeyStatus = cloudReadyService.chaosMonkeyStatusForApplication('helloworld')
 
         then:
-        1 * mockRestClientService.getAsJson(applicationSettingsUrl) >> [
-            enabled: 'true',
-            optLevel: 'application'
-        ]
+        1 * mockRestClientService.getAsJson(applicationSettingsUrl) >> new JSONObject([
+                enabled: 'true',
+                optLevel: 'application'
+        ])
         0 * mockRestClientService._
         chaosMonkeyStatus == 'enabled'
     }
@@ -61,10 +63,10 @@ class CloudReadyServiceSpec extends Specification {
         String chaosMonkeyStatus = cloudReadyService.chaosMonkeyStatusForApplication('helloworld')
 
         then:
-        1 * mockRestClientService.getAsJson(applicationSettingsUrl) >> [
-            enabled: 'false',
-            optLevel: 'cluster'
-        ]
+        1 * mockRestClientService.getAsJson(applicationSettingsUrl) >> new JSONObject([
+                enabled: 'false',
+                optLevel: 'cluster'
+        ])
         0 * mockRestClientService._
         chaosMonkeyStatus == 'disabled'
     }
@@ -102,10 +104,10 @@ class CloudReadyServiceSpec extends Specification {
         String chaosMonkeyStatus = cloudReadyService.chaosMonkeyStatusForCluster(Region.US_EAST_1, 'helloworld')
 
         then:
-        1 * mockRestClientService.getAsJson(clusterSettingsUrl) >> [
+        1 * mockRestClientService.getAsJson(clusterSettingsUrl) >> new JSONObject([
                 enabled: 'true',
                 optLevel: 'application'
-        ]
+        ])
         0 * mockRestClientService._
         chaosMonkeyStatus == 'enabled'
     }
@@ -115,10 +117,10 @@ class CloudReadyServiceSpec extends Specification {
         String chaosMonkeyStatus = cloudReadyService.chaosMonkeyStatusForCluster(Region.US_EAST_1, 'helloworld')
 
         then:
-        1 * mockRestClientService.getAsJson(clusterSettingsUrl) >> [
+        1 * mockRestClientService.getAsJson(clusterSettingsUrl) >> new JSONObject([
                 enabled: 'false',
                 optLevel: 'cluster'
-        ]
+        ])
         0 * mockRestClientService._
         chaosMonkeyStatus == 'disabled'
     }
@@ -162,10 +164,10 @@ class CloudReadyServiceSpec extends Specification {
         Set<String> appsWithClusterOptLevel = cloudReadyService.applicationsWithOptLevel('cluster')
 
         then:
-        1 * mockRestClientService.getAsJson(expectUrl) >> [ 'applications': [
+        1 * mockRestClientService.getAsJson(expectUrl) >> new JSONObject([ 'applications': [
                 [name: 'helloworld1'],
                 [name: 'helloworld2']
-        ]]
+        ]])
         0 * mockRestClientService._
         appsWithClusterOptLevel == ['helloworld1', 'helloworld2'] as Set
     }

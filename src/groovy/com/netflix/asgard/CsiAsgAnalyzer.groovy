@@ -67,7 +67,7 @@ Got response ${response.statusCode} - ${response.content} from ${url}.")
         String baseUrl = configService.asgAnalyzerBaseUrl
         String encodedName = URLEncoder.encode(name, 'UTF-8')
         String url = "${baseUrl}/jr/csi/json__csi/scheduler?action=state&name=${encodedName}&state=${state}"
-        def response = restClientService.getAsJson(url)
+        def response = restClientService.getJsonAsText(url)
         if (response == null) {
             throw new ServiceUnavailableException("Failed to modify CSI analysis '${name}'. ${url}")
         }
