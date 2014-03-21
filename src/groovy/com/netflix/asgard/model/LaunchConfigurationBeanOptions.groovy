@@ -28,7 +28,8 @@ import groovy.transform.Canonical
 /**
  * Attributes specified when manipulating launch configurations.
  */
-@Canonical class LaunchConfigurationBeanOptions extends BeanOptions {
+@Canonical
+class LaunchConfigurationBeanOptions extends BeanOptions {
 
     /** @see LaunchConfiguration#launchConfigurationName */
     String launchConfigurationName
@@ -79,7 +80,9 @@ import groovy.transform.Canonical
 
     @SuppressWarnings('ReturnsNullInsteadOfEmptyCollection')
     private static Set<BlockDeviceMapping> copyBlockDeviceMappings(Collection<BlockDeviceMapping> source) {
-        if (source == null) { return null }
+        if (source == null) {
+            return null
+        }
         source.collect {
             new BlockDeviceMapping(virtualName: it.virtualName, deviceName: it.deviceName,
                     ebs: source.ebs ? new Ebs(snapshotId: it.ebs?.snapshotId, volumeSize: it.ebs?.volumeSize) : null)
@@ -110,6 +113,17 @@ import groovy.transform.Canonical
         )
     }
 
+    static LaunchConfigurationBeanOptions from(Map params) {
+        new LaunchConfigurationBeanOptions(
+                imageId: params.imageId,
+                instanceMonitoring: new InstanceMonitoring().withEnabled(params.instanceMonitoring.toBoolean()),
+                instanceType: params.instanceType,
+                keyName: params.keyName,
+                securityGroups: params.securityGroups,
+                iamInstanceProfile: params.iamInstanceProfile,
+                instancePriceType: InstancePriceType.parse(params.instancePriceType),
+                ebsOptimized: params.ebsOptimized?.toBoolean())
+    }
     /**
      * Copy options from an LaunchConfiguration.
      *
@@ -144,7 +158,7 @@ import groovy.transform.Canonical
      * @return a CreateLaunchConfigurationRequest based on these options
      */
     CreateLaunchConfigurationRequest getCreateLaunchConfigurationRequest(UserContext userContext,
-            SpotInstanceRequestService spotInstanceRequestService) {
+                                                           SpotInstanceRequestService spotInstanceRequestService) {
         String spotPrice = null
         if (instancePriceType == InstancePriceType.SPOT) {
             spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instanceType)
@@ -159,7 +173,7 @@ import groovy.transform.Canonical
                 kernelId: kernelId ?: null, // Be careful not to set empties here. Null is okay.
                 ramdiskId: ramdiskId ?: null, // Be careful not to set empties here. Null is okay.
                 blockDeviceMappings: copyBlockDeviceMappings(blockDeviceMappings),
-                instanceMonitoring: instanceMonitoring,
+                instanceMonitoring: instanceMonitoring ?: new InstanceMonitoring().withEnabled(false),
                 spotPrice: spotPrice,
                 iamInstanceProfile: iamInstanceProfile,
                 ebsOptimized: ebsOptimized

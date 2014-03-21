@@ -17,11 +17,13 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
+import com.amazonaws.services.autoscaling.model.InstanceMonitoring
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
 import com.netflix.asgard.model.AutoScalingGroupMixin
 import com.netflix.asgard.model.InstancePriceType
+import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.SubnetData
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
@@ -47,11 +49,11 @@ class ClusterControllerSpec extends Specification {
             subnet('subnet-4', 'us-east-1e', 'external'),
     ])
     final AutoScalingGroup asg = new AutoScalingGroup(autoScalingGroupName: 'helloworld-example-v015',
-        minSize: 3, desiredCapacity: 5, maxSize: 7, healthCheckGracePeriod: 42, defaultCooldown: 360,
-        launchConfigurationName: 'helloworld-lc', healthCheckType: AutoScalingGroupHealthCheckType.EC2,
-        instances: [new Instance(instanceId: 'i-6ef9f30e'), new Instance(instanceId: 'i-95fe1df6')],
-        availabilityZones: ['us-east-1c'], loadBalancerNames: ['hello-elb'], terminationPolicies: ['hello-tp'],
-        vPCZoneIdentifier: 'subnet-1')
+            minSize: 3, desiredCapacity: 5, maxSize: 7, healthCheckGracePeriod: 42, defaultCooldown: 360,
+            launchConfigurationName: 'helloworld-lc', healthCheckType: AutoScalingGroupHealthCheckType.EC2,
+            instances: [new Instance(instanceId: 'i-6ef9f30e'), new Instance(instanceId: 'i-95fe1df6')],
+            availabilityZones: ['us-east-1c'], loadBalancerNames: ['hello-elb'], terminationPolicies: ['hello-tp'],
+            vPCZoneIdentifier: 'subnet-1')
     final LaunchConfiguration launchConfiguration = new LaunchConfiguration(imageId: 'lastImageId',
             instanceType: 'lastInstanceType', keyName: 'lastKeyName', securityGroups: ['sg-123', 'sg-456'],
             iamInstanceProfile: 'lastIamProfile', spotPrice: '1.23')
@@ -66,9 +68,9 @@ class ClusterControllerSpec extends Specification {
         controller.with() {
             awsAutoScalingService = Mock(AwsAutoScalingService)
             taskService = Mock(TaskService)
-            taskService.getRunningTasksByObject(*_) >> []
+            taskService.getRunningTasksByObject(* _) >> []
             pushService = Mock(PushService)
-            pushService.prepareEdit(*_) >> [:]
+            pushService.prepareEdit(* _) >> [:]
             awsEc2Service = Mock(AwsEc2Service)
             awsEc2Service.getSubnets(_) >> subnets
             awsEc2Service.getAvailabilityZones(_) >> []
@@ -81,9 +83,10 @@ class ClusterControllerSpec extends Specification {
     def 'show should display cluster with one ASG'() {
         controller.awsAutoScalingService.getCluster(_, 'helloworld-example') >> {
             new Cluster([
-                AutoScalingGroupData.from(new AutoScalingGroup(autoScalingGroupName: 'helloworld-example-v015',
-                    instances: [new Instance(instanceId: 'i-6ef9f30e'), new Instance(instanceId: 'i-95fe1df6')]),
-                        [:], [], [:], [])
+                    AutoScalingGroupData.from(new AutoScalingGroup(autoScalingGroupName: 'helloworld-example-v015',
+                            instances: [new Instance(instanceId: 'i-6ef9f30e'),
+                                    new Instance(instanceId: 'i-95fe1df6')]),
+                            [:], [], [:], [])
             ])
         }
         controller.params.id = 'helloworld-example'
@@ -286,6 +289,32 @@ class ClusterControllerSpec extends Specification {
         then:
         flash.chainModel.cmd == cmd
         response.redirectedUrl == '/cluster/prepareDeployment'
+    }
+
+    def 'controller should build options from params'() {
+        def params = [imageId: 'test1', keyName: 'testkey',
+                selectedSecurityGroups: 'sec',
+                iamInstanceProfile: 'aim',
+                pricing: '11', ebsOptimized: 'false']
+        LaunchConfigurationBeanOptions options = controller.buildLaunchOptions(params)
+
+        expect:
+        options != null
+        options.iamInstanceProfile == 'aim'
+        options.ebsOptimized == false
+        options.instanceMonitoring != null
+        options.instanceMonitoring == new InstanceMonitoring().withEnabled(false)
+        options.instancePriceType == InstancePriceType.parse('11')
+        options.securityGroups == new HashSet<String>(['sec'])
+    }
+
+    def 'controller should build options from params including instance monitoring if set to true'() {
+        def params = [imageId: 'test1', keyName: 'testkey', securityGroups: 'sec', iamInstanceProfile: 'aim',
+                pricing: '11', ebsOptimized: false, instanceMonitoring: 'true']
+        LaunchConfigurationBeanOptions options = controller.buildLaunchOptions(params)
+
+        expect:
+        options.instanceMonitoring == new InstanceMonitoring().withEnabled(true)
     }
 
     def 'deploy should fail when the cluster has two autoscaling group'() {
