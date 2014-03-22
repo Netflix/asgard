@@ -21,7 +21,6 @@ import com.amazonaws.ClientConfiguration
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.ec2.AmazonEC2Client
-import com.amazonaws.services.ec2.model.ActivateLicenseRequest
 import com.amazonaws.services.ec2.model.AllocateAddressRequest
 import com.amazonaws.services.ec2.model.AllocateAddressResult
 import com.amazonaws.services.ec2.model.AssociateDhcpOptionsRequest
@@ -65,7 +64,6 @@ import com.amazonaws.services.ec2.model.CreateVpnConnectionRequest
 import com.amazonaws.services.ec2.model.CreateVpnConnectionResult
 import com.amazonaws.services.ec2.model.CreateVpnGatewayRequest
 import com.amazonaws.services.ec2.model.CreateVpnGatewayResult
-import com.amazonaws.services.ec2.model.DeactivateLicenseRequest
 import com.amazonaws.services.ec2.model.DeleteCustomerGatewayRequest
 import com.amazonaws.services.ec2.model.DeleteDhcpOptionsRequest
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest
@@ -100,8 +98,6 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest
 import com.amazonaws.services.ec2.model.DescribeInstancesResult
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest
 import com.amazonaws.services.ec2.model.DescribeKeyPairsResult
-import com.amazonaws.services.ec2.model.DescribeLicensesRequest
-import com.amazonaws.services.ec2.model.DescribeLicensesResult
 import com.amazonaws.services.ec2.model.DescribePlacementGroupsRequest
 import com.amazonaws.services.ec2.model.DescribePlacementGroupsResult
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest
@@ -505,12 +501,8 @@ class MockAmazonEC2Client extends AmazonEC2Client {
 
     AttachVolumeResult attachVolume(AttachVolumeRequest attachVolumeRequest) { null }
 
-    DescribeLicensesResult describeLicenses(DescribeLicensesRequest describeLicensesRequest) { null }
-
     PurchaseReservedInstancesOfferingResult purchaseReservedInstancesOffering(
             PurchaseReservedInstancesOfferingRequest purchaseReservedInstancesOfferingRequest) { null }
-
-    void activateLicense(ActivateLicenseRequest activateLicenseRequest) { }
 
     void resetImageAttribute(ResetImageAttributeRequest resetImageAttributeRequest) { }
 
@@ -528,8 +520,6 @@ class MockAmazonEC2Client extends AmazonEC2Client {
     void deleteSpotDatafeedSubscription(DeleteSpotDatafeedSubscriptionRequest deleteSpotDatafeedSubscriptionRequest) { }
 
     DescribeVpcsResult describeVpcs(DescribeVpcsRequest describeVpcsRequest) { new DescribeVpcsResult() }
-
-    void deactivateLicense(DeactivateLicenseRequest deactivateLicenseRequest) { }
 
     DescribeSnapshotAttributeResult describeSnapshotAttribute(
             DescribeSnapshotAttributeRequest describeSnapshotAttributeRequest) { null }
@@ -650,8 +640,6 @@ class MockAmazonEC2Client extends AmazonEC2Client {
     DescribeSpotDatafeedSubscriptionResult describeSpotDatafeedSubscription() { null }
 
     DescribeTagsResult describeTags() { null }
-
-    DescribeLicensesResult describeLicenses() { null }
 
     DescribeVpnConnectionsResult describeVpnConnections() { null }
 
