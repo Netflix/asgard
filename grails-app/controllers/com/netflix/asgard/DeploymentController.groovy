@@ -44,7 +44,6 @@ class DeploymentController {
     def deploymentService
     def flowService
 
-
     /**
      * Lists all running deployments and the last 100 completed deployments.
      */
