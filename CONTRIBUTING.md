@@ -8,7 +8,7 @@ There's a plethora of ways to contribute to Asgard!
 * Fixing open issues listed in the [issue tracker](https://github.com/Netflix/asgard/issues)
 * Proposing, discussing, and implementing new features
 * Participating in the [Asgard Show on Google Hangouts](http://www.youtube.com/user/TheAsgardShow)
-* [Join us at Netflix](http://jobs.netflix.com/) and work on Asgard fulltime!
+* [Join us at Netflix](http://jobs.netflix.com/) and work on Asgard fulltime! 
 * Surprising us with some other form of contribution!
 
 
@@ -20,9 +20,9 @@ Good communication makes a big difference. We are always eager to listen, reflec
 
 ## Contributing to Asgard
 
-To contribute code or documentation, please submit a pull request to the [GitHub repository](https://github.com/Netflix/asgard).
+To contribute code or documentation, please submit a pull request to the [GitHub repository](https://github.com/Netflix/asgard). 
 
-A good way to familiarize yourself with the codebase and contribution process is to look for and tackle low-hanging fruits in the [issue tracker](https://github.com/Netflix/asgard/issues). Before embarking on a more ambitious contribution, please quickly [get in touch](#communication) with us. This will help to make sure that the contribution is aligned with Asgard's overall direction and goals, and gives us a chance to guide design and implementation where needed.
+A good way to familiarize yourself with the codebase and contribution process is to look for and tackle low-hanging fruits in the [issue tracker](https://github.com/Netflix/asgard/issues). Before embarking on a more ambitious contribution, please quickly [get in touch](#communication) with us. This will help to make sure that the contribution is aligned with Asgard's overall direction and goals, and gives us a chance to guide design and implementation where needed. 
 
 **We appreciate your effort, and want to avoid a situation where a contribution requires extensive rework (by you or by us), sits in the queue for a long time, or cannot be accepted at all!**
 
@@ -53,6 +53,6 @@ Asgard supports JRE 1.6 and higher. Therefore, language features and APIs that a
 
 ### Tests
 
-All tests are now written in Spock.
+All tests are written in Spock.
 
 The Asgard Team
