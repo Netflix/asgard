@@ -36,6 +36,7 @@ import grails.converters.XML
 class DeploymentController {
 
     static allowedMethods = [deploy: 'POST', proceed: 'POST', rollback: 'POST']
+    static defaultAction = "list"
 
     def applicationService
     def awsAutoScalingService
@@ -43,7 +44,6 @@ class DeploymentController {
     def deploymentService
     def flowService
 
-    def index = { redirect(action: 'list', params: params) }
 
     /**
      * Lists all running deployments and the last 100 completed deployments.
