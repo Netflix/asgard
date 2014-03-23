@@ -806,14 +806,6 @@ class ConfigService {
     }
 
     /**
-     * @return boolean representing enabled instance monitoring. By default, AWS enables detailed instance
-     * monitoring; you must explicitly turn it off
-     */
-    boolean getEnableInstanceMonitoring(){
-        grailsApplication.config.cloud?.launchConfig?.enableInstanceMonitoring ?: false
-    }
-
-    /**
      * @return URL with info about configuring Fast Properties
      */
     String getFastPropertyInfoUrl() {

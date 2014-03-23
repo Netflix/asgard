@@ -18,7 +18,6 @@ package com.netflix.asgard.model
 import com.amazonaws.services.autoscaling.model.BlockDeviceMapping
 import com.amazonaws.services.autoscaling.model.CreateLaunchConfigurationRequest
 import com.amazonaws.services.autoscaling.model.Ebs
-import com.amazonaws.services.autoscaling.model.InstanceMonitoring
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.netflix.asgard.SpotInstanceRequestService
 import spock.lang.Specification
@@ -65,7 +64,7 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
             kernelId: 'kernelId1',
             ramdiskId: 'ramdiskId1',
             blockDeviceMappings: [new BlockDeviceMapping(deviceName: 'deviceName1', ebs: new Ebs(volumeSize: 256))],
-            instanceMonitoring: new InstanceMonitoring().withEnabled(false),
+            instanceMonitoring: null,
             iamInstanceProfile: 'iamInstanceProfile1',
             ebsOptimized: false
     )
@@ -113,32 +112,6 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
         LaunchConfigurationBeanOptions.from(awsLaunchConfiguration) == lcOptions
     }
 
-    def 'getCreateLaunchConfigurationRequest should have instance monitoring turned off by default'(){
-        def request = lcOptions.getCreateLaunchConfigurationRequest(null, null)
-
-        expect:
-        request.instanceMonitoring != null
-    }
-
-    def 'should create LaunchConfigurationBeanOptions from an arbitrary map'(){
-        def params = [imageId: 'test1',
-                keyName: 'testkey',
-                securityGroups: ["sec"],
-                iamInstanceProfile: 'aim',
-                instancePriceType: '11',
-                ebsOptimized: false,
-                instanceMonitoring: true]
-
-        def opts = LaunchConfigurationBeanOptions.from(params)
-
-        expect:
-        opts != null
-        opts.instanceMonitoring == new InstanceMonitoring().withEnabled(true)
-        opts.ebsOptimized == false
-        opts.securityGroups == new HashSet<String>(["sec"])
-        opts.instancePriceType == InstancePriceType.parse('11')
-
-    }
     def 'should create CreateLaunchConfigurationRequest'() {
         expect:
         lcOptions.getCreateLaunchConfigurationRequest(null, null) == createLaunchConfigurationRequest
