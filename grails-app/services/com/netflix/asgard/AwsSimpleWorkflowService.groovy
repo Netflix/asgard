@@ -50,6 +50,7 @@ import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.retriever.AwsResultsRetriever
+import com.netflix.glisten.WorkflowExecutionCreationCallback
 import groovyx.gpars.dataflow.Dataflow
 import groovyx.gpars.dataflow.Promise
 import org.joda.time.DateTime
@@ -67,6 +68,11 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     def awsClientService
     def configService
     Caches caches
+
+    /**
+     * Optional end date for workflow execution time filter, useful for testing, when current date is not desirable.
+     */
+    DateTime filterEndTime
 
     /**
      * Configure service properties
@@ -317,6 +323,42 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
         caches.allOpenWorkflowExecutions.list().findAll { it.tagList }
     }
 
+    /**
+     * The callback for Glisten to call after creating a WorkflowExecution, in order to update Asgard's
+     * WorkflowExecution caches.
+     */
+    WorkflowExecutionCreationCallback updateCaches = new WorkflowExecutionCreationCallback() {
+        @Override
+        void call(WorkflowExecution workflowExecution) {
+            getWorkflowExecutionInfoByWorkflowExecution(workflowExecution) // Update caches
+        }
+    }
+
+    /**
+     * Looks for an open workflow execution tagged with a link (name and object type)to a cloud object that the
+     * execution is acting upon.
+     * Because we invoke updateCaches on each workflow execution, we first look in the cache to see if there is an open
+     * workflow. If we find one, we then check AWS to make sure it has not closed yet. Note that we only have
+     * notification of updated cache when an execution starts (not when it closes), and this cache is local.
+     *
+     * @param link the object that describes the type and name of the cloud object for which to find an execution
+     * @return any single open WorkflowExecutionInfo tagged with the specified link, or null if no match found
+     */
+    WorkflowExecutionInfo getOpenWorkflowExecutionForObjectLink(Link link) {
+        String linkTag = new SwfWorkflowTags(link: link).constructTag('link')
+        WorkflowExecutionInfo workflowExecutionInfo = openWorkflowExecutions.find {
+            it.tagList.contains(linkTag)
+        }
+        if (workflowExecutionInfo) {
+            WorkflowExecutionBeanOptions workflowExecutionBeanOptions =
+                    getWorkflowExecutionInfoByWorkflowExecution(workflowExecutionInfo.execution)
+            if (workflowExecutionBeanOptions) {
+                workflowExecutionInfo = workflowExecutionBeanOptions.executionInfo
+            }
+        }
+        workflowExecutionInfo
+    }
+
     // Closed workflow executions
 
     private List<WorkflowExecutionInfo> retrieveClosedWorkflowExecutions() {
@@ -327,7 +369,8 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     }
 
     private ExecutionTimeFilter getExecutionTimeFilter() {
-        Date oldestDate = new DateTime().minusDays(configService.workflowExecutionRetentionPeriodInDays).toDate()
+        DateTime endTime = filterEndTime ?: new DateTime()
+        Date oldestDate = endTime.minusDays(configService.workflowExecutionRetentionPeriodInDays).toDate()
         new ExecutionTimeFilter(oldestDate: oldestDate)
     }
 

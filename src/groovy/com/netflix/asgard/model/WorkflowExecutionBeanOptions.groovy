@@ -18,6 +18,7 @@ package com.netflix.asgard.model
 import com.amazonaws.services.simpleworkflow.model.HistoryEvent
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
 import com.netflix.asgard.EntityType
+import com.netflix.asgard.Region
 import com.netflix.asgard.Task
 import com.netflix.glisten.HistoryAnalyzer
 import com.netflix.glisten.LogMessage
@@ -70,4 +71,22 @@ import groovy.transform.Canonical
         task
     }
 
+    /**
+     * Constructs a deployment based on the SWF workflow execution
+     *
+     * @return deployment that represents the workflow execution
+     */
+    Deployment asDeployment() {
+        SwfWorkflowTags swfWorkflowTags = new SwfWorkflowTags()
+        swfWorkflowTags.withTags(executionInfo.tagList)
+        String status = executionInfo.closeStatus?.toLowerCase() ?: 'running'
+        List<LogMessage> logMessages = events ? HistoryAnalyzer.of(events).logMessages : []
+        Date lastUpdate = logMessages ? logMessages.last().timestamp : executionInfo.startTimestamp
+        Date lastTime = executionInfo.closeStatus ? executionInfo.closeTimestamp : lastUpdate
+        String clusterName = swfWorkflowTags.link?.id
+        Region region = swfWorkflowTags?.user?.region
+        new Deployment(swfWorkflowTags.id, clusterName, region, executionInfo.execution, swfWorkflowTags.desc,
+                swfWorkflowTags?.user?.username, executionInfo.startTimestamp, lastTime, status,
+                logMessages*.toString())
+    }
 }

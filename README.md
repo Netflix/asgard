@@ -8,8 +8,6 @@ Asgard is a web-based tool for managing cloud-based applications and infrastruct
 
 Grab the [latest binary release](http://netflix.box.com/asgard)
 
-(We are using Box to host binaries now, not GitHub.)
-
 ## DETAILS
 
 Please see the [wiki](https://github.com/Netflix/asgard/wiki).
