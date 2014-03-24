@@ -16,20 +16,26 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
-import groovy.transform.ToString
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import groovy.transform.Canonical
 import java.util.concurrent.CopyOnWriteArrayList
 import org.apache.commons.logging.LogFactory
 import org.joda.time.DateTime
 
-@ToString class Task {
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility=Visibility.ANY, getterVisibility=Visibility.NONE, isGetterVisibility=Visibility.NONE)
+@Canonical class Task {
     private static final logger = LogFactory.getLog(this)
 
     String id
-    WorkflowExecution workflowExecution
+    @JsonIgnore WorkflowExecution workflowExecution
     UserContext userContext
     String env
     String name
-    Thread thread
+    @JsonIgnore Thread thread
     String status
     Date startTime
     Date updateTime
@@ -39,8 +45,20 @@ import org.joda.time.DateTime
     String objectId
     List<String> log = new CopyOnWriteArrayList<String>()
 
-    def log(String op) {
-        updateTime = new Date()
+    /**
+     * The server name and port of the server that is running this task, if the task was fetched from a remote server.
+     * Otherwise, null.
+     */
+    String server
+
+    /**
+     * Adds a string to the task's log of recorded operations.
+     *
+     * @param op the operation message to log
+     * @param logTime the moment that the operation occurred, or right now by default if unspecified
+     */
+    def log(String op, Date logTime = new Date()) {
+        updateTime = logTime
         operation = op
         def updateTimeString = updateTime.format("yyyy-MM-dd_HH:mm:ss")
         log << updateTimeString + ' ' + op
@@ -50,20 +68,33 @@ import org.joda.time.DateTime
                 "{Region: ${userContext?.region}} [${name}] ${operation}"
     }
 
-    def getDurationString() {
+    /**
+     * @return how long the task has been running, or how long it took to run, in abbreviated human readable form such
+     *          as '1h 14m 37s'
+     */
+    String getDurationString() {
         DateTime endTime = isDone() ? new DateTime(updateTime) : Time.now()
         Time.format(new DateTime(startTime), endTime)
     }
 
+    /**
+     * @return human-readable summary of the state of the task
+     */
     String getSummary() {
         "Asgard task ${status} in ${env} ${userContext?.region} by " +
                 "${userContext?.username ?: userContext?.clientHostName}: ${name}"
     }
 
+    /**
+     * @return the log of operations completed, concatenated into a single newline-delimited string
+     */
     String getLogAsString() {
         log.join("\n")
     }
 
+    /**
+     * @return true if the status field is an expected successful or failed value
+     */
     Boolean isDone() {
         'completed'.equalsIgnoreCase(status) || 'failed'.equalsIgnoreCase(status) || 'TIMED_OUT'.
                 equalsIgnoreCase(status)
@@ -106,5 +137,4 @@ import org.joda.time.DateTime
             attemptNumber++
         }
     }
-
 }

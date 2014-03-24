@@ -15,6 +15,9 @@
  */
 package com.netflix.asgard
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
+
 /**
  * A way to indicate a choice of region within the Amazon Web Services global service offering.
  */
@@ -68,11 +71,32 @@ enum Region {
             'Sao Paulo'
     )
 
+    /**
+     * The commonly used code name of the region such as us-east-1.
+     */
     String code
+
+    /**
+     * The code name of the region used in EC2 pricing json files.
+     */
     String pricingJsonCode
+
+    /**
+     * The name of the image file to display when the region is selected.
+     */
     String mapImageFileName
+
+    /**
+     * The geographical location of the region.
+     */
     String location
 
+    /**
+     * @param code the commonly used code name of the region such as us-east-1
+     * @param pricingJsonCode the code name of the region used in EC2 pricing json files
+     * @param mapImageFileName the name of the image file to display when the region is selected
+     * @param location the geographical location of the region
+     */
     Region(String code, String pricingJsonCode, mapImageFileName, location) {
         this.code = code
         this.pricingJsonCode = pricingJsonCode
@@ -87,8 +111,9 @@ enum Region {
      * @param code a String such as us-east-1 or ap-southeast-1
      * @return Region a matching Region object, or null if no match found
      */
+    @JsonCreator
     static Region withCode(String code) {
-        Region.values().find { it.code == code } as Region
+        Region.values().find { it.code == code || it.name() == code } as Region
     }
 
     /**
@@ -118,9 +143,17 @@ enum Region {
     }
     static Region defaultRegion() { Region.US_EAST_1 }
 
+    /**
+     * @return a human readable description of the code name and geographical location of the region
+     */
     String getDescription() {
         "$code ($location)"
     }
 
+    /**
+     * @return the code name of the region such as us-east-1
+     */
+    @JsonValue
+    @Override
     String toString() { code }
 }

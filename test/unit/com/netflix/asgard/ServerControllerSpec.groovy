@@ -22,6 +22,7 @@ import spock.lang.Specification
 class ServerControllerSpec extends Specification {
 
     ServerService serverService = Mock(ServerService)
+    TaskService taskService = Mock(TaskService)
     Properties systemProps
     Map<String, String> env
 
@@ -64,5 +65,17 @@ class ServerControllerSpec extends Specification {
                 'user.language': 'en'
         ]
         0 * _
+    }
+
+    void 'should show local in-memory running task count'() {
+
+        controller.taskService = taskService
+
+        when:
+        controller.runningTaskCount()
+
+        then:
+        response.contentAsString == '3'
+        taskService.getLocalRunningInMemory() >> [new Task(), new Task(), new Task()]
     }
 }

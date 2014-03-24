@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.netflix.asgard.model.CsiScheduledAnalysisFactory
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class CsiAsgAnalyzerSpec extends Specification {
 
     RestClientService mockRestClientService = Mock(RestClientService)
@@ -98,7 +99,7 @@ canary-launcher?cache=false.'
 
         then:
         1 * mockConfigService.getAsgAnalyzerBaseUrl() >> 'http://csi.netflix.com'
-        1 * mockRestClientService.getAsJson('http://csi.netflix.com/jr/csi/json__csi/scheduler?\
+        1 * mockRestClientService.getJsonAsText('http://csi.netflix.com/jr/csi/json__csi/scheduler?\
 action=state&name=fakeblock_analysis&state=paused') >> 'okay'
         0 * _
     }
@@ -110,7 +111,7 @@ action=state&name=fakeblock_analysis&state=paused') >> 'okay'
 
         then:
         1 * mockConfigService.getAsgAnalyzerBaseUrl() >> 'http://csi.netflix.com'
-        1 * mockRestClientService.getAsJson('http://csi.netflix.com/jr/csi/json__csi/scheduler?\
+        1 * mockRestClientService.getJsonAsText('http://csi.netflix.com/jr/csi/json__csi/scheduler?\
 action=state&name=fakeblock_analysis&state=paused')
         0 * _
 

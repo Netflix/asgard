@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class DefaultUserDataProvider implements UserDataProvider {
 
+    static final String REGION_ENV_KEY = 'EC2_REGION'
+
     @Autowired
     ConfigService configService
 
@@ -38,7 +40,7 @@ class DefaultUserDataProvider implements UserDataProvider {
             exportVar('CLUSTER', names.cluster) +
             exportVar('AUTO_SCALE_GROUP', autoScalingGroupName) +
             exportVar('LAUNCH_CONFIG', launchConfigName) +
-            exportVar('EC2_REGION', userContext.region.code, false)
+            exportVar(REGION_ENV_KEY, userContext.region.code, false)
         List<String> additionalEnvVars = Relationships.labeledEnvironmentVariables(names,
                 configService.userDataVarPrefix)
         result += additionalEnvVars ? additionalEnvVars.join('\n') : ''

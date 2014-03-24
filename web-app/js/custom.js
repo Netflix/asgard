@@ -990,7 +990,7 @@ jQuery(document).ready(function() {
                 contentType: 'application/json'
             };
             var pollOptions = {
-                min_wait: 1000,
+                min_wait: 3000,
                 wait_multiplier: 2
             };
             poller = jQuery.poll(ajaxOptions, pollOptions);

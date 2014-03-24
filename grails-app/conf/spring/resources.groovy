@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.CaseFormat
 import com.netflix.asgard.CachedMapBuilder
 import com.netflix.asgard.Caches
@@ -40,6 +42,8 @@ beans = {
     cachedMapBuilder(CachedMapBuilder, ref('threadScheduler'), limitedRegions)
 
     caches(Caches, ref('cachedMapBuilder'), ref('configService'))
+
+    objectMapper(ObjectMapper)
 
     defaultUserDataProvider(DefaultUserDataProvider) { bean ->
         bean.lazyInit = true

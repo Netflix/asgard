@@ -15,20 +15,19 @@
  */
 package com.netflix.asgard.model
 
-import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.ec2.model.Image
+import com.amazonaws.services.ec2.model.Instance
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.google.common.collect.Lists
 import com.netflix.asgard.MergedInstance
 import com.netflix.asgard.Relationships
 import com.netflix.frigga.ami.AppVersion
-import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
+import groovy.transform.Canonical
 
 /**
  * Immutable custom representation of an AWS instance in an AutoScalingGroupData.
  */
-@EqualsAndHashCode
-@ToString
+@Canonical
 class GroupedInstance {
 
     final String instanceId
@@ -37,6 +36,12 @@ class GroupedInstance {
     final String healthStatus
     final String launchConfigurationName
     final Date launchTime
+    final String hostName
+    final String port
+    final String publicDnsName
+    final String publicIpAddress
+    final String privateDnsName
+    final String privateIpAddress
     final List<String> loadBalancers
     final AppVersion appVersion
     final String buildJobName
@@ -45,53 +50,38 @@ class GroupedInstance {
     final String discoveryStatus
     final String healthCheckUrl
 
-    static GroupedInstance from(Instance asgInstance, Collection<LoadBalancerDescription> loadBalancersForInstance,
-                                   MergedInstance mergedInstance, Image image) {
-        AppVersion appVersion = Relationships.dissectAppVersion(image?.appVersion)
-        new GroupedInstance(
-                asgInstance.instanceId,
-                asgInstance.availabilityZone,
-                asgInstance.lifecycleState,
-                asgInstance.healthStatus,
-                asgInstance.launchConfigurationName,
-                mergedInstance?.launchTime,
-                loadBalancersForInstance.collect { it.loadBalancerName },
-                appVersion,
-                appVersion?.buildJobName,
-                appVersion?.buildNumber,
-                image?.imageId,
-                mergedInstance?.appInstance?.status,
-                mergedInstance?.appInstance?.healthCheckUrl
-        )
+    static GroupedInstance from(com.amazonaws.services.autoscaling.model.Instance asgInstance,
+                                Collection<LoadBalancerDescription> loadBalancersForInstance,
+                                MergedInstance mergedInstance, Image image) {
+        AppVersion appVersion = Relationships.dissectAppVersion(image?.appVersion as String)
+        List<String> loadBalancerNames = loadBalancersForInstance.collect { it.loadBalancerName }
+        ApplicationInstance appInstance = mergedInstance?.appInstance
+        Instance ec2Instance = mergedInstance?.ec2Instance
+        new GroupedInstance(asgInstance, loadBalancerNames, appInstance, ec2Instance, appVersion, image?.imageId)
     }
 
-    private GroupedInstance(
-            String instanceId,
-            String availabilityZone,
-            String lifecycleState,
-            String healthStatus,
-            String launchConfigurationName,
-            Date launchTime,
-            List<String> loadBalancers,
-            AppVersion appVersion,
-            String buildJobName,
-            String buildNumber,
-            String imageId,
-            String discoveryStatus,
-            String healthCheckUrl) {
+    private GroupedInstance(com.amazonaws.services.autoscaling.model.Instance asgInstance,
+                            Collection<String> loadBalancerNames, ApplicationInstance appInstance, Instance ec2Instance,
+                            AppVersion appVersion, String imageId) {
 
-        this.instanceId = instanceId
-        this.availabilityZone = availabilityZone
-        this.lifecycleState = lifecycleState
-        this.healthStatus = healthStatus
-        this.launchConfigurationName = launchConfigurationName
-        this.launchTime = launchTime ? new Date(launchTime.time) : null
-        this.loadBalancers = Collections.unmodifiableList(loadBalancers ? new ArrayList<String>(loadBalancers) : [])
+        this.instanceId = asgInstance.instanceId
+        this.availabilityZone = asgInstance.availabilityZone
+        this.lifecycleState = asgInstance.lifecycleState
+        this.healthStatus = asgInstance.healthStatus
+        this.launchConfigurationName = asgInstance.launchConfigurationName
+        this.hostName = appInstance?.hostName
+        this.port = appInstance?.port
+        this.discoveryStatus = appInstance?.status
+        this.healthCheckUrl = appInstance?.healthCheckUrl
+        this.launchTime = ec2Instance?.launchTime
+        this.publicDnsName = ec2Instance?.publicDnsName
+        this.publicIpAddress = ec2Instance?.publicIpAddress
+        this.privateDnsName = ec2Instance?.privateDnsName
+        this.privateIpAddress = ec2Instance?.privateIpAddress
+        this.loadBalancers = Collections.unmodifiableList(Lists.newArrayList(loadBalancerNames ?: []))
         this.appVersion = appVersion
-        this.buildJobName = buildJobName
-        this.buildNumber = buildNumber
+        this.buildJobName = appVersion?.buildJobName
+        this.buildNumber = appVersion?.buildNumber
         this.imageId = imageId
-        this.discoveryStatus = discoveryStatus
-        this.healthCheckUrl = healthCheckUrl
     }
 }

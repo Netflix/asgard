@@ -173,6 +173,7 @@ ticket {
 
 server {
     online = true
+    otherServerNamePortCombos = System.getProperty('otherServers')?.split(',') ?: []
 }
 
 environments {

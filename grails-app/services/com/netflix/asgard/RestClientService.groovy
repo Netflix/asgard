@@ -21,6 +21,7 @@ import groovy.util.slurpersupport.GPathResult
 import java.security.KeyStore
 import java.security.Security
 import java.util.concurrent.TimeUnit
+import org.apache.http.Consts
 import org.apache.http.HttpEntity
 import org.apache.http.HttpHost
 import org.apache.http.HttpResponse
@@ -36,6 +37,7 @@ import org.apache.http.client.params.ClientPNames
 import org.apache.http.conn.params.ConnRoutePNames
 import org.apache.http.conn.scheme.Scheme
 import org.apache.http.conn.ssl.SSLSocketFactory
+import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.AutoRetryHttpClient
 import org.apache.http.impl.client.DefaultHttpClient
@@ -44,6 +46,7 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.params.HttpConnectionParams
 import org.apache.http.util.EntityUtils
+import org.codehaus.groovy.grails.web.json.JSONElement
 import org.springframework.beans.factory.InitializingBean
 import sun.net.InetAddressCachePolicy
 
@@ -51,6 +54,12 @@ import sun.net.InetAddressCachePolicy
 class RestClientService implements InitializingBean {
 
     static transactional = false
+
+    final static ContentType TEXT_PLAIN_UTF8 = ContentType.create(ContentType.TEXT_PLAIN.mimeType, Consts.UTF_8)
+    final static ContentType APPLICATION_XML_UTF8 = ContentType.create(ContentType.APPLICATION_XML.mimeType,
+            Consts.UTF_8)
+    final static ContentType APPLICATION_JSON_UTF8 = ContentType.APPLICATION_JSON
+    final static Integer DEFAULT_TIMEOUT_MILLIS = 10000
 
     def configService
 
@@ -81,50 +90,78 @@ class RestClientService implements InitializingBean {
         Security.setProperty('networkaddress.cache.ttl', '0')
     }
 
-    def getAsXml(String uri, Integer timeoutMillis = 10000, boolean swallowException = true) {
+    /**
+     * Gets text over HTTP with an XML content type, and uses grails.converters.XML to parse the text.
+     *
+     * @param uri the URI to connect to
+     * @param timeoutMillis the value to use as socket and connection timeout when making the request
+     * @return the XML parsed object
+     */
+    def getAsXml(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS) {
+        String content = get(uri, APPLICATION_XML_UTF8, timeoutMillis)
         try {
-            String content = get(uri, 'application/xml; charset=UTF-8', timeoutMillis)
             return content ? XML.parse(content) as GPathResult : null
         } catch (Exception e) {
-            log.error "GET from ${uri} failed: ${e}"
-            if (swallowException) {
-                return null
-            } else {
-                throw e
-            }
+            log.error "Parsing XML content from ${uri} failed: ${content}", e
+            return null
         }
     }
 
-    def getAsJson(String uri, Integer timeoutMillis = 10000) {
+    /**
+     * Gets text over HTTP with a JSON content type, and uses grails.converters.JSON to parse the text.
+     *
+     * @param uri the URI to connect to
+     * @param timeoutMillis the value to use as socket and connection timeout when making the request
+     * @return the JSON parsed object
+     */
+    JSONElement getAsJson(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS) {
+        String content = get(uri, APPLICATION_JSON_UTF8, timeoutMillis)
         try {
-            String content = get(uri, 'application/json; charset=UTF-8', timeoutMillis)
-
-            // Strip JSONP padding if needed.
             return content ? JSON.parse(content) : null
         } catch (Exception e) {
-            log.error "GET from ${uri} failed: ${e}"
+            log.error "Parsing JSON content from ${uri} failed: ${content}", e
             return null
         }
     }
 
-    String getAsText(String uri, Integer timeoutMillis = 10000) {
+    /**
+     * Gets JSON text over HTTP using a JSON content type, but leaves the payload in text form for alternate parsing.
+     *
+     * @param uri the URI to connect to
+     * @param timeoutMillis the value to use as socket and connection timeout when making the request
+     * @return the raw JSON string
+     */
+    String getJsonAsText(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS) {
+        get(uri, APPLICATION_JSON_UTF8, timeoutMillis)
+    }
+
+    /**
+     * Gets text over HTTP using a plain text content type, but leaves the payload in text form for alternate parsing.
+     *
+     * @param uri the URI to connect to
+     * @param timeoutMillis the value to use as socket and connection timeout when making the request
+     * @return the raw JSON string
+     */
+    String getAsText(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS) {
+        get(uri, TEXT_PLAIN_UTF8, timeoutMillis)
+    }
+
+    private String get(String uri, ContentType contentType = ContentType.DEFAULT_TEXT,
+                       Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS) {
         try {
-            return get(uri, 'text/plain; charset=UTF-8', timeoutMillis)
+            HttpGet httpGet = getWithTimeout(uri, timeoutMillis)
+            String contentTypeString = contentType.toString()
+            httpGet.setHeader('Content-Type', contentTypeString)
+            httpGet.setHeader('Accept', contentTypeString)
+            executeAndProcessResponse(httpGet) { HttpResponse httpResponse ->
+                if (readStatusCode(httpResponse) == HttpURLConnection.HTTP_OK) {
+                    HttpEntity httpEntity = httpResponse.getEntity()
+                    return EntityUtils.toString(httpEntity)
+                }
+                return null
+            }
         } catch (Exception e) {
             log.error "GET from ${uri} failed: ${e}"
-            return null
-        }
-    }
-
-    private String get(String uri, String contentType, Integer timeoutMillis) {
-        HttpGet httpGet = getWithTimeout(uri, timeoutMillis)
-        httpGet.setHeader('Content-Type', contentType)
-        httpGet.setHeader('Accept', contentType)
-        executeAndProcessResponse(httpGet) { HttpResponse httpResponse ->
-            if (readStatusCode(httpResponse) == HttpURLConnection.HTTP_OK) {
-                HttpEntity httpEntity = httpResponse.getEntity()
-                return EntityUtils.toString(httpEntity)
-            }
             return null
         }
     }
@@ -132,8 +169,8 @@ class RestClientService implements InitializingBean {
     /**
      * Convenience method to create a http-client HttpGet with the timeout parameters set
      *
-     * @param uri The uri to connect to.
-     * @param timeoutMillis The value to use as socket and connection timeout when making the request
+     * @param uri the URI to connect to
+     * @param timeoutMillis the value to use as socket and connection timeout when making the request
      * @return HttpGet object with parameters set
      */
     private HttpGet getWithTimeout(String uri, int timeoutMillis) {
@@ -147,9 +184,9 @@ class RestClientService implements InitializingBean {
      * Template method to execute a HttpUriRequest object (HttpGet, HttpPost, etc.), process the response with a
      * closure, and perform the cleanup necessary to return the connection to the pool.
      *
-     * @param request An http action to execute with httpClient
-     * @param responseHandler Handles the response from the request and provides the return value for this method
-     * @return The return value of executing responseHandler
+     * @param request an http action to execute with httpClient
+     * @param responseHandler handles the response from the request and provides the return value for this method
+     * @return the return value of executing responseHandler
      */
     private Object executeAndProcessResponse(HttpUriRequest request, Closure responseHandler) {
         try {
@@ -194,11 +231,7 @@ class RestClientService implements InitializingBean {
      * @return int the HTTP response code
      */
     int post(String uriPath, Map<String, String> query) {
-        HttpPost httpPost = new HttpPost(uriPath)
-        httpPost.setEntity(new UrlEncodedFormEntity(query.collect { key, value ->
-            new BasicNameValuePair(key, value)
-        }))
-        executePost(httpPost)
+        postAsNameValuePairs(uriPath, query).statusCode
     }
 
     /**
@@ -219,13 +252,6 @@ class RestClientService implements InitializingBean {
         restResponse
     }
 
-    private int executePost(HttpPost httpPost) {
-        executeAndProcessResponse(httpPost) { HttpResponse httpResponse ->
-            logErrors(httpPost, httpResponse)
-            readStatusCode(httpResponse)
-        } as int
-    }
-
     private logErrors(HttpPost httpPost, HttpResponse httpResponse) {
         if (readStatusCode(httpResponse) >= 300) {
             log.error("POST to ${httpPost.URI.path} failed: ${readStatusCode(httpResponse)} " +
@@ -233,14 +259,32 @@ class RestClientService implements InitializingBean {
         }
     }
 
+    /**
+     * Sends an HTTP PUT request.
+     *
+     * @param uri the URI to connect to
+     * @return the HTTP status code of the response
+     */
     int put(String uri) {
         executeAndProcessResponse(new HttpPut(uri), readStatusCode) as int
     }
 
+    /**
+     * Sends an HTTP DELETE request.
+     *
+     * @param uri the URI to connect to
+     * @return the HTTP status code of the response
+     */
     int delete(String uri) {
         executeAndProcessResponse(new HttpDelete(uri), readStatusCode) as int
     }
 
+    /**
+     * Performs an HTTP GET request on the specified URL, only to check what kind of HTTP status code gets returned.
+     *
+     * @param url the URL to connect to
+     * @return the HTTP status code of the response
+     */
     Integer getResponseCode(String url) {
         Integer statusCode = null
         try {
@@ -252,7 +296,7 @@ class RestClientService implements InitializingBean {
         statusCode
     }
 
-    Closure readStatusCode = { HttpResponse httpResponse ->
+    private Closure readStatusCode = { HttpResponse httpResponse ->
         httpResponse.statusLine.statusCode
     }
 
