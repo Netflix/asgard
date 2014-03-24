@@ -39,6 +39,7 @@ import com.netflix.asgard.DefaultUserDataProvider
 import com.netflix.asgard.DiscoveryService
 import com.netflix.asgard.DnsService
 import com.netflix.asgard.EmailerService
+import com.netflix.asgard.EnvironmentService
 import com.netflix.asgard.EurekaAddressCollectorService
 import com.netflix.asgard.FastPropertyService
 import com.netflix.asgard.FlagService
@@ -364,7 +365,7 @@ class Mocks {
             }
             taskService.grailsApplication = grailsApplication()
             taskService.emailerService = emailerService()
-            taskService.awsSimpleDbService = awsSimpleDbService()
+            taskService.environmentService = new EnvironmentService()
             taskService.idService = new IdService() {
                 String nextId(UserContext userContext, SimpleDbSequenceLocator sequenceLocator) {
                     '1'

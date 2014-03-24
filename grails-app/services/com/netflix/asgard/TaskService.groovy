@@ -22,7 +22,9 @@ import com.google.common.collect.Lists
 import com.netflix.asgard.model.SimpleDbSequenceLocator
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.plugin.TaskFinishedListener
+import java.rmi.RemoteException
 import java.util.concurrent.ConcurrentLinkedQueue
+import org.apache.http.HttpStatus
 import org.codehaus.groovy.runtime.StackTraceUtils
 
 /**
@@ -39,11 +41,16 @@ class TaskService {
 
     Caches caches
     def awsSimpleWorkflowService
+    def configService
     def emailerService
+    def environmentService
     def flowService
     def idService
     def grailsApplication
+    def objectMapper
     def pluginService
+    def restClientService
+    def serverService
 
     Integer numberOfCompletedTasksToRetain = 500
 
@@ -103,8 +110,9 @@ class TaskService {
             throw new ValidationException(msg)
         }
         String id = idService.nextId(userContext, SimpleDbSequenceLocator.Task)
+        Date date = environmentService.currentDate
         Task task = new Task(id: id, userContext: userContext, name: name, status: 'starting',
-                startTime: new Date(), env: grailsApplication.config.cloud.accountName, objectType: link?.type,
+                startTime: date, env: grailsApplication.config.cloud.accountName, objectType: link?.type,
                 objectId: link?.id
         )
         return task
@@ -184,10 +192,32 @@ class TaskService {
     }
 
     /**
-     * @return all running tasks (including SWF workflow executions)
+     * @return all the running in-memory tasks from all the other remote Asgard machines
+     */
+    List<Task> getRemoteRunningInMemory() {
+        serverService.listRemoteServerNamesAndPorts().collect {
+            String url = "http://${it}/task/runningInMemory.json"
+            String json = restClientService.getJsonAsText(url)
+            log.debug "Remote tasks from ${url}: ${json}"
+            if (json) {
+                return objectMapper.reader(Task).readValues(json) as List<Task>
+            }
+            []
+        }.flatten() as List<Task>
+    }
+
+    /**
+     * @return a single concatenated list of all in-memory running tasks from the local and all the remote servers
+     */
+    List<Task> getAllRunningInMemory() {
+        localRunningInMemory + remoteRunningInMemory
+    }
+
+    /**
+     * @return all running tasks including local and remote in-memory tasks, and SWF workflow executions
      */
     Collection<Task> getAllRunning() {
-        running + awsSimpleWorkflowService.openWorkflowExecutions.collect {
+        allRunningInMemory + awsSimpleWorkflowService.openWorkflowExecutions.collect {
             new WorkflowExecutionBeanOptions(it).asTask()
         }
     }
@@ -212,11 +242,7 @@ class TaskService {
         try {
             new Retriable<Task>(
                     work: {
-                        Task task = running.find { it.id == id }
-                        if (!task) { task = completed.find { it.id == id } }
-                        if (!task) {
-                            task = awsSimpleWorkflowService.getWorkflowExecutionInfoByTaskId(id)?.asTask()
-                        }
+                        Task task = getLocalTaskById(id) ?: getWorkflowTaskById(id) ?: getRemoteTaskById(id)
                         if (!task) { throw new IllegalArgumentException("There is no task with id ${id}.") }
                         task
                     },
@@ -227,26 +253,93 @@ class TaskService {
         }
     }
 
+    /**
+     * Looks up a task from the workflow executions in Amazon Simple Workflow.
+     *
+     * @param id the unique ID of the task to find
+     * @return a matching Task for an SWF workflow execution, or null if none found
+     */
+    Task getWorkflowTaskById(String id) {
+        if (!id) { return null }
+        awsSimpleWorkflowService.getWorkflowExecutionInfoByTaskId(id)?.asTask()
+    }
+
+    /**
+     * Looks up a local in-memory task by its ID, either in the collection of running tasks or completed tasks.
+     *
+     * @param id the unique ID of the task to find
+     * @return a matching Task that is running in-memory in the local JVM machine, or null if none found
+     */
+    Task getLocalTaskById(String id) {
+        if (!id) { return null }
+        running.find { it.id == id } ?: completed.find { it.id == id }
+    }
+
+    /**
+     * Looks for a matching Task on all remote systems and returns the first one found, or null if none found.
+     *
+     * @param id the unique ID of the task to find
+     * @return a matching Task that is running in-memory on a remote machine, or null if none found
+     */
+    Task getRemoteTaskById(String id) {
+        if (!id) { return null }
+        serverService.listRemoteServerNamesAndPorts().findResult {
+            String url = "http://${it}/task/runningInMemory/${id}.json"
+            String json = restClientService.getJsonAsText(url)
+            log.debug "Remote task from ${url}: ${json}"
+            if (json) {
+                Task task = objectMapper.reader(com.netflix.asgard.Task).readValue(json) as Task
+                task.server = it
+                return task
+            }
+            null
+        } as Task
+    }
+
     Collection<Task> getRunningTasksByObject(Link link, Region region) {
         Closure matcher = { it.objectType == link.type && it.objectId == link.id && it.userContext.region == region }
+
+        // This is incomplete because it should include SWF tasks, as well as tasks running on other Asgard instances.
+        // The cluster screen uses this, so changing it to call remote Asgard instances would impact performance of the
+        // cluster screen. Calling SWF would probably still be a good idea here. To solve the performance problem of
+        // the remote Asgard instances, either cache the running tasks of remote Asgards, or refactor all long-running
+        // tasks into SWF workflows so the need to call remote Asgards for in-memory task lists goes away.
         running.findAll(matcher).sort { it.startTime }
     }
 
+    /**
+     * Interrupts and stops a running task, be it local in-memory, remote in-memory, or a workflow execution in
+     * Amazon Simple Workflow Service
+     *
+     * @param userContext who, where, why
+     * @param task the task to cancel
+     */
     void cancelTask(UserContext userContext, Task task) {
         String cancelledByMessage = "Cancelled by ${userContext.username ?: 'user'}@${userContext.clientHostName}"
         if (task.workflowExecution) {
             WorkflowClientExternal client = flowService.getWorkflowClient(task.workflowExecution)
             client.terminateWorkflowExecution(cancelledByMessage, task.toString(), ChildPolicy.TERMINATE)
-        } else {
+        } else if (task.server) {
+            String url = "http://${task.server}/task/cancel"
+            int statusCode = restClientService.post(url, [id: task.id, format: 'json'])
+            if (statusCode != HttpStatus.SC_OK) {
+                String msg = "Error trying to cancel remote task ${task.id} '${task.name}' on '${task.server}' " +
+                        "Response status code was ${statusCode}"
+                throw new RemoteException(msg)
+            }
+        } else if (task.thread) {
             try {
                 task.thread.interrupt()
-                task.log(cancelledByMessage)
+                task.log(cancelledByMessage, environmentService.currentDate)
                 fail(task)
             } catch (CancelledException ignored) {
                 // Thrown if task is cancelled while sleeping. Not an error.
             } catch (Exception e) {
                 exception(task, e)
             }
+        } else {
+            String msg = "ERROR: Unable to cancel task lacking workflowExecution, thread, or server of origin: ${task}"
+            throw new IllegalStateException(msg)
         }
     }
 }

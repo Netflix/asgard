@@ -46,12 +46,19 @@ import org.joda.time.DateTime
     List<String> log = new CopyOnWriteArrayList<String>()
 
     /**
+     * The server name and port of the server that is running this task, if the task was fetched from a remote server.
+     * Otherwise, null.
+     */
+    String server
+
+    /**
      * Adds a string to the task's log of recorded operations.
      *
      * @param op the operation message to log
+     * @param logTime the moment that the operation occurred, or right now by default if unspecified
      */
-    def log(String op) {
-        updateTime = new Date()
+    def log(String op, Date logTime = new Date()) {
+        updateTime = logTime
         operation = op
         def updateTimeString = updateTime.format("yyyy-MM-dd_HH:mm:ss")
         log << updateTimeString + ' ' + op
