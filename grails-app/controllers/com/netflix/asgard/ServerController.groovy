@@ -102,6 +102,26 @@ class ServerController {
     }
 
     /**
+     * Starts a thread that will wait until there are zero local in-memory tasks, and then will attempt to terminate
+     * this Asgard instance within the instance's Auto Scaling Group.
+     *
+     * @see ServerService#startWither()
+     */
+    def startWither() {
+        serverService.startWither()
+        flash.messages = ['Started withering process to terminate current instance or ASG after tasks are drained']
+        redirect(action: 'all', params: [format: 'json'])
+    }
+
+    /**
+     * Aborts the current withering thread.
+     */
+    def cancelWither() {
+        flash.messages = serverService.cancelWither()
+        redirect(action: 'all', params: [format: 'json'])
+    }
+
+    /**
      * Displays all environment variables and system properties for debugging.
      */
     def props() {
