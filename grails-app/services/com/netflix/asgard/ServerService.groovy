@@ -282,7 +282,7 @@ class ServerService implements InitializingBean {
      * @return the version of Asgard that is currently running
      */
     String getVersion() {
-        grailsApplication.metadata['app.version']
+        grailsApplication?.metadata ? grailsApplication.metadata['app.version'] : null
     }
 
     /**
