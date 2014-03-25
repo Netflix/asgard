@@ -178,6 +178,7 @@ and groupName is #groupName""")
     }
 
     def 'zone availabilities should sum, group, and filter reservation counts and instance counts'() {
+        configService.getReservationOfferingTypeFilters() >> []
         mockReservationCache.list() >> [
                 [instanceCount: 1, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active'],
                 [instanceCount: 10, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active'],
@@ -213,7 +214,118 @@ and groupName is #groupName""")
         ]
     }
 
+    def 'zone availabilities should sum, group, and filter reservation counts and instance counts when filtered'() {
+        configService.getReservationOfferingTypeFilters() >> ['Light Utilization']
+        mockReservationCache.list() >> [
+                [instanceCount: 1, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active',
+                 offeringType: 'Light Utilization'],
+                [instanceCount: 10, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active'],
+                [instanceCount: 100, availabilityZone: 'us-east-1a', instanceType: 'm1.small', state: 'active'],
+                [instanceCount: 1000, availabilityZone: 'us-east-1b', instanceType: 'm2.xlarge', state: 'active'],
+                [instanceCount: 10000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'retired'],
+                [instanceCount: 100000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active']
+        ].collect { new ReservedInstances(it) }
+        Placement zoneA = new Placement(availabilityZone: 'us-east-1a')
+        Placement zoneB = new Placement(availabilityZone: 'us-east-1b')
+        Placement zoneC = new Placement(availabilityZone: 'us-east-1c')
+        InstanceState running = new InstanceState(name: 'running')
+        mockInstanceCache.list() >> [
+                new Instance(instanceType: 'm2.xlarge', placement: zoneA, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneA, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneA, state: running),
+                new Instance(instanceType: 'm1.small', placement: zoneA, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneC, state: running),
+        ]
+
+        when:
+        List<ZoneAvailability> zoneAvailabilities = awsEc2Service.getZoneAvailabilities(userContext, 'm2.xlarge')
+
+        then:
+        zoneAvailabilities == [
+                new ZoneAvailability(zoneName: 'us-east-1a', totalReservations: 100010, usedReservations: 3),
+                new ZoneAvailability(zoneName: 'us-east-1b', totalReservations: 1000, usedReservations: 4),
+                new ZoneAvailability(zoneName: 'us-east-1c', totalReservations: 0, usedReservations: 1),
+        ]
+    }
+
+    def 'zone availabilities should show none instance counts when filtered by offering type'() {
+        configService.getReservationOfferingTypeFilters() >> ['Light Utilization', 'Medium Utilization']
+        mockReservationCache.list() >> [
+                [instanceCount: 1, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active',
+                 offeringType: 'Light Utilization'],
+                [instanceCount: 10, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active',
+                 offeringType: 'Medium Utilization'],
+                [instanceCount: 100, availabilityZone: 'us-east-1a', instanceType: 'm1.small', state: 'active'],
+                [instanceCount: 1000, availabilityZone: 'us-east-1b', instanceType: 'm2.xlarge', state: 'active'],
+                [instanceCount: 10000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'retired'],
+                [instanceCount: 100000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active']
+        ].collect { new ReservedInstances(it) }
+        Placement zoneA = new Placement(availabilityZone: 'us-east-1a')
+        Placement zoneB = new Placement(availabilityZone: 'us-east-1b')
+        Placement zoneC = new Placement(availabilityZone: 'us-east-1c')
+        InstanceState running = new InstanceState(name: 'running')
+        mockInstanceCache.list() >> [
+                new Instance(instanceType: 'm2.xlarge', placement: zoneA, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneA, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneA, state: running),
+                new Instance(instanceType: 'm1.small', placement: zoneA, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneB, state: running),
+                new Instance(instanceType: 'm2.xlarge', placement: zoneC, state: running),
+        ]
+
+        when:
+        List<ZoneAvailability> zoneAvailabilities = awsEc2Service.getZoneAvailabilities(userContext, 'm2.xlarge')
+
+        then:
+        zoneAvailabilities == [
+                new ZoneAvailability(zoneName: 'us-east-1a', totalReservations: 100000, usedReservations: 3),
+                new ZoneAvailability(zoneName: 'us-east-1b', totalReservations: 1000, usedReservations: 4),
+                new ZoneAvailability(zoneName: 'us-east-1c', totalReservations: 0, usedReservations: 1),
+        ]
+    }
+
+    def 'instance reservations should be filterable'() {
+        def listOfReservations = [
+                [instanceCount: 1, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active',
+                 offeringType: 'Light Utilization'],
+                [instanceCount: 10, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active'],
+                [instanceCount: 100, availabilityZone: 'us-east-1a', instanceType: 'm1.small', state: 'active'],
+                [instanceCount: 1000, availabilityZone: 'us-east-1b', instanceType: 'm2.xlarge', state: 'active'],
+                [instanceCount: 10000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'retired'],
+                [instanceCount: 100000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active']
+        ].collect { new ReservedInstances(it) }
+        def answer = awsEc2Service.filterReservedInstancesByOffering(listOfReservations, [])
+
+        expect:
+        answer.size() == listOfReservations.size()
+    }
+
+    def 'instance reservations should be filterable by Light Utilization'() {
+        def listOfReservations = [
+                [instanceCount: 1, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active',
+                 offeringType: 'Light Utilization'],
+                [instanceCount: 10, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active'],
+                [instanceCount: 100, availabilityZone: 'us-east-1a', instanceType: 'm1.small', state: 'active'],
+                [instanceCount: 1000, availabilityZone: 'us-east-1b', instanceType: 'm2.xlarge', state: 'active'],
+                [instanceCount: 10000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'retired'],
+                [instanceCount: 100000, availabilityZone: 'us-east-1a', instanceType: 'm2.xlarge', state: 'active']
+        ].collect { new ReservedInstances(it) }
+        def sizeBefore = listOfReservations.size()
+        def filteredList = awsEc2Service.filterReservedInstancesByOffering(listOfReservations, ['Light Utilization'])
+
+        expect:
+        (sizeBefore - 1) == filteredList.size()
+    }
+
     def 'zone availability should be empty if there are no reservations'() {
+        configService.getReservationOfferingTypeFilters() >> []
         mockReservationCache.list() >> []
         Placement zoneA = new Placement(availabilityZone: 'us-east-1a')
         InstanceState running = new InstanceState(name: 'running')

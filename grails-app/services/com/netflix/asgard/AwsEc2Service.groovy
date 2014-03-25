@@ -981,7 +981,9 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
      *          are no reservations in any zones for the specified instance type
      */
     List<ZoneAvailability> getZoneAvailabilities(UserContext userContext, String instanceType) {
-        Collection<ReservedInstances> reservedInstanceGroups = getReservedInstances(userContext)
+        Collection<ReservedInstances> reservedInstanceGroups =
+                filterReservedInstancesByOffering(getReservedInstances(userContext),
+                        configService.getReservationOfferingTypeFilters())
         Map<String, Integer> zonesToActiveReservationCounts = [:]
         for (ReservedInstances reservedInstanceGroup in reservedInstanceGroups) {
             if (reservedInstanceGroup.state == 'active' && reservedInstanceGroup.instanceType == instanceType) {
@@ -1006,6 +1008,14 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             new ZoneAvailability(zoneName: zone, totalReservations: reservationCount, usedReservations: instanceCount)
         }
         zoneAvailabilities.any { it.totalReservations } ? zoneAvailabilities : []
+    }
+
+    Collection<ReservedInstances> filterReservedInstancesByOffering(Collection<ReservedInstances> instances,
+                                                                    List<String> filters){
+        if (filters.size() > 0) {
+            instances.removeAll { it.offeringType in filters }
+        }
+        instances
     }
 
     Collection<ReservedInstances> getReservedInstances(UserContext userContext) {
