@@ -33,99 +33,12 @@ class ServerServiceSpec extends Specification {
     EnvironmentService environmentService = Mock(EnvironmentService)
     FlagService flagService = Mock(FlagService)
     InitService initService = Mock(InitService)
-    TaskService taskService = Mock(TaskService)
     ServerService serverService = new ServerService(awsAutoScalingService: awsAutoScalingService,
             configService: configService, environmentService: environmentService, initService: initService,
-            flagService: flagService, taskService: taskService)
+            flagService: flagService)
 
     void setup() {
         new MonkeyPatcherService().createDynamicMethods()
-    }
-
-    void 'cancelling wither process should do nothing if not withering'() {
-
-        expect:
-        serverService.cancelWither() == ['Wither process was not running']
-    }
-
-    void 'should cancel running wither process'() {
-
-        CountDownLatch workFinished = new CountDownLatch(1)
-        Thread thread = Thread.start {
-            try {
-                workFinished.await()
-            } catch (InterruptedException ignore) { }
-        }
-        serverService.withering = thread
-
-        expect:
-        thread.isAlive()
-
-        when:
-        serverService.cancelWither()
-
-        then:
-        thread.join(10)
-        !thread.isAlive()
-    }
-
-    void 'starting wither should fail if wither is already running'() {
-
-        CountDownLatch workFinished = new CountDownLatch(1)
-        Thread thread = Thread.start {
-            try {
-                workFinished.await()
-            } catch (InterruptedException ignore) { }
-        }
-        serverService.withering = thread
-
-        when:
-        serverService.startWither()
-
-        then:
-        thrown(IllegalStateException)
-
-        cleanup:
-        thread.interrupt()
-    }
-
-    void 'wither should delete current ASG if it has one instance'() {
-
-        String asgName = 'helloworld-v002'
-        AutoScalingGroup asg = new AutoScalingGroup(instances: [new Instance()])
-        UserContext userContext = UserContext.auto(Region.US_WEST_1)
-
-        when:
-        serverService.startWither()
-        serverService.withering.join()
-
-        then:
-        1 * configService.userDataVarPrefix >> 'CLOUD_'
-        1 * environmentService.getEnvironmentVariable('CLOUD_AUTO_SCALE_GROUP') >> asgName
-        1 * environmentService.getEnvironmentVariable('EC2_REGION') >> 'us-west-1'
-        1 * taskService.localRunningInMemory >> []
-        1 * awsAutoScalingService.getAutoScalingGroup(userContext, asgName) >> asg
-        1 * awsAutoScalingService.deleteAutoScalingGroup(userContext, asgName, AsgDeletionMode.FORCE)
-        0 * _
-    }
-
-    void 'wither should fail if ASG has many instances'() {
-
-        String asgName = 'helloworld-v002'
-        AutoScalingGroup asg = new AutoScalingGroup(instances: [new Instance(), new Instance()])
-        UserContext userContext = UserContext.auto(Region.US_WEST_1)
-
-        when:
-        serverService.startWither()
-        serverService.withering.join()
-
-        then:
-        1 * configService.userDataVarPrefix >> 'CLOUD_'
-        1 * environmentService.getEnvironmentVariable('CLOUD_AUTO_SCALE_GROUP') >> asgName
-        1 * environmentService.getEnvironmentVariable('EC2_REGION') >> 'us-west-1'
-        1 * taskService.localRunningInMemory >> []
-        1 * awsAutoScalingService.getAutoScalingGroup(userContext, asgName) >> asg
-        0 * _
     }
 
     @Unroll("it's #blocked that traffic gets blocked iff caches are filled is #filled and skip flag is off is #flagOff")

@@ -24,6 +24,7 @@ class ServerControllerSpec extends Specification {
 
     ServerService serverService = Mock(ServerService)
     TaskService taskService = Mock(TaskService)
+    WitherService witherService = Mock(WitherService)
     Properties systemProps
     Map<String, String> env
 
@@ -42,6 +43,7 @@ class ServerControllerSpec extends Specification {
                 'SHELL': '/bin/bash'
         ]
         controller.serverService = serverService
+        controller.witherService = witherService
     }
 
     def 'should hide sensitive values in system properties and environment variables'() {
@@ -86,7 +88,7 @@ class ServerControllerSpec extends Specification {
         controller.startWither()
 
         then:
-        1 * serverService.startWither()
+        1 * witherService.startWither()
         flash.messages == ['Started withering process to terminate current instance or ASG after tasks are drained']
         0 * _
     }
@@ -97,7 +99,7 @@ class ServerControllerSpec extends Specification {
         controller.cancelWither()
 
         then:
-        1 * serverService.cancelWither() >> ['Cancelled']
+        1 * witherService.cancelWither() >> ['Cancelled']
         flash.messages == ['Cancelled']
         0 * _
     }
