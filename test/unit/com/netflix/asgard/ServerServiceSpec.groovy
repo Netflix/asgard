@@ -125,7 +125,6 @@ class ServerServiceSpec extends Specification {
         1 * environmentService.getEnvironmentVariable('EC2_REGION') >> 'us-west-1'
         1 * taskService.localRunningInMemory >> []
         1 * awsAutoScalingService.getAutoScalingGroup(userContext, asgName) >> asg
-        serverService.withering.thrown(IllegalStateException)
         0 * _
     }
 
