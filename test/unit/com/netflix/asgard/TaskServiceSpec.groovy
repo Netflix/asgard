@@ -472,14 +472,17 @@ class TaskServiceSpec extends Specification {
         then:
         thread.join(10)
         !thread.isAlive()
-        task1.log == ['Get ready', 'Go!', '2014-03-10_14:21:01 Cancelled by homer@commodore64']
+        task1.log[0] == 'Get ready'
+        task1.log[1] == 'Go!'
+        task1.log[2] ==~ /2014-03-.._..:21:01 Cancelled by homer@commodore64/
         task1.status == 'failed'
         task1.operation == ''
         completedTaskQueue.size() == 1
         1 * environmentService.currentDate >> date
         1 * emailerService.sendUserEmail('yo@example.com',
-                'Asgard task failed in prod us-east-1 by marge: Create ASG helloworld-v001',
-                'Get ready\nGo!\n2014-03-10_14:21:01 Cancelled by homer@commodore64')
+                'Asgard task failed in prod us-east-1 by marge: Create ASG helloworld-v001', _) >> {
+            assert it[2] ==~ /Get ready\nGo!\n2014-03-.._..:21:01 Cancelled by homer@commodore64/
+        }
         0 * _
     }
 
