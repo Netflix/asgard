@@ -23,23 +23,44 @@ class HealthcheckServiceSpec extends Specification {
     ServerService serverService = Mock(ServerService)
     HealthcheckService healthcheckService = new HealthcheckService(serverService: serverService)
 
-    def 'should be unhealthy if server is not ready for traffic'() {
+    void 'should be unhealthy if server is not ready for traffic'() {
 
         when:
-        boolean isHealthy = healthcheckService.checkHealth()
+        healthcheckService.checkHealthAndInvokeCallbacks()
 
         then:
-        !isHealthy
+        !healthcheckService.readyForTraffic
         serverService.shouldCacheLoadingBlockUserRequests() >> true
     }
 
-    def 'should be healthy if server is ready for traffic'() {
+    void 'should be healthy if server is ready for traffic'() {
 
         when:
-        boolean isHealthy = healthcheckService.checkHealth()
+        healthcheckService.checkHealthAndInvokeCallbacks()
 
         then:
-        isHealthy
+        healthcheckService.readyForTraffic
         serverService.shouldCacheLoadingBlockUserRequests() >> false
+    }
+
+    void 'should run any registered callbacks when performing health check'() {
+
+        Boolean wasItHealthy = null
+        Boolean isItHealthy = null
+
+        Closure callback = { Boolean wasHealthyBefore, Boolean isHealthyNow ->
+            wasItHealthy = wasHealthyBefore
+            isItHealthy = isHealthyNow
+        }
+
+        when:
+        healthcheckService.registerCallback('testing', callback)
+        healthcheckService.checkHealthAndInvokeCallbacks()
+
+        then:
+        healthcheckService.readyForTraffic
+        serverService.shouldCacheLoadingBlockUserRequests() >> false
+        wasItHealthy == Boolean.FALSE
+        isItHealthy == Boolean.TRUE
     }
 }

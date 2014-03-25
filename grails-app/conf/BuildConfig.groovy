@@ -94,7 +94,12 @@ grails.project.dependency.resolution = {
                 // Amazon Web Services programmatic interface. Transitive dependency of glisten, but also used directly.
                 'com.amazonaws:aws-java-sdk:1.7.5',
 
-                // Transitive dependencies of aws-java-sdk, but also used for REST calls, e.g., HttpClient
+                // Enables publication of a health check URL for deploying Asgard, and an on/off switch for activities.
+                // Transitive dependencies include:
+                // rxjava, archaius, ribbon, servo, netflix-commons, netflix-statistics, jersey, guava
+                'com.netflix.eureka:eureka-client:1.1.127',
+
+                // Transitive dependencies of eureka and aws-java-sdk, but also used for REST calls, e.g., HttpClient
                 'org.apache.httpcomponents:httpcore:4.2',
                 'org.apache.httpcomponents:httpclient:4.2.3',
 
@@ -109,7 +114,7 @@ grails.project.dependency.resolution = {
                 'commons-lang:commons-lang:2.4',
 
                 // Easier Java from Joshua Bloch and Google, e.g., Multiset, ImmutableSet, Maps, Table, Splitter
-                'com.google.guava:guava:12.0',
+                'com.google.guava:guava:14.0.1',
 
                 // SSH calls to retrieve secret keys from remote servers, e.g., JSch, ChammelExec
                 'com.jcraft:jsch:0.1.45',

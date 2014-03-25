@@ -24,8 +24,34 @@ class HealthcheckService implements BackgroundProcessInitializer {
 
     def serverService
 
+    /**
+     * Cached result of periodic health check calculation.
+     */
     Boolean readyForTraffic = false
 
+    /**
+     * Registered procedures that should be called each time the health check runs. Each closure is expected to have
+     * this signature:
+     * <p>
+     * callback(Boolean wasHealthyLastTime, Boolean isHealthyNow)
+     */
+    Map<String, Closure> callbackNamesToCallbacks = [:]
+
+    /**
+     * Adds a new named callback to the map of callbacks to call each time the health check runs.
+     *
+     * @param name the name of the registered callback
+     * @param callback the Closure to execute, which should take two Boolean parameters like
+     *          callback(Boolean wasHealthyLastTime, Boolean isHealthyNow)
+     */
+    void registerCallback(String name, Closure callback) {
+        callbackNamesToCallbacks.put(name, callback)
+    }
+
+    /**
+     * Starts the background thread that periodically checks the health of the server, updates the readyForTraffic flag,
+     * and calls any registered callbacks that need to be executed when health changes.
+     */
     void initializeBackgroundProcess() {
         start()
     }
@@ -34,13 +60,25 @@ class HealthcheckService implements BackgroundProcessInitializer {
         Thread.startDaemon('Healthcheck') {
             //noinspection GroovyInfiniteLoopStatement
             while (true) {
-                readyForTraffic = checkHealth()
+                checkHealthAndInvokeCallbacks()
                 sleep 5000
             }
         }.priority = Thread.MIN_PRIORITY
     }
 
-    private Boolean checkHealth() {
-        !serverService.shouldCacheLoadingBlockUserRequests()
+    /**
+     * Performs the health check to determine whether or not the system is currently ready for traffic, then calls any
+     * registered callbacks that need to respond to health check events.
+     *
+     * @return true if the system is ready for traffic, false otherwise
+     * @see ServerService#shouldCacheLoadingBlockUserRequests()
+     */
+    void checkHealthAndInvokeCallbacks() {
+        Boolean wasHealthyLastTime = readyForTraffic
+        Boolean isHealthyNow = !serverService.shouldCacheLoadingBlockUserRequests()
+        readyForTraffic = isHealthyNow
+        for (Closure callback in callbackNamesToCallbacks.values()) {
+            callback(wasHealthyLastTime, isHealthyNow)
+        }
     }
 }
