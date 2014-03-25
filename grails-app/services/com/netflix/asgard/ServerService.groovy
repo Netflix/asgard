@@ -15,9 +15,7 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.netflix.asgard.model.GroupedInstance
-import com.netflix.asgard.push.AsgDeletionMode
 import com.netflix.asgard.push.Cluster
 import com.netflix.asgard.server.Environment
 import com.netflix.asgard.server.Server

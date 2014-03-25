@@ -15,13 +15,10 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.ec2.model.Instance
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.GroupedInstance
-import com.netflix.asgard.push.AsgDeletionMode
 import com.netflix.asgard.push.Cluster
-import java.util.concurrent.CountDownLatch
 import spock.lang.Specification
 import spock.lang.Unroll
 
