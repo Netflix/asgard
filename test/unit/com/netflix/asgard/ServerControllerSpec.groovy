@@ -18,6 +18,7 @@ package com.netflix.asgard
 import grails.test.mixin.TestFor
 import spock.lang.Specification
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 @TestFor(ServerController)
 class ServerControllerSpec extends Specification {
 
@@ -77,5 +78,27 @@ class ServerControllerSpec extends Specification {
         then:
         response.contentAsString == '3'
         taskService.getLocalRunningInMemory() >> [new Task(), new Task(), new Task()]
+    }
+
+    void 'should start wither process'() {
+
+        when:
+        controller.startWither()
+
+        then:
+        1 * serverService.startWither()
+        flash.messages == ['Started withering process to terminate current instance or ASG after tasks are drained']
+        0 * _
+    }
+
+    void 'should cancel wither process'() {
+
+        when:
+        controller.cancelWither()
+
+        then:
+        1 * serverService.cancelWither() >> ['Cancelled']
+        flash.messages == ['Cancelled']
+        0 * _
     }
 }
