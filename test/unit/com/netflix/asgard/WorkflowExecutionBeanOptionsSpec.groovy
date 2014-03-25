@@ -94,8 +94,11 @@ class WorkflowExecutionBeanOptionsSpec extends Specification {
         actualDeployment == new Deployment('42', '123', Region.US_WEST_2,
                 new WorkflowExecution(workflowId: 'def', runId: 'abc'),
                 'Give it away give it away give it away give it away now', 'akiedis', new Date(1372230630000),
-                new Date(1372230633000), 'running', ['2013-06-26_00:10:31 starting task',
-                '2013-06-26_00:10:32 doing task', '2013-06-26_00:10:33 finished'])
-
+                new Date(1372230633000), 'running', [
+                new LogMessage(new Date(1372230631000), 'starting task').toString(),
+                new LogMessage(new Date(1372230632000), 'doing task').toString(),
+                new LogMessage(new Date(1372230633000), 'finished').toString()
+            ]
+        )
     }
 }
