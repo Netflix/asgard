@@ -22,6 +22,8 @@ import com.amazonaws.util.EC2MetadataUtils
  */
 class EnvironmentService {
 
+    static transactional = false
+
     /**
      * @param key the name of the environment variable whose value is needed
      * @return the environment variable value for the specified key, abstracted into a service class for easier unit
