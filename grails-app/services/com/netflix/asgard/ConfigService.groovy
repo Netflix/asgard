@@ -812,6 +812,9 @@ class ConfigService {
         grailsApplication.config.platform?.fastPropertyInfoUrl ?: ''
     }
 
+    /**
+     * @return List of filters to apply to instance reservations
+     */
     List<String> getReservationOfferingTypeFilters(){
         grailsApplication.config.cloud?.reservationOfferingTypeFilters ?: []
     }

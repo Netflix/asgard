@@ -1010,11 +1010,14 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         zoneAvailabilities.any { it.totalReservations } ? zoneAvailabilities : []
     }
 
+    /**
+     * @param instances Collection of ReservedInstances
+     * @param filters as List of Strings
+     * @return Collection of ReservedInstances that are filtered by @param filters
+     */
     Collection<ReservedInstances> filterReservedInstancesByOffering(Collection<ReservedInstances> instances,
                                                                     List<String> filters){
-        if (filters.size() > 0) {
-            instances.removeAll { it.offeringType in filters }
-        }
+        instances.removeAll { it.offeringType in filters }
         instances
     }
 
