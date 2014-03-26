@@ -44,6 +44,10 @@
   <td class="name"><g:link controller="instanceType" action="list">Instance Type:</g:link></td>
   <td class="value">${launchTemplate.instanceType}</td>
 </tr>
+<tr class="prop">
+    <td class="name">VPC Associate Public IP's:</td>
+    <td class="value">${launchTemplate.associatePublicIpAddress}</td>
+  </tr>
 <g:if test="${launchTemplate.kernelId}">
   <tr class="prop">
     <td class="name">Kernel ID:</td>

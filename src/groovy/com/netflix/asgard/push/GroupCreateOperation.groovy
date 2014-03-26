@@ -81,7 +81,8 @@ class GroupCreateOperation extends AbstractPushOperation {
                     withKeyName(options.keyName).withRamdiskId(options.ramdiskId).
                     withSecurityGroups(options.common.securityGroups).
                     withIamInstanceProfile(options.iamInstanceProfile).
-                    withSpotPrice(options.spotPrice).withEbsOptimized(options.ebsOptimized)
+                    withSpotPrice(options.spotPrice).withEbsOptimized(options.ebsOptimized).
+		    withAssociatePublicIpAddress(options.associatePublicIpAddress)
 
             final Collection<AutoScalingProcessType> suspendedProcesses = Sets.newHashSet()
             if (options.zoneRebalancingSuspended) {
