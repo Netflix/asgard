@@ -103,12 +103,11 @@ class DeploymentService {
      * @param asgOverrides specify changes to the template auto scaling group
      * @return the unique ID of the workflow execution that is starting
      */
-    public String startDeployment(UserContext userContext, String clusterName,
-            DeploymentWorkflowOptions deploymentOptions, LaunchConfigurationBeanOptions lcOverrides,
-            AutoScalingGroupBeanOptions asgOverrides) {
+    public String startDeployment(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
+            LaunchConfigurationBeanOptions lcOverrides, AutoScalingGroupBeanOptions asgOverrides) {
 
         SwfWorkflow<DeploymentWorkflow> workflow = flowService.getNewWorkflowClient(userContext,
-                DeploymentWorkflow, new Link(EntityType.cluster, clusterName))
+                DeploymentWorkflow, new Link(EntityType.cluster, deploymentOptions.clusterName))
         workflow.client.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
         workflow.tags.id
     }
