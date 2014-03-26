@@ -29,9 +29,12 @@ class SecretServiceUnitSpec extends Specification {
     static final String LOAD_BALANCER_PASSWORD_FILE = 'lbpassfile'
     static final String LOAD_BALANCER_PASSWORD = 'chicken42'
 
-    def configService = Mock(ConfigService)
+    ConfigService configService = Mock(ConfigService)
+    EnvironmentService environmentService = Mock(EnvironmentService)
+
     SshRemoteFileReader remoteFileReader = Mock(SshRemoteFileReader)
-    SecretService secretService = new SecretService(configService: configService, sshRemoteFileReader: remoteFileReader)
+    SecretService secretService = new SecretService(configService: configService, sshRemoteFileReader: remoteFileReader,
+            environmentService: environmentService)
 
     def 'should not initialize if offline'() {
         configService.online >> false
@@ -59,6 +62,29 @@ class SecretServiceUnitSpec extends Specification {
         then:
         secretService.loadBalancerUserName == LOAD_BALANCER_USER
         secretService.loadBalancerPassword == LOAD_BALANCER_PASSWORD
+    }
+
+    void 'should not make remote calls if offline'() {
+        configService.online >> false
+
+        when:
+        secretService.afterPropertiesSet()
+
+        then:
+        secretService.loadBalancerUserName == null
+        secretService.loadBalancerPassword == null
+    }
+
+    void 'should not make remote calls if running on an AWS instance'() {
+        configService.online >> true
+        environmentService.instanceId >> 'i-blah'
+
+        when:
+        secretService.afterPropertiesSet()
+
+        then:
+        secretService.loadBalancerUserName == null
+        secretService.loadBalancerPassword == null
     }
 
     def 'should throw exception if remote file contents empty'() {

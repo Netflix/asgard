@@ -22,13 +22,14 @@ class SecretService implements InitializingBean {
 
     static transactional = false
     def configService
+    def environmentService
     SshRemoteFileReader sshRemoteFileReader
 
     String loadBalancerUserName
     String loadBalancerPassword
 
     void afterPropertiesSet() {
-        if (configService.online) {
+        if (configService.online && !environmentService.instanceId) {
             sshRemoteFileReader = sshRemoteFileReader ?: new SshRemoteFileReader()
             if (configService.loadBalancerUsernameFile && configService.loadBalancerPasswordFile) {
                 loadBalancerUserName = fetchRemote(configService.loadBalancerUsernameFile)
