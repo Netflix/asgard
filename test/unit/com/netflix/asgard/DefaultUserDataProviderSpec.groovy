@@ -47,6 +47,7 @@ class DefaultUserDataProviderSpec extends Specification {
                 export ENVIRONMENT=
                 export MONITOR_BUCKET=helloworld
                 export APP=helloworld
+                export APP_GROUP=
                 export STACK=example
                 export CLUSTER=helloworld-example
                 export AUTO_SCALE_GROUP=helloworld-example-v345
@@ -65,6 +66,7 @@ class DefaultUserDataProviderSpec extends Specification {
                 export ENVIRONMENT=
                 export MONITOR_BUCKET=helloworld
                 export APP=helloworld
+                export APP_GROUP=
                 export STACK=
                 export CLUSTER=
                 export AUTO_SCALE_GROUP=

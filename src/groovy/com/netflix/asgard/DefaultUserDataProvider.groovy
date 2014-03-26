@@ -36,6 +36,7 @@ class DefaultUserDataProvider implements UserDataProvider {
         String result = exportVar('ENVIRONMENT', configService.accountName) +
             exportVar('MONITOR_BUCKET', applicationService.getMonitorBucket(userContext, appName, names.cluster)) +
             exportVar('APP', appName) +
+            exportVar('APP_GROUP', applicationService.getRegisteredApplication(userContext, appName)?.group) +
             exportVar('STACK', names.stack) +
             exportVar('CLUSTER', names.cluster) +
             exportVar('AUTO_SCALE_GROUP', autoScalingGroupName) +

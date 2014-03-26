@@ -66,6 +66,7 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
             export NETFLIX_ENVIRONMENT=test
             export NETFLIX_MONITOR_BUCKET=hello
             export NETFLIX_APP=hello
+            export NETFLIX_APP_GROUP=
             export NETFLIX_STACK=dev
             export NETFLIX_CLUSTER=hello-dev
             export NETFLIX_AUTO_SCALE_GROUP=hello-dev-v001
@@ -105,7 +106,8 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
 
         String description = "blah blah blah, ancestor_version=nflx-base-2.0-12345-h24"
         launchContext.image = new Image(description: description)
-        AppRegistration app = new AppRegistration(name: 'hi', monitorBucketType: MonitorBucketType.byName(type))
+        AppRegistration app = new AppRegistration(name: 'hi', monitorBucketType: MonitorBucketType.byName(type),
+                group: 'hi_group')
         launchContext.application = app
         launchContext.autoScalingGroup = new AutoScalingGroupBeanOptions(autoScalingGroupName: 'hi-dev-v001')
         launchContext.launchConfiguration = new LaunchConfigurationBeanOptions(
@@ -122,6 +124,7 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
                 export NETFLIX_ENVIRONMENT=test
                 export NETFLIX_MONITOR_BUCKET=${monitorBucket ?: ''}
                 export NETFLIX_APP=hi
+                export NETFLIX_APP_GROUP=hi_group
                 export NETFLIX_STACK=dev
                 export NETFLIX_CLUSTER=hi-dev
                 export NETFLIX_AUTO_SCALE_GROUP=hi-dev-v001
@@ -176,6 +179,7 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
                 export NETFLIX_ENVIRONMENT=test
                 export NETFLIX_MONITOR_BUCKET=${appEnvVar}
                 export NETFLIX_APP=${appEnvVar}
+                export NETFLIX_APP_GROUP=
                 export NETFLIX_STACK=
                 export NETFLIX_CLUSTER=${asg?.autoScalingGroupName ?: ''}
                 export NETFLIX_AUTO_SCALE_GROUP=${asg?.autoScalingGroupName ?: ''}
