@@ -16,9 +16,11 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.Sets
 import com.netflix.asgard.deployment.DeploymentWorkflowOptions
 import com.netflix.asgard.deployment.ProceedPreference
+import com.netflix.asgard.deployment.StartDeploymentRequest
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
@@ -35,7 +37,7 @@ import grails.converters.XML
  */
 class DeploymentController {
 
-    static allowedMethods = [deploy: 'POST', proceed: 'POST', rollback: 'POST']
+    static allowedMethods = [deploy: 'POST', proceed: 'POST', rollback: 'POST', startDeployment: 'POST']
     static defaultAction = "list"
 
     def applicationService
@@ -43,6 +45,7 @@ class DeploymentController {
     def awsEc2Service
     def deploymentService
     def flowService
+    ObjectMapper objectMapper
 
     /**
      * Lists all running deployments and the last 100 completed deployments.
@@ -125,7 +128,20 @@ class DeploymentController {
 
     /**
      * Start a deployment.
+     */
+    def startDeployment() {
+        UserContext userContext = UserContext.of(request)
+        String json = request.JSON.toString()
+        StartDeploymentRequest startDeploymentRequest = objectMapper.reader(StartDeploymentRequest).readValue(json)
+        String taskId = deploymentService.startDeployment(userContext, startDeploymentRequest.deploymentOptions,
+                startDeploymentRequest.lcOverrides, startDeploymentRequest.asgOverrides)
+        redirect(controller: 'deployment', action: 'show', id: taskId)
+    }
+
+    /**
+     * Start a deployment.
      *
+     * @deprecated startDeployment will be used in the future
      * @param cmd holds deployment attributes
      */
     def deploy(DeployCommand cmd) {
@@ -207,8 +223,7 @@ class DeploymentController {
                 ebsOptimized: params.ebsOptimized?.toBoolean()
         )
 
-        String taskId = deploymentService.startDeployment(userContext, cmd.clusterName, deploymentOptions, lcOptions,
-                asgOptions)
+        String taskId = deploymentService.startDeployment(userContext, deploymentOptions, lcOptions, asgOptions)
         redirect(controller: 'deployment', action: 'show', id: taskId)
     }
 }

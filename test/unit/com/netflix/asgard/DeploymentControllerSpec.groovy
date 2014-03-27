@@ -120,7 +120,7 @@ class DeploymentControllerSpec extends Specification {
         controller.deploy(cmd)
 
         then:
-        1 * controller.deploymentService.startDeployment(_, 'helloworld', _, _, _) >> '123'
+        1 * controller.deploymentService.startDeployment(_, _, _, _) >> '123'
         flash.message == null
         response.redirectedUrl == '/deployment/show/123'
     }

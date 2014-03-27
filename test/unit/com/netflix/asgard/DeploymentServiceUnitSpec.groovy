@@ -137,12 +137,12 @@ class DeploymentServiceUnitSpec extends Specification {
 
     def 'starting a deployment should make workflow client, call getter to update cache, and return task ID'() {
         UserContext userContext = UserContext.auto(Region.US_EAST_1)
-        DeploymentWorkflowOptions deployOpts = new DeploymentWorkflowOptions()
+        DeploymentWorkflowOptions deployOpts = new DeploymentWorkflowOptions(clusterName: 'Calysteral')
         LaunchConfigurationBeanOptions lcOpts = new LaunchConfigurationBeanOptions()
         AutoScalingGroupBeanOptions asgOpts = new AutoScalingGroupBeanOptions()
 
         when:
-        String taskId = deploymentService.startDeployment(userContext, 'Calysteral', deployOpts, lcOpts, asgOpts)
+        String taskId = deploymentService.startDeployment(userContext, deployOpts, lcOpts, asgOpts)
 
         then:
         taskId == '07700900461'
