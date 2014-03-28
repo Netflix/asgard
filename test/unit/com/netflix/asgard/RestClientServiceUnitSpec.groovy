@@ -63,6 +63,25 @@ class RestClientServiceUnitSpec extends Specification {
         0 * _
     }
 
+    void 'getAsXml should support extraHeaders'() {
+
+                when:
+                GPathResult appsXml = restClientService.getAsXml('http://fakeblock.com', 300,
+                    ['x-api-key':'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'])
+
+                then:
+                2 * httpResponse.entity >> new StringEntity('<apps><app>fakeblock</app><app>helloworld</app></apps>')
+                1 * httpResponse.statusLine >> okStatusLine
+                1 * httpClient.execute(_) >> {
+                    HttpGet request = it[0]
+                    assert request.getHeaders("x-api-key")[0].value == 'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'
+                    httpResponse
+                }
+                appsXml.app[0].text() == 'fakeblock'
+                appsXml.app[1].text() == 'helloworld'
+                0 * _
+            }
+
     void 'getAsXml should return null if request for XML returns content that cannot be parsed'() {
 
         when:

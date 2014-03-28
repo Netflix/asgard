@@ -18,10 +18,13 @@ package com.netflix.asgard
 import grails.converters.JSON
 import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
+
 import java.security.KeyStore
 import java.security.Security
 import java.util.concurrent.TimeUnit
+
 import org.apache.http.Consts
+import org.apache.http.Header
 import org.apache.http.HttpEntity
 import org.apache.http.HttpHost
 import org.apache.http.HttpResponse
@@ -48,6 +51,7 @@ import org.apache.http.params.HttpConnectionParams
 import org.apache.http.util.EntityUtils
 import org.codehaus.groovy.grails.web.json.JSONElement
 import org.springframework.beans.factory.InitializingBean
+
 import sun.net.InetAddressCachePolicy
 
 @SuppressWarnings('ImportFromSunPackages')
@@ -97,8 +101,9 @@ class RestClientService implements InitializingBean {
      * @param timeoutMillis the value to use as socket and connection timeout when making the request
      * @return the XML parsed object
      */
-    def getAsXml(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS) {
-        String content = get(uri, APPLICATION_XML_UTF8, timeoutMillis)
+    def getAsXml(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS,
+                 Map<String,String> extraHeaders = [:]) {
+        String content = get(uri, APPLICATION_XML_UTF8, timeoutMillis, extraHeaders)
         try {
             return content ? XML.parse(content) as GPathResult : null
         } catch (Exception e) {
@@ -114,8 +119,9 @@ class RestClientService implements InitializingBean {
      * @param timeoutMillis the value to use as socket and connection timeout when making the request
      * @return the JSON parsed object
      */
-    JSONElement getAsJson(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS) {
-        String content = get(uri, APPLICATION_JSON_UTF8, timeoutMillis)
+    JSONElement getAsJson(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS,
+                          Map<String,String> extraHeaders = [:]) {
+        String content = get(uri, APPLICATION_JSON_UTF8, timeoutMillis, extraHeaders)
         try {
             return content ? JSON.parse(content) : null
         } catch (Exception e) {
@@ -131,8 +137,9 @@ class RestClientService implements InitializingBean {
      * @param timeoutMillis the value to use as socket and connection timeout when making the request
      * @return the raw JSON string
      */
-    String getJsonAsText(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS) {
-        get(uri, APPLICATION_JSON_UTF8, timeoutMillis)
+    String getJsonAsText(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS,
+                         Map<String,String> extraHeaders = [:]) {
+        get(uri, APPLICATION_JSON_UTF8, timeoutMillis, extraHeaders)
     }
 
     /**
@@ -142,17 +149,20 @@ class RestClientService implements InitializingBean {
      * @param timeoutMillis the value to use as socket and connection timeout when making the request
      * @return the raw JSON string
      */
-    String getAsText(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS) {
-        get(uri, TEXT_PLAIN_UTF8, timeoutMillis)
+    String getAsText(String uri, Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS,
+                     Map<String,String> extraHeaders = [:]) {
+        get(uri, TEXT_PLAIN_UTF8, timeoutMillis, extraHeaders)
     }
 
     private String get(String uri, ContentType contentType = ContentType.DEFAULT_TEXT,
-                       Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS) {
+                       Integer timeoutMillis = DEFAULT_TIMEOUT_MILLIS,
+                       Map<String,String> extraHeaders = [:]) {
         try {
             HttpGet httpGet = getWithTimeout(uri, timeoutMillis)
             String contentTypeString = contentType.toString()
             httpGet.setHeader('Content-Type', contentTypeString)
             httpGet.setHeader('Accept', contentTypeString)
+            extraHeaders.each { header,value -> httpGet.setHeader(header,value) }
             executeAndProcessResponse(httpGet) { HttpResponse httpResponse ->
                 if (readStatusCode(httpResponse) == HttpURLConnection.HTTP_OK) {
                     HttpEntity httpEntity = httpResponse.getEntity()
@@ -188,7 +198,9 @@ class RestClientService implements InitializingBean {
      * @param responseHandler handles the response from the request and provides the return value for this method
      * @return the return value of executing responseHandler
      */
-    private Object executeAndProcessResponse(HttpUriRequest request, Closure responseHandler) {
+    private Object executeAndProcessResponse(HttpUriRequest request, Closure responseHandler,
+                                             Map<String,String> extraHeaders = [:]) {
+        extraHeaders.each { header,value -> request.setHeader(header,value) }
         try {
             HttpResponse httpResponse = httpClient.execute(request)
             Object retVal = responseHandler(httpResponse)
@@ -211,18 +223,22 @@ class RestClientService implements InitializingBean {
      * @param nameValuePairs the name-value pairs to pass in the post body
      * @return int the HTTP response code
      */
-    RestResponse postAsNameValuePairs(String uriPath, Map<String, String> nameValuePairs) {
+    RestResponse postAsNameValuePairs(String uriPath, Map<String, String> nameValuePairs,
+                                      Map<String, String> extraHeaders = [:] ) {
         HttpPost httpPost = new HttpPost(uriPath)
         if (nameValuePairs) {
             List<NameValuePair> data = nameValuePairs.collect { new BasicNameValuePair(it.key, it.value) }
             httpPost.setEntity(new UrlEncodedFormEntity(data))
         }
-        executeAndProcessResponse(httpPost) {
+
+        Closure marshallResponse = {
             logErrors(httpPost, it)
             int statusCode = it.statusLine.statusCode
             String content = it.entity.content.getText()
             new RestResponse(statusCode, content)
         }
+
+        executeAndProcessResponse(httpPost, marshallResponse, extraHeaders)
     }
 
     /**
@@ -230,8 +246,8 @@ class RestClientService implements InitializingBean {
      * @param query the name-value pairs to pass in the post body
      * @return int the HTTP response code
      */
-    int post(String uriPath, Map<String, String> query) {
-        postAsNameValuePairs(uriPath, query).statusCode
+    int post(String uriPath, Map<String, String> query, Map<String, String> extraHeaders = [:]) {
+        postAsNameValuePairs(uriPath, query, extraHeaders).statusCode
     }
 
     /**
@@ -239,13 +255,13 @@ class RestClientService implements InitializingBean {
      * @param xml the XML string to pass in the post body, excluding the xml header line
      * @return post response
      */
-    RestResponse postAsXml(String uriPath, String xml) {
+    RestResponse postAsXml(String uriPath, String xml, Map<String,String> extraHeaders = [:]) {
         StringEntity entity = new StringEntity(
                 '<?xml version="1.0" encoding="UTF-8" ?>' + xml, "application/xml", "UTF-8")
         HttpPost httpPost = new HttpPost(uriPath)
         httpPost.setEntity(entity)
         RestResponse restResponse = null
-        executeAndProcessResponse(httpPost) {
+        executeAndProcessResponse(httpPost, extraHeaders) {
             logErrors(httpPost, it)
             restResponse = new RestResponse(it.statusLine.statusCode, it.entity.content.getText())
         }
@@ -265,8 +281,8 @@ class RestClientService implements InitializingBean {
      * @param uri the URI to connect to
      * @return the HTTP status code of the response
      */
-    int put(String uri) {
-        executeAndProcessResponse(new HttpPut(uri), readStatusCode) as int
+    int put(String uri, Map<String, String> extraHeaders = [:]) {
+        executeAndProcessResponse(new HttpPut(uri), readStatusCode, extraHeaders) as int
     }
 
     /**
@@ -275,8 +291,8 @@ class RestClientService implements InitializingBean {
      * @param uri the URI to connect to
      * @return the HTTP status code of the response
      */
-    int delete(String uri) {
-        executeAndProcessResponse(new HttpDelete(uri), readStatusCode) as int
+    int delete(String uri, Map<String, String> extraHeaders = [:]) {
+        executeAndProcessResponse(new HttpDelete(uri), readStatusCode, extraHeaders) as int
     }
 
     /**
