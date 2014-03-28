@@ -159,7 +159,7 @@ import groovy.transform.Canonical
                 kernelId: kernelId ?: null, // Be careful not to set empties here. Null is okay.
                 ramdiskId: ramdiskId ?: null, // Be careful not to set empties here. Null is okay.
                 blockDeviceMappings: copyBlockDeviceMappings(blockDeviceMappings),
-                instanceMonitoring: instanceMonitoring,
+                instanceMonitoring: instanceMonitoring ?: new InstanceMonitoring().withEnabled(false),
                 spotPrice: spotPrice,
                 iamInstanceProfile: iamInstanceProfile,
                 ebsOptimized: ebsOptimized

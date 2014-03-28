@@ -18,6 +18,7 @@ package com.netflix.asgard
 import com.amazonaws.services.autoscaling.model.Alarm
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
+import com.amazonaws.services.autoscaling.model.InstanceMonitoring
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
@@ -59,6 +60,8 @@ class AutoScalingControllerSpec extends Specification {
         controller.awsLoadBalancerService = awsLoadBalancerService
         controller.cloudReadyService = cloudReadyService
         controller.configService = configService
+
+        configService.getEnableInstanceMonitoring() >> false
     }
 
     void setupHeavyWeightMocks() {
@@ -370,7 +373,7 @@ class AutoScalingControllerSpec extends Specification {
             ebsOptimized = ebsOptimizedParam
         }
         LaunchConfiguration expectedLaunchConfiguration = new LaunchConfiguration().
-                withEbsOptimized(ebsOptimizedValue)
+                withEbsOptimized(ebsOptimizedValue).withInstanceMonitoring(new InstanceMonitoring().withEnabled(false))
 
         when:
         controller.save(cmd)

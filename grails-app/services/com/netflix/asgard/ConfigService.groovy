@@ -832,6 +832,14 @@ class ConfigService {
     }
 
     /**
+     * @return boolean representing enabled instance monitoring. By default, AWS enables detailed instance
+     * monitoring; you must explicitly turn it off
+     */
+    boolean getEnableInstanceMonitoring() {
+        grailsApplication.config.cloud?.launchConfig?.enableInstanceMonitoring ?: false
+    }
+
+    /**
      * @return List of filters to apply to instance reservations (i.e. Light Utilization, etc). By providing
      * values, these reservation types will be removed from the total count of reservations within the
      * AwsEc2Service. Otherwise, all reservation types will be returned.
