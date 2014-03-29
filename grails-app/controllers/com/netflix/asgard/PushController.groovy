@@ -47,7 +47,7 @@ class PushController {
 
         Map attrs = [:]
         try {
-            attrs = pushService.prepareEdit(userContext, name, showAllImages, actionName,
+            attrs = pushService.prepareEdit(userContext, name, showAllImages,
                     Requests.ensureList(params.selectedSecurityGroups))
             attrs.putAll([
                     pricing: params.pricing ?: attrs.pricing
