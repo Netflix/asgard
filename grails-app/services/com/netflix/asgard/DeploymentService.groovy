@@ -36,6 +36,34 @@ class DeploymentService {
     def awsSimpleWorkflowService
     def flowService
 
+    Map<String, String> deploymentIdToManualDecisionToken= [:] // must be put somewhere more durable (SimpleDB or SWF)
+
+    /**
+     * Retrieves the token needed for manual completion of the judgement SWF activity in a deployment workflow.
+     * @param deploymentId identifies the specific deployment
+     * @return token needed to complete SWF activity
+     */
+    String getManualTokenForDeployment(String deploymentId) {
+        deploymentIdToManualDecisionToken[deploymentId]
+    }
+
+    /**
+     * Records the token needed for manual completion of the judgement SWF activity in a deployment workflow.
+     * @param deploymentId identifies the specific deployment
+     * @param token needed to complete SWF activity
+     */
+    void setManualTokenForDeployment(String deploymentId, String token) {
+        deploymentIdToManualDecisionToken[deploymentId] = token
+    }
+
+    /**
+     * Removes the token needed for manual completion of the judgement SWF activity in a deployment workflow.
+     * @param deploymentId identifies the specific deployment
+     */
+    void removeManualTokenForDeployment(String deploymentId) {
+        deploymentIdToManualDecisionToken[deploymentId] = null
+    }
+
     /**
      * Get all running deployments.
      */
@@ -72,6 +100,9 @@ class DeploymentService {
                         Deployment deployment = awsSimpleWorkflowService.
                                 getWorkflowExecutionInfoByTaskId(id)?.asDeployment()
                         if (!deployment) { throw new IllegalArgumentException("There is no deployment with id ${id}.") }
+                        if (!deployment.isDone()) {
+                            deployment.token = getManualTokenForDeployment(id)
+                        }
                         deployment
                     },
                     firstDelayMillis: 300
