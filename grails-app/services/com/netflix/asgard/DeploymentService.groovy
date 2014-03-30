@@ -15,6 +15,9 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.simpledb.model.Attribute
+import com.amazonaws.services.simpledb.model.Item
+import com.amazonaws.services.simpledb.model.ReplaceableAttribute
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.model.ChildPolicy
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
@@ -34,9 +37,11 @@ class DeploymentService {
     def applicationService
     def awsEc2Service
     def awsSimpleWorkflowService
+    def awsSimpleDbService
     def flowService
 
-    Map<String, String> deploymentIdToManualDecisionToken= [:] // must be put somewhere more durable (SimpleDB or SWF)
+    static final String DOMAIN = 'SWF_TOKEN_FOR_DEPLOYMENT'
+    static final String TOKEN = 'token'
 
     /**
      * Retrieves the token needed for manual completion of the judgement SWF activity in a deployment workflow.
@@ -44,7 +49,9 @@ class DeploymentService {
      * @return token needed to complete SWF activity
      */
     String getManualTokenForDeployment(String deploymentId) {
-        deploymentIdToManualDecisionToken[deploymentId]
+        Item item = awsSimpleDbService.selectOne(DOMAIN, deploymentId)
+        Attribute attribute = item?.attributes?.find { it.name == TOKEN }
+        attribute?.value
     }
 
     /**
@@ -53,7 +60,8 @@ class DeploymentService {
      * @param token needed to complete SWF activity
      */
     void setManualTokenForDeployment(String deploymentId, String token) {
-        deploymentIdToManualDecisionToken[deploymentId] = token
+        awsSimpleDbService.save(DOMAIN, deploymentId,
+                [new ReplaceableAttribute(name: TOKEN, value: token, replace: true)])
     }
 
     /**
@@ -61,7 +69,7 @@ class DeploymentService {
      * @param deploymentId identifies the specific deployment
      */
     void removeManualTokenForDeployment(String deploymentId) {
-        deploymentIdToManualDecisionToken[deploymentId] = null
+        awsSimpleDbService.delete(DOMAIN, deploymentId)
     }
 
     /**

@@ -15,6 +15,8 @@
  */
 package com.netflix.asgard
 
+import com.amazonaws.services.simpledb.model.Attribute
+import com.amazonaws.services.simpledb.model.Item
 import com.amazonaws.services.simpleworkflow.flow.StartWorkflowOptions
 import com.amazonaws.services.simpleworkflow.flow.WorkflowClientExternal
 import com.amazonaws.services.simpleworkflow.flow.generic.GenericWorkflowClientExternal
@@ -39,7 +41,7 @@ class DeploymentServiceUnitSpec extends Specification {
     AwsSimpleWorkflowService awsSimpleWorkflowService = Mock(AwsSimpleWorkflowService)
     FlowService flowService = Mock(FlowService)
     DeploymentService deploymentService = new DeploymentService(awsSimpleWorkflowService: awsSimpleWorkflowService,
-            flowService: flowService)
+            flowService: flowService, awsSimpleDbService: Mock(AwsSimpleDbService))
 
     Closure<WorkflowExecutionInfo> newWorkflowExecutionInfo = { int sequenceNumber ->
         new WorkflowExecutionInfo(tagList: new SwfWorkflowTags(id: sequenceNumber as String).constructTags(),
@@ -102,6 +104,10 @@ class DeploymentServiceUnitSpec extends Specification {
         and:
         1 * deploymentService.awsSimpleWorkflowService.getWorkflowExecutionInfoByTaskId('1') >>
                 new WorkflowExecutionBeanOptions(newWorkflowExecutionInfo(1))
+        1 * deploymentService.awsSimpleDbService.selectOne('SWF_TOKEN_FOR_DEPLOYMENT', '1') >> new Item(name: '1',
+                attributes: [new Attribute(name: 'token', value: '1')])
+        0 * _
+
     }
 
     void 'should not get deployment if it does not exist'() {
@@ -113,6 +119,7 @@ class DeploymentServiceUnitSpec extends Specification {
 
         and:
         3 * deploymentService.awsSimpleWorkflowService.getWorkflowExecutionInfoByTaskId('1')
+        0 * _
     }
 
     void 'should not get deployment without an id'() {
