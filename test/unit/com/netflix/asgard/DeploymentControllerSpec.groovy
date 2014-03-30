@@ -133,6 +133,7 @@ class DeploymentControllerSpec extends Specification {
         1 * controller.flowService.getManualActivityCompletionClient('abc') >> Mock(ManualActivityCompletionClient) {
             1 * complete(true)
         }
+        1 * controller.deploymentService.removeManualTokenForDeployment('123')
         0 * _
 
         and:
@@ -148,6 +149,7 @@ class DeploymentControllerSpec extends Specification {
         1 * controller.flowService.getManualActivityCompletionClient('abc') >> Mock(ManualActivityCompletionClient) {
             1 * complete(false)
         }
+        1 * controller.deploymentService.removeManualTokenForDeployment('123')
         0 * _
 
         and:

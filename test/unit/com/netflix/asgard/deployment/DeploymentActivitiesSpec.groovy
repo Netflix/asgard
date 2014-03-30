@@ -24,6 +24,7 @@ import com.netflix.asgard.AwsEc2Service
 import com.netflix.asgard.AwsLoadBalancerService
 import com.netflix.asgard.AwsSimpleWorkflowService
 import com.netflix.asgard.ConfigService
+import com.netflix.asgard.DeploymentService
 import com.netflix.asgard.DiscoveryService
 import com.netflix.asgard.EmailerService
 import com.netflix.asgard.LaunchTemplateService
@@ -59,13 +60,14 @@ class DeploymentActivitiesSpec extends Specification {
     LinkGenerator mockLinkGenerator = Mock(LinkGenerator)
     AwsSimpleWorkflowService mockAwsSimpleWorkflowService = Mock(AwsSimpleWorkflowService)
     PluginService mockPluginService = Mock(PluginService)
+    DeploymentService mockDeploymentService = Mock(DeploymentService)
     DeploymentActivities deploymentActivities = new DeploymentActivitiesImpl(
             awsAutoScalingService: mockAwsAutoScalingService, awsEc2Service: mockAwsEc2Service,
             launchTemplateService: mockLaunchTemplateService, configService: mockConfigService,
             discoveryService: mockDiscoveryService, awsLoadBalancerService: mockAwsLoadBalancerService,
             emailerService: mockEmailerService, activity: mockActivityOperations,
             grailsLinkGenerator: mockLinkGenerator, awsSimpleWorkflowService: mockAwsSimpleWorkflowService,
-            pluginService: mockPluginService)
+            pluginService: mockPluginService, deploymentService: mockDeploymentService)
 
     AsgDeploymentNames asgDeploymentNames = new AsgDeploymentNames(
             previousAsgName: 'rearden_metal_pourer-v001',
@@ -302,6 +304,9 @@ class DeploymentActivitiesSpec extends Specification {
                     Mock(WorkflowExecutionBeanOptions) {
                 getTags() >> new SwfWorkflowTags(id: 1)
             }
+        }
+        with(mockDeploymentService) {
+            1 * setManualTokenForDeployment('1', '8badf00d')
         }
         0 * _
     }

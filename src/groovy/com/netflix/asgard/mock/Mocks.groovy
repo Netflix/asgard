@@ -179,7 +179,6 @@ class Mocks {
             applicationService.grailsApplication = grailsApplication()
             applicationService.configService = configService()
             applicationService.awsClientService = awsClientService()
-            applicationService.simpleDbClient = applicationService.awsClientService.createImpl(MockAmazonSimpleDBClient)
 
             List<String> names =
                     ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot', 'videometadata'].asImmutable()
