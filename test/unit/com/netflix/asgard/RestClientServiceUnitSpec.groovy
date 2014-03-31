@@ -65,22 +65,22 @@ class RestClientServiceUnitSpec extends Specification {
 
     void 'getAsXml should support extraHeaders'() {
 
-                when:
-                GPathResult appsXml = restClientService.getAsXml('http://fakeblock.com', 300,
-                    ['x-api-key':'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'])
+        when:
+        GPathResult appsXml = restClientService.getAsXml('http://fakeblock.com', 300,
+                ['x-api-key':'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'])
 
-                then:
-                2 * httpResponse.entity >> new StringEntity('<apps><app>fakeblock</app><app>helloworld</app></apps>')
-                1 * httpResponse.statusLine >> okStatusLine
-                1 * httpClient.execute(_) >> {
-                    HttpGet request = it[0]
-                    assert request.getHeaders("x-api-key")[0].value == 'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'
-                    httpResponse
-                }
-                appsXml.app[0].text() == 'fakeblock'
-                appsXml.app[1].text() == 'helloworld'
-                0 * _
-            }
+        then:
+        2 * httpResponse.entity >> new StringEntity('<apps><app>fakeblock</app><app>helloworld</app></apps>')
+        1 * httpResponse.statusLine >> okStatusLine
+        1 * httpClient.execute(_) >> {
+            HttpGet request = it[0]
+            assert request.getHeaders("x-api-key")[0].value == 'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'
+            httpResponse
+        }
+        appsXml.app[0].text() == 'fakeblock'
+        appsXml.app[1].text() == 'helloworld'
+        0 * _
+    }
 
     void 'getAsXml should return null if request for XML returns content that cannot be parsed'() {
 
@@ -121,6 +121,27 @@ class RestClientServiceUnitSpec extends Specification {
             assert request.getURI().toString() == 'http://fakeblock.com'
             assert request.getHeaders('Content-Type')[0].value == 'application/json; charset=UTF-8'
             assert request.getHeaders('Accept')[0].value == 'application/json; charset=UTF-8'
+            httpResponse
+        }
+        appJson.app == 'fakeblock'
+        0 * _
+    }
+
+    void 'getAsJson should support extra headers'() {
+
+        when:
+        JSONElement appJson = restClientService.getAsJson('http://fakeblock.com', 300,
+                ['x-api-key':'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'])
+
+        then:
+        2 * httpResponse.entity >> new StringEntity('{"app":"fakeblock"}')
+        1 * httpResponse.statusLine >> okStatusLine
+        1 * httpClient.execute(_) >> {
+            HttpGet request = it[0]
+            assert request.getURI().toString() == 'http://fakeblock.com'
+            assert request.getHeaders('Content-Type')[0].value == 'application/json; charset=UTF-8'
+            assert request.getHeaders('Accept')[0].value == 'application/json; charset=UTF-8'
+            assert request.getHeaders("x-api-key")[0].value == 'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'
             httpResponse
         }
         appJson.app == 'fakeblock'
@@ -223,6 +244,27 @@ class RestClientServiceUnitSpec extends Specification {
         0 * _
     }
 
+    void 'getAsText should support extra headers'() {
+
+        when:
+        String result = restClientService.getAsText('http://fakeblock.com', 300,
+            ['x-api-key':'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'])
+
+        then:
+        2 * httpResponse.entity >> new StringEntity('Welcome to Fakeblock')
+        1 * httpResponse.statusLine >> okStatusLine
+        1 * httpClient.execute(_) >> {
+            HttpGet request = it[0]
+            assert request.getURI().toString() == 'http://fakeblock.com'
+            assert request.getHeaders('Content-Type')[0].value == 'text/plain; charset=UTF-8'
+            assert request.getHeaders('Accept')[0].value == 'text/plain; charset=UTF-8'
+            assert request.getHeaders("x-api-key")[0].value == 'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'
+            httpResponse
+        }
+        result == 'Welcome to Fakeblock'
+        0 * _
+    }
+
     void 'getAsText should return null if text response status code is not 200'() {
 
         when:
@@ -293,6 +335,29 @@ class RestClientServiceUnitSpec extends Specification {
         0 * _
     }
 
+    void "post should support extra headers"() {
+
+        when:
+        int responseCode = restClientService.post('http://fakeblock.com',
+                [type: 'wood', user: 'George Maharis'],
+                ['x-api-key':'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'])
+
+        then:
+        responseCode == 200
+
+        and:
+        2 * httpResponse.entity >> new StringEntity('{ "knock": "unknown" }')
+        2 * httpResponse.statusLine >> okStatusLine
+        1 * httpClient.execute(_) >> {
+            HttpPost request = it[0]
+            assert request.getURI().toString() == 'http://fakeblock.com'
+            assert request.entity.content.text == 'type=wood&user=George+Maharis'
+            assert request.getHeaders("x-api-key")[0].value == 'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'
+            httpResponse
+        }
+        0 * _
+    }
+
     void "post should throw for HTTP error"() {
 
         when:
@@ -328,6 +393,28 @@ class RestClientServiceUnitSpec extends Specification {
         0 * _
     }
 
+    void 'put should support extra headers'() {
+
+        when:
+        int responseCode = restClientService.put('http://fakeblock.com/knock',
+                ['x-api-key':'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'])
+
+        then:
+        responseCode == 200
+
+        and:
+        1 * httpResponse.entity >> new StringEntity('{ "knock": "unknown" }')
+        1 * httpResponse.statusLine >> okStatusLine
+        1 * httpClient.execute(_) >> {
+            HttpPut request = it[0]
+            assert request.getURI().toString() == 'http://fakeblock.com/knock'
+            assert request.entity == null
+            assert request.getHeaders("x-api-key")[0].value == 'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'
+            httpResponse
+        }
+        0 * _
+    }
+
     void 'delete'() {
 
         when:
@@ -342,6 +429,27 @@ class RestClientServiceUnitSpec extends Specification {
         1 * httpClient.execute(_) >> {
             HttpDelete request = it[0]
             assert request.getURI().toString() == 'http://fakeblock.com/knock'
+            httpResponse
+        }
+        0 * _
+    }
+
+    void 'delete should support extra headers'() {
+
+        when:
+        int responseCode = restClientService.delete('http://fakeblock.com/knock',
+                ['x-api-key':'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'])
+
+        then:
+        responseCode == 200
+
+        and:
+        1 * httpResponse.entity >> new StringEntity('{ "knock": "unknown" }')
+        1 * httpResponse.statusLine >> okStatusLine
+        1 * httpClient.execute(_) >> {
+            HttpDelete request = it[0]
+            assert request.getURI().toString() == 'http://fakeblock.com/knock'
+            assert request.getHeaders("x-api-key")[0].value == 'VzcPaqYjsLK47IW3JTkv6OMyxVnmmC'
             httpResponse
         }
         0 * _
