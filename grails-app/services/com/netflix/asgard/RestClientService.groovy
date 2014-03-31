@@ -18,11 +18,9 @@ package com.netflix.asgard
 import grails.converters.JSON
 import grails.converters.XML
 import groovy.util.slurpersupport.GPathResult
-
 import java.security.KeyStore
 import java.security.Security
 import java.util.concurrent.TimeUnit
-
 import org.apache.http.Consts
 import org.apache.http.Header
 import org.apache.http.HttpEntity
@@ -51,7 +49,6 @@ import org.apache.http.params.HttpConnectionParams
 import org.apache.http.util.EntityUtils
 import org.codehaus.groovy.grails.web.json.JSONElement
 import org.springframework.beans.factory.InitializingBean
-
 import sun.net.InetAddressCachePolicy
 
 @SuppressWarnings('ImportFromSunPackages')
