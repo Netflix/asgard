@@ -92,7 +92,7 @@ grails.project.dependency.resolution = {
 
         compile(
                 // Amazon Web Services programmatic interface. Transitive dependency of glisten, but also used directly.
-                'com.amazonaws:aws-java-sdk:1.7.4',
+                'com.amazonaws:aws-java-sdk:1.7.5',
 
                 // Transitive dependencies of aws-java-sdk, but also used for REST calls, e.g., HttpClient
                 'org.apache.httpcomponents:httpcore:4.2',
