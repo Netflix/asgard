@@ -29,6 +29,11 @@ class ConfigServiceSpec extends Specification {
         configService.getEbsVolumeDeviceNamesForLaunchConfigs() == ['/dev/sdb', '/dev/sdc']
     }
 
+    def 'should return false instance monitoring'() {
+        expect:
+        configService.enableInstanceMonitoring == false
+    }
+
     def 'should return reserved instance filter if provided'(){
         expect:
         configService.getReservationOfferingTypeFilters() == []
