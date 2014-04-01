@@ -34,10 +34,31 @@ class EnvironmentService {
     }
 
     /**
-     * @return the instance ID of the current runtime, or throws an exception if not running in the cloud
+     * @return the instance ID of the current runtime, or null if not running in the AWS cloud
      */
     String getInstanceId() {
         EC2MetadataUtils.instanceId
+    }
+
+    /**
+     * Parses the name of the availability zone where the system is running, and truncates the last character to convert
+     * a zone like us-west-1b to us-west-1. This assumes that Amazon will continue to follow their current naming
+     * pattern for zones and regions, where the zone name is always a region name followed by a single letter. If that
+     * pattern changes, we'll need a different approach such as an environment variable, although that has a different
+     * set of tenuous assumptions.
+     *
+     * @return the region where the current system is running, or null if not running in the AWS cloud
+     */
+    String getRegion() {
+        String zone = EC2MetadataUtils.availabilityZone
+        return zone ? zone[0..-2] : null
+    }
+
+    /**
+     * @return the availability zone where the current system is running, or null if not running in the AWS cloud
+     */
+    String getAvailabilityZone() {
+        EC2MetadataUtils.availabilityZone
     }
 
     /**

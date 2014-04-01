@@ -33,4 +33,23 @@ class EnvironmentServiceSpec extends Specification {
         expect:
         new EnvironmentService().instanceId == 'i-deadbeef'
     }
+
+    void 'should get the availability zone of the current system from AWS helper class'() {
+        EC2MetadataUtils.metaClass.static.getAvailabilityZone = { 'us-west-1a' }
+
+        expect:
+        new EnvironmentService().availabilityZone == 'us-west-1a'
+    }
+
+    void 'should get the region of the current system based on the availability zone from AWS helper class'() {
+        EC2MetadataUtils.metaClass.static.getAvailabilityZone = { zone }
+
+        expect:
+        new EnvironmentService().region == region
+
+        where:
+        zone         | region
+        'us-west-1a' | 'us-west-1'
+        null         | null
+    }
 }

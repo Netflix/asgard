@@ -30,6 +30,7 @@ import com.netflix.asgard.ThreadScheduler
 import com.netflix.asgard.auth.OneLoginAuthenticationProvider
 import com.netflix.asgard.auth.RestrictEditAuthorizationProvider
 import com.netflix.asgard.deployment.DeploymentActivitiesImpl
+import com.netflix.asgard.eureka.EurekaClientHolder
 import com.netflix.asgard.model.CsiScheduledAnalysisFactory
 import groovy.io.FileType
 
@@ -42,6 +43,10 @@ beans = {
     cachedMapBuilder(CachedMapBuilder, ref('threadScheduler'), limitedRegions)
 
     caches(Caches, ref('cachedMapBuilder'), ref('configService'))
+
+    eurekaClientHolder(EurekaClientHolder) {
+        it.autowire = "byName"
+    }
 
     objectMapper(ObjectMapper)
 
