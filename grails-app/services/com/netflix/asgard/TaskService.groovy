@@ -207,6 +207,22 @@ class TaskService {
     }
 
     /**
+     * @return a single concatenated list of all locally cached running tasks (without tasks on other Asgard servers)
+     */
+    List<Task> getAllRunningInCache() {
+        localRunningInMemory + allRunningInSwf
+    }
+
+    /**
+     * @return a list of all running tasks from the AWS Simple Workflow Service
+     */
+    List<Task> getAllRunningInSwf() {
+        awsSimpleWorkflowService.openWorkflowExecutions.collect {
+            new WorkflowExecutionBeanOptions(it).asTask()
+        }
+    }
+
+    /**
      * @return a single concatenated list of all in-memory running tasks from the local and all the remote servers
      */
     List<Task> getAllRunningInMemory() {
@@ -217,9 +233,7 @@ class TaskService {
      * @return all running tasks including local and remote in-memory tasks, and cached SWF workflow executions
      */
     Collection<Task> getAllRunning() {
-        allRunningInMemory + awsSimpleWorkflowService.openWorkflowExecutions.collect {
-            new WorkflowExecutionBeanOptions(it).asTask()
-        }
+        allRunningInMemory + allRunningInSwf
     }
 
     /**
@@ -303,7 +317,7 @@ class TaskService {
         // cluster screen. To solve the performance problem of the remote Asgard instances, either cache the running
         // tasks of remote Asgards, or refactor all long-running tasks into SWF workflows so the need to call remote
         // Asgards for in-memory task lists goes away.
-        allRunning.findAll(matcher).sort { it.startTime }
+        allRunningInCache.findAll(matcher).sort { it.startTime }
     }
 
     /**
