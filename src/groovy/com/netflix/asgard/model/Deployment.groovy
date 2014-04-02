@@ -24,7 +24,7 @@ import org.joda.time.DateTime
 /**
  * Attributes that describe a deployment workflow execution.
  */
-@Canonical
+@Canonical(excludes='token')
 class Deployment {
     final String id
     final String clusterName
@@ -36,6 +36,9 @@ class Deployment {
     final Date updateTime
     final String status
     final List<String> log
+
+    /** AWS Simple Workflow Service activity token needed to complete a manual activity */
+    String token
 
     /**
      * @return indication that workflow is done running

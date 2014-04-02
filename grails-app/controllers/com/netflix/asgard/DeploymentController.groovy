@@ -119,6 +119,7 @@ class DeploymentController {
                 getManualActivityCompletionClient(token)
         try {
             manualActivityCompletionClient.complete(shouldProceed)
+            deploymentService.removeManualTokenForDeployment(id)
             flash.message = "Automated deployment will ${shouldProceed ? '' : 'not '}proceed."
         } catch (Exception e) {
             flash.message = "Deployment failed: ${e.toString()}"

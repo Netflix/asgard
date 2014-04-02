@@ -15,13 +15,16 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.simpledb.AmazonSimpleDB
+import com.amazonaws.AmazonServiceException
+import com.amazonaws.services.simpledb.model.Item
 import com.netflix.asgard.model.MonitorBucketType
 import spock.lang.Specification
 import spock.lang.Unroll
 
 @SuppressWarnings("GroovyAssignabilityCheck")
 class ApplicationServiceUnitSpec extends Specification {
+
+    static final DOMAIN_NAME = 'CLOUD_APPLICATIONS'
 
     final Collection<String> APP_NAMES = ['aws_stats', 'api', 'cryptex', 'helloworld', 'abcache']
 
@@ -40,8 +43,9 @@ class ApplicationServiceUnitSpec extends Specification {
                 work(new Task())
             }
         }
-        applicationService.simpleDbClient = Mock(AmazonSimpleDB)
         applicationService.cloudReadyService = Mock(CloudReadyService)
+        applicationService.awsSimpleDbService = Mock(AwsSimpleDbService)
+        applicationService.domainName = DOMAIN_NAME
     }
 
     def 'should return correct apps for load balancer'() {
@@ -78,13 +82,12 @@ class ApplicationServiceUnitSpec extends Specification {
         applicationService.getRegisteredApplication(_, _) >> null
 
         when:
-        CreateApplicationResult result = applicationService.createRegisteredApplication(
-                UserContext.auto(), 'helloworld', null,
+        applicationService.createRegisteredApplication(UserContext.auto(), 'helloworld', null,
                 'Web Application', 'Say hello', 'jsmith', 'jsmith@example.com',
                 MonitorBucketType.application, 'a,b,c', true)
 
         then:
-        1 * applicationService.simpleDbClient.putAttributes(_)
+        1 * applicationService.awsSimpleDbService.save('CLOUD_APPLICATIONS', 'HELLOWORLD', _)
         notThrown(NullPointerException)
     }
 
@@ -102,5 +105,30 @@ class ApplicationServiceUnitSpec extends Specification {
         'none'        | ''
         'application' | 'hello'
         'cluster'     | 'hello-there'
+    }
+
+    def 'should retrieve applications'() {
+        new MonkeyPatcherService().createDynamicMethods()
+        Item item1 = new Item(name: 'Zebra')
+        Item item2 = new Item(name: 'aardvark')
+
+        when:
+        Collection<AppRegistration> applications = applicationService.retrieveApplications()
+
+        then:
+        1 * applicationService.awsSimpleDbService.selectAll(DOMAIN_NAME) >> [item1, item2]
+        applications == [AppRegistration.from(item2), AppRegistration.from(item1)]
+    }
+
+    def 'should bubble up AWS error'() {
+        AmazonServiceException ase = new AmazonServiceException('other exception')
+
+        when:
+        applicationService.retrieveApplications()
+
+        then:
+        1 * applicationService.awsSimpleDbService.selectAll(DOMAIN_NAME) >> { throw ase }
+        AmazonServiceException e = thrown()
+        e == ase
     }
 }
