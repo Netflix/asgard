@@ -104,8 +104,8 @@ class DeploymentServiceUnitSpec extends Specification {
         and:
         1 * deploymentService.awsSimpleWorkflowService.getWorkflowExecutionInfoByTaskId('1') >>
                 new WorkflowExecutionBeanOptions(newWorkflowExecutionInfo(1))
-        1 * deploymentService.awsSimpleDbService.selectOne('SWF_TOKEN_FOR_DEPLOYMENT', '1') >> new Item(name: '1',
-                attributes: [new Attribute(name: 'token', value: '1')])
+        1 * deploymentService.awsSimpleDbService.selectOne('ASGARD_SWF_TOKEN_FOR_DEPLOYMENT', '1') >> new Item(
+                name: '1', attributes: [new Attribute(name: 'token', value: '1')])
         0 * _
 
     }

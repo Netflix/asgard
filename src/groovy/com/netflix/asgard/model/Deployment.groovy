@@ -37,6 +37,7 @@ class Deployment {
     final String status
     final List<String> log
 
+    /** AWS Simple Workflow Service activity token needed to complete a manual activity */
     String token
 
     /**

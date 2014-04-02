@@ -48,14 +48,14 @@ class AwsSimpleDbServiceUnitSpec extends Specification {
     }
 
     def 'should select one item'() {
-        String query = "select * from CLOUD_APPLICATIONS where itemName()='BEAVER'"
+        String query = "select * from CLOUD_APPLICATIONS where itemName()='beaver'"
 
         when:
         Item actualItem = awsSimpleDbService.selectOne(DOMAIN_NAME, 'beaver')
 
         then:
-        1 * simpleDbClient.select(new SelectRequest(query, true)) >> new SelectResult(items: [new Item(name: 'BEAVER')])
-        actualItem == new Item(name: 'BEAVER')
+        1 * simpleDbClient.select(new SelectRequest(query, true)) >> new SelectResult(items: [new Item(name: 'beaver')])
+        actualItem == new Item(name: 'beaver')
     }
 
     def 'should create domain if missing'() {
@@ -78,7 +78,29 @@ class AwsSimpleDbServiceUnitSpec extends Specification {
         awsSimpleDbService.save(DOMAIN_NAME, 'beaver', attributes)
 
         then:
-        1 * simpleDbClient.putAttributes(new PutAttributesRequest(domainName: DOMAIN_NAME, itemName: 'BEAVER',
+        1 * simpleDbClient.putAttributes(new PutAttributesRequest(domainName: DOMAIN_NAME, itemName: 'beaver',
+                attributes: attributes))
+    }
+
+    def 'should save item after first attempt fails due to missing domain'() {
+        Collection<ReplaceableAttribute> attributes = [new ReplaceableAttribute(name: 'status', value: 'busy')]
+
+        when:
+        awsSimpleDbService.save(DOMAIN_NAME, 'beaver', attributes)
+
+        then:
+        1 * simpleDbClient.putAttributes(new PutAttributesRequest(domainName: DOMAIN_NAME, itemName: 'beaver',
+                attributes: attributes)) >> {
+            AmazonServiceException amazonServiceException = new AmazonServiceException('')
+            amazonServiceException.errorCode = 'NoSuchDomain'
+            throw amazonServiceException
+        }
+
+        then:
+        1 * simpleDbClient.createDomain(new CreateDomainRequest(DOMAIN_NAME))
+
+        then:
+        1 * simpleDbClient.putAttributes(new PutAttributesRequest(domainName: DOMAIN_NAME, itemName: 'beaver',
                 attributes: attributes))
     }
 
@@ -89,7 +111,7 @@ class AwsSimpleDbServiceUnitSpec extends Specification {
         awsSimpleDbService.delete(DOMAIN_NAME, 'beaver', attributes)
 
         then:
-        1 * simpleDbClient.deleteAttributes(new DeleteAttributesRequest(domainName: DOMAIN_NAME, itemName: 'BEAVER',
+        1 * simpleDbClient.deleteAttributes(new DeleteAttributesRequest(domainName: DOMAIN_NAME, itemName: 'beaver',
                 attributes: attributes))
     }
 }

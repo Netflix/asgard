@@ -87,7 +87,7 @@ class ApplicationServiceUnitSpec extends Specification {
                 MonitorBucketType.application, 'a,b,c', true)
 
         then:
-        1 * applicationService.awsSimpleDbService.save('CLOUD_APPLICATIONS', 'helloworld', _)
+        1 * applicationService.awsSimpleDbService.save('CLOUD_APPLICATIONS', 'HELLOWORLD', _)
         notThrown(NullPointerException)
     }
 

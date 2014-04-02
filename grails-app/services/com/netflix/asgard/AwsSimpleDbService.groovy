@@ -69,25 +69,27 @@ class AwsSimpleDbService implements InitializingBean {
 
     /**
      * Retrieves all items in a domain from a region of Simple DB.
+     *
      * @param domainName to query in
      * @param region to query from
      * @return items queried for
      */
-    List<Item> selectAll(String domainName, Region region = Region.US_EAST_1) {
+    List<Item> selectAll(String domainName, Region region = Region.defaultRegion()) {
         String queryString = "select * from ${domainName} limit 2500"
         runQuery(domainName, queryString, region)
     }
 
     /**
      * Retrieves an item in a domain from a region of Simple DB.
+     *
      * @param domainName to query in
      * @param itemName to query for
      * @param region to query from
      * @return item queried for or null if nonexistent
      */
-    Item selectOne(String domainName, String itemName, Region region = Region.US_EAST_1) {
+    Item selectOne(String domainName, String itemName, Region region = Region.defaultRegion()) {
         assert !(itemName.contains("'")) // Simple way to avoid SQL injection
-        String queryString = "select * from ${domainName} where itemName()='${itemName.toUpperCase()}'"
+        String queryString = "select * from ${domainName} where itemName()='${itemName}'"
         List<Item> items = runQuery(domainName, queryString, region)
         Check.loneOrNone(items, 'items')
     }
@@ -108,28 +110,49 @@ class AwsSimpleDbService implements InitializingBean {
 
     /**
      * Saves attributes for an item in a domain from a region of Simple DB.
+     *
      * @param domainName to save in
      * @param itemName to save for
      * @param attributes to save
      * @param region to save in
      */
     void save(String domainName, String itemName, Collection<ReplaceableAttribute> attributes,
-              Region region = Region.US_EAST_1) {
-        awsClient.by(region).putAttributes(new PutAttributesRequest().withDomainName(domainName).
-                withItemName(itemName.toUpperCase()).withAttributes(attributes))
+              Region region = Region.defaultRegion()) {
+        try {
+            awsClient.by(region).putAttributes(new PutAttributesRequest().withDomainName(domainName).
+                    withItemName(itemName).withAttributes(attributes))
+        } catch (AmazonServiceException ase) {
+            if (ase.errorCode == 'NoSuchDomain') {
+                awsClient.by(region).createDomain(new CreateDomainRequest(domainName))
+                // try to save again
+                awsClient.by(region).putAttributes(new PutAttributesRequest().withDomainName(domainName).
+                        withItemName(itemName).withAttributes(attributes))
+            } else {
+                throw ase
+            }
+        }
     }
 
     /**
      * Deletes attributes for an item in a domain for a region of Simple DB.
+     *
      * @param domainName to delete from
      * @param itemName to delete
      * @param attributes to delete or null to delete the entire item
      * @param region to delete from
      */
     void delete(String domainName, String itemName, List<Attribute> attributes = null,
-                Region region = Region.US_EAST_1) {
-        awsClient.by(region).deleteAttributes(new DeleteAttributesRequest(domainName, itemName.toUpperCase(),
-                attributes))
+                Region region = Region.defaultRegion()) {
+        try {
+            awsClient.by(region).deleteAttributes(new DeleteAttributesRequest(domainName, itemName,
+                    attributes))
+        } catch (AmazonServiceException ase) {
+            if (ase.errorCode == 'NoSuchDomain') {
+                awsClient.by(region).createDomain(new CreateDomainRequest(domainName))
+            } else {
+                throw ase
+            }
+        }
     }
 
     // Domains

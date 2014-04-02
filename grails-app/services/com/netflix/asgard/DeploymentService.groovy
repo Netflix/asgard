@@ -40,11 +40,12 @@ class DeploymentService {
     def awsSimpleDbService
     def flowService
 
-    static final String DOMAIN = 'SWF_TOKEN_FOR_DEPLOYMENT'
+    static final String DOMAIN = 'ASGARD_SWF_TOKEN_FOR_DEPLOYMENT'
     static final String TOKEN = 'token'
 
     /**
      * Retrieves the token needed for manual completion of the judgement SWF activity in a deployment workflow.
+     *
      * @param deploymentId identifies the specific deployment
      * @return token needed to complete SWF activity
      */
@@ -56,6 +57,7 @@ class DeploymentService {
 
     /**
      * Records the token needed for manual completion of the judgement SWF activity in a deployment workflow.
+     *
      * @param deploymentId identifies the specific deployment
      * @param token needed to complete SWF activity
      */
@@ -66,6 +68,7 @@ class DeploymentService {
 
     /**
      * Removes the token needed for manual completion of the judgement SWF activity in a deployment workflow.
+     *
      * @param deploymentId identifies the specific deployment
      */
     void removeManualTokenForDeployment(String deploymentId) {

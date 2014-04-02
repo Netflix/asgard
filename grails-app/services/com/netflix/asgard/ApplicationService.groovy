@@ -78,7 +78,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         if (from == From.CACHE) {
             return caches.allApplications.get(name)
         }
-        Item item = awsSimpleDbService.selectOne(domainName, name)
+        Item item = awsSimpleDbService.selectOne(domainName, name.toUpperCase())
         AppRegistration appRegistration = AppRegistration.from(item)
         caches.allApplications.put(name, appRegistration)
         appRegistration
@@ -105,7 +105,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         String creationLogMessage = "Create registered app ${name}, type ${type}, owner ${owner}, email ${email}"
         taskService.runTask(userContext, creationLogMessage, { task ->
             try {
-                awsSimpleDbService.save(domainName, name, attributes)
+                awsSimpleDbService.save(domainName, name.toUpperCase(), attributes)
                 result.appCreated = true
             } catch (AmazonServiceException e) {
                 result.appCreateException = e
@@ -145,9 +145,9 @@ class ApplicationService implements CacheInitializer, InitializingBean {
                 bucketType, tags, true)
         taskService.runTask(userContext,
                 "Update registered app ${name}, type ${type}, owner ${owner}, email ${email}", { task ->
-            awsSimpleDbService.save(domainName, name, attributes)
+            awsSimpleDbService.save(domainName, name.toUpperCase(), attributes)
             if (!tags) {
-                awsSimpleDbService.delete(domainName, name, [new Attribute().withName('tags')])
+                awsSimpleDbService.delete(domainName, name.toUpperCase(), [new Attribute().withName('tags')])
             }
         }, Link.to(EntityType.application, name))
         getRegisteredApplication(userContext, name)
@@ -157,7 +157,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
         Check.notEmpty(name, "name")
         validateDelete(userContext, name)
         taskService.runTask(userContext, "Delete registered app ${name}", { task ->
-            awsSimpleDbService.delete(domainName, name)
+            awsSimpleDbService.delete(domainName, name.toUpperCase())
         }, Link.to(EntityType.application, name))
         getRegisteredApplication(userContext, name)
     }
