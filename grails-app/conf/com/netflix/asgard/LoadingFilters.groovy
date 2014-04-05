@@ -24,7 +24,7 @@ class LoadingFilters {
     def serverService
 
     def filters = {
-        all(controller: '(cache|init|healthcheck|server)', invert: true) {
+        all(controller: '(cache|init|healthcheck|server|flag)', invert: true) {
             before = {
                 if (serverService.shouldCacheLoadingBlockUserRequests()) {
                     render(status: HttpServletResponse.SC_SERVICE_UNAVAILABLE, view: '/loading')
