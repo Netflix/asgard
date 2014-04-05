@@ -44,7 +44,7 @@ class SnsTaskFinishedListener implements TaskFinishedListener {
     void taskFinished(Task task) {
         Region region = configService.taskFinishedSnsTopicRegion
         String topicName = configService.taskFinishedSnsTopicName
-        if (!region || !topicName) {
+        if (!region || !topicName || !configService.online) {
             return // Sns notifications are not configured
         }
         UserContext userContext = UserContext.auto(region)
