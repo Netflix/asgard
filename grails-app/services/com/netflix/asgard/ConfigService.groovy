@@ -456,6 +456,13 @@ class ConfigService {
     }
 
     /**
+     * @return a map of deprecated server names to new canonical server names, or an empty map if not configured
+     */
+    Map<String, String> getDeprecatedServerNamesToReplacements() {
+        grailsApplication.config.server?.deprecatedServerNamesToReplacements ?: [:]
+    }
+
+    /**
      * @return the AWS account access ID stored in the local configuration file, or null if not configured
      */
     String getAccessId() {
