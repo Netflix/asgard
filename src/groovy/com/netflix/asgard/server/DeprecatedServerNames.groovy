@@ -104,7 +104,7 @@ class DeprecatedServerNames implements InitializingBean {
      */
     String getFullUrl(HttpServletRequest request) {
         String queryString = request.queryString
-        getNestedRequestWithActualUrl(request).requestURL + (queryString ? "?${queryString}": '')
+        getNestedRequestWithActualUrl(request).requestURL + (queryString ? "?${queryString}" : '')
     }
 
     /**
