@@ -32,7 +32,6 @@ import com.netflix.asgard.auth.RestrictEditAuthorizationProvider
 import com.netflix.asgard.deployment.DeploymentActivitiesImpl
 import com.netflix.asgard.eureka.EurekaClientHolder
 import com.netflix.asgard.model.CsiScheduledAnalysisFactory
-import com.netflix.asgard.auth.SamlAuthenticationProvider
 import groovy.io.FileType
 
 beans = {
