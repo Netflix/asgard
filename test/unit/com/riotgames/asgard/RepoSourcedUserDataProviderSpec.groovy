@@ -167,11 +167,11 @@ parts:
         f.length() > 0
     }
 
-    //@Ignore
+    @Ignore
     def 'should build complete user data'() {
         RepoSourcedUserDataProvider repoSourcedUserDataProvider = makeProvider()
         String ud = repoSourcedUserDataProvider.buildUserData(launchContext)
-        println ud
+        //println ud
         expect:
         ud != null
         ud.length() > 0

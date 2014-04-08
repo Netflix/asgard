@@ -77,7 +77,9 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
 
             DefaultHttpClient httpclient = new DefaultHttpClient()
             HttpGet httpGet = new HttpGet(url)
-            if (accept) httpGet.addHeader('Accept', accept)
+            if (accept) {
+                httpGet.addHeader('Accept', accept)
+            }
 
             HttpResponse response = httpclient.execute(httpGet)
             if (response.statusLine.statusCode < 300) {
@@ -118,7 +120,8 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
          * @return  a map of regex Pattern => String for substituting variables with values.
          */
         Variables(ConfigService configService, LaunchContext launchContext) {
-            String envName = splitTail(configService.accountName, '-')  //CQ: maybe use configService.envStyle as the default?
+            // NOTE(CQ): maybe use configService.envStyle as the default?
+            String envName = splitTail(configService.accountName, '-')
             String groupName = launchContext.autoScalingGroup?.autoScalingGroupName  // null on single instance launch
             String appName = launchContext.application?.name  // null on single instance launch
             variables = [
@@ -157,7 +160,7 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
      */
     static String splitTail(String input, String delim) {
         String[] parts = input.split(delim)
-        parts && parts.size() > 0 ? parts[parts.size()-1] : ''
+        parts && parts.size() > 0 ? parts[parts.size() - 1] : ''
     }
 
     /**
@@ -165,7 +168,7 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
      * to yield the final representation which can then be assembled into a UserData string.
      */
     static class Formula {
-        final def formula
+        final formula
 
         /**
          * Retrieves a formula in YAML from from a repo, and returns a parsed Formula instance iff found and valid,
@@ -197,11 +200,13 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
          * Substitutes variables in the the source and target paths.
          */
         void substituteVariables(Variables variables) {
-            formula.parts.each { part->
+            formula.parts.each { part ->
                 part.source = variables.substituted(part.source)
                 part.target = variables.substituted(part.target)
-                if (part.target.endsWith('/'))
-                    part.target += splitTail(part.source, '/')  // reuse the name part of the source if target ends with /
+                if (part.target.endsWith('/')) {
+                    part.target += splitTail(part.source, '/')
+                    // reuse the name part of the source if target ends with /
+                }
             }
         }
 
@@ -209,10 +214,11 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
          * Retrieves source blobs from the repo, and substitute vars as indicated.
          */
         void retrieveBlobs(Repo repo, Variables variables) {
-            formula.parts.each { part->
+            formula.parts.each { part ->
                 part.blob = repo.retrieveText(part.source) // stuff the blob in the part object
-                if (part.subst)
+                if (part.subst) {
                     part.blob = variables.substituted(part.blob)
+                }
             }
         }
 
@@ -296,7 +302,7 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
                             bodyPart.setContent(part.blob, 'text/cloud-config')
                             break
 
-                        //CQ: how to sub-catagorize these cloud-config sub-parts...?
+                        // NOTE(CQ): how to sub-catagorize these cloud-config sub-parts...?
 
                         // write_files
                         case 'write-files':
@@ -320,7 +326,7 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
             msg.writeTo(baos, (String[])['Message-Id'])
             baos.toString()
 
-            //CQ: could/should gzip+base64 encode here.
+            // NOTE(CQ): could/should gzip+base64 encode here.
         }
     }
 
@@ -334,7 +340,7 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
         Variables variables = new Variables(configService, launchContext)
 
         // Scans the formulaPaths, substituting vars in each, and retrieves and parses the first one found.
-        Formula formula = formulaPaths.findResult { path->
+        Formula formula = formulaPaths.findResult { path ->
             Formula.fromRepo(repo, variables.substituted(path))
         }
         if (formula) {
