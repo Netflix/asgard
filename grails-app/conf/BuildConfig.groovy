@@ -120,7 +120,7 @@ grails.project.dependency.resolution = {
                 'com.jcraft:jsch:0.1.45',
 
                 // Send emails about system errors and task completions
-                'javax.mail:mail:1.4.3',
+                'javax.mail:mail:1.4.5',
 
                 // Better date API, e.g., DateTime
                 'joda-time:joda-time:1.6.2',
@@ -147,6 +147,9 @@ grails.project.dependency.resolution = {
 
                 // Used by RepoSourcedUserDataProvider for YAML parsing
                 "org.yaml:snakeyaml:1.8",
+
+                // Activation 1.1.1 fixes bugs in 1.1 that break MIME handling in RSUDP tests.
+                'javax.activation:activation:1.1.1',
 
         ) { // Exclude superfluous and dangerous transitive dependencies
             excludes(
