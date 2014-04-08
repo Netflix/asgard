@@ -39,6 +39,7 @@ import com.netflix.asgard.model.GroupedInstance
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
+import com.netflix.asgard.push.GroupDeleteOperation
 import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
@@ -59,6 +60,7 @@ class AutoScalingController {
     def configService
     def instanceTypeService
     def mergedInstanceService
+    def pushService
     def spotInstanceRequestService
     def stackService
 
@@ -459,25 +461,12 @@ class AutoScalingController {
         UserContext userContext = UserContext.of(request)
         String name = params.name
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, name)
-        Boolean showGroupNext = false
         if (!group) {
             flash.message = "Auto Scaling Group '${name}' not found."
         } else {
-            if (group?.instances?.size() <= 0) {
-                try {
-                    awsAutoScalingService.deleteAutoScalingGroup(userContext, name)
-                    flash.message = "AutoScaling Group '${name}' has been deleted."
-                } catch (Exception e) {
-                    flash.message = "Could not delete Auto Scaling Group: ${e}"
-                    showGroupNext = true
-                }
-            } else {
-                flash.message = "You cannot delete an auto scaling group that still has instances. " +
-                        "Set the min and max to 0, wait for the instances to disappear, then try deleting again."
-                showGroupNext = true
-            }
+            GroupDeleteOperation operation = pushService.startGroupDelete(userContext, group)
+            redirect(controller: 'task', action: 'show', params: [id: operation.taskId])
         }
-        showGroupNext ? redirect(action: 'show', params: [id: name]) : redirect(action: 'list')
     }
 
     def postpone() {
