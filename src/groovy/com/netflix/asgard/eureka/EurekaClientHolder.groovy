@@ -96,7 +96,9 @@ class EurekaClientHolder implements InitializingBean {
      */
     EurekaInstanceConfig createEurekaInstanceConfig() {
         if (environmentService.instanceId) {
-            return new AsgardCloudEurekaInstanceConfig(nonSecurePort: configService.localInstancePort)
+            String virtualHostName = configService.localVirtualHostName
+            Integer nonSecurePort = configService.localInstancePort
+            return new AsgardCloudEurekaInstanceConfig(nonSecurePort: nonSecurePort, virtualHostName: virtualHostName)
         } else {
             return new AsgardDataCenterEurekaInstanceConfig()
         }
