@@ -4,7 +4,6 @@ import com.netflix.asgard.AppRegistration
 import com.netflix.asgard.ConfigService
 import com.netflix.asgard.Region
 import com.netflix.asgard.UserContext
-import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchContext
 import org.codehaus.groovy.grails.commons.DefaultGrailsApplication
@@ -12,6 +11,7 @@ import org.yaml.snakeyaml.Yaml
 
 import spock.lang.Ignore
 import spock.lang.Specification
+
 import static RepoSourcedUserDataProvider.Formula
 import static RepoSourcedUserDataProvider.Repo
 import static RepoSourcedUserDataProvider.Variables

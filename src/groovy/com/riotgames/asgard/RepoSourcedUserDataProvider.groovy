@@ -203,7 +203,7 @@ class RepoSourcedUserDataProvider implements AdvancedUserDataProvider, Initializ
             formula.parts.each { part ->
                 part.source = variables.substituted(part.source)
                 part.target = variables.substituted(part.target)
-                if (part.target.endsWith('/')) {
+                if (part.target?.endsWith('/')) {
                     part.target += splitTail(part.source, '/')
                     // reuse the name part of the source if target ends with /
                 }
