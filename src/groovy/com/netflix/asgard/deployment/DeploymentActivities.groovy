@@ -25,7 +25,7 @@ import com.netflix.asgard.model.ScheduledAsgAnalysis
 /**
  * Method contracts and annotations used for the automatic deployment SWF workflow actions.
  */
-@Activities(version = "1.7")
+@Activities(version = "1.8")
 @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = -1L,
         defaultTaskStartToCloseTimeoutSeconds = 300L)
 interface DeploymentActivities {
@@ -149,12 +149,14 @@ interface DeploymentActivities {
     /**
      * Sends a notification about the status of the deployment.
      *
+     * @param userContext who, where, why
      * @param notificationDestination where deployment notifications will be sent
      * @param asgName of the ASG to modify
      * @param subject of the notification
      * @param rollbackCause textual description of the reason why an ASG is not operational, or null if it is
      */
-    void sendNotification(String notificationDestination, String asgName, String subject, String rollbackCause)
+    void sendNotification(UserContext userContext, String notificationDestination, String asgName, String subject,
+            String rollbackCause)
 
     /**
      * Starts the analysis of Auto Scaling Groups in a cluster.
