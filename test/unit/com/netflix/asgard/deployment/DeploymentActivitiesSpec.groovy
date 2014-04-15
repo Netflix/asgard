@@ -313,8 +313,8 @@ class DeploymentActivitiesSpec extends Specification {
 
     def 'should send notification'() {
         when:
-        deploymentActivities.sendNotification('hrearden@reardenmetal.com', 'rearden_metal_pourer-v001',
-                'Read this Hank!', 'Production has halted.')
+        deploymentActivities.sendNotification(UserContext.auto(), 'hrearden@reardenmetal.com',
+                'rearden_metal_pourer-v001', 'Read this Hank!', 'Production has halted.')
 
         then:
         with(mockActivityOperations) {

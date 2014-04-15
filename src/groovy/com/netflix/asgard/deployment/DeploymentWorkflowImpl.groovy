@@ -96,7 +96,8 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                 }
                 subject = "Deployment failed for ASG '${asgDeploymentNames.nextAsgName}'."
             }
-            activities.sendNotification(notificationDestination, clusterName, subject, deploymentCompleteMessage)
+            activities.sendNotification(userContext, notificationDestination, clusterName, subject,
+                    deploymentCompleteMessage)
             status deploymentCompleteMessage
         }
     }
@@ -135,7 +136,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                     deploymentOptions.canaryStartUpTimeoutMinutes, canaryCapacity, canaryCapacity,
                     canaryCapacity, operationDescription)
             waitFor(scaleAsgPromise) {
-                determineWhetherToProceedToNextStep(asgDeploymentNames.nextAsgName,
+                determineWhetherToProceedToNextStep(userContext, asgDeploymentNames.nextAsgName,
                         deploymentOptions.canaryJudgmentPeriodMinutes, deploymentOptions.notificationDestination,
                         deploymentOptions.scaleUp, operationDescription)
             }
@@ -148,7 +149,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                     deploymentOptions.desiredCapacityStartUpTimeoutMinutes, nextAsgTemplate.minSize,
                     nextAsgTemplate.desiredCapacity, nextAsgTemplate.maxSize, operationDescription)
             waitFor(scaleAsgPromise) {
-                determineWhetherToProceedToNextStep(asgDeploymentNames.nextAsgName,
+                determineWhetherToProceedToNextStep(userContext, asgDeploymentNames.nextAsgName,
                         deploymentOptions.desiredCapacityJudgmentPeriodMinutes,
                         deploymentOptions.notificationDestination, deploymentOptions.disablePreviousAsg,
                         operationDescription)
@@ -176,7 +177,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                 status "Waiting ${secondsToWaitAfterEurekaChange} seconds for clients to stop using instances."
                 Promise<Void> waitAfterEurekaChange = timer(secondsToWaitAfterEurekaChange, 'waitAfterEurekaChange')
                 waitFor(waitAfterEurekaChange) {
-                    Promise<Boolean> deleteAsg = determineWhetherToProceedToNextStep(
+                    Promise<Boolean> deleteAsg = determineWhetherToProceedToNextStep(userContext,
                             asgDeploymentNames.nextAsgName, deploymentOptions.fullTrafficJudgmentPeriodMinutes,
                             deploymentOptions.notificationDestination, deploymentOptions.deletePreviousAsg,
                             'full traffic')
@@ -256,8 +257,9 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
         }
     }
 
-    private Promise<Boolean> determineWhetherToProceedToNextStep(String asgName, int judgmentPeriodMinutes,
-            String notificationDestination, ProceedPreference continueWithNextStep, String operationDescription) {
+    private Promise<Boolean> determineWhetherToProceedToNextStep(UserContext userContext, String asgName,
+            int judgmentPeriodMinutes, String notificationDestination, ProceedPreference continueWithNextStep,
+            String operationDescription) {
         if (continueWithNextStep == ProceedPreference.Yes) { return promiseFor(true) }
         if (continueWithNextStep == ProceedPreference.No) { return promiseFor(false) }
         String judgmentMessage = "ASG will now be evaluated for up to ${unit(judgmentPeriodMinutes, 'minute')}" +
@@ -271,7 +273,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                 String clusterName = Relationships.clusterFromGroupName(asgName)
                 String subject = "${operationDescription.capitalize()} judgement period for ASG '${asgName}' has ended."
                 String message = 'Please make a decision to proceed or roll back.'
-                activities.sendNotification(notificationDestination, clusterName, subject, message)
+                activities.sendNotification(userContext, notificationDestination, clusterName, subject, message)
                 Promise.Void()
             }
         }

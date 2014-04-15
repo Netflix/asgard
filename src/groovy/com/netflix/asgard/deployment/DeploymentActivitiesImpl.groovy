@@ -216,11 +216,12 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     }
 
     @Override
-    void sendNotification(String notificationDestination, String clusterName, String subject, String message) {
+    void sendNotification(UserContext userContext, String notificationDestination, String clusterName, String subject,
+            String message) {
         String messageWithLink = """\
         ${message}
         ${grailsLinkGenerator.link(base: configService.linkCanonicalServerUrl, controller: 'cluster', action: 'show',
-                id: clusterName)}""".stripIndent()
+                params: [id: clusterName, region: userContext.region.code])}""".stripIndent()
         emailerService.sendUserEmail(notificationDestination, subject, messageWithLink)
     }
 
