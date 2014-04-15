@@ -54,4 +54,8 @@ class Deployment {
         DateTime endTime = isDone() ? new DateTime(updateTime) : Time.now()
         Time.format(new DateTime(startTime), endTime)
     }
+
+    String getRegionCode() {
+        region.code
+    }
 }

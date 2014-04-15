@@ -1,0 +1,288 @@
+<h1>Deploy Next ASG for Cluster '{{clusterName}}'</h1>
+<div class="twbs">
+  <div class="alert alert-danger" ng-show="validationErrors">
+    <strong>Validation Errors!</strong>
+    <div ng-repeat="error in validationErrors">{{error}}</div>
+  </div>
+
+  <div ng-class="{concealed: deploymentOptions !== undefined}">
+    <div class="progress progress-striped active">
+      <div class="progress-bar" style="width: 55%"></div>
+    </div>
+  </div>
+  <div class="deployment" ng-class="{concealed: deploymentOptions === undefined}">
+    <div class="buttons">
+      <button class="deploy" ng-click="startDeployment()" ng-disabled="startingDeployment"><div>Deploy 'helloclay--test_instance_count-v251'</div></button>
+    </div>
+    <div class="well">
+      <div class="row">
+        <div class="col-md-10">
+          <h3>{{environment.nextGroupName}}</h3>
+        </div>
+        <div class="col-md-2">
+          <div ng-class="{hideAdvancedItems: hideAdvancedItems}">
+            <span class="toggle fakeLink" ng-click="toggleAdvanced()">Advanced Options</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="generalOptions container" collapse="hideAdvancedItems === true">
+        <div class="row">
+          <div class="col-md-3">
+            <label>VPC:</label>
+          </div>
+          <div class="col-md-9">
+            <div>
+              <input type="radio" ng-model="asgOptions.subnetPurpose" value="" id="subnetPurpose_"/>
+              <label for="subnetPurpose_" class="choice">Launch non-VPC instances</label>
+            </div>
+            <div ng-repeat="purpose in environment.subnetPurposes">
+              <input type="radio" ng-model="asgOptions.subnetPurpose" value="{{purpose}}" id="subnetPurpose_{{purpose}}"/>
+              <label for="subnetPurpose_{{purpose}}" class="choice">Launch '{{purpose}}' VPC instances</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="launchConfigOptions container">
+        <div class="row" collapse="hideAdvancedItems === true">
+          <div class="col-md-12"><h4>Launch Configuration</h4></div>
+        </div>
+        <div class="row">
+          <div class="col-md-3"><label for="imageId">AMI Image ID:</label></div>
+          <div class="col-md-9">
+            <select id="imageId" ng-model="lcOptions.imageId"
+                                        ng-options="opt.id as opt.imageLocation + ' | ' + opt.id for opt in environment.images">
+            <option value="">Select Image</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" collapse="hideAdvancedItems === true">
+          <div class="col-md-3">
+            <label for="instanceType"><a href="/us-west-1/instanceType/list">Instance Type:</a></label>
+          </div>
+          <div class="col-md-9">
+            <select id="instanceType" ng-model="lcOptions.instanceType"
+                    ng-options="opt.id as opt.id + ' ' + opt.price for opt in environment.instanceTypes">
+            </select>
+          </div>
+        </div>
+        <div class="row" collapse="hideAdvancedItems === true">
+          <div class="col-md-3">
+            <label for="key">SSH Key:</label>
+          </div>
+          <div class="col-md-9">
+            <select id="key" ng-model="lcOptions.keyName" ng-options="opt for opt in environment.keys"></select>
+          </div>
+        </div>
+        <div class="row" collapse="hideAdvancedItems === true">
+          <div class="col-md-3">
+            <label for="securityGroups">Security Groups:</label>
+          </div>
+          <div class="col-md-9">
+            <select id="securityGroups"  multiple="multiple" size="5" ng-model="lcOptions.securityGroups"
+                    ng-options="opt.selection as opt.name for opt in environment.securityGroups | filter:{vpcId: vpcId}:true">
+              <option value="">Select Security Groups</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" collapse="hideAdvancedItems === true">
+          <div class="col-md-3">
+            <label>Pricing:</label>
+          </div>
+          <div class="col-md-9">
+            <div>
+              <input type="radio" ng-model="lcOptions.instancePriceType" value="ON_DEMAND" id="onDemand"/>
+              <label for="onDemand" class="choice">On Demand</label>
+            </div>
+            <div>
+              <input type="radio" ng-model="lcOptions.instancePriceType" value="SPOT" id="spot"/>
+              <label for="spot" class="choice">Spot</label>
+              &nbsp;<a href="{{environment.spotUrl}}">What's this?</a>
+            </div>
+          </div>
+        </div>
+        <div class="row" collapse="hideAdvancedItems === true">
+          <div class="col-md-3">
+            <label for="iamInstanceProfile">IAM Instance Profile:</label>
+          </div>
+          <div class="col-md-9">
+            <input type="text" id="iamInstanceProfile" ng-model="lcOptions.iamInstanceProfile" value="BaseIAMRole"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="autoScalingGroupOptions container" collapse="hideAdvancedItems === true">
+        <div class="row">
+          <div class="col-md-12"><h4>Auto Scaling Group</h4></div>
+        </div>
+        <div class="row">
+          <div class="col-md-3"><label for="imageId">Instance Bounds:</label></div>
+          <div class="col-md-9 numbers">
+            <label for="min">Min:</label> <input type="text" class="number" id="min" ng-model="asgOptions.minSize"/>
+            <label for="max">Max:</label> <input type="text" class="number" id="max" ng-model="asgOptions.maxSize"/>
+          </div>
+        </div>
+        <div class="row" title="The method that the group will use to decide when to replace a problematic instance">
+          <div class="col-md-3">
+              <label for="healthCheckType">ASG Health Check Type:</label>
+            </div>
+          <div class="col-md-9">
+            <select id="healthCheckType" ng-model="asgOptions.healthCheckType"
+                ng-options="opt.id as opt.id + ' (' + opt.description + ')' for opt in environment.healthCheckTypes">
+            </select>
+          </div>
+        </div>
+        <div class="row" title="The number of seconds to wait after instance launch before running the health check">
+          <div class="col-md-3">
+              <label for="healthCheckGracePeriod">ASG Health Check Grace Period:</label>
+          </div>
+          <div class="col-md-9">
+              <input type="text" class="number" id="healthCheckGracePeriod" ng-model="asgOptions.healthCheckGracePeriod"/> seconds
+          </div>
+        </div>
+          <div class="row" title="The number of seconds after a scaling activity completes before any further scaling activities can start">
+            <div class="col-md-3">
+              <label for="defaultCooldown">Cooldown:</label>
+          </div>
+          <div class="col-md-9">
+              <input type="text" class="number" id="defaultCooldown" ng-model="asgOptions.defaultCooldown"/> seconds
+          </div>
+        </div>
+        <div class="row" title="The algorithm to use when selecting which instance to terminate">
+          <div class="col-md-3">
+            <label for="terminationPolicy">Termination Policy:</label>
+        </div>
+          <div class="col-md-9">
+            <select id="terminationPolicy" ng-model="asgOptions.terminationPolicies[0]"
+                    ng-options="opt for opt in environment.terminationPolicies"></select>
+          </div>
+        </div>
+          <div class="row">
+            <div class="col-md-3">
+              <label for="availabilityZones">AvailablityZones:</label>
+          </div>
+          <div class="col-md-9">
+            <select id="availabilityZones"  multiple="multiple" size="5" ng-model="asgOptions.availabilityZones"
+                    ng-options="opt.zone as opt.zone for opt in environment.availabilityZonesAndPurpose | filter:{purpose: asgOptions.subnetPurpose}:true">
+              <option value="">Select Zones</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <label>Load Balancers<br/>(cannot be added or removed later):</label>
+          </div>
+          <div class="col-md-9">
+            <select id="loadBalancers"  multiple="multiple" size="5"
+                    ng-model="asgOptions.loadBalancerNames"
+                    ng-options="opt.id as opt.id for opt in environment.loadBalancers | filter:{vpcId: vpcId}:true">
+              <option value="">Select Load Balancers</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="well">
+      <div class="deploymentOptions container">
+        <div class="row">
+          <div class="col-md-12">
+            <h3>Deployment Configuration</h3>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <label for="notificationDestination">Notifications will be sent to:</label>
+          </div>
+          <div class="col-md-9">
+            <input type="text" ng-model="deploymentOptions.notificationDestination" id="notificationDestination" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12"><h4>Steps</h4></div>
+        </div>
+      <div class="row">
+        <div class="col-md-12">
+            <div class="step panel panel-info">
+              <div class="panel-heading"><h4 class="createAsg">Create ASG</h4></div>
+              <div class="panel-body numbers">
+                Wait
+                <input type="text" ng-model="deploymentOptions.delayDurationMinutes" />
+                minutes before creation.
+              </div>
+            </div>
+            <div class="step panel panel-info" ng-show="deploymentOptions.doCanary === true">
+              <div class="panel-heading"><h4 class="scaling">Resize ASG</h4><div class="removeStep" ng-click="deploymentOptions.doCanary = false"></div></div>
+              <div class="panel-body numbers">
+                Resize to
+                <input type="text" ng-model="deploymentOptions.canaryCapacity" />
+                healthy instance(s) within
+                <input type="text" ng-model="deploymentOptions.canaryStartUpTimeoutMinutes" />
+                minutes or roll back.
+              </div>
+            </div>
+            <div class="stepDivider">
+              <button type="button" class="btn btn-default" ng-show="deploymentOptions.doCanary !== true" ng-click="deploymentOptions.doCanary = true">Add Resize ASG Step</button>
+              <button type="button" class="btn btn-default" ng-show="deploymentOptions.scaleUp !== 'Ask' && deploymentOptions.doCanary === true" ng-click="deploymentOptions.scaleUp = 'Ask'">Add Judgement Step</button>
+            </div>
+            <div class="step panel panel-info" ng-show="deploymentOptions.scaleUp === 'Ask' && deploymentOptions.doCanary === true">
+              <div class="panel-heading"><h4 class="judgement">Wait For Judgement</h4><div class="removeStep" ng-click="deploymentOptions.scaleUp = 'Yes'"></div></div>
+              <div class="panel-body numbers">
+                Deployment will be paused and notifications will be sent now and after
+                <input type="text" ng-model="deploymentOptions.canaryJudgmentPeriodMinutes" />
+                minutes.
+              </div>
+            </div>
+            <div class="step panel panel-info">
+              <div class="panel-heading"><h4 class="scaling">Resize ASG</h4></div>
+              <div class="panel-body numbers">
+                Resize to
+                <input type="text" ng-model="asgOptions.desiredCapacity" />
+                healthy instance(s) within
+                <input type="text" ng-model="deploymentOptions.desiredCapacityStartUpTimeoutMinutes" />
+                minutes or roll back.
+              </div>
+            </div>
+            <div class="step panel panel-info" ng-show="deploymentOptions.disablePreviousAsg === 'Ask'">
+              <div class="panel-heading"><h4 class="judgement">Wait For Judgement</h4><div class="removeStep" ng-click="deploymentOptions.disablePreviousAsg = 'Yes'"></div></div>
+              <div class="panel-body numbers">
+                Deployment will be paused and notifications will be sent now and after
+                <input type="text" ng-model="deploymentOptions.desiredCapacityJudgmentPeriodMinutes" />
+                minutes.
+              </div>
+            </div>
+            <div class="stepDivider">
+              <button type="button" class="btn btn-default" ng-show="deploymentOptions.disablePreviousAsg !== 'Ask'" ng-click="deploymentOptions.disablePreviousAsg = 'Ask'">Add Judgement Step</button>
+              <button type="button" class="btn btn-default" ng-show="deploymentOptions.disablePreviousAsg === 'No'" ng-click="deploymentOptions.disablePreviousAsg = 'Yes'">Add Disable Previous ASG Step</button>
+            </div>
+            <div class="step panel panel-info" ng-show="deploymentOptions.disablePreviousAsg !== 'No'">
+              <div class="panel-heading"><h4 class="disablePreviousAsg">Disable Previous ASG</h4><div class="removeStep" ng-click="deploymentOptions.disablePreviousAsg = 'No'"></div></div>
+              <div class="panel-body numbers">
+                This turns off traffic the previous ASG and sends full traffic to the new ASG.
+              </div>
+            </div>
+            <div class="step panel panel-info" ng-show="deploymentOptions.deletePreviousAsg === 'Ask' && deploymentOptions.disablePreviousAsg !== 'No'">
+              <div class="panel-heading"><h4 class="judgement">Wait For Judgement</h4><div class="removeStep" ng-click="deploymentOptions.deletePreviousAsg = 'Yes'"></div></div>
+              <div class="panel-body numbers">
+                Deployment will be paused and notifications will be sent now and after
+                <input type="text" ng-model="deploymentOptions.fullTrafficJudgmentPeriodMinutes" />
+                minutes.
+              </div>
+            </div>
+            <div class="stepDivider" ng-show="deploymentOptions.disablePreviousAsg !== 'No'">
+              <button type="button" class="btn btn-default" ng-show="deploymentOptions.deletePreviousAsg !== 'Ask'" ng-click="deploymentOptions.deletePreviousAsg = 'Ask'">Add Judgement Step</button>
+              <button type="button" class="btn btn-default" ng-show="deploymentOptions.deletePreviousAsg === 'No'" ng-click="deploymentOptions.deletePreviousAsg = 'Yes'">Add Clean Up Step</button>
+            </div>
+            <div class="step panel panel-info" ng-show="deploymentOptions.deletePreviousAsg !== 'No' && deploymentOptions.disablePreviousAsg !== 'No'">
+              <div class="panel-heading"><h4 class="cleanUp">Clean Up</h4><div class="removeStep" ng-click="deploymentOptions.deletePreviousAsg = 'No'"></div></div>
+              <div class="panel-body numbers">
+                Delete the previous ASG.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

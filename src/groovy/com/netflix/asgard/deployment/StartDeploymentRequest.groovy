@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.deployment
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import groovy.transform.Canonical
@@ -27,4 +28,30 @@ class StartDeploymentRequest {
     DeploymentWorkflowOptions deploymentOptions
     LaunchConfigurationBeanOptions lcOverrides
     AutoScalingGroupBeanOptions asgOverrides
+
+    /**
+     * @return List of all validation errors
+     */
+    @JsonIgnore
+    List<String> getValidationErrors() {
+        List<String> errors = []
+        if (deploymentOptions.doCanary) {
+            errors.addAll(checkCapacityBounds(deploymentOptions.canaryCapacity, asgOverrides))
+        }
+        errors.addAll(checkCapacityBounds(asgOverrides.desiredCapacity, asgOverrides))
+        errors
+    }
+
+    private List<String> checkCapacityBounds(int capacity, AutoScalingGroupBeanOptions asgOptions) {
+        List<String> errors = []
+        if (asgOptions.minSize > capacity) {
+            errors << "Resize ASG capacity '${capacity}' is less than the ASG's minimum instance bound \
+'${asgOptions.minSize}'."
+        }
+        if (asgOptions.maxSize < capacity) {
+            errors << "Resize ASG capacity '${capacity}' is greater than the ASG's maximum instance bound \
+'${asgOptions.maxSize}'."
+        }
+        errors
+    }
 }

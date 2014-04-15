@@ -1,0 +1,61 @@
+<div class="body" ng-class="{concealed: deployment === undefined}">
+  <h1>Deployment</h1>
+
+  <div class="buttons" ng-hide="deployment.done">
+    <button class="stop" ng-click="stopDeployment()"><div>Stop Deployment</div></button>
+    <div ng-show="deployment.token">
+      <button class="rollback" ng-click="rollbackDeployment()"><div>Rollback Deployment</div></button>
+      <button class="proceed" ng-click="proceedWithDeployment()"><div>Proceed With Deployment</div></button>
+    </div>
+  </div>
+
+  <div class="task">
+    <table>
+      <tbody>
+      <tr class="prop">
+        <td class="name">Return to<br/>Cluster:</td>
+        <td class="value">
+          <a href="{{deployment.region.code}}/cluster/show/{{deployment.clusterName}}"
+             title="Show all the auto scaling groups in this cluster" class="cluster">{{deployment.clusterName}}</a>
+        </td>
+      </tr>
+      <tr class="prop">
+        <td class="name">Description:</td>
+        <td class="value">{{deployment.description}}</td>
+      </tr>
+      <tr class="prop">
+        <td class="name">Workflow Execution Details:</td>
+        <td class="value">
+          <a href="workflowExecution/show?{{encodedWorkflowExecutionIds()}}">Workflow Execution</a>
+        </td>
+      </tr>
+      <tr class="prop">
+        <td class="name">Region:</td>
+        <td class="value">{{deployment.regionCode}}</td>
+      </tr>
+      <tr class="prop">
+        <td class="name">Status:</td>
+        <td class="value"><span id="taskStatus">{{deployment.status}}</span></td>
+      </tr>
+      <tr class="prop">
+        <td class="name">Start Time:</td>
+        <td class="value date">{{deployment.startTime | date: 'yyyy-MM-dd HH:mm:ss Z'}}</td>
+      </tr>
+      <tr class="prop">
+        <td class="name">Duration:</td>
+        <td class="value"><span id="taskDurationString">{{deployment.durationString}}</span></td>
+      </tr>
+      <tr class="prop">
+        <td class="name">Owner:</td>
+        <td class="value">{{deployment.owner}}</td>
+      </tr>
+      <tr class="prop">
+        <td class="name">Log:</td>
+        <td class="value">
+          <textArea class="resizable" name="log" rows="20" cols="160" readonly="true">{{logText}}</textArea>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

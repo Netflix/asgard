@@ -42,7 +42,9 @@
       <tbody>
       <g:each var="deployment" in="${deployments}" status="i">
         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
-          <td><g:linkObject type="deployment" id="${deployment.id}" name="${deployment.startTime}"/></td>
+          <td>
+            <g:link class="deploy" controller="ng" action=" " fragment="deployment/detail/${deployment.id}">${deployment.startTime}</g:link>
+          </td>
           <td>${deployment.status}</td>
           <td><g:linkObject type="cluster" id="${deployment.clusterName}" name="${deployment.clusterName}"/></td>
           <td>${deployment.owner}</td>

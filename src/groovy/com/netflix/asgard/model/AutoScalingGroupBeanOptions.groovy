@@ -65,7 +65,7 @@ import groovy.transform.Canonical
     String subnetPurpose
 
     /** @see AutoScalingGroup#terminationPolicies */
-    Set<String> terminationPolicies
+    List<String> terminationPolicies
 
     /** @see AutoScalingGroup#tags */
     Set<Tag> tags
@@ -81,8 +81,8 @@ import groovy.transform.Canonical
         this.loadBalancerNames = copyNonNullToSet(loadBalancerNames)
     }
 
-    void setTerminationPolicies(Collection<String> terminationPolicies) {
-        this.terminationPolicies = copyNonNullToSet(terminationPolicies)
+    void setTerminationPolicies(List<String> terminationPolicies) {
+        this.terminationPolicies = copyNonNullToList(terminationPolicies)
     }
 
     void setTags(Collection<Tag> tags) {
@@ -125,7 +125,7 @@ import groovy.transform.Canonical
                 healthCheckGracePeriod: source.healthCheckGracePeriod,
                 placementGroup: source.placementGroup,
                 subnetPurpose: source.subnetPurpose,
-                terminationPolicies: copyNonNullToSet(source.terminationPolicies),
+                terminationPolicies: copyNonNullToList(source.terminationPolicies),
                 tags: copyTags(source.tags),
                 suspendedProcesses: copyNonNullToSet(source.suspendedProcesses)
         )
@@ -160,7 +160,7 @@ import groovy.transform.Canonical
                     healthCheckGracePeriod: healthCheckGracePeriod,
                     placementGroup: placementGroup,
                     subnetPurpose: subnetPurpose,
-                    terminationPolicies: copyNonNullToSet(terminationPolicies),
+                    terminationPolicies: copyNonNullToList(terminationPolicies),
                     tags: copyTags(tags),
                     suspendedProcesses: copyNonNullToSet(suspendedProcesses)
             )
@@ -188,7 +188,7 @@ import groovy.transform.Canonical
                 healthCheckGracePeriod: healthCheckGracePeriod,
                 placementGroup: placementGroup,
                 vPCZoneIdentifier: vpcZoneIdentifier,
-                terminationPolicies: copyNonNullToSet(terminationPolicies),
+                terminationPolicies: copyNonNullToList(terminationPolicies),
                 tags: copyTags(tags)
         )
     }
@@ -216,7 +216,7 @@ import groovy.transform.Canonical
                 healthCheckGracePeriod: healthCheckGracePeriod,
                 placementGroup: placementGroup,
                 vPCZoneIdentifier: vpcZoneIdentifier,
-                terminationPolicies: copyNonNullToSet(terminationPolicies)
+                terminationPolicies: copyNonNullToList(terminationPolicies)
         )
     }
 

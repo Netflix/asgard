@@ -93,4 +93,17 @@ class StartDeploymentRequestSpec extends Specification {
         expect:
         startDeploymentRequest == mapper.reader(StartDeploymentRequest).readValue(json)
     }
+
+    void 'should return no errors for valid request'() {
+        expect:
+        startDeploymentRequest.validationErrors == []
+    }
+
+    void 'should return errors for invalid capacity bounds'() {
+        startDeploymentRequest.asgOverrides.maxSize = 1
+        expect:
+        startDeploymentRequest.validationErrors == [
+                "Resize ASG capacity '2' is greater than the ASG's maximum instance bound '1'."
+        ]
+    }
 }
