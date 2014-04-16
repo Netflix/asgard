@@ -29,6 +29,7 @@ class InstanceTypeServiceTests extends GroovyTestCase {
         assert instanceTypes.any { it.name == 'm1.large' }
         assert instanceTypes.any { it.name == 'i2.xlarge' }
         assert instanceTypes.any { it.name == 'm3.medium' }
+        assert instanceTypes.any { it.name == 'r3.xlarge' }
         // Custom instance type from config is included
         assert instanceTypes.any { it.name == 'huge.mainframe' }
     }

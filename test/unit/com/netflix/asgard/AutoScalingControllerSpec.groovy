@@ -334,7 +334,7 @@ class AutoScalingControllerSpec extends Specification {
                 'm3.xlarge', 'm1.xlarge', 'c1.xlarge', 'm2.2xlarge', 'i2.xlarge', 'm3.2xlarge', 'm2.4xlarge',
                 'i2.2xlarge', 'cg1.4xlarge', 'cc2.8xlarge', 'hi1.4xlarge', 'i2.4xlarge', 'cr1.8xlarge', 'hs1.8xlarge',
                 'i2.8xlarge', 'huge.mainframe', 'c3.2xlarge', 'c3.4xlarge', 'c3.8xlarge', 'c3.large', 'c3.xlarge',
-                'cc1.4xlarge', 'g2.2xlarge'
+                'cc1.4xlarge', 'g2.2xlarge', 'r3.2xlarge', 'r3.4xlarge', 'r3.8xlarge', 'r3.xlarge'
         ] == attrs['instanceTypes']*.name
     }
 
