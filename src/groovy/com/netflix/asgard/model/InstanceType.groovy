@@ -47,6 +47,7 @@ enum InstanceType {
     Cc28xlarge("cc2.8xlarge"),
     G22xlarge("g2.2xlarge"),
     Cg14xlarge("cg1.4xlarge"),
+    R3Large("r3.large"),
     R3Xlarge("r3.xlarge"),
     R32xlarge("r3.2xlarge"),
     R34xlarge("r3.4xlarge"),

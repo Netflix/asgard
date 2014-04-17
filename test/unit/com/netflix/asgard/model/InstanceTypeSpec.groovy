@@ -35,6 +35,7 @@ class InstanceTypeSpec extends Specification {
 
         where:
         a | b
+        'r3.large'  | 'r3.large'
         'r3.xlarge' | 'r3.xlarge'
         'r3.2xlarge' | 'r3.2xlarge'
         'r3.4xlarge' | 'r3.4xlarge'

@@ -278,7 +278,8 @@ class InstanceTypeService implements CacheInitializer {
                         JSONArray valueColumns = sizeObject.valueColumns
                         for (JSONElement valueColumn in valueColumns) {
                             String productTypeString = valueColumn.name
-                            InstanceProductType product = products.find { it.jsonPricingName == productTypeString }
+                            InstanceProductType product = products.find { it.jsonPricingName == productTypeString ||
+                                    it.alternatePricingName == productTypeString }
                             if (product) {
                                 String priceString = valueColumn.prices.USD
                                 if (priceString?.isBigDecimal()) {
@@ -303,6 +304,7 @@ class InstanceTypeService implements CacheInitializer {
         try {
             return InstanceType.fromValue(jsonSizeCode)
         } catch (IllegalArgumentException ignore) {
+            println "unable to get instance type from jsonSizeCode: ${jsonSizeCode}"
             return null
         }
     }
