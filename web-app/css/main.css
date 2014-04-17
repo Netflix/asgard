@@ -471,7 +471,7 @@ td.checkbox          { text-align: center; }
 .deployment .deploymentOptions div.step div.removeStep { padding: 8px; margin: 2px; float: right; display: inline-block; background: no-repeat url(../images/tango/16/places/user-trash.png); cursor: pointer;}
 
 .deployment .deploymentOptions div.step h4.createAsg            { background-image: url(../images/tango/24/status/network-idle.png) }
-.deployment .deploymentOptions div.step h4.judgement            { background-image: url(../images/tango/24/actions/appointment-new.png); }
+.deployment .deploymentOptions div.step h4.judgment            { background-image: url(../images/tango/24/actions/appointment-new.png); }
 .deployment .deploymentOptions div.step h4.scaling              { background-image: url(../images/tango/24/tools/resize.png); }
 .deployment .deploymentOptions div.step h4.disablePreviousAsg   { background-image: url(../images/tango/24/status/traffic-disable.png); }
 .deployment .deploymentOptions div.step h4.cleanUp              { background-image: url(../images/tango/24/actions/edit-clear.png); }

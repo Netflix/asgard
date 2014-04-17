@@ -224,10 +224,10 @@
             </div>
             <div class="stepDivider">
               <button type="button" class="btn btn-default" ng-show="deploymentOptions.doCanary !== true" ng-click="deploymentOptions.doCanary = true">Add Resize ASG Step</button>
-              <button type="button" class="btn btn-default" ng-show="deploymentOptions.scaleUp !== 'Ask' && deploymentOptions.doCanary === true" ng-click="deploymentOptions.scaleUp = 'Ask'">Add Judgement Step</button>
+              <button type="button" class="btn btn-default" ng-show="deploymentOptions.scaleUp !== 'Ask' && deploymentOptions.doCanary === true" ng-click="deploymentOptions.scaleUp = 'Ask'">Add Judgment Step</button>
             </div>
             <div class="step panel panel-info" ng-show="deploymentOptions.scaleUp === 'Ask' && deploymentOptions.doCanary === true">
-              <div class="panel-heading"><h4 class="judgement">Wait For Judgement</h4><div class="removeStep" ng-click="deploymentOptions.scaleUp = 'Yes'"></div></div>
+              <div class="panel-heading"><h4 class="judgment">Wait For Judgment</h4><div class="removeStep" ng-click="deploymentOptions.scaleUp = 'Yes'"></div></div>
               <div class="panel-body numbers">
                 Deployment will be paused and notifications will be sent now and after
                 <input type="text" ng-model="deploymentOptions.canaryJudgmentPeriodMinutes" />
@@ -245,7 +245,7 @@
               </div>
             </div>
             <div class="step panel panel-info" ng-show="deploymentOptions.disablePreviousAsg === 'Ask'">
-              <div class="panel-heading"><h4 class="judgement">Wait For Judgement</h4><div class="removeStep" ng-click="deploymentOptions.disablePreviousAsg = 'Yes'"></div></div>
+              <div class="panel-heading"><h4 class="judgment">Wait For Judgment</h4><div class="removeStep" ng-click="deploymentOptions.disablePreviousAsg = 'Yes'"></div></div>
               <div class="panel-body numbers">
                 Deployment will be paused and notifications will be sent now and after
                 <input type="text" ng-model="deploymentOptions.desiredCapacityJudgmentPeriodMinutes" />
@@ -253,7 +253,7 @@
               </div>
             </div>
             <div class="stepDivider">
-              <button type="button" class="btn btn-default" ng-show="deploymentOptions.disablePreviousAsg !== 'Ask'" ng-click="deploymentOptions.disablePreviousAsg = 'Ask'">Add Judgement Step</button>
+              <button type="button" class="btn btn-default" ng-show="deploymentOptions.disablePreviousAsg !== 'Ask'" ng-click="deploymentOptions.disablePreviousAsg = 'Ask'">Add Judgment Step</button>
               <button type="button" class="btn btn-default" ng-show="deploymentOptions.disablePreviousAsg === 'No'" ng-click="deploymentOptions.disablePreviousAsg = 'Yes'">Add Disable Previous ASG Step</button>
             </div>
             <div class="step panel panel-info" ng-show="deploymentOptions.disablePreviousAsg !== 'No'">
@@ -263,7 +263,7 @@
               </div>
             </div>
             <div class="step panel panel-info" ng-show="deploymentOptions.deletePreviousAsg === 'Ask' && deploymentOptions.disablePreviousAsg !== 'No'">
-              <div class="panel-heading"><h4 class="judgement">Wait For Judgement</h4><div class="removeStep" ng-click="deploymentOptions.deletePreviousAsg = 'Yes'"></div></div>
+              <div class="panel-heading"><h4 class="judgment">Wait For Judgment</h4><div class="removeStep" ng-click="deploymentOptions.deletePreviousAsg = 'Yes'"></div></div>
               <div class="panel-body numbers">
                 Deployment will be paused and notifications will be sent now and after
                 <input type="text" ng-model="deploymentOptions.fullTrafficJudgmentPeriodMinutes" />
@@ -271,7 +271,7 @@
               </div>
             </div>
             <div class="stepDivider" ng-show="deploymentOptions.disablePreviousAsg !== 'No'">
-              <button type="button" class="btn btn-default" ng-show="deploymentOptions.deletePreviousAsg !== 'Ask'" ng-click="deploymentOptions.deletePreviousAsg = 'Ask'">Add Judgement Step</button>
+              <button type="button" class="btn btn-default" ng-show="deploymentOptions.deletePreviousAsg !== 'Ask'" ng-click="deploymentOptions.deletePreviousAsg = 'Ask'">Add Judgment Step</button>
               <button type="button" class="btn btn-default" ng-show="deploymentOptions.deletePreviousAsg === 'No'" ng-click="deploymentOptions.deletePreviousAsg = 'Yes'">Add Clean Up Step</button>
             </div>
             <div class="step panel panel-info" ng-show="deploymentOptions.deletePreviousAsg !== 'No' && deploymentOptions.disablePreviousAsg !== 'No'">

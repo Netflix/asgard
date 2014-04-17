@@ -42,8 +42,8 @@ angular.module('asgardApp')
       judgeDeployment('proceed');
     };
 
-    var judgeDeployment = function(judgement) {
-      $http.post('deployment/' + judgement, {
+    var judgeDeployment = function(judgment) {
+      $http.post('deployment/' + judgment, {
         id: deploymentId,
         token: $scope.deployment.token
       });
