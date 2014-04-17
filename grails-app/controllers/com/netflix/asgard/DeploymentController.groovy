@@ -129,6 +129,11 @@ class DeploymentController {
         deploymentService.removeManualTokenForDeployment(id)
     }
 
+    /**
+     * Get info about the cluster. It will be used to create the next ASG.
+     *
+     * @param id which specifies the cluster name
+     */
     def prepareDeployment(String id) {
         UserContext userContext = UserContext.of(request)
         Cluster cluster = awsAutoScalingService.getCluster(userContext, id)
