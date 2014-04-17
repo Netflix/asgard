@@ -153,6 +153,7 @@ class InstanceTypeService implements CacheInitializer {
         String compOpt = 'Compute optimized'
         String six4 = '64-bit'
         String three2OrSix4 = '32-bit or 64-bit'
+        String hcpu = 'High-CPU'
         [
                 new HardwareProfile(instanceType: 't1.micro', family: 'Micro instances', group: 'Micro', size: 'Micro',
                         arch: three2OrSix4, vCpu: '1', ecu: 'Variable', mem: '0.615', storage: 'EBS only',
@@ -179,10 +180,10 @@ class InstanceTypeService implements CacheInitializer {
                 new HardwareProfile(instanceType: 'm3.2xlarge', family: gen, group: second, size: xxl, arch: six4,
                         vCpu: '8', ecu: '26', mem: '30', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'High'),
 
-                new HardwareProfile(instanceType: 'c1.medium', family: compOpt, group: 'High-CPU', size: 'Medium',
+                new HardwareProfile(instanceType: 'c1.medium', family: compOpt, group: hcpu, size: 'Medium',
                         arch: three2OrSix4, vCpu: '2', ecu: '5', mem: '1.7', storage: '1 x 350', ebsOptim: '-',
                         netPerf: 'Moderate'),
-                new HardwareProfile(instanceType: 'c1.xlarge', family: compOpt, group: 'High-CPU', size: xl,
+                new HardwareProfile(instanceType: 'c1.xlarge', family: compOpt, group: hcpu, size: xl,
                         arch: six4, vCpu: '8', ecu: '20', mem: '7', storage: '4 x 420', ebsOptim: 'Yes',
                         netPerf: 'High'),
                 new HardwareProfile(instanceType: 'cc1.4xlarge', family: compOpt, group: cc, size: xxxxl,
@@ -211,6 +212,19 @@ class InstanceTypeService implements CacheInitializer {
                         netPerf: 'High'),
                 new HardwareProfile(instanceType: 'r3.8xlarge', family: memOpt, group: hiMem, size: xxxxxxxxl,
                         arch: six4, vCpu: '32', ecu: '104', mem: '244', storage: '2 x 320', ebsOptim: '-',
+                        netPerf: 'High'),
+
+                new HardwareProfile(instanceType: 'c3.large', family: compOpt, group: hcpu, size: 'Large', arch: six4,
+                        vCpu: '2', ecu: '6.5', mem: '3.75', storage: '2 x 16', ebsOptim: '-', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'c3.xlarge', family: compOpt, group: hcpu, size: xl, arch: six4,
+                        vCpu: '4', ecu: '13', mem: '7.5', storage: '2 x 40', ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'c3.2xlarge', family: compOpt, group: hcpu, size: xxl, arch: six4,
+                        vCpu: '8', ecu: '26', mem: '15', storage: '2 x 80', ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'c3.4xlarge', family: compOpt, group: hcpu, size: xxxxl,
+                        arch: six4, vCpu: '16', ecu: '52', mem: '30', storage: '2 x 160', ebsOptim: 'Yes',
+                        netPerf: 'High'),
+                new HardwareProfile(instanceType: 'c3.8xlarge', family: compOpt, group: hcpu, size: xxxxxxxxl,
+                        arch: six4, vCpu: '32', ecu: '104', mem: '60', storage: '2 x 320', ebsOptim: '-',
                         netPerf: 'High'),
 
                 new HardwareProfile(instanceType: 'cr1.8xlarge', family: memOpt, group: 'High-Memory Cluster',
