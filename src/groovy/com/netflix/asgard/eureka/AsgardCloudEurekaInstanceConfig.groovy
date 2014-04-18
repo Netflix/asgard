@@ -25,7 +25,15 @@ import com.netflix.appinfo.CloudInstanceConfig
  */
 class AsgardCloudEurekaInstanceConfig extends CloudInstanceConfig {
 
+    /**
+     * @see com.netflix.appinfo.EurekaInstanceConfig#getNonSecurePort()
+     */
     int nonSecurePort
+
+    /**
+     * @see com.netflix.appinfo.EurekaInstanceConfig#getVirtualHostName()
+     */
+    String virtualHostName
 
     @Override
     String getAppname() { 'asgard' }
@@ -33,5 +41,10 @@ class AsgardCloudEurekaInstanceConfig extends CloudInstanceConfig {
     @Override
     int getNonSecurePort() {
         nonSecurePort ?: super.nonSecurePort
+    }
+
+    @Override
+    String getVirtualHostName() {
+        virtualHostName ?: super.virtualHostName
     }
 }

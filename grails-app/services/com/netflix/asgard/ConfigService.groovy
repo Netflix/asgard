@@ -217,6 +217,21 @@ class ConfigService {
     }
 
     /**
+     * Gets the virtual host name, or "virtual IP" or "VIP", that the system should use to override the default virtual
+     * host name in Eureka client when registering with Eureka service.
+     *
+     * It's common for the VIP to be in the form <name>:<port> such as
+     * asgard-prod:7001
+     *
+     * @return the virtual host name override to use, or null if not configured
+     * @see com.netflix.asgard.eureka.EurekaClientHolder#createEurekaInstanceConfig()
+     * @see com.netflix.appinfo.EurekaInstanceConfig#getVirtualHostName()
+     */
+    String getLocalVirtualHostName() {
+        grailsApplication.config.eureka?.localVirtualHostName ?: null
+    }
+
+    /**
      * Gets the URL to use for Eureka Client to register with Eureka Service if the availability zone where the system
      * is currently running does not have a zone entry anywhere in the values of regionToEurekaServiceAvailabilityZones.
      *
