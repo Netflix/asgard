@@ -259,7 +259,7 @@
             <div class="step panel panel-info" ng-show="deploymentOptions.disablePreviousAsg !== 'No'">
               <div class="panel-heading"><h4 class="disablePreviousAsg">Disable Previous ASG</h4><div class="removeStep" ng-click="deploymentOptions.disablePreviousAsg = 'No'"></div></div>
               <div class="panel-body numbers">
-                This turns off traffic the previous ASG and sends full traffic to the new ASG.
+                This turns off traffic to the previous ASG and sends full traffic to the new ASG.
               </div>
             </div>
             <div class="step panel panel-info" ng-show="deploymentOptions.deletePreviousAsg === 'Ask' && deploymentOptions.disablePreviousAsg !== 'No'">
