@@ -50,4 +50,36 @@ class DeploymentSpec extends Specification {
         new Date(0) | new Date(1000)    | '1s'
         new Date(0) | new Date(9999999) | '2h 46m 39s'
     }
+
+    void 'should construct step JSON'() {
+        expect:
+        Deployment.constructStepJson(7) == '{"step":7}'
+    }
+
+    void 'should parse step JSON'() {
+        expect:
+        Deployment.parseStepIndex('{"step":7}') == 7
+    }
+
+    void 'should organize log by steps'() {
+        Deployment deployment = new Deployment(null, null, null, null, null, null, null, null, null, [
+                '{"step":0}',
+                'on the first step',
+                'still finishing up step one',
+                '{"step":1}',
+                'now working on the next one',
+
+        ])
+
+        expect:
+        deployment.logForSteps == [
+                [
+                        'on the first step',
+                        'still finishing up step one',
+                ],
+                [
+                        'now working on the next one'
+                ]
+        ]
+    }
 }

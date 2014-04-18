@@ -16,6 +16,13 @@
 package com.netflix.asgard.deployment
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.netflix.asgard.deployment.steps.CreateAsgStep
+import com.netflix.asgard.deployment.steps.DeleteAsgStep
+import com.netflix.asgard.deployment.steps.DisableAsgStep
+import com.netflix.asgard.deployment.steps.JudgmentStep
+import com.netflix.asgard.deployment.steps.ResizeStep
+import com.netflix.asgard.deployment.steps.WaitStep
+import com.netflix.asgard.model.AsgRoleInCluster
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
@@ -28,17 +35,16 @@ class StartDeploymentRequestSpec extends Specification {
             new DeploymentWorkflowOptions(
                     clusterName: "helloworld",
                     notificationDestination:"jdoe@netflix.com",
-                    delayDurationMinutes: 5,
-                    doCanary: true,
-                    canaryCapacity: 1,
-                    canaryStartUpTimeoutMinutes: 30,
-                    canaryJudgmentPeriodMinutes: 60,
-                    scaleUp: "Yes",
-                    desiredCapacityStartUpTimeoutMinutes: 40,
-                    desiredCapacityJudgmentPeriodMinutes: 120,
-                    disablePreviousAsg: "Ask",
-                    fullTrafficJudgmentPeriodMinutes: 240,
-                    deletePreviousAsg: "No"),
+                    steps: [
+                            new WaitStep(durationMinutes: 5, description:  "delay"),
+                            new CreateAsgStep(),
+                            new ResizeStep(capacity: 1, targetAsg: AsgRoleInCluster.Next, startUpTimeoutMinutes: 30),
+                            new ResizeStep(capacity: 3, targetAsg: AsgRoleInCluster.Next, startUpTimeoutMinutes: 40),
+                            new JudgmentStep(durationMinutes: 120),
+                            new DisableAsgStep(targetAsg: AsgRoleInCluster.Previous),
+                            new DeleteAsgStep(targetAsg: AsgRoleInCluster.Previous)
+                    ]
+            ),
             new LaunchConfigurationBeanOptions(
                     imageId: "ami-12345678",
                     keyName: "nf-test-keypair-a",
@@ -66,12 +72,16 @@ class StartDeploymentRequestSpec extends Specification {
                     suspendedProcesses: [AutoScalingProcessType.AddToLoadBalancer])
     )
 
-    String json = '{"deploymentOptions":{"clusterName":"helloworld",' +
-            '"notificationDestination":"jdoe@netflix.com","delayDurationMinutes":5,"doCanary":true,' +
-            '"canaryCapacity":1,"canaryStartUpTimeoutMinutes":30,"canaryJudgmentPeriodMinutes":60,' +
-            '"scaleUp":"Yes","desiredCapacityStartUpTimeoutMinutes":40,' +
-            '"desiredCapacityJudgmentPeriodMinutes":120,"disablePreviousAsg":"Ask",' +
-            '"fullTrafficJudgmentPeriodMinutes":240,"deletePreviousAsg":"No"},' +
+    String json = '{"deploymentOptions":{"clusterName":"helloworld","notificationDestination":"jdoe@netflix.com",' +
+            '"steps":[' +
+            '{"type":"Wait","durationMinutes":5,"description":"delay"},' +
+            '{"type":"CreateAsg"},' +
+            '{"type":"Resize","targetAsg":"Next","capacity":1,"startUpTimeoutMinutes":30},' +
+            '{"type":"Resize","targetAsg":"Next","capacity":3,"startUpTimeoutMinutes":40},' +
+            '{"type":"Judgment","durationMinutes":120},' +
+            '{"type":"DisableAsg","targetAsg":"Previous"},' +
+            '{"type":"DeleteAsg","targetAsg":"Previous"}' +
+            ']},' +
 
             '"lcOptions":{"launchConfigurationName":null,"imageId":"ami-12345678",' +
             '"keyName":"nf-test-keypair-a","securityGroups":["sg-12345678"],' +
@@ -105,7 +115,7 @@ class StartDeploymentRequestSpec extends Specification {
         startDeploymentRequest.asgOptions.maxSize = 1
         expect:
         startDeploymentRequest.validationErrors == [
-                "Resize ASG capacity '2' is greater than the ASG's maximum instance bound '1'."
+                "Resize ASG capacity '3' is greater than the ASG's maximum instance bound '1'."
         ]
     }
 }

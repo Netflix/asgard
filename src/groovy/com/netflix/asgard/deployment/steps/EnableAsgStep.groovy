@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Netflix, Inc.
+ * Copyright 2014 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard.deployment
+package com.netflix.asgard.deployment.steps
 
-import com.netflix.asgard.deployment.steps.DeploymentStep
+import com.netflix.asgard.model.AsgRoleInCluster
 import groovy.transform.Canonical
 
-/**
- * Attributes of the deployment process itself.
- */
-@Canonical class DeploymentWorkflowOptions {
-
-    /** Name of the cluster where the deployment is taking place */
-    String clusterName
-
-    /** Endpoint where deployment notifications will be sent */
-    String notificationDestination
-
-    /** Ordered steps that describe a deployment */
-    List<DeploymentStep> steps
-
+@Canonical
+class EnableAsgStep implements DeploymentStep {
+    /** Indicates the ASG that will be targeted by this operation */
+    AsgRoleInCluster targetAsg
 }

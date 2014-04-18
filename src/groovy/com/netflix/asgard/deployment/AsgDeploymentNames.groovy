@@ -16,7 +16,9 @@
 package com.netflix.asgard.deployment
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.netflix.asgard.model.AsgRoleInCluster
 import groovy.transform.Immutable
 
 /**
@@ -47,6 +49,18 @@ import groovy.transform.Immutable
                 nextAsgName: nextAsgName,
                 nextLaunchConfigName: nextLaunchConfigName
         )
+    }
+
+    @JsonIgnore
+    /** Name of specific ASG based on the role that it has in the Cluster */
+    String getAsgName(AsgRoleInCluster asgRole) {
+        if (asgRole == AsgRoleInCluster.Previous) {
+            return previousAsgName
+        }
+        if (asgRole == AsgRoleInCluster.Next) {
+            return nextAsgName
+        }
+        null
     }
 
 }

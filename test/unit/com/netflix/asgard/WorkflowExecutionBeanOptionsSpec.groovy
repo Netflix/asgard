@@ -98,7 +98,7 @@ class WorkflowExecutionBeanOptionsSpec extends Specification {
                 new LogMessage(new Date(1372230631000), 'starting task').toString(),
                 new LogMessage(new Date(1372230632000), 'doing task').toString(),
                 new LogMessage(new Date(1372230633000), 'finished').toString()
-            ]
+            ], []
         )
     }
 }

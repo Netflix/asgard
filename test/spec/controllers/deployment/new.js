@@ -21,8 +21,8 @@ describe('Controller: DeploymentNewCtrl', function () {
 
   it('should set initial scope', function () {
     $httpBackend.expectGET(
-        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
-      deploymentOptions: 'deploymentOptions1',
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
+      deploymentOptions: { steps: [] },
       environment: 'environment1',
       lcOptions: 'lcOptions1',
       asgOptions: {
@@ -33,7 +33,7 @@ describe('Controller: DeploymentNewCtrl', function () {
     $httpBackend.flush();
     expect(scope.clusterName).toEqual('helloworld');
     expect(scope.hideAdvancedItems).toEqual(true);
-    expect(scope.deploymentOptions).toEqual('deploymentOptions1');
+    expect(scope.deploymentOptions).toEqual({ steps: [] });
     expect(scope.environment).toEqual('environment1');
     expect(scope.asgOptions.name).toEqual('asgOptions1');
     expect(scope.lcOptions).toEqual('lcOptions1');
@@ -44,7 +44,8 @@ describe('Controller: DeploymentNewCtrl', function () {
 
   it('should set VPC id based on subnet purpose', function () {
     $httpBackend.expectGET(
-        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
+      deploymentOptions: { steps: [] },
       environment: {
         purposeToVpcId: {
           'internal': 'vpc1',
@@ -67,7 +68,8 @@ describe('Controller: DeploymentNewCtrl', function () {
 
   it('should toggle suspended processes', function () {
     $httpBackend.expectGET(
-        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
+      deploymentOptions: { steps: [] },
       asgOptions: {
         suspendedProcesses: []
       }
@@ -107,14 +109,14 @@ describe('Controller: DeploymentNewCtrl', function () {
 
   it('should start deployment', function () {
     $httpBackend.expectGET(
-        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
-      deploymentOptions: 'deploymentOptions1'
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
+      deploymentOptions: { steps: [] }
     });
     $httpBackend.flush();
     expect(scope.startingDeployment).toEqual(undefined);
     scope.startDeployment();
     expect(scope.startingDeployment).toEqual(true);
-    $httpBackend.expectPOST('deployment/start', {"deploymentOptions":"deploymentOptions1"}).respond(200, {
+    $httpBackend.expectPOST('deployment/start', {"deploymentOptions":{ steps: [] }}).respond(200, {
       deploymentId: "123"
     });
     $httpBackend.flush();
@@ -123,20 +125,172 @@ describe('Controller: DeploymentNewCtrl', function () {
 
   it('should show errors on failure to start deployment', function () {
     $httpBackend.expectGET(
-        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
-      deploymentOptions: 'deploymentOptions1'
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
+      deploymentOptions: { steps: [] }
     });
     $httpBackend.flush();
     expect(scope.startingDeployment).toEqual(undefined);
     scope.startDeployment();
     expect(scope.startingDeployment).toEqual(true);
-    $httpBackend.expectPOST('deployment/start', {"deploymentOptions":"deploymentOptions1"}).respond(422, {
+    $httpBackend.expectPOST('deployment/start', {"deploymentOptions":{ steps: [] }}).respond(422, {
       validationErrors: 'errors'
     });
     $httpBackend.flush();
     expect(scope.startingDeployment).toEqual(false);
     expect(scope.validationErrors).toEqual('errors');
     expect($location.path()).toEqual('');
+  });
+
+  it('should conditionally allow steps', function() {
+    $httpBackend.expectGET(
+      'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
+      deploymentOptions: {
+        steps: [
+          {"type":"Wait","durationMinutes":60},
+          {"type":"CreateAsg"},
+          {"type":"Resize","targetAsg":"Next","capacity":0,"startUpTimeoutMinutes":40},
+          {"type":"Judgment","durationMinutes":120},
+          {"type":"DisableAsg","targetAsg":"Previous"}
+        ]
+      }
+    });
+    $httpBackend.flush();
+    expect(scope.isStepAllowed("Wait", 4)).toEqual(true);
+    expect(scope.isStepAllowed("Wait", 0)).toEqual(false); // before another Wait
+    expect(scope.isStepAllowed("Wait", 2)).toEqual(false); // after another Wait
+    expect(scope.isStepAllowed("Wait", 10)).toEqual(false); // at the end
+    expect(scope.isStepAllowed("Judgment", 4)).toEqual(true);
+    expect(scope.isStepAllowed("Judgment", 6)).toEqual(false); // before another Judgment
+    expect(scope.isStepAllowed("Judgment", 8)).toEqual(false); // after another Judgment
+    expect(scope.isStepAllowed("Judgment", 10)).toEqual(false); // at the end
+    expect(scope.isStepAllowed("ResizeAsg", 4)).toEqual(true);
+    expect(scope.isStepAllowed("ResizeAsg", 2)).toEqual(false); // before Create
+    expect(scope.isStepAllowed("DisableAsg", 8)).toEqual(true);
+    expect(scope.isStepAllowed("DisableAsg", 2)).toEqual(false); // before Create
+    expect(scope.isStepAllowed("EnableAsg", 4)).toEqual(true);
+    expect(scope.isStepAllowed("EnableAsg", 2)).toEqual(false); // before Create
+    expect(scope.isStepAllowed("DeleteAsg", 2)).toEqual(false); // before Create
+    expect(scope.isStepAllowed("DeleteAsg", 10)).toEqual(true); // at the end
+    expect(scope.isStepAllowed("DeleteAsg", 8)).toEqual(false); // not at the end
+  });
+
+  it('should conditionally allow steps with DeleteAsg step', function() {
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
+        deploymentOptions: {
+          steps: [
+            {"type":"CreateAsg"},
+            {"type":"DisableAsg","targetAsg":"Previous"},
+            {"type":"DeleteAsg","targetAsg":"Previous"}
+          ]
+        }
+      });
+    $httpBackend.flush();
+    expect(scope.isStepAllowed("DeleteAsg", 4)).toEqual(false); // there can be only one
+    expect(scope.isStepAllowed("DeleteAsg", 6)).toEqual(false); // there can be only one
+    expect(scope.isStepAllowed("DisableAsg", 4)).toEqual(true);
+    expect(scope.isStepAllowed("DisableAsg", 6)).toEqual(false); // after Delete
+    expect(scope.isStepAllowed("EnableAsg", 4)).toEqual(true);
+    expect(scope.isStepAllowed("EnableAsg", 6)).toEqual(false); // after Delete
+    expect(scope.isStepAllowed("ResizeAsg", 4)).toEqual(true);
+    expect(scope.isStepAllowed("ResizeAsg", 6)).toEqual(false); // after Delete
+  });
+
+  it('should add step', function() {
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
+        deploymentOptions: {
+          steps: [
+            {"type":"CreateAsg"},
+            {"type":"DeleteAsg","targetAsg":"Previous"}
+          ]
+        }
+      });
+    $httpBackend.flush();
+    scope.toggleShowStepTypes(2);
+
+    expect(scope.deploymentOptions.steps).toEqual([
+      { type : 'CreateAsg' },
+      { type : 'DeleteAsg', targetAsg : 'Previous' }
+    ]);
+    expect(scope.generated.stepsDisplay).toEqual([
+      { showSteps : false },
+      { type : 'CreateAsg' },
+      { showSteps : true },
+      { type : 'DeleteAsg', targetAsg : 'Previous' },
+      { showSteps : false }
+    ]);
+    expect(scope.generated.jsonSteps).
+      toEqual('[\n  {"type":"CreateAsg"},\n  {"type":"DeleteAsg","targetAsg":"Previous"}\n]');
+
+    scope.addStep("DisableAsg", 2);
+    scope.$apply();
+
+    expect(scope.deploymentOptions.steps).toEqual([
+      { type : 'CreateAsg' },
+      { type : 'DisableAsg', targetAsg : 'Previous' },
+      { type : 'DeleteAsg', targetAsg : 'Previous' }
+    ]);
+    expect(scope.generated.stepsDisplay).toEqual([
+      { showSteps : false },
+      { type : 'CreateAsg' },
+      { showSteps : false },
+      { type : 'DisableAsg', targetAsg : 'Previous' },
+      { showSteps : false },
+      { type : 'DeleteAsg', targetAsg : 'Previous' },
+      { showSteps : false }
+    ]);
+    expect(scope.generated.jsonSteps).
+      toEqual('[\n  {"type":"CreateAsg"},\n  {"type":"DisableAsg","targetAsg":"Previous"},\n  {"type":"DeleteAsg","targetAsg":"Previous"}\n]');
+  });
+
+  it('should remove step', function() {
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
+        deploymentOptions: {
+          steps: [
+            {"type":"CreateAsg"},
+            { type : 'DisableAsg', targetAsg : 'Previous' },
+            {"type":"DeleteAsg","targetAsg":"Previous"}
+          ]
+        }
+      });
+    $httpBackend.flush();
+    scope.toggleShowStepTypes(2);
+
+    expect(scope.deploymentOptions.steps).toEqual([
+      { type : 'CreateAsg' },
+      { type : 'DisableAsg', targetAsg : 'Previous' },
+      { type : 'DeleteAsg', targetAsg : 'Previous' }
+    ]);
+    expect(scope.generated.stepsDisplay).toEqual([
+      { showSteps : false },
+      { type : 'CreateAsg' },
+      { showSteps : true },
+      { type : 'DisableAsg', targetAsg : 'Previous' },
+      { showSteps : false },
+      { type : 'DeleteAsg', targetAsg : 'Previous' },
+      { showSteps : false }
+    ]);
+    expect(scope.generated.jsonSteps).
+      toEqual('[\n  {"type":"CreateAsg"},\n  {"type":"DisableAsg","targetAsg":"Previous"},\n  {"type":"DeleteAsg","targetAsg":"Previous"}\n]');
+
+    scope.removeStep(2);
+    scope.$apply();
+
+    expect(scope.deploymentOptions.steps).toEqual([
+      { type : 'CreateAsg' },
+      { type : 'DeleteAsg', targetAsg : 'Previous' }
+    ]);
+    expect(scope.generated.stepsDisplay).toEqual([
+      { showSteps : false },
+      { type : 'CreateAsg' },
+      { showSteps : false },
+      { type : 'DeleteAsg', targetAsg : 'Previous' },
+      { showSteps : false }
+    ]);
+    expect(scope.generated.jsonSteps).
+      toEqual('[\n  {"type":"CreateAsg"},\n  {"type":"DeleteAsg","targetAsg":"Previous"}\n]');
   });
 
 });

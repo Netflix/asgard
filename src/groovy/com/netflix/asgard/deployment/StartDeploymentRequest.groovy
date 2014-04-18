@@ -16,6 +16,7 @@
 package com.netflix.asgard.deployment
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.netflix.asgard.deployment.steps.ResizeStep
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import groovy.transform.Canonical
@@ -35,10 +36,9 @@ class StartDeploymentRequest {
     @JsonIgnore
     List<String> getValidationErrors() {
         List<String> errors = []
-        if (deploymentOptions.doCanary) {
-            errors.addAll(checkCapacityBounds(deploymentOptions.canaryCapacity, asgOptions))
+        deploymentOptions.steps.findAll { it instanceof ResizeStep }.each { ResizeStep resizeStep ->
+            errors.addAll(checkCapacityBounds(resizeStep.capacity, asgOptions))
         }
-        errors.addAll(checkCapacityBounds(asgOptions.desiredCapacity, asgOptions))
         errors
     }
 

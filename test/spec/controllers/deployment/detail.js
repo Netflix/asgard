@@ -84,4 +84,26 @@ describe('Controller: DeploymentDetailCtrl', function () {
     $httpBackend.flush();
   });
 
+  it('should return step status', function () {
+    scope.deployment = {
+      status: "running",
+      steps: [0, 1, 2],
+      logForSteps: [0, 1]
+    };
+    expect(scope.getStepStatus(0)).toEqual("success");
+    expect(scope.getStepStatus(1)).toEqual("running");
+    expect(scope.getStepStatus(2)).toEqual("queued");
+
+    scope.deployment.status = "failure";
+    expect(scope.getStepStatus(0)).toEqual("success");
+    expect(scope.getStepStatus(1)).toEqual("failure");
+    expect(scope.getStepStatus(2)).toEqual("queued");
+
+    scope.deployment.status = "completed";
+    scope.deployment.logForSteps = [0, 1, 2];
+    expect(scope.getStepStatus(0)).toEqual("success");
+    expect(scope.getStepStatus(1)).toEqual("success");
+    expect(scope.getStepStatus(2)).toEqual("success");
+  });
+
 });

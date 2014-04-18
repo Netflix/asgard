@@ -16,14 +16,10 @@
     </div>
     <div class="well">
       <div class="row">
-        <div class="col-md-10">
-          <h3>{{environment.nextGroupName}}</h3>
+        <div ng-class="{hideAdvancedItems: hideAdvancedItems}" class="pull-right">
+          <span class="toggle fakeLink" ng-click="toggleAdvanced()">Advanced Options</span>
         </div>
-        <div class="col-md-2">
-          <div ng-class="{hideAdvancedItems: hideAdvancedItems}">
-            <span class="toggle fakeLink" ng-click="toggleAdvanced()">Advanced Options</span>
-          </div>
-        </div>
+        <h3>{{environment.nextGroupName}}</h3>
       </div>
 
       <div class="generalOptions container" collapse="hideAdvancedItems">
@@ -273,86 +269,29 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-12"><h4>Steps</h4></div>
+          <div ng-class="{hideAdvancedItems: hideJsonSteps}" class="pull-right">
+            <span class="toggle fakeLink" ng-click="toggleJsonSteps()">JSON</span>
+          </div>
+          <h4>Steps</h4>
         </div>
-      <div class="row">
-        <div class="col-md-12">
-            <div class="step panel panel-info">
-              <div class="panel-heading"><h4 class="createAsg">Create ASG</h4></div>
-              <div class="panel-body numbers">
-                Wait
-                <input type="text" ng-model="deploymentOptions.delayDurationMinutes" />
-                minutes before creation.
-              </div>
+        <div class="steps">
+          <div class="alert alert-danger" ng-show="jsonStepsParseError">
+            <div>{{jsonStepsParseError}}</div>
+          </div>
+          <div ng-hide="hideJsonSteps">
+            <textarea ng-focus="editJsonSteps()" ng-blur="saveJsonSteps()" ng-model="generated.jsonSteps"
+                      rows="10" cols="100"></textarea>
+          </div>
+          <div ng-hide="hideHtmlSteps" class="animate-repeat" ng-repeat="(stepIndex, step) in generated.stepsDisplay">
+            <div class="buttonPanel" ng-if="step.showSteps === false" ng-click="toggleShowStepTypes(stepIndex)">
+              <button type="button" class="insert btn btn-default">Insert Step</button>
             </div>
-            <div class="step panel panel-info" ng-show="deploymentOptions.doCanary === true">
-              <div class="panel-heading"><h4 class="scaling">Resize ASG</h4><div class="removeStep" ng-click="deploymentOptions.doCanary = false"></div></div>
-              <div class="panel-body numbers">
-                Resize to
-                <input type="text" ng-model="deploymentOptions.canaryCapacity" />
-                healthy instance(s) within
-                <input type="text" ng-model="deploymentOptions.canaryStartUpTimeoutMinutes" />
-                minutes or roll back.
-              </div>
+            <div class="buttonPanel" ng-if="step.showSteps === true">
+                <button ng-repeat="stepTypeName in stepTypeNames" type="button" class="btn btn-default"
+                        ng-if="isStepAllowed(stepTypeName, stepIndex)"
+                        ng-click="addStep(stepTypeName, stepIndex)">{{stepTypeDisplay(stepTypeName)}}</button>
             </div>
-            <div class="stepDivider">
-              <button type="button" class="btn btn-default" ng-show="deploymentOptions.doCanary !== true" ng-click="deploymentOptions.doCanary = true">Add Resize ASG Step</button>
-              <button type="button" class="btn btn-default" ng-show="deploymentOptions.scaleUp !== 'Ask' && deploymentOptions.doCanary === true" ng-click="deploymentOptions.scaleUp = 'Ask'">Add Judgment Step</button>
-            </div>
-            <div class="step panel panel-info" ng-show="deploymentOptions.scaleUp === 'Ask' && deploymentOptions.doCanary === true">
-              <div class="panel-heading"><h4 class="judgment">Wait For Judgment</h4><div class="removeStep" ng-click="deploymentOptions.scaleUp = 'Yes'"></div></div>
-              <div class="panel-body numbers">
-                Deployment will be paused and notifications will be sent now and after
-                <input type="text" ng-model="deploymentOptions.canaryJudgmentPeriodMinutes" />
-                minutes.
-              </div>
-            </div>
-            <div class="step panel panel-info">
-              <div class="panel-heading"><h4 class="scaling">Resize ASG</h4></div>
-              <div class="panel-body numbers">
-                Resize to
-                <input type="text" ng-model="asgOptions.desiredCapacity" />
-                healthy instance(s) within
-                <input type="text" ng-model="deploymentOptions.desiredCapacityStartUpTimeoutMinutes" />
-                minutes or roll back.
-              </div>
-            </div>
-            <div class="step panel panel-info" ng-show="deploymentOptions.disablePreviousAsg === 'Ask'">
-              <div class="panel-heading"><h4 class="judgment">Wait For Judgment</h4><div class="removeStep" ng-click="deploymentOptions.disablePreviousAsg = 'Yes'"></div></div>
-              <div class="panel-body numbers">
-                Deployment will be paused and notifications will be sent now and after
-                <input type="text" ng-model="deploymentOptions.desiredCapacityJudgmentPeriodMinutes" />
-                minutes.
-              </div>
-            </div>
-            <div class="stepDivider">
-              <button type="button" class="btn btn-default" ng-show="deploymentOptions.disablePreviousAsg !== 'Ask'" ng-click="deploymentOptions.disablePreviousAsg = 'Ask'">Add Judgment Step</button>
-              <button type="button" class="btn btn-default" ng-show="deploymentOptions.disablePreviousAsg === 'No'" ng-click="deploymentOptions.disablePreviousAsg = 'Yes'">Add Disable Previous ASG Step</button>
-            </div>
-            <div class="step panel panel-info" ng-show="deploymentOptions.disablePreviousAsg !== 'No'">
-              <div class="panel-heading"><h4 class="disablePreviousAsg">Disable Previous ASG</h4><div class="removeStep" ng-click="deploymentOptions.disablePreviousAsg = 'No'"></div></div>
-              <div class="panel-body numbers">
-                This turns off traffic to the previous ASG and sends full traffic to the new ASG.
-              </div>
-            </div>
-            <div class="step panel panel-info" ng-show="deploymentOptions.deletePreviousAsg === 'Ask' && deploymentOptions.disablePreviousAsg !== 'No'">
-              <div class="panel-heading"><h4 class="judgment">Wait For Judgment</h4><div class="removeStep" ng-click="deploymentOptions.deletePreviousAsg = 'Yes'"></div></div>
-              <div class="panel-body numbers">
-                Deployment will be paused and notifications will be sent now and after
-                <input type="text" ng-model="deploymentOptions.fullTrafficJudgmentPeriodMinutes" />
-                minutes.
-              </div>
-            </div>
-            <div class="stepDivider" ng-show="deploymentOptions.disablePreviousAsg !== 'No'">
-              <button type="button" class="btn btn-default" ng-show="deploymentOptions.deletePreviousAsg !== 'Ask'" ng-click="deploymentOptions.deletePreviousAsg = 'Ask'">Add Judgment Step</button>
-              <button type="button" class="btn btn-default" ng-show="deploymentOptions.deletePreviousAsg === 'No'" ng-click="deploymentOptions.deletePreviousAsg = 'Yes'">Add Clean Up Step</button>
-            </div>
-            <div class="step panel panel-info" ng-show="deploymentOptions.deletePreviousAsg !== 'No' && deploymentOptions.disablePreviousAsg !== 'No'">
-              <div class="panel-heading"><h4 class="cleanUp">Clean Up</h4><div class="removeStep" ng-click="deploymentOptions.deletePreviousAsg = 'No'"></div></div>
-              <div class="panel-body numbers">
-                Delete the previous ASG.
-              </div>
-            </div>
+            <div ng-if="step.type" class="step panel panel-primary" ng-include="stepUrl(step.type)"></div>
           </div>
         </div>
       </div>

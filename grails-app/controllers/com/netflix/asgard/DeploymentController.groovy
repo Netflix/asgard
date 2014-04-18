@@ -77,11 +77,7 @@ class DeploymentController {
         if (!deployment) {
             Requests.renderNotFound('Deployment', id, this)
         } else {
-            withFormat {
-                html { return [ deployment : deployment ] }
-                xml { new XML(deployment).render(response) }
-                json { new JSON(deployment).render(response) }
-            }
+            render objectMapper.writer().writeValueAsString(deployment)
         }
     }
 
@@ -147,6 +143,7 @@ class DeploymentController {
         asgOptions.with {
             autoScalingGroupName = null
             launchConfigurationName = null
+            subnetPurpose = subnetPurpose ?: ""
         }
 
         LaunchConfiguration lc = awsAutoScalingService.getLaunchConfiguration(userContext,
