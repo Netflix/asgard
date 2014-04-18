@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.model
 
+import com.google.common.collect.Lists
 import com.google.common.collect.Sets
 
 /**
@@ -34,5 +35,15 @@ abstract class BeanOptions {
      */
     protected static <T> Set<T> copyNonNullToSet(Collection<T> source) {
         source == null ? null : Sets.newHashSet(source)
+    }
+
+    /**
+     * Copies a non null collection to a new List. It does not deep copy.
+     *
+     * @param source collection to copy
+     * @return a new List containing the same objects or null if source was null
+     */
+    protected static <T> List<T> copyNonNullToList(Collection<T> source) {
+        source == null ? null : Lists.newArrayList(source)
     }
 }

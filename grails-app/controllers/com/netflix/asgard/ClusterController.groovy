@@ -20,8 +20,6 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
-import com.netflix.asgard.deployment.DeploymentWorkflowOptions
-import com.netflix.asgard.deployment.ProceedPreference
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.InstancePriceType
@@ -182,31 +180,6 @@ ${lastGroup.loadBalancerNames}"""
 
     def result() {
         render view: '/common/result'
-    }
-
-    def prepareDeployment(String id) {
-        UserContext userContext = UserContext.of(request)
-        Cluster cluster = awsAutoScalingService.getCluster(userContext, id)
-        Map<String, Object> attributes = commonNextAsgPreparation(userContext, cluster)
-        String appName = Relationships.appNameFromGroupName(cluster.name)
-        String email = applicationService.getEmailFromApp(userContext, appName)
-        attributes?.putAll([
-                deploymentWorkflowOptions: new DeploymentWorkflowOptions(
-                        notificationDestination: params.notificationDestination ?: email,
-                        delayDurationMinutes: params.int('delayDurationMinutes') ?: 0,
-                        doCanary: Boolean.parseBoolean(params.doCanary),
-                        canaryCapacity: params.int('canaryCount') ?: 1,
-                        canaryStartUpTimeoutMinutes: params.int('canaryStartUpTimeoutMinutes') ?: 30,
-                        canaryJudgmentPeriodMinutes: params.int('canaryJudgmentPeriodMinutes') ?: 60,
-                        scaleUp: ProceedPreference.parse(params.scaleUp),
-                        desiredCapacityStartUpTimeoutMinutes: params.int('desiredCapacityStartUpTimeoutMinutes') ?: 40,
-                        desiredCapacityJudgmentPeriodMinutes: params.int('desiredCapacityJudgmentPeriodMinutes') ?: 120,
-                        disablePreviousAsg: ProceedPreference.parse(params.disablePreviousAsg),
-                        fullTrafficJudgmentPeriodMinutes: params.int('fullTrafficJudgmentPeriodMinutes') ?: 240,
-                        deletePreviousAsg: ProceedPreference.parse(params.deletePreviousAsg)
-                )
-        ])
-        attributes
     }
 
     def prepareNextAsg(String id) {

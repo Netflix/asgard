@@ -44,7 +44,7 @@ class DeploymentService {
     static final String TOKEN = 'token'
 
     /**
-     * Retrieves the token needed for manual completion of the judgement SWF activity in a deployment workflow.
+     * Retrieves the token needed for manual completion of the judgment SWF activity in a deployment workflow.
      *
      * @param deploymentId identifies the specific deployment
      * @return token needed to complete SWF activity
@@ -56,7 +56,7 @@ class DeploymentService {
     }
 
     /**
-     * Records the token needed for manual completion of the judgement SWF activity in a deployment workflow.
+     * Records the token needed for manual completion of the judgment SWF activity in a deployment workflow.
      *
      * @param deploymentId identifies the specific deployment
      * @param token needed to complete SWF activity
@@ -67,7 +67,7 @@ class DeploymentService {
     }
 
     /**
-     * Removes the token needed for manual completion of the judgement SWF activity in a deployment workflow.
+     * Removes the token needed for manual completion of the judgment SWF activity in a deployment workflow.
      *
      * @param deploymentId identifies the specific deployment
      */

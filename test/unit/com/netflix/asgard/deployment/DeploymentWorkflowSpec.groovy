@@ -146,7 +146,7 @@ class DeploymentWorkflowSpec extends Specification {
                 "ASG will now be evaluated for up to 60 minutes during the canary capacity judgment period.") >> false
         then:
         1 * mockActivities.sendNotification(_, 'gob@bluth.com', 'the_seaward',
-                "Canary capacity judgement period for ASG 'the_seaward-v003' has ended.",
+                "Canary capacity judgment period for ASG 'the_seaward-v003' has ended.",
                 "Please make a decision to proceed or roll back.")
         then: 1 * mockActivities.enableAsg(userContext, 'the_seaward-v002')
         then: 1 * mockActivities.disableAsg(userContext, 'the_seaward-v003')

@@ -271,7 +271,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
             Promise<Void> judgmentTimeout = timer(minutesToSeconds(judgmentPeriodMinutes), 'judgmentTimeout')
             waitFor(judgmentTimeout) {
                 String clusterName = Relationships.clusterFromGroupName(asgName)
-                String subject = "${operationDescription.capitalize()} judgement period for ASG '${asgName}' has ended."
+                String subject = "${operationDescription.capitalize()} judgment period for ASG '${asgName}' has ended."
                 String message = 'Please make a decision to proceed or roll back.'
                 activities.sendNotification(userContext, notificationDestination, clusterName, subject, message)
                 Promise.Void()

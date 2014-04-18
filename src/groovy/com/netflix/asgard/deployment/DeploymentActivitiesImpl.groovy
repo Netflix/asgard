@@ -202,14 +202,16 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
                 getWorkflowExecutionInfoByWorkflowExecution(activity.workflowExecution)
         SwfWorkflowTags tags = workflowExecutionBeanOptions.tags
         deploymentService.setManualTokenForDeployment(tags.id, activity.taskToken)
+        String link = grailsLinkGenerator.link(base: configService.linkCanonicalServerUrl, controller: 'ng',
+                action: ' ', fragment: "deployment/detail/${tags.id}")
         String message = """
         Auto Scaling Group '${asgName}' is being deployed.
         ${operationDescription}
         Please determine if the deployment should proceed.
 
-        ${grailsLinkGenerator.link(base: configService.linkCanonicalServerUrl, controller: 'deployment', action: 'show',
-                params: [id: tags.id, token: activity.taskToken])}
+        ${link}
         """.stripIndent()
+
         String subject = "Asgard deployment response requested for '${asgName}'."
         emailerService.sendUserEmail(notificationDestination, subject, message)
         true

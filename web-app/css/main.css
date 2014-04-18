@@ -460,12 +460,45 @@ label.choice        { padding-right: 15px; }
 table.securityGroups { width: auto; }
 td.checkbox          { text-align: center; }
 
+.deployment { margin-bottom: 800px; }
+.deployment div label { font-weight: normal }
+.deployment .well { margin: 5px; }
+.deployment .row { margin: 3px; }
+.deployment div h3 { margin-top: 0 }
+
+.deployment .deploymentOptions div.step { margin: 5px; width: 600px; }
+.deployment .deploymentOptions div.step h4 { padding: 0 35px; margin: 0; display: inline-block; background: no-repeat; height: 25px; }
+.deployment .deploymentOptions div.step div.removeStep { padding: 8px; margin: 2px; float: right; display: inline-block; background: no-repeat url(../images/tango/16/places/user-trash.png); cursor: pointer;}
+
+.deployment .deploymentOptions div.step h4.createAsg            { background-image: url(../images/tango/24/status/network-idle.png) }
+.deployment .deploymentOptions div.step h4.judgment            { background-image: url(../images/tango/24/actions/appointment-new.png); }
+.deployment .deploymentOptions div.step h4.scaling              { background-image: url(../images/tango/24/tools/resize.png); }
+.deployment .deploymentOptions div.step h4.disablePreviousAsg   { background-image: url(../images/tango/24/status/traffic-disable.png); }
+.deployment .deploymentOptions div.step h4.cleanUp              { background-image: url(../images/tango/24/actions/edit-clear.png); }
+
+.deployment .deploymentOptions div.stepDivider { padding: 0; margin: 0; width: 600px; text-align: center; }
+
+div.step.ng-hide-remove {
+    -webkit-animation: flipInX 1s;
+    -moz-animation: flipInX 1s;
+    -ms-animation: flipInX 1s;
+    animation: flipInX 1s;
+}
+
+div.step.ng-hide-add {
+    display: block !important;
+    -webkit-animation: flipOutX 1s;
+    -moz-animation: flipOutX 1s;
+    -ms-animation: flipOutX 1s;
+    animation: flipOutX 1s;
+}
+
 /* GROUP REPLACING PUSH */
 .cluster h3            {                  margin-bottom: 8px; }
 .cluster ul.tasks      { padding-left: 0; margin-bottom: 10px; list-style-type: none; }
 .groupReplacingPush    { padding: 0;      margin: 0; clear: both; }
 .groupReplacingPush li.clusterAsgForm { padding: 10px;   margin-right: 14px; margin-bottom: 14px; display: inline-block; float: left; max-width: 340px; border-style: solid; border-color: #CCC #999 #999 #CCC; border-width: 1px 2px 2px 1px; }
-.cluster div.intro          { float: left; margin-right: 40px; }
+.cluster div.intro          { float: left; margin-right: 40px; width: 100%}
 .cluster table.reservations { float: left; margin-bottom: 14px; width: auto; }
 .groupReplacingPush .batchResizeContainer { display: none; padding: 0 8px; }
 .groupReplacingPush li.disabledGroup,
@@ -480,15 +513,12 @@ td.checkbox          { text-align: center; }
 .groupReplacingPush .filter                      { width: 60px;      }
 .groupReplacingPush .name                        { white-space: normal; min-width: 86px; }
 
-.groupReplacingPush li.deploymentWorkflowOptions         { max-width: 500px; }
-.groupReplacingPush li.deploymentWorkflowOptions .name   { min-width: 280px; }
-
 #showAdvancedOptionsToCreateFastProperty   { margin-left: 230px; }
 
                    span.toggle       { background: url(../images/tango/16/actions/list-remove.png) transparent no-repeat 0 50%; padding: 0 2px 0 17px; line-height: 16px; }
 .hideAdvancedItems span.toggle       { background-image: url(../images/tango/16/actions/list-add.png); }
 .hideAdvancedItems .advancedItems,
-.hideAdvancedItems tr.advanced       { display: none; }
+.hideAdvancedItems .advanced       { display: none; }
 
 .tip .template { display: none; }
 .tip img       { margin-left: 4px; cursor: help; }

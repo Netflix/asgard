@@ -34,3 +34,4 @@ test-results.xml
 app/bower_components
 web-app/scripts
 web-app/views
+coverage
