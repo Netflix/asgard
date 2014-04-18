@@ -28,7 +28,13 @@ import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.amazonaws.services.simpleworkflow.model.WorkflowExecution
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.netflix.asgard.deployment.DeploymentWorkflowOptions
-import com.netflix.asgard.deployment.ProceedPreference
+import com.netflix.asgard.deployment.steps.CreateAsgStep
+import com.netflix.asgard.deployment.steps.DeleteAsgStep
+import com.netflix.asgard.deployment.steps.DisableAsgStep
+import com.netflix.asgard.deployment.steps.JudgmentStep
+import com.netflix.asgard.deployment.steps.ResizeStep
+import com.netflix.asgard.deployment.steps.WaitStep
+import com.netflix.asgard.model.AsgRoleInCluster
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
@@ -61,7 +67,7 @@ class DeploymentControllerSpec extends Specification {
         "subnetPurpose":"internal","healthCheckType":"EC2",
         "placementGroup":null,"launchConfigurationName":null,"desiredCapacity":"3",
         "availabilityZones":["us-west-1c","us-west-1a"],"loadBalancerNames":["helloclay--frontend"],
-        "minSize":0,"healthCheckGracePeriod":600,"defaultCooldown":10,"maxSize":"${maxSize}",
+        "minSize":0,"healthCheckGracePeriod":600,"defaultCooldown":10,"maxSize":${maxSize},
         "terminationPolicies":["OldestLaunchConfiguration"]},
         "lcOptions":
         {"securityGroups":["sg-12345678"],"kernelId":"","launchConfigurationName":null,
@@ -69,12 +75,17 @@ class DeploymentControllerSpec extends Specification {
         "imageId":"ami-12345678","keyName":"keypair","ramdiskId":"","instanceMonitoringIsEnabled":false,
         "iamInstanceProfile":"BaseIAMRole","ebsOptimized":false},
         "deploymentOptions":
-        {"clusterName":"helloclay--test",
-        "desiredCapacityStartUpTimeoutMinutes":"41","disablePreviousAsg":"Ask",
-        "canaryCapacity":1,"scaleUp":"Ask","deletePreviousAsg":"Ask","delayDurationMinutes":"5","doCanary":true,
-        "canaryStartUpTimeoutMinutes":"31","notificationDestination":"cmccoy@netflix.com",
-        "desiredCapacityJudgmentPeriodMinutes":"121","canaryJudgmentPeriodMinutes":"61",
-        "fullTrafficJudgmentPeriodMinutes":"241"}}""" as String
+        {"clusterName":"helloclay--test","notificationDestination":"cmccoy@netflix.com", "steps": [
+                {"type": "Wait", "durationMinutes": 5, "description": "delay"},
+                {"type": "CreateAsg"},
+                {"type": "Resize", "capacity": 1, "startUpTimeoutMinutes": 31},
+                {"type": "Judgment", "durationMinutes": 61},
+                {"type": "Resize", "capacity": 3, "startUpTimeoutMinutes": 41},
+                {"type": "Judgment", "durationMinutes": 121},
+                {"type": "DisableAsg", "targetAsg": "Previous"},
+                {"type": "Judgment", "durationMinutes": 241},
+                {"type": "DeleteAsg", "targetAsg": "Previous"}
+        ]}}""" as String
     }
 
     void setup() {
@@ -142,17 +153,18 @@ class DeploymentControllerSpec extends Specification {
                 new DeploymentWorkflowOptions(
                         clusterName: "helloclay--test",
                         notificationDestination: "cmccoy@netflix.com",
-                        delayDurationMinutes: 5,
-                        doCanary: true,
-                        canaryCapacity: 1,
-                        canaryStartUpTimeoutMinutes: 31,
-                        canaryJudgmentPeriodMinutes: 61,
-                        scaleUp: ProceedPreference.Ask,
-                        desiredCapacityStartUpTimeoutMinutes: 41,
-                        desiredCapacityJudgmentPeriodMinutes: 121,
-                        disablePreviousAsg: ProceedPreference.Ask,
-                        fullTrafficJudgmentPeriodMinutes: 241,
-                        deletePreviousAsg: ProceedPreference.Ask),
+                        steps: [
+                                new WaitStep(durationMinutes: 5, description: "delay"),
+                                new CreateAsgStep(),
+                                new ResizeStep(capacity: 1, startUpTimeoutMinutes: 31),
+                                new JudgmentStep(durationMinutes: 61),
+                                new ResizeStep(capacity: 3, startUpTimeoutMinutes: 41),
+                                new JudgmentStep(durationMinutes: 121),
+                                new DisableAsgStep(targetAsg: AsgRoleInCluster.Previous),
+                                new JudgmentStep(durationMinutes: 241),
+                                new DeleteAsgStep(targetAsg: AsgRoleInCluster.Previous)
+                        ]
+                ),
                 new LaunchConfigurationBeanOptions(
                         launchConfigurationName: null,
                         imageId: "ami-12345678",
@@ -238,13 +250,17 @@ class DeploymentControllerSpec extends Specification {
 
     def 'should show deployment'() {
         when:
-        def result = controller.show('123')
+        controller.show('123')
 
         then:
-        result.deployment == new Deployment('123')
+        response.status == 200
+        objectMapper.readValue(response.text, Map) == objectMapper.readValue("""{"id":"123","clusterName":"cluster",
+            "region":"us-west-1","workflowExecution":null,"description":null,"owner":null,"startTime":null,
+            "updateTime":null,"status":null,"log":null,"steps":null,"token":null,"durationString":"0s","done":true,
+            "regionCode":"us-west-1","logForSteps":[[]]}""", Map)
 
         and:
-        1 * controller.deploymentService.getDeploymentById('123') >> new Deployment('123')
+        1 * controller.deploymentService.getDeploymentById('123') >> new Deployment('123', 'cluster', Region.US_WEST_1)
     }
 
     def 'should not show missing deployment'() {
@@ -404,7 +420,7 @@ class DeploymentControllerSpec extends Specification {
         ])
 
         when:
-        controller.prepare("helloclay--test", true, "CreateJudgeAndCleanUp")
+        controller.prepare("helloclay--test", true, "CreateAndCleanUpPreviousAsg")
 
         then:
         response.status == 200
@@ -412,17 +428,12 @@ class DeploymentControllerSpec extends Specification {
                 deploymentOptions: [
                         clusterName: "helloclay--test",
                         notificationDestination: "jdoe@netflix.com",
-                        delayDurationMinutes: 0,
-                        doCanary: false,
-                        canaryCapacity: 1,
-                        canaryStartUpTimeoutMinutes: 30,
-                        canaryJudgmentPeriodMinutes: 60,
-                        scaleUp: "Ask",
-                        desiredCapacityStartUpTimeoutMinutes: 40,
-                        desiredCapacityJudgmentPeriodMinutes: 120,
-                        disablePreviousAsg: "Ask",
-                        fullTrafficJudgmentPeriodMinutes: 240,
-                        deletePreviousAsg: "Ask"
+                        steps:[
+                                [type: "CreateAsg"],
+                                [type: "Resize", targetAsg: "Next", capacity: 0, startUpTimeoutMinutes: 40],
+                                [type: "DisableAsg", targetAsg: "Previous"],
+                                [type: "DeleteAsg", targetAsg: "Previous"]
+                        ]
                 ],
                 lcOptions: [
                         launchConfigurationName: null,

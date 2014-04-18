@@ -350,9 +350,7 @@ button.resize div, a.resize                   { background-image: url(../images/
 .buttons button.elastic div                   { background-image: url(../images/tango/24/tools/select-lasso.png);                                }
 .buttons button.save div                      { background-image: url(../images/tango/24/actions/document-save.png);                             }
 .buttons button.deploy div                    { background-image: url(../images/tango/24/tools/deploy.png);                                      }
-.buttons a.deploy                             { background-image: url(../images/tango/24/tools/deploy.png);                                      }
-.buttons button.proceed div                   { background-image: url(../images/tango/24/actions/media-playback-start.png);                      }
-.buttons button.rollback div                  { background-image: url(../images/tango/24/actions/media-seek-backward.png);                       }
+.buttons a.deploy                             { background-image: url(../images/tango/24/tools/deploy.png);                                       }
 .buttons button.schedule div                  { background-image: url(../images/tango/24/actions/appointment-new.png);                           }
 .buttons button.outOfService div              { background-image: url(../images/tango/24/status/weather-clear-night.png);                        }
 .buttons button.inService div                 { background-image: url(../images/tango/24/status/weather-clear.png);                              }
@@ -466,31 +464,50 @@ td.checkbox          { text-align: center; }
 .deployment .row { margin: 3px; }
 .deployment div h3 { margin-top: 0 }
 
-.deployment .deploymentOptions div.step { margin: 5px; width: 600px; }
-.deployment .deploymentOptions div.step h4 { padding: 0 35px; margin: 0; display: inline-block; background: no-repeat; height: 25px; }
-.deployment .deploymentOptions div.step div.removeStep { padding: 8px; margin: 2px; float: right; display: inline-block; background: no-repeat url(../images/tango/16/places/user-trash.png); cursor: pointer;}
+.deploymentOptions div.step { margin: 5px 0; width: 600px; }
+.deploymentOptions div.step h4 { padding: 0 35px; margin: 0; display: inline-block; background: no-repeat; height: 25px; }
+.deploymentOptions div.step .panel-heading { padding: 5px; }
+.deploymentOptions div.step .panel-body { padding: 5px; line-height: 22px; }
+.deploymentOptions div.step div.removeStep { padding: 8px; margin: 2px; float: right; display: inline-block; background: no-repeat url(../images/tango/16/places/user-trash.png); cursor: pointer; }
+.deploymentOptions div.step div.waiting { padding: 8px; margin: 2px; float: right; display: inline-block; background: no-repeat url(../images/spinner.gif); }
 
-.deployment .deploymentOptions div.step h4.createAsg            { background-image: url(../images/tango/24/status/network-idle.png) }
-.deployment .deploymentOptions div.step h4.judgment            { background-image: url(../images/tango/24/actions/appointment-new.png); }
-.deployment .deploymentOptions div.step h4.scaling              { background-image: url(../images/tango/24/tools/resize.png); }
-.deployment .deploymentOptions div.step h4.disablePreviousAsg   { background-image: url(../images/tango/24/status/traffic-disable.png); }
-.deployment .deploymentOptions div.step h4.cleanUp              { background-image: url(../images/tango/24/actions/edit-clear.png); }
+.deploymentOptions div.step h4.createAsg            { background-image: url(../images/tango/24/status/network-idle.png) }
+.deploymentOptions div.step h4.wait                 { background-image: url(../images/tango/24/actions/appointment-new.png); }
+.deploymentOptions div.step h4.judgment             { background-image: url(../images/tango/24/actions/appointment-new.png); }
+.deploymentOptions div.step h4.scaling              { background-image: url(../images/tango/24/tools/resize.png); }
+.deploymentOptions div.step h4.disableAsg           { background-image: url(../images/tango/24/status/traffic-disable.png); }
+.deploymentOptions div.step h4.enableAsg            { background-image: url(../images/tango/24/status/traffic-enable.png); }
+.deploymentOptions div.step h4.cleanUp              { background-image: url(../images/tango/24/actions/edit-clear.png); }
+.deploymentOptions div.step h4.addStep              { background-image: url(../images/tango/24/places/start-here.png); }
 
-.deployment .deploymentOptions div.stepDivider { padding: 0; margin: 0; width: 600px; text-align: center; }
+.deployment .container .row { margin: 10px 0; }
+.deployment .logMessage { margin: 0; padding: 0; line-height: 12px; }
 
-div.step.ng-hide-remove {
-    -webkit-animation: flipInX 1s;
-    -moz-animation: flipInX 1s;
-    -ms-animation: flipInX 1s;
-    animation: flipInX 1s;
+.steps button.btn { padding: 0 10px; margin: 0 2px; height: 22px; }
+.steps button.insert { padding: 0 200px; }
+.steps .buttonPanel { text-align: center; width: 600px; background: no-repeat; }
+.steps .buttonPanel button { padding: 0 30px; background: no-repeat; background-position: 4px 2px; }
+.steps .buttonPanel button.proceed  { background-image: url(../images/tango/16/actions/media-seek-backward.png); }
+.steps .buttonPanel button.rollback { background-image: url(../images/tango/16/actions/media-playback-start.png); }
+
+.animate-repeat.ng-move,
+.animate-repeat.ng-enter,
+.animate-repeat.ng-leave {
+    transition: all linear 0.5s;
 }
 
-div.step.ng-hide-add {
-    display: block !important;
-    -webkit-animation: flipOutX 1s;
-    -moz-animation: flipOutX 1s;
-    -ms-animation: flipOutX 1s;
-    animation: flipOutX 1s;
+.animate-repeat.ng-leave.ng-leave-active,
+.animate-repeat.ng-move,
+.animate-repeat.ng-enter {
+    opacity:0;
+    max-height:0;
+}
+
+.animate-repeat.ng-leave,
+.animate-repeat.ng-move.ng-move-active,
+.animate-repeat.ng-enter.ng-enter-active {
+    opacity:1;
+    max-height:100px;
 }
 
 /* GROUP REPLACING PUSH */

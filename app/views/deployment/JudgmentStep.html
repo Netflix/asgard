@@ -1,0 +1,19 @@
+<div class="panel-heading">
+  <h4 class="judgment">Wait For Judgment</h4>
+  <div ng-hide="readOnlyDeploymentSteps" class="removeStep" ng-click="removeStep($index)"></div>
+  <div ng-if="getStepStatus($index) === 'running'" class="waiting"></div>
+</div>
+<div ng-hide="readOnlyDeploymentSteps" class="panel-body numbers">
+  Deployment will be paused and notifications will be sent now and after
+  <input ng-disabled="readOnlyDeploymentSteps" type="text" ng-model="step.durationMinutes" />
+  minutes.
+</div>
+<div ng-show="readOnlyDeploymentSteps" class="panel-body">
+  <div class="logMessage" ng-repeat="logMessage in getLogForStep($index)">{{logMessage}}</div>
+</div>
+<div ng-show="readOnlyDeploymentSteps" class="panel-body">
+  <div class="buttonPanel" ng-if="deployment.token && getCurrentStep() === $index">
+    <button type="button" class="btn btn-default proceed" ng-click="rollbackDeployment()">Rollback</button>
+    <button type="button" class="btn btn-default rollback" ng-click="proceedWithDeployment()">Proceed</button>
+  </div>
+</div>
