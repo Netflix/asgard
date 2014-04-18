@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Netflix, Inc.
+ * Copyright 2014 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,24 +15,29 @@
  */
 package com.netflix.asgard
 
-import javax.servlet.http.HttpServletResponse
+import com.netflix.asgard.server.DeprecatedServerNames
 
-class LoadingFilters {
+/**
+ * Redirects a deprecated server name request to an equivalent URL on the canonical replacement server name.
+ */
+class DeprecatedServerNameFilters {
 
-    def dependsOn = [InitFilters]
-
-    def serverService
+    DeprecatedServerNames deprecatedServerNames
 
     def filters = {
-        all(controller: '(cache|init|healthcheck|server|flag)', invert: true) {
+        all(controller: '*', action: '*') {
             before = {
-                if (serverService.shouldCacheLoadingBlockUserRequests()) {
-                    render(status: HttpServletResponse.SC_SERVICE_UNAVAILABLE, view: '/loading')
+
+                String replacementUrl = deprecatedServerNames.replaceDeprecatedServerName(request)
+                if (replacementUrl) {
+                    redirect(url: replacementUrl)
                     return false
                 }
+
+                // If the last value is falsy and there is no explicit return statement then this filter method will
+                // return a falsy value and cause requests to fail silently.
                 return true
             }
         }
     }
-
 }

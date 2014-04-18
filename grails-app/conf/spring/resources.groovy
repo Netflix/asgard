@@ -32,6 +32,7 @@ import com.netflix.asgard.auth.RestrictEditAuthorizationProvider
 import com.netflix.asgard.deployment.DeploymentActivitiesImpl
 import com.netflix.asgard.eureka.EurekaClientHolder
 import com.netflix.asgard.model.CsiScheduledAnalysisFactory
+import com.netflix.asgard.server.DeprecatedServerNames
 import groovy.io.FileType
 
 beans = {
@@ -43,6 +44,10 @@ beans = {
     cachedMapBuilder(CachedMapBuilder, ref('threadScheduler'), limitedRegions)
 
     caches(Caches, ref('cachedMapBuilder'), ref('configService'))
+
+    deprecatedServerNames(DeprecatedServerNames) {
+        it.autowire = "byName"
+    }
 
     eurekaClientHolder(EurekaClientHolder) {
         it.autowire = "byName"
