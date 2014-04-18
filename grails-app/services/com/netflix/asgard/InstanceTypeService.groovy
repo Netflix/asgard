@@ -304,7 +304,6 @@ class InstanceTypeService implements CacheInitializer {
         try {
             return InstanceType.fromValue(jsonSizeCode)
         } catch (IllegalArgumentException ignore) {
-            println "unable to get instance type from jsonSizeCode: ${jsonSizeCode}"
             return null
         }
     }
