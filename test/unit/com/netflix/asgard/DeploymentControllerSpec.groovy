@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
+import com.amazonaws.services.autoscaling.model.InstanceMonitoring
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.Image
@@ -65,7 +66,7 @@ class DeploymentControllerSpec extends Specification {
         "lcOverrides":
         {"securityGroups":["sg-12345678"],"kernelId":"","launchConfigurationName":null,
         "userData":null,"instancePriceType":"ON_DEMAND","instanceType":"m1.large","blockDeviceMappings":[],
-        "imageId":"ami-12345678","keyName":"keypair","ramdiskId":"","instanceMonitoring":null,
+        "imageId":"ami-12345678","keyName":"keypair","ramdiskId":"","instanceMonitoringIsEnabled":false,
         "iamInstanceProfile":"BaseIAMRole","ebsOptimized":false},
         "deploymentOptions":
         {"clusterName":"helloclay--test",
@@ -162,7 +163,7 @@ class DeploymentControllerSpec extends Specification {
                         kernelId: "",
                         ramdiskId: "",
                         blockDeviceMappings: [],
-                        instanceMonitoring: null,
+                        instanceMonitoringIsEnabled: false,
                         instancePriceType: InstancePriceType.ON_DEMAND,
                         iamInstanceProfile: "BaseIAMRole",
                         ebsOptimized: false
@@ -301,9 +302,10 @@ class DeploymentControllerSpec extends Specification {
                 kernelId: "",
                 ramdiskId: "",
                 blockDeviceMappings: [],
-                instanceMonitoring: null,
+                instanceMonitoring: new InstanceMonitoring(enabled: false),
                 iamInstanceProfile: "BaseIAMRole",
-                ebsOptimized: false
+                ebsOptimized: false,
+                associatePublicIpAddress: false
         )
         Subnets subnets = new Subnets([
                 new SubnetData("1", "", "vpc1", "", 1, "us-east-1", "internal", SubnetTarget.EC2)
@@ -340,10 +342,11 @@ class DeploymentControllerSpec extends Specification {
                         kernelId: "",
                         ramdiskId: "",
                         blockDeviceMappings: [],
-                        instanceMonitoring: null,
+                        instanceMonitoringIsEnabled: false,
                         instancePriceType: "ON_DEMAND",
                         iamInstanceProfile: "BaseIAMRole",
-                        ebsOptimized: false
+                        ebsOptimized: false,
+                        associatePublicIpAddress: false
                 ],
                 asgOptions: [
                         autoScalingGroupName: null,

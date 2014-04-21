@@ -35,7 +35,7 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
             kernelId: 'kernelId1',
             ramdiskId: 'ramdiskId1',
             blockDeviceMappings: [new BlockDeviceMapping(deviceName: 'deviceName1', ebs: new Ebs(volumeSize: 256))],
-            instanceMonitoring: null,
+            instanceMonitoringIsEnabled: false,
             instancePriceType: InstancePriceType.ON_DEMAND,
             iamInstanceProfile: 'iamInstanceProfile1',
             ebsOptimized: false
@@ -51,7 +51,7 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
             kernelId: 'kernelId1',
             ramdiskId: 'ramdiskId1',
             blockDeviceMappings: [new BlockDeviceMapping(deviceName: 'deviceName1', ebs: new Ebs(volumeSize: 256))],
-            instanceMonitoring: null,
+            instanceMonitoring: new InstanceMonitoring(enabled: false),
             iamInstanceProfile: 'iamInstanceProfile1',
             ebsOptimized: false
     )
