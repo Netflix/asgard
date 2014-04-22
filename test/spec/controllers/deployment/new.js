@@ -20,7 +20,8 @@ describe('Controller: DeploymentNewCtrl', function () {
   }));
 
   it('should set initial scope', function () {
-    $httpBackend.expectGET('deployment/prepareDeployment/helloworld').respond({
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
       deploymentOptions: 'deploymentOptions1',
       environment: 'environment1',
       asgOptions: 'asgOptions1',
@@ -37,7 +38,8 @@ describe('Controller: DeploymentNewCtrl', function () {
   });
 
   it('should set VPC id based on subnet purpose', function () {
-    $httpBackend.expectGET('deployment/prepareDeployment/helloworld').respond({
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
       environment: {
         purposeToVpcId: {
           'internal': 'vpc1',
@@ -67,7 +69,8 @@ describe('Controller: DeploymentNewCtrl', function () {
   });
 
   it('should start deployment', function () {
-    $httpBackend.expectGET('deployment/prepareDeployment/helloworld').respond({
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
       deploymentOptions: 'deploymentOptions1'
     });
     $httpBackend.flush();
@@ -82,7 +85,8 @@ describe('Controller: DeploymentNewCtrl', function () {
   });
 
   it('should show errors on failure to start deployment', function () {
-    $httpBackend.expectGET('deployment/prepareDeployment/helloworld').respond({
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
       deploymentOptions: 'deploymentOptions1'
     });
     $httpBackend.flush();

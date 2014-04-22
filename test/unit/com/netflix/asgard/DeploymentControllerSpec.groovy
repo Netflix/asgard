@@ -310,7 +310,97 @@ class DeploymentControllerSpec extends Specification {
         ])
 
         when:
-        controller.prepareDeployment("helloclay--test")
+        controller.prepare("helloclay--test", false, null)
+
+        then:
+        response.status == 200
+        objectMapper.readValue(response.contentAsString, Map) == [
+                lcOptions: [
+                        launchConfigurationName: null,
+                        imageId: "ami-12345678",
+                        keyName: "keypair",
+                        securityGroups: ["sg-12345678"],
+                        userData: null,
+                        instanceType: "m1.large",
+                        kernelId: "",
+                        ramdiskId: "",
+                        blockDeviceMappings: [],
+                        instanceMonitoring: null,
+                        instancePriceType: "ON_DEMAND",
+                        iamInstanceProfile: "BaseIAMRole",
+                        ebsOptimized: false
+                ],
+                asgOptions: [
+                        autoScalingGroupName: null,
+                        launchConfigurationName: null,
+                        minSize: 0,
+                        maxSize: 5,
+                        desiredCapacity: 3,
+                        defaultCooldown: 10,
+                        availabilityZones: ["us-west-1c", "us-west-1a"],
+                        loadBalancerNames: ["helloclay--frontend"],
+                        healthCheckType: "EC2",
+                        healthCheckGracePeriod: 600,
+                        placementGroup: null,
+                        subnetPurpose: "internal",
+                        terminationPolicies: ["OldestLaunchConfiguration"],
+                        tags: [],
+                        suspendedProcesses: []
+                ]
+        ]
+
+        and:
+        with(controller.awsAutoScalingService) {
+            1 * getCluster(_, "helloclay--test") >> new Cluster([AutoScalingGroupData.from(asg, [:], [], [:], [])])
+            1 * getAutoScalingGroup(_, "helloclay--test-v456", From.AWS) >> asg
+            1 * getLaunchConfiguration(_, "lc123") >> lc
+        }
+        with(controller.awsEc2Service) {
+            1 * getSubnets(_) >> subnets
+        }
+        0 * _
+    }
+
+    def 'should prepare deployment with environment and template'() {
+        Image.metaClass['getPackageName'] = { -> "package123" }
+
+        AutoScalingGroup asg = new AutoScalingGroup(
+                autoScalingGroupName: "helloclay--test-v456",
+                launchConfigurationName: "lc123",
+                minSize: 0,
+                maxSize: 5,
+                desiredCapacity: 3,
+                defaultCooldown: 10,
+                availabilityZones: ["us-west-1c", "us-west-1a"],
+                loadBalancerNames: ["helloclay--frontend"],
+                healthCheckType: AutoScalingGroupHealthCheckType.EC2,
+                healthCheckGracePeriod: 600,
+                placementGroup: null,
+                terminationPolicies: ["OldestLaunchConfiguration"],
+                tags: [],
+                suspendedProcesses: [],
+                vPCZoneIdentifier: "1"
+        )
+        LaunchConfiguration lc = new LaunchConfiguration(
+                launchConfigurationName: "lc123",
+                imageId: "ami-12345678",
+                keyName: "keypair",
+                securityGroups: ["sg-12345678"],
+                userData: null,
+                instanceType: "m1.large",
+                kernelId: "",
+                ramdiskId: "",
+                blockDeviceMappings: [],
+                instanceMonitoring: null,
+                iamInstanceProfile: "BaseIAMRole",
+                ebsOptimized: false
+        )
+        Subnets subnets = new Subnets([
+                new SubnetData("1", "", "vpc1", "", 1, "us-east-1", "internal", SubnetTarget.EC2)
+        ])
+
+        when:
+        controller.prepare("helloclay--test", true, "CreateJudgeAndCleanUp")
 
         then:
         response.status == 200

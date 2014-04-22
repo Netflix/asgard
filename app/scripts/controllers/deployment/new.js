@@ -5,7 +5,9 @@ angular.module("asgardApp")
     $scope.clusterName = $routeParams.clusterName;
     $scope.hideAdvancedItems = true;
 
-    $http.get("deployment/prepareDeployment/" + $scope.clusterName).success(function(data, status, headers, config) {
+    $http.get("deployment/prepare/" + $scope.clusterName,
+        {params: {includeEnvironment: true, deploymentTemplateName: "CreateJudgeAndCleanUp"}}).
+        success(function(data) {
       $scope.deploymentOptions = data.deploymentOptions;
       $scope.environment = data.environment;
       $scope.asgOptions = data.asgOptions;
@@ -30,10 +32,10 @@ angular.module("asgardApp")
         lcOverrides: $scope.lcOptions
       };
       var json = JSON.stringify(deployment);
-      $http.post("deployment/startDeployment", json).success(function (data, status, headers) {
+      $http.post("deployment/startDeployment", json).success(function (data) {
         var deploymentId = data.deploymentId;
         $location.path("deployment/detail/" + deploymentId);
-      }).error(function (data, status, headers) {
+      }).error(function (data) {
         $scope.validationErrors = data.validationErrors;
         $scope.startingDeployment = false
       });
