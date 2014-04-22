@@ -33,4 +33,13 @@ enum InstanceProductType {
         this.spotPricingName = spotPricingName
         this.jsonPricingName = jsonPricingName
     }
+
+    /**
+     * Returns true or false depending on the value -- if linux or os then true, otherwise false
+     * @param productType String like linux or os
+     * @return true if there is a match
+     */
+    boolean didProductTypeMatch(String productType){
+        productType == this.jsonPricingName || productType == 'os'
+    }
 }

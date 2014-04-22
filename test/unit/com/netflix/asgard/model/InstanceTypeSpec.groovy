@@ -19,7 +19,7 @@ import spock.lang.Specification
 
 class InstanceTypeSpec extends Specification {
 
-    def 'should work as list like it did before'(){
+    def 'should work as list like it did before'() {
 
         when:
         List<InstanceType> instanceTypes = InstanceType.values() as List
@@ -27,7 +27,22 @@ class InstanceTypeSpec extends Specification {
         instanceTypes.size() >= 28
     }
 
-    def 'should work w/fromValue like it did before'(){
+    def 'should work with new instance types of R3* '(String a, String b) {
+        InstanceType type = InstanceType.fromValue(a)
+
+        expect:
+        type.toString() == b
+
+        where:
+        a | b
+        'r3.large'  | 'r3.large'
+        'r3.xlarge' | 'r3.xlarge'
+        'r3.2xlarge' | 'r3.2xlarge'
+        'r3.4xlarge' | 'r3.4xlarge'
+        'r3.8xlarge' | 'r3.8xlarge'
+    }
+
+    def 'should work w/fromValue like it did before'() {
 
         when:
         InstanceType type = InstanceType.fromValue('c3.8xlarge')
@@ -35,7 +50,7 @@ class InstanceTypeSpec extends Specification {
         type.toString() == 'c3.8xlarge'
     }
 
-    def 'validate .fromValue() call with blank or null value or bad string'(){
+    def 'validate .fromValue() call with blank or null value or bad string'() {
 
         when:
         InstanceType.fromValue('')
@@ -51,7 +66,7 @@ class InstanceTypeSpec extends Specification {
         thrown(IllegalArgumentException)
     }
 
-    def 'validate .fromValue() with valid values'(){
+    def 'validate .fromValue() with valid values'() {
 
         when:
         InstanceType type = InstanceType.fromValue('m3.large')
