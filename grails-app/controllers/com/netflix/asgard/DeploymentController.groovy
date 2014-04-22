@@ -153,7 +153,8 @@ class DeploymentController {
             launchConfigurationName = null
             userData = null
             iamInstanceProfile = iamInstanceProfile ?: configService.defaultIamRole
-            instanceMonitoring = null
+            instanceMonitoringIsEnabled: instanceMonitoringIsEnabled != null ? instanceMonitoringIsEnabled :
+                    configService.enableInstanceMonitoring
         }
 
         String groupName = lastGroup.autoScalingGroupName

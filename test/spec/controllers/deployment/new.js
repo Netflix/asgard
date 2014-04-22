@@ -23,17 +23,22 @@ describe('Controller: DeploymentNewCtrl', function () {
     $httpBackend.expectGET('deployment/prepareDeployment/helloworld').respond({
       deploymentOptions: 'deploymentOptions1',
       environment: 'environment1',
-      asgOptions: 'asgOptions1',
-      lcOptions: 'lcOptions1'
+      lcOptions: 'lcOptions1',
+      asgOptions: {
+        name: "asgOptions1",
+        suspendedProcesses: ["AddToLoadBalancer"]
+      }
     });
     $httpBackend.flush();
     expect(scope.clusterName).toEqual('helloworld');
     expect(scope.hideAdvancedItems).toEqual(true);
     expect(scope.deploymentOptions).toEqual('deploymentOptions1');
     expect(scope.environment).toEqual('environment1');
-    expect(scope.asgOptions).toEqual('asgOptions1');
+    expect(scope.asgOptions.name).toEqual('asgOptions1');
     expect(scope.lcOptions).toEqual('lcOptions1');
     expect(scope.vpcId).toEqual(undefined);
+    expect(scope.suspendAZRebalance).toEqual(false);
+    expect(scope.suspendAddToLoadBalancer).toEqual(true);
   });
 
   it('should set VPC id based on subnet purpose', function () {
@@ -48,14 +53,45 @@ describe('Controller: DeploymentNewCtrl', function () {
     $httpBackend.flush();
     scope.asgOptions = {};
     scope.asgOptions.subnetPurpose = 'internal';
-    scope.$digest();
+    scope.$apply();
     expect(scope.vpcId).toEqual('vpc1');
     scope.asgOptions.subnetPurpose = 'external';
-    scope.$digest();
+    scope.$apply();
     expect(scope.vpcId).toEqual('vpc2');
     scope.asgOptions.subnetPurpose = 'neither';
-    scope.$digest();
+    scope.$apply();
     expect(scope.vpcId).toEqual('');
+  });
+
+  it('should toggle suspended processes', function () {
+    $httpBackend.expectGET('deployment/prepareDeployment/helloworld').respond({
+      asgOptions: {
+        suspendedProcesses: []
+      }
+    });
+    $httpBackend.flush();
+    expect(scope.suspendAZRebalance).toEqual(false);
+    expect(scope.suspendAddToLoadBalancer).toEqual(false);
+    expect(scope.asgOptions.suspendedProcesses).toEqual([]);
+
+    scope.$apply();
+    expect(scope.asgOptions.suspendedProcesses).toEqual([]);
+
+    scope.suspendAZRebalance = true;
+    scope.$apply();
+    expect(scope.asgOptions.suspendedProcesses).toEqual(["AZRebalance"]);
+
+    scope.suspendAddToLoadBalancer = true;
+    scope.$apply();
+    expect(scope.asgOptions.suspendedProcesses).toEqual(["AZRebalance", "AddToLoadBalancer"]);
+
+    scope.suspendAZRebalance = false;
+    scope.$apply();
+    expect(scope.asgOptions.suspendedProcesses).toEqual(["AddToLoadBalancer"]);
+
+    scope.suspendAddToLoadBalancer = false;
+    scope.$apply();
+    expect(scope.asgOptions.suspendedProcesses).toEqual([]);
   });
 
   it('should toggle advanced items', function () {

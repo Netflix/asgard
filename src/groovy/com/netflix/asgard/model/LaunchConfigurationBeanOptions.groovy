@@ -58,7 +58,7 @@ import groovy.transform.Canonical
     Set<BlockDeviceMapping> blockDeviceMappings
 
     /** @see LaunchConfiguration#instanceMonitoring */
-    InstanceMonitoring instanceMonitoring
+    Boolean instanceMonitoringIsEnabled
 
     /** Instance price type indicates how instances are priced. */
     InstancePriceType instancePriceType
@@ -68,6 +68,9 @@ import groovy.transform.Canonical
 
     /** @see LaunchConfiguration#ebsOptimized */
     Boolean ebsOptimized
+
+    /** @see LaunchConfiguration#associatePublicIpAddress */
+    Boolean associatePublicIpAddress
 
     void setSecurityGroups(Collection<String> securityGroups) {
         this.securityGroups = copyNonNullToSet(securityGroups)
@@ -103,10 +106,11 @@ import groovy.transform.Canonical
                 kernelId: source.kernelId,
                 ramdiskId: source.ramdiskId,
                 blockDeviceMappings: copyBlockDeviceMappings(source.blockDeviceMappings),
-                instanceMonitoring: source.instanceMonitoring,
+                instanceMonitoringIsEnabled: source.instanceMonitoringIsEnabled,
                 instancePriceType: source.instancePriceType,
                 iamInstanceProfile: source.iamInstanceProfile,
-                ebsOptimized: source.ebsOptimized
+                ebsOptimized: source.ebsOptimized,
+                associatePublicIpAddress: source.associatePublicIpAddress
         )
     }
 
@@ -128,10 +132,11 @@ import groovy.transform.Canonical
                     kernelId: kernelId,
                     ramdiskId: ramdiskId,
                     blockDeviceMappings: copyBlockDeviceMappings(blockDeviceMappings),
-                    instanceMonitoring: instanceMonitoring,
+                    instanceMonitoringIsEnabled: instanceMonitoring?.enabled,
                     instancePriceType: spotPrice ? InstancePriceType.SPOT : InstancePriceType.ON_DEMAND,
                     iamInstanceProfile: iamInstanceProfile,
-                    ebsOptimized: ebsOptimized
+                    ebsOptimized: ebsOptimized,
+                    associatePublicIpAddress: associatePublicIpAddress
             )
         }
     }
@@ -159,10 +164,11 @@ import groovy.transform.Canonical
                 kernelId: kernelId ?: null, // Be careful not to set empties here. Null is okay.
                 ramdiskId: ramdiskId ?: null, // Be careful not to set empties here. Null is okay.
                 blockDeviceMappings: copyBlockDeviceMappings(blockDeviceMappings),
-                instanceMonitoring: instanceMonitoring ?: new InstanceMonitoring().withEnabled(false),
+                instanceMonitoring: new InstanceMonitoring().withEnabled(instanceMonitoringIsEnabled ?: false),
                 spotPrice: spotPrice,
                 iamInstanceProfile: iamInstanceProfile,
-                ebsOptimized: ebsOptimized
+                ebsOptimized: ebsOptimized,
+                associatePublicIpAddress: associatePublicIpAddress
         )
     }
 
