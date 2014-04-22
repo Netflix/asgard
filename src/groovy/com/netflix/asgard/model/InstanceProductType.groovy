@@ -21,7 +21,7 @@ package com.netflix.asgard.model
  */
 enum InstanceProductType {
 
-    LINUX_UNIX('Linux/UNIX', 'linux', 'os')
+    LINUX_UNIX('Linux/UNIX', 'linux')
 
     /** The name of the product type in Amazon's spot pricing history API. */
     String spotPricingName
@@ -29,11 +29,17 @@ enum InstanceProductType {
     /** Product types with this field set should have JSON-derived on-demand and reserved prices. */
     String jsonPricingName
 
-    String alternatePricingName
-
-    InstanceProductType(String spotPricingName, String jsonPricingName = null, String altPricingName = 'os') {
+    InstanceProductType(String spotPricingName, String jsonPricingName = null) {
         this.spotPricingName = spotPricingName
         this.jsonPricingName = jsonPricingName
-        this.alternatePricingName = altPricingName
+    }
+
+    /**
+     * Returns true or false depending on the value -- if linux or os then true, otherwise false
+     * @param productType String like linux or os
+     * @return true if there is a match
+     */
+    boolean didProductTypeMatch(String productType){
+        productType == this.jsonPricingName || productType == 'os'
     }
 }

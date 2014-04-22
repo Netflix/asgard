@@ -277,9 +277,7 @@ class InstanceTypeService implements CacheInitializer {
                     if (instanceType) {
                         JSONArray valueColumns = sizeObject.valueColumns
                         for (JSONElement valueColumn in valueColumns) {
-                            String productTypeString = valueColumn.name
-                            InstanceProductType product = products.find { it.jsonPricingName == productTypeString ||
-                                    it.alternatePricingName == productTypeString }
+                            InstanceProductType product = products.find { it.didProductTypeMatch(valueColumn.name) }
                             if (product) {
                                 String priceString = valueColumn.prices.USD
                                 if (priceString?.isBigDecimal()) {
