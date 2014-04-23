@@ -26,6 +26,8 @@ class TaskControllerSpec extends Specification {
 
     TaskService taskService = Mock(TaskService)
 
+    ObjectMapper objectMapper = new ObjectMapper()
+
     private Task task1 = new Task(id: '789', name: 'Create ASG helloworld-v001', env: 'prod', status: 'running',
             userContext: new UserContext(ticket: 'CMC-123', username: 'hsimpson',
                     clientHostName: 'laptop-hsimpson', region: Region.US_EAST_1,
@@ -62,7 +64,7 @@ class TaskControllerSpec extends Specification {
     void setup() {
         TestUtils.setUpMockRequest()
         controller.taskService = taskService
-        controller.objectMapper = new ObjectMapper()
+        controller.objectMapper = objectMapper
     }
 
     void 'should show task info by id'() {
@@ -93,8 +95,7 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should render JSON array for in-memory task list'() {
-
-        request.contentType = 'application/json'
+        request.format = "json"
 
         when:
         controller.runningInMemory()
@@ -107,8 +108,7 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should render empty JSON array for zero-length in-memory task list'() {
-
-        request.contentType = 'application/json'
+        request.format = "json"
 
         when:
         controller.runningInMemory()
@@ -121,12 +121,10 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should render single JSON task object for specific found task ID'() {
-
-        request.contentType = 'application/json'
-        params.id = '789'
+        request.format = "json"
 
         when:
-        controller.runningInMemory()
+        controller.runningInMemory('789')
 
         then:
         1 * taskService.getLocalTaskById('789') >> task1
@@ -136,11 +134,10 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should indicate that a specific local task is not found'() {
-        request.contentType = 'application/json'
-        params.id = 'nosuchluck'
+        request.format = "json"
 
         when:
-        controller.runningInMemory()
+        controller.runningInMemory('nosuchluck')
 
         then:
         1 * taskService.getLocalTaskById('nosuchluck') >> null
@@ -150,12 +147,10 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should cancel a local in-memory running task and redirect to the relevant object'() {
-
-        request.contentType = 'application/x-www-form-urlencoded'
-        params.id = '789'
+        response.format = "form"
 
         when:
-        controller.cancel()
+        controller.cancel('789')
 
         then:
         1 * taskService.getTaskById('789') >> task1
@@ -166,12 +161,10 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should cancel a local in-memory running task and redirect to a generic result'() {
-
-        request.contentType = 'application/x-www-form-urlencoded'
-        params.id = '456'
+        response.format = "form"
 
         when:
-        controller.cancel()
+        controller.cancel('456')
 
         then:
         1 * taskService.getTaskById('456') >> task2
@@ -182,11 +175,8 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should fail to cancel a non-existent local in-memory running task'() {
-
-        params.id = 'nosuchluck'
-
         when:
-        controller.cancel()
+        controller.cancel('nosuchluck')
 
         then:
         1 * taskService.getTaskById('nosuchluck') >> null
@@ -198,18 +188,21 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should cancel a task and render JSON output'() {
-        params.id = '456'
-        params.format = 'json'
+        response.format = "json"
 
         when:
-        controller.cancel()
+        controller.cancel('456')
 
         then:
         1 * taskService.getTaskById('456') >> task2
         1 * taskService.cancelTask(_, task2)
         0 * _
+
+        and:
         flash.message == null
         response.redirectUrl == null
-        response.text == '{\n  "result": "Task \'456:Disable ASG helloworld-v000\' canceled."\n}'
+        objectMapper.readValue(response.text, Map) == [
+                result: "Task '456:Disable ASG helloworld-v000' canceled."
+        ]
     }
 }

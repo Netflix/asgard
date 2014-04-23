@@ -23,8 +23,8 @@ import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.simpleworkflow.flow.ManualActivityCompletionClient
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.netflix.asgard.deployment.DeploymentTemplate
 import com.netflix.asgard.deployment.DeploymentWorkflowOptions
-import com.netflix.asgard.deployment.ProceedPreference
 import com.netflix.asgard.deployment.StartDeploymentRequest
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.AutoScalingGroupHealthCheckType
@@ -41,7 +41,7 @@ import grails.converters.XML
  */
 class DeploymentController {
 
-    static allowedMethods = [proceed: 'POST', rollback: 'POST', startDeployment: 'POST']
+    static allowedMethods = [proceed: 'POST', rollback: 'POST', start: 'POST']
     static defaultAction = "list"
 
     def applicationService
@@ -133,8 +133,10 @@ class DeploymentController {
      * Get info about the cluster. It will be used to create the next ASG.
      *
      * @param id which specifies the cluster name
+     * @param includeEnvironment include other possible values for attributes in response (all ELB names for example)
+     * @param deploymentTemplateName predefined deploymentOptions to include in response (see DeploymentTemplate)
      */
-    def prepareDeployment(String id) {
+    def prepare(String id, boolean includeEnvironment, String deploymentTemplateName) {
         UserContext userContext = UserContext.of(request)
         Cluster cluster = awsAutoScalingService.getCluster(userContext, id)
         AutoScalingGroup lastGroup = awsAutoScalingService.
@@ -153,86 +155,82 @@ class DeploymentController {
             launchConfigurationName = null
             userData = null
             iamInstanceProfile = iamInstanceProfile ?: configService.defaultIamRole
-            instanceMonitoring = null
-        }
-
-        String groupName = lastGroup.autoScalingGroupName
-        String appName = Relationships.appNameFromGroupName(groupName)
-        String email = applicationService.getEmailFromApp(userContext, appName)
-        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(
-                clusterName: cluster.name,
-                notificationDestination: email,
-                delayDurationMinutes: 0,
-                doCanary: false,
-                canaryCapacity: 1,
-                canaryStartUpTimeoutMinutes: 30,
-                canaryJudgmentPeriodMinutes: 60,
-                scaleUp: ProceedPreference.Ask,
-                desiredCapacityStartUpTimeoutMinutes: 40,
-                desiredCapacityJudgmentPeriodMinutes: 120,
-                disablePreviousAsg: ProceedPreference.Ask,
-                fullTrafficJudgmentPeriodMinutes: 240,
-                deletePreviousAsg: ProceedPreference.Ask
-        )
-
-        String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
-        Image currentImage = awsEc2Service.getImage(userContext, lc.imageId)
-        Collection<Image> images = awsEc2Service.getImagesForPackage(userContext, currentImage.packageName)
-        List<SecurityGroup> effectiveSecurityGroups = awsEc2Service.getEffectiveSecurityGroups(userContext)
-        Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
-        Collection<AvailabilityZone> allAvailabilityZones = awsEc2Service.getAvailabilityZones(userContext)
-        List<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext).
-                sort { it.loadBalancerName.toLowerCase() }
-        List<String> subnetPurposes = subnets.getPurposesForZones(allAvailabilityZones*.zoneName,
-                SubnetTarget.EC2).sort()
-        List<Map<String, String>> availabilityZonesAndPurpose = []
-        subnets.groupZonesByPurpose(allAvailabilityZones*.zoneName, SubnetTarget.EC2).each { purpose, zones ->
-            zones.each { zone ->
-                availabilityZonesAndPurpose << [
-                        zone: zone,
-                        purpose: purpose ?: ''
-                ]
-            }
+            instanceMonitoringIsEnabled = instanceMonitoringIsEnabled != null ? instanceMonitoringIsEnabled :
+                    configService.enableInstanceMonitoring
         }
 
         Map<String, Object> attributes = [
-                deploymentOptions: deploymentOptions,
                 lcOptions: lcOverrides,
-                asgOptions: asgOverrides,
-                environment: [
-                        nextGroupName: nextGroupName,
-                        terminationPolicies: awsAutoScalingService.terminationPolicyTypes,
-                        purposeToVpcId: purposeToVpcId,
-                        subnetPurposes: subnetPurposes,
-                        availabilityZonesAndPurpose: availabilityZonesAndPurpose,
-                        loadBalancers: loadBalancers.collect {
-                            [id: it.loadBalancerName, vpcId: it.getVPCId() ?: '']
-                        },
-                        healthCheckTypes: AutoScalingGroupHealthCheckType.values().collect {
-                            [id: it.name(), description: it.description]
-                        },
-                        instanceTypes: instanceTypeService.getInstanceTypes(userContext).collect {
-                            [id: it.name,
-                                    price: it.monthlyLinuxOnDemandPrice ? it.monthlyLinuxOnDemandPrice + '/mo' : '']
-                        },
-                        securityGroups: effectiveSecurityGroups.collect {
-                            [id: it.groupId, name: it.groupName, selection: it.vpcId ? it.groupId : it.groupName,
-                                    vpcId: it.vpcId ?: '']
-                        },
-                        images: images.sort { it.imageLocation.toLowerCase() }.collect {
-                            [id: it.imageId, imageLocation: it.imageLocation]
-                        },
-                        keys: awsEc2Service.getKeys(userContext).collect { it.keyName.toLowerCase() }.sort(),
-                        spotUrl: configService.spotUrl,
-                ]
+                asgOptions: asgOverrides
         ]
+        DeploymentTemplate deploymentTemplate = DeploymentTemplate.of(deploymentTemplateName)
+        if (deploymentTemplate) {
+            DeploymentWorkflowOptions deploymentOptions = deploymentTemplate.deployment
+            String groupName = lastGroup.autoScalingGroupName
+            String appName = Relationships.appNameFromGroupName(groupName)
+            String email = applicationService.getEmailFromApp(userContext, appName)
+            deploymentOptions.with {
+                clusterName = cluster.name
+                notificationDestination = email
+            }
+            attributes.deploymentOptions = deploymentOptions
+        }
+        if (includeEnvironment) {
+            String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
+            Image currentImage = awsEc2Service.getImage(userContext, lc.imageId)
+            Collection<Image> images = awsEc2Service.getImagesForPackage(userContext, currentImage.packageName)
+            List<SecurityGroup> effectiveSecurityGroups = awsEc2Service.getEffectiveSecurityGroups(userContext)
+            Collection<AvailabilityZone> allAvailabilityZones = awsEc2Service.getAvailabilityZones(userContext)
+            Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
+            List<String> subnetPurposes = subnets.getPurposesForZones(allAvailabilityZones*.zoneName,
+                    SubnetTarget.EC2).sort()
+            List<Map<String, String>> availabilityZonesAndPurpose = []
+            subnets.groupZonesByPurpose(allAvailabilityZones*.zoneName, SubnetTarget.EC2).each { purpose, zones ->
+                zones.each { zone ->
+                    availabilityZonesAndPurpose << [
+                            zone: zone,
+                            purpose: purpose ?: ''
+                    ]
+                }
+            }
+            List<LoadBalancerDescription> loadBalancers = awsLoadBalancerService.getLoadBalancers(userContext).
+                    sort { it.loadBalancerName.toLowerCase() }
+            attributes.environment = [
+                    nextGroupName: nextGroupName,
+                    terminationPolicies: awsAutoScalingService.terminationPolicyTypes,
+                    purposeToVpcId: purposeToVpcId,
+                    subnetPurposes: subnetPurposes,
+                    availabilityZonesAndPurpose: availabilityZonesAndPurpose,
+                    loadBalancers: loadBalancers.collect {
+                        [id: it.loadBalancerName, vpcId: it.getVPCId() ?: '']
+                    },
+                    healthCheckTypes: AutoScalingGroupHealthCheckType.values().collect {
+                        [id: it.name(), description: it.description]
+                    },
+                    instanceTypes: instanceTypeService.getInstanceTypes(userContext).collect {
+                        [id: it.name,
+                                price: it.monthlyLinuxOnDemandPrice ? it.monthlyLinuxOnDemandPrice + '/mo' : '']
+                    },
+                    securityGroups: effectiveSecurityGroups.collect {
+                        [id: it.groupId, name: it.groupName, selection: it.vpcId ? it.groupId : it.groupName,
+                                vpcId: it.vpcId ?: '']
+                    },
+                    images: images.sort { it.imageLocation.toLowerCase() }.collect {
+                        [id: it.imageId, imageLocation: it.imageLocation]
+                    },
+                    keys: awsEc2Service.getKeys(userContext).collect { it.keyName.toLowerCase() }.sort(),
+                    spotUrl: configService.spotUrl,
+            ]
+        }
         render objectMapper.writer().writeValueAsString(attributes)
     }
 
     /**
      * Start a deployment.
+     *
+     * @see StartDeploymentRequest
      */
-    def startDeployment() {
+    def start() {
         UserContext userContext = UserContext.of(request)
         String json = request.JSON.toString()
         StartDeploymentRequest startDeploymentRequest = objectMapper.reader(StartDeploymentRequest).readValue(json)

@@ -11,7 +11,6 @@ There's a plethora of ways to contribute to Asgard!
 * [Join us at Netflix](http://jobs.netflix.com/) and work on Asgard fulltime! 
 * Surprising us with some other form of contribution!
 
-
 All forms of contribution are very much appreciated.
 
 ## Communication

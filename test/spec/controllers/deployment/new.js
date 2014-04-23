@@ -20,24 +20,31 @@ describe('Controller: DeploymentNewCtrl', function () {
   }));
 
   it('should set initial scope', function () {
-    $httpBackend.expectGET('deployment/prepareDeployment/helloworld').respond({
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
       deploymentOptions: 'deploymentOptions1',
       environment: 'environment1',
-      asgOptions: 'asgOptions1',
-      lcOptions: 'lcOptions1'
+      lcOptions: 'lcOptions1',
+      asgOptions: {
+        name: "asgOptions1",
+        suspendedProcesses: ["AddToLoadBalancer"]
+      }
     });
     $httpBackend.flush();
     expect(scope.clusterName).toEqual('helloworld');
     expect(scope.hideAdvancedItems).toEqual(true);
     expect(scope.deploymentOptions).toEqual('deploymentOptions1');
     expect(scope.environment).toEqual('environment1');
-    expect(scope.asgOptions).toEqual('asgOptions1');
+    expect(scope.asgOptions.name).toEqual('asgOptions1');
     expect(scope.lcOptions).toEqual('lcOptions1');
     expect(scope.vpcId).toEqual(undefined);
+    expect(scope.suspendAZRebalance).toEqual(false);
+    expect(scope.suspendAddToLoadBalancer).toEqual(true);
   });
 
   it('should set VPC id based on subnet purpose', function () {
-    $httpBackend.expectGET('deployment/prepareDeployment/helloworld').respond({
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
       environment: {
         purposeToVpcId: {
           'internal': 'vpc1',
@@ -48,14 +55,46 @@ describe('Controller: DeploymentNewCtrl', function () {
     $httpBackend.flush();
     scope.asgOptions = {};
     scope.asgOptions.subnetPurpose = 'internal';
-    scope.$digest();
+    scope.$apply();
     expect(scope.vpcId).toEqual('vpc1');
     scope.asgOptions.subnetPurpose = 'external';
-    scope.$digest();
+    scope.$apply();
     expect(scope.vpcId).toEqual('vpc2');
     scope.asgOptions.subnetPurpose = 'neither';
-    scope.$digest();
+    scope.$apply();
     expect(scope.vpcId).toEqual('');
+  });
+
+  it('should toggle suspended processes', function () {
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
+      asgOptions: {
+        suspendedProcesses: []
+      }
+    });
+    $httpBackend.flush();
+    expect(scope.suspendAZRebalance).toEqual(false);
+    expect(scope.suspendAddToLoadBalancer).toEqual(false);
+    expect(scope.asgOptions.suspendedProcesses).toEqual([]);
+
+    scope.$apply();
+    expect(scope.asgOptions.suspendedProcesses).toEqual([]);
+
+    scope.suspendAZRebalance = true;
+    scope.$apply();
+    expect(scope.asgOptions.suspendedProcesses).toEqual(["AZRebalance"]);
+
+    scope.suspendAddToLoadBalancer = true;
+    scope.$apply();
+    expect(scope.asgOptions.suspendedProcesses).toEqual(["AZRebalance", "AddToLoadBalancer"]);
+
+    scope.suspendAZRebalance = false;
+    scope.$apply();
+    expect(scope.asgOptions.suspendedProcesses).toEqual(["AddToLoadBalancer"]);
+
+    scope.suspendAddToLoadBalancer = false;
+    scope.$apply();
+    expect(scope.asgOptions.suspendedProcesses).toEqual([]);
   });
 
   it('should toggle advanced items', function () {
@@ -67,14 +106,15 @@ describe('Controller: DeploymentNewCtrl', function () {
   });
 
   it('should start deployment', function () {
-    $httpBackend.expectGET('deployment/prepareDeployment/helloworld').respond({
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
       deploymentOptions: 'deploymentOptions1'
     });
     $httpBackend.flush();
     expect(scope.startingDeployment).toEqual(undefined);
     scope.startDeployment();
     expect(scope.startingDeployment).toEqual(true);
-    $httpBackend.expectPOST('deployment/startDeployment', {"deploymentOptions":"deploymentOptions1"}).respond(200, {
+    $httpBackend.expectPOST('deployment/start', {"deploymentOptions":"deploymentOptions1"}).respond(200, {
       deploymentId: "123"
     });
     $httpBackend.flush();
@@ -82,14 +122,15 @@ describe('Controller: DeploymentNewCtrl', function () {
   });
 
   it('should show errors on failure to start deployment', function () {
-    $httpBackend.expectGET('deployment/prepareDeployment/helloworld').respond({
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
       deploymentOptions: 'deploymentOptions1'
     });
     $httpBackend.flush();
     expect(scope.startingDeployment).toEqual(undefined);
     scope.startDeployment();
     expect(scope.startingDeployment).toEqual(true);
-    $httpBackend.expectPOST('deployment/startDeployment', {"deploymentOptions":"deploymentOptions1"}).respond(422, {
+    $httpBackend.expectPOST('deployment/start', {"deploymentOptions":"deploymentOptions1"}).respond(422, {
       validationErrors: 'errors'
     });
     $httpBackend.flush();

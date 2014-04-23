@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
+import com.amazonaws.services.autoscaling.model.InstanceMonitoring
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.ec2.model.Image
@@ -65,7 +66,7 @@ class DeploymentControllerSpec extends Specification {
         "lcOverrides":
         {"securityGroups":["sg-12345678"],"kernelId":"","launchConfigurationName":null,
         "userData":null,"instancePriceType":"ON_DEMAND","instanceType":"m1.large","blockDeviceMappings":[],
-        "imageId":"ami-12345678","keyName":"keypair","ramdiskId":"","instanceMonitoring":null,
+        "imageId":"ami-12345678","keyName":"keypair","ramdiskId":"","instanceMonitoringIsEnabled":false,
         "iamInstanceProfile":"BaseIAMRole","ebsOptimized":false},
         "deploymentOptions":
         {"clusterName":"helloclay--test",
@@ -124,7 +125,7 @@ class DeploymentControllerSpec extends Specification {
         request.JSON = createStartDeploymentRequest()
 
         when:
-        controller.startDeployment()
+        controller.start()
 
         then:
         response.status == 200
@@ -162,7 +163,7 @@ class DeploymentControllerSpec extends Specification {
                         kernelId: "",
                         ramdiskId: "",
                         blockDeviceMappings: [],
-                        instanceMonitoring: null,
+                        instanceMonitoringIsEnabled: false,
                         instancePriceType: InstancePriceType.ON_DEMAND,
                         iamInstanceProfile: "BaseIAMRole",
                         ebsOptimized: false
@@ -191,7 +192,7 @@ class DeploymentControllerSpec extends Specification {
         request.JSON = createStartDeploymentRequest(0)
 
         when:
-        controller.startDeployment()
+        controller.start()
 
         then:
         response.status == 422
@@ -301,16 +302,109 @@ class DeploymentControllerSpec extends Specification {
                 kernelId: "",
                 ramdiskId: "",
                 blockDeviceMappings: [],
-                instanceMonitoring: null,
+                instanceMonitoring: new InstanceMonitoring(enabled: false),
                 iamInstanceProfile: "BaseIAMRole",
-                ebsOptimized: false
+                ebsOptimized: false,
+                associatePublicIpAddress: false
         )
         Subnets subnets = new Subnets([
                 new SubnetData("1", "", "vpc1", "", 1, "us-east-1", "internal", SubnetTarget.EC2)
         ])
 
         when:
-        controller.prepareDeployment("helloclay--test")
+        controller.prepare("helloclay--test", false, null)
+
+        then:
+        response.status == 200
+        objectMapper.readValue(response.contentAsString, Map) == [
+                lcOptions: [
+                        launchConfigurationName: null,
+                        imageId: "ami-12345678",
+                        keyName: "keypair",
+                        securityGroups: ["sg-12345678"],
+                        userData: null,
+                        instanceType: "m1.large",
+                        kernelId: "",
+                        ramdiskId: "",
+                        blockDeviceMappings: [],
+                        instanceMonitoringIsEnabled: false,
+                        instancePriceType: "ON_DEMAND",
+                        iamInstanceProfile: "BaseIAMRole",
+                        ebsOptimized: false,
+                        associatePublicIpAddress: false
+                ],
+                asgOptions: [
+                        autoScalingGroupName: null,
+                        launchConfigurationName: null,
+                        minSize: 0,
+                        maxSize: 5,
+                        desiredCapacity: 3,
+                        defaultCooldown: 10,
+                        availabilityZones: ["us-west-1c", "us-west-1a"],
+                        loadBalancerNames: ["helloclay--frontend"],
+                        healthCheckType: "EC2",
+                        healthCheckGracePeriod: 600,
+                        placementGroup: null,
+                        subnetPurpose: "internal",
+                        terminationPolicies: ["OldestLaunchConfiguration"],
+                        tags: [],
+                        suspendedProcesses: []
+                ]
+        ]
+
+        and:
+        with(controller.awsAutoScalingService) {
+            1 * getCluster(_, "helloclay--test") >> new Cluster([AutoScalingGroupData.from(asg, [:], [], [:], [])])
+            1 * getAutoScalingGroup(_, "helloclay--test-v456", From.AWS) >> asg
+            1 * getLaunchConfiguration(_, "lc123") >> lc
+        }
+        with(controller.awsEc2Service) {
+            1 * getSubnets(_) >> subnets
+        }
+        0 * _
+    }
+
+    def 'should prepare deployment with environment and template'() {
+        Image.metaClass['getPackageName'] = { -> "package123" }
+
+        AutoScalingGroup asg = new AutoScalingGroup(
+                autoScalingGroupName: "helloclay--test-v456",
+                launchConfigurationName: "lc123",
+                minSize: 0,
+                maxSize: 5,
+                desiredCapacity: 3,
+                defaultCooldown: 10,
+                availabilityZones: ["us-west-1c", "us-west-1a"],
+                loadBalancerNames: ["helloclay--frontend"],
+                healthCheckType: AutoScalingGroupHealthCheckType.EC2,
+                healthCheckGracePeriod: 600,
+                placementGroup: null,
+                terminationPolicies: ["OldestLaunchConfiguration"],
+                tags: [],
+                suspendedProcesses: [],
+                vPCZoneIdentifier: "1"
+        )
+        LaunchConfiguration lc = new LaunchConfiguration(
+                launchConfigurationName: "lc123",
+                imageId: "ami-12345678",
+                keyName: "keypair",
+                securityGroups: ["sg-12345678"],
+                userData: null,
+                instanceType: "m1.large",
+                kernelId: "",
+                ramdiskId: "",
+                blockDeviceMappings: [],
+                instanceMonitoring: null,
+                iamInstanceProfile: "BaseIAMRole",
+                ebsOptimized: false,
+                associatePublicIpAddress: false
+        )
+        Subnets subnets = new Subnets([
+                new SubnetData("1", "", "vpc1", "", 1, "us-east-1", "internal", SubnetTarget.EC2)
+        ])
+
+        when:
+        controller.prepare("helloclay--test", true, "CreateJudgeAndCleanUp")
 
         then:
         response.status == 200
@@ -340,10 +434,11 @@ class DeploymentControllerSpec extends Specification {
                         kernelId: "",
                         ramdiskId: "",
                         blockDeviceMappings: [],
-                        instanceMonitoring: null,
+                        instanceMonitoringIsEnabled: false,
                         instancePriceType: "ON_DEMAND",
                         iamInstanceProfile: "BaseIAMRole",
-                        ebsOptimized: false
+                        ebsOptimized: false,
+                        associatePublicIpAddress: false
                 ],
                 asgOptions: [
                         autoScalingGroupName: null,
@@ -410,6 +505,7 @@ class DeploymentControllerSpec extends Specification {
         }
         with(controller.configService) {
             1 * getSpotUrl() >> "spotUrl"
+            1 * getEnableInstanceMonitoring()
         }
         0 * _
     }
