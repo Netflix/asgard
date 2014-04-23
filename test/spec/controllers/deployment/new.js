@@ -66,7 +66,8 @@ describe('Controller: DeploymentNewCtrl', function () {
   });
 
   it('should toggle suspended processes', function () {
-    $httpBackend.expectGET('deployment/prepareDeployment/helloworld').respond({
+    $httpBackend.expectGET(
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateJudgeAndCleanUp&includeEnvironment=true').respond({
       asgOptions: {
         suspendedProcesses: []
       }
