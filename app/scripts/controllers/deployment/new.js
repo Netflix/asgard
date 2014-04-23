@@ -4,10 +4,14 @@ angular.module("asgardApp")
   .controller("DeploymentNewCtrl", function ($scope, $routeParams, $http, $location) {
     $scope.clusterName = $routeParams.clusterName;
     $scope.hideAdvancedItems = true;
+    var prepareParams = {
+      params: {
+        includeEnvironment: true,
+        deploymentTemplateName: "CreateJudgeAndCleanUp"
+      }
+    };
 
-    $http.get("deployment/prepare/" + $scope.clusterName,
-        {params: {includeEnvironment: true, deploymentTemplateName: "CreateJudgeAndCleanUp"}}).
-        success(function(data) {
+    $http.get("deployment/prepare/" + $scope.clusterName, prepareParams).success(function(data) {
       $scope.deploymentOptions = data.deploymentOptions;
       $scope.environment = data.environment;
       $scope.asgOptions = data.asgOptions;

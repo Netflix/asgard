@@ -155,7 +155,7 @@ class DeploymentController {
             launchConfigurationName = null
             userData = null
             iamInstanceProfile = iamInstanceProfile ?: configService.defaultIamRole
-            instanceMonitoringIsEnabled: instanceMonitoringIsEnabled != null ? instanceMonitoringIsEnabled :
+            instanceMonitoringIsEnabled = instanceMonitoringIsEnabled != null ? instanceMonitoringIsEnabled :
                     configService.enableInstanceMonitoring
         }
 

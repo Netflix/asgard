@@ -26,7 +26,7 @@
         </div>
       </div>
 
-      <div class="generalOptions container" collapse="hideAdvancedItems === true">
+      <div class="generalOptions container" collapse="hideAdvancedItems">
         <div class="row">
           <div class="col-md-3">
             <label>VPC:</label>
@@ -45,7 +45,7 @@
       </div>
 
       <div class="launchConfigOptions container">
-        <div class="row" collapse="hideAdvancedItems === true">
+        <div class="row" collapse="hideAdvancedItems">
           <div class="col-md-12"><h4>Launch Configuration</h4></div>
         </div>
         <div class="row">
@@ -57,7 +57,7 @@
             </select>
           </div>
         </div>
-        <div class="row" collapse="hideAdvancedItems === true">
+        <div class="row" collapse="hideAdvancedItems">
           <div class="col-md-3">
             <label for="instanceType"><a href="/us-west-1/instanceType/list">Instance Type:</a></label>
           </div>
@@ -67,7 +67,7 @@
             </select>
           </div>
         </div>
-        <div class="row" collapse="hideAdvancedItems === true">
+        <div class="row" collapse="hideAdvancedItems">
           <div class="col-md-3">
             <label for="key">SSH Key:</label>
           </div>
@@ -75,7 +75,7 @@
             <select id="key" ng-model="lcOptions.keyName" ng-options="opt for opt in environment.keys"></select>
           </div>
         </div>
-        <div class="row" collapse="hideAdvancedItems === true">
+        <div class="row" collapse="hideAdvancedItems">
           <div class="col-md-3">
             <label for="securityGroups">Security Groups:</label>
           </div>
@@ -86,7 +86,7 @@
             </select>
           </div>
         </div>
-        <div class="row" collapse="hideAdvancedItems === true">
+        <div class="row" collapse="hideAdvancedItems">
           <div class="col-md-3">
             <label>Pricing:</label>
           </div>
@@ -102,7 +102,7 @@
             </div>
           </div>
         </div>
-        <div class="row" collapse="hideAdvancedItems === true">
+        <div class="row" collapse="hideAdvancedItems">
           <div class="col-md-3">
             <label for="kernelId">Kernel ID:</label>
           </div>
@@ -110,7 +110,7 @@
             <input type="text" id="kernelId" ng-model="lcOptions.kernelId"/>
           </div>
         </div>
-        <div class="row" collapse="hideAdvancedItems === true">
+        <div class="row" collapse="hideAdvancedItems">
           <div class="col-md-3">
             <label for="ramdiskId">Ram Disk ID:</label>
           </div>
@@ -118,7 +118,7 @@
             <input type="text" id="ramdiskId" ng-model="lcOptions.ramdiskId"/>
           </div>
         </div>
-        <div class="row" collapse="hideAdvancedItems === true">
+        <div class="row" collapse="hideAdvancedItems">
           <div class="col-md-3">
             <label for="iamInstanceProfile">IAM Instance Profile:</label>
           </div>
@@ -126,7 +126,7 @@
             <input type="text" id="iamInstanceProfile" ng-model="lcOptions.iamInstanceProfile"/>
           </div>
         </div>
-        <div class="row" collapse="hideAdvancedItems === true">
+        <div class="row" collapse="hideAdvancedItems">
           <div class="col-md-3">
             <label>Associate Public IP Address:</label>
           </div>
@@ -139,7 +139,7 @@
               <label for="associatePublicIpAddressDefault" class="choice">Default</label>
           </div>
         </div>
-        <div class="row" collapse="hideAdvancedItems === true">
+        <div class="row" collapse="hideAdvancedItems">
           <div class="col-md-3">
             <label>Instance Monitoring:</label>
           </div>
@@ -150,7 +150,7 @@
               <label for="instanceMonitoringIsEnabledFalse" class="choice">Disabled</label>
           </div>
         </div>
-        <div class="row" collapse="hideAdvancedItems === true">
+        <div class="row" collapse="hideAdvancedItems">
           <div class="col-md-3">
             <label>EBS Optimized:</label>
           </div>
@@ -163,7 +163,7 @@
         </div>
       </div>
 
-      <div class="autoScalingGroupOptions container" collapse="hideAdvancedItems === true">
+      <div class="autoScalingGroupOptions container" collapse="hideAdvancedItems">
         <div class="row">
           <div class="col-md-12"><h4>Auto Scaling Group</h4></div>
         </div>
