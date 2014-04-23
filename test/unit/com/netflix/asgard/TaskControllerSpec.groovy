@@ -95,7 +95,7 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should render JSON array for in-memory task list'() {
-        response.format = "json"
+        request.format = "json"
 
         when:
         controller.runningInMemory()
@@ -108,7 +108,7 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should render empty JSON array for zero-length in-memory task list'() {
-        response.format = "json"
+        request.format = "json"
 
         when:
         controller.runningInMemory()
@@ -121,7 +121,7 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should render single JSON task object for specific found task ID'() {
-        response.format = "json"
+        request.format = "json"
 
         when:
         controller.runningInMemory('789')
@@ -134,7 +134,7 @@ class TaskControllerSpec extends Specification {
     }
 
     void 'should indicate that a specific local task is not found'() {
-        response.format = "json"
+        request.format = "json"
 
         when:
         controller.runningInMemory('nosuchluck')

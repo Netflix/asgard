@@ -115,7 +115,7 @@ class TaskController {
      *          all Task objects will be returned
      */
     def runningInMemory(String id) {
-        withFormat {
+        request.withFormat {
             json {
                 def result
                 if (id) {
