@@ -113,7 +113,7 @@ describe('Controller: DeploymentNewCtrl', function () {
     expect(scope.startingDeployment).toEqual(undefined);
     scope.startDeployment();
     expect(scope.startingDeployment).toEqual(true);
-    $httpBackend.expectPOST('deployment/startDeployment', {"deploymentOptions":"deploymentOptions1"}).respond(200, {
+    $httpBackend.expectPOST('deployment/start', {"deploymentOptions":"deploymentOptions1"}).respond(200, {
       deploymentId: "123"
     });
     $httpBackend.flush();
@@ -129,7 +129,7 @@ describe('Controller: DeploymentNewCtrl', function () {
     expect(scope.startingDeployment).toEqual(undefined);
     scope.startDeployment();
     expect(scope.startingDeployment).toEqual(true);
-    $httpBackend.expectPOST('deployment/startDeployment', {"deploymentOptions":"deploymentOptions1"}).respond(422, {
+    $httpBackend.expectPOST('deployment/start', {"deploymentOptions":"deploymentOptions1"}).respond(422, {
       validationErrors: 'errors'
     });
     $httpBackend.flush();

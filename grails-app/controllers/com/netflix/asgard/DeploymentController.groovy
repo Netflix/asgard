@@ -41,7 +41,7 @@ import grails.converters.XML
  */
 class DeploymentController {
 
-    static allowedMethods = [proceed: 'POST', rollback: 'POST', startDeployment: 'POST']
+    static allowedMethods = [proceed: 'POST', rollback: 'POST', start: 'POST']
     static defaultAction = "list"
 
     def applicationService
@@ -227,8 +227,10 @@ class DeploymentController {
 
     /**
      * Start a deployment.
+     *
+     * @see StartDeploymentRequest
      */
-    def startDeployment() {
+    def start() {
         UserContext userContext = UserContext.of(request)
         String json = request.JSON.toString()
         StartDeploymentRequest startDeploymentRequest = objectMapper.reader(StartDeploymentRequest).readValue(json)

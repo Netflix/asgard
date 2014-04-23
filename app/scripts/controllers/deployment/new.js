@@ -67,7 +67,7 @@ angular.module("asgardApp")
         lcOverrides: $scope.lcOptions
       };
       var json = JSON.stringify(deployment);
-      $http.post("deployment/startDeployment", json).success(function (data) {
+      $http.post("deployment/start", json).success(function (data) {
         var deploymentId = data.deploymentId;
         $location.path("deployment/detail/" + deploymentId);
       }).error(function (data) {
