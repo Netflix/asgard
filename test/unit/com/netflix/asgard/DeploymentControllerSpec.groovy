@@ -125,7 +125,7 @@ class DeploymentControllerSpec extends Specification {
         request.JSON = createStartDeploymentRequest()
 
         when:
-        controller.startDeployment()
+        controller.start()
 
         then:
         response.status == 200
@@ -192,7 +192,7 @@ class DeploymentControllerSpec extends Specification {
         request.JSON = createStartDeploymentRequest(0)
 
         when:
-        controller.startDeployment()
+        controller.start()
 
         then:
         response.status == 422
