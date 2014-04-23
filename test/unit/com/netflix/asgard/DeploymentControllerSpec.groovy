@@ -327,10 +327,11 @@ class DeploymentControllerSpec extends Specification {
                         kernelId: "",
                         ramdiskId: "",
                         blockDeviceMappings: [],
-                        instanceMonitoring: null,
+                        instanceMonitoringIsEnabled: false,
                         instancePriceType: "ON_DEMAND",
                         iamInstanceProfile: "BaseIAMRole",
-                        ebsOptimized: false
+                        ebsOptimized: false,
+                        associatePublicIpAddress: false
                 ],
                 asgOptions: [
                         autoScalingGroupName: null,
@@ -395,7 +396,8 @@ class DeploymentControllerSpec extends Specification {
                 blockDeviceMappings: [],
                 instanceMonitoring: null,
                 iamInstanceProfile: "BaseIAMRole",
-                ebsOptimized: false
+                ebsOptimized: false,
+                associatePublicIpAddress: false
         )
         Subnets subnets = new Subnets([
                 new SubnetData("1", "", "vpc1", "", 1, "us-east-1", "internal", SubnetTarget.EC2)
@@ -503,6 +505,7 @@ class DeploymentControllerSpec extends Specification {
         }
         with(controller.configService) {
             1 * getSpotUrl() >> "spotUrl"
+            1 * getEnableInstanceMonitoring()
         }
         0 * _
     }
