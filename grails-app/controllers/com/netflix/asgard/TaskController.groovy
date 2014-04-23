@@ -77,8 +77,7 @@ class TaskController {
         }
     }
 
-    def cancel() {
-        String id = params.id
+    def cancel(String id) {
         UserContext userContext = UserContext.of(request)
         Task task = taskService.getTaskById(id)
         if (!task) {
@@ -115,11 +114,10 @@ class TaskController {
      * @param id if specified, JSON for a single task will be returned, or a 404 if not found; otherwise a JSON array of
      *          all Task objects will be returned
      */
-    def runningInMemory() {
+    def runningInMemory(String id) {
         request.withFormat {
             json {
                 def result
-                String id = params.id
                 if (id) {
                     result = taskService.getLocalTaskById(id)
                     if (!result) {
