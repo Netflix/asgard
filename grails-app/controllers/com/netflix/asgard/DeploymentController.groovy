@@ -233,7 +233,7 @@ class DeploymentController {
      */
     def start() {
         UserContext userContext = UserContext.of(request)
-        String json = request.JSON.toString()
+        String json = request.reader.text
         StartDeploymentRequest startDeploymentRequest = objectMapper.reader(StartDeploymentRequest).readValue(json)
         List<String> validationErrors = startDeploymentRequest.validationErrors
         if (validationErrors) {
