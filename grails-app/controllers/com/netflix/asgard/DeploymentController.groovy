@@ -35,6 +35,7 @@ import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.push.Cluster
 import grails.converters.JSON
 import grails.converters.XML
+import org.springframework.http.HttpStatus
 
 /**
  * Allows management of workflows that automate the deployment of a new ASG to an existing controller.
@@ -232,11 +233,11 @@ class DeploymentController {
      */
     def start() {
         UserContext userContext = UserContext.of(request)
-        String json = request.JSON.toString()
+        String json = request.reader.text
         StartDeploymentRequest startDeploymentRequest = objectMapper.reader(StartDeploymentRequest).readValue(json)
         List<String> validationErrors = startDeploymentRequest.validationErrors
         if (validationErrors) {
-            response.setStatus(422)
+            response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value())
             render ([validationErrors: validationErrors] as JSON)
         } else {
             String deploymentId = deploymentService.startDeployment(userContext,
