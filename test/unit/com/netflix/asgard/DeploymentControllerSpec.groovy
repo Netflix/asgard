@@ -56,14 +56,14 @@ class DeploymentControllerSpec extends Specification {
     String activityCompletionRequest = '{"id":"123","token":"abc"}'
 
     Closure<String> createStartDeploymentRequest = { int maxSize = 5 ->
-        """{"asgOverrides":
+        """{"asgOptions":
         {"suspendedProcesses":[],"tags":[],"autoScalingGroupName":null,
         "subnetPurpose":"internal","healthCheckType":"EC2",
         "placementGroup":null,"launchConfigurationName":null,"desiredCapacity":"3",
         "availabilityZones":["us-west-1c","us-west-1a"],"loadBalancerNames":["helloclay--frontend"],
         "minSize":0,"healthCheckGracePeriod":600,"defaultCooldown":10,"maxSize":"${maxSize}",
         "terminationPolicies":["OldestLaunchConfiguration"]},
-        "lcOverrides":
+        "lcOptions":
         {"securityGroups":["sg-12345678"],"kernelId":"","launchConfigurationName":null,
         "userData":null,"instancePriceType":"ON_DEMAND","instanceType":"m1.large","blockDeviceMappings":[],
         "imageId":"ami-12345678","keyName":"keypair","ramdiskId":"","instanceMonitoringIsEnabled":false,

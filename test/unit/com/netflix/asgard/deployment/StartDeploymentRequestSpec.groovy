@@ -73,13 +73,13 @@ class StartDeploymentRequestSpec extends Specification {
             '"desiredCapacityJudgmentPeriodMinutes":120,"disablePreviousAsg":"Ask",' +
             '"fullTrafficJudgmentPeriodMinutes":240,"deletePreviousAsg":"No"},' +
 
-            '"lcOverrides":{"launchConfigurationName":null,"imageId":"ami-12345678",' +
+            '"lcOptions":{"launchConfigurationName":null,"imageId":"ami-12345678",' +
             '"keyName":"nf-test-keypair-a","securityGroups":["sg-12345678"],' +
             '"userData":"#!/bin/bash","instanceType":"m1.large","kernelId":"123","ramdiskId":"abc",' +
             '"blockDeviceMappings":null,"instanceMonitoringIsEnabled":false,"instancePriceType":"ON_DEMAND",' +
             '"iamInstanceProfile":"BaseIAMRole","ebsOptimized":true,"associatePublicIpAddress":false},' +
 
-            '"asgOverrides":{"autoScalingGroupName":null,"launchConfigurationName":null,"minSize":1,"maxSize":3,' +
+            '"asgOptions":{"autoScalingGroupName":null,"launchConfigurationName":null,"minSize":1,"maxSize":3,' +
             '"desiredCapacity":2,"defaultCooldown":10,"availabilityZones":["us-west-1a"],' +
             '"loadBalancerNames":["helloworld--frontend"],"healthCheckType":"EC2","healthCheckGracePeriod":600,' +
             '"placementGroup":null,"subnetPurpose":"internal",' +
@@ -102,7 +102,7 @@ class StartDeploymentRequestSpec extends Specification {
     }
 
     void 'should return errors for invalid capacity bounds'() {
-        startDeploymentRequest.asgOverrides.maxSize = 1
+        startDeploymentRequest.asgOptions.maxSize = 1
         expect:
         startDeploymentRequest.validationErrors == [
                 "Resize ASG capacity '2' is greater than the ASG's maximum instance bound '1'."

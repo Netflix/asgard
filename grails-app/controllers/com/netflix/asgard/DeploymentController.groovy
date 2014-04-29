@@ -142,16 +142,16 @@ class DeploymentController {
         AutoScalingGroup lastGroup = awsAutoScalingService.
                 getAutoScalingGroup(userContext, cluster.last().autoScalingGroupName, From.AWS)
         Subnets subnets = awsEc2Service.getSubnets(userContext)
-        AutoScalingGroupBeanOptions asgOverrides = AutoScalingGroupBeanOptions.from(lastGroup, subnets)
-        asgOverrides.with {
+        AutoScalingGroupBeanOptions asgOptions = AutoScalingGroupBeanOptions.from(lastGroup, subnets)
+        asgOptions.with {
             autoScalingGroupName = null
             launchConfigurationName = null
         }
 
         LaunchConfiguration lc = awsAutoScalingService.getLaunchConfiguration(userContext,
                 lastGroup.launchConfigurationName)
-        LaunchConfigurationBeanOptions lcOverrides = LaunchConfigurationBeanOptions.from(lc)
-        lcOverrides.with {
+        LaunchConfigurationBeanOptions lcOptions = LaunchConfigurationBeanOptions.from(lc)
+        lcOptions.with {
             launchConfigurationName = null
             userData = null
             iamInstanceProfile = iamInstanceProfile ?: configService.defaultIamRole
@@ -160,8 +160,8 @@ class DeploymentController {
         }
 
         Map<String, Object> attributes = [
-                lcOptions: lcOverrides,
-                asgOptions: asgOverrides
+                lcOptions: lcOptions,
+                asgOptions: asgOptions
         ]
         DeploymentTemplate deploymentTemplate = DeploymentTemplate.of(deploymentTemplateName)
         if (deploymentTemplate) {
@@ -240,8 +240,8 @@ class DeploymentController {
             render ([validationErrors: validationErrors] as JSON)
         } else {
             String deploymentId = deploymentService.startDeployment(userContext,
-                    startDeploymentRequest.deploymentOptions, startDeploymentRequest.lcOverrides,
-                    startDeploymentRequest.asgOverrides)
+                    startDeploymentRequest.deploymentOptions, startDeploymentRequest.lcOptions,
+                    startDeploymentRequest.asgOptions)
             render ([deploymentId: deploymentId] as JSON)
         }
     }
