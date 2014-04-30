@@ -18,10 +18,10 @@ package com.netflix.asgard.push
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.amazonaws.services.autoscaling.model.Instance
 import com.netflix.asgard.MonkeyPatcherService
-import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.model.AutoScalingGroupData
 import spock.lang.Specification
 
+@SuppressWarnings("UnusedObject")
 class ClusterSpec extends Specification {
 
     Instance ideadbeef = new Instance(instanceId: 'i-deadbeef')
@@ -44,7 +44,13 @@ class ClusterSpec extends Specification {
         cluster = new Cluster([groupv000, groupv002, groupOrig, groupv001])
     }
 
-    void 'should create a new cluster'() {
+    private AutoScalingGroupData makeGroupData(String name, long createdTimeMillis, List<Instance> instances = []) {
+        AutoScalingGroupData.from(new AutoScalingGroup(autoScalingGroupName: name,
+                createdTime: new Date(createdTimeMillis), instances: instances), null, null, null, [])
+    }
+
+    void "should create a new cluster"() {
+
         expect:
         groupOrig.autoScalingGroupName == cluster[0].autoScalingGroupName
         groupv000.autoScalingGroupName == cluster[1].autoScalingGroupName
@@ -52,23 +58,42 @@ class ClusterSpec extends Specification {
         groupv002.autoScalingGroupName == cluster[3].autoScalingGroupName
     }
 
-    void 'last should be the most recent'() {
+    void "last should be the most recent"() {
+
         expect:
         groupv002.autoScalingGroupName == cluster.last().autoScalingGroupName
     }
 
-    void 'should get instances'() {
+    void "should get instances"() {
+
         expect:
         [ideadbeef, iaaaa4444, ieeee9999].collect { it.instanceId } == cluster.instances.collect { it.instanceId }
     }
 
-    void 'should get instance ids'() {
+    void "should get instance ids"() {
+
         expect:
         ['i-deadbeef', 'i-aaaa4444', 'i-eeee9999'] == cluster.instances.collect { it.instanceId }
     }
 
-    private AutoScalingGroupData makeGroupData(String name, long createdTimeEpochMillis, List<Instance> instances = []) {
-        AutoScalingGroupData.from(new AutoScalingGroup(autoScalingGroupName: name,
-                createdTime: new Date(createdTimeEpochMillis), instances: instances), null, null, null, [])
+    void "should fail when zero ASGs are provided"() {
+
+        when:
+        new Cluster([])
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    void "should fail is ASGs are in different clusters"() {
+
+        AutoScalingGroupData asg1 = makeGroupData("helloworld", 1398890600000)
+        AutoScalingGroupData asg2 = makeGroupData("goodbyeworld", 1398890700000)
+
+        when:
+        new Cluster([asg1, asg2])
+
+        then:
+        thrown(IllegalStateException)
     }
 }

@@ -110,8 +110,9 @@ class ClusterController {
                 html {
                     AutoScalingGroupData lastGroup = cluster.last()
                     String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
-                    Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
-                    String recommendedNextStep = cluster.size() >= Relationships.CLUSTER_MAX_GROUPS ?
+                    int clusterMaxGroups = configService.clusterMaxGroups
+                    Boolean okayToCreateGroup = cluster.size() < clusterMaxGroups
+                    String recommendedNextStep = cluster.size() >= clusterMaxGroups ?
                         'Delete an old group before pushing to a new group.' :
                         cluster.size() <= 1 ? 'Create a new group and switch traffic to it' :
                         'Switch traffic to the preferred group, then delete legacy group'
@@ -194,7 +195,7 @@ ${lastGroup.loadBalancerNames}"""
             return
         }
 
-        Boolean okayToCreateGroup = cluster.size() < Relationships.CLUSTER_MAX_GROUPS
+        Boolean okayToCreateGroup = cluster.size() < configService.clusterMaxGroups
         if (okayToCreateGroup) {
             AutoScalingGroupData lastGroup = cluster.last()
             String lcName = lastGroup.launchConfigurationName

@@ -74,6 +74,7 @@ class ClusterControllerSpec extends Specification {
             awsLoadBalancerService = Mock(AwsLoadBalancerService)
             awsLoadBalancerService.getLoadBalancers(_) >> []
             configService = Mock(ConfigService)
+            configService.clusterMaxGroups >> 3
         }
     }
 
@@ -104,8 +105,10 @@ class ClusterControllerSpec extends Specification {
         controller.awsAutoScalingService.getCluster(_, 'helloworld-example') >> {
             new Cluster([
                     AutoScalingGroupData.from(new AutoScalingGroup(autoScalingGroupName: 'helloworld-example-v014',
+                            createdTime: new Date(1398890600000),
                             instances: [new Instance(instanceId: 'i-8ee4eeee')]), [:], [], [:], []),
                     AutoScalingGroupData.from(new AutoScalingGroup(autoScalingGroupName: 'helloworld-example-v015',
+                            createdTime: new Date(1398890700000),
                             instances: [new Instance(instanceId: 'i-6ef9f30e'),
                                     new Instance(instanceId: 'i-95fe1df6')]), [:], [], [:], [])
             ])

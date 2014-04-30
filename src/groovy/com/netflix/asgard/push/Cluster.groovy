@@ -29,6 +29,11 @@ class Cluster extends AbstractList<AutoScalingGroupData> {
     final String name
     final List<AutoScalingGroupData> groups
 
+    /**
+     * Creates a cluster object for the specified Auto Scaling Groups, sorted based on created time.
+     *
+     * @param groups
+     */
     Cluster(List<AutoScalingGroupData> groups) {
 
         // Ensure there are some groups and they all belong in the same cluster
@@ -39,7 +44,7 @@ class Cluster extends AbstractList<AutoScalingGroupData> {
         }
 
         // Sort the groups into push order and store them in this Cluster object
-        this.groups = Collections.unmodifiableList(groups.sort(Relationships.PUSH_SEQUENCE_COMPARATOR))
+        this.groups = Collections.unmodifiableList(groups.sort { a, b -> a.createdTime.time <=> b.createdTime.time })
     }
 
     AutoScalingGroupData last() { groups.size() >= 1 ? groups[size() - 1] : null }
