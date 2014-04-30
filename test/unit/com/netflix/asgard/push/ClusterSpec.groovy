@@ -85,7 +85,7 @@ class ClusterSpec extends Specification {
         thrown(IllegalArgumentException)
     }
 
-    void "should fail is ASGs are in different clusters"() {
+    void "should fail if ASGs are in different clusters"() {
 
         AutoScalingGroupData asg1 = makeGroupData("helloworld", 1398890600000)
         AutoScalingGroupData asg2 = makeGroupData("goodbyeworld", 1398890700000)
