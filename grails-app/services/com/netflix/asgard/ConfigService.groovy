@@ -992,4 +992,13 @@ class ConfigService {
     String getAsgAnalyzerBaseUrl() {
         grailsApplication.config.cloud?.asgAnalyzerBaseUrl ?: ''
     }
+
+    /**
+     * The maximum number of auto scaling groups allowed in a cluster spanning multiple push sequence numbers.
+     *
+     * @return the configured maximum number of ASGs in a Cluster, or 3 if not configured
+     */
+    Integer getClusterMaxGroups() {
+        grailsApplication.config.cluster?.maxGroups ?: 3
+    }
 }

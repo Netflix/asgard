@@ -15,9 +15,6 @@
  */
 package com.netflix.asgard
 
-import com.amazonaws.services.autoscaling.model.AutoScalingGroup
-import com.netflix.asgard.mock.Mocks
-import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.frigga.Names
 import com.netflix.frigga.ami.AppVersion
 import grails.test.GrailsUnitTestCase
@@ -27,61 +24,7 @@ import org.joda.time.DateTime
 class RelationshipsTests extends GrailsUnitTestCase {
 
     void setUp() {
-        Mocks.createDynamicMethods()
-    }
-
-    private void assertPushSequenceSortResult(List<String> expectedResult, List<String> input) {
-        assert expectedResult == input.collect {
-            AutoScalingGroupData.from(new AutoScalingGroup().withAutoScalingGroupName(it), null, null, null, [])
-        }.sort(Relationships.PUSH_SEQUENCE_COMPARATOR).collect { it.autoScalingGroupName }
-    }
-
-    void testPushSequenceComparator() {
-
-        Mocks.awsAutoScalingService()
-
-        assertPushSequenceSortResult(["discovery-dev",
-                "discovery-dev-v997",
-                "discovery-dev-v998",
-                "discovery-dev-v999",
-                "discovery-dev-v000",
-                "discovery-dev-v001",
-                "discovery-dev-v002",
-                "discovery-dev-v003"
-        ], [
-                "discovery-dev-v997",
-                "discovery-dev-v003",
-                "discovery-dev-v999",
-                "discovery-dev-v001",
-                "discovery-dev",
-                "discovery-dev-v998",
-                "discovery-dev-v002",
-                "discovery-dev-v000"
-        ])
-
-        assertPushSequenceSortResult(["discovery-dev", "discovery-dev-v000"], ["discovery-dev", "discovery-dev-v000"])
-        assertPushSequenceSortResult(["discovery-dev", "discovery-dev-v000"], ["discovery-dev-v000", "discovery-dev"])
-        assertPushSequenceSortResult(
-                ["discovery-dev", "discovery-dev-v000", "discovery-dev-v001"],
-                ["discovery-dev-v001", "discovery-dev", "discovery-dev-v000"])
-        assertPushSequenceSortResult([
-                "discovery-dev-v001", "discovery-dev-v002"],
-                ["discovery-dev-v001", "discovery-dev-v002"])
-        assertPushSequenceSortResult(
-                ["discovery-dev-v001", "discovery-dev-v002"],
-                ["discovery-dev-v002", "discovery-dev-v001"])
-        assertPushSequenceSortResult(
-                ["discovery-dev-v563", "discovery-dev-v564", "discovery-dev-v565"],
-                ["discovery-dev-v563", "discovery-dev-v565", "discovery-dev-v564"])
-        assertPushSequenceSortResult(
-                ["discovery-dev-v998", "discovery-dev-v999", "discovery-dev-v000"],
-                ["discovery-dev-v000", "discovery-dev-v998", "discovery-dev-v999"])
-        assertPushSequenceSortResult(
-                ["discovery-dev-v998", "discovery-dev-v999", "discovery-dev-v000"],
-                ["discovery-dev-v000", "discovery-dev-v999", "discovery-dev-v998"])
-        assertPushSequenceSortResult(
-                ["discovery-dev-v999", "discovery-dev-v000", "discovery-dev-v001"],
-                ["discovery-dev-v000", "discovery-dev-v999", "discovery-dev-v001"])
+        new MonkeyPatcherService().createDynamicMethods()
     }
 
     void testBuildNextAutoScalingGroupName() {
