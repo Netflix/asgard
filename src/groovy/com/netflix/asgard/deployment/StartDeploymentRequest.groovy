@@ -26,8 +26,8 @@ import groovy.transform.Canonical
 @Canonical
 class StartDeploymentRequest {
     DeploymentWorkflowOptions deploymentOptions
-    LaunchConfigurationBeanOptions lcOverrides
-    AutoScalingGroupBeanOptions asgOverrides
+    LaunchConfigurationBeanOptions lcOptions
+    AutoScalingGroupBeanOptions asgOptions
 
     /**
      * @return List of all validation errors
@@ -36,9 +36,9 @@ class StartDeploymentRequest {
     List<String> getValidationErrors() {
         List<String> errors = []
         if (deploymentOptions.doCanary) {
-            errors.addAll(checkCapacityBounds(deploymentOptions.canaryCapacity, asgOverrides))
+            errors.addAll(checkCapacityBounds(deploymentOptions.canaryCapacity, asgOptions))
         }
-        errors.addAll(checkCapacityBounds(asgOverrides.desiredCapacity, asgOverrides))
+        errors.addAll(checkCapacityBounds(asgOptions.desiredCapacity, asgOptions))
         errors
     }
 

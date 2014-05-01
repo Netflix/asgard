@@ -63,8 +63,8 @@ angular.module("asgardApp")
       $scope.startingDeployment = true;
       var deployment = {
         deploymentOptions: $scope.deploymentOptions,
-        asgOverrides: $scope.asgOptions,
-        lcOverrides: $scope.lcOptions
+        asgOptions: $scope.asgOptions,
+        lcOptions: $scope.lcOptions
       };
       var json = JSON.stringify(deployment);
       $http.post("deployment/start", json).success(function (data) {
