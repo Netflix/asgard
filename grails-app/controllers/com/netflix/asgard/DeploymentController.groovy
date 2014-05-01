@@ -158,6 +158,7 @@ class DeploymentController {
             iamInstanceProfile = iamInstanceProfile ?: configService.defaultIamRole
             instanceMonitoringIsEnabled = instanceMonitoringIsEnabled != null ? instanceMonitoringIsEnabled :
                     configService.enableInstanceMonitoring
+            blockDeviceMappings = null // SWF can not handle serializing this, and Asgard builds them per instance type.
         }
 
         Map<String, Object> attributes = [
