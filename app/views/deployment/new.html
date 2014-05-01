@@ -12,7 +12,7 @@
   </div>
   <div class="deployment" ng-class="{concealed: deploymentOptions === undefined}">
     <div class="buttons">
-      <button class="deploy" ng-click="startDeployment()" ng-disabled="startingDeployment"><div>Deploy 'helloclay--test_instance_count-v251'</div></button>
+      <button class="deploy" ng-click="startDeployment()" ng-disabled="startingDeployment"><div>Deploy '{{environment.nextGroupName}}'</div></button>
     </div>
     <div class="well">
       <div class="row">
