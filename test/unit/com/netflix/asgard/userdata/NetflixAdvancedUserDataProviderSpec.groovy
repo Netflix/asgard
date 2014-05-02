@@ -13,10 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard.userdata
 
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.Tag
+import com.netflix.asgard.AppRegistration
+import com.netflix.asgard.ApplicationService
+import com.netflix.asgard.ConfigService
+import com.netflix.asgard.MonkeyPatcherService
+import com.netflix.asgard.PluginService
+import com.netflix.asgard.Region
+import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.LaunchContext

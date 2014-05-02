@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard.userdata
 
+import com.netflix.asgard.PluginService
+import com.netflix.asgard.Relationships
+import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.LaunchContext
 import com.netflix.asgard.plugin.AdvancedUserDataProvider
 import org.springframework.beans.factory.annotation.Autowired

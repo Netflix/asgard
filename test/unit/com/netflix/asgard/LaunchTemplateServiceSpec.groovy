@@ -23,6 +23,7 @@ import com.netflix.asgard.model.LaunchContext
 import com.netflix.asgard.model.MonitorBucketType
 import com.netflix.asgard.plugin.AdvancedUserDataProvider
 import com.netflix.asgard.plugin.UserDataProvider
+import com.netflix.asgard.userdata.DefaultAdvancedUserDataProvider
 import spock.lang.Specification
 
 @SuppressWarnings("GroovyAssignabilityCheck")

@@ -17,6 +17,7 @@ package com.netflix.asgard
 
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup
 import com.netflix.asgard.push.AsgDeletionMode
+import com.netflix.asgard.userdata.UserDataPropertyKeys
 
 /**
  * Handles the work involved in making an Asgard instance "wither", that is, waiting for all in-memory tasks to end and
@@ -64,7 +65,7 @@ class WitherService {
 
             String prefix = configService.userDataVarPrefix
             String asgName = environmentService.getEnvironmentVariable("${prefix}AUTO_SCALE_GROUP")
-            String regionCode = environmentService.getEnvironmentVariable(DefaultUserDataProvider.REGION_ENV_KEY)
+            String regionCode = environmentService.getEnvironmentVariable(UserDataPropertyKeys.EC2_REGION)
             Region region = Region.withCode(regionCode)
             if (!asgName || !region) {
                 throw new IllegalStateException("Cannot wither in ASG '${asgName}' in region '${regionCode}'")
