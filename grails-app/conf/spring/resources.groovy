@@ -19,9 +19,9 @@ import com.google.common.base.CaseFormat
 import com.netflix.asgard.CachedMapBuilder
 import com.netflix.asgard.Caches
 import com.netflix.asgard.CsiAsgAnalyzer
-import com.netflix.asgard.DefaultAdvancedUserDataProvider
-import com.netflix.asgard.DefaultUserDataProvider
-import com.netflix.asgard.NetflixAdvancedUserDataProvider
+import com.netflix.asgard.userdata.DefaultAdvancedUserDataProvider
+import com.netflix.asgard.userdata.DefaultUserDataProvider
+import com.netflix.asgard.userdata.NetflixAdvancedUserDataProvider
 import com.netflix.asgard.NoOpAsgAnalyzer
 import com.netflix.asgard.Region
 import com.netflix.asgard.ServiceInitLoggingBeanPostProcessor

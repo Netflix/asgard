@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard.userdata
 
+import com.netflix.asgard.ApplicationService
+import com.netflix.asgard.ConfigService
+import com.netflix.asgard.Relationships
+import com.netflix.asgard.UserContext
 import com.netflix.asgard.plugin.UserDataProvider
 import com.netflix.frigga.Names
 import javax.xml.bind.DatatypeConverter
 import org.springframework.beans.factory.annotation.Autowired
 
 class DefaultUserDataProvider implements UserDataProvider {
-
-    static final String REGION_ENV_KEY = 'EC2_REGION'
 
     @Autowired
     ConfigService configService
@@ -33,15 +35,17 @@ class DefaultUserDataProvider implements UserDataProvider {
     String buildUserDataForVariables(UserContext userContext, String appName, String autoScalingGroupName,
             String launchConfigName) {
         Names names = Relationships.dissectCompoundName(autoScalingGroupName)
-        String result = exportVar('ENVIRONMENT', configService.accountName) +
-            exportVar('MONITOR_BUCKET', applicationService.getMonitorBucket(userContext, appName, names.cluster)) +
-            exportVar('APP', appName) +
-            exportVar('APP_GROUP', applicationService.getRegisteredApplication(userContext, appName)?.group) +
-            exportVar('STACK', names.stack) +
-            exportVar('CLUSTER', names.cluster) +
-            exportVar('AUTO_SCALE_GROUP', autoScalingGroupName) +
-            exportVar('LAUNCH_CONFIG', launchConfigName) +
-            exportVar(REGION_ENV_KEY, userContext.region.code, false)
+        String monitorBucket = applicationService.getMonitorBucket(userContext, appName, names.cluster)
+        String appGroup = applicationService.getRegisteredApplication(userContext, appName)?.group
+        String result = exportVar(UserDataPropertyKeys.ENVIRONMENT, configService.accountName) +
+            exportVar(UserDataPropertyKeys.MONITOR_BUCKET, monitorBucket) +
+            exportVar(UserDataPropertyKeys.APP, appName) +
+            exportVar(UserDataPropertyKeys.APP_GROUP, appGroup) +
+            exportVar(UserDataPropertyKeys.STACK, names.stack) +
+            exportVar(UserDataPropertyKeys.CLUSTER, names.cluster) +
+            exportVar(UserDataPropertyKeys.AUTO_SCALE_GROUP, autoScalingGroupName) +
+            exportVar(UserDataPropertyKeys.LAUNCH_CONFIG, launchConfigName) +
+            exportVar(UserDataPropertyKeys.EC2_REGION, userContext.region.code, false)
         List<String> additionalEnvVars = Relationships.labeledEnvironmentVariables(names,
                 configService.userDataVarPrefix)
         result += additionalEnvVars ? additionalEnvVars.join('\n') : ''

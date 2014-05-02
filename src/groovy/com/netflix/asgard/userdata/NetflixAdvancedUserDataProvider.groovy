@@ -13,9 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard.userdata
 
 import com.amazonaws.services.ec2.model.Image
+import com.netflix.asgard.ApplicationService
+import com.netflix.asgard.ConfigService
+import com.netflix.asgard.PluginService
+import com.netflix.asgard.Relationships
+import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.LaunchContext
 import com.netflix.asgard.plugin.AdvancedUserDataProvider
 import java.util.regex.Matcher

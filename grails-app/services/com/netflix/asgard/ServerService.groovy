@@ -21,6 +21,7 @@ import com.netflix.asgard.server.Environment
 import com.netflix.asgard.server.Server
 import com.netflix.asgard.server.ServerState
 import com.netflix.asgard.server.SwitchAttemptResult
+import com.netflix.asgard.userdata.UserDataPropertyKeys
 import org.joda.time.DateTime
 import org.joda.time.Hours
 import org.joda.time.Minutes
@@ -340,7 +341,7 @@ class ServerService implements InitializingBean {
             return otherServers
         }
 
-        String regionName = environmentService.getEnvironmentVariable(DefaultUserDataProvider.REGION_ENV_KEY)
+        String regionName = environmentService.getEnvironmentVariable(UserDataPropertyKeys.EC2_REGION)
         String prefix = configService.userDataVarPrefix
         String clusterName = environmentService.getEnvironmentVariable("${prefix}CLUSTER")
 
