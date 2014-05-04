@@ -30,6 +30,7 @@ import com.netflix.asgard.push.GroupCreateOperation
 import com.netflix.asgard.push.GroupCreateOptions
 import grails.test.mixin.TestFor
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @SuppressWarnings(["GroovyAssignabilityCheck"])
 @TestFor(ClusterController)
@@ -218,6 +219,23 @@ class ClusterControllerSpec extends Specification {
                 it
             }
         }
+    }
+
+    @Unroll
+    def 'integer conversion should allow any valid integer'(String toConvert, Integer defaultValue, Integer expected) {
+        expect:
+        controller.convertToIntOrUseDefault(toConvert, defaultValue) == expected
+
+        where:
+        toConvert | defaultValue | expected
+        "nonInt"  | 100          | 100
+        "1"       | 100          | 1
+        "0"       | 100          | 0
+        "-1"      | 100          | -1
+        null      | 100          | 100
+        ""        | 100          | 100
+        " "       | 100          | 100
+        " 123 "   | 100          | 123
     }
 
     def 'next group should have selections over defaults'() {

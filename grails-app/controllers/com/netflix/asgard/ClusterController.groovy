@@ -20,6 +20,7 @@ import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.ScheduledUpdateGroupAction
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.google.common.annotations.VisibleForTesting
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.InstancePriceType
@@ -37,6 +38,7 @@ import com.netflix.asgard.push.InitialTraffic
 import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
+import groovy.transform.PackageScope
 
 @ContextParam('region')
 class ClusterController {
@@ -292,8 +294,10 @@ Group: ${loadBalancerNames}"""
         }
     }
 
-    private int convertToIntOrUseDefault(String value, Integer defaultValue) {
-        value?.toInteger() ?: defaultValue
+    @VisibleForTesting
+    @PackageScope
+    int convertToIntOrUseDefault(String value, Integer defaultValue) {
+        value?.isInteger() ? value.toInteger() : defaultValue
     }
 
     private boolean shouldAzRebalanceBeSuspended(String azRebalance, boolean lastRebalanceSuspended) {
