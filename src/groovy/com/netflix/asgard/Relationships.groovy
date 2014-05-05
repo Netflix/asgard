@@ -150,7 +150,7 @@ class Relationships {
      * @return true if the detail is valid
      */
     static Boolean checkDetail(String detail) {
-        NameValidation.checkDetail(detail)
+        NameValidation.checkNameWithHyphen(detail)
     }
 
     static String buildLaunchConfigurationName(String autoScalingGroupName) {
