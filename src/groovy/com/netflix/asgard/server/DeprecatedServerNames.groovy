@@ -16,6 +16,7 @@
 package com.netflix.asgard.server
 
 import com.netflix.asgard.ConfigService
+import com.netflix.asgard.Requests
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import javax.servlet.http.HttpServletRequest
@@ -28,12 +29,6 @@ import org.springframework.beans.factory.InitializingBean
 class DeprecatedServerNames implements InitializingBean {
 
     ConfigService configService
-
-    /**
-     * The regex pattern to identify user agent strings sent by browsers, as opposed to scripting libraries and tools
-     * such as curl.
-     */
-    Pattern browserUserAgentPattern = Pattern.compile('.*(Mozilla|Chrome|Firefox|Safari|MSIE|Opera).*')
 
     /**
      * A cached copy of the regular expression pattern for identifying a request URL as using a deprecated server name.
@@ -71,8 +66,7 @@ class DeprecatedServerNames implements InitializingBean {
         Matcher matcher = deprecatedUrlPattern.matcher(request.requestURL)
         if (matcher.matches()) {
             boolean isGet = request.method == 'GET'
-            String userAgent = request.getHeader('user-agent')
-            boolean isBrowserRequest = userAgent?.matches(browserUserAgentPattern)
+            boolean isBrowserRequest = Requests.isBrowser(request)
             if (isBrowserRequest && isGet) {
                 String deprecatedServerName = matcher.group(1)
                 String newServerName = getReplacementServerName(deprecatedServerName)

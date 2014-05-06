@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard
 
+import java.util.regex.Pattern
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import org.codehaus.groovy.grails.web.servlet.FlashScope
@@ -23,6 +24,22 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.springframework.web.context.request.RequestContextHolder
 
 class Requests {
+
+    /**
+     * The regex pattern to identify user agent strings sent by browsers, as opposed to scripting libraries and tools
+     * such as curl.
+     */
+    static final Pattern BROWSER_USER_AGENT_PATTERN = Pattern.compile('.*(Mozilla|Chrome|Firefox|Safari|MSIE|Opera).*')
+
+    /**
+     * Determines whether an incoming request is from a web browser or not.
+     *
+     * @param request the http servlet request to analyze
+     * @return true if the request's user agent string matches a browser user agent pattern
+     */
+    static boolean isBrowser(HttpServletRequest request) {
+        request.getHeader('user-agent')?.matches(BROWSER_USER_AGENT_PATTERN)
+    }
 
     static HttpServletRequest getRequest() {
         GrailsWebRequest webRequest = (GrailsWebRequest) RequestContextHolder.currentRequestAttributes()

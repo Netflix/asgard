@@ -23,6 +23,32 @@ import spock.lang.Specification
 @SuppressWarnings("GroovyAssignabilityCheck")
 class RequestsSpec extends Specification {
 
+    void "should determine if a request came from a browser"() {
+
+        HttpServletRequest request = Mock(HttpServletRequest)
+
+        when:
+        boolean isBrowser = Requests.isBrowser(request)
+
+        then:
+        isBrowser == result
+        1 * request.getHeader('user-agent') >> userAgent
+
+        where:
+        result | userAgent
+        true   | 'Mozilla'
+        true   | 'MSIE'
+        true   | 'Safari'
+        true   | 'Firefox'
+        true   | 'Chrome'
+        true   | 'Opera'
+        true   | 'Mozilla/5.0 (X11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.116 Safari/537.36'
+        true   | 'Opera/7.03 (Windows NT 4.0; U) [en]'
+        true   | 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X; en) AppleWebKit (KHTML, like Gecko)'
+        false  | 'curl'
+        false  | 'curl/7.15.0 (i386-portbld-freebsd5.4) libcurl/7.15.0 OpenSSL/0.9.7e zlib/1.2.1'
+    }
+
     void "should ensure that a param list remains a list"() {
         List<String> expected = ["us-east-1c", "us-east-1d"]
         List<String> param = ["us-east-1c", "us-east-1d"]
