@@ -26,7 +26,7 @@ class AuthorizationFilters {
     def pluginService
 
     def filters = {
-        all(controller: '*', action: '*') {
+        all(controller: '(cache|init|healthcheck|server|flag)', invert: true) {
             before = {
                 Collection<AuthorizationProvider> authorizationProviders = pluginService.authorizationProviders
                 if (authorizationProviders.any { !it.isAuthorized(request, controllerName, actionName) }) {

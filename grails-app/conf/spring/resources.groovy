@@ -28,6 +28,7 @@ import com.netflix.asgard.ServiceInitLoggingBeanPostProcessor
 import com.netflix.asgard.SnsTaskFinishedListener
 import com.netflix.asgard.ThreadScheduler
 import com.netflix.asgard.auth.OneLoginAuthenticationProvider
+import com.netflix.asgard.auth.RestrictBrowserAuthorizationProvider
 import com.netflix.asgard.auth.RestrictEditAuthorizationProvider
 import com.netflix.asgard.deployment.DeploymentActivitiesImpl
 import com.netflix.asgard.eureka.EurekaClientHolder
@@ -97,6 +98,8 @@ beans = {
     restrictEditAuthorizationProvider(RestrictEditAuthorizationProvider) { bean ->
         bean.lazyInit = true
     }
+
+    restrictBrowserAuthorizationProvider(RestrictBrowserAuthorizationProvider)
 
     //**** Plugin behavior
 
