@@ -176,6 +176,8 @@ class TaskService {
             try {
                 taskFinishedListener.taskFinished(task)
             } catch (Exception e) {
+                String className = taskFinishedListener.getClass().simpleName
+                log.error "Task finished listener ${className} failed for task ${task.id} ${task.summary}", e
                 emailerService.sendExceptionEmail("Task finished plugin error: $e", e)
             }
         }
