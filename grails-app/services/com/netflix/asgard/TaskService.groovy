@@ -172,9 +172,6 @@ class TaskService {
         if (completed.size() > numberOfCompletedTasksToRetain) {
             completed.poll()
         }
-        if (task.email) {
-            emailerService.sendUserEmail(task.email, task.summary, task.logAsString)
-        }
         for (TaskFinishedListener taskFinishedListener in pluginService?.taskFinishedListeners) {
             try {
                 taskFinishedListener.taskFinished(task)

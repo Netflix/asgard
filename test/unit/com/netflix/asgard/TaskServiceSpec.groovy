@@ -479,10 +479,6 @@ class TaskServiceSpec extends Specification {
         task1.operation == ''
         completedTaskQueue.size() == 1
         1 * environmentService.currentDate >> date
-        1 * emailerService.sendUserEmail('yo@example.com',
-                'Asgard task failed in prod us-east-1 by marge: Create ASG helloworld-v001', _) >> {
-            assert it[2] ==~ /Get ready\nGo!\n2014-03-.._..:21:01 Cancelled by homer@commodore64/
-        }
         0 * _
     }
 
