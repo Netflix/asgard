@@ -60,7 +60,7 @@ class ApplicationController {
                     app.owner?.toLowerCase() in lowercaseTerms ||
                     app.email?.toLowerCase() in lowercaseTerms ||
                     app.group?.toLowerCase() in lowercaseTerms ||
-                    app.tags*.toLowerCase().any { lowercaseTerms }
+                        (app.tags && app.tags*.toLowerCase().find { it == lowercaseTerms })
             } as GroupedAppRegistrationSet
         }
         withFormat {
