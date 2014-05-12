@@ -1,5 +1,5 @@
 Asgard
-Copyright 2012 Netflix, Inc.
+Copyright 2014 Netflix, Inc.
 
 -------------------------
 Attribution for Java Code
