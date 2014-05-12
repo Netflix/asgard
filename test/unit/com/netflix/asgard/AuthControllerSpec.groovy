@@ -16,9 +16,9 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.auth.AsgardToken
-import com.netflix.asgard.mock.ShiroTestUtil
 import com.netflix.asgard.plugin.AuthenticationProvider
 import grails.test.mixin.TestFor
+import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.subject.Subject
 import spock.lang.Specification
@@ -32,12 +32,8 @@ class AuthControllerSpec extends Specification {
     def pluginService = Mock(PluginService)
 
     def setup() {
-        ShiroTestUtil.setSubject(subject)
+        SecurityUtils.metaClass.static.getSubject = { subject }
         controller.pluginService = pluginService
-    }
-
-    def cleanup() {
-        ShiroTestUtil.tearDownShiro()
     }
 
     def 'should throw 403 if authentication is not configured'() {

@@ -16,9 +16,9 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.auth.ApiToken
-import com.netflix.asgard.mock.ShiroTestUtil
 import grails.test.MockUtils
 import grails.test.mixin.TestFor
+import org.apache.shiro.SecurityUtils
 import org.apache.shiro.subject.Subject
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -35,11 +35,7 @@ class ApiTokenControllerSpec extends Specification {
         MockUtils.prepareForConstraintsTests(GenerateApiTokenCommand)
 
         subject.principal >> 'testUser@netflix.com'
-        ShiroTestUtil.setSubject(subject)
-    }
-
-    def cleanup() {
-        ShiroTestUtil.tearDownShiro()
+        SecurityUtils.metaClass.static.getSubject = { subject }
     }
 
     def 'should return 401 if api tokens disabled'() {

@@ -16,7 +16,7 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.auth.ApiToken
-import com.netflix.asgard.mock.ShiroTestUtil
+import org.apache.shiro.SecurityUtils
 import org.apache.shiro.subject.Subject
 import spock.lang.Specification
 
@@ -30,12 +30,8 @@ class ApiTokenServiceUnitSpec extends Specification {
     def setup() {
         Subject subject = Mock(Subject)
         subject.principal >> 'test@netflix.com'
-        ShiroTestUtil.setSubject(subject)
+        SecurityUtils.metaClass.static.getSubject = { subject }
         apiToken = new ApiToken('ThisPurpose', 'testDL@netflix.com', 90, 'key')
-    }
-
-    def cleanup() {
-        ShiroTestUtil.tearDownShiro()
     }
 
     def 'should validate a valid token'() {
