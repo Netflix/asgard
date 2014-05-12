@@ -16,7 +16,7 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.auth.ApiToken
-import com.netflix.asgard.mock.ShiroTestUtil
+import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.authc.AuthenticationInfo
 import org.apache.shiro.authc.SimpleAuthenticationInfo
@@ -34,14 +34,10 @@ class ApiTokenRealmSpec extends Specification {
     def setup() {
         Subject subject = Mock(Subject)
         subject.principal >> 'test@netflix.com'
-        ShiroTestUtil.setSubject(subject)
+        SecurityUtils.metaClass.static.getSubject = { subject }
         apiToken = new ApiToken('ThisPurpose', 'testDL@netflix.com', 90, 'key')
 
         applicationContext.getBean(ApiTokenService) >> apiTokenService
-    }
-
-    def cleanup() {
-        ShiroTestUtil.tearDownShiro()
     }
 
     def 'should throw AuthenticationException when token is null'() {
