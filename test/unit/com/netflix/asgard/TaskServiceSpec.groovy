@@ -21,7 +21,9 @@ import com.amazonaws.services.simpleworkflow.model.WorkflowExecutionInfo
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.Queues
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
+import com.netflix.asgard.plugin.TaskFinishedListener
 import java.rmi.RemoteException
+import java.rmi.ServerException
 import java.util.concurrent.CountDownLatch
 import org.apache.http.HttpStatus
 import spock.lang.Specification
@@ -99,12 +101,14 @@ class TaskServiceSpec extends Specification {
     FlowService flowService = Mock(FlowService)
     EmailerService emailerService = Mock(EmailerService)
     EnvironmentService environmentService = Mock(EnvironmentService)
+    PluginService pluginService = Mock(PluginService)
+    TaskFinishedListener taskFinishedListener = Mock(TaskFinishedListener)
     Queue<Task> runningTaskQueue = Queues.newConcurrentLinkedQueue()
     Queue<Task> completedTaskQueue = Queues.newConcurrentLinkedQueue()
     TaskService service = new TaskService(awsSimpleWorkflowService: awsSimpleWorkflowService,
             running: runningTaskQueue, completed: completedTaskQueue, emailerService: emailerService,
             environmentService: environmentService, flowService: flowService, objectMapper: new ObjectMapper(),
-            restClientService: restClientService, serverService: serverService)
+            pluginService: pluginService, restClientService: restClientService, serverService: serverService)
 
     private <T> void addToQueue(Queue<T> queue, T... items) {
         items.each { queue.add(it) }
@@ -479,6 +483,7 @@ class TaskServiceSpec extends Specification {
         task1.operation == ''
         completedTaskQueue.size() == 1
         1 * environmentService.currentDate >> date
+        1 * pluginService.taskFinishedListeners >> []
         0 * _
     }
 
@@ -506,6 +511,31 @@ class TaskServiceSpec extends Specification {
         then:
         1 * restClientService.post('http://asgard100/task/cancel', ['id':'4', format: 'json'])
         thrown(RemoteException)
+        0 * _
+    }
+
+    @SuppressWarnings("GroovyAccessibility")
+    void "should call task finished listeners after a task finishes"() {
+
+        when:
+        service.finish(task1)
+
+        then:
+        1 * pluginService.taskFinishedListeners >> [taskFinishedListener]
+        1 * taskFinishedListener.taskFinished(task1)
+        0 * _
+    }
+
+    @SuppressWarnings("GroovyAccessibility")
+    void "should send a system alert email if task finished listener call throws an exception"() {
+
+        when:
+        service.finish(task1)
+
+        then:
+        1 * pluginService.taskFinishedListeners >> [taskFinishedListener]
+        1 * taskFinishedListener.taskFinished(task1) >> { throw new ServerException('Busted') }
+        1 * emailerService.sendExceptionEmail(_, _)
         0 * _
     }
 }
