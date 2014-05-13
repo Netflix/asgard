@@ -390,4 +390,16 @@ class AutoScalingControllerSpec extends Specification {
         'true'              | true
         'false'             | false
     }
+
+    void 'should generate group name and environment variables from ASG form inputs'() {
+        request.format = 'json'
+        params.appName = 'hello-c0latam'
+        configService.userDataVarPrefix >> 'CLOUD_'
+
+        when:
+        controller.generateName()
+
+        then:
+        response.contentAsString == '{"groupName":"hello-c0latam","envVars":["CLOUD_COUNTRIES=latam"]}'
+    }
 }

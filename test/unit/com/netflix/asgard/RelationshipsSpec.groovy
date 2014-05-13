@@ -619,6 +619,18 @@ class RelationshipsSpec extends Specification {
         envVars == ['export NETFLIX_DEV_PHASE=stage', 'export NETFLIX_PARTNERS=sony']
     }
 
+    void "should create labeled environment variables map"() {
+
+        when:
+        Names names = new Names('test')
+        names.partners = 'sony'
+        names.devPhase = 'stage'
+        Map<String, String> envVars = Relationships.labeledEnvVarsMap(names, 'NETFLIX_')
+
+        then:
+        envVars == ['NETFLIX_DEV_PHASE': 'stage', 'NETFLIX_PARTNERS': 'sony']
+    }
+
     void "should show pretty-formatted map keys for labeled variables"() {
         when:
         Names names = new Names('test-p0sony-d0stage')
