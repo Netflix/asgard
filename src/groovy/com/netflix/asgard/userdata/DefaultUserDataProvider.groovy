@@ -17,10 +17,8 @@ package com.netflix.asgard.userdata
 
 import com.netflix.asgard.ApplicationService
 import com.netflix.asgard.ConfigService
-import com.netflix.asgard.Relationships
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.plugin.UserDataProvider
-import com.netflix.frigga.Names
 import javax.xml.bind.DatatypeConverter
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -32,27 +30,15 @@ class DefaultUserDataProvider implements UserDataProvider {
     @Autowired
     ApplicationService applicationService
 
+    @Override
     String buildUserDataForVariables(UserContext userContext, String appName, String autoScalingGroupName,
             String launchConfigName) {
-        Names names = Relationships.dissectCompoundName(autoScalingGroupName)
-        String monitorBucket = applicationService.getMonitorBucket(userContext, appName, names.cluster)
-        String appGroup = applicationService.getRegisteredApplication(userContext, appName)?.group
-        String result = exportVar(UserDataPropertyKeys.ENVIRONMENT, configService.accountName) +
-            exportVar(UserDataPropertyKeys.MONITOR_BUCKET, monitorBucket) +
-            exportVar(UserDataPropertyKeys.APP, appName) +
-            exportVar(UserDataPropertyKeys.APP_GROUP, appGroup) +
-            exportVar(UserDataPropertyKeys.STACK, names.stack) +
-            exportVar(UserDataPropertyKeys.CLUSTER, names.cluster) +
-            exportVar(UserDataPropertyKeys.AUTO_SCALE_GROUP, autoScalingGroupName) +
-            exportVar(UserDataPropertyKeys.LAUNCH_CONFIG, launchConfigName) +
-            exportVar(UserDataPropertyKeys.EC2_REGION, userContext.region.code, false)
-        List<String> additionalEnvVars = Relationships.labeledEnvironmentVariables(names,
-                configService.userDataVarPrefix)
-        result += additionalEnvVars ? additionalEnvVars.join('\n') : ''
-        DatatypeConverter.printBase64Binary(result.bytes)
-    }
 
-    private String exportVar(String name, String val, boolean includePrefix = true) {
-        "export ${includePrefix ? configService.userDataVarPrefix : ''}${name}=${val ?: ''}\n"
+        PropertiesUserDataProvider propertiesUserDataProvider = new PropertiesUserDataProvider(
+                configService: configService, applicationService: applicationService)
+        Map<String, String> props = propertiesUserDataProvider.mapProperties(userContext, appName, autoScalingGroupName,
+                launchConfigName)
+        String result = props.collect { k, v -> "export ${k}=${v}" }.join('\n') + '\n'
+        DatatypeConverter.printBase64Binary(result.bytes)
     }
 }

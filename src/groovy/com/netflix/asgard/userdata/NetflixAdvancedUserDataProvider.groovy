@@ -23,6 +23,7 @@ import com.netflix.asgard.Relationships
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.LaunchContext
 import com.netflix.asgard.plugin.AdvancedUserDataProvider
+import com.netflix.asgard.plugin.UserDataProvider
 import java.util.regex.Matcher
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -32,8 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired
  *
  * This user data creation plugin is used by Netflix, and not recommended for use by people outside Netflix.
  *
- * For the newer AMIs created by Aminator, this implementation creates a short, simple user data string consisting of
- * Unix-style export statements for name value pairs only. For other AMIs, this plugin delegates to the complex, legacy,
+ * For the newer AMIs created by Aminator, this implementation creates a short, simple user data string consisting only
+ * of name value pairs formatted like a properties file. For other AMIs, this plugin delegates to the complex, legacy,
  * closed-source UserDataProvider plugin used at Netflix for deployments of an older Base AMI that has different startup
  * behavior.
  */
@@ -64,7 +65,7 @@ class NetflixAdvancedUserDataProvider implements AdvancedUserDataProvider {
         if (matcher.matches()) {
             Integer majorVersion = matcher.group(1) as Integer
             if (majorVersion >= 2) {
-                DefaultUserDataProvider simpleProvider = new DefaultUserDataProvider(configService: configService,
+                UserDataProvider simpleProvider = new PropertiesUserDataProvider(configService: configService,
                         applicationService: applicationService)
                 return simpleProvider.buildUserDataForVariables(userContext, appName, groupName, launchConfigName)
             }
