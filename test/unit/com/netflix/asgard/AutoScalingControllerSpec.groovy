@@ -24,8 +24,8 @@ import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.Image
-import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Multiset
 import com.google.common.collect.TreeMultiset
@@ -400,6 +400,7 @@ class AutoScalingControllerSpec extends Specification {
         controller.generateName()
 
         then:
-        response.contentAsString == '{"groupName":"hello-c0latam","envVars":["CLOUD_COUNTRIES=latam"]}'
+        new ObjectMapper().readValue(response.contentAsString, Map) ==
+                [groupName: 'hello-c0latam', envVars: ['CLOUD_COUNTRIES=latam']]
     }
 }
