@@ -30,6 +30,7 @@ import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.ApplicationInstance
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.AutoScalingGroupData
+import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.Subnets
 import org.apache.commons.logging.LogFactory
@@ -115,7 +116,8 @@ class RollingPushOperation extends AbstractPushOperation {
                 launchConfigurationName: newLaunchName, imageId: options.imageId, keyName: options.keyName,
                 securityGroups: securityGroups, instanceType: options.instanceType,
                 kernelId: oldLaunch.kernelId, ramdiskId: oldLaunch.ramdiskId, iamInstanceProfile: iamInstanceProfile,
-                ebsOptimized: oldLaunch.ebsOptimized
+                ebsOptimized: oldLaunch.ebsOptimized,
+                instancePriceType: options.spotPrice ? InstancePriceType.SPOT : InstancePriceType.ON_DEMAND
         )
         UserContext userContext = options.common.userContext
         Subnets subnets = awsEc2Service.getSubnets(userContext)
