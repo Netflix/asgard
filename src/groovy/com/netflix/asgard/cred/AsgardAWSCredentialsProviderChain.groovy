@@ -19,6 +19,7 @@ import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.auth.AWSCredentialsProviderChain
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider
 import com.amazonaws.auth.InstanceProfileCredentialsProvider
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider
 import com.netflix.asgard.ConfigService
 import com.netflix.asgard.RestClientService
@@ -59,9 +60,10 @@ class AsgardAWSCredentialsProviderChain extends AWSCredentialsProviderChain {
                         new ConfigCredentialsProvider(configService),
                         new LocalFilesCredentialsProvider(configService),
                         new SshCredentialsProvider(configService),
+                        new KeyManagementServiceAssumeRoleCredentialsProvider(configService, restClientService),
                         new KeyManagementServiceCredentialsProvider(configService, restClientService),
-
-                        // Should be at the end because it's about where Asgard is running, not how it's configured.
+                        new STSAssumeRoleSessionCredentialsProvider(configService.assumeRoleArn,
+                                configService.assumeRoleSessionName),
                         new InstanceProfileCredentialsProvider()
                 ] as AWSCredentialsProvider[]
         )

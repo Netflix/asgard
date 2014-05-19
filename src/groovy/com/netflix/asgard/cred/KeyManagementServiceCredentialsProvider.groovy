@@ -50,7 +50,7 @@ import org.apache.commons.logging.LogFactory
  */
 class KeyManagementServiceCredentialsProvider extends AbstractCredentialsProvider {
 
-    private static long THIRTY_MINUTES_IN_MILLISECONDS = 30L * 60 * 1000
+    final static long THIRTY_MINUTES_IN_MILLISECONDS = 30 * 60 * 1000L
 
     private static final log = LogFactory.getLog(this)
 
@@ -77,7 +77,7 @@ class KeyManagementServiceCredentialsProvider extends AbstractCredentialsProvide
     /**
      * Mechanism for checking time, overridable for each of unit testing.
      */
-    private Clock clock
+    protected Clock clock
 
     /**
      * Constructs a new KeyManagementServiceCredentialsProvider which will call the configured key management service
@@ -116,7 +116,7 @@ class KeyManagementServiceCredentialsProvider extends AbstractCredentialsProvide
      * Starts a new AWS session by sending an SSL request (signed with a local keystore file) to a proprietary Amazon
      * Key Management Service (AKMS). This class then vends the short lived session credentials sent back from AKMS.
      */
-    private void startSession() {
+    protected void startSession() {
 
         boolean online = configService.online
         String endpoint = configService.keyManagementServiceEndpoint
@@ -158,7 +158,7 @@ class KeyManagementServiceCredentialsProvider extends AbstractCredentialsProvide
      *
      * @return true if new temporary credentials are needed
      */
-    private boolean needsNewSession() {
+    protected boolean needsNewSession() {
         if (!sessionCredentials) {
             return true
         }
