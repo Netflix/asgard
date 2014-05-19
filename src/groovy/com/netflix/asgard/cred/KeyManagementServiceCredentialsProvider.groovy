@@ -75,7 +75,7 @@ class KeyManagementServiceCredentialsProvider extends AbstractCredentialsProvide
     private RestClientService restClientService
 
     /**
-     * Mechanism for checking time, overridable for each of unit testing.
+     * Mechanism for checking time, overridable for ease of unit testing.
      */
     protected Clock clock
 
@@ -165,5 +165,12 @@ class KeyManagementServiceCredentialsProvider extends AbstractCredentialsProvide
 
         long millisecondsRemaining = sessionCredentialsExpiration.time - clock.currentTimeMillis()
         millisecondsRemaining < THIRTY_MINUTES_IN_MILLISECONDS
+    }
+
+    /**
+     * @return the number of milliseconds since Jan 1, 1970 (can be mocked for unit testing)
+     */
+    long currentTimeMillis() {
+        clock.currentTimeMillis()
     }
 }

@@ -66,8 +66,6 @@ class KeyManagementServiceAssumeRoleCredentialsProvider extends AbstractCredenti
      * @param configService the means for looking up key management service endpoint and the location of the local
      *          keystore file
      * @param restClientService the means to make a call over HTTPS to the key management service
-     * @param localFileReader used to read in a local file
-     * @param clock used to check the time to predict session expiration
      * @param keyManagementServiceCredentialsProvider the kms provider to use for fetching the initial credentials (can
      *          be null to create a new one)
      */
@@ -100,7 +98,7 @@ class KeyManagementServiceAssumeRoleCredentialsProvider extends AbstractCredenti
         String roleArn = configService.assumeRoleArn
         String roleSessionName = configService.assumeRoleSessionName
 
-        if (roleArn && roleSessionName) {
+        if (credsForSts && roleArn && roleSessionName) {
             log.debug 'Fetching AssumeRole AWS credentials from STS based on credentials from key management service'
             AWSSecurityTokenService securityTokenService = new AWSSecurityTokenServiceClient(credsForSts)
             AssumeRoleRequest request = new AssumeRoleRequest(roleArn: roleArn, roleSessionName: roleSessionName)
@@ -127,7 +125,7 @@ class KeyManagementServiceAssumeRoleCredentialsProvider extends AbstractCredenti
             return true
         }
 
-        long currentTimeMillis = keyManagementServiceCredentialsProvider.clock.currentTimeMillis()
+        long currentTimeMillis = keyManagementServiceCredentialsProvider.currentTimeMillis()
         long millisecondsRemaining = sessionCredentialsExpiration.time - currentTimeMillis
         millisecondsRemaining < (60 * 1000)
     }
