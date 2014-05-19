@@ -123,6 +123,7 @@ class KeyManagementServiceCredentialsProviderSpec extends Specification {
         true   | 'https://kms/key' | 7103 | '/home/.ssl/keystore.jks' | ''
     }
 
+    @SuppressWarnings("GroovyAssignabilityCheck")
     private getCredentialsInteractions() {
         provider.sessionCredentialsExpiration == new Date(1390360309000)
         1 * configService.isOnline() >> true
