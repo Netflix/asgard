@@ -550,6 +550,20 @@ class ConfigService {
     }
 
     /**
+     * @return the Amazon Resource Name (ARN) of the IAM role that Asgard should assume when getting credentials
+     */
+    String getAssumeRoleArn() {
+        grailsApplication.config.secret?.assumeRole?.roleArn ?: null
+    }
+
+    /**
+     * @return the name to call the IAM session that is fetching credentials to AssumeRole for a different AWS account
+     */
+    String getAssumeRoleSessionName() {
+        grailsApplication.config.secret?.assumeRole?.roleSessionName ?: null
+    }
+
+    /**
      * @return the endpoint to call for fetching secret keys for AWS access, or null by default
      */
     String getKeyManagementServiceEndpoint() {
