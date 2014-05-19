@@ -56,6 +56,6 @@ final class InstanceTypeData {
      */
     String getMonthlyLinuxOnDemandPrice() {
         if (linuxOnDemandPrice == null) { return null }
-        NumberFormat.getCurrencyInstance().format(linuxOnDemandPrice * 24 * 30)
+        NumberFormat.getCurrencyInstance(Locale.US).format(linuxOnDemandPrice * 24 * 30)
     }
 }
