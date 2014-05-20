@@ -73,12 +73,14 @@ log4j = {
     error 'com.amazonaws.services.simpleworkflow.flow.worker.DecisionTaskPoller'
 
     environments {
-        development {
+        def devConfig = {
             console name: 'stdout', layout: pattern(conversionPattern: '[%d{ISO8601}] %c{4}    %m%n')
             root {
                 info 'stdout'
             }
         }
+        development devConfig
+        mcetestLocalDev devConfig
     }
 }
 
