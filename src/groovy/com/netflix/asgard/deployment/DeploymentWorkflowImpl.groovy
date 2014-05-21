@@ -34,6 +34,7 @@ import com.netflix.asgard.deployment.steps.JudgmentStep
 import com.netflix.asgard.deployment.steps.ResizeStep
 import com.netflix.asgard.deployment.steps.WaitStep
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
+import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.Deployment
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScheduledAsgAnalysis
@@ -71,6 +72,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                 nextAsgTemplate.with {
                     autoScalingGroupName = asgDeploymentNames.nextAsgName
                     launchConfigurationName = asgDeploymentNames.nextLaunchConfigName
+                    suspendedProcesses?.removeAll(AutoScalingProcessType.getDisableProcesses())
                 }
                 Promise<LaunchConfigurationBeanOptions> nextLcTemplateConstructed = promiseFor(activities.
                         constructLaunchConfigForNextAsg(userContext, nextAsgTemplate, lcInputs))
