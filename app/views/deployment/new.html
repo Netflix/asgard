@@ -50,7 +50,7 @@
             <select id="imageId" ng-model="lcOptions.imageId"
                                         ng-options="opt.id as opt.imageLocation + ' | ' + opt.id for opt in environment.images">
             <option value="">Select Image</option>
-            </select>
+            </select>&nbsp;<span ng-hide="hideShowMoreAmisLink || hideAdvancedItems" class="fakeLink" ng-click="retrieveAllAmis()">Show more AMIs</span>
           </div>
         </div>
         <div class="row" collapse="hideAdvancedItems">

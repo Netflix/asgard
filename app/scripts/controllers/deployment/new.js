@@ -6,6 +6,7 @@ angular.module("asgardApp")
     $scope.hideAdvancedItems = true;
     $scope.hideJsonSteps = true;
     $scope.hideHtmlSteps = false;
+    $scope.hideShowMoreAmisLink = false;
     $scope.targetAsgTypes = ["Previous", "Next"];
 
     $scope.count= 0;
@@ -293,6 +294,13 @@ angular.module("asgardApp")
       }).error(function (data) {
         $scope.validationErrors = data.validationErrors;
         $scope.startingDeployment = false
+      });
+    };
+
+    $scope.retrieveAllAmis = function() {
+      $http.get("deployment/allAmis/").success(function(data) {
+        $scope.environment.images = data;
+        $scope.hideShowMoreAmisLink = true
       });
     };
 

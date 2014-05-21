@@ -225,6 +225,18 @@ class DeploymentController {
     }
 
     /**
+     * @return all AMIs for account
+     */
+    def allAmis() {
+        UserContext userContext = UserContext.of(request)
+        Collection<Image> images = awsEc2Service.getAccountImages(userContext)
+        List<Map> imageDetails = images.sort { it.imageLocation.toLowerCase() }.collect {
+            [id: it.imageId, imageLocation: it.imageLocation]
+        }
+        render objectMapper.writer().writeValueAsString(imageDetails)
+    }
+
+    /**
      * Start a deployment.
      *
      * @see StartDeploymentRequest
