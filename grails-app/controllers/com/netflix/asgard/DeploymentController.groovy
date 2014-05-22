@@ -156,6 +156,10 @@ class DeploymentController {
             instanceMonitoringIsEnabled = instanceMonitoringIsEnabled != null ? instanceMonitoringIsEnabled :
                     configService.enableInstanceMonitoring
             blockDeviceMappings = null // SWF can not handle serializing this, and Asgard builds them per instance type.
+            securityGroups = lcOptions.securityGroups.collect {
+                // all security groups should be ids rather than names
+                awsEc2Service.getSecurityGroup(userContext, it)
+            }.sort { it.groupName }.collect { it.groupId }
         }
 
         Map<String, Object> attributes = [
@@ -211,8 +215,7 @@ class DeploymentController {
                                 price: it.monthlyLinuxOnDemandPrice ? it.monthlyLinuxOnDemandPrice + '/mo' : '']
                     },
                     securityGroups: effectiveSecurityGroups.collect {
-                        [id: it.groupId, name: it.groupName, selection: it.vpcId ? it.groupId : it.groupName,
-                                vpcId: it.vpcId ?: '']
+                        [id: it.groupId, name: it.groupName, vpcId: it.vpcId ?: '']
                     },
                     images: images.sort { it.imageLocation.toLowerCase() }.collect {
                         [id: it.imageId, imageLocation: it.imageLocation]
