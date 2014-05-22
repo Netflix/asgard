@@ -252,6 +252,14 @@ angular.module("asgardApp")
       }
     });
 
+    $scope.$watch("selectionsForSubnet[asgOptions.subnetPurpose].securityGroups", function() {
+      if ($scope.asgOptions) {
+        $scope.selectedSecurityGroupNames = $scope.environment.securityGroups.filter(function(value) {
+            return $scope.selectionsForSubnet[$scope.asgOptions.subnetPurpose].securityGroups.indexOf(value.id) !== -1;
+          }).map(function(value) { return value.name })
+      }
+    });
+
     $scope.$watch("suspendAZRebalance", function() {
       if ($scope.asgOptions) {
         toggleSuspendedProcess("AZRebalance", $scope.suspendAZRebalance);

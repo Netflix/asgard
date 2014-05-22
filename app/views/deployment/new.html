@@ -76,6 +76,7 @@
             <label for="securityGroups">Security Groups:</label>
           </div>
           <div class="col-md-9">
+            <div class="selectedValues"><div ng-repeat="selectedSecurityGroupName in selectedSecurityGroupNames">{{selectedSecurityGroupName}}</div></div>
             <select id="securityGroups"  multiple="multiple" size="10"
                     ng-model="selectionsForSubnet[asgOptions.subnetPurpose].securityGroups"
                     ng-options="opt.id as opt.name for opt in environment.securityGroups | filter:{vpcId: vpcId}:true">
@@ -245,9 +246,10 @@
             <label>Load Balancers<br/>(cannot be added or removed later):</label>
           </div>
           <div class="col-md-9">
+            <div class="selectedValues"><div ng-repeat="selectedLoadBalancerName in selectionsForSubnet[asgOptions.subnetPurpose].loadBalancerNames">{{selectedLoadBalancerName}}</div></div>
             <select id="loadBalancers"  multiple="multiple" size="10"
                     ng-model="selectionsForSubnet[asgOptions.subnetPurpose].loadBalancerNames"
-                    ng-options="opt.id for opt in environment.loadBalancers | filter:{vpcId: vpcId}:true">
+                    ng-options="opt.id as opt.id for opt in environment.loadBalancers | filter:{vpcId: vpcId}:true">
               <option value="">Select Load Balancers</option>
             </select>
           </div>
