@@ -185,8 +185,9 @@ class HostedZoneController {
 
     private resourceRecordSetFromCommandObject(ResourceRecordSetCommand cmd) {
         String hostedZoneId = cmd.hostedZoneId
-        List<String> resourceRecordStrings = Requests.ensureList(cmd.resourceRecords?.split('\n')).collect { it.trim() }
+        List<String> resourceRecordStrings = cmd.resourceRecords?.trim() ? Requests.ensureList(cmd.resourceRecords?.split('\n')).collect { it.trim() } : null
         String aliasTarget = cmd.aliasTarget
+        String aliasTargetHostedZoneId = params.aliasTargetHostedZoneId ?: hostedZoneId
         new ResourceRecordSet(
                 name: cmd.resourceRecordSetName,
                 type: cmd.type,
@@ -195,8 +196,8 @@ class HostedZoneController {
                 region: cmd.resourceRecordSetRegion ?: null,
                 failover: cmd.failover ?: null,
                 tTL: cmd.ttl ?: null,
-                resourceRecords: resourceRecordStrings.collect { new ResourceRecord(it) } ?: null,
-                aliasTarget: aliasTarget ? new AliasTarget(hostedZoneId, aliasTarget) : null,
+                resourceRecords: resourceRecordStrings?.collect { new ResourceRecord(it) } ?: null,
+                aliasTarget: aliasTarget ? new AliasTarget(aliasTargetHostedZoneId, aliasTarget).withEvaluateTargetHealth(params.evaluateTargetHealth == "Yes") : null,
                 healthCheckId: cmd.healthCheckId ?: null
         )
     }
@@ -224,6 +225,8 @@ class ResourceRecordSetCommand {
     Long ttl
     String resourceRecords
     String aliasTarget
+    String aliasTargetHostedZoneId
+    String evaluateTargetHealth
     String healthCheckId
     String comment
 }

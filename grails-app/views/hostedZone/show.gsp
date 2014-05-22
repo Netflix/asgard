@@ -75,6 +75,7 @@
                     <th>TTL</th>
                     <th>Region</th>
                     <th>Alias<br/>Target</th>
+                    <th>Evaluate<br/>Target<br>Health</th>
                     <th>Set<br/>ID</th>
                     <th>Weight</th>
                     <th>Failover</th>
@@ -96,6 +97,7 @@
                         <td>${resourceRecordSet.TTL}</td>
                         <td>${resourceRecordSet.region}</td>
                         <td class="aliasTarget">${resourceRecordSet.aliasTarget?.dNSName}</td>
+                        <td>${resourceRecordSet.aliasTarget ? (resourceRecordSet.aliasTarget.evaluateTargetHealth ? "Yes" : "No") : ''}</td>
                         <td class="resourceRecordSetId">${resourceRecordSet.setIdentifier}</td>
                         <td>${resourceRecordSet.weight}</td>
                         <td>${resourceRecordSet.failover}</td>
@@ -116,6 +118,7 @@
                             <input type="hidden" name="ttl" value="${resourceRecordSet.TTL ?: ''}"/>
                             <input type="hidden" name="resourceRecords" value="${resourceRecordSet.resourceRecords.collect { it.value }.join('\n') ?: ''}"/>
                             <input type="hidden" name="aliasTarget" value="${resourceRecordSet.aliasTarget?.dNSName ?: ''}"/>
+                            <input type="hidden" name="evaluateTargetHealth" value="${resourceRecordSet.aliasTarget ? (resourceRecordSet.aliasTarget.evaluateTargetHealth ? 'Yes' : 'No') : ''}"/>
                             <input type="hidden" name="healthCheckId" value="${resourceRecordSet.healthCheckId ?: ''}"/>
                             <g:buttonSubmit class="delete" action="removeResourceRecordSet" value="Remove"
                                             data-warning="Really remove resource record set '${resourceRecordSet.name}'?"/>

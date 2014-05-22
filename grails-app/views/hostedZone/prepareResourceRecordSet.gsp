@@ -122,6 +122,29 @@
         </tr>
         <tr class="prop">
           <td class="name">
+            <label for="aliasTargetHostedZoneId">Alias Target Hosted Zone:</label>
+          </td>
+          <td class="longInput">
+            <g:textField name="aliasTargetHostedZoneId" value="${params.aliasTargetHostedZoneId}"/>
+          </td>
+        </tr>
+        <tr class="prop advanced">
+          <td class="name">
+            <label>Evaluate Target Health:</label>
+          </td>
+          <td>
+            <div>
+              <g:radio name="evaluateTargetHealth" id="evaluateTargetHealthYes" value="Yes" checked="${params.evaluateTargetHealth == 'Yes'}"/>
+              <label for="evaluateTargetHealthYes" class="choice">Yes</label>
+            </div>
+            <div>
+              <g:radio name="evaluateTargetHealth" id="evaluateTargetHealthNo" value="No" checked="${params.evaluateTargetHealth == 'No'}"/>
+              <label for="evaluateTargetHealthNo" class="choice">No</label>
+            </div>
+          </td>
+        </tr>
+        <tr class="prop">
+          <td class="name">
             <label for="healthCheckId">Health Check Id:</label>
           </td>
           <td class="longInput">
