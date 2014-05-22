@@ -8,8 +8,8 @@ angular.module("asgardApp")
     $scope.hideHtmlSteps = false;
     $scope.hideShowMoreAmisLink = false;
     $scope.targetAsgTypes = ["Previous", "Next"];
-
     $scope.count= 0;
+    $scope.selectionsForSubnet = {}
 
     var isSameStepBeforeOrAfter = function(stepTypeName, index) {
       if (index > 0 && index < $scope.generated.stepsDisplay.length - 1) {
@@ -232,6 +232,18 @@ angular.module("asgardApp")
         $scope.suspendAddToLoadBalancer = $scope.asgOptions.suspendedProcesses.indexOf("AddToLoadBalancer") > -1;
       }
       initStepsDisplay();
+      angular.forEach($scope.environment.subnetPurposes.concat(""), function(value) {
+        $scope.selectionsForSubnet[value] = {
+          securityGroups: [],
+          availabilityZones: [],
+          loadBalancerNames: []
+        }
+      });
+      $scope.selectionsForSubnet[$scope.asgOptions.subnetPurpose] = {
+        securityGroups: $scope.lcOptions.securityGroups,
+        availabilityZones: $scope.asgOptions.availabilityZones,
+        loadBalancerNames: $scope.asgOptions.loadBalancerNames
+      };
     });
 
     $scope.$watch("asgOptions.subnetPurpose", function() {
@@ -282,6 +294,10 @@ angular.module("asgardApp")
     $scope.startDeployment = function() {
       $scope.startingDeployment = true;
       constructStepsFromDisplay();
+      var subnetSpecificSelections = $scope.selectionsForSubnet[$scope.asgOptions.subnetPurpose];
+      $scope.lcOptions.securityGroups = subnetSpecificSelections.securityGroups;
+      $scope.asgOptions.availabilityZones = subnetSpecificSelections.availabilityZones;
+      $scope.asgOptions.loadBalancerNames = subnetSpecificSelections.loadBalancerNames;
       var deployment = {
         deploymentOptions: $scope.deploymentOptions,
         asgOptions: $scope.asgOptions,
