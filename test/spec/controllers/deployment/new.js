@@ -19,38 +19,26 @@ describe('Controller: DeploymentNewCtrl', function () {
     });
   }));
 
-  it('should set initial scope', function () {
-    $httpBackend.expectGET(
-        'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
-      deploymentOptions: { steps: [] },
-      environment: 'environment1',
-      lcOptions: 'lcOptions1',
-      asgOptions: {
-        name: "asgOptions1",
-        suspendedProcesses: ["AddToLoadBalancer"]
-      }
-    });
-    $httpBackend.flush();
-    expect(scope.clusterName).toEqual('helloworld');
-    expect(scope.hideAdvancedItems).toEqual(true);
-    expect(scope.deploymentOptions).toEqual({ steps: [] });
-    expect(scope.environment).toEqual('environment1');
-    expect(scope.asgOptions.name).toEqual('asgOptions1');
-    expect(scope.lcOptions).toEqual('lcOptions1');
-    expect(scope.vpcId).toEqual(undefined);
-    expect(scope.suspendAZRebalance).toEqual(false);
-    expect(scope.suspendAddToLoadBalancer).toEqual(true);
-  });
-
   it('should set VPC id based on subnet purpose', function () {
     $httpBackend.expectGET(
         'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
       deploymentOptions: { steps: [] },
+      asgOptions: {
+        subnetPurpose: "",
+        suspendedProcesses: [],
+        availabilityZones: [],
+        loadBalancerNames: []
+      },
+      lcOptions: {
+        securityGroups: []
+      },
       environment: {
+        subnetPurposes: [],
         purposeToVpcId: {
           'internal': 'vpc1',
           'external': 'vpc2'
-        }
+        },
+        securityGroups: []
       }
     });
     $httpBackend.flush();
@@ -69,10 +57,21 @@ describe('Controller: DeploymentNewCtrl', function () {
   it('should toggle suspended processes', function () {
     $httpBackend.expectGET(
         'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
-      deploymentOptions: { steps: [] },
-      asgOptions: {
-        suspendedProcesses: []
-      }
+        deploymentOptions: { steps: [] },
+        asgOptions: {
+          subnetPurpose: "",
+          suspendedProcesses: [],
+          availabilityZones: [],
+          loadBalancerNames: []
+        },
+        lcOptions: {
+          securityGroups: []
+        },
+        environment: {
+          purposeToVpcId: {},
+          subnetPurposes: [],
+          securityGroups: []
+        }
     });
     $httpBackend.flush();
     expect(scope.suspendAZRebalance).toEqual(false);
@@ -110,13 +109,38 @@ describe('Controller: DeploymentNewCtrl', function () {
   it('should start deployment', function () {
     $httpBackend.expectGET(
         'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
-      deploymentOptions: { steps: [] }
+        deploymentOptions: { steps: [] },
+        asgOptions: {
+          subnetPurpose: "",
+          suspendedProcesses: [],
+          availabilityZones: [],
+          loadBalancerNames: []
+        },
+        lcOptions: {
+          securityGroups: []
+        },
+        environment: {
+          purposeToVpcId: {},
+          subnetPurposes: [],
+          securityGroups: []
+        }
     });
     $httpBackend.flush();
     expect(scope.startingDeployment).toEqual(undefined);
     scope.startDeployment();
     expect(scope.startingDeployment).toEqual(true);
-    $httpBackend.expectPOST('deployment/start', {"deploymentOptions":{ steps: [] }}).respond(200, {
+    $httpBackend.expectPOST('deployment/start', {
+      deploymentOptions: { steps: [] },
+      asgOptions: {
+        subnetPurpose: "",
+        suspendedProcesses: [],
+        availabilityZones: [],
+        loadBalancerNames: []
+      },
+      lcOptions: {
+        securityGroups: []
+      }
+    }).respond(200, {
       deploymentId: "123"
     });
     $httpBackend.flush();
@@ -126,13 +150,38 @@ describe('Controller: DeploymentNewCtrl', function () {
   it('should show errors on failure to start deployment', function () {
     $httpBackend.expectGET(
         'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
-      deploymentOptions: { steps: [] }
+        deploymentOptions: { steps: [] },
+        asgOptions: {
+          subnetPurpose: "",
+          suspendedProcesses: [],
+          availabilityZones: [],
+          loadBalancerNames: []
+        },
+        lcOptions: {
+          securityGroups: []
+        },
+        environment: {
+          purposeToVpcId: {},
+          subnetPurposes: [],
+          securityGroups: []
+        }
     });
     $httpBackend.flush();
     expect(scope.startingDeployment).toEqual(undefined);
     scope.startDeployment();
     expect(scope.startingDeployment).toEqual(true);
-    $httpBackend.expectPOST('deployment/start', {"deploymentOptions":{ steps: [] }}).respond(422, {
+    $httpBackend.expectPOST('deployment/start', {
+      deploymentOptions: { steps: [] },
+      asgOptions: {
+        subnetPurpose: "",
+          suspendedProcesses: [],
+          availabilityZones: [],
+          loadBalancerNames: []
+      },
+      lcOptions: {
+        securityGroups: []
+      }
+    }).respond(422, {
       validationErrors: 'errors'
     });
     $httpBackend.flush();
@@ -143,16 +192,30 @@ describe('Controller: DeploymentNewCtrl', function () {
 
   it('should conditionally allow steps', function() {
     $httpBackend.expectGET(
-      'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
-      deploymentOptions: {
-        steps: [
-          {"type":"Wait","durationMinutes":60},
-          {"type":"CreateAsg"},
-          {"type":"Resize","targetAsg":"Next","capacity":0,"startUpTimeoutMinutes":40},
-          {"type":"Judgment","durationMinutes":120},
-          {"type":"DisableAsg","targetAsg":"Previous"}
-        ]
-      }
+        'deployment/prepare/helloworld?deploymentTemplateName=CreateAndCleanUpPreviousAsg&includeEnvironment=true').respond({
+        deploymentOptions: {
+          steps: [
+            {"type":"Wait","durationMinutes":60},
+            {"type":"CreateAsg"},
+            {"type":"Resize","targetAsg":"Next","capacity":0,"startUpTimeoutMinutes":40},
+            {"type":"Judgment","durationMinutes":120},
+            {"type":"DisableAsg","targetAsg":"Previous"}
+          ]
+        },
+        asgOptions: {
+          subnetPurpose: "",
+          suspendedProcesses: [],
+          availabilityZones: [],
+          loadBalancerNames: []
+        },
+        lcOptions: {
+          securityGroups: []
+        },
+        environment: {
+          purposeToVpcId: {},
+          subnetPurposes: [],
+          securityGroups: []
+        }
     });
     $httpBackend.flush();
     expect(scope.isStepAllowed("Wait", 4)).toEqual(true);
@@ -183,6 +246,20 @@ describe('Controller: DeploymentNewCtrl', function () {
             {"type":"DisableAsg","targetAsg":"Previous"},
             {"type":"DeleteAsg","targetAsg":"Previous"}
           ]
+        },
+        asgOptions: {
+          subnetPurpose: "",
+          suspendedProcesses: [],
+          availabilityZones: [],
+          loadBalancerNames: []
+        },
+        lcOptions: {
+          securityGroups: []
+        },
+        environment: {
+          purposeToVpcId: {},
+          subnetPurposes: [],
+          securityGroups: []
         }
       });
     $httpBackend.flush();
@@ -204,6 +281,20 @@ describe('Controller: DeploymentNewCtrl', function () {
             {"type":"CreateAsg"},
             {"type":"DeleteAsg","targetAsg":"Previous"}
           ]
+        },
+        asgOptions: {
+          subnetPurpose: "",
+          suspendedProcesses: [],
+          availabilityZones: [],
+          loadBalancerNames: []
+        },
+        lcOptions: {
+          securityGroups: []
+        },
+        environment: {
+          purposeToVpcId: {},
+          subnetPurposes: [],
+          securityGroups: []
         }
       });
     $httpBackend.flush();
@@ -253,6 +344,20 @@ describe('Controller: DeploymentNewCtrl', function () {
             { type : 'DisableAsg', targetAsg : 'Previous' },
             {"type":"DeleteAsg","targetAsg":"Previous"}
           ]
+        },
+        asgOptions: {
+          subnetPurpose: "",
+          suspendedProcesses: [],
+          availabilityZones: [],
+          loadBalancerNames: []
+        },
+        lcOptions: {
+          securityGroups: []
+        },
+        environment: {
+          purposeToVpcId: {},
+          subnetPurposes: [],
+          securityGroups: []
         }
       });
     $httpBackend.flush();

@@ -227,10 +227,8 @@ angular.module("asgardApp")
       $scope.environment = data.environment;
       $scope.asgOptions = data.asgOptions;
       $scope.lcOptions = data.lcOptions;
-      if ($scope.asgOptions) {
-        $scope.suspendAZRebalance = $scope.asgOptions.suspendedProcesses.indexOf("AZRebalance") > -1;
-        $scope.suspendAddToLoadBalancer = $scope.asgOptions.suspendedProcesses.indexOf("AddToLoadBalancer") > -1;
-      }
+      $scope.suspendAZRebalance = $scope.asgOptions.suspendedProcesses.indexOf("AZRebalance") > -1;
+      $scope.suspendAddToLoadBalancer = $scope.asgOptions.suspendedProcesses.indexOf("AddToLoadBalancer") > -1;
       initStepsDisplay();
       angular.forEach($scope.environment.subnetPurposes.concat(""), function(value) {
         $scope.selectionsForSubnet[value] = {
