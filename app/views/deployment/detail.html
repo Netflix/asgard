@@ -3,59 +3,49 @@
 
   <div class="buttons" ng-hide="deployment.done">
     <button class="stop" ng-click="stopDeployment()"><div>Stop Deployment</div></button>
-    <div ng-show="deployment.token">
-      <button class="rollback" ng-click="rollbackDeployment()"><div>Rollback Deployment</div></button>
-      <button class="proceed" ng-click="proceedWithDeployment()"><div>Proceed With Deployment</div></button>
-    </div>
   </div>
 
-  <div class="task">
-    <table>
-      <tbody>
-      <tr class="prop">
-        <td class="name">Return to<br/>Cluster:</td>
-        <td class="value">
-          <a href="{{deployment.region.code}}/cluster/show/{{deployment.clusterName}}"
-             title="Show all the auto scaling groups in this cluster" class="cluster">{{deployment.clusterName}}</a>
-        </td>
-      </tr>
-      <tr class="prop">
-        <td class="name">Description:</td>
-        <td class="value">{{deployment.description}}</td>
-      </tr>
-      <tr class="prop">
-        <td class="name">Workflow Execution Details:</td>
-        <td class="value">
-          <a href="workflowExecution/show?{{encodedWorkflowExecutionIds()}}">Workflow Execution</a>
-        </td>
-      </tr>
-      <tr class="prop">
-        <td class="name">Region:</td>
-        <td class="value">{{deployment.regionCode}}</td>
-      </tr>
-      <tr class="prop">
-        <td class="name">Status:</td>
-        <td class="value"><span id="taskStatus">{{deployment.status}}</span></td>
-      </tr>
-      <tr class="prop">
-        <td class="name">Start Time:</td>
-        <td class="value date">{{deployment.startTime | date: 'yyyy-MM-dd HH:mm:ss Z'}}</td>
-      </tr>
-      <tr class="prop">
-        <td class="name">Duration:</td>
-        <td class="value"><span id="taskDurationString">{{deployment.durationString}}</span></td>
-      </tr>
-      <tr class="prop">
-        <td class="name">Owner:</td>
-        <td class="value">{{deployment.owner}}</td>
-      </tr>
-      <tr class="prop">
-        <td class="name">Log:</td>
-        <td class="value">
-          <textArea class="resizable" name="log" rows="20" cols="160" readonly="true">{{logText}}</textArea>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+  <div class="deployment twbs">
+    <div class="container">
+        <div class="row">
+          <div class="col-sm-4">Return to Cluster:</div>
+          <div class="col-sm-8">
+            <a href="{{deployment.region.code}}/cluster/show/{{deployment.clusterName}}"
+               title="Show all the auto scaling groups in this cluster" class="cluster">{{deployment.clusterName}}</a>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-4">Region:</div>
+          <div class="col-sm-8">{{deployment.regionCode}}</div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">Status:</div>
+            <div class="col-sm-8"><span id="taskStatus">{{deployment.status}}</span></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">Start Time:</div>
+            <div class="col-sm-8">{{deployment.startTime | date: 'yyyy-MM-dd HH:mm:ss Z'}}</div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">Duration:</div>
+            <div class="col-sm-8"><span id="taskDurationString">{{deployment.durationString}}</span></div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">Owner:</div>
+            <div class="col-sm-8">{{deployment.owner}}</div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+              <div class="deploymentOptions steps" ng-repeat="step in deployment.steps">
+                <div ng-if="step.type" class="step panel"
+                     ng-class="{'panel-success': getStepStatus($index) === 'success',
+                     'panel-danger': getStepStatus($index) === 'failure',
+                     'panel-primary': getStepStatus($index) === 'running',
+                     'panel-default': getStepStatus($index) === 'queued'}"
+                     ng-include="stepUrl(step.type)"></div>
+              </div>
+            </div>
+        </div>
+    </div>
   </div>
 </div>

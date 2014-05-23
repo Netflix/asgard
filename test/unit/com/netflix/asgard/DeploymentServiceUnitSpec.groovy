@@ -51,7 +51,7 @@ class DeploymentServiceUnitSpec extends Specification {
 
     Closure<Deployment> newDeployment = { int sequenceNumber ->
         new Deployment(sequenceNumber as String, null, null, null, null, null, new Date(sequenceNumber),
-                new Date(sequenceNumber), 'running', [])
+                new Date(sequenceNumber), 'running', [], [])
     }
 
     def setup() {
@@ -174,7 +174,7 @@ class DeploymentServiceUnitSpec extends Specification {
         Deployment deployment = deploymentService.getRunningDeploymentForCluster('helloworld-example')
 
         then:
-        deployment == new Deployment('123', null, null, null, null, null, null, null, 'running', [])
+        deployment == new Deployment('123', null, null, null, null, null, null, null, 'running', [], [])
         1 * awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link) >> new WorkflowExecutionInfo(
                 tagList: new SwfWorkflowTags(id: '123').constructTags())
     }

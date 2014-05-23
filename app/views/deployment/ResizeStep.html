@@ -1,0 +1,19 @@
+<div class="panel-heading">
+  <h4 class="scaling">Resize {{step.targetAsg}} ASG</h4>
+  <div ng-hide="readOnlyDeploymentSteps" class="removeStep" ng-click="removeStep($index)"></div>
+  <div ng-if="getStepStatus($index) === 'running'" class="waiting"></div>
+</div>
+<div ng-hide="readOnlyDeploymentSteps" class="panel-body numbers">
+  <div>
+  Resize
+  <select ng-disabled="readOnlyDeploymentSteps" ng-model="step.targetAsg" ng-options="targetAsgType for targetAsgType in targetAsgTypes"></select>
+  to
+  <input ng-disabled="readOnlyDeploymentSteps" type="text" ng-model="step.capacity" />
+  healthy instance(s) within
+  <input ng-disabled="readOnlyDeploymentSteps" type="text" ng-model="step.startUpTimeoutMinutes" />
+  minutes or roll back.
+  </div>
+</div>
+<div ng-show="readOnlyDeploymentSteps" class="panel-body">
+  <div class="logMessage" ng-repeat="logMessage in getLogForStep($index)">{{logMessage}}</div>
+</div>

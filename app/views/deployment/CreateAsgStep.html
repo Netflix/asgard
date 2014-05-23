@@ -1,0 +1,10 @@
+<div class="panel-heading">
+  <h4 class="createAsg">Create ASG</h4>
+  <div ng-if="getStepStatus($index) === 'running'" class="waiting"></div>
+</div>
+<div ng-hide="readOnlyDeploymentSteps" class="panel-body numbers">
+  Creates the new Auto Scaling Group and Launch Configuration with 0 instances.
+</div>
+<div ng-show="readOnlyDeploymentSteps" class="panel-body">
+  <div class="logMessage" ng-repeat="logMessage in getLogForStep($index)">{{logMessage}}</div>
+</div>

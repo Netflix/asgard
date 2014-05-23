@@ -15,45 +15,42 @@
  */
 package com.netflix.asgard.deployment
 
+import com.netflix.asgard.deployment.steps.CreateAsgStep
+import com.netflix.asgard.deployment.steps.DeleteAsgStep
+import com.netflix.asgard.deployment.steps.DisableAsgStep
+import com.netflix.asgard.deployment.steps.ResizeStep
+import com.netflix.asgard.model.AsgRoleInCluster
+
 /**
  * Creates instances of Deployment by name for use as templates.
  */
 enum DeploymentTemplate {
-    CreateJudgeAndCleanUp({
-        newDeploymentWithDefaults
+    CreateAndCleanUpPreviousAsg({
+        new DeploymentWorkflowOptions(
+                steps: [
+                        new CreateAsgStep(),
+                        new ResizeStep(targetAsg: AsgRoleInCluster.Next, capacity: 0, startUpTimeoutMinutes: 40),
+                        new DisableAsgStep(targetAsg: AsgRoleInCluster.Previous),
+                        new DeleteAsgStep(targetAsg: AsgRoleInCluster.Previous)
+                ],
+        )
     }), CreateOnly({
-        newDeploymentWithDefaults.with{
-            scaleUp = ProceedPreference.Yes
-            disablePreviousAsg = ProceedPreference.No
-            deletePreviousAsg = ProceedPreference.No
-            it
-        }
+        new DeploymentWorkflowOptions(
+            steps: [
+                    new CreateAsgStep(),
+                    new ResizeStep(targetAsg: AsgRoleInCluster.Next, capacity: 0, startUpTimeoutMinutes: 40)
+            ],
+        )
     })
 
-    static private DeploymentWorkflowOptions getNewDeploymentWithDefaults() {
-        new DeploymentWorkflowOptions(
-                delayDurationMinutes: 0,
-                doCanary: false,
-                canaryCapacity: 1,
-                canaryStartUpTimeoutMinutes: 30,
-                canaryJudgmentPeriodMinutes: 60,
-                scaleUp: ProceedPreference.Ask,
-                desiredCapacityStartUpTimeoutMinutes: 40,
-                desiredCapacityJudgmentPeriodMinutes: 120,
-                disablePreviousAsg: ProceedPreference.Ask,
-                fullTrafficJudgmentPeriodMinutes: 240,
-                deletePreviousAsg: ProceedPreference.Ask
-        )
-    }
+    Closure<DeploymentWorkflowOptions> constructDeployment
 
-    Closure<DeploymentWorkflowOptions> customizeDeployment
-
-    DeploymentTemplate(Closure<DeploymentWorkflowOptions> customizeDeployment) {
-        this.customizeDeployment = customizeDeployment
+    DeploymentTemplate(Closure<DeploymentWorkflowOptions> constructDeployment) {
+        this.constructDeployment = constructDeployment
     }
 
     DeploymentWorkflowOptions getDeployment() {
-        customizeDeployment()
+        constructDeployment()
     }
 
     static DeploymentTemplate of(String name) {

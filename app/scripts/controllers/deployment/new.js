@@ -4,10 +4,220 @@ angular.module("asgardApp")
   .controller("DeploymentNewCtrl", function ($scope, $routeParams, $http, $location) {
     $scope.clusterName = $routeParams.clusterName;
     $scope.hideAdvancedItems = true;
+    $scope.hideJsonSteps = true;
+    $scope.hideHtmlSteps = false;
+    $scope.targetAsgTypes = ["Previous", "Next"];
+
+    $scope.count= 0;
+
+    var isSameStepBeforeOrAfter = function(stepTypeName, index) {
+      if (index > 0 && index < $scope.generated.stepsDisplay.length - 1) {
+        return $scope.generated.stepsDisplay[index - 1].type === stepTypeName || $scope.generated.stepsDisplay[index + 1].type === stepTypeName;
+      }
+      if (index > 1) {
+        return $scope.generated.stepsDisplay[index - 1].type === stepTypeName;
+      }
+      if (index < $scope.generated.stepsDisplay.length) {
+        return $scope.generated.stepsDisplay[index + 1].type === stepTypeName;
+      }
+      return true;
+    };
+
+    var isLastStep = function(index) {
+      return index === $scope.generated.stepsDisplay.length - 1;
+    };
+
+    var isFirstStep = function(index) {
+      return index === 0;
+    };
+
+    var firstIndexOfStepType = function(stepTypeName) {
+      var i, n = $scope.generated.stepsDisplay.length;
+      for (i = 0; i < n; ++i) {
+        var nextStep = $scope.generated.stepsDisplay[i];
+        if ('type' in nextStep && nextStep.type === stepTypeName) {
+          return i;
+        }
+      }
+      return undefined;
+    };
+
+    var isBeforeCreateStep = function(index) {
+        return index < firstIndexOfStepType("CreateAsg");
+    };
+
+    var isAfterDeleteStep = function(index) {
+      return index > firstIndexOfStepType("DeleteAsg");
+    };
+
+    var stepTypes = {
+      "Wait": {
+        display: "Wait",
+        isAllowed: function(index) {
+          return !isSameStepBeforeOrAfter("Wait", index) && !isLastStep(index);
+        },
+        add: function(index) {
+          $scope.generated.stepsDisplay.splice(index, 0, {"type":"Wait", "durationMinutes":60});
+        }
+      },
+      "Judgment": {
+        display: "Judgment",
+        isAllowed: function(index) {
+          return !isSameStepBeforeOrAfter("Judgment", index) && !isLastStep(index);
+        },
+        add: function(index) {
+          $scope.generated.stepsDisplay.splice(index, 0, {"type":"Judgment", "durationMinutes":120});
+        }
+      },
+      "ResizeAsg": {
+        display: "Resize",
+        isAllowed: function(index) {
+          return !isBeforeCreateStep(index) && !isAfterDeleteStep(index);
+        },
+        add: function(index) {
+          $scope.generated.stepsDisplay.splice(index, 0,
+            {"type":"Resize", "targetAsg":"Next", "capacity":0, "startUpTimeoutMinutes":40});
+        }
+      },
+      "DisableAsg": {
+        display: "Disable",
+        isAllowed: function(index) {
+          return !isBeforeCreateStep(index) && !isAfterDeleteStep(index);
+        },
+        add: function(index) {
+          $scope.generated.stepsDisplay.splice(index, 0, {"type":"DisableAsg", "targetAsg":"Previous"});
+        }
+      },
+      "EnableAsg": {
+        display: "Enable",
+        isAllowed: function(index) {
+          return !isBeforeCreateStep(index) && !isAfterDeleteStep(index);
+        },
+        add: function(index) {
+          $scope.generated.stepsDisplay.splice(index, 0, {"type":"EnableAsg", "targetAsg":"Next"});
+        }
+      },
+      "DeleteAsg": {
+        display: "Delete",
+        isAllowed: function(index) {
+          return !isBeforeCreateStep(index) && !isAfterDeleteStep(index) && !firstIndexOfStepType("DeleteAsg")
+            && isLastStep(index);
+        },
+        add: function(index) {
+          $scope.generated.stepsDisplay.splice(index, 0, {"type":"DeleteAsg", "targetAsg":"Previous"});
+        }
+      }
+    };
+
+    $scope.stepTypeNames = Object.keys(stepTypes);
+
+    $scope.isStepAllowed = function(stepTypeName, index) {
+      return stepTypes[stepTypeName].isAllowed(index);
+    };
+
+    $scope.stepTypeDisplay = function(stepTypeName) {
+      return stepTypes[stepTypeName].display;
+    };
+
+    $scope.addStep = function(stepTypeName, index) {
+      resetStepsDisplay();
+      stepTypes[stepTypeName].add(index);
+      $scope.generated.stepsDisplay.splice(index, 0, {showSteps: false});
+    };
+
+    $scope.removeStep = function(index) {
+      resetStepsDisplay();
+      $scope.generated.stepsDisplay.splice(index, 2);
+    };
+
+    var resetStepsDisplay = function() {
+      var i, n = $scope.generated.stepsDisplay.length;
+      for (i = 0; i < n; ++i) {
+        var nextStep = $scope.generated.stepsDisplay[i];
+        if ('showSteps' in nextStep) {
+          nextStep.showSteps = false
+        }
+      }
+    };
+
+    var initStepsDisplay = function() {
+      $scope.generated = {};
+      $scope.generated.stepsDisplay = [{showSteps: false}];
+      var i, n = $scope.deploymentOptions.steps.length;
+      for (i = 0; i < n; ++i) {
+        var nextStep = $scope.deploymentOptions.steps[i];
+        $scope.generated.stepsDisplay.push(nextStep);
+        $scope.generated.stepsDisplay.push({showSteps: false});
+      }
+    };
+
+    $scope.editJsonSteps = function() {
+      $scope.hideHtmlSteps = true;
+    };
+
+    $scope.saveJsonSteps = function() {
+      $scope.jsonStepsParseError = null;
+      var jsonSteps;
+      try {
+        jsonSteps = angular.fromJson($scope.generated.jsonSteps);
+      } catch(e) {
+        $scope.jsonStepsParseError = e.stack;
+        return;
+      }
+      var steps = [];
+      var i, n = jsonSteps.length;
+      for (i = 0; i < n; ++i) {
+        var nextStep = jsonSteps[i];
+        steps.push(nextStep);
+      }
+      $scope.deploymentOptions.steps = steps;
+      initStepsDisplay();
+      $scope.hideHtmlSteps = false;
+    };
+
+    var constructStepsFromDisplay = function() {
+      var steps = [];
+      var i, n = $scope.generated.stepsDisplay.length;
+      for (i = 0; i < n; ++i) {
+        var nextStep = $scope.generated.stepsDisplay[i];
+        if ('type' in nextStep) {
+          steps.push(nextStep);
+        }
+      }
+      $scope.deploymentOptions.steps = angular.fromJson(angular.toJson(steps));
+    };
+
+    $scope.$watch("generated.stepsDisplay", function() {
+      if ($scope.deploymentOptions) {
+        constructStepsFromDisplay();
+      }
+    }, true);
+
+    $scope.$watch("deploymentOptions.steps", function() {
+      if ($scope.deploymentOptions) {
+        var text ='[\n';
+        var i, n = $scope.deploymentOptions.steps.length;
+        for (i = 0; i < n; ++i) {
+          var nextStep = $scope.deploymentOptions.steps[i];
+          text = text + '  ' + angular.toJson(nextStep);
+          if (i < n - 1) {
+            text = text + ',\n';
+          }
+        }
+        text = text + '\n]';
+        $scope.generated.jsonSteps = text;
+      }
+    });
+
+    $scope.toggleShowStepTypes = function(index) {
+      var value = $scope.generated.stepsDisplay[index].showSteps;
+      $scope.generated.stepsDisplay[index].showSteps = !value;
+    };
+
     var prepareParams = {
       params: {
         includeEnvironment: true,
-        deploymentTemplateName: "CreateJudgeAndCleanUp"
+        deploymentTemplateName: "CreateAndCleanUpPreviousAsg"
       }
     };
 
@@ -20,6 +230,7 @@ angular.module("asgardApp")
         $scope.suspendAZRebalance = $scope.asgOptions.suspendedProcesses.indexOf("AZRebalance") > -1;
         $scope.suspendAddToLoadBalancer = $scope.asgOptions.suspendedProcesses.indexOf("AddToLoadBalancer") > -1;
       }
+      initStepsDisplay();
     });
 
     $scope.$watch("asgOptions.subnetPurpose", function() {
@@ -59,8 +270,17 @@ angular.module("asgardApp")
       $scope.hideAdvancedItems = !$scope.hideAdvancedItems
     };
 
+    $scope.toggleJsonSteps = function() {
+      $scope.hideJsonSteps = !$scope.hideJsonSteps
+    };
+
+    $scope.stepUrl = function(type) {
+      return '/views/deployment/' + type + 'Step.html';
+    };
+
     $scope.startDeployment = function() {
       $scope.startingDeployment = true;
+      constructStepsFromDisplay();
       var deployment = {
         deploymentOptions: $scope.deploymentOptions,
         asgOptions: $scope.asgOptions,
