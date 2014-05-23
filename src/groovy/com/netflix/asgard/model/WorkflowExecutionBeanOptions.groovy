@@ -83,7 +83,7 @@ import groovy.transform.Canonical
         List<DeploymentStep> steps = []
         def input = getInput()
         if (input) {
-            DeploymentWorkflowOptions deploymentWorkflowOptions = input[1]
+            DeploymentWorkflowOptions deploymentWorkflowOptions = input[1] // get the second argument to the workflow
             steps = deploymentWorkflowOptions.steps
         }
         SwfWorkflowTags swfWorkflowTags = new SwfWorkflowTags()
