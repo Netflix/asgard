@@ -34,6 +34,7 @@ import com.netflix.asgard.deployment.DeploymentActivitiesImpl
 import com.netflix.asgard.eureka.EurekaClientHolder
 import com.netflix.asgard.model.CsiScheduledAnalysisFactory
 import com.netflix.asgard.server.DeprecatedServerNames
+import com.netflix.asgard.userdata.PropertiesUserDataProvider
 import groovy.io.FileType
 
 beans = {
@@ -55,6 +56,10 @@ beans = {
     }
 
     objectMapper(ObjectMapper)
+
+    propertiesUserDataProvider(PropertiesUserDataProvider) { bean ->
+        bean.lazyInit = true
+    }
 
     defaultUserDataProvider(DefaultUserDataProvider) { bean ->
         bean.lazyInit = true
