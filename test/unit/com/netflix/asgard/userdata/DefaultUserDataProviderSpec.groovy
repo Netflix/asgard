@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard.userdata
 
+import com.netflix.asgard.ApplicationService
+import com.netflix.asgard.ConfigService
+import com.netflix.asgard.Region
+import com.netflix.asgard.UserContext
 import javax.xml.bind.DatatypeConverter
 import spock.lang.Specification
 
@@ -38,41 +42,41 @@ class DefaultUserDataProviderSpec extends Specification {
 
     def 'should generate user data in the default format'() {
 
+        String expected = 'export ENVIRONMENT=\n' +
+                'export MONITOR_BUCKET=helloworld\n' +
+                'export APP=helloworld\n' +
+                'export APP_GROUP=\n' +
+                'export STACK=example\n' +
+                'export CLUSTER=helloworld-example\n' +
+                'export AUTO_SCALE_GROUP=helloworld-example-v345\n' +
+                'export LAUNCH_CONFIG=helloworld-example-v345-1234567890\n' +
+                'export EC2_REGION=sa-east-1\n'
+
         when:
         String userDataEncoded = provider.buildUserDataForVariables(userContext, 'helloworld',
                 'helloworld-example-v345', 'helloworld-example-v345-1234567890')
 
         then:
-        decode(userDataEncoded) == '''\
-                export ENVIRONMENT=
-                export MONITOR_BUCKET=helloworld
-                export APP=helloworld
-                export APP_GROUP=
-                export STACK=example
-                export CLUSTER=helloworld-example
-                export AUTO_SCALE_GROUP=helloworld-example-v345
-                export LAUNCH_CONFIG=helloworld-example-v345-1234567890
-                export EC2_REGION=sa-east-1
-                '''.stripIndent()
+        decode(userDataEncoded) == expected
     }
 
     def 'should generate user data with blanks for null values'() {
+
+        String expected = 'export ENVIRONMENT=\n' +
+                'export MONITOR_BUCKET=helloworld\n' +
+                'export APP=helloworld\n' +
+                'export APP_GROUP=\n' +
+                'export STACK=\n' +
+                'export CLUSTER=\n' +
+                'export AUTO_SCALE_GROUP=\n' +
+                'export LAUNCH_CONFIG=\n' +
+                'export EC2_REGION=sa-east-1\n'
 
         when:
         String userDataEncoded = provider.buildUserDataForVariables(userContext, 'helloworld', null, null)
 
         then:
-        decode(userDataEncoded) == '''\
-                export ENVIRONMENT=
-                export MONITOR_BUCKET=helloworld
-                export APP=helloworld
-                export APP_GROUP=
-                export STACK=
-                export CLUSTER=
-                export AUTO_SCALE_GROUP=
-                export LAUNCH_CONFIG=
-                export EC2_REGION=sa-east-1
-                '''.stripIndent()
+        decode(userDataEncoded) == expected
     }
 
     private String decode(String encoded) {

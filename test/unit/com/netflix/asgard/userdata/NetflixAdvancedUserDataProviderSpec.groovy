@@ -13,10 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.asgard
+package com.netflix.asgard.userdata
 
 import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.Tag
+import com.netflix.asgard.AppRegistration
+import com.netflix.asgard.ApplicationService
+import com.netflix.asgard.ConfigService
+import com.netflix.asgard.MonkeyPatcherService
+import com.netflix.asgard.PluginService
+import com.netflix.asgard.Region
+import com.netflix.asgard.UserContext
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.LaunchContext
@@ -63,15 +70,15 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
     }
 
     final static String helloStandardUserData = """\
-            export NETFLIX_ENVIRONMENT=test
-            export NETFLIX_MONITOR_BUCKET=hello
-            export NETFLIX_APP=hello
-            export NETFLIX_APP_GROUP=
-            export NETFLIX_STACK=dev
-            export NETFLIX_CLUSTER=hello-dev
-            export NETFLIX_AUTO_SCALE_GROUP=hello-dev-v001
-            export NETFLIX_LAUNCH_CONFIG=hello-dev-v001-1234567
-            export EC2_REGION=us-west-2
+            NETFLIX_ENVIRONMENT=test
+            NETFLIX_MONITOR_BUCKET=hello
+            NETFLIX_APP=hello
+            NETFLIX_APP_GROUP=
+            NETFLIX_STACK=dev
+            NETFLIX_CLUSTER=hello-dev
+            NETFLIX_AUTO_SCALE_GROUP=hello-dev-v001
+            NETFLIX_LAUNCH_CONFIG=hello-dev-v001-1234567
+            EC2_REGION=us-west-2
             """.stripIndent()
     final static String helloCustomUserData = "No soup for you. region=us-west-2 app=hello asg=hello-dev-v001"
 
@@ -121,15 +128,15 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
 
         then:
         userData == """\
-                export NETFLIX_ENVIRONMENT=test
-                export NETFLIX_MONITOR_BUCKET=${monitorBucket ?: ''}
-                export NETFLIX_APP=hi
-                export NETFLIX_APP_GROUP=hi_group
-                export NETFLIX_STACK=dev
-                export NETFLIX_CLUSTER=hi-dev
-                export NETFLIX_AUTO_SCALE_GROUP=hi-dev-v001
-                export NETFLIX_LAUNCH_CONFIG=hi-dev-v001-1234567
-                export EC2_REGION=us-west-2
+                NETFLIX_ENVIRONMENT=test
+                NETFLIX_MONITOR_BUCKET=${monitorBucket ?: ''}
+                NETFLIX_APP=hi
+                NETFLIX_APP_GROUP=hi_group
+                NETFLIX_STACK=dev
+                NETFLIX_CLUSTER=hi-dev
+                NETFLIX_AUTO_SCALE_GROUP=hi-dev-v001
+                NETFLIX_LAUNCH_CONFIG=hi-dev-v001-1234567
+                EC2_REGION=us-west-2
                 """.stripIndent()
 
         where:
@@ -176,15 +183,15 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
 
         then:
         userData == """\
-                export NETFLIX_ENVIRONMENT=test
-                export NETFLIX_MONITOR_BUCKET=${appEnvVar}
-                export NETFLIX_APP=${appEnvVar}
-                export NETFLIX_APP_GROUP=
-                export NETFLIX_STACK=
-                export NETFLIX_CLUSTER=${asg?.autoScalingGroupName ?: ''}
-                export NETFLIX_AUTO_SCALE_GROUP=${asg?.autoScalingGroupName ?: ''}
-                export NETFLIX_LAUNCH_CONFIG=robot-123456
-                export EC2_REGION=us-west-2
+                NETFLIX_ENVIRONMENT=test
+                NETFLIX_MONITOR_BUCKET=${appEnvVar}
+                NETFLIX_APP=${appEnvVar}
+                NETFLIX_APP_GROUP=
+                NETFLIX_STACK=
+                NETFLIX_CLUSTER=${asg?.autoScalingGroupName ?: ''}
+                NETFLIX_AUTO_SCALE_GROUP=${asg?.autoScalingGroupName ?: ''}
+                NETFLIX_LAUNCH_CONFIG=robot-123456
+                EC2_REGION=us-west-2
                 """.stripIndent()
 
         where:

@@ -35,7 +35,7 @@ import com.netflix.asgard.AwsSqsService
 import com.netflix.asgard.CachedMapBuilder
 import com.netflix.asgard.Caches
 import com.netflix.asgard.ConfigService
-import com.netflix.asgard.DefaultUserDataProvider
+import com.netflix.asgard.userdata.DefaultUserDataProvider
 import com.netflix.asgard.DiscoveryService
 import com.netflix.asgard.DnsService
 import com.netflix.asgard.EmailerService

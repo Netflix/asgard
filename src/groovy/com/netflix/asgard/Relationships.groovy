@@ -150,7 +150,7 @@ class Relationships {
      * @return true if the detail is valid
      */
     static Boolean checkDetail(String detail) {
-        NameValidation.checkDetail(detail)
+        NameValidation.checkNameWithHyphen(detail)
     }
 
     static String buildLaunchConfigurationName(String autoScalingGroupName) {
@@ -235,16 +235,29 @@ class Relationships {
         labeledEnvironmentVariables(dissectCompoundName(asgName), prefix)
     }
 
-    static List<String> labeledEnvironmentVariables(Names names, String prefix) {
+    /**
+     * Gets the environment variables as a map of name value pairs, gathered from the fields in a Names object derived
+     * from an Auto Scaling Group name. The fields are the ones that are meant as special labels for specific dimensions
+     * of difference between ASGs.
+     *
+     * @param names the container of special label fields
+     * @param prefix the namespace string that should be appended to each label key to create a full environment
+     *      variable key
+     * @return a map of environment variable keys to values
+     */
+    static Map<String, String> labeledEnvVarsMap(Names names, String prefix) {
         Check.notNull(prefix, String, 'prefix')
-        List<String> envVars = []
-
-        LABELED_ENV_VAR_FIELDS.each { String field ->
+        Map<String, String> props = [:]
+        for (String field in LABELED_ENV_VAR_FIELDS) {
             if (names[field]) {
-                envVars << "export ${prefix}${Meta.splitCamelCase(field, "_").toUpperCase()}=${names[field]}"
+                props["${prefix}${Meta.splitCamelCase(field, "_").toUpperCase()}"] = names[field]
             }
         }
-        envVars
+        props
+    }
+
+    static List<String> labeledEnvironmentVariables(Names names, String prefix) {
+        labeledEnvVarsMap(names, prefix).collect { k, v -> "export ${k}=${v}" }.toList()
     }
 
     private static PARTS_FIELDS = (LABELED_ENV_VAR_FIELDS + ['stack', 'detail']).sort()

@@ -39,6 +39,7 @@ import com.netflix.asgard.model.GroupedInstance
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
+import com.netflix.frigga.Names
 import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
@@ -488,13 +489,13 @@ class AutoScalingController {
     }
 
     def generateName() {
-        withFormat {
+        request.withFormat {
             json {
                 if (params.appName) {
                     try {
                         String groupName = Relationships.buildGroupName(params, true)
-                        List<String> envVars = Relationships.labeledEnvironmentVariables(groupName,
-                                configService.userDataVarPrefix)
+                        List<String> envVars = Relationships.labeledEnvVarsMap(Names.parseName(groupName),
+                                configService.userDataVarPrefix).collect { k, v -> "${k}=${v}" }
                         Map result = [groupName: groupName, envVars: envVars]
                         render(result as JSON)
                     } catch (Exception e) {

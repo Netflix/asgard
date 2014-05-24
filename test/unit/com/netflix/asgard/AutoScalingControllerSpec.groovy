@@ -24,8 +24,8 @@ import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.amazonaws.services.ec2.model.GroupIdentifier
 import com.amazonaws.services.ec2.model.Image
-import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Multiset
 import com.google.common.collect.TreeMultiset
@@ -389,5 +389,18 @@ class AutoScalingControllerSpec extends Specification {
         ''                  | false
         'true'              | true
         'false'             | false
+    }
+
+    void 'should generate group name and environment variables from ASG form inputs'() {
+        request.format = 'json'
+        params.appName = 'hello-c0latam'
+        configService.userDataVarPrefix >> 'CLOUD_'
+
+        when:
+        controller.generateName()
+
+        then:
+        new ObjectMapper().readValue(response.contentAsString, Map) ==
+                [groupName: 'hello-c0latam', envVars: ['CLOUD_COUNTRIES=latam']]
     }
 }
