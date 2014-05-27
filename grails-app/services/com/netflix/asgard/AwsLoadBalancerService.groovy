@@ -28,6 +28,7 @@ import com.amazonaws.services.elasticloadbalancing.model.DeleteLoadBalancerReque
 import com.amazonaws.services.elasticloadbalancing.model.DeregisterInstancesFromLoadBalancerRequest
 import com.amazonaws.services.elasticloadbalancing.model.DescribeInstanceHealthRequest
 import com.amazonaws.services.elasticloadbalancing.model.DescribeLoadBalancersRequest
+import com.amazonaws.services.elasticloadbalancing.model.DescribeLoadBalancersResult
 import com.amazonaws.services.elasticloadbalancing.model.DetachLoadBalancerFromSubnetsRequest
 import com.amazonaws.services.elasticloadbalancing.model.DisableAvailabilityZonesForLoadBalancerRequest
 import com.amazonaws.services.elasticloadbalancing.model.EnableAvailabilityZonesForLoadBalancerRequest
@@ -43,6 +44,7 @@ import com.netflix.asgard.cache.CacheInitializer
 import com.netflix.asgard.model.InstanceStateData
 import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
+import com.netflix.asgard.retriever.AwsResultsRetriever
 import org.springframework.beans.factory.InitializingBean
 
 class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
@@ -85,8 +87,28 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
 
     // Load Balancers
 
+    final AwsResultsRetriever loadBalancerRetriever = new AwsResultsRetriever<LoadBalancerDescription,
+    DescribeLoadBalancersRequest, DescribeLoadBalancersResult>() {
+        @Override
+        protected DescribeLoadBalancersResult makeRequest(Region region, DescribeLoadBalancersRequest request) {
+            awsClient.by(region).describeLoadBalancers(request)
+        }
+        @Override
+        protected List<LoadBalancerDescription> accessResult(DescribeLoadBalancersResult result) {
+            result.loadBalancerDescriptions
+        }
+        @Override
+        protected void setNextToken(DescribeLoadBalancersRequest request, String nextToken) {
+            request.withMarker(nextToken)
+        }
+        @Override
+        protected String getNextToken(DescribeLoadBalancersResult result) {
+            result.nextMarker
+        }
+    }
+
     private List<LoadBalancerDescription> retrieveLoadBalancers(Region region) {
-        awsClient.by(region).describeLoadBalancers(new DescribeLoadBalancersRequest()).getLoadBalancerDescriptions()
+        loadBalancerRetriever.retrieve(region, new DescribeLoadBalancersRequest())
     }
 
     Collection<LoadBalancerDescription> getLoadBalancers(UserContext userContext) {
