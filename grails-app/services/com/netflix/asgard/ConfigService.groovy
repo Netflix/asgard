@@ -620,6 +620,16 @@ class ConfigService {
     }
 
     /**
+     * Only used by the example {@link com.netflix.asgard.userdata.NetflixAdvancedUserDataProvider}.
+     *
+     * @return true if {@link com.netflix.asgard.userdata.NetflixAdvancedUserDataProvider} should use property file
+     *          formatted user data for deploying Windows images
+     */
+    boolean getUsePropertyFileUserDataForWindowsImages() {
+        grailsApplication.config.cloud?.usePropertyFileUserDataForWindowsImages ?: false
+    }
+
+    /**
      * @return the base server URL for generating links to the current Asgard instance in outgoing emails
      */
     String getLinkCanonicalServerUrl() {

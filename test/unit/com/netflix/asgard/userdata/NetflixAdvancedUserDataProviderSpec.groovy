@@ -215,6 +215,41 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
         1 * userDataProvider.buildUserDataForVariables(userContext, '', '', '')
     }
 
+    void 'should use properties file format user data only if image and configuration indicate are set up for it'() {
+
+        configService.usePropertyFileUserDataForWindowsImages >> propForWin
+        Image image = new Image(platform: platform, description: description)
+
+        expect:
+        result == netflixAdvancedUserDataProvider.shouldUsePropertiesUserData(image)
+
+        where:
+        result | propForWin | platform  | description
+        false  | false      | null      | null
+        false  | false      | ''        | ''
+        false  | true       | ''        | ''
+        false  | false      | ''        | "blah blah blah, ancestor_version=nflx-base-1-12345-h24"
+        false  | true       | null      | "blah blah blah, ancestor_version=nflx-base-1-12345-h24"
+        false  | false      | null      | "blah blah blah, ancestor_version=nflx-base-1.0-12345-h24"
+        false  | false      | null      | "blah blah blah, ancestor_version=nflx-base-1.3-12345-h24"
+        true   | false      | null      | "blah blah blah, ancestor_version=nflx-base-2.0-12345-h24"
+        true   | true       | null      | "blah blah blah, ancestor_version=nflx-base-2.0-12345-h24"
+        true   | false      | null      | "blah blah blah, ancestor_version=nflx-base-3-12345-h24"
+        true   | false      | null      | "blah blah blah, ancestor_version=nflx-base-10-12345-h24"
+        true   | false      | null      | "blah blah blah, ancestor_version=nflx-base-10.0-12345-h24"
+        true   | false      | null      | "blah blah blah, ancestor_version=nflx-base-10.1-12345-h24"
+        true   | false      | null      | "blah blah blah, ancestor_version=nflx-base-11-12345-h24"
+        false  | false      | null      | "blah blah blah"
+        false  | false      | 'windows' | "blah blah blah"
+        false  | false      | 'Windows' | "blah blah blah"
+        true   | true       | 'windows' | "blah blah blah"
+        true   | true       | 'windows' | "blah blah blah"
+        true   | true       | 'Windows' | "blah blah blah"
+        false  | true       | 'linux'   | "blah blah blah"
+        true   | true       | 'windows' | "blah blah blah, ancestor_version=nflx-base-1-12345-h24"
+        true   | true       | 'windows' | "blah blah blah, ancestor_version=nflx-base-2-12345-h24"
+    }
+
     private AutoScalingGroupBeanOptions asg(String name) {
         new AutoScalingGroupBeanOptions(autoScalingGroupName: name)
     }

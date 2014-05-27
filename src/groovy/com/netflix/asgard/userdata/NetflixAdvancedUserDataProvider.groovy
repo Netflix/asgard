@@ -60,18 +60,34 @@ class NetflixAdvancedUserDataProvider implements AdvancedUserDataProvider {
         String appName = appNameFromApplication ?: Relationships.appNameFromGroupName(groupName) ?:
             Relationships.packageFromAppVersion(image.appVersion) ?: ''
 
+        if (shouldUsePropertiesUserData(image)) {
+            UserDataProvider simpleProvider = new PropertiesUserDataProvider(configService: configService,
+                    applicationService: applicationService)
+            return simpleProvider.buildUserDataForVariables(userContext, appName, groupName, launchConfigName)
+        }
+
+        // If the AMI lacks a nflx-base version 2 or greater, use the complex legacy user data format.
+        pluginService.userDataProvider.buildUserDataForVariables(userContext, appName, groupName, launchConfigName)
+    }
+
+    /**
+     * Determines whether the deployment of the specified image should have user data in properties file format or not.
+     *
+     * @return true if Asgard's configuration and the image have the characteristics that indicate the need for a
+     *          user data in a properties file format
+     */
+    boolean shouldUsePropertiesUserData(Image image) {
+        if (configService.usePropertyFileUserDataForWindowsImages && image?.platform?.toLowerCase() == 'windows') {
+            return true
+        }
         // If the AMI's description shows a nflx-base version of 2 or greater, use the simple user data format.
         Matcher matcher = image?.description =~ /.*ancestor_version=nflx-base-([0-9]+)[^0-9].*/
         if (matcher.matches()) {
             Integer majorVersion = matcher.group(1) as Integer
             if (majorVersion >= 2) {
-                UserDataProvider simpleProvider = new PropertiesUserDataProvider(configService: configService,
-                        applicationService: applicationService)
-                return simpleProvider.buildUserDataForVariables(userContext, appName, groupName, launchConfigName)
+                return true
             }
         }
-
-        // If the AMI lacks a nflx-base version 2 or greater, use the complex legacy user data format.
-        pluginService.userDataProvider.buildUserDataForVariables(userContext, appName, groupName, launchConfigName)
+        false
     }
 }
