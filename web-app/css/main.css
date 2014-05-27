@@ -459,12 +459,14 @@ table.securityGroups { width: auto; }
 td.checkbox          { text-align: center; }
 
 .deployment { margin-bottom: 800px; }
+.deployment input[type="radio"] { margin: 3px !important; }
 .deployment div label { font-weight: normal }
 .deployment .well { margin: 5px; }
 .deployment .row { margin: 3px; }
 .deployment div h3 { margin-top: 0 }
 
 .deploymentOptions div.step { margin: 5px 0; width: 600px; }
+.deploymentOptions div.step input, .deploymentOptions div.step select { margin: 3px !important; }
 .deploymentOptions div.step h4 { padding: 0 35px; margin: 0; display: inline-block; background: no-repeat; height: 25px; }
 .deploymentOptions div.step .panel-heading { padding: 5px; }
 .deploymentOptions div.step .panel-body { padding: 5px; line-height: 22px; }
@@ -482,6 +484,7 @@ td.checkbox          { text-align: center; }
 
 .deployment .container .row { margin: 10px 0; }
 .deployment .logMessage { margin: 0; padding: 0; line-height: 12px; }
+.deployment .selectedValues div { margin: 0 4px 4px 0; padding: 3px; border: 1px solid #999; background-color: #fff; display: inline-block; }
 
 .steps button.btn { padding: 0 10px; margin: 0 2px; height: 22px; }
 .steps button.insert { padding: 0 200px; }

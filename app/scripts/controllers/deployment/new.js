@@ -6,9 +6,10 @@ angular.module("asgardApp")
     $scope.hideAdvancedItems = true;
     $scope.hideJsonSteps = true;
     $scope.hideHtmlSteps = false;
+    $scope.hideShowMoreAmisLink = false;
     $scope.targetAsgTypes = ["Previous", "Next"];
-
     $scope.count= 0;
+    $scope.selectionsForSubnet = {}
 
     var isSameStepBeforeOrAfter = function(stepTypeName, index) {
       if (index > 0 && index < $scope.generated.stepsDisplay.length - 1) {
@@ -226,16 +227,34 @@ angular.module("asgardApp")
       $scope.environment = data.environment;
       $scope.asgOptions = data.asgOptions;
       $scope.lcOptions = data.lcOptions;
-      if ($scope.asgOptions) {
-        $scope.suspendAZRebalance = $scope.asgOptions.suspendedProcesses.indexOf("AZRebalance") > -1;
-        $scope.suspendAddToLoadBalancer = $scope.asgOptions.suspendedProcesses.indexOf("AddToLoadBalancer") > -1;
-      }
+      $scope.suspendAZRebalance = $scope.asgOptions.suspendedProcesses.indexOf("AZRebalance") > -1;
+      $scope.suspendAddToLoadBalancer = $scope.asgOptions.suspendedProcesses.indexOf("AddToLoadBalancer") > -1;
       initStepsDisplay();
+      angular.forEach($scope.environment.subnetPurposes.concat(""), function(value) {
+        $scope.selectionsForSubnet[value] = {
+          securityGroups: [],
+          availabilityZones: [],
+          loadBalancerNames: []
+        }
+      });
+      $scope.selectionsForSubnet[$scope.asgOptions.subnetPurpose] = {
+        securityGroups: $scope.lcOptions.securityGroups,
+        availabilityZones: $scope.asgOptions.availabilityZones,
+        loadBalancerNames: $scope.asgOptions.loadBalancerNames
+      };
     });
 
     $scope.$watch("asgOptions.subnetPurpose", function() {
       if ($scope.environment) {
         $scope.vpcId = $scope.environment.purposeToVpcId[$scope.asgOptions.subnetPurpose] || "";
+      }
+    });
+
+    $scope.$watch("selectionsForSubnet[asgOptions.subnetPurpose].securityGroups", function() {
+      if ($scope.asgOptions) {
+        $scope.selectedSecurityGroupNames = $scope.environment.securityGroups.filter(function(value) {
+            return $scope.selectionsForSubnet[$scope.asgOptions.subnetPurpose].securityGroups.indexOf(value.id) !== -1;
+          }).map(function(value) { return value.name })
       }
     });
 
@@ -281,6 +300,10 @@ angular.module("asgardApp")
     $scope.startDeployment = function() {
       $scope.startingDeployment = true;
       constructStepsFromDisplay();
+      var subnetSpecificSelections = $scope.selectionsForSubnet[$scope.asgOptions.subnetPurpose];
+      $scope.lcOptions.securityGroups = subnetSpecificSelections.securityGroups;
+      $scope.asgOptions.availabilityZones = subnetSpecificSelections.availabilityZones;
+      $scope.asgOptions.loadBalancerNames = subnetSpecificSelections.loadBalancerNames;
       var deployment = {
         deploymentOptions: $scope.deploymentOptions,
         asgOptions: $scope.asgOptions,
@@ -293,6 +316,13 @@ angular.module("asgardApp")
       }).error(function (data) {
         $scope.validationErrors = data.validationErrors;
         $scope.startingDeployment = false
+      });
+    };
+
+    $scope.retrieveAllAmis = function() {
+      $http.get("deployment/allAmis/").success(function(data) {
+        $scope.environment.images = data;
+        $scope.hideShowMoreAmisLink = true
       });
     };
 

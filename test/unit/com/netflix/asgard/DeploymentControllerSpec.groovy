@@ -376,6 +376,7 @@ class DeploymentControllerSpec extends Specification {
         }
         with(controller.awsEc2Service) {
             1 * getSubnets(_) >> subnets
+            1 * getSecurityGroup(_, 'sg-12345678') >> new SecurityGroup(groupId: 'sg-12345678')
         }
         0 * _
     }
@@ -483,7 +484,7 @@ class DeploymentControllerSpec extends Specification {
                                 [id: "ELB", description: "Replace instances that fail ELB health check"]
                         ],
                         instanceTypes: [[id: null, price:""]],
-                        securityGroups: [[id: "sg-1", name: "hcsg", selection: "sg-1", vpcId: "vpc1"]],
+                        securityGroups: [[id: "sg-1", name: "hcsg", vpcId: "vpc1"]],
                         images: [[id: "img123", imageLocation: "imgloc"]],
                         keys: ["key1"],
                         spotUrl: "spotUrl"
@@ -504,6 +505,7 @@ class DeploymentControllerSpec extends Specification {
             1 * getEffectiveSecurityGroups(_) >> [new SecurityGroup(groupId: "sg-1", groupName: "hcsg", vpcId: "vpc1")]
             1 * getAvailabilityZones(_) >> [new AvailabilityZone(zoneName: "us-east-1")]
             1 * getKeys(_) >> [new KeyPairInfo(keyName: "key1")]
+            1 * getSecurityGroup(_, 'sg-12345678') >> new SecurityGroup(groupId: 'sg-12345678')
         }
         with(controller.awsLoadBalancerService) {
             1 * getLoadBalancers(_) >> [new LoadBalancerDescription(loadBalancerName: "lb1", vPCId: "vpc1")]
