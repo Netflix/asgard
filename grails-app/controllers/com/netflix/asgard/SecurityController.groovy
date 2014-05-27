@@ -23,6 +23,7 @@ import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.UserIdGroupPair
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
+import com.netflix.asgard.model.Subnets
 import com.netflix.grails.contextParam.ContextParam
 import grails.converters.JSON
 import grails.converters.XML
@@ -115,9 +116,11 @@ class SecurityController {
         } else {
             applications = applicationService.getRegisteredApplications(userContext)
         }
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        Collection<String> vpcIds = subnets.mapPurposeToVpcId().values() as Set
         [
             applications: applications,
-            vpcIds: awsEc2Service.getVpcs(userContext)*.vpcId,
+            vpcIds: vpcIds,
             selectedVpcIds: params.selectedVpcIds,
             enableVpc: params.enableVpc,
             name: name,
