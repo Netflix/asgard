@@ -71,7 +71,7 @@ class NetflixAdvancedUserDataProvider implements AdvancedUserDataProvider {
     }
 
     /**
-     * Determines whether the deployment of the specified image should have user data in properties file format or not.
+     * Determines whether or not the deployment of the specified image should have user data in properties file format.
      *
      * @return true if Asgard's configuration and the image have the characteristics that indicate the need for a
      *          user data in a properties file format
