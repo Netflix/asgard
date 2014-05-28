@@ -168,7 +168,7 @@ class DeploymentController {
         ]
         DeploymentTemplate deploymentTemplate = DeploymentTemplate.of(deploymentTemplateName)
         if (deploymentTemplate) {
-            DeploymentWorkflowOptions deploymentOptions = deploymentTemplate.deployment
+            DeploymentWorkflowOptions deploymentOptions = deploymentTemplate.getDeployment(asgOptions.desiredCapacity)
             String groupName = lastGroup.autoScalingGroupName
             String appName = Relationships.appNameFromGroupName(groupName)
             String email = applicationService.getEmailFromApp(userContext, appName)
