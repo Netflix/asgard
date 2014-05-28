@@ -431,7 +431,7 @@ class DeploymentControllerSpec extends Specification {
                         notificationDestination: "jdoe@netflix.com",
                         steps:[
                                 [type: "CreateAsg"],
-                                [type: "Resize", targetAsg: "Next", capacity: 0, startUpTimeoutMinutes: 40],
+                                [type: "Resize", targetAsg: "Next", capacity: 3, startUpTimeoutMinutes: 40],
                                 [type: "DisableAsg", targetAsg: "Previous"],
                                 [type: "DeleteAsg", targetAsg: "Previous"]
                         ]
