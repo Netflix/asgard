@@ -25,20 +25,20 @@ import com.netflix.asgard.model.AsgRoleInCluster
  * Creates instances of Deployment by name for use as templates.
  */
 enum DeploymentTemplate {
-    CreateAndCleanUpPreviousAsg({
+    CreateAndCleanUpPreviousAsg({ int capacity ->
         new DeploymentWorkflowOptions(
                 steps: [
                         new CreateAsgStep(),
-                        new ResizeStep(targetAsg: AsgRoleInCluster.Next, capacity: 0, startUpTimeoutMinutes: 40),
+                        new ResizeStep(targetAsg: AsgRoleInCluster.Next, capacity: capacity, startUpTimeoutMinutes: 40),
                         new DisableAsgStep(targetAsg: AsgRoleInCluster.Previous),
                         new DeleteAsgStep(targetAsg: AsgRoleInCluster.Previous)
                 ],
         )
-    }), CreateOnly({
+    }), CreateOnly({ int capacity ->
         new DeploymentWorkflowOptions(
             steps: [
                     new CreateAsgStep(),
-                    new ResizeStep(targetAsg: AsgRoleInCluster.Next, capacity: 0, startUpTimeoutMinutes: 40)
+                    new ResizeStep(targetAsg: AsgRoleInCluster.Next, capacity: capacity, startUpTimeoutMinutes: 40)
             ],
         )
     })
@@ -49,8 +49,8 @@ enum DeploymentTemplate {
         this.constructDeployment = constructDeployment
     }
 
-    DeploymentWorkflowOptions getDeployment() {
-        constructDeployment()
+    DeploymentWorkflowOptions getDeployment(int capacity = 0) {
+        constructDeployment(capacity)
     }
 
     static DeploymentTemplate of(String name) {
