@@ -68,7 +68,6 @@ class KeyManagementServiceAssumeRoleCredentialsProviderSpec extends Specificatio
         1 * initialProvider.currentTimeMillis() >> 1390360887000
     }
 
-
     void 'should not need a new session if the expiration time is a long time in the future'() {
         provider.sessionCredentials = new BasicSessionCredentials('JABBATHEHUTT', 'H+HANSOLOwookiee', 'AQ*****Zn8lgU=')
         provider.sessionCredentialsExpiration = new Date(1400000000000)
