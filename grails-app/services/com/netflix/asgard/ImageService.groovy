@@ -187,11 +187,13 @@ class ImageService implements BackgroundProcessInitializer {
 
     private Set<String> getRemoteImageIdsInUse(Region region, Task task) {
         Set<String> remoteImageIdsInUse = Sets.newHashSet()
-        String remoteServer = grailsApplication.config.promote.targetServer
-        String url = "${remoteServer}/${region.code}/image/used.json"
-        task.tryUntilSuccessful {
-            JSONArray jsonListOfImageIds = restClientService.getAsJson(url) as JSONArray
-            remoteImageIdsInUse.addAll(jsonListOfImageIds)
+        List<String> promotionTargetServerRootUrls = configService.promotionTargetServerRootUrls
+        for (String remoteServer in promotionTargetServerRootUrls) {
+            String url = "${remoteServer}/${region.code}/image/used.json"
+            task.tryUntilSuccessful {
+                JSONArray jsonListOfImageIds = restClientService.getAsJson(url) as JSONArray
+                remoteImageIdsInUse.addAll(jsonListOfImageIds)
+            }
         }
         remoteImageIdsInUse
     }
@@ -216,10 +218,10 @@ class ImageService implements BackgroundProcessInitializer {
         // Config values that might not be defined mustn't be assumed to be of type String. If you change def to
         // String here then the falsy value becomes "{}" which is a truthy value and breaks the if expression.
         Boolean imageTagPromotionEnabled = grailsApplication.config.promote.imageTags ?: false
-        String promotionTargetServer = grailsApplication.config.promote.targetServer ?: ''
+        List<String> promotionTargetServers = configService.promotionTargetServerRootUrls
         String canonicalServerForBakeEnvironment =
                 grailsApplication.config.promote.canonicalServerForBakeEnvironment ?: ''
-        if (!imageTagPromotionEnabled || !promotionTargetServer || !canonicalServerForBakeEnvironment) {
+        if (!imageTagPromotionEnabled || !promotionTargetServers || !canonicalServerForBakeEnvironment) {
             log.debug 'Environment not configured for tag replication.'
             return false
         }
@@ -248,14 +250,21 @@ class ImageService implements BackgroundProcessInitializer {
                 return
             }
 
-            log.info 'ImageTagReplicator starting'
+            List<String> targetRoolUrls = configService.promotionTargetServerRootUrls
+            log.info "ImageTagReplicator starting for promotion target servers ${targetRoolUrls}"
 
-            // Try to connect to promotion target server. Abort if server is unavailable.
-            String promotionTargetServer = grailsApplication.config.promote.targetServer
-            checkServerHealth(promotionTargetServer)
+            for (String promotionTargetServer in targetRoolUrls) {
+                try {
+                    // Try to connect to promotion target server. Abort if server is unavailable.
+                    checkServerHealth(promotionTargetServer)
 
-            Region.values().each { replicateTagsForRegion(promotionTargetServer, it) }
-            log.info 'ImageTagReplicator done'
+                    Region.values().each { replicateTagsForRegion(promotionTargetServer, it) }
+                    log.info "Image tag replication done for ${promotionTargetServer}"
+                } catch (Exception e) {
+                    log.error "ImageTagReplicator failed for ${promotionTargetServer}", e
+                }
+            }
+            log.info "ImageTagReplicator done for all promotion target servers ${targetRoolUrls}"
         } catch (Exception e) {
             log.error "ImageTagReplicator failed: ${e}"
         }
@@ -277,7 +286,7 @@ class ImageService implements BackgroundProcessInitializer {
         Multimap<String, String> deletableTagNamesToImageIds = ArrayListMultimap.create()
         Multimap<Tag, String> addableTagsToImageIds = ArrayListMultimap.create()
 
-        // Look through all the prod images. For each one, find its counterpart in the test images.
+        // Look through all the remote images. For each one, find its counterpart in the local images.
         // Correct any mismatches.
         prodImages.each { Image prodImage ->
             Image testImage = testImages.find { it.imageId == prodImage.imageId }
@@ -298,11 +307,11 @@ class ImageService implements BackgroundProcessInitializer {
             }
         }
         deletableTagNamesToImageIds.keySet().each { tagKey ->
-            deleteRemoteTags(region, deletableTagNamesToImageIds.get(tagKey), tagKey)
+            deleteRemoteTags(promotionTargetServer, region, deletableTagNamesToImageIds.get(tagKey), tagKey)
             Time.sleepCancellably(grailsApplication.config.cloud.throttleMillis ?: 250)
         }
         addableTagsToImageIds.keySet().each { tag ->
-            addRemoteTags(region, addableTagsToImageIds.get(tag), tag)
+            addRemoteTags(promotionTargetServer, region, addableTagsToImageIds.get(tag), tag)
             Time.sleepCancellably(grailsApplication.config.cloud.throttleMillis ?: 250)
         }
         log.info "ImageTagReplicator finished in region ${region}"
@@ -336,18 +345,16 @@ class ImageService implements BackgroundProcessInitializer {
         tagMap
     }
 
-    private deleteRemoteTags(Region region, Collection<String> remoteImageIds, String name) {
-        log.info "Deleting prod image tags ${name} for ${remoteImageIds} in ${region}"
-        String promotionTargetServer = grailsApplication.config.promote.targetServer
-        String url = "${promotionTargetServer}/${region.code}/image/removeTags"
+    private deleteRemoteTags(String remoteServer, Region region, Collection<String> remoteImageIds, String name) {
+        log.info "Deleting prod image tags ${name} for ${remoteImageIds} in ${remoteServer} ${region}"
+        String url = "${remoteServer}/${region.code}/image/removeTags"
         Map<String, String> query = ['imageIds': remoteImageIds.join(','), 'name': name]
         postForReplication(url, query)
     }
 
-    private addRemoteTags(Region region, Collection<String> remoteImageIds, Tag tag) {
-        log.info "Adding tag ${tag.key}=${tag.value} to remote images ${remoteImageIds} in ${region}"
-        String promotionTargetServer = grailsApplication.config.promote.targetServer
-        String url = "${promotionTargetServer}/${region.code}/image/addTags"
+    private addRemoteTags(String remoteServer, Region region, Collection<String> remoteImageIds, Tag tag) {
+        log.info "Adding tag ${tag.key}=${tag.value} to remote images ${remoteImageIds} in ${remoteServer} ${region}"
+        String url = "${remoteServer}/${region.code}/image/addTags"
         Map<String, String> query = ['imageIds': remoteImageIds.join(','), 'name': tag.key, 'value': tag.value]
         postForReplication(url, query)
     }
@@ -357,6 +364,7 @@ class ImageService implements BackgroundProcessInitializer {
             log.debug "Calling ${url} with params ${query} for tag replication."
             int responseCode = restClientService.post(url, query)
             if (responseCode >= 300) {
+
                 String msg = "Call to ${url} with params ${query} returned status code ${responseCode}"
                 throw new ServerNotActiveException(msg)
             }

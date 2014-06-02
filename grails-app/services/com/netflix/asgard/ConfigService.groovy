@@ -630,6 +630,13 @@ class ConfigService {
     }
 
     /**
+     * @return the list of server root URLs for copying data such as image tags from a source account to target accounts
+     */
+    List<String> getPromotionTargetServerRootUrls() {
+        grailsApplication.config.promote?.targetServerRootUrls ?: []
+    }
+
+    /**
      * @return the base server URL for generating links to the current Asgard instance in outgoing emails
      */
     String getLinkCanonicalServerUrl() {
