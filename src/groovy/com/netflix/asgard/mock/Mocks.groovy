@@ -138,7 +138,6 @@ class Mocks {
                                     awsAccounts: [TEST_AWS_ACCOUNT_ID, PROD_AWS_ACCOUNT_ID]
                             ],
                             promote: [
-                                    targetServer: 'http://prod',
                                     imageTags: true,
                                     canonicalServerForBakeEnvironment: 'http://test'
                             ],

@@ -422,12 +422,14 @@ class ImageDeleteCommand {
     AwsAutoScalingService awsAutoScalingService
     AwsEc2Service awsEc2Service
     RestClientService restClientService
+    ConfigService configService
     def grailsApplication
 
     @SuppressWarnings("GroovyAssignabilityCheck")
     static constraints = {
         id(nullable: false, blank: false, size: 12..12, validator: { String value, ImageDeleteCommand command ->
             UserContext userContext = UserContext.of(Requests.request)
+            List<String> promotionTargetServerRootUrls = configService.promotionTargetServerRootUrls
             String promotionTargetServer = command.grailsApplication.config.promote.targetServer
             String env = command.grailsApplication.config.cloud.accountName
 
@@ -439,18 +441,20 @@ class ImageDeleteCommand {
             if (instances || launchConfigurations) {
                 String reason = constructReason(instances, launchConfigurations)
                 return ['image.imageId.used', value, env, reason]
-            } else if (promotionTargetServer) {
+            } else if (promotionTargetServerRootUrls) {
                 // If the AMI is not in use on master server, check promoted data.
-                String url = "${promotionTargetServer}/${userContext.region}/image/references/${value}"
-                JSONElement json = command.restClientService.getAsJson(url)
-                if (json == null) {
-                    return ['image.imageId.prodInaccessible', value, url]
-                }
-                Collection<String> remoteInstances = json.instances
-                Collection<String> remoteLaunchConfigurations = json.launchConfigurations
-                if (remoteInstances || remoteLaunchConfigurations) {
-                    String reason = constructReason(remoteInstances, remoteLaunchConfigurations)
-                    return ['image.imageId.used', value, 'prod', reason]
+                for (String remoteServer in promotionTargetServerRootUrls) {
+                    String url = "${remoteServer}/${userContext.region}/image/references/${value}"
+                    JSONElement json = command.restClientService.getAsJson(url)
+                    if (json == null) {
+                        return ['image.imageId.remoteInaccessible', value, url]
+                    }
+                    Collection<String> remoteInstances = json.instances
+                    Collection<String> remoteLaunchConfigurations = json.launchConfigurations
+                    if (remoteInstances || remoteLaunchConfigurations) {
+                        String reason = constructReason(remoteInstances, remoteLaunchConfigurations)
+                        return ['image.imageId.used', value, remoteServer, reason]
+                    }
                 }
             }
             null

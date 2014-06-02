@@ -37,7 +37,7 @@ class ImageServiceReplicateTagsSpec extends ImageServiceSpec {
         imageService.runReplicateImageTags()
 
         then:
-        1 * restClientService.post({ it =~ /\/image\/addTags/ }, expectedPostData) >> 200
+        2 * restClientService.post({ it =~ /\/image\/addTags/ }, expectedPostData) >> 200
     }
 
     def 'should call separate updates for same key and different value'() {
@@ -54,8 +54,8 @@ class ImageServiceReplicateTagsSpec extends ImageServiceSpec {
         imageService.runReplicateImageTags()
 
         then:
-        1 * restClientService.post({ it =~ /\/image\/addTags/ }, expectedPostData) >> 200
-        1 * restClientService.post({ it =~ /\/image\/addTags/ }, expectedPostData2) >> 200
+        2 * restClientService.post({ it =~ /\/image\/addTags/ }, expectedPostData) >> 200
+        2 * restClientService.post({ it =~ /\/image\/addTags/ }, expectedPostData2) >> 200
     }
 
     def 'should delete tags if missing from production'() {
@@ -71,7 +71,7 @@ class ImageServiceReplicateTagsSpec extends ImageServiceSpec {
         imageService.runReplicateImageTags()
 
         then:
-        1 * restClientService.post({ it =~ /\/image\/removeTags/ }, expectedPostData) >> 200
+        2 * restClientService.post({ it =~ /\/image\/removeTags/ }, expectedPostData) >> 200
     }
 
     private setupReplicateTestAndProdImages(List<Image> testImages, List<Image> prodImages) {
@@ -94,8 +94,8 @@ class ImageServiceReplicateTagsSpec extends ImageServiceSpec {
         }
         GPathResult prodImagesXml = XML.parse(sw.toString()) as GPathResult
         awsEc2Service.getAccountImages(UserContext.auto()) >> testImages
-        1 * restClientService.getAsXml({ it =~ /\/us-east-1\/image\/list\.xml/ }) >> prodImagesXml
-
+        restClientService.getAsXml({ it =~ /\/us-east-1\/image\/list\.xml/ }) >> prodImagesXml
+        configService.getPromotionTargetServerRootUrls() >> ['http://staging', 'http://prod']
         restClientService.getAsText(_, _) >> InetAddress.getLocalHost().getHostName()
         restClientService.getResponseCode(_) >> 200
         awsEc2Service.getAccountImages(_) >> []
