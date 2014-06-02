@@ -20,6 +20,7 @@ import com.amazonaws.services.ec2.model.Image
 import com.amazonaws.services.ec2.model.Instance
 import grails.converters.JSON
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class ImageServiceLastReferencedTaggingSpec extends ImageServiceSpec {
 
     def 'should tag if image is referenced in test instance'() {
