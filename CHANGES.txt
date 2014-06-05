@@ -1,3 +1,45 @@
+1.5
+
+Features
+- Platform-independent user data provider option (formatted like a properties file)
+- Ability to run Asgard in one AWS account and AssumeRole to manage a different account
+- Automated deployment can accept arbitrary user-chosen steps
+- Each application can have an optional application group
+- Each application can have optional tags
+- Enable configurable maximum number of ASGs per cluster
+- REST endpoints for retrieving a deployment workflow plan JSON blob, and for starting a workflow with that JSON
+- Additional ways to configure Asgard to get AWS credentials, including from an IAM profile
+- Updated list of AWS instance types
+- Links to security groups include both name and ID
+- Made it possible to skip cache loading during cache loading, using runtime flag API
+- Support for HTTPS ELB listeners (Thanks Greg Dziemidowicz)
+- Configurable AWS API socket timeout value
+- Shared visibility all of in-memory running tasks across Asgard instances in a cluster
+- Filterable instance reservations by offering type
+
+
+Infrastructure
+- Turn off noisy, legacy task completion emails
+- Introduced AngularJS for auto deployment screens, with Grunt build and JavaScript unit tests
+- Asgard's health check should fail while initializing, but then should pass forever, for desired load balancer behavior
+- Asgard can register with Eureka service for conventional discoverability
+- "Wither" function to have Asgard delete itself after it finishes all running in-memory tasks
+- Separate SimpleDB service from Application service
+- Store SWF tokens in database
+- Ability to set arbitrary headers via RestClientService (Thanks e0d)
+- Upgraded frigga library to allow for letters in version strings of AMI appversion tags
+- Converted more JUnit tests to Spock
+
+
+Bug Fixes
+- List of VPCs for security group creation only includes VPCs that have conventionally labeled subnets
+- List of ELBs over 400 can be listed successfully
+- List of RDS DB instances over 100 can be listed successfully
+- Rolling push can work with spot instances (Thanks Dale Wijnand)
+- Force U.S. dollars for Amazon-listed currency amounts (Thanks Dale Wijnand)
+- Allow an initial size of 0 for creating the next ASG in a cluster
+
+
 1.4.2
 
 Features
