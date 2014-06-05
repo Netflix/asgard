@@ -250,10 +250,10 @@ class ImageService implements BackgroundProcessInitializer {
                 return
             }
 
-            List<String> targetRoolUrls = configService.promotionTargetServerRootUrls
-            log.info "ImageTagReplicator starting for promotion target servers ${targetRoolUrls}"
+            List<String> targetRootUrls = configService.promotionTargetServerRootUrls
+            log.info "ImageTagReplicator starting for promotion target servers ${targetRootUrls}"
 
-            for (String promotionTargetServer in targetRoolUrls) {
+            for (String promotionTargetServer in targetRootUrls) {
                 try {
                     // Try to connect to promotion target server. Abort if server is unavailable.
                     checkServerHealth(promotionTargetServer)
@@ -264,7 +264,7 @@ class ImageService implements BackgroundProcessInitializer {
                     log.error "ImageTagReplicator failed for ${promotionTargetServer}", e
                 }
             }
-            log.info "ImageTagReplicator done for all promotion target servers ${targetRoolUrls}"
+            log.info "ImageTagReplicator done for all promotion target servers ${targetRootUrls}"
         } catch (Exception e) {
             log.error "ImageTagReplicator failed: ${e}"
         }
