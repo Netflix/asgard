@@ -1230,13 +1230,19 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         }, Link.to(EntityType.launchConfiguration, name), existingTask)
         getLaunchConfiguration(userContext, name)
     }
-
+    
     List<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType, String imageId, UserContext userContext) {
-        List<BlockDeviceMapping> onImage =  awsEc2Service.getImage(userContext, imageId, From.CACHE).getBlockDeviceMappings();
-        if(!onImage.isEmpty()){
-            return onImage;
+        Image image = awsEc2Service.getImage(userContext, imageId, From.CACHE);
+        if(image != null){
+            List<BlockDeviceMapping> onImage = image.getBlockDeviceMappings();
+            if(!onImage.isEmpty()){
+                return onImage;
+            }
         }
+        return buildBlockDeviceMappings(instanceType)
+    }
 
+    List<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType) {
         if (configService.instanceTypeNeedsEbsVolumes(instanceType)) {
             List<String> deviceNames = configService.ebsVolumeDeviceNamesForLaunchConfigs
             return deviceNames.collect{ new BlockDeviceMapping(deviceName: it,
