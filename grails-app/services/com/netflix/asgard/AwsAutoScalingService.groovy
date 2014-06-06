@@ -1217,12 +1217,14 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             Task existingTask = null) {
         String name = launchConfiguration.launchConfigurationName
         String imageId = launchConfiguration.imageId
+        String instanceType = launchConfiguration.instanceType
+
         Check.notNull(name, LaunchConfiguration, "name")
         Check.notNull(imageId, LaunchConfiguration, "imageId")
         Check.notNull(launchConfiguration.keyName, LaunchConfiguration, "keyName")
         Check.notNull(launchConfiguration.instanceType, LaunchConfiguration, "instanceType")
         taskService.runTask(userContext, "Create Launch Configuration '${name}' with image '${imageId}'", { Task task ->
-            launchConfiguration.blockDeviceMappings = buildBlockDeviceMappings(launchConfiguration.instanceType, imageId, userContext)
+            launchConfiguration.blockDeviceMappings = buildBlockDeviceMappings(instanceType, imageId, userContext)
             awsClient.by(userContext.region).createLaunchConfiguration(launchConfiguration.
                     getCreateLaunchConfigurationRequest(userContext, spotInstanceRequestService))
             pushService.addAccountsForImage(userContext, imageId, task)
@@ -1232,11 +1234,11 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
     
     List<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType, String imageId, UserContext userContext) {
-        Image image = awsEc2Service.getImage(userContext, imageId, From.CACHE);
-        if(image != null){
-            List<BlockDeviceMapping> onImage = image.getBlockDeviceMappings();
-            if(!onImage.isEmpty()){
-                return onImage;
+        Image image = awsEc2Service.getImage(userContext, imageId, From.CACHE)
+        if (image != null){
+            List<BlockDeviceMapping> onImage = image.getBlockDeviceMappings()
+            if (!onImage.isEmpty()){
+                return onImage
             }
         }
         return buildBlockDeviceMappings(instanceType)
