@@ -76,6 +76,7 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.InitializingBean
 
+@SuppressWarnings("TrailingWhitespace")
 class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     static transactional = false
