@@ -64,7 +64,8 @@ import groovy.transform.Canonical
             List<LogMessage> logMessages = HistoryAnalyzer.of(events).logMessages
             boolean isDone = executionInfo.closeTimestamp != null
             String currentOperation = isDone || !logMessages ? '' : logMessages.last().text
-            Date lastTime = isDone ? executionInfo.closeTimestamp : logMessages.last().timestamp
+            Date lastUpdate = logMessages ? logMessages.last().timestamp : executionInfo.startTimestamp
+            Date lastTime = isDone ? executionInfo.closeTimestamp : lastUpdate
             task.with {
                 log = logMessages*.toString()
                 updateTime = lastTime
