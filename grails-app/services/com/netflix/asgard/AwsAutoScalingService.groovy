@@ -1222,7 +1222,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         Check.notNull(launchConfiguration.keyName, LaunchConfiguration, "keyName")
         Check.notNull(launchConfiguration.instanceType, LaunchConfiguration, "instanceType")
         taskService.runTask(userContext, "Create Launch Configuration '${name}' with image '${imageId}'", { Task task ->
-            launchConfiguration.blockDeviceMappings = buildBlockDeviceMappings(launchConfiguration.instanceType)
+            launchConfiguration.blockDeviceMappings = buildBlockDeviceMappings(launchConfiguration.instanceType, imageId, userContext)
             awsClient.by(userContext.region).createLaunchConfiguration(launchConfiguration.
                     getCreateLaunchConfigurationRequest(userContext, spotInstanceRequestService))
             pushService.addAccountsForImage(userContext, imageId, task)
@@ -1231,7 +1231,12 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         getLaunchConfiguration(userContext, name)
     }
 
-    List<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType) {
+    List<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType, String imageId, UserContext userContext) {
+        List<BlockDeviceMapping> onImage =  awsEc2Service.getImage(userContext, imageId, From.CACHE).getBlockDeviceMappings();
+        if(!onImage.isEmpty()){
+            return onImage;
+        }
+
         if (configService.instanceTypeNeedsEbsVolumes(instanceType)) {
             List<String> deviceNames = configService.ebsVolumeDeviceNamesForLaunchConfigs
             return deviceNames.collect{ new BlockDeviceMapping(deviceName: it,
