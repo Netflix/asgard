@@ -111,6 +111,15 @@ class ClusterController {
             withFormat {
                 html {
                     AutoScalingGroupData lastGroup = cluster.last()
+                    LaunchConfiguration lastLaunchConfig = awsAutoScalingService.
+                            getLaunchConfiguration(userContext, lastGroup.launchConfigurationName, From.CACHE)
+
+                    boolean associatePublicIpAddress = false
+
+                    if (lastLaunchConfig) {
+                      associatePublicIpAddress = lastLaunchConfig.isAssociatePublicIpAddress()
+                    }
+
                     String nextGroupName = Relationships.buildNextAutoScalingGroupName(lastGroup.autoScalingGroupName)
                     int clusterMaxGroups = configService.clusterMaxGroups
                     Boolean okayToCreateGroup = cluster.size() < clusterMaxGroups
@@ -157,6 +166,7 @@ ${lastGroup.loadBalancerNames}"""
                             loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
                             selectedLoadBalancers: selectedLoadBalancers,
                             spotUrl: configService.spotUrl,
+                            associatePublicIpAddress: lastLaunchConfig.getAssociatePublicIpAddress(),
                             pricing: params.pricing ?: attributes.pricing
                     ])
                     attributes
@@ -246,6 +256,8 @@ ${loadBalancerNames}"""
 Group: ${lastGroup.loadBalancerNames}"""
             boolean ebsOptimized = params.containsKey('ebsOptimized') ? params.ebsOptimized?.toBoolean() :
                 lastLaunchConfig.ebsOptimized
+            boolean associatePublicIpAddress = params.containsKey('associatePublicIpAddress') ? params.associatePublicIpAddress?.toBoolean() :
+                lastLaunchConfig.associatePublicIpAddress
             if (params.noOptionalDefaults != 'true') {
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
@@ -286,7 +298,8 @@ Group: ${loadBalancerNames}"""
                     scheduledActions: newScheduledActions,
                     vpcZoneIdentifier: vpcZoneIdentifier,
                     spotPrice: spotPrice,
-                    ebsOptimized: ebsOptimized
+                    ebsOptimized: ebsOptimized,
+                    associatePublicIpAddress: associatePublicIpAddress
             )
             def operation = pushService.startGroupCreate(options)
             flash.message = "${operation.task.name} has been started."

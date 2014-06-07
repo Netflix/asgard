@@ -75,6 +75,14 @@
       </div>
     </td>
   </tr>
+  <tr class="prop advanced" title="Enables associating of public IP addresses to VPC instances.">
+    <td class="name">
+      <label for="associatePublicIPAddress">Associate Public IP's:</label>
+    </td>
+    <td>
+      <input type="checkbox" id="associatePublicIpAddress" name="associatePublicIpAddress" value="1" <g:if test="${associatePublicIpAddress == true}">checked</g:if> />
+    </td>
+  </tr>
   <tr class="prop advanced">
     <td class="name">
       <label for="kernelId">Kernel ID:</label>

@@ -142,7 +142,7 @@ class AwsAutoScalingServiceIntegrationSpec extends Specification {
                 withMaxSize(0).withMinSize(0).withDefaultCooldown(0)
         final LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId('ami-deadbeef').
                 withInstanceType('m1.small').withKeyName('keyName').withSecurityGroups([]).withUserData('').
-                withEbsOptimized(false)
+                withEbsOptimized(false).withAssociatePublicIpAddress(true)
 
         when:
         final CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(

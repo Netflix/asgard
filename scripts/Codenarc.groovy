@@ -217,4 +217,3 @@ try {
 catch (MissingMethodException ignored) {
     // Ignore. Older versions of Groovy/Grails do not implement this method
 }
-
