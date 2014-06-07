@@ -38,7 +38,8 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
             instanceMonitoringIsEnabled: false,
             instancePriceType: InstancePriceType.ON_DEMAND,
             iamInstanceProfile: 'iamInstanceProfile1',
-            ebsOptimized: false
+            ebsOptimized: false,
+            associatePublicIpAddress: true
     )
 
     LaunchConfiguration awsLaunchConfiguration = new LaunchConfiguration(
@@ -53,7 +54,8 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
             blockDeviceMappings: [new BlockDeviceMapping(deviceName: 'deviceName1', ebs: new Ebs(volumeSize: 256))],
             instanceMonitoring: new InstanceMonitoring(enabled: false),
             iamInstanceProfile: 'iamInstanceProfile1',
-            ebsOptimized: false
+            ebsOptimized: false,
+            associatePublicIpAddress: true
     )
     CreateLaunchConfigurationRequest createLaunchConfigurationRequest = new CreateLaunchConfigurationRequest(
             launchConfigurationName: 'launchConfigurationName1',
@@ -67,7 +69,8 @@ class LaunchConfigurationBeanOptionsSpec extends Specification {
             blockDeviceMappings: [new BlockDeviceMapping(deviceName: 'deviceName1', ebs: new Ebs(volumeSize: 256))],
             instanceMonitoring: new InstanceMonitoring().withEnabled(false),
             iamInstanceProfile: 'iamInstanceProfile1',
-            ebsOptimized: false
+            ebsOptimized: false,
+            associatePublicIpAddress: true
     )
 
     def 'getCreateLaunchConfigurationRequest should have instance monitoring turned off by default'() {
