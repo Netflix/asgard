@@ -1238,7 +1238,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         if (image != null){
             List<BlockDeviceMapping> onImage = image.getBlockDeviceMappings()
             if (!onImage.isEmpty()){
-                return onImage
+                return merge(onImage, buildBlockDeviceMappings(instanceType))
             }
         }
         return buildBlockDeviceMappings(instanceType)
@@ -1252,6 +1252,23 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         }else{
             return []
         }
+    }
+    
+    List<BlockDeviceMapping> merge(List<BlockDeviceMapping> onImage, List<BlockDeviceMapping> inConfig) {
+        List<BlockDeviceMapping> result = []
+        Set<String> deviceNames = [] as Set
+
+        for (BlockDeviceMapping mapping : inConfig){
+            result.add(mapping)
+            deviceNames.add(mapping.getDeviceName())
+        }
+
+        for (BlockDeviceMapping mapping : onImage){
+            if (!deviceNames.contains(mapping.getDeviceName())){
+                result.add(mapping)
+            }
+        }
+        return result
     }
 
     def deleteLaunchConfiguration(UserContext userContext, String name, Task existingTask = null) {
