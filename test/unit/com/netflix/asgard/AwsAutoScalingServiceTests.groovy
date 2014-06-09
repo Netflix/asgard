@@ -30,7 +30,7 @@ class AwsAutoScalingServiceTests extends GroovyTestCase {
     void setUp() {
         Mocks.createDynamicMethods()
     }
-    
+
     void testMerge() {
         AwsAutoScalingService asgService = Mocks.awsAutoScalingService()
         List<BlockDeviceMapping> onImage = []
