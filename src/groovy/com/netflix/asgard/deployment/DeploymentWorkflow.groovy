@@ -40,7 +40,8 @@ interface DeploymentWorkflow {
      */
     @Execute(version = "1.5")
     void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
-                LaunchConfigurationBeanOptions lcOverrides, AutoScalingGroupBeanOptions asgOverrides)
+                LaunchConfigurationBeanOptions lcOverrides, AutoScalingGroupBeanOptions asgOverrides,
+                Map<String, String> userMetaData)
 
     /**
      * @return current log history of the workflow

@@ -138,6 +138,8 @@ class LaunchTemplateServiceSpec extends Specification {
                 launchConfigurationName: 'hello-wassup-987654321')
         LaunchConfigurationBeanOptions launchConfig = new LaunchConfigurationBeanOptions(
                 launchConfigurationName: 'hello-wassup-987654321', imageId: image.imageId)
+        Map<String, String> userMetaData = [meta: "data"]
+
         launchTemplateService.applicationService = Mock(ApplicationService) {
             getRegisteredApplication(*_) >> application
         }
@@ -146,11 +148,11 @@ class LaunchTemplateServiceSpec extends Specification {
         }
 
         when:
-        String userData = launchTemplateService.buildUserData(userContext, asg, launchConfig)
+        String userData = launchTemplateService.buildUserData(userContext, asg, launchConfig, userMetaData)
 
         then:
         1 * advancedUserDataProvider.buildUserData(
-                new LaunchContext(userContext, image, application, asg, launchConfig)) >> 'ta da!'
+                new LaunchContext(userContext, image, application, asg, launchConfig, userMetaData)) >> 'ta da!'
         userData == 'ta da!'
     }
 
@@ -163,7 +165,7 @@ class LaunchTemplateServiceSpec extends Specification {
         String userData = launchTemplateService.buildUserDataForImage(userContext, image)
 
         then:
-        1 * advancedUserDataProvider.buildUserData(new LaunchContext(userContext, image, null, null, null)) >> 'ta da!'
+        1 * advancedUserDataProvider.buildUserData(new LaunchContext(userContext, image, null, null, null, null)) >> 'ta da!'
         userData == 'ta da!'
     }
 }

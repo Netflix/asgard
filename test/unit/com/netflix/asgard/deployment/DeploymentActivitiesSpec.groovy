@@ -114,7 +114,8 @@ class DeploymentActivitiesSpec extends Specification {
     def 'should create launch config for next ASG'() {
         when:
         deploymentActivities.createLaunchConfigForNextAsg(userContext, null,
-                new LaunchConfigurationBeanOptions(launchConfigurationName: 'rearden_metal_pourer-20130718090004'))
+                new LaunchConfigurationBeanOptions(launchConfigurationName: 'rearden_metal_pourer-20130718090004'),
+                [meta:"data"])
 
         then:
         with(mockAwsAutoScalingService) {

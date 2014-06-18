@@ -49,4 +49,9 @@ import groovy.transform.Canonical
      * An object similar in most ways to the launch configuration with which the deployment will be done.
      */
     LaunchConfigurationBeanOptions launchConfiguration
+
+    /**
+     * User metadata for providing to custom userdata providers
+     */
+    Map<String, String> userMetaData
 }

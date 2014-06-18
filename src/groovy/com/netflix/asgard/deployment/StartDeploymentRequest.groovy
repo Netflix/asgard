@@ -29,6 +29,7 @@ class StartDeploymentRequest {
     DeploymentWorkflowOptions deploymentOptions
     LaunchConfigurationBeanOptions lcOptions
     AutoScalingGroupBeanOptions asgOptions
+    Map<String, String> userMetaData
 
     /**
      * @return List of all validation errors

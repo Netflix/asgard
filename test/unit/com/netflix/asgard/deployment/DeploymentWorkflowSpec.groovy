@@ -52,6 +52,8 @@ class DeploymentWorkflowSpec extends Specification {
             securityGroups: ['sg-defec8ed', 'sg-default'], iamInstanceProfile: 'defaultIamInstanceProfile',
             instancePriceType: InstancePriceType.ON_DEMAND, launchConfigurationName: 'the_seaward-v003-20130626140848')
 
+    Map<String, String> userMetaData = [meta: "data"]
+
     AutoScalingGroupBeanOptions asgInputs = new AutoScalingGroupBeanOptions(
             availabilityZones: ['us-west2a', 'us-west2b'], minSize: 1, desiredCapacity: 3, maxSize: 4,
             subnetPurpose: 'internal')
@@ -77,7 +79,7 @@ class DeploymentWorkflowSpec extends Specification {
         with(mockActivities) {
             1 * getAsgDeploymentNames(userContext, 'the_seaward') >> asgDeploymentNames
             1 * constructLaunchConfigForNextAsg(userContext, asgTemplate, lcInputs) >> lcTemplate
-            1 * createLaunchConfigForNextAsg(userContext, asgTemplate, lcTemplate) >> 'the_seaward-v003-20130626140848'
+            1 * createLaunchConfigForNextAsg(userContext, asgTemplate, lcTemplate, userMetaData) >> 'the_seaward-v003-20130626140848'
             1 * createNextAsgForClusterWithoutInstances(userContext, asgTemplate) >> 'the_seaward-v003'
             1 * copyScalingPolicies(userContext, asgDeploymentNames) >> 0
             1 * copyScheduledActions(userContext, asgDeploymentNames) >> 0
@@ -99,7 +101,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}', 'Waiting 10 minutes before next step.', '{"step":1}'] +
@@ -141,7 +143,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}', 'Waiting 10 minutes before next step.', '{"step":1}'] +
@@ -183,7 +185,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + fullCapacityScaleUpLog + [
@@ -217,7 +219,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + canaryScaleUpLog + [
@@ -244,7 +246,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + canaryScaleUpLog +
@@ -276,7 +278,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + fullCapacityScaleUpLog + [
@@ -306,7 +308,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + canaryScaleUpLog +
@@ -337,7 +339,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + fullCapacityScaleUpLog +
@@ -369,7 +371,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + canaryScaleUpLog +
@@ -407,7 +409,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + canaryScaleUpLog +
@@ -446,7 +448,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + fullCapacityScaleUpLog + [
@@ -488,7 +490,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + fullCapacityScaleUpLog + [
@@ -532,7 +534,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + fullCapacityScaleUpLog + [
@@ -568,7 +570,7 @@ class DeploymentWorkflowSpec extends Specification {
         )
 
         when:
-        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs, userMetaData)
 
         then:
         workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + fullCapacityScaleUpLog + [
