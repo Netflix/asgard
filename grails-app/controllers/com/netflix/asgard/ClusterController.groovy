@@ -267,7 +267,7 @@ Group: ${loadBalancerNames}"""
                             groupName: nextGroupName,
                             securityGroups: securityGroups,
                             maxStartupRetries: convertToIntOrUseDefault(params.maxStartupRetries, 5),
-                            metadata: convertToKeyValue("meta")
+                            metadata: params.userMetaData
                     ),
                     initialTraffic: initialTraffic,
                     minSize: minSize,
@@ -299,19 +299,6 @@ Group: ${loadBalancerNames}"""
     @PackageScope
     int convertToIntOrUseDefault(String value, Integer defaultValue) {
         value?.isInteger() ? value.toInteger() : defaultValue
-    }
-
-    @VisibleForTesting
-    @PackageScope
-    Map<String,String> convertToKeyValue(String prefix) {
-        Map<String,Object> maps = new HashMap<String, Object>()
-
-        for (Map.Entry<String, Object> entry : params.entrySet()) {
-            if (entry.getKey().startsWith(prefix))
-                maps.put(entry.getKey(), entry.getValue())
-        }
-
-        return maps
     }
 
     private boolean shouldAzRebalanceBeSuspended(String azRebalance, boolean lastRebalanceSuspended) {
