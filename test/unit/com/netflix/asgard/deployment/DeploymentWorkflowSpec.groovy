@@ -79,7 +79,8 @@ class DeploymentWorkflowSpec extends Specification {
         with(mockActivities) {
             1 * getAsgDeploymentNames(userContext, 'the_seaward') >> asgDeploymentNames
             1 * constructLaunchConfigForNextAsg(userContext, asgTemplate, lcInputs) >> lcTemplate
-            1 * createLaunchConfigForNextAsg(userContext, asgTemplate, lcTemplate, userMetaData) >> 'the_seaward-v003-20130626140848'
+            1 * createLaunchConfigForNextAsg(userContext, asgTemplate, lcTemplate, userMetaData) >>
+                    'the_seaward-v003-20130626140848'
             1 * createNextAsgForClusterWithoutInstances(userContext, asgTemplate) >> 'the_seaward-v003'
             1 * copyScalingPolicies(userContext, asgDeploymentNames) >> 0
             1 * copyScheduledActions(userContext, asgDeploymentNames) >> 0

@@ -165,7 +165,8 @@ class LaunchTemplateServiceSpec extends Specification {
         String userData = launchTemplateService.buildUserDataForImage(userContext, image)
 
         then:
-        1 * advancedUserDataProvider.buildUserData(new LaunchContext(userContext, image, null, null, null, null)) >> 'ta da!'
+        1 * advancedUserDataProvider.buildUserData(new LaunchContext(userContext, image, null, null, null, null)) >>
+                'ta da!'
         userData == 'ta da!'
     }
 }

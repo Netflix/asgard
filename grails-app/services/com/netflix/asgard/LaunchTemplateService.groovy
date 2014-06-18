@@ -87,7 +87,8 @@ class LaunchTemplateService {
         AppRegistration app = applicationService.getRegisteredApplication(userContext, appName)
 
         // Wrap all the inputs in a single class so we can add more inputs later without changing the plugin interface.
-        LaunchContext launchContext = new LaunchContext(userContext, image, app, autoScalingGroup, launchConfiguration, userMetaData)
+        LaunchContext launchContext = new LaunchContext(userContext, image, app, autoScalingGroup, launchConfiguration,
+                userMetaData)
         pluginService.advancedUserDataProvider.buildUserData(launchContext)
     }
 
