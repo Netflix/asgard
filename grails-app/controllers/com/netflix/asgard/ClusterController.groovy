@@ -267,7 +267,7 @@ Group: ${loadBalancerNames}"""
                             groupName: nextGroupName,
                             securityGroups: securityGroups,
                             maxStartupRetries: convertToIntOrUseDefault(params.maxStartupRetries, 5),
-                            metadata: params.userMetaData
+                            userMetadata: params.userMetaData
                     ),
                     initialTraffic: initialTraffic,
                     minSize: minSize,

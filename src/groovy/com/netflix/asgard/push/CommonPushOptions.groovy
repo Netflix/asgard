@@ -29,5 +29,5 @@ import groovy.transform.Immutable
     String groupName
     List<String> securityGroups
     Integer maxStartupRetries = 5
-    Map<String, String> metadata = [:]
+    Map<String, String> userMetadata = [:]
 }
