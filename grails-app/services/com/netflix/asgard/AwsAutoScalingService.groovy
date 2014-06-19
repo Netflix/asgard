@@ -76,7 +76,6 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.InitializingBean
 
-@SuppressWarnings("TrailingWhitespace")
 class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     static transactional = false
@@ -1218,30 +1217,18 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
             Task existingTask = null) {
         String name = launchConfiguration.launchConfigurationName
         String imageId = launchConfiguration.imageId
-        String instanceType = launchConfiguration.instanceType
-
         Check.notNull(name, LaunchConfiguration, "name")
         Check.notNull(imageId, LaunchConfiguration, "imageId")
         Check.notNull(launchConfiguration.keyName, LaunchConfiguration, "keyName")
         Check.notNull(launchConfiguration.instanceType, LaunchConfiguration, "instanceType")
         taskService.runTask(userContext, "Create Launch Configuration '${name}' with image '${imageId}'", { Task task ->
-            launchConfiguration.blockDeviceMappings = buildBlockDeviceMappings(instanceType, imageId, userContext)
+            launchConfiguration.blockDeviceMappings = buildBlockDeviceMappings(launchConfiguration.instanceType)
             awsClient.by(userContext.region).createLaunchConfiguration(launchConfiguration.
                     getCreateLaunchConfigurationRequest(userContext, spotInstanceRequestService))
             pushService.addAccountsForImage(userContext, imageId, task)
+
         }, Link.to(EntityType.launchConfiguration, name), existingTask)
         getLaunchConfiguration(userContext, name)
-    }
-
-    List<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType, String imageId, UserContext userContext) {
-        Image image = awsEc2Service.getImage(userContext, imageId, From.CACHE)
-        if (image != null){
-            List<BlockDeviceMapping> onImage = image.getBlockDeviceMappings()
-            if (!onImage.isEmpty()){
-                return merge(onImage, buildBlockDeviceMappings(instanceType))
-            }
-        }
-        return buildBlockDeviceMappings(instanceType)
     }
 
     List<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType) {
@@ -1252,23 +1239,6 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         }else{
             return []
         }
-    }
-    
-    List<BlockDeviceMapping> merge(List<BlockDeviceMapping> onImage, List<BlockDeviceMapping> inConfig) {
-        List<BlockDeviceMapping> result = []
-        Set<String> deviceNames = [] as Set
-
-        for (BlockDeviceMapping mapping : inConfig){
-            result.add(mapping)
-            deviceNames.add(mapping.getDeviceName())
-        }
-
-        for (BlockDeviceMapping mapping : onImage){
-            if (!deviceNames.contains(mapping.getDeviceName())){
-                result.add(mapping)
-            }
-        }
-        return result
     }
 
     def deleteLaunchConfiguration(UserContext userContext, String name, Task existingTask = null) {
