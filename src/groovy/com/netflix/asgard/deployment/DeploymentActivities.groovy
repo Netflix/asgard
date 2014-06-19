@@ -105,16 +105,18 @@ interface DeploymentActivities {
      *
      * @param userContext who, where, why
      * @param asgName of the ASG to modify
+     * @return boolean representing the success of the activity
      */
-    void enableAsg(UserContext userContext, String asgName)
+    Boolean enableAsg(UserContext userContext, String asgName)
 
     /**
      * Disables scaling behavior for the ASG and traffic to its instances.
      *
      * @param userContext who, where, why
      * @param asgName of the ASG to modify
+     * @return boolean representing the success of the activity
      */
-    void disableAsg(UserContext userContext, String asgName)
+    Boolean disableAsg(UserContext userContext, String asgName)
 
     /**
      * Deletes an ASG.
