@@ -20,8 +20,6 @@ import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.ec2.model.AvailabilityZone
 import com.netflix.asgard.mock.Mocks
 import com.netflix.asgard.push.Cluster
-import com.amazonaws.services.autoscaling.model.BlockDeviceMapping
-import com.amazonaws.services.autoscaling.model.Ebs
 
 class AwsAutoScalingServiceTests extends GroovyTestCase {
 
@@ -29,20 +27,6 @@ class AwsAutoScalingServiceTests extends GroovyTestCase {
 
     void setUp() {
         Mocks.createDynamicMethods()
-    }
-
-    void testMerge() {
-        AwsAutoScalingService asgService = Mocks.awsAutoScalingService()
-        List<BlockDeviceMapping> onImage = []
-        List<BlockDeviceMapping> inConfig = []
-        onImage.add(new BlockDeviceMapping(deviceName: "a", ebs: new Ebs(volumeSize: 1)))
-        onImage.add(new BlockDeviceMapping(deviceName: "b", ebs: new Ebs(volumeSize: 1)))
-        inConfig.add(new BlockDeviceMapping(deviceName: "a", ebs: new Ebs(volumeSize: 2)))
-        List<BlockDeviceMapping> merged = asgService.merge(onImage, inConfig)
-        assert 2 == merged.size()
-        assert merged.any { 'a' == it.getDeviceName() }
-        assert merged.any { 'b' == it.getDeviceName() }
-        assert merged.any { 2 == it.getEbs().getVolumeSize() }
     }
 
     void testGetClusters() {
