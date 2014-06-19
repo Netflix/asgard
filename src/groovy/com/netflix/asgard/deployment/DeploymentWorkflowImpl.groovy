@@ -275,7 +275,17 @@ initially with 0 instances."
     }
 
     private void rollback(UserContext userContext, AsgDeploymentNames asgDeploymentNames) {
-        activities.enableAsg(userContext, asgDeploymentNames.previousAsgName)
-        activities.disableAsg(userContext, asgDeploymentNames.nextAsgName)
+        Promise<Boolean> previousAsgEnabled = doTry {
+            activities.enableAsg(userContext, asgDeploymentNames.previousAsgName)
+        } withCatch { Throwable t ->
+            status "Previous ASG '${asgDeploymentNames.previousAsgName}' could not be enabled."
+            promiseFor(false)
+        } result
+        waitFor(previousAsgEnabled) {
+            if (it) {
+                activities.disableAsg(userContext, asgDeploymentNames.nextAsgName)
+            }
+            Promise.Void()
+        }
     }
 }
