@@ -15,6 +15,7 @@
  */
 package com.netflix.asgard.deployment
 
+import com.amazonaws.AmazonServiceException
 import com.netflix.asgard.Region
 import com.netflix.asgard.UserContext
 import com.netflix.asgard.deployment.steps.CreateAsgStep
@@ -598,5 +599,40 @@ class DeploymentWorkflowSpec extends Specification {
         then: 1 * mockActivities.sendNotification(_, 'gob@bluth.com', 'the_seaward',
                 "Deployment failed for ASG 'the_seaward-v003'.",
                 "Deployment was rolled back. Judge decided ASG 'the_seaward-v003' was not viable.")
+    }
+
+    def 'should not rollback if previous ASG has disappeared'() {
+        DeploymentWorkflowOptions deploymentOptions = new DeploymentWorkflowOptions(clusterName: 'the_seaward',
+                notificationDestination: 'gob@bluth.com',
+                steps: [
+                        new CreateAsgStep(),
+                        new ResizeStep(capacity: 1, startUpTimeoutMinutes: 30)
+                ]
+        )
+
+        when:
+        workflowExecuter.deploy(userContext, deploymentOptions, lcInputs, asgInputs)
+
+        then:
+        workflowOperations.logHistory == ['{"step":0}'] + createAsgLog + '{"step":1}' + canaryScaleUpLog +
+                "Previous ASG 'the_seaward-v002' could not be enabled." +
+                "Deployment was rolled back due to error: java.lang.IllegalStateException: Something really went wrong!"
+        interaction {
+            createAsgInteractions()
+        }
+        0 * _
+
+        then: 1 * mockActivities.resizeAsg(userContext, 'the_seaward-v003', 1, 1, 4)
+        then: 1 * mockActivities.reasonAsgIsNotOperational(userContext, 'the_seaward-v003', 1) >> {
+            throw new IllegalStateException('Something really went wrong!')
+        }
+        then: 1 * mockActivities.enableAsg(userContext, 'the_seaward-v002') >> {
+            throw new AmazonServiceException('AutoScalingGroup name not found - no such group: the_seaward-v002')
+        }
+        then: 0 * mockActivities.disableAsg(userContext, 'the_seaward-v003')
+        then: 1 * mockActivities.sendNotification(_, 'gob@bluth.com', 'the_seaward',
+                "Deployment failed for ASG 'the_seaward-v003'.",
+                "Deployment was rolled back due to error: java.lang.IllegalStateException: Something really went wrong!"
+        )
     }
 }

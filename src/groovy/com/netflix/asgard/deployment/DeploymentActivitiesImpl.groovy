@@ -140,7 +140,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     }
 
     @Override
-    void enableAsg(UserContext userContext, String asgName) {
+    Boolean enableAsg(UserContext userContext, String asgName) {
         Task task = new Task()
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, asgName)
         String appName = Relationships.appNameFromGroupName(asgName)
@@ -158,10 +158,11 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
                 discoveryService.enableAppInstances(userContext, appName, instanceIds, task)
             }
         }
+        true
     }
 
     @Override
-    void disableAsg(UserContext userContext, String asgName) {
+    Boolean disableAsg(UserContext userContext, String asgName) {
         Task task = new Task()
         AutoScalingGroup group = awsAutoScalingService.getAutoScalingGroup(userContext, asgName)
         String appName = Relationships.appNameFromGroupName(asgName)
@@ -181,6 +182,7 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
                 discoveryService.disableAppInstances(userContext, appName, instanceIds, task)
             }
         }
+        true
     }
 
     @Override
