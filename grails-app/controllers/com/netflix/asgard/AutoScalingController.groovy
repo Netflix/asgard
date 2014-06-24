@@ -251,6 +251,7 @@ class AutoScalingController {
         }
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
+        Map<String, String> userMetaData = params.userMetaData
         String subnetPurpose = params.subnetPurpose ?: null
         String vpcId = purposeToVpcId[subnetPurpose]
         Set<String> appsWithClusterOptLevel = []
@@ -285,7 +286,8 @@ class AutoScalingController {
                 iamInstanceProfile: configService.defaultIamRole,
                 spotUrl: configService.spotUrl,
                 isChaosMonkeyActive: cloudReadyService.isChaosMonkeyActive(userContext.region),
-                appsWithClusterOptLevel: appsWithClusterOptLevel ?: []
+                appsWithClusterOptLevel: appsWithClusterOptLevel ?: [],
+                userMetaData: userMetaData ?: [:]
         ]
     }
 
