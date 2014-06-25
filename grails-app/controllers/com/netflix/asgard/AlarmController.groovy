@@ -190,10 +190,9 @@ class AlarmController {
                 evaluationPeriods = cmd.evaluationPeriods
                 threshold = cmd.threshold
             }
-            alarm.dimensions = []
             awsCloudWatchService.getDimensionsForNamespace(metricId.namespace).each {
                 String value = params[it]
-                if (value) {
+                if (value != null) {
                     alarm.dimensions << new Dimension(name: it, value: params[it])
                 }
             }
