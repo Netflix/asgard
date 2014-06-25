@@ -146,7 +146,8 @@ interface DeploymentActivities {
      */
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = -1L,
             defaultTaskStartToCloseTimeoutSeconds = 86400L)
-    Boolean askIfDeploymentShouldProceed(String notificationDestination, String asgName, String operationDescription)
+    Boolean askIfDeploymentShouldProceed(UserContext userContext, String notificationDestination, String asgName,
+            String operationDescription)
 
     /**
      * Sends a notification about the status of the deployment.

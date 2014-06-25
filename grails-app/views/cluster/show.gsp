@@ -29,15 +29,24 @@
       <g:if test="${flash.message}">
         <div class="message">${flash.message}</div>
       </g:if>
-      <g:if test="${!runningTasks && !requireLoginForEdit}">
-        <div class="buttons">
-          <g:link class="deploy" controller="ng" action=" " fragment="deployment/new/${params.id}">Prepare Automated Deployment</g:link>
-        </div>
+      <g:if test="${deployment}">
+        <div class="warning">Cancel the automated deployment currently running before manually editing this cluster.</div>
+        <h3>Running deployment:</h3>
+        <g:link class="deployment" controller="ng" action=" " fragment="deployment/detail/${deployment.id}">${deployment.description}</g:link>
+        <p></p>
       </g:if>
-      <p>
-        Recommended next step: <br/>
-        <em>${recommendedNextStep}</em>
-      </p>
+      <g:else>
+        <g:if test="${!runningTasks && !requireLoginForEdit}">
+          <div class="buttons">
+            <g:link class="deploy" controller="ng" action=" " fragment="deployment/new/${params.id}">Prepare Automated Deployment</g:link>
+          </div>
+        </g:if>
+        <p>
+          Recommended next step: <br/>
+          <em>${recommendedNextStep}</em>
+        </p>
+      </g:else>
+    </div>
       <g:if test="${runningTasks}">
         <h3>Running tasks:</h3>
         <ul class="tasks">

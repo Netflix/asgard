@@ -52,6 +52,7 @@ class ClusterController {
     def awsEc2Service
     def awsLoadBalancerService
     def configService
+    def deploymentService
     def mergedInstanceService
     def pushService
     def spotInstanceRequestService
@@ -157,7 +158,8 @@ ${lastGroup.loadBalancerNames}"""
                             loadBalancersGroupedByVpcId: loadBalancers.groupBy { it.VPCId },
                             selectedLoadBalancers: selectedLoadBalancers,
                             spotUrl: configService.spotUrl,
-                            pricing: params.pricing ?: attributes.pricing
+                            pricing: params.pricing ?: attributes.pricing,
+                            deployment: deploymentService.getRunningDeploymentForCluster(cluster.name)
                     ])
                     attributes
                 }

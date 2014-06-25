@@ -399,6 +399,7 @@ a.dbSecurity          { padding:  2px 2px  2px 26px; background: url(../images/t
 a.dbSnapshot          { padding:  2px 2px  2px 26px; background: url(../images/tango/16/devices/database-snapshot.png)           transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.cloudready          { padding:  2px 2px  2px 26px; background: url(../images/tango/16/emotes/face-monkey.png)                  transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.task                { padding:  2px 2px  2px 24px; background: url(../images/tango/16/actions/edit-paste.png)                  transparent no-repeat 3px 1px; display: inline-block; line-height: 17px; min-height: 17px; }
+a.deployment          { padding:  2px 2px  2px 24px; background: url(../images/tango/16/tools/deploy.png)                        transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.builds              { padding:  2px 2px  2px 22px; background: url(../images/builds.png)                                       transparent no-repeat 5px 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.mail                { padding:  2px 2px  2px 22px; background: url(../images/tango/16/actions/mail-message-new.png)            transparent no-repeat 0   1px; display: inline-block; line-height: 16px; min-height: 16px; }
 a.jira                { padding:  2px 2px  2px 22px; background: url(../images/jira.png)                                         transparent no-repeat 0   1px; display: inline-block; line-height: 16px; min-height: 16px; }
@@ -458,7 +459,7 @@ label.choice        { padding-right: 15px; }
 table.securityGroups { width: auto; }
 td.checkbox          { text-align: center; }
 
-.deployment { margin-bottom: 800px; }
+div.deployment { margin-bottom: 800px; }
 .deployment input[type="radio"] { margin: 3px !important; }
 .deployment div label { font-weight: normal }
 .deployment .well { margin: 5px; }
