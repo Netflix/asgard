@@ -76,6 +76,7 @@ class ClusterControllerSpec extends Specification {
             awsLoadBalancerService.getLoadBalancers(_) >> []
             configService = Mock(ConfigService)
             configService.clusterMaxGroups >> 3
+            deploymentService = Mock(DeploymentService)
         }
     }
 

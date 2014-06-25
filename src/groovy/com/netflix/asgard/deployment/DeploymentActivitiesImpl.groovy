@@ -199,13 +199,15 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
 
     @ManualActivityCompletion
     @Override
-    Boolean askIfDeploymentShouldProceed(String notificationDestination, String asgName, String operationDescription) {
+    Boolean askIfDeploymentShouldProceed(UserContext userContext, String notificationDestination, String asgName,
+            String operationDescription) {
         WorkflowExecutionBeanOptions workflowExecutionBeanOptions = awsSimpleWorkflowService.
                 getWorkflowExecutionInfoByWorkflowExecution(activity.workflowExecution)
         SwfWorkflowTags tags = workflowExecutionBeanOptions.tags
         deploymentService.setManualTokenForDeployment(tags.id, activity.taskToken)
-        String link = grailsLinkGenerator.link(base: configService.linkCanonicalServerUrl, controller: 'ng',
-                action: ' ', fragment: "deployment/detail/${tags.id}")
+        String clusterName = Relationships.clusterFromGroupName(asgName)
+        String link = grailsLinkGenerator.link(base: configService.linkCanonicalServerUrl, controller: 'cluster',
+                action: 'show', params: [id: clusterName, region: userContext.region.code])
         String message = """
         Auto Scaling Group '${asgName}' is being deployed.
         ${operationDescription}

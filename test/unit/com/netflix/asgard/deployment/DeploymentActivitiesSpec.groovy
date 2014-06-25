@@ -274,8 +274,8 @@ class DeploymentActivitiesSpec extends Specification {
 
     def 'should ask if deployment should proceed'() {
         when:
-        deploymentActivities.askIfDeploymentShouldProceed('hrearden@reardenmetal.com', 'rearden_metal_pourer-v001',
-                'It has finished pouring.')
+        deploymentActivities.askIfDeploymentShouldProceed(UserContext.auto(), 'hrearden@reardenmetal.com',
+                'rearden_metal_pourer-v001', 'It has finished pouring.')
 
         then:
         with(mockActivityOperations) {

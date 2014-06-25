@@ -252,8 +252,8 @@ initially with 0 instances."
         String judgmentMessage = "ASG will now be evaluated for up to ${unit(judgmentPeriodMinutes, 'minute')}" +
                 " during the judgment period."
         status judgmentMessage
-        Promise<Boolean> proceed = promiseFor(activities.askIfDeploymentShouldProceed(notificationDestination,
-                    asgName, judgmentMessage))
+        Promise<Boolean> proceed = promiseFor(activities.askIfDeploymentShouldProceed(userContext,
+                notificationDestination, asgName, judgmentMessage))
         DoTry<Void> sendNotificationAtJudgmentTimeout = doTry {
             Promise<Void> judgmentTimeout = timer(minutesToSeconds(judgmentPeriodMinutes), 'judgmentTimeout')
             waitFor(judgmentTimeout) {

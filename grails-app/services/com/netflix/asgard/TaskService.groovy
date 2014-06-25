@@ -209,7 +209,7 @@ class TaskService {
      * @return a single concatenated list of all locally cached running tasks (without tasks on other Asgard servers)
      */
     List<Task> getAllRunningInCache() {
-        localRunningInMemory + allRunningInSwf
+        localRunningInMemory
     }
 
     /**
