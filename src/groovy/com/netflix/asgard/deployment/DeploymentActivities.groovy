@@ -25,9 +25,9 @@ import com.netflix.asgard.model.ScheduledAsgAnalysis
 /**
  * Method contracts and annotations used for the automatic deployment SWF workflow actions.
  */
-@Activities(version = "1.8")
+@Activities(version = "1.9")
 @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = -1L,
-        defaultTaskStartToCloseTimeoutSeconds = 300L)
+        defaultTaskStartToCloseTimeoutSeconds = 600L)
 interface DeploymentActivities {
 
     /**
@@ -145,7 +145,7 @@ interface DeploymentActivities {
      * @return indication on whether to proceed with the deployment
      */
     @ActivityRegistrationOptions(defaultTaskScheduleToStartTimeoutSeconds = -1L,
-            defaultTaskStartToCloseTimeoutSeconds = 86400L)
+            defaultTaskStartToCloseTimeoutSeconds = 259200L)
     Boolean askIfDeploymentShouldProceed(UserContext userContext, String notificationDestination, String asgName,
             String operationDescription)
 
