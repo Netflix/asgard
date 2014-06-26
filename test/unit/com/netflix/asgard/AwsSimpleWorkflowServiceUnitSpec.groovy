@@ -233,7 +233,8 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
         Link link = new Link(EntityType.cluster, 'gus-fring')
 
         when:
-        WorkflowExecutionInfo result = awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link)
+        WorkflowExecutionInfo result = awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(Region.US_WEST_2,
+                link)
 
         then:
         result == deployGusFring1
@@ -242,6 +243,21 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
         1 * awsSimpleWorkflowService.configService.getSimpleWorkflowDomain() >> 'Albuquerque'
         1 * mockAmazonSimpleWorkflow.describeWorkflowExecution(
                 new DescribeWorkflowExecutionRequest(domain: 'Albuquerque')) >> new WorkflowExecutionDetail()
+        0 * _
+    }
+
+    def 'should not return a workflow execution matching the specified link from the cache with the wrong region'() {
+
+        Link link = new Link(EntityType.cluster, 'gus-fring')
+
+        when:
+        WorkflowExecutionInfo result = awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(Region.US_WEST_1,
+                link)
+
+        then:
+        result == null
+        1 * awsSimpleWorkflowService.caches.allOpenWorkflowExecutions.list() >>
+                [deployGusFring1, deployWalterWhite1, deployGusFring2]
         0 * _
     }
 
@@ -255,7 +271,8 @@ class AwsSimpleWorkflowServiceUnitSpec extends Specification {
         Link link = new Link(EntityType.cluster, 'this-isnt-running')
 
         when:
-        WorkflowExecutionInfo result = awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(link)
+        WorkflowExecutionInfo result = awsSimpleWorkflowService.getOpenWorkflowExecutionForObjectLink(Region.US_WEST_1,
+                link)
 
         then:
         result == null

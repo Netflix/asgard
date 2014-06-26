@@ -335,19 +335,25 @@ class AwsSimpleWorkflowService implements CacheInitializer, InitializingBean {
     }
 
     /**
-     * Looks for an open workflow execution tagged with a link (name and object type)to a cloud object that the
-     * execution is acting upon.
+     * Looks for an open workflow execution in a region tagged with a link (name and object type) to a cloud object
+     * that the execution is acting upon.
      * Because we invoke updateCaches on each workflow execution, we first look in the cache to see if there is an open
      * workflow. If we find one, we then check AWS to make sure it has not closed yet. Note that we only have
      * notification of updated cache when an execution starts (not when it closes), and this cache is local.
      *
+     * @param region where the link object exists
      * @param link the object that describes the type and name of the cloud object for which to find an execution
      * @return any single open WorkflowExecutionInfo tagged with the specified link, or null if no match found
      */
-    WorkflowExecutionInfo getOpenWorkflowExecutionForObjectLink(Link link) {
+    WorkflowExecutionInfo getOpenWorkflowExecutionForObjectLink(Region region, Link link) {
         String linkTag = new SwfWorkflowTags(link: link).constructTag('link')
         WorkflowExecutionInfo workflowExecutionInfo = openWorkflowExecutions.find {
-            it.tagList.contains(linkTag)
+            if (it.tagList.contains(linkTag)) {
+                SwfWorkflowTags tags = new SwfWorkflowTags()
+                tags.withTags(it.tagList)
+                return tags.user.region == region
+            }
+            false
         }
         if (workflowExecutionInfo) {
             WorkflowExecutionBeanOptions workflowExecutionBeanOptions =
