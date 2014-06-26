@@ -23,6 +23,7 @@ import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
 import com.google.common.annotations.VisibleForTesting
 import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
+import com.netflix.asgard.model.Deployment
 import com.netflix.asgard.model.InstancePriceType
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.SubnetTarget
@@ -142,6 +143,8 @@ ${lastGroup.loadBalancerNames}"""
                             SubnetTarget.EC2).sort()
                     Map<String, Collection<String>> zonesByPurpose = subnets.groupZonesByPurpose(
                             availabilityZones*.zoneName, SubnetTarget.EC2)
+                    Deployment deployment = deploymentService.getRunningDeploymentForCluster(userContext.region,
+                            cluster.name)
                     attributes.putAll([
                             cluster: cluster,
                             runningTasks: runningTasks,
@@ -159,7 +162,7 @@ ${lastGroup.loadBalancerNames}"""
                             selectedLoadBalancers: selectedLoadBalancers,
                             spotUrl: configService.spotUrl,
                             pricing: params.pricing ?: attributes.pricing,
-                            deployment: deploymentService.getRunningDeploymentForCluster(cluster.name)
+                            deployment: deployment
                     ])
                     attributes
                 }
