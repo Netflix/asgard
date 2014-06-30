@@ -124,7 +124,7 @@ class RollingPushOperation extends AbstractPushOperation {
         AutoScalingGroupBeanOptions groupForUserData = AutoScalingGroupBeanOptions.from(group, subnets)
         groupForUserData.launchConfigurationName = newLaunchName
         launchConfig.userData = launchTemplateService.buildUserData(options.common.userContext, groupForUserData,
-                launchConfig)
+                launchConfig, options.common.userMetadata)
         awsAutoScalingService.createLaunchConfiguration(options.common.userContext, launchConfig, task)
 
         Time.sleepCancellably 200 // small pause before ASG update to avoid rate limiting

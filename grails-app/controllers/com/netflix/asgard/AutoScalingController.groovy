@@ -251,7 +251,7 @@ class AutoScalingController {
         }
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         Map<String, String> purposeToVpcId = subnets.mapPurposeToVpcId()
-        Map<String, String> userMetaData = params.userMetaData
+        Map<String, String> userMetaData = params.userMetaData ?: [:]
         String subnetPurpose = params.subnetPurpose ?: null
         String vpcId = purposeToVpcId[subnetPurpose]
         Set<String> appsWithClusterOptLevel = []
@@ -357,7 +357,7 @@ class AutoScalingController {
                 launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instType)
             }
             boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
-            Map<String, String> userMetaData = params.userMetaData
+            Map<String, String> userMetaData = params.userMetaData ?: [:]
             CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
                     userContext, groupTemplate, launchConfigTemplate, suspendedProcesses, enableChaosMonkey,
                     userMetaData)

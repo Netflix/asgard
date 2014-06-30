@@ -98,7 +98,8 @@ class PushController {
                     instanceType: params.instanceType,
                     groupName: groupName,
                     securityGroups: selectedSecurityGroups,
-                    maxStartupRetries: params.maxStartupRetries?.toInteger() ?: 5
+                    maxStartupRetries: params.maxStartupRetries?.toInteger() ?: 5,
+                    userMetadata: params.userMetaData ?: [:]
                 ),
                 newestFirst: params.newestFirst == 'true',
                 relaunchCount: relaunchCount,
