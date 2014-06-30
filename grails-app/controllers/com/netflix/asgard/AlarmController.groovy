@@ -191,9 +191,13 @@ class AlarmController {
                 threshold = cmd.threshold
             }
             awsCloudWatchService.getDimensionsForNamespace(metricId.namespace).each {
-                String value = params[it]
-                if (value != null) {
-                    alarm.dimensions << new Dimension(name: it, value: params[it])
+                String name = it
+                String value = params[name]
+                if (value) {
+                    alarm.dimensions << new Dimension(name: name, value: params[name])
+                } else {
+                    Dimension removedDimension = alarm.dimensions.find { it.name == name }
+                    alarm.dimensions.remove(removedDimension)
                 }
             }
             // The topic is optional, but if it is specified then it should exist.
