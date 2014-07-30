@@ -151,6 +151,7 @@ class InstanceTypeService implements CacheInitializer {
         String memOpt = 'Memory optimized'
         String hiMem = 'High-Memory'
         String compOpt = 'Compute optimized'
+        String bInst = 'Burstable Performance Instances'
         String six4 = '64-bit'
         String three2OrSix4 = '32-bit or 64-bit'
         String hcpu = 'High-CPU'
@@ -158,13 +159,23 @@ class InstanceTypeService implements CacheInitializer {
                 new HardwareProfile(instanceType: 't1.micro', family: 'Micro instances', group: 'Micro', size: 'Micro',
                         arch: three2OrSix4, vCpu: '1', ecu: 'Variable', mem: '0.615', storage: 'EBS only',
                         ebsOptim: '-', netPerf: 'Very Low'),
+                new HardwareProfile(instanceType: 't2.micro', family: bInst, group: gen, size: 'Micro',
+                        arch: three2OrSix4, vCpu: '1', ecu: 'Variable', mem: '1', storage: 'EBS only',
+                        ebsOptim: '-', netPerf: 'Low to Moderate'),
 
                 new HardwareProfile(instanceType: 'm1.small', family: gen, group: 'Standard', size: 'Small (Default)',
                         arch: three2OrSix4, vCpu: '1', ecu: '1', mem: '1.7', storage: '1 x 160', ebsOptim: '-',
                         netPerf: 'Low'),
+                new HardwareProfile(instanceType: 't2.small', family: bInst, group: gen, size: 'Small',
+                        arch: three2OrSix4, vCpu: '1', ecu: '1', mem: '2', storage: 'EBS only', ebsOptim: '-',
+                        netPerf: 'Low to Moderate'),
+
                 new HardwareProfile(instanceType: 'm1.medium', family: gen, group: 'Standard', size: 'Medium',
                         arch: three2OrSix4, vCpu: '1', ecu: '2', mem: '3.75', storage: '1 x 410', ebsOptim: '-',
                         netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 't2.medium', family: bInst, group: gen, size: 'Medium',
+                        arch: three2OrSix4, vCpu: '2', ecu: '2', mem: '4', storage: 'EBS only', ebsOptim: '-',
+                        netPerf: 'Low to Moderate'),
 
                 new HardwareProfile(instanceType: 'm1.large', family: gen, group: 'Standard', size: 'Large', arch: six4,
                         vCpu: '2', ecu: '4', mem: '7.5', storage: '2 x 420', ebsOptim: 'Yes', netPerf: 'Moderate'),

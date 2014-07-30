@@ -375,6 +375,56 @@
                                 ]
                             }
                         ]
+                    },
+                    {
+                        "type": "Burstable Performance Instances",
+                        "sizes": [
+                            {
+                                "size": "t2.micro",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "1",
+                                "storageGB": "ebsonly",
+                                "valueColumns": [
+                                    {
+                                        "name": "os",
+                                        "prices": {
+                                            "USD": "0.013"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "t2.small",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "2",
+                                "storageGB": "ebsonly",
+                                "valueColumns": [
+                                    {
+                                        "name": "os",
+                                        "prices": {
+                                            "USD": "0.026"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "t2.medium",
+                                "vCPU": "2",
+                                "ECU": "variable",
+                                "memoryGiB": "4",
+                                "storageGB": "ebsonly",
+                                "valueColumns": [
+                                    {
+                                        "name": "os",
+                                        "prices": {
+                                            "USD": "0.052"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             },
@@ -740,6 +790,56 @@
                                 ]
                             }
                         ]
+                    },
+                    {
+                        "type": "Burstable Performance Instances",
+                        "sizes": [
+                            {
+                                "size": "t2.micro",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "1",
+                                "storageGB": "ebsonly",
+                                "valueColumns": [
+                                    {
+                                        "name": "os",
+                                        "prices": {
+                                            "USD": "0.013"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "t2.small",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "2",
+                                "storageGB": "ebsonly",
+                                "valueColumns": [
+                                    {
+                                        "name": "os",
+                                        "prices": {
+                                            "USD": "0.026"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "t2.medium",
+                                "vCPU": "2",
+                                "ECU": "variable",
+                                "memoryGiB": "4",
+                                "storageGB": "ebsonly",
+                                "valueColumns": [
+                                    {
+                                        "name": "os",
+                                        "prices": {
+                                            "USD": "0.052"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             },
@@ -1085,6 +1185,56 @@
                                         "name": "os",
                                         "prices": {
                                             "USD": "0.047"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "Burstable Performance Instances",
+                        "sizes": [
+                            {
+                                "size": "t2.micro",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "1",
+                                "storageGB": "ebsonly",
+                                "valueColumns": [
+                                    {
+                                        "name": "os",
+                                        "prices": {
+                                            "USD": "0.013"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "t2.small",
+                                "vCPU": "1",
+                                "ECU": "variable",
+                                "memoryGiB": "2",
+                                "storageGB": "ebsonly",
+                                "valueColumns": [
+                                    {
+                                        "name": "os",
+                                        "prices": {
+                                            "USD": "0.026"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "size": "t2.medium",
+                                "vCPU": "2",
+                                "ECU": "variable",
+                                "memoryGiB": "4",
+                                "storageGB": "ebsonly",
+                                "valueColumns": [
+                                    {
+                                        "name": "os",
+                                        "prices": {
+                                            "USD": "0.052"
                                         }
                                     }
                                 ]
