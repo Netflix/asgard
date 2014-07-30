@@ -637,7 +637,7 @@ scheduled actions #scheduleNames and suspended processes #processNames""")
 
         expect:
         mappings.size() == 2
-        block.ebs.volumeSize == 125
+        block.virtualName == 'ephemeral0'
     }
 
     def 'should not build a custom launch configuration for other types'(){
