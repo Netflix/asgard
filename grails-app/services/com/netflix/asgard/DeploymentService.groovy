@@ -146,11 +146,12 @@ class DeploymentService {
      * @return the unique ID of the workflow execution that is starting
      */
     public String startDeployment(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
-            LaunchConfigurationBeanOptions lcOverrides, AutoScalingGroupBeanOptions asgOverrides) {
+            LaunchConfigurationBeanOptions lcOverrides, AutoScalingGroupBeanOptions asgOverrides,
+            Map<String, String> userMetaData) {
 
         SwfWorkflow<DeploymentWorkflow> workflow = flowService.getNewWorkflowClient(userContext,
                 DeploymentWorkflow, new Link(EntityType.cluster, deploymentOptions.clusterName))
-        workflow.client.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides)
+        workflow.client.deploy(userContext, deploymentOptions, lcOverrides, asgOverrides, userMetaData)
         workflow.tags.id
     }
 

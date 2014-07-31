@@ -147,9 +147,10 @@ class DeploymentServiceUnitSpec extends Specification {
         DeploymentWorkflowOptions deployOpts = new DeploymentWorkflowOptions(clusterName: 'Calysteral')
         LaunchConfigurationBeanOptions lcOpts = new LaunchConfigurationBeanOptions()
         AutoScalingGroupBeanOptions asgOpts = new AutoScalingGroupBeanOptions()
+        Map<String, String> userMetaData = [meta: "data"]
 
         when:
-        String taskId = deploymentService.startDeployment(userContext, deployOpts, lcOpts, asgOpts)
+        String taskId = deploymentService.startDeployment(userContext, deployOpts, lcOpts, asgOpts, userMetaData)
 
         then:
         taskId == '07700900461'

@@ -355,8 +355,10 @@ class AutoScalingController {
                 launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instType)
             }
             boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
+            Map<String, String> userMetaData = params.userMetaData
             CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
-                    userContext, groupTemplate, launchConfigTemplate, suspendedProcesses, enableChaosMonkey)
+                    userContext, groupTemplate, launchConfigTemplate, suspendedProcesses, enableChaosMonkey,
+                    userMetaData)
             flash.message = result.toString()
             if (result.succeeded()) {
                 redirect(action: 'show', params: [id: groupName])

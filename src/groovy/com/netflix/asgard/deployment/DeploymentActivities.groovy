@@ -60,7 +60,7 @@ interface DeploymentActivities {
      * @return name of the launch configuration
      */
     String createLaunchConfigForNextAsg(UserContext userContext, AutoScalingGroupBeanOptions autoScalingGroup,
-            LaunchConfigurationBeanOptions launchConfiguration)
+            LaunchConfigurationBeanOptions launchConfiguration, Map<String, String> userMetaData)
 
     /**
      * Creates the next ASG in the cluster based on the asgOptions but without instances.

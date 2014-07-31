@@ -27,7 +27,8 @@ class DeploymentWorkflowDescriptionTemplate extends WorkflowDescriptionTemplate 
 
     @Override
     void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
-                LaunchConfigurationBeanOptions lcOverrides, AutoScalingGroupBeanOptions asgOverrides) {
+                LaunchConfigurationBeanOptions lcOverrides, AutoScalingGroupBeanOptions asgOverrides,
+                Map<String, String> userMetaData) {
         description = "Deploying new ASG to cluster '${deploymentOptions.clusterName}'"
     }
 }

@@ -85,7 +85,9 @@ class DeploymentControllerSpec extends Specification {
                 {"type": "DisableAsg", "targetAsg": "Previous"},
                 {"type": "Judgment", "durationMinutes": 241},
                 {"type": "DeleteAsg", "targetAsg": "Previous"}
-        ]}}""" as String
+        ]},
+        "userMetaData": {"meta": "data"}
+        }""" as String
     }
 
     void setup() {
@@ -195,8 +197,9 @@ class DeploymentControllerSpec extends Specification {
                         subnetPurpose: "internal",
                         terminationPolicies: ["OldestLaunchConfiguration"],
                         tags: [],
-                        suspendedProcesses: []
-                )
+                        suspendedProcesses: [],
+                ),
+                [meta: "data"]
         ) >> '123'
     }
 

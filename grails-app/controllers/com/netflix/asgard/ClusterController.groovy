@@ -271,7 +271,8 @@ Group: ${loadBalancerNames}"""
                             instanceType: instanceType,
                             groupName: nextGroupName,
                             securityGroups: securityGroups,
-                            maxStartupRetries: convertToIntOrUseDefault(params.maxStartupRetries, 5)
+                            maxStartupRetries: convertToIntOrUseDefault(params.maxStartupRetries, 5),
+                            userMetadata: params.userMetaData
                     ),
                     initialTraffic: initialTraffic,
                     minSize: minSize,

@@ -70,6 +70,8 @@ class StartDeploymentRequestSpec extends Specification {
                     subnetPurpose: "internal",
                     terminationPolicies: ["OldestLaunchConfiguration"],
                     suspendedProcesses: [AutoScalingProcessType.AddToLoadBalancer])
+            ,
+            [meta: "data"]
     )
 
     String json = '{"deploymentOptions":{"clusterName":"helloworld","notificationDestination":"jdoe@netflix.com",' +
@@ -82,7 +84,6 @@ class StartDeploymentRequestSpec extends Specification {
             '{"type":"DisableAsg","targetAsg":"Previous"},' +
             '{"type":"DeleteAsg","targetAsg":"Previous"}' +
             ']},' +
-
             '"lcOptions":{"launchConfigurationName":null,"imageId":"ami-12345678",' +
             '"keyName":"nf-test-keypair-a","securityGroups":["sg-12345678"],' +
             '"userData":"#!/bin/bash","instanceType":"m1.large","kernelId":"123","ramdiskId":"abc",' +
@@ -94,7 +95,8 @@ class StartDeploymentRequestSpec extends Specification {
             '"loadBalancerNames":["helloworld--frontend"],"healthCheckType":"EC2","healthCheckGracePeriod":600,' +
             '"placementGroup":null,"subnetPurpose":"internal",' +
             '"terminationPolicies":["OldestLaunchConfiguration"],"tags":null,' +
-            '"suspendedProcesses":["AddToLoadBalancer"]}}'
+            '"suspendedProcesses":["AddToLoadBalancer"]},' +
+            '"userMetaData":{"meta":"data"}}'
 
     void 'should convert a StartDeploymentRequest to JSON'() {
         expect:

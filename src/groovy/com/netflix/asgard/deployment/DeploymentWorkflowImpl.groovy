@@ -60,7 +60,8 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
 
     @Override
     void deploy(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
-                LaunchConfigurationBeanOptions lcInputs, AutoScalingGroupBeanOptions asgInputs) {
+                LaunchConfigurationBeanOptions lcInputs, AutoScalingGroupBeanOptions asgInputs,
+                Map<String, String> userMetaData) {
         String clusterName = deploymentOptions.clusterName
         Promise<AsgDeploymentNames> asgDeploymentNamesPromise = promiseFor(activities.getAsgDeploymentNames(userContext,
                 clusterName))
@@ -78,7 +79,7 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                         constructLaunchConfigForNextAsg(userContext, nextAsgTemplate, lcInputs))
                 waitFor(nextLcTemplateConstructed) { LaunchConfigurationBeanOptions nextLcTemplate ->
                     startDeployment(userContext, deploymentOptions, asgDeploymentNames, nextAsgTemplate, nextLcTemplate,
-                            runningAsgAnalyses)
+                            userMetaData, runningAsgAnalyses)
                 }
             } withCatch { Throwable e ->
                 rollbackCause = e
@@ -110,7 +111,8 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
 
     private Promise<Void> startDeployment(UserContext userContext, DeploymentWorkflowOptions deploymentOptions,
             AsgDeploymentNames asgDeploymentNames, AutoScalingGroupBeanOptions nextAsgTemplate,
-            LaunchConfigurationBeanOptions nextLcTemplate, List<DoTry<ScheduledAsgAnalysis>> runningAsgAnalyses) {
+            LaunchConfigurationBeanOptions nextLcTemplate, Map<String, String> userMetaData,
+            List<DoTry<ScheduledAsgAnalysis>> runningAsgAnalyses) {
 
         Map<Class<? extends DeploymentStep>, Closure<Promise>> stepsToOperations = [
                 (WaitStep): { WaitStep step ->
@@ -120,7 +122,8 @@ class DeploymentWorkflowImpl implements DeploymentWorkflow, WorkflowOperator<Dep
                 (CreateAsgStep): { CreateAsgStep step ->
                     status "Creating Launch Configuration '${asgDeploymentNames.nextLaunchConfigName}'."
                     Promise<String> launchConfigCreated = promiseFor(
-                            activities.createLaunchConfigForNextAsg(userContext, nextAsgTemplate, nextLcTemplate))
+                            activities.createLaunchConfigForNextAsg(userContext, nextAsgTemplate, nextLcTemplate,
+                                    userMetaData))
                     waitFor(launchConfigCreated) {
                         status "Creating Auto Scaling Group '${asgDeploymentNames.nextAsgName}' \
 initially with 0 instances."

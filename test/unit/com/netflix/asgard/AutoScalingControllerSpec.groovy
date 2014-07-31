@@ -380,8 +380,8 @@ class AutoScalingControllerSpec extends Specification {
 
         then:
         1 * controller.awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(_, _, expectedLaunchConfiguration,
-                _, _) >> new CreateAutoScalingGroupResult()
-        0 * controller.awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(_, _, _, _, _)
+                _, _, _) >> new CreateAutoScalingGroupResult()
+        0 * controller.awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(_, _, _, _, _, _)
 
         where:
         ebsOptimizedParam   | ebsOptimizedValue
