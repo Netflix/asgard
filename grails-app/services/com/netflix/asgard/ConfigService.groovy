@@ -927,16 +927,30 @@ class ConfigService {
     String getSpotUrl() {
         grailsApplication.config.cloud?.spot?.infoUrl ?: ''
     }
-
+    /**
+     * @return device name - virtual name mapping for custom volumes added to launch configurations for specific
+     * instance types
+     */
+    Map<String, String> getDeviceNameVirtualNameMapping() {
+        grailsApplication.config.cloud?.launchConfig?.customVolumes?.deviceNameVirtualNameMapping ?:
+                ['/dev/sdb': 'ephemeral0', '/dev/sdc': 'ephemeral1']
+    }
    /**
     * @return a Closure that determines if EBS volumes are needed for launch configurations based on instance type
     */
     Closure<Boolean> getInstanceTypeNeedsEbsVolumes() {
         grailsApplication.config.cloud?.launchConfig?.ebsVolumes?.instanceTypeNeeds ?: { String instanceType ->
+            false
+        }
+    }
+    /**
+     * @return a Closure that determines if custom volumes are needed for launch configurations based on instance type
+    */
+    Closure<Boolean> getInstanceTypeNeedsCustomVolumes() {
+        grailsApplication.config.cloud?.launchConfig?.customVolumes?.instanceTypeNeeds ?: { String instanceType ->
             instanceType.startsWith('m3.')
         }
     }
-
     /**
      * @return the size of EBS volumes added to launch configurations for specific instance types
      */

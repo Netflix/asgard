@@ -22,9 +22,11 @@ class ConfigServiceSpec extends Specification {
 
     ConfigService configService = new ConfigService(grailsApplication: Mocks.grailsApplication())
 
-    def 'should return true for m3 instance EBS check'(){
+    def 'should return true for m3 instance custom checks'(){
         expect:
-        configService.instanceTypeNeedsEbsVolumes('m3.') == true
+        configService.instanceTypeNeedsEbsVolumes('m3.') == false
+        configService.instanceTypeNeedsCustomVolumes('m3.') == true
+        configService.getDeviceNameVirtualNameMapping() == ['/dev/sdb': 'ephemeral0', '/dev/sdc': 'ephemeral1']
         configService.getSizeOfEbsVolumesAddedToLaunchConfigs() == 125
         configService.getEbsVolumeDeviceNamesForLaunchConfigs() == ['/dev/sdb', '/dev/sdc']
     }
