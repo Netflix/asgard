@@ -79,7 +79,7 @@ class InstanceTypeServiceSpec extends Specification {
                 'i2.4xlarge', 'i2.8xlarge', 'i2.xlarge', 'm1.large', 'm1.medium', 'm1.small', 'm1.xlarge', 'm2.2xlarge',
                 'm2.4xlarge', 'm2.xlarge', 'm3.2xlarge', 'm3.large', 'm3.medium', 'm3.xlarge', 'r3.2xlarge',
                 'r3.4xlarge', 'r3.8xlarge', 'r3.large', 'r3.xlarge', 'superduper.4xlarge',
-                't1.micro'] == instanceTypes*.name.sort()
+                't1.micro', 't2.medium', 't2.micro', 't2.small'] == instanceTypes*.name.sort()
         //each list contains mostly nulls
         def allSizes = instanceTypes*.hardwareProfile*.size
         allSizes.removeAll { it == null }

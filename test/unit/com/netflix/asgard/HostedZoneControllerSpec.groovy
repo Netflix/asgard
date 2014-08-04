@@ -111,8 +111,8 @@ class HostedZoneControllerSpec extends Specification {
             e.statusCode = 503
             throw e
         }
-        controller.flash.message == 'Status Code: 503, AWS Service: Route53, AWS Request ID: BOOGIEBOOGIE, ' +
-                'AWS Error Code: DontLikeYou, AWS Error Message: Sorry, pal.'
+        controller.flash.message == 'Sorry, pal. (Service: Route53; Status Code: 503; ' +
+                                    'Error Code: DontLikeYou; Request ID: BOOGIEBOOGIE)'
         response.redirectUrl == '/hostedZone/create?name=test.example.com'
         0 * _
     }
@@ -195,8 +195,8 @@ class HostedZoneControllerSpec extends Specification {
         }
         controller.flash.message == 'Could not add resource record set: ' +
                 'com.amazonaws.services.route53.model.InvalidInputException: ' +
-                'Status Code: 503, AWS Service: Route53, AWS Request ID: BOOGIEBOOGIE, ' +
-                'AWS Error Code: DontLikeYou, AWS Error Message: Sorry, pal.'
+                'Sorry, pal. (Service: Route53; Status Code: 503; Error Code: DontLikeYou; ' +
+                'Request ID: BOOGIEBOOGIE)'
         response.redirectUrl ==
                 '/hostedZone/prepareResourceRecordSet?hostedZoneId=ZATANNA&resourceRecordSetName=plain.example.com.'
         0 * _
@@ -256,8 +256,8 @@ class HostedZoneControllerSpec extends Specification {
         }
         controller.flash.message == 'Could not delete resource record set: ' +
                 'com.amazonaws.services.route53.model.InvalidInputException: ' +
-                'Status Code: 503, AWS Service: Route53, AWS Request ID: BOOGIEBOOGIE, ' +
-                'AWS Error Code: DontLikeYou, AWS Error Message: Sorry, pal.'
+                'Sorry, pal. (Service: Route53; Status Code: 503; ' +
+                'Error Code: DontLikeYou; Request ID: BOOGIEBOOGIE)'
         response.redirectUrl == '/hostedZone/show/ZATANNA'
         0 * _
         noExceptionThrown()
