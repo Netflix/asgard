@@ -23,7 +23,7 @@ import spock.lang.Specification
  * Created by danw on 2/28/14.
  */
 @TestFor(ApplicationController)
-@Mock([CloudReadyService, ConfigService])
+@Mock([ConfigService])
 class ApplicationControllerSpec extends Specification {
 
     void "params are resilient"() {

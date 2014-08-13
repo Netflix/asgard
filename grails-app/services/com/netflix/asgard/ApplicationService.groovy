@@ -39,7 +39,6 @@ class ApplicationService implements CacheInitializer, InitializingBean {
     def awsLoadBalancerService
     def awsSimpleDbService
     Caches caches
-    def cloudReadyService
     def configService
     def fastPropertyService
     def mergedInstanceGroupingService
@@ -90,7 +89,7 @@ class ApplicationService implements CacheInitializer, InitializingBean {
 
     CreateApplicationResult createRegisteredApplication(UserContext userContext, String nameInput, String group,
             String type, String description, String owner, String email, MonitorBucketType monitorBucketType,
-            String tags, boolean enableChaosMonkey) {
+            String tags) {
         String name = nameInput.toLowerCase()
         CreateApplicationResult result = new CreateApplicationResult()
         result.appName = name
@@ -109,10 +108,6 @@ class ApplicationService implements CacheInitializer, InitializingBean {
                 result.appCreated = true
             } catch (AmazonServiceException e) {
                 result.appCreateException = e
-            }
-            if (enableChaosMonkey) {
-                task.log("Enabling Chaos Monkey for ${name}.")
-                result.cloudReadyUnavailable = !cloudReadyService.enableChaosMonkeyForApplication(name)
             }
         }, Link.to(EntityType.application, name))
         getRegisteredApplication(userContext, name)
@@ -220,7 +215,6 @@ class CreateApplicationResult {
     String appName
     Boolean appCreated
     Exception appCreateException
-    Boolean cloudReadyUnavailable // Just a warning, does not affect success.
 
     String toString() {
         StringBuilder output = new StringBuilder()
@@ -229,9 +223,6 @@ class CreateApplicationResult {
         }
         if (appCreateException) {
             output.append("Could not create Application '${appName}': ${appCreateException}. ")
-        }
-        if (cloudReadyUnavailable) {
-            output.append('Chaos Monkey was not enabled because Cloudready is currently unavailable. ')
         }
         output.toString()
     }

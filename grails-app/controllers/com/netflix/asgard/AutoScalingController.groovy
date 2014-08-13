@@ -56,7 +56,6 @@ class AutoScalingController {
     def awsCloudWatchService
     def awsEc2Service
     def awsLoadBalancerService
-    def cloudReadyService
     def configService
     def instanceTypeService
     def mergedInstanceService
@@ -175,7 +174,6 @@ class AutoScalingController {
                 map
             } as Map
             String clusterName = Relationships.clusterFromGroupName(name)
-            boolean isChaosMonkeyActive = cloudReadyService.isChaosMonkeyActive(userContext.region)
             def details = [
                     instanceCount: instanceCount,
                     showPostponeButton: showPostponeButton,
@@ -200,8 +198,7 @@ class AutoScalingController {
                     alarmsByName: alarmsByName,
                     subnetPurpose: subnetPurpose ?: null,
                     vpcZoneIdentifier: group.VPCZoneIdentifier,
-                    isChaosMonkeyActive: isChaosMonkeyActive,
-                    chaosMonkeyEditLink: cloudReadyService.constructChaosMonkeyEditLink(userContext.region, appName)
+                    chaosMonkeyEditLink: configService.getMonkeyCommanderEditLink(appName)
             ]
             withFormat {
                 html { return details }
@@ -254,14 +251,6 @@ class AutoScalingController {
         String subnetPurpose = params.subnetPurpose ?: null
         String vpcId = purposeToVpcId[subnetPurpose]
         Set<String> appsWithClusterOptLevel = []
-        if (cloudReadyService.isChaosMonkeyActive(userContext.region)) {
-            try {
-                appsWithClusterOptLevel = cloudReadyService.applicationsWithOptLevel('cluster')
-            } catch (ServiceUnavailableException sue) {
-                flash.message = "${sue.message} Therefore, you should specify your application's " +
-                        'Chaos Monkey settings directly in Cloudready after ASG creation.'
-            }
-        }
         [
                 applications: applicationService.getRegisteredApplications(userContext),
                 group: group,
@@ -284,7 +273,6 @@ class AutoScalingController {
                 instanceTypes: instanceTypeService.getInstanceTypes(userContext),
                 iamInstanceProfile: configService.defaultIamRole,
                 spotUrl: configService.spotUrl,
-                isChaosMonkeyActive: cloudReadyService.isChaosMonkeyActive(userContext.region),
                 appsWithClusterOptLevel: appsWithClusterOptLevel ?: []
         ]
     }
@@ -354,9 +342,8 @@ class AutoScalingController {
             if (params.pricing == InstancePriceType.SPOT.name()) {
                 launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instType)
             }
-            boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
             CreateAutoScalingGroupResult result = awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(
-                    userContext, groupTemplate, launchConfigTemplate, suspendedProcesses, enableChaosMonkey)
+                    userContext, groupTemplate, launchConfigTemplate, suspendedProcesses)
             flash.message = result.toString()
             if (result.succeeded()) {
                 redirect(action: 'show', params: [id: groupName])

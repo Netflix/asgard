@@ -48,7 +48,6 @@ class AutoScalingControllerSpec extends Specification {
     AwsEc2Service awsEc2Service = Mock(AwsEc2Service)
     AwsCloudWatchService awsCloudWatchService = Mock(AwsCloudWatchService)
     AwsLoadBalancerService awsLoadBalancerService = Mock(AwsLoadBalancerService)
-    CloudReadyService cloudReadyService = Mock(CloudReadyService)
     ConfigService configService = Mock(ConfigService)
 
     void setup() {
@@ -58,7 +57,6 @@ class AutoScalingControllerSpec extends Specification {
         controller.awsEc2Service = awsEc2Service
         controller.awsCloudWatchService = awsCloudWatchService
         controller.awsLoadBalancerService = awsLoadBalancerService
-        controller.cloudReadyService = cloudReadyService
         controller.configService = configService
 
         configService.getEnableInstanceMonitoring() >> false
@@ -127,10 +125,9 @@ class AutoScalingControllerSpec extends Specification {
         1 * awsEc2Service.getImage(_, imageId, From.CACHE) >> image
         1 * awsEc2Service.getSecurityGroupNameIdPairsByNamesOrIds(_, [sgName]) >> securityGroupIdObjects
         1 * awsCloudWatchService.getAlarms(_, []) >> []
-        1 * cloudReadyService.isChaosMonkeyActive(_) >> true
         1 * applicationService.getRegisteredApplication(_, 'helloworld') >> app
         1 * configService.buildServerUrl >> buildLink
-        1 * cloudReadyService.constructChaosMonkeyEditLink(_, 'helloworld') >> chaosLink
+        1 * configService.getMonkeyCommanderEditLink('helloworld') >> chaosLink
         0 * _
         response.status == 200
 
@@ -148,7 +145,6 @@ class AutoScalingControllerSpec extends Specification {
                 group: asgData,
                 image: image,
                 instanceCount: 1,
-                isChaosMonkeyActive: true,
                 launchConfiguration: launchConfig,
                 launchStatus: 'Enabled',
                 mismatchedElbNamesToZoneLists: mismatchedElbsToZones,
@@ -380,8 +376,8 @@ class AutoScalingControllerSpec extends Specification {
 
         then:
         1 * controller.awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(_, _, expectedLaunchConfiguration,
-                _, _) >> new CreateAutoScalingGroupResult()
-        0 * controller.awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(_, _, _, _, _)
+                _) >> new CreateAutoScalingGroupResult()
+        0 * controller.awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(_, _, _, _)
 
         where:
         ebsOptimizedParam   | ebsOptimizedValue
