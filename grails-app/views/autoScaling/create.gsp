@@ -48,9 +48,6 @@
             <g:render template="/loadBalancer/selection"/>
           </tbody>
           <g:render template="/launchConfiguration/launchConfigOptions" />
-          <tbody class="clusterChaosMonkeyOptions ${params.appName in appsWithClusterOptLevel ? '' : 'concealed'}">
-            <g:render template="/common/chaosMonkeyOptions" />
-          <tbody>
         </table>
         <ul id="appsWithClusterOptLevel" class="concealed">
           <g:each var="app" in="${appsWithClusterOptLevel}">

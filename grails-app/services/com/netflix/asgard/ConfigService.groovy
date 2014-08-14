@@ -990,17 +990,13 @@ class ConfigService {
     }
 
     /**
-     * @return URL for Cloud Ready REST calls
+     * Get the Monkey Commander URL for editing Chaos Monkey settings for an application.
+     *
+     * @param applicationName name of application
+     * @return link to Cloud Ready
      */
-    String getCloudReadyUrl() {
-        grailsApplication.config.cloud?.cloudReady?.url ?: null
-    }
-
-    /**
-     * @return Regions where Chaos Monkey is indigenous
-     */
-    Collection<Region> getChaosMonkeyRegions() {
-        grailsApplication.config.cloud?.cloudReady?.chaosMonkey?.regions ?: []
+    String getMonkeyCommanderEditLink(String applicationName) {
+        "http://monkey-commander.${accountName}.netflix.net/monkey-commander/chaos/${applicationName}/edit"
     }
 
     /**

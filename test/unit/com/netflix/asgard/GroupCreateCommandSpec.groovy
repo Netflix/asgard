@@ -26,14 +26,12 @@ class GroupCreateCommandSpec extends Specification {
     GroupCreateCommand cmd
     ApplicationService mockApplicationService = Mock(ApplicationService)
     AwsAutoScalingService mockAwsAutoScalingService = Mock(AwsAutoScalingService)
-    CloudReadyService mockCloudReadyService = Mock(CloudReadyService)
 
     void setup() {
         mockForConstraintsTests(GroupCreateCommand)
         cmd = new GroupCreateCommand()
         cmd.applicationService = mockApplicationService
         cmd.awsAutoScalingService = mockAwsAutoScalingService
-        cmd.cloudReadyService = mockCloudReadyService
     }
 
     @Unroll("""should validate appName input '#appName' with error code '#error'""")
@@ -131,40 +129,5 @@ class GroupCreateCommandSpec extends Specification {
         detail        | error
         'v305'        | 'name.usesReservedFormat'
         'blah-v305'   | 'name.usesReservedFormat'
-    }
-
-    @Unroll("""should validate chaosMonkey input '#chaosMonkey' with error code '#error' when requestedFromGui is \
-'#requestedFromGui' and isChaosMonkeyActive is '#isChaosMonkeyActive' and optLevel is '#optLevel'""")
-    def 'chaosMonkey constraints'() {
-        cmd.chaosMonkey = chaosMonkey
-        cmd.region = 'us-east-1'
-        cmd.requestedFromGui = requestedFromGui
-        cmd.appWithClusterOptLevel = optLevel
-        mockCloudReadyService.isChaosMonkeyActive(Region.US_EAST_1) >> isChaosMonkeyActive
-
-        when:
-        cmd.validate()
-
-        then:
-        cmd.errors.chaosMonkey == error
-
-        where:
-        chaosMonkey | requestedFromGui  | isChaosMonkeyActive   | optLevel  | error
-        'enabled'   | true              | true                  | true      | null
-        'enabled'   | false             | true                  | true      | null
-        'enabled'   | true              | false                 | true      | null
-        'enabled'   | true              | true                  | false     | null
-        'enabled'   | true              | false                 | false     | null
-        'enabled'   | false             | true                  | false     | null
-        'enabled'   | false             | false                 | true      | null
-        'enabled'   | false             | false                 | false     | null
-        null        | true              | true                  | true      | 'chaosMonkey.optIn.missing.error'
-        null        | false             | true                  | true      | null
-        null        | true              | false                 | true      | null
-        null        | true              | true                  | false     | null
-        null        | true              | false                 | false     | null
-        null        | false             | true                  | false     | null
-        null        | false             | false                 | true      | null
-        null        | false             | false                 | false     | null
     }
 }

@@ -21,13 +21,11 @@ import grails.validation.Validateable
 
     def applicationService
     def awsAutoScalingService
-    def cloudReadyService
 
     String appName
     String stack
     String newStack
     String detail
-    String chaosMonkey
     String region
     String imageId
     boolean requestedFromGui
@@ -38,7 +36,6 @@ import grails.validation.Validateable
         stack(nullable: true, validator: validateStack)
         newStack(nullable: true, validator: validateNewStack)
         detail(nullable: true, validator: validateDetail)
-        chaosMonkey(nullable: true, validator: validateChaosMonkey)
         imageId(nullable: false, blank: false)
     }
 
@@ -90,17 +87,6 @@ import grails.validation.Validateable
         }
         if (Relationships.usesReservedFormat(value)) {
             return "name.usesReservedFormat"
-        }
-    }
-
-    private static Closure validateChaosMonkey = { value, command ->
-        if (!command.chaosMonkey) {
-            Region region = Region.withCode(command.region)
-            boolean isChaosMonkeyChoiceNeglected = command.cloudReadyService.isChaosMonkeyActive(region) &&
-                    command.requestedFromGui && command.appWithClusterOptLevel
-            if (isChaosMonkeyChoiceNeglected) {
-                return "chaosMonkey.optIn.missing.error"
-            }
         }
     }
 }

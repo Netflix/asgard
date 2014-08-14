@@ -33,7 +33,6 @@ class ApplicationController {
     def awsEc2Service
     def awsAutoScalingService
     def awsLoadBalancerService
-    def cloudReadyService
     def configService
     def discoveryService
 
@@ -139,7 +138,6 @@ class ApplicationController {
                     groups.collect { Relationships.clusterFromGroupName(it.autoScalingGroupName) }.unique()
             request.alertingServiceConfigUrl = configService.alertingServiceConfigUrl
             SecurityGroup appSecurityGroup = awsEc2Service.getSecurityGroup(userContext, name)
-            boolean isChaosMonkeyActive = cloudReadyService.isChaosMonkeyActive(userContext.region)
             def details = [
                     app: app,
                     strictName: Relationships.checkStrictName(app.name),
@@ -149,8 +147,7 @@ class ApplicationController {
                     securities: awsEc2Service.getSecurityGroupsForApp(userContext, name),
                     appSecurityGroup: appSecurityGroup,
                     launches: awsAutoScalingService.getLaunchConfigurationsForApp(userContext, name),
-                    isChaosMonkeyActive: isChaosMonkeyActive,
-                    chaosMonkeyEditLink: cloudReadyService.constructChaosMonkeyEditLink(userContext.region, app.name)
+                    chaosMonkeyEditLink: configService.getMonkeyCommanderEditLink(app.name)
             ]
             withFormat {
                 html { return details }
@@ -164,8 +161,7 @@ class ApplicationController {
 
     def create = {
         [
-                typeList: typeList,
-                isChaosMonkeyActive: cloudReadyService.isChaosMonkeyActive()
+                typeList: typeList
         ]
     }
 
@@ -182,10 +178,9 @@ class ApplicationController {
             String email = params.email
             String monitorBucketTypeString = params.monitorBucketType
             String tags = normalizeTagDelimiter(params.tags)
-            boolean enableChaosMonkey = params.chaosMonkey == 'enabled'
             MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
             CreateApplicationResult result = applicationService.createRegisteredApplication(userContext, name, group,
-                    type, desc, owner, email, bucketType, tags, enableChaosMonkey)
+                    type, desc, owner, email, bucketType, tags)
             flash.message = result.toString()
             if (result.succeeded()) {
                 redirect(action: 'show', params: [id: name])
@@ -304,14 +299,11 @@ class ApplicationController {
 
 class ApplicationCreateCommand {
 
-    def cloudReadyService
-
     String name
     String email
     String type
     String description
     String owner
-    String chaosMonkey
     String tags
     String monitorBucketType
     boolean requestedFromGui
@@ -331,15 +323,6 @@ class ApplicationCreateCommand {
         description(nullable: false, blank: false)
         monitorBucketType(nullable: false, blank: false)
         owner(nullable: false, blank: false)
-        chaosMonkey(nullable: true, validator: { value, command ->
-            if (!command.chaosMonkey) {
-                boolean isChaosMonkeyChoiceNeglected = command.cloudReadyService.isChaosMonkeyActive() &&
-                        command.requestedFromGui
-                if (isChaosMonkeyChoiceNeglected) {
-                    return 'chaosMonkey.optIn.missing.error'
-                }
-            }
-        })
         tags(nullable: true, blank: true)
     }
 }

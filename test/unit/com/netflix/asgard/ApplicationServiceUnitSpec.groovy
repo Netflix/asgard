@@ -43,7 +43,6 @@ class ApplicationServiceUnitSpec extends Specification {
                 work(new Task())
             }
         }
-        applicationService.cloudReadyService = Mock(CloudReadyService)
         applicationService.awsSimpleDbService = Mock(AwsSimpleDbService)
         applicationService.domainName = DOMAIN_NAME
     }
@@ -84,7 +83,7 @@ class ApplicationServiceUnitSpec extends Specification {
         when:
         applicationService.createRegisteredApplication(UserContext.auto(), 'helloworld', null,
                 'Web Application', 'Say hello', 'jsmith', 'jsmith@example.com',
-                MonitorBucketType.application, 'a,b,c', true)
+                MonitorBucketType.application, 'a,b,c')
 
         then:
         1 * applicationService.awsSimpleDbService.save('CLOUD_APPLICATIONS', 'HELLOWORLD', _)
