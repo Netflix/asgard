@@ -49,6 +49,8 @@ import com.amazonaws.services.elasticloadbalancing.model.InstanceState
 import com.amazonaws.services.elasticloadbalancing.model.Listener
 import com.amazonaws.services.elasticloadbalancing.model.ListenerDescription
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.amazonaws.services.elasticloadbalancing.model.ModifyLoadBalancerAttributesRequest
+import com.amazonaws.services.elasticloadbalancing.model.ModifyLoadBalancerAttributesResult
 import com.amazonaws.services.elasticloadbalancing.model.Policies
 import com.amazonaws.services.elasticloadbalancing.model.RegisterInstancesWithLoadBalancerRequest
 import com.amazonaws.services.elasticloadbalancing.model.RegisterInstancesWithLoadBalancerResult
@@ -132,6 +134,10 @@ class MockAmazonElasticLoadBalancingClient extends AmazonElasticLoadBalancingCli
             SetLoadBalancerListenerSSLCertificateRequest setLoadBalancerListenerSSLCertificateRequest) { }
 
     CreateLoadBalancerResult createLoadBalancer(CreateLoadBalancerRequest createLoadBalancerRequest) { null }
+
+    ModifyLoadBalancerAttributesResult modifyLoadBalancerAttributes(ModifyLoadBalancerAttributesRequest request) {
+        null
+    }
 
     EnableAvailabilityZonesForLoadBalancerResult enableAvailabilityZonesForLoadBalancer(
             EnableAvailabilityZonesForLoadBalancerRequest enableAvailabilityZonesForLoadBalancerRequest) { null }
