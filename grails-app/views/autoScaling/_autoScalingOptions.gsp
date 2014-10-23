@@ -18,6 +18,22 @@
 <%@ page import="com.netflix.asgard.model.AutoScalingGroupHealthCheckType" %>
 <tr class="prop">
   <td class="name">
+    App<br/>Version:
+  </td>
+  <td class="value numbers">
+    <input type="text" class="number" id="bcAppVersion" name="bcAppVersion" value=""/>
+  </td>
+</tr>
+<tr class="prop">
+  <td class="name">
+    Chef<br/>Environment:
+  </td>
+  <td class="value">
+    <input type="text" id="chefEnvironment" name="chefEnvironment" value=""/>
+  </td>
+</tr>
+<tr class="prop">
+  <td class="name">
     Instance<br/>Bounds:
   </td>
   <td class="value numbers">

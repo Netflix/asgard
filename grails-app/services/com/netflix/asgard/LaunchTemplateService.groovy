@@ -79,7 +79,7 @@ class LaunchTemplateService {
      * @return the user data string that should be applied to the LaunchConfiguration of an auto scaling group
      */
     String buildUserData(UserContext userContext, AutoScalingGroupBeanOptions autoScalingGroup,
-            LaunchConfigurationBeanOptions launchConfiguration) {
+            LaunchConfigurationBeanOptions launchConfiguration, Map<String, String> userMetaData) {
 
         String imageId = launchConfiguration.imageId
         Image image = awsEc2Service.getImage(userContext, imageId)
@@ -87,7 +87,8 @@ class LaunchTemplateService {
         AppRegistration app = applicationService.getRegisteredApplication(userContext, appName)
 
         // Wrap all the inputs in a single class so we can add more inputs later without changing the plugin interface.
-        LaunchContext launchContext = new LaunchContext(userContext, image, app, autoScalingGroup, launchConfiguration)
+        LaunchContext launchContext = new LaunchContext(userContext, image, app, autoScalingGroup, launchConfiguration,
+                userMetaData)
         pluginService.advancedUserDataProvider.buildUserData(launchContext)
     }
 

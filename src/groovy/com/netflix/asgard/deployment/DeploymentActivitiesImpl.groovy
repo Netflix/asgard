@@ -91,7 +91,8 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
 
     @Override
     String createLaunchConfigForNextAsg(UserContext userContext, AutoScalingGroupBeanOptions autoScalingGroup,
-        LaunchConfigurationBeanOptions launchConfiguration) {
+        LaunchConfigurationBeanOptions launchConfiguration,
+        Map<String, String> userMetaData) {
         launchConfiguration.userData = launchTemplateService.buildUserData(userContext, autoScalingGroup,
                 launchConfiguration)
         awsAutoScalingService.createLaunchConfiguration(userContext, launchConfiguration, new Task())

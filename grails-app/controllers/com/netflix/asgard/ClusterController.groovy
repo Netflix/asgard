@@ -253,9 +253,13 @@ Group: ${lastGroup.loadBalancerNames}"""
                 vpcZoneIdentifier = vpcZoneIdentifier ?: subnets.constructNewVpcZoneIdentifierForZones(
                         lastGroup.vpcZoneIdentifier, selectedZones)
             }
+            Map<String, String> userMetaData = [:]
+            userMetaData.put('APP_VERSION', params.bcAppVersion)
+            userMetaData.put('CHEF_ENVIRONMENT', params.chefEnvironment)
             log.debug """ClusterController.createNextGroup for Cluster '${cluster.name}' Load Balancers for next \
 Group: ${loadBalancerNames}"""
             GroupCreateOptions options = new GroupCreateOptions(
+
                     common: new CommonPushOptions(
                             userContext: userContext,
                             checkHealth: checkHealth,
@@ -266,7 +270,8 @@ Group: ${loadBalancerNames}"""
                             instanceType: instanceType,
                             groupName: nextGroupName,
                             securityGroups: securityGroups,
-                            maxStartupRetries: convertToIntOrUseDefault(params.maxStartupRetries, 5)
+                            maxStartupRetries: convertToIntOrUseDefault(params.maxStartupRetries, 5),
+                            userMetaData: userMetaData
                     ),
                     initialTraffic: initialTraffic,
                     minSize: minSize,

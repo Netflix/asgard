@@ -1152,7 +1152,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     CreateAutoScalingGroupResult createLaunchConfigAndAutoScalingGroup(UserContext userContext,
             AutoScalingGroup groupTemplate, LaunchConfiguration launchConfigTemplate,
             Collection<AutoScalingProcessType> suspendedProcesses, boolean enableChaosMonkey = false,
-            Task existingTask = null) {
+            Map<String, String> userMetaData = [:], Task existingTask = null) {
 
         CreateAutoScalingGroupResult result = new CreateAutoScalingGroupResult()
         String groupName = groupTemplate.autoScalingGroupName
@@ -1169,7 +1169,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
         launchConfig.securityGroups = launchTemplateService.includeDefaultSecurityGroups(
                 launchConfigTemplate.securityGroups, groupTemplate.VPCZoneIdentifier as boolean, userContext.region)
         taskService.runTask(userContext, msg, { Task task ->
-            String userData = launchTemplateService.buildUserData(userContext, groupOptions, launchConfig)
+            String userData = launchTemplateService.buildUserData(userContext, groupOptions, launchConfig, userMetaData)
             launchConfig.userData = userData
             result.launchConfigName = launchConfigName
             result.autoScalingGroupName = groupName

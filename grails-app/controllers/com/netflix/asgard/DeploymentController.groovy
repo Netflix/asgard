@@ -255,7 +255,7 @@ class DeploymentController {
         } else {
             String deploymentId = deploymentService.startDeployment(userContext,
                     startDeploymentRequest.deploymentOptions, startDeploymentRequest.lcOptions,
-                    startDeploymentRequest.asgOptions)
+                    startDeploymentRequest.asgOptions, startDeploymentRequest.userMetaData)
             render ([deploymentId: deploymentId] as JSON)
         }
     }
