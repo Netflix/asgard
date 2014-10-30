@@ -968,6 +968,11 @@ jQuery(document).ready(function() {
                     if (taskData.status !== 'running') {
                         poller.stop = true;
                         jCancellationForm.slideUp();
+                        if('Notification' in window) {
+                            var notification = new Notification("Job's Done", {
+                                'body': taskData.status
+                            });
+                        }
                     }
                 },
                 contentType: 'application/json'
@@ -1720,5 +1725,16 @@ jQuery(document).ready(function() {
         });
     };
     setUpTableSortability();
+
+    var setUpNotifications = function() {
+        if('Notification' in window && Notification.permission !== 'granted') {
+            Notification.requestPermission(function(permission) {
+                if(Notification.permission !== permission) {
+                    Notification.permission = permission;
+                }
+            });
+        }
+    };
+    setUpNotifications();
 
 });
