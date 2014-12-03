@@ -24,6 +24,7 @@ import com.netflix.asgard.MonkeyPatcherService
 import com.netflix.asgard.PluginService
 import com.netflix.asgard.Region
 import com.netflix.asgard.UserContext
+import com.netflix.asgard.applications.SimpleDBApplicationService
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.LaunchContext
@@ -119,7 +120,7 @@ class NetflixAdvancedUserDataProviderSpec extends Specification {
         launchContext.autoScalingGroup = new AutoScalingGroupBeanOptions(autoScalingGroupName: 'hi-dev-v001')
         launchContext.launchConfiguration = new LaunchConfigurationBeanOptions(
                 launchConfigurationName: 'hi-dev-v001-1234567')
-        netflixAdvancedUserDataProvider.applicationService = Spy(ApplicationService) {
+        netflixAdvancedUserDataProvider.applicationService = Spy(SimpleDBApplicationService) {
             getRegisteredApplication(_, _) >> app
         }
 

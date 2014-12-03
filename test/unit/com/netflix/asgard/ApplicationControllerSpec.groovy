@@ -30,7 +30,7 @@ class ApplicationControllerSpec extends Specification {
         setup:
             ApplicationService applicationService = Mock(ApplicationService)
             controller.applicationService = applicationService
-            def result = Mock(CreateApplicationResult)
+            def result = Mock(ApplicationModificationResult)
             result.succeeded() >> true
 
             params.name = "name"

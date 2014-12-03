@@ -179,8 +179,9 @@ class ApplicationController {
             String monitorBucketTypeString = params.monitorBucketType
             String tags = normalizeTagDelimiter(params.tags)
             MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
-            CreateApplicationResult result = applicationService.createRegisteredApplication(userContext, name, group,
-                    type, desc, owner, email, bucketType, tags)
+            def result = applicationService.createRegisteredApplication(
+                userContext, name, group, type, desc, owner, email, bucketType, tags
+            )
             flash.message = result.toString()
             if (result.succeeded()) {
                 redirect(action: 'show', params: [id: name])
@@ -210,9 +211,10 @@ class ApplicationController {
         String monitorBucketTypeString = params.monitorBucketType
         try {
             MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
-            applicationService.updateRegisteredApplication(userContext, name, group, type, desc, owner, email, tags,
-                    bucketType)
-            flash.message = "Application '${name}' has been updated."
+            def result = applicationService.updateRegisteredApplication(
+                userContext, name, group, type, desc, owner, email, tags, bucketType
+            )
+            flash.message = result.toString()
         } catch (Exception e) {
             flash.message = "Could not update Application: ${e}"
         }
