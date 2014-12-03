@@ -131,9 +131,6 @@ grails.project.dependency.resolution = {
                 // This fixes ivy resolution issues we had with our transitive dependency on 1.4.
                 'commons-codec:commons-codec:1.5',
 
-                // Call Perforce in process. Delete when user data no longer come from Perforce at deployment time.
-                'com.perforce:p4java:2010.1.269249',
-
                 // Rules for AWS named objects, e.g., Names, AppVersion
                 'com.netflix.frigga:frigga:0.11',
 
