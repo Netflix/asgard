@@ -35,14 +35,15 @@ class InstanceTypeControllerTests {
         assert 31 <= types.size()
         assert 'c1.medium' == types[0].name
         InstanceTypeData m1Small = types.find { it.name == 'm1.small' }
-        assert 'Small (Default)' == m1Small.hardwareProfile.size
+        assert 'Small (Default)' == m1Small.hardwareProfile.sizeDeploymentWorkflowSpec
         assert '3.75' == types.find { it.name == 'm1.medium' }.hardwareProfile.mem
         assert '68.4' == types.find { it.name == 'm2.4xlarge' }.hardwareProfile.mem
         InstanceTypeData c1medium = types.find { it.name == 'c1.medium' }
         assert '2' == c1medium.hardwareProfile.vCpu
         assert '64-bit' == types.find { it.name == 'm1.large' }.hardwareProfile.arch
         assert 'Moderate' == types.find { it.name == 'm2.xlarge' }.hardwareProfile.netPerf
-        assert 0.044 == m1Small.linuxOnDemandPrice
+        assert null == m1Small.linuxOnDemandPrice
+        assert 0.280 == types.find { it.name == 'm3.xlarge' }.linuxOnDemandPrice
 
         assert 4 <= types.findAll{ it.name =~ /i2./ }.size
     }
