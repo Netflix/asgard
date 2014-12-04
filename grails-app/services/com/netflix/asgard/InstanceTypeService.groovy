@@ -126,7 +126,7 @@ class InstanceTypeService implements CacheInitializer {
             if (hardwareProfile) {
                 InstanceTypeData instanceTypeData = new InstanceTypeData(
                         hardwareProfile: hardwareProfile,
-                        linuxOnDemandPrice: onDemandPrices.get(instanceType, InstanceProductType.LINUX_UNIX),
+                        linuxOnDemandPrice: onDemandPrices?.get(instanceType, InstanceProductType.LINUX_UNIX),
                 )
                 namesToInstanceTypeDatas[name] = instanceTypeData
             } else {
@@ -263,7 +263,7 @@ class InstanceTypeService implements CacheInitializer {
         JSONElement config = pricingJson.config
         JSONArray regionJsonArray = config.regions
         for (JSONElement regionJsonObject in regionJsonArray) {
-            Region region = Region.withPricingJsonCode(regionJsonObject.region)
+            Region region = Region.withCode(regionJsonObject.region)
             List<InstanceType> instanceTypes = InstanceType.values() as List
             List<InstanceProductType> products = InstanceProductType.values() as List
             Table<InstanceType, InstanceProductType, BigDecimal> pricesByHardwareAndProduct =
