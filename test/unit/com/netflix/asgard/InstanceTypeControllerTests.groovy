@@ -35,7 +35,7 @@ class InstanceTypeControllerTests {
         assert 31 <= types.size()
         assert 'c1.medium' == types[0].name
         InstanceTypeData m1Small = types.find { it.name == 'm1.small' }
-        assert 'Small (Default)' == m1Small.hardwareProfile.sizeDeploymentWorkflowSpec
+        assert 'Small (Default)' == m1Small.hardwareProfile.size
         assert '3.75' == types.find { it.name == 'm1.medium' }.hardwareProfile.mem
         assert '68.4' == types.find { it.name == 'm2.4xlarge' }.hardwareProfile.mem
         InstanceTypeData c1medium = types.find { it.name == 'c1.medium' }
