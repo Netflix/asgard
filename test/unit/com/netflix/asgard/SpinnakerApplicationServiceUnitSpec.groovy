@@ -69,6 +69,27 @@ class SpinnakerApplicationServiceUnitSpec extends Specification {
         ["prod", "test"] as Set | new AppRegistration(monitorBucketType: MonitorBucketType.none)
     }
 
+    void "should return AppRegistration with lower case names"() {
+        given:
+        def metadata = new ApplicationMetadata(
+            name, null, null, null, null, null, null, null, null, [applicationService.accountName] as Set, null, null
+        )
+
+        when:
+        def appRegistration = applicationService.convertToAppRegistration(new MutableApplication(null, metadata))
+
+        then:
+        appRegistration.name == expectedName
+
+        where:
+        name        | expectedName
+        "360"       | "360"
+        "mixedCase" | "mixedcase"
+        "lower"     | "lower"
+        "UPPER"     | "upper"
+        "miXED123"  | "mixed123"
+    }
+
     void "should create application if it does not already exist"() {
         given:
         def mutableApplication = Mock(MutableApplication)
