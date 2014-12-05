@@ -117,7 +117,9 @@ beans = {
 
     if (application.config.spinnaker?.gateUrl) {
         applicationService(
-            SpinnakerApplicationService, application.config.spinnaker.gateUrl, application.config.cloud.accountName
+            SpinnakerApplicationService,
+            application.config.spinnaker.gateUrl as String,
+            application.config.cloud.accountName as String
         ) { bean ->
             bean.lazyInit = true
         }
