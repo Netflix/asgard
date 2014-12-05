@@ -35,6 +35,7 @@ import com.netflix.asgard.AwsSqsService
 import com.netflix.asgard.CachedMapBuilder
 import com.netflix.asgard.Caches
 import com.netflix.asgard.ConfigService
+import com.netflix.asgard.applications.SimpleDBApplicationService
 import com.netflix.asgard.userdata.DefaultUserDataProvider
 import com.netflix.asgard.DiscoveryService
 import com.netflix.asgard.DnsService
@@ -172,16 +173,8 @@ class Mocks {
     private static ApplicationService applicationService
     static ApplicationService applicationService() {
         if (applicationService == null) {
-            MockUtils.mockLogging(ApplicationService, false)
-            applicationService = new ApplicationService()
-            applicationService.caches = caches()
-            applicationService.grailsApplication = grailsApplication()
-            applicationService.configService = configService()
-            applicationService.awsClientService = awsClientService()
-            applicationService.awsSimpleDbService = awsSimpleDbService()
-
             List<String> names =
-                    ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot', 'videometadata'].asImmutable()
+                ['abcache', 'api', 'aws_stats', 'cryptex', 'helloworld', 'ntsuiboot', 'videometadata'].asImmutable()
             List<AppRegistration> apps = names.collect({ AppRegistration.from(item(it.toUpperCase())) }).asImmutable()
 
             // Populate map of names to apps
@@ -189,11 +182,22 @@ class Mocks {
             apps.eachWithIndex { app, index -> namesToApps[names[index]] = app }
             namesToApps = namesToApps.asImmutable()
 
-            applicationService.metaClass.getRegisteredApplications = { UserContext userContext -> apps }
-            applicationService.metaClass.getRegisteredApplication = { UserContext userContext, String name ->
-                namesToApps[name]
-            }
+            MockUtils.mockLogging(SimpleDBApplicationService, false)
+            applicationService = new SimpleDBApplicationService() {
+                @Override
+                List<AppRegistration> getRegisteredApplications(UserContext userContext) {
+                    return apps
+                }
 
+                @Override
+                AppRegistration getRegisteredApplication(UserContext userContext, String nameInput) {
+                    return namesToApps[nameInput]
+                }
+            }
+            applicationService.caches = caches()
+            applicationService.configService = configService()
+            applicationService.awsClientService = awsClientService()
+            applicationService.awsSimpleDbService = awsSimpleDbService()
             applicationService.afterPropertiesSet()
             applicationService.initializeCaches()
 

@@ -19,6 +19,8 @@ import com.google.common.base.CaseFormat
 import com.netflix.asgard.CachedMapBuilder
 import com.netflix.asgard.Caches
 import com.netflix.asgard.CsiAsgAnalyzer
+import com.netflix.asgard.applications.SimpleDBApplicationService
+import com.netflix.asgard.applications.SpinnakerApplicationService
 import com.netflix.asgard.NoOpAsgAnalyzer
 import com.netflix.asgard.Region
 import com.netflix.asgard.ServiceInitLoggingBeanPostProcessor
@@ -112,6 +114,19 @@ beans = {
     }
 
     restrictBrowserAuthorizationProvider(RestrictBrowserAuthorizationProvider)
+
+    if (application.config.spinnaker?.gateUrl) {
+        applicationService(
+            SpinnakerApplicationService, application.config.spinnaker.gateUrl, application.config.cloud.accountName
+        ) { bean ->
+            bean.lazyInit = true
+        }
+    } else {
+        applicationService(SimpleDBApplicationService) { bean ->
+            bean.lazyInit = true
+        }
+    }
+
 
     //**** Plugin behavior
 

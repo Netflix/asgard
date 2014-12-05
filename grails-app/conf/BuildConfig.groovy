@@ -52,6 +52,7 @@ grails.project.dependency.resolution = {
         grailsHome()
         grailsCentral()
         mavenCentral()
+        mavenRepo "http://dl.bintray.com/spinnaker/spinnaker"
 
         // Optional custom repository for dependencies.
         Closure internalRepo = {
@@ -140,7 +141,10 @@ grails.project.dependency.resolution = {
                 // Used for JSON parsing of AWS Simple Workflow Service metadata.
                 // Previously this was an indirect depencency through Grails itself, but this caused errors in some
                 // Grails environments.
-                'com.googlecode.json-simple:json-simple:1.1'
+                'com.googlecode.json-simple:json-simple:1.1',
+
+                // Spinnaker client is used to retrieve application metadata
+                'com.netflix.spinnaker.client:spinnaker-client:0.6'
         ) { // Exclude superfluous and dangerous transitive dependencies
             excludes(
                     // Some libraries bring older versions of JUnit as a transitive dependency and that can interfere
