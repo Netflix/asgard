@@ -212,7 +212,7 @@ class ApplicationController {
         try {
             MonitorBucketType bucketType = Enum.valueOf(MonitorBucketType, monitorBucketTypeString)
             def result = applicationService.updateRegisteredApplication(
-                userContext, name, group, type, desc, owner, email, tags, bucketType
+                userContext, name, group, type, desc, owner, email, bucketType, tags
             )
             flash.message = result.toString()
         } catch (Exception e) {
