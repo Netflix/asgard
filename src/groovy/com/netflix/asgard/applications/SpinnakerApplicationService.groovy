@@ -248,6 +248,8 @@ class SpinnakerApplicationService extends AbstractApplicationService implements 
             def metadata = application.metadata
             if (metadata.accounts.contains(accountName)) {
                 def monitorBucketType = MonitorBucketType.byName(metadata.monitorBucketType)
+                Map<String, String> additionalAttributes = [:]
+                additionalAttributes.pdApiKey = metadata.pagerDuty
                 return new AppRegistration(
                     name: metadata.name?.toLowerCase(),
                     group: metadata.group,
@@ -258,7 +260,8 @@ class SpinnakerApplicationService extends AbstractApplicationService implements 
                     createTime: metadata.created,
                     updateTime: metadata.updated,
                     monitorBucketType: monitorBucketType ?: MonitorBucketType.defaultForOldApps,
-                    tags: metadata.tags as List
+                    tags: metadata.tags as List,
+                    additionalAttributes: additionalAttributes
                 )
             }
         }
