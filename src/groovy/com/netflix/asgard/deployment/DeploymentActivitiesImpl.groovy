@@ -23,7 +23,6 @@ import com.netflix.asgard.AwsEc2Service
 import com.netflix.asgard.AwsLoadBalancerService
 import com.netflix.asgard.AwsSimpleWorkflowService
 import com.netflix.asgard.Caches
-import com.netflix.asgard.CloudReadyService
 import com.netflix.asgard.ConfigService
 import com.netflix.asgard.DeploymentService
 import com.netflix.asgard.DiscoveryService
@@ -56,7 +55,6 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
     AwsLoadBalancerService awsLoadBalancerService
     AwsSimpleWorkflowService awsSimpleWorkflowService
     Caches caches
-    CloudReadyService cloudReadyService
     ConfigService configService
     DeploymentService deploymentService
     DiscoveryService discoveryService

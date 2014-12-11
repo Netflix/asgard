@@ -23,6 +23,7 @@ import com.amazonaws.services.elasticloadbalancing.model.AttachLoadBalancerToSub
 import com.amazonaws.services.elasticloadbalancing.model.ConfigureHealthCheckRequest
 import com.amazonaws.services.elasticloadbalancing.model.CreateLoadBalancerListenersRequest
 import com.amazonaws.services.elasticloadbalancing.model.CreateLoadBalancerRequest
+import com.amazonaws.services.elasticloadbalancing.model.CrossZoneLoadBalancing
 import com.amazonaws.services.elasticloadbalancing.model.DeleteLoadBalancerListenersRequest
 import com.amazonaws.services.elasticloadbalancing.model.DeleteLoadBalancerRequest
 import com.amazonaws.services.elasticloadbalancing.model.DeregisterInstancesFromLoadBalancerRequest
@@ -35,7 +36,9 @@ import com.amazonaws.services.elasticloadbalancing.model.EnableAvailabilityZones
 import com.amazonaws.services.elasticloadbalancing.model.Instance
 import com.amazonaws.services.elasticloadbalancing.model.InstanceState
 import com.amazonaws.services.elasticloadbalancing.model.Listener
+import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerAttributes
 import com.amazonaws.services.elasticloadbalancing.model.LoadBalancerDescription
+import com.amazonaws.services.elasticloadbalancing.model.ModifyLoadBalancerAttributesRequest
 import com.amazonaws.services.elasticloadbalancing.model.RegisterInstancesWithLoadBalancerRequest
 import com.amazonaws.services.elasticloadbalancing.model.SourceSecurityGroup
 import com.google.common.collect.ArrayListMultimap
@@ -233,7 +236,11 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
             } else {
                 request.withAvailabilityZones(zoneList)
             }
-            awsClient.by(userContext.region).createLoadBalancer(request)  // has result
+            def client = awsClient.by(userContext.region)
+            client.createLoadBalancer(request)
+            def modifyRequest = new ModifyLoadBalancerAttributesRequest(loadBalancerName: name, loadBalancerAttributes:
+                    new LoadBalancerAttributes(crossZoneLoadBalancing: new CrossZoneLoadBalancing(enabled: true)))
+            client.modifyLoadBalancerAttributes(modifyRequest)
         }, Link.to(EntityType.loadBalancer, name))
         getLoadBalancer(userContext, name)
     }

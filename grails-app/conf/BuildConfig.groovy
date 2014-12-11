@@ -52,6 +52,7 @@ grails.project.dependency.resolution = {
         grailsHome()
         grailsCentral()
         mavenCentral()
+        mavenRepo "http://dl.bintray.com/spinnaker/spinnaker"
 
         // Optional custom repository for dependencies.
         Closure internalRepo = {
@@ -131,9 +132,6 @@ grails.project.dependency.resolution = {
                 // This fixes ivy resolution issues we had with our transitive dependency on 1.4.
                 'commons-codec:commons-codec:1.5',
 
-                // Call Perforce in process. Delete when user data no longer come from Perforce at deployment time.
-                'com.perforce:p4java:2010.1.269249',
-
                 // Rules for AWS named objects, e.g., Names, AppVersion
                 'com.netflix.frigga:frigga:0.11',
 
@@ -143,7 +141,10 @@ grails.project.dependency.resolution = {
                 // Used for JSON parsing of AWS Simple Workflow Service metadata.
                 // Previously this was an indirect depencency through Grails itself, but this caused errors in some
                 // Grails environments.
-                'com.googlecode.json-simple:json-simple:1.1'
+                'com.googlecode.json-simple:json-simple:1.1',
+
+                // Spinnaker client is used to retrieve application metadata
+                'com.netflix.spinnaker.client:spinnaker-client:0.6'
         ) { // Exclude superfluous and dangerous transitive dependencies
             excludes(
                     // Some libraries bring older versions of JUnit as a transitive dependency and that can interfere

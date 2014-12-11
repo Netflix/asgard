@@ -17,12 +17,13 @@ package com.netflix.asgard
 
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.simpledb.model.Item
+import com.netflix.asgard.applications.SimpleDBApplicationService
 import com.netflix.asgard.model.MonitorBucketType
 import spock.lang.Specification
 import spock.lang.Unroll
 
 @SuppressWarnings("GroovyAssignabilityCheck")
-class ApplicationServiceUnitSpec extends Specification {
+class SimpleDBApplicationServiceUnitSpec extends Specification {
 
     static final DOMAIN_NAME = 'CLOUD_APPLICATIONS'
 
@@ -32,10 +33,10 @@ class ApplicationServiceUnitSpec extends Specification {
     def caches = new Caches(new MockCachedMapBuilder([
             (EntityType.application): allApplications,
     ]))
-    ApplicationService applicationService
+    SimpleDBApplicationService applicationService
 
     void setup() {
-        applicationService = Spy(ApplicationService)
+        applicationService = Spy(SimpleDBApplicationService)
         applicationService.caches = caches
         applicationService.taskService = new TaskService() {
             def runTask(UserContext context, String name, Closure work, Link link = null,
@@ -43,7 +44,6 @@ class ApplicationServiceUnitSpec extends Specification {
                 work(new Task())
             }
         }
-        applicationService.cloudReadyService = Mock(CloudReadyService)
         applicationService.awsSimpleDbService = Mock(AwsSimpleDbService)
         applicationService.domainName = DOMAIN_NAME
     }
@@ -84,7 +84,7 @@ class ApplicationServiceUnitSpec extends Specification {
         when:
         applicationService.createRegisteredApplication(UserContext.auto(), 'helloworld', null,
                 'Web Application', 'Say hello', 'jsmith', 'jsmith@example.com',
-                MonitorBucketType.application, 'a,b,c', true)
+                MonitorBucketType.application, 'a,b,c')
 
         then:
         1 * applicationService.awsSimpleDbService.save('CLOUD_APPLICATIONS', 'HELLOWORLD', _)

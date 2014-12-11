@@ -113,7 +113,6 @@
               </select>
             </td>
           </tr>
-          <g:render template="/common/chaosMonkeyOptions" />
           </tbody>
         </table>
       </div>

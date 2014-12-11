@@ -36,7 +36,6 @@ import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult
 import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsRequest
 import com.amazonaws.services.autoscaling.model.DescribeScheduledActionsResult
-import com.amazonaws.services.autoscaling.model.Ebs
 import com.amazonaws.services.autoscaling.model.Instance
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration
 import com.amazonaws.services.autoscaling.model.LifecycleState
@@ -90,7 +89,6 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     def awsEc2Service
     def awsLoadBalancerService
     Caches caches
-    def cloudReadyService
     def configService
     def discoveryService
     def idService
@@ -1151,8 +1149,7 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
     CreateAutoScalingGroupResult createLaunchConfigAndAutoScalingGroup(UserContext userContext,
             AutoScalingGroup groupTemplate, LaunchConfiguration launchConfigTemplate,
-            Collection<AutoScalingProcessType> suspendedProcesses, boolean enableChaosMonkey = false,
-            Task existingTask = null) {
+            Collection<AutoScalingProcessType> suspendedProcesses, Task existingTask = null) {
 
         CreateAutoScalingGroupResult result = new CreateAutoScalingGroupResult()
         String groupName = groupTemplate.autoScalingGroupName
@@ -1194,13 +1191,6 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
                     result.launchConfigDeleteException = launchConfigDeleteException
                 }
             }
-
-            if (result.autoScalingGroupCreated && enableChaosMonkey) {
-                String cluster = Relationships.clusterFromGroupName(groupTemplate.autoScalingGroupName)
-                task.log("Enabling Chaos Monkey for ${cluster}.")
-                Region region = userContext.region
-                result.cloudReadyUnavailable = !cloudReadyService.enableChaosMonkeyForCluster(region, cluster)
-            }
         }, Link.to(EntityType.autoScaling, groupName), existingTask)
 
         result
@@ -1232,10 +1222,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
     }
 
     List<BlockDeviceMapping> buildBlockDeviceMappings(String instanceType) {
-        if (configService.instanceTypeNeedsEbsVolumes(instanceType)) {
-            List<String> deviceNames = configService.ebsVolumeDeviceNamesForLaunchConfigs
-            return deviceNames.collect{ new BlockDeviceMapping(deviceName: it,
-                    ebs: new Ebs(volumeSize: configService.sizeOfEbsVolumesAddedToLaunchConfigs)) }
+        if (configService.instanceTypeNeedsCustomVolumes(instanceType)) {
+            Map<String, String> mapping = configService.getDeviceNameVirtualNameMapping()
+            return mapping.collect { new BlockDeviceMapping(deviceName: it.key, virtualName: it.value) }
         }else{
             return []
         }
@@ -1263,7 +1252,6 @@ class CreateAutoScalingGroupResult {
     AmazonServiceException autoScalingCreateException
     Boolean launchConfigDeleted
     AmazonServiceException launchConfigDeleteException
-    Boolean cloudReadyUnavailable // Just a warning, does not affect success.
 
     String toString() {
         StringBuilder output = new StringBuilder()
@@ -1282,9 +1270,6 @@ class CreateAutoScalingGroupResult {
         if (launchConfigDeleted) { output.append("Launch Config '$launchConfigName' has been deleted. ") }
         if (launchConfigDeleteException) {
             output.append("Failed to delete Launch Config '${launchConfigName}': ${launchConfigDeleteException}. ")
-        }
-        if (cloudReadyUnavailable) {
-            output.append('Chaos Monkey was not enabled because Cloudready is currently unavailable. ')
         }
         output.toString()
     }

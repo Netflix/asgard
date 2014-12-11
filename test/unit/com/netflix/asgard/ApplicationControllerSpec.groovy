@@ -23,14 +23,14 @@ import spock.lang.Specification
  * Created by danw on 2/28/14.
  */
 @TestFor(ApplicationController)
-@Mock([CloudReadyService, ConfigService])
+@Mock([ConfigService])
 class ApplicationControllerSpec extends Specification {
 
     void "params are resilient"() {
         setup:
             ApplicationService applicationService = Mock(ApplicationService)
             controller.applicationService = applicationService
-            def result = Mock(CreateApplicationResult)
+            def result = Mock(ApplicationModificationResult)
             result.succeeded() >> true
 
             params.name = "name"

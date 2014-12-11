@@ -19,9 +19,8 @@ import com.google.common.base.CaseFormat
 import com.netflix.asgard.CachedMapBuilder
 import com.netflix.asgard.Caches
 import com.netflix.asgard.CsiAsgAnalyzer
-import com.netflix.asgard.userdata.DefaultAdvancedUserDataProvider
-import com.netflix.asgard.userdata.DefaultUserDataProvider
-import com.netflix.asgard.userdata.NetflixAdvancedUserDataProvider
+import com.netflix.asgard.applications.SimpleDBApplicationService
+import com.netflix.asgard.applications.SpinnakerApplicationService
 import com.netflix.asgard.NoOpAsgAnalyzer
 import com.netflix.asgard.Region
 import com.netflix.asgard.ServiceInitLoggingBeanPostProcessor
@@ -34,6 +33,10 @@ import com.netflix.asgard.deployment.DeploymentActivitiesImpl
 import com.netflix.asgard.eureka.EurekaClientHolder
 import com.netflix.asgard.model.CsiScheduledAnalysisFactory
 import com.netflix.asgard.server.DeprecatedServerNames
+import com.netflix.asgard.userdata.DefaultAdvancedUserDataProvider
+import com.netflix.asgard.userdata.DefaultUserDataProvider
+import com.netflix.asgard.userdata.LocalFileUserDataProvider
+import com.netflix.asgard.userdata.NetflixAdvancedUserDataProvider
 import com.netflix.asgard.userdata.PropertiesUserDataProvider
 import groovy.io.FileType
 
@@ -88,6 +91,12 @@ beans = {
         }
     }
 
+    if (application.config.plugin?.userDataProvider == 'localFileUserDataProvider') {
+      localFileUserDataProvider(LocalFileUserDataProvider) { bean ->
+        bean.lazyInit = true
+      }
+    }
+
     if (application.config.plugin?.advancedUserDataProvider == 'netflixAdvancedUserDataProvider') {
         netflixAdvancedUserDataProvider(NetflixAdvancedUserDataProvider) { bean ->
             bean.lazyInit = true
@@ -105,6 +114,21 @@ beans = {
     }
 
     restrictBrowserAuthorizationProvider(RestrictBrowserAuthorizationProvider)
+
+    if (application.config.spinnaker?.gateUrl) {
+        applicationService(
+            SpinnakerApplicationService,
+            application.config.spinnaker.gateUrl as String,
+            application.config.cloud.accountName as String
+        ) { bean ->
+            bean.lazyInit = true
+        }
+    } else {
+        applicationService(SimpleDBApplicationService) { bean ->
+            bean.lazyInit = true
+        }
+    }
+
 
     //**** Plugin behavior
 
