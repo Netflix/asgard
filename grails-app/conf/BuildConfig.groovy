@@ -144,7 +144,7 @@ grails.project.dependency.resolution = {
                 'com.googlecode.json-simple:json-simple:1.1',
 
                 // Spinnaker client is used to retrieve application metadata
-                'com.netflix.spinnaker.client:spinnaker-client:0.6'
+                'com.netflix.spinnaker.client:spinnaker-client:0.11'
         ) { // Exclude superfluous and dangerous transitive dependencies
             excludes(
                     // Some libraries bring older versions of JUnit as a transitive dependency and that can interfere
