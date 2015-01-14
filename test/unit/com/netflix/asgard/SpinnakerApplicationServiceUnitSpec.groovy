@@ -135,9 +135,11 @@ class SpinnakerApplicationServiceUnitSpec extends Specification {
         )
 
         then:
-        1 * spinnaker.operations() >> { throw new TaskExecutionException("Error", taskWithErrors()) }
+        1 * spinnaker.operations() >> {
+          throw new TaskExecutionException("Failed to save application", taskWithErrors())
+        }
 
-        result.message == "Could not create Application, reason: Error1, Error2"
+        result.message == "[TASK-ID] Failed to save application, reason(s)='Error1, Error2'"
         !result.succeeded()
     }
 
@@ -184,10 +186,10 @@ class SpinnakerApplicationServiceUnitSpec extends Specification {
 
         then:
         1 * spinnaker.application(appName.toUpperCase()) >> {
-            throw new TaskExecutionException("Error", taskWithErrors())
+            throw new TaskExecutionException("Failed to save application", taskWithErrors())
         }
 
-        result.message == "Could not update Application, reason: Error1, Error2"
+        result.message == "[TASK-ID] Failed to save application, reason(s)='Error1, Error2'"
         !result.succeeded()
 
         where:
@@ -233,14 +235,13 @@ class SpinnakerApplicationServiceUnitSpec extends Specification {
 
     private taskWithErrors() {
         Mock(com.netflix.spinnaker.client.model.Task) {
+            1 * getId() >> "TASK-ID"
             1 * getVariables() >> [
-                [
-                    key  : "exception",
-                    value: [
-                        details: [
-                            errors: [ "Error1", "Error2"]
-                        ]
-                    ]]
+                new com.netflix.spinnaker.client.model.Task.TaskVariable("exception", [
+                    details: [
+                        errors: [ "Error1", "Error2"]
+                    ]
+                ])
             ]
         }
     }

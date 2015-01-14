@@ -160,7 +160,7 @@ class SpinnakerApplicationService extends AbstractApplicationService implements 
                     getRegisteredApplication(userContext, name)
                 } catch (TaskExecutionException e) {
                     successful = false
-                    message = "Could not create Application, reason: ${extractErrorReason(e)}"
+                    message = e.getMessage()
                 }
             },
             Link.to(EntityType.application, name)
@@ -197,7 +197,7 @@ class SpinnakerApplicationService extends AbstractApplicationService implements 
                     getRegisteredApplication(userContext, name)
                 } catch (TaskExecutionException e) {
                     successful = false
-                    message = "Could not update Application, reason: ${extractErrorReason(e)}"
+                    message = e.getMessage()
                 }
             },
             Link.to(EntityType.application, name)
@@ -269,15 +269,5 @@ class SpinnakerApplicationService extends AbstractApplicationService implements 
         }
 
         return null
-    }
-
-    private String extractErrorReason(TaskExecutionException e) {
-        def exceptionVariable = e.task.variables.find { it.key.toUpperCase().contains("EXCEPTION") }
-        def errors = exceptionVariable?.value?.details?.errors
-        if (!errors) {
-            throw e
-        }
-
-        return errors.join(", ")
     }
 }
