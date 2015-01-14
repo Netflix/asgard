@@ -135,7 +135,9 @@ class SpinnakerApplicationServiceUnitSpec extends Specification {
         )
 
         then:
-        1 * spinnaker.operations() >> { throw new TaskExecutionException("Failed to save application", taskWithErrors()) }
+        1 * spinnaker.operations() >> {
+          throw new TaskExecutionException("Failed to save application", taskWithErrors())
+        }
 
         result.message == "[TASK-ID] Failed to save application, reason(s)='Error1, Error2'"
         !result.succeeded()
