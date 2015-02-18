@@ -96,6 +96,8 @@ class AwsSimpleDbService implements InitializingBean {
 
     private List<Item> runQuery(String domainName, String queryString, Region region) {
         List<Item> appItems = []
+        if (!region.simpledb) return appItems
+
         try {
             appItems = itemRetriever.retrieve(region, new SelectRequest(queryString, true))
         } catch (AmazonServiceException ase) {
@@ -118,6 +120,8 @@ class AwsSimpleDbService implements InitializingBean {
      */
     void save(String domainName, String itemName, Collection<ReplaceableAttribute> attributes,
               Region region = Region.defaultRegion()) {
+        if (!region.simpledb) return
+
         try {
             awsClient.by(region).putAttributes(new PutAttributesRequest().withDomainName(domainName).
                     withItemName(itemName).withAttributes(attributes))
@@ -143,6 +147,8 @@ class AwsSimpleDbService implements InitializingBean {
      */
     void delete(String domainName, String itemName, List<Attribute> attributes = null,
                 Region region = Region.defaultRegion()) {
+        if (!region.simpledb) return
+
         try {
             awsClient.by(region).deleteAttributes(new DeleteAttributesRequest(domainName, itemName,
                     attributes))
@@ -159,6 +165,7 @@ class AwsSimpleDbService implements InitializingBean {
 
     List<String> listDomains(Region region) {
         List<String> domains = []
+        if (!region.simpledb) return domains
 
         ListDomainsResult result = listDomainsWithToken(region, null)
         while (true) {

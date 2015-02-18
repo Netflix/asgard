@@ -47,6 +47,13 @@ enum Region {
             'Ireland'
     ),
 
+    EU_CENTRAL_1('eu-central-1',
+            'eu-frankfurt',
+            'eu-central-1.gif',
+            'Frankfurt',
+            false
+    ),
+
     AP_NORTHEAST_1('ap-northeast-1',
             'apac-tokyo',
             'ap-northeast-1.png',
@@ -92,16 +99,22 @@ enum Region {
     String location
 
     /**
+     * Enable SimpleDB caching
+     */
+    Boolean simpledb
+
+    /**
      * @param code the commonly used code name of the region such as us-east-1
      * @param pricingJsonCode the code name of the region used in EC2 pricing json files
      * @param mapImageFileName the name of the image file to display when the region is selected
      * @param location the geographical location of the region
      */
-    Region(String code, String pricingJsonCode, mapImageFileName, location) {
+    Region(String code, String pricingJsonCode, mapImageFileName, location, Boolean simpledb = true) {
         this.code = code
         this.pricingJsonCode = pricingJsonCode
         this.mapImageFileName = mapImageFileName
         this.location = location
+        this.simpledb = simpledb
     }
 
     /**
