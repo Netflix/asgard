@@ -501,7 +501,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
                 }
             }
         }
-        groupId ? groupId : group?.groupId
+        groupId ?: group?.groupId
         if (groupId) {
             return caches.allSecurityGroups.by(region).put(groupId, group)
         }
