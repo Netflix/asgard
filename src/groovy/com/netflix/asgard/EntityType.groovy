@@ -103,7 +103,7 @@ import java.lang.reflect.Modifier
     static final EntityType<ScalingPolicy> scalingPolicy = create('Scaling Policy', { it.policyName })
     static final EntityType<ScheduledUpdateGroupAction> scheduledAction = create('ScheduledAction',
             { it.scheduledActionName })
-    static final EntityType<SecurityGroup> security = create('Security Group', { it.groupName })
+    static final EntityType<SecurityGroup> security = create('Security Group', { it.groupId })
     static final EntityType<Snapshot> snapshot = create('Storage Snapshot', { it.snapshotId }, 'snap-')
     static final EntityType<SourceSecurityGroup> sourceSecurityGroup = create('Source Security Group', { it.groupName })
     static final EntityType<SpotInstanceRequest> spotInstanceRequest = create('Spot Instance Request',

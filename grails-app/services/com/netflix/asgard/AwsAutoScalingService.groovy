@@ -1163,8 +1163,9 @@ class AwsAutoScalingService implements CacheInitializer, InitializingBean {
 
         LaunchConfigurationBeanOptions launchConfig = LaunchConfigurationBeanOptions.from(launchConfigTemplate)
         launchConfig.launchConfigurationName = launchConfigName
+        String vpcId = subnets.getVpcIdForVpcZoneIdentifier(groupTemplate.VPCZoneIdentifier)
         launchConfig.securityGroups = launchTemplateService.includeDefaultSecurityGroups(
-                launchConfigTemplate.securityGroups, groupTemplate.VPCZoneIdentifier as boolean, userContext.region)
+                launchConfigTemplate.securityGroups, vpcId, userContext.region)
         taskService.runTask(userContext, msg, { Task task ->
             String userData = launchTemplateService.buildUserData(userContext, groupOptions, launchConfig)
             launchConfig.userData = userData

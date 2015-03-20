@@ -37,6 +37,7 @@ import com.netflix.asgard.model.AutoScalingGroupData
 import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScalingPolicyData
+import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.plugin.AsgAnalyzer
@@ -50,7 +51,9 @@ class DeploymentActivitiesSpec extends Specification {
 
     UserContext userContext = UserContext.auto(Region.US_WEST_1)
     AwsAutoScalingService mockAwsAutoScalingService = Mock(AwsAutoScalingService)
-    AwsEc2Service mockAwsEc2Service = Mock(AwsEc2Service)
+    AwsEc2Service mockAwsEc2Service = Stub(AwsEc2Service) {
+        getSubnets(_) >> Stub(Subnets)
+    }
     LaunchTemplateService mockLaunchTemplateService = Mock(LaunchTemplateService)
     ConfigService mockConfigService = Mock(ConfigService)
     DiscoveryService mockDiscoveryService = Mock(DiscoveryService)
@@ -108,7 +111,7 @@ class DeploymentActivitiesSpec extends Specification {
                 securityGroups: ['defaultSecurityGroup'], iamInstanceProfile: 'defaultIamRole',
                 launchConfigurationName: 'rearden_metal_pourer-20130718090004')
         1 * mockConfigService.getDefaultIamRole() >> 'defaultIamRole'
-        1 * mockLaunchTemplateService.includeDefaultSecurityGroups(_, false, _) >> ['defaultSecurityGroup']
+        1 * mockLaunchTemplateService.includeDefaultSecurityGroups(_, '', _) >> ['defaultSecurityGroup']
     }
 
     def 'should create launch config for next ASG'() {
