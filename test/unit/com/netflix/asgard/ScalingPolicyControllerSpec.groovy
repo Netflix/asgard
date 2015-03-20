@@ -40,6 +40,7 @@ class ScalingPolicyControllerSpec extends Specification {
         TestUtils.setUpMockRequest()
         MockUtils.prepareForConstraintsTests(ScalingPolicyCreateCommand)
         controller.awsAutoScalingService = Mocks.awsAutoScalingService()
+        new MonkeyPatcherService().createDynamicMethods()
     }
 
     def 'save should create scaling policy and associated alarm'() {
