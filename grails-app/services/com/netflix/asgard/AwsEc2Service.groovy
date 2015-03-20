@@ -472,37 +472,38 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         String groupName
         DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest()
         String groupId = ''
+        SecurityGroup cachedSecGroup = null
         if (name ==~ SECURITY_GROUP_ID_PATTERN) {
             groupId = name
             request.withGroupIds(groupId)
-            SecurityGroup cachedSecGroup = caches.allSecurityGroups.by(region).list().find { it.groupId == groupId }
-            groupName = cachedSecGroup?.groupName
+            cachedSecGroup = caches.allSecurityGroups.by(region).get(groupId)
         } else {
-            request.withGroupNames(name)
             groupName = name
+            request.withGroupNames(name)
+            cachedSecGroup = caches.allSecurityGroups.by(region).list().find { it.groupName == groupName }
+            groupId = cachedSecGroup?.groupId
         }
         if (from == From.CACHE) {
-            return caches.allSecurityGroups.by(region).get(groupName)
+            return cachedSecGroup
         }
         SecurityGroup group = null
         try {
             DescribeSecurityGroupsResult result = awsClient.by(region).describeSecurityGroups(request)
             group = Check.loneOrNone(result.getSecurityGroups(), SecurityGroup)
-            groupName = group?.groupName
         } catch (AmazonServiceException e) {
-            // Can't find a security group with that request.
-            if (e.errorCode == 'InvalidParameterValue' && !groupId) {
+            // Can't find a security group by name.
+            if (e.errorCode == 'InvalidParameterValue') {
                 // It's likely a VPC security group which we can't reference by name. Maybe it has an ID in the cache.
-                SecurityGroup cachedGroup = caches.allSecurityGroups.by(region).get(groupName)
-                if (cachedGroup) {
-                    request = new DescribeSecurityGroupsRequest(groupIds: [cachedGroup.groupId])
+                if (cachedSecGroup) {
+                    request = new DescribeSecurityGroupsRequest(groupIds: [cachedSecGroup.groupId])
                     DescribeSecurityGroupsResult result = awsClient.by(region).describeSecurityGroups(request)
                     group = Check.lone(result?.getSecurityGroups(), SecurityGroup)
                 }
             }
         }
-        if (groupName) {
-            return caches.allSecurityGroups.by(region).put(groupName, group)
+        groupId ? groupId : group?.groupId
+        if (groupId) {
+            return caches.allSecurityGroups.by(region).put(groupId, group)
         }
         null
     }
@@ -571,7 +572,7 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
         taskService.runTask(userContext, "Remove Security Group ${name}", { task ->
             awsClient.by(userContext.region).deleteSecurityGroup(new DeleteSecurityGroupRequest(groupId: id))
         }, Link.to(EntityType.security, name))
-        caches.allSecurityGroups.by(userContext.region).remove(name)
+        caches.allSecurityGroups.by(userContext.region).remove(id)
     }
 
     /**

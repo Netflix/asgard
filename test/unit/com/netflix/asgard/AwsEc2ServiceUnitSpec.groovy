@@ -348,7 +348,8 @@ and groupName is #groupName""")
         actualSecurityGroup == expectedSecurityGroup
         1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['super_secure'])) >>
                 new DescribeSecurityGroupsResult(securityGroups: [expectedSecurityGroup])
-        1 * mockSecurityGroupCache.put('super_secure', expectedSecurityGroup) >> expectedSecurityGroup
+        1 * mockSecurityGroupCache.list() >> [expectedSecurityGroup]
+        1 * mockSecurityGroupCache.put('sg-123', expectedSecurityGroup) >> expectedSecurityGroup
         0 * _
     }
 
@@ -362,8 +363,8 @@ and groupName is #groupName""")
         actualSecurityGroup == expectedSecurityGroup
         1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >>
                 new DescribeSecurityGroupsResult(securityGroups: [expectedSecurityGroup])
-        1 * mockSecurityGroupCache.list() >> [expectedSecurityGroup]
-        1 * mockSecurityGroupCache.put('super_secure', expectedSecurityGroup) >> expectedSecurityGroup
+        1 * mockSecurityGroupCache.get('sg-123') >> expectedSecurityGroup
+        1 * mockSecurityGroupCache.put('sg-123', expectedSecurityGroup) >> expectedSecurityGroup
         0 * _
     }
 
@@ -375,7 +376,7 @@ and groupName is #groupName""")
 
         then:
         actualSecurityGroup == expectedSecurityGroup
-        1 * mockSecurityGroupCache.get('super_secure') >> expectedSecurityGroup
+        1 * mockSecurityGroupCache.list() >> [expectedSecurityGroup]
         0 * _
     }
 
@@ -387,8 +388,7 @@ and groupName is #groupName""")
 
         then:
         actualSecurityGroup == expectedSecurityGroup
-        1 * mockSecurityGroupCache.list() >> [expectedSecurityGroup]
-        1 * mockSecurityGroupCache.get('super_secure') >> expectedSecurityGroup
+        1 * mockSecurityGroupCache.get('sg-123') >> expectedSecurityGroup
         0 * _
     }
 
@@ -398,12 +398,11 @@ and groupName is #groupName""")
 
         then:
         actualSecurityGroup == null
-        1 * mockSecurityGroupCache.list() >> []
-        1 * mockSecurityGroupCache.get(null)
+        1 * mockSecurityGroupCache.get('sg-123')
         0 * _
     }
 
-    def 'should put null in cache by name when security group is not found by name'() {
+    def 'should put null in cache when security group is not found by name'() {
         when:
         SecurityGroup actualSecurityGroup = awsEc2Service.getSecurityGroup(userContext, 'super_secure')
 
@@ -412,34 +411,21 @@ and groupName is #groupName""")
         1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['super_secure'])) >> {
             throw new AmazonServiceException('there is no security group like that')
         }
-        1 * mockSecurityGroupCache.put('super_secure', null)
+        1 * mockSecurityGroupCache.list() >> []
         0 * _
     }
 
-    def 'should put null in cache by name when security group is not found by id'() {
+    def 'should put null in cache when security group is not found by id'() {
         when:
         SecurityGroup actualSecurityGroup = awsEc2Service.getSecurityGroup(userContext, 'sg-123')
 
         then:
         null == actualSecurityGroup
+        1 * mockSecurityGroupCache.get('sg-123')
         1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >> {
             throw new AmazonServiceException('there is no security group like that')
         }
-        1 * mockSecurityGroupCache.list() >> [new SecurityGroup(groupId: 'sg-123', groupName: 'super_secure')]
-        1 * mockSecurityGroupCache.put('super_secure', null)
-        0 * _
-    }
-
-    def 'should put nothing in cache when security group is not found by id or in cache'() {
-        when:
-        SecurityGroup actualSecurityGroup =  awsEc2Service.getSecurityGroup(userContext, 'sg-123')
-
-        then:
-        null == actualSecurityGroup
-        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >> {
-            throw new AmazonServiceException('there is no security group like that')
-        }
-        1 * mockSecurityGroupCache.list() >> [new SecurityGroup(groupId: 'sg-000', groupName: 'super_secure')]
+        1 * mockSecurityGroupCache.put('sg-123', null)
         0 * _
     }
 
@@ -451,16 +437,16 @@ and groupName is #groupName""")
         SecurityGroup actualSecurityGroup =  awsEc2Service.getSecurityGroup(userContext, 'super_secure')
 
         then:
-        null == actualSecurityGroup
+        securityGroup == actualSecurityGroup
+        1 * mockSecurityGroupCache.list() >> [securityGroup]
         1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['super_secure'])) >> {
             AmazonServiceException e = new AmazonServiceException('you cannot ask for a VPC Security Group by name')
             e.errorCode = 'InvalidParameterValue'
             throw e
         }
-        1 * mockSecurityGroupCache.get('super_secure') >> securityGroup
         1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >>
-                new DescribeSecurityGroupsResult(securityGroups: [securityGroup])
-        1 * mockSecurityGroupCache.put('super_secure', securityGroup)
+            new DescribeSecurityGroupsResult(securityGroups: [securityGroup])
+        1 * mockSecurityGroupCache.put('sg-123', securityGroup) >> securityGroup
         0 * _
     }
 
@@ -475,7 +461,7 @@ and groupName is #groupName""")
             e.errorCode = 'NotInvalidParameterValue'
             throw e
         }
-        1 * mockSecurityGroupCache.put('super_secure', null)
+        1 * mockSecurityGroupCache.list()
         0 * _
     }
 
@@ -490,7 +476,8 @@ and groupName is #groupName""")
             e.errorCode = 'InvalidParameterValue'
             throw e
         }
-        1 * mockSecurityGroupCache.list() >> []
+        1 * mockSecurityGroupCache.get('sg-123')
+        1 * mockSecurityGroupCache.put('sg-123', null)
         0 * _
     }
 
@@ -608,6 +595,7 @@ and groupName is #groupName""")
             Closure work = it[2]
             work(new Task())
         }
+        1 * mockSecurityGroupCache.list()
         0 * _
     }
 

@@ -107,8 +107,11 @@ class RollingPushOperation extends AbstractPushOperation {
         loadBalancerNames = group.loadBalancerNames
         String newLaunchName = Relationships.buildLaunchConfigurationName(groupName)
         Time.sleepCancellably 100 // tiny pause before LC create to avoid rate limiting
+        UserContext userContext = options.common.userContext
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        String vpcId = subnets.getVpcIdForVpcZoneIdentifier(group.VPCZoneIdentifier)
         Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(options.securityGroups,
-                group.VPCZoneIdentifier as boolean, options.userContext.region)
+            vpcId, options.userContext.region)
         String oldLaunchName = oldLaunch.launchConfigurationName
         task.log("Updating launch from ${oldLaunchName} with ${options.imageId} into ${newLaunchName}")
         String iamInstanceProfile = options.iamInstanceProfile ?: null
@@ -119,8 +122,6 @@ class RollingPushOperation extends AbstractPushOperation {
                 ebsOptimized: oldLaunch.ebsOptimized,
                 instancePriceType: options.spotPrice ? InstancePriceType.SPOT : InstancePriceType.ON_DEMAND
         )
-        UserContext userContext = options.common.userContext
-        Subnets subnets = awsEc2Service.getSubnets(userContext)
         AutoScalingGroupBeanOptions groupForUserData = AutoScalingGroupBeanOptions.from(group, subnets)
         groupForUserData.launchConfigurationName = newLaunchName
         launchConfig.userData = launchTemplateService.buildUserData(options.common.userContext, groupForUserData,

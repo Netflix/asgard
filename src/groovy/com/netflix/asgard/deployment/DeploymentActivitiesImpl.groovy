@@ -39,6 +39,7 @@ import com.netflix.asgard.model.AutoScalingProcessType
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.ScalingPolicyData
 import com.netflix.asgard.model.ScheduledAsgAnalysis
+import com.netflix.asgard.model.Subnets
 import com.netflix.asgard.model.SwfWorkflowTags
 import com.netflix.asgard.model.WorkflowExecutionBeanOptions
 import com.netflix.asgard.push.AsgDeletionMode
@@ -80,8 +81,10 @@ class DeploymentActivitiesImpl implements DeploymentActivities {
             AutoScalingGroupBeanOptions nextAutoScalingGroup, LaunchConfigurationBeanOptions inputs) {
         LaunchConfigurationBeanOptions launchConfiguration = LaunchConfigurationBeanOptions.from(inputs)
         launchConfiguration.launchConfigurationName = nextAutoScalingGroup.launchConfigurationName
+        Subnets subnets = awsEc2Service.getSubnets(userContext)
+        String vpcId = subnets.getVpcIdForSubnetPurpose(nextAutoScalingGroup.subnetPurpose)
         Collection<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(
-                launchConfiguration.securityGroups, nextAutoScalingGroup.subnetPurpose as boolean, userContext.region)
+                launchConfiguration.securityGroups, vpcId, userContext.region)
         launchConfiguration.securityGroups = securityGroups
         launchConfiguration.iamInstanceProfile = launchConfiguration.iamInstanceProfile ?: configService.defaultIamRole
         launchConfiguration

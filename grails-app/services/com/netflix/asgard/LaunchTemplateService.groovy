@@ -16,9 +16,11 @@
 package com.netflix.asgard
 
 import com.amazonaws.services.ec2.model.Image
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.netflix.asgard.model.AutoScalingGroupBeanOptions
 import com.netflix.asgard.model.LaunchConfigurationBeanOptions
 import com.netflix.asgard.model.LaunchContext
+import java.util.regex.Pattern
 
 /**
  * Dynamically creates certain fields of a launch template (LaunchConfiguration/LaunchSpecification) based on the
@@ -28,6 +30,8 @@ class LaunchTemplateService {
 
     static transactional = false
 
+    private static Pattern SECURITY_GROUP_ID_PATTERN = ~/sg-[a-f0-9]+/
+
     def applicationService
     def awsEc2Service
     def configService
@@ -36,25 +40,39 @@ class LaunchTemplateService {
     Caches caches
 
     /**
-     * There are Security Groups that should always be included and they are added here.
+     * There are Security Groups that should always be included and they are added here. All security group names
+     * are also converted into IDs.
      *
      * @param securityGroups Security Group IDs or names before the defaults are added (VPC needs IDs rather than names)
-     * @param isVPC indicates if security groups are in VPC
-     * @param region the default Security Group IDs will be looked up by name for this region (required for VPC)
-     * @return new Collection of Security Group names or IDs without duplicates
+     * @param vpcId the ID of the VPC that all security groups are in
+     * @param region the region that all security groups are in
+     * @return new Collection of Security Group IDs without duplicates
      */
-    Collection<String> includeDefaultSecurityGroups(Collection<String> securityGroups, boolean isVPC = false,
-            Region region = null) {
-        List<String> defaultSecurityGroupNames =
-            isVPC ? configService.defaultVpcSecurityGroupNames : configService.defaultSecurityGroups
-        List<String> defaultSecurityGroups = defaultSecurityGroupNames
-        // Use IDs rather than names if VPC or ids were specified
-        if (isVPC || (securityGroups && securityGroups.iterator().next().startsWith('sg-')) ) {
-            defaultSecurityGroups = defaultSecurityGroupNames.collect {
-                caches.allSecurityGroups.by(region).get(it)?.groupId
-            }.findAll { it }
+    Collection<String> includeDefaultSecurityGroups(Collection<String> securityGroups, String vpcId, Region region) {
+        Collection<String> ids = securityGroups.findAll { it ==~ SECURITY_GROUP_ID_PATTERN }
+        Collection<String> names = securityGroups - ids
+
+        Collection<String> namesWithDefaults = names + configService.defaultSecurityGroups
+        if (vpcId) {
+            namesWithDefaults = namesWithDefaults + configService.defaultVpcSecurityGroupNames
         }
-        (securityGroups + defaultSecurityGroups) as Set
+
+        Collection<SecurityGroup> securityGroupsLookedUpByName = caches.allSecurityGroups.by(region).list().findAll {
+            namesWithDefaults.contains(it.groupName) && (vpcId ? vpcId == it.vpcId : !it.vpcId)
+        }
+        (ids + securityGroupsLookedUpByName*.groupId) as Set
+    }
+
+    /**
+     * @deprecated use includeDefaultSecurityGroups instead
+     * There are Security Groups that should always be included and they are added here.
+     *
+     * @param securityGroups Security Group names before the defaults are added
+     * @return new Collection of Security Group names without duplicates
+     */
+    Collection<String> includeDefaultSecurityGroupsForNonVpc(Collection<String> securityGroups) {
+        List<String> defaultSecurityGroupNames = configService.defaultSecurityGroups
+        (securityGroups + defaultSecurityGroupNames) as Set
     }
 
     /**

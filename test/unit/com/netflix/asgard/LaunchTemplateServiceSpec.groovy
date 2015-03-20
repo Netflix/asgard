@@ -31,8 +31,20 @@ class LaunchTemplateServiceSpec extends Specification {
 
     ApplicationService applicationService
     AwsEc2Service awsEc2Service
-    ConfigService mockConfigService = Mock(ConfigService)
-    CachedMap mockSecurityGroupCache = Mock(CachedMap)
+    ConfigService mockConfigService = Stub() {
+        getDefaultSecurityGroups() >> ['dsg1', 'dsg2']
+        getDefaultVpcSecurityGroupNames() >> ['dsg1-vpc']
+    }
+    CachedMap mockSecurityGroupCache = Stub {
+        list() >> [
+            'sg1': [],
+            'dsg1': [],
+            'dsg2': [],
+            'dsg1-vpc': []
+        ].collect { name, details ->
+            new SecurityGroup(groupName: name, groupId: "sg-${name}")
+        }
+    }
     Caches caches
     LaunchTemplateService launchTemplateService
     PluginService pluginService
@@ -54,79 +66,39 @@ class LaunchTemplateServiceSpec extends Specification {
         new MonkeyPatcherService().createDynamicMethods()
     }
 
-    def 'should include default security group names'() {
+    def 'should include default security group IDs'() {
         when:
-        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups([])
+        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups([], "", Region.US_EAST_1)
 
         then:
-        securityGroups == ['dsg1', 'dsg2'] as Set
-        1 * mockConfigService.defaultSecurityGroups >> ['dsg1', 'dsg2']
+        securityGroups == ['sg-dsg1', 'sg-dsg2'] as Set
     }
 
-    def 'should not include duplicate security group names'() {
+    def 'should not include duplicate security group IDs'() {
         when:
-        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(['sg1', 'dsg2'])
+        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(['sg1', 'dsg2'], "",
+            Region.US_EAST_1)
 
         then:
-        securityGroups == ['sg1', 'dsg1', 'dsg2'] as Set
-        1 * mockConfigService.defaultSecurityGroups >> ['dsg1', 'dsg2']
+        securityGroups == ['sg-sg1', 'sg-dsg1', 'sg-dsg2'] as Set
     }
 
-    def 'should include default VPC security group IDs'() {
-        when:
-        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups([], true, Region.US_EAST_1)
-
-        then:
-        securityGroups == ['sg-101', 'sg-102'] as Set
-        1 * mockConfigService.defaultVpcSecurityGroupNames >> ['dsg1', 'dsg2']
-        1 * mockSecurityGroupCache.get('dsg1') >> new SecurityGroup(groupId: 'sg-101')
-        1 * mockSecurityGroupCache.get('dsg2') >> new SecurityGroup(groupId: 'sg-102')
-    }
-
-    def 'should not include duplicate VPC security group IDs'() {
+    def 'should not include security groups already without cached ID'() {
         when:
         Set<String> securityGroups = launchTemplateService.
-                includeDefaultSecurityGroups(['sg1', 'sg-102'], true, Region.US_EAST_1)
+            includeDefaultSecurityGroups(['sg1', 'sg2'], "", Region.US_EAST_1)
 
         then:
-        securityGroups == ['sg1', 'sg-101', 'sg-102'] as Set
-        1 * mockConfigService.defaultVpcSecurityGroupNames >> ['dsg1', 'dsg2']
-        1 * mockSecurityGroupCache.get('dsg1') >> new SecurityGroup(groupId: 'sg-101')
-        1 * mockSecurityGroupCache.get('dsg2') >> new SecurityGroup(groupId: 'sg-102')
+        securityGroups == ['sg-dsg1', 'sg-dsg2', 'sg-sg1'] as Set
     }
 
-    def 'should not include default VPC security group IDs not in cache'() {
+    def 'should include security groups already referenced by IDs without lookup'() {
         when:
-        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(['sg1'], true,
-                Region.US_EAST_1)
+        Set<String> securityGroups = launchTemplateService.
+            includeDefaultSecurityGroups(['sg1', 'sg-101'], "", Region.US_EAST_1)
 
         then:
-        securityGroups == ['sg1', 'sg-101'] as Set
-        1 * mockConfigService.defaultVpcSecurityGroupNames >> ['dsg1', 'dsg2']
-        1 * mockSecurityGroupCache.get('dsg1') >> new SecurityGroup(groupId: 'sg-101')
-        1 * mockSecurityGroupCache.get('dsg2') >> null
-    }
-
-    def 'should consistently use id rather than name when ids are specified'() {
-        mockConfigService.defaultSecurityGroups >> ['dsg1']
-        mockSecurityGroupCache.get('dsg1') >> new SecurityGroup(groupId: 'sg-101')
-
-        when:
-        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(['sg-100'])
-
-        then:
-        securityGroups == ['sg-100', 'sg-101'] as Set
-    }
-
-    def 'should consistently use name rather than id when names are specified'() {
-        mockConfigService.defaultSecurityGroups >> ['dsg1']
-        mockSecurityGroupCache.get('dsg1') >> new SecurityGroup(groupId: 'sg-101')
-
-        when:
-        Set<String> securityGroups = launchTemplateService.includeDefaultSecurityGroups(['sg1'])
-
-        then:
-        securityGroups == ['sg1', 'dsg1'] as Set
+        securityGroups == ['sg-dsg1', 'sg-dsg2', 'sg-sg1', 'sg-101'] as Set
     }
 
     def 'should build user data string for auto scaling group and launch config'() {
