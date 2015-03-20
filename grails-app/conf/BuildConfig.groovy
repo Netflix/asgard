@@ -53,6 +53,7 @@ grails.project.dependency.resolution = {
         grailsCentral()
         mavenCentral()
         mavenRepo "http://dl.bintray.com/spinnaker/spinnaker"
+        mavenRepo "http://repo.grails.org/grails/repo/"
 
         // Optional custom repository for dependencies.
         Closure internalRepo = {
