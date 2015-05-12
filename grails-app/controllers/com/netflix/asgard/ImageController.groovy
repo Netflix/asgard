@@ -428,7 +428,8 @@ class ImageDeleteCommand {
     static constraints = {
         id(nullable: false, blank: false, size: 12..12, validator: { String value, ImageDeleteCommand command ->
             UserContext userContext = UserContext.of(Requests.request)
-            List<String> promotionTargetServerRootUrls = command.grailsApplication.config.promote?.targetServerRootUrls ?: []
+            List<String> promotionTargetServerRootUrls
+                = command.grailsApplication.config.promote?.targetServerRootUrls ?: []
             String promotionTargetServer = command.grailsApplication.config.promote.targetServer
             String env = command.grailsApplication.config.cloud.accountName
 
