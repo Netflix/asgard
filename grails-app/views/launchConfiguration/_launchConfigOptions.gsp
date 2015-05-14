@@ -104,7 +104,7 @@
       <label for="ebsOptimized">EBS Optimized?</label>
     </td>
     <td>
-      <input id="ebsOptimized" type="checkbox" name="ebsOptimized" /> (may incur additional costs)
+      <input id="ebsOptimized" type="checkbox" value="true" name="ebsOptimized" /> (may incur additional costs)
     </td>
   </tr>
   <tr class="prop advanced">
