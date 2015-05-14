@@ -387,8 +387,9 @@ class AutoScalingControllerSpec extends Specification {
         'true'              | true
         'false'             | false
     }
-    
-    @Unroll("save should create placement tenancy #placementTenancyValue launch config for param #placementTenancyParam")
+
+    @Unroll("save should create placement tenancy #placementTenancyValue " +
+            " launch config for param #placementTenancyParam")
     def 'save should create config with placement tenancy'() {
         controller.configService = Mock(ConfigService)
         controller.awsAutoScalingService = Mock(AwsAutoScalingService)
