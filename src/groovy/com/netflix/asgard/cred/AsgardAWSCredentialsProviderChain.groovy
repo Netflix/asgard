@@ -1,4 +1,4 @@
-/*
+    /*
  * Copyright 2014 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,20 +52,34 @@ import com.netflix.asgard.RestClientService
  */
 class AsgardAWSCredentialsProviderChain extends AWSCredentialsProviderChain {
     public AsgardAWSCredentialsProviderChain(ConfigService configService, RestClientService restClientService) {
-        super(
-                // Varargs in Java constructor work against elegance of super call in Groovy subclass
-                [
-                        new EnvironmentVariableCredentialsProvider(),
-                        new SystemPropertiesCredentialsProvider(),
-                        new ConfigCredentialsProvider(configService),
-                        new LocalFilesCredentialsProvider(configService),
-                        new SshCredentialsProvider(configService),
-                        new KeyManagementServiceAssumeRoleCredentialsProvider(configService, restClientService),
-                        new KeyManagementServiceCredentialsProvider(configService, restClientService),
-                        new STSAssumeRoleSessionCredentialsProvider(configService.assumeRoleArn,
-                                configService.assumeRoleSessionName),
-                        new InstanceProfileCredentialsProvider()
-                ] as AWSCredentialsProvider[]
-        )
+        super(makeChain(configService, restClientService))
+    }
+
+    public static AWSCredentialsProvider[] makeChain(ConfigService configService, RestClientService restClientService) {
+        if (configService.assumeRoleArn != null && configService.assumeRoleSessionName != null) {
+            return [
+                    new EnvironmentVariableCredentialsProvider(),
+                    new SystemPropertiesCredentialsProvider(),
+                    new ConfigCredentialsProvider(configService),
+                    new LocalFilesCredentialsProvider(configService),
+                    new SshCredentialsProvider(configService),
+                    new KeyManagementServiceAssumeRoleCredentialsProvider(configService, restClientService),
+                    new KeyManagementServiceCredentialsProvider(configService, restClientService),
+                    new STSAssumeRoleSessionCredentialsProvider(configService.assumeRoleArn as String,
+                            configService.assumeRoleSessionName as String),
+                    new InstanceProfileCredentialsProvider()
+            ] as AWSCredentialsProvider[]
+        } else {
+            return [
+                    new EnvironmentVariableCredentialsProvider(),
+                    new SystemPropertiesCredentialsProvider(),
+                    new ConfigCredentialsProvider(configService),
+                    new LocalFilesCredentialsProvider(configService),
+                    new SshCredentialsProvider(configService),
+                    new KeyManagementServiceAssumeRoleCredentialsProvider(configService, restClientService),
+                    new KeyManagementServiceCredentialsProvider(configService, restClientService),
+                    new InstanceProfileCredentialsProvider()
+            ] as AWSCredentialsProvider[]
+        }
     }
 }
