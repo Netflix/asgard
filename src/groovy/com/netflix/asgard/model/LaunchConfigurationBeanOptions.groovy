@@ -72,6 +72,9 @@ import groovy.transform.Canonical
     /** @see LaunchConfiguration#associatePublicIpAddress */
     Boolean associatePublicIpAddress
 
+    /** @see LaunchConfiguration#getPlacementTenancy */
+    String placementTenancy
+
     void setSecurityGroups(Collection<String> securityGroups) {
         this.securityGroups = copyNonNullToSet(securityGroups)
     }
@@ -110,7 +113,8 @@ import groovy.transform.Canonical
                 instancePriceType: source.instancePriceType,
                 iamInstanceProfile: source.iamInstanceProfile,
                 ebsOptimized: source.ebsOptimized,
-                associatePublicIpAddress: source.associatePublicIpAddress
+                associatePublicIpAddress: source.associatePublicIpAddress,
+                placementTenancy: source.placementTenancy
         )
     }
 
@@ -136,7 +140,8 @@ import groovy.transform.Canonical
                     instancePriceType: spotPrice ? InstancePriceType.SPOT : InstancePriceType.ON_DEMAND,
                     iamInstanceProfile: iamInstanceProfile,
                     ebsOptimized: ebsOptimized,
-                    associatePublicIpAddress: associatePublicIpAddress
+                    associatePublicIpAddress: associatePublicIpAddress,
+                    placementTenancy: placementTenancy
             )
         }
     }
@@ -168,7 +173,8 @@ import groovy.transform.Canonical
                 spotPrice: spotPrice,
                 iamInstanceProfile: iamInstanceProfile,
                 ebsOptimized: ebsOptimized,
-                associatePublicIpAddress: associatePublicIpAddress
+                associatePublicIpAddress: associatePublicIpAddress,
+                placementTenancy: placementTenancy
         )
     }
 

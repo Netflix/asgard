@@ -321,7 +321,8 @@ class DeploymentControllerSpec extends Specification {
                 instanceMonitoring: new InstanceMonitoring(enabled: false),
                 iamInstanceProfile: "BaseIAMRole",
                 ebsOptimized: false,
-                associatePublicIpAddress: false
+                associatePublicIpAddress: false,
+                placementTenancy: "default"
         )
         Subnets subnets = new Subnets([
                 new SubnetData("1", "", "vpc1", "", 1, "us-east-1", "internal", SubnetTarget.EC2)
@@ -347,7 +348,8 @@ class DeploymentControllerSpec extends Specification {
                         instancePriceType: "ON_DEMAND",
                         iamInstanceProfile: "BaseIAMRole",
                         ebsOptimized: false,
-                        associatePublicIpAddress: false
+                        associatePublicIpAddress: false,
+                        placementTenancy: "default"
                 ],
                 asgOptions: [
                         autoScalingGroupName: null,
@@ -414,7 +416,8 @@ class DeploymentControllerSpec extends Specification {
                 instanceMonitoring: null,
                 iamInstanceProfile: "BaseIAMRole",
                 ebsOptimized: false,
-                associatePublicIpAddress: false
+                associatePublicIpAddress: false,
+                placementTenancy: "default"
         )
         Subnets subnets = new Subnets([
                 new SubnetData("1", "", "vpc1", "", 1, "us-east-1", "internal", SubnetTarget.EC2)
@@ -450,7 +453,8 @@ class DeploymentControllerSpec extends Specification {
                         instancePriceType: "ON_DEMAND",
                         iamInstanceProfile: "BaseIAMRole",
                         ebsOptimized: false,
-                        associatePublicIpAddress: false
+                        associatePublicIpAddress: false,
+                        placementTenancy: "default"
                 ],
                 asgOptions: [
                         autoScalingGroupName: null,

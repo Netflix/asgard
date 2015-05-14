@@ -369,7 +369,8 @@ class AutoScalingControllerSpec extends Specification {
             ebsOptimized = ebsOptimizedParam
         }
         LaunchConfiguration expectedLaunchConfiguration = new LaunchConfiguration().
-                withEbsOptimized(ebsOptimizedValue).withInstanceMonitoring(new InstanceMonitoring().withEnabled(false))
+                withEbsOptimized(ebsOptimizedValue).withInstanceMonitoring(new InstanceMonitoring().withEnabled(false)).
+                withPlacementTenancy("default")
 
         when:
         controller.save(cmd)
@@ -385,6 +386,37 @@ class AutoScalingControllerSpec extends Specification {
         ''                  | false
         'true'              | true
         'false'             | false
+    }
+    
+    @Unroll("save should create placement tenancy #placementTenancyValue launch config for param #placementTenancyParam")
+    def 'save should create config with placement tenancy'() {
+        controller.configService = Mock(ConfigService)
+        controller.awsAutoScalingService = Mock(AwsAutoScalingService)
+        controller.awsEc2Service = Mock(AwsEc2Service) {
+            getSubnets(_) >> new Subnets([])
+        }
+        GroupCreateCommand cmd = new GroupCreateCommand()
+        controller.params.with {
+            appName = 'helloworld'
+            placementTenancy = placementTenancyParam
+        }
+        LaunchConfiguration expectedLaunchConfiguration = new LaunchConfiguration().
+                withEbsOptimized(false).withPlacementTenancy(placementTenancyValue).
+                withInstanceMonitoring(new InstanceMonitoring().withEnabled(false))
+
+        when:
+        controller.save(cmd)
+
+        then:
+        1 * controller.awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(_, _, expectedLaunchConfiguration,
+                _) >> new CreateAutoScalingGroupResult()
+        0 * controller.awsAutoScalingService.createLaunchConfigAndAutoScalingGroup(_, _, _, _)
+
+        where:
+        placementTenancyParam | placementTenancyValue
+        null                  | 'default'
+        'default'             | 'default'
+        'dedicated'           | 'dedicated'
     }
 
     void 'should generate group name and environment variables from ASG form inputs'() {

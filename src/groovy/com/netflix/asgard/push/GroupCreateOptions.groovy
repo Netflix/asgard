@@ -37,6 +37,7 @@ import groovy.transform.Immutable
     Collection<ScheduledUpdateGroupAction> scheduledActions
     String spotPrice
     boolean ebsOptimized
+    String placementTenancy
 
     /** The number of instances to create at a time while inflating the auto scaling group. */
     Integer batchSize

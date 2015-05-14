@@ -334,11 +334,13 @@ class AutoScalingController {
             boolean ebsOptimized = params.ebsOptimized?.toBoolean()
             boolean enableMonitoring = params.enableInstanceMonitoring ? params.enableInstanceMonitoring.toBoolean() :
                     configService.enableInstanceMonitoring
+            String placementTenancy = params.placementTenancy ?: "default"
             LaunchConfiguration launchConfigTemplate = new LaunchConfiguration().withImageId(imageId).
                     withKernelId(kernelId).withInstanceType(instType).withKeyName(keyName).withRamdiskId(ramdiskId).
                     withSecurityGroups(securityGroups).withIamInstanceProfile(iamInstanceProfile).
                     withEbsOptimized(ebsOptimized).withInstanceMonitoring(new InstanceMonitoring()
-                        .withEnabled(enableMonitoring))
+                        .withEnabled(enableMonitoring)).
+                    withPlacementTenancy(placementTenancy)
             if (params.pricing == InstancePriceType.SPOT.name()) {
                 launchConfigTemplate.spotPrice = spotInstanceRequestService.recommendSpotPrice(userContext, instType)
             }

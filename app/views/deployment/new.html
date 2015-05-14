@@ -159,6 +159,17 @@
               <label for="ebsOptimizedFalse" class="choice">No</label>
           </div>
         </div>
+        <div class="row" collapse="hideAdvancedItems">
+          <div class="col-md-3">
+            <label>Placement Tenancy:</label>
+          </div>
+          <div class="col-md-9">
+            <input type="radio" ng-model="lcOptions.placementTenancy" ng-value="default" id="placementTenancyDefault">
+            <label for="placementTenancyDefault" class="choice">Multi-tenant</label>
+            <input type="radio" ng-model="lcOptions.placementTenancy" ng-value="dedicated" id="placementTenancyDedicated">
+            <label for="placementTenancyDedicated" class="choice">Single-tenant</label>
+          </div>
+        </div>
       </div>
 
       <div class="autoScalingGroupOptions container" collapse="hideAdvancedItems">

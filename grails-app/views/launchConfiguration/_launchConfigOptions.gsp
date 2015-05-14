@@ -99,4 +99,23 @@
       <input type="text" id="iamInstanceProfile" name="iamInstanceProfile" value="${params.iamInstanceProfile ?: iamInstanceProfile}"/>
     </td>
   </tr>
+  <tr class="prop advanced">
+    <td class="name">
+      <label for="ebsOptimized">EBS Optimized?</label>
+    </td>
+    <td>
+      <input id="ebsOptimized" type="checkbox" name="ebsOptimized" /> (may incur additional costs)
+    </td>
+  </tr>
+  <tr class="prop advanced">
+    <td class="name">
+      Placement Tenancy
+    </td>
+    <td>
+      <input type="radio" name="placementTenancy" value="default" id="placementTenancyDefault" ${params.placementTenancy != 'dedicated' ? 'checked="checked"' : ''}>
+      <label for="placementTenancyDefault" class="choice">Multi-tenant (default)</label>
+      <input type="radio" name="placementTenancy" value="dedicated" id="placementTenancyDedicated" ${params.placementTenancy == 'dedicated' ? 'checked="checked"' : ''}>
+      <label for="placementTenancyDedicated" class="choice">Single-tenant</label>
+    </td>
+  </tr>
 </tbody>
