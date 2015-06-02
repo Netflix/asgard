@@ -450,6 +450,27 @@ and groupName is #groupName""")
         0 * _
     }
 
+    def 'should find non cached VPC Security Group by name when an account has no default VPC'() {
+        // This will happen when getting a VPC Security Group by name that was created too recently to be in the cache
+        SecurityGroup securityGroup = new SecurityGroup(groupId: 'sg-123', groupName: 'super_secure')
+
+        when:
+        SecurityGroup actualSecurityGroup =  awsEc2Service.getSecurityGroup(userContext, 'super_secure')
+
+        then:
+        securityGroup == actualSecurityGroup
+        1 * mockSecurityGroupCache.list() >> [securityGroup]
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['super_secure'])) >> {
+            AmazonServiceException e = new AmazonServiceException('you cannot ask for a VPC Security Group by name')
+            e.errorCode = 'VPCIdNotSpecified'
+            throw e
+        }
+        1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >>
+            new DescribeSecurityGroupsResult(securityGroups: [securityGroup])
+        1 * mockSecurityGroupCache.put('sg-123', securityGroup) >> securityGroup
+        0 * _
+    }
+
     def 'should not try to find non cached VPC Security Group by name without specific errorCode'() {
         when:
         SecurityGroup actualSecurityGroup =  awsEc2Service.getSecurityGroup(userContext, 'super_secure')

@@ -492,8 +492,8 @@ class AwsEc2Service implements CacheInitializer, InitializingBean {
             group = Check.loneOrNone(result.getSecurityGroups(), SecurityGroup)
         } catch (AmazonServiceException e) {
             // Can't find a security group by name.
-            if (e.errorCode == 'InvalidParameterValue') {
-                // It's likely a VPC security group which we can't reference by name. Maybe it has an ID in the cache.
+            if (e.errorCode == 'InvalidParameterValue' || e.errorCode == 'VPCIdNotSpecified') {
+          	// It's likely a VPC security group which we can't reference by name. Maybe it has an ID in the cache.
                 if (cachedSecGroup) {
                     request = new DescribeSecurityGroupsRequest(groupIds: [cachedSecGroup.groupId])
                     DescribeSecurityGroupsResult result = awsClient.by(region).describeSecurityGroups(request)
