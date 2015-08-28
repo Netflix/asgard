@@ -452,6 +452,9 @@ div.filter input                { border: 1px solid #CCC; background-color: #EEF
 label.choice        { padding-right: 15px; }
 .environment li a   { padding: 4px 5px 5px 5px; display: block; border-radius: 6px; -moz-border-radius: 6px; -webkit-border-radius: 6px; }
 .environment a.test { background-color: black;   color: white !important; text-shadow: 2px 2px 1px #E9231B; border: 1px solid #666; }
+.environment a.build { background-color: black;   color: white !important; text-shadow: 2px 2px 1px #E9231B; border: 1px solid #666; }
+.environment a.dev { background-color: forestgreen;   color: white !important; text-shadow: 2px 2px 1px #E9231B; border: 1px solid #666; }
+.environment a.stage { background-color: deepskyblue;   color: white !important; text-shadow: 2px 2px 1px #E9231B; border: 1px solid #666; }
 .environment a.prod { background-color: #E9231B; color: white !important; text-shadow: 2px 2px 1px black;   border: 1px solid #666; }
 .externalLinks li a { padding:  2px 2px  2px 22px; background: transparent no-repeat 0 1px; display: inline-block; line-height: 16px; min-height: 16px; }
 
