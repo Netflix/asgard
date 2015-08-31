@@ -18,7 +18,7 @@ package com.netflix.asgard
 import com.netflix.asgard.auth.ApiToken
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.AuthenticationException
-import org.apache.shiro.grails.ConfigUtils
+//import org.apache.shiro.grails.ConfigUtils
 
 class ApiTokenFilters {
 
@@ -46,7 +46,7 @@ class ApiTokenFilters {
                 if (apiToken) {
                     // For API tokens, login is only valid for duration of one request.
                     SecurityUtils.subject?.logout()
-                    ConfigUtils.removePrincipal(SecurityUtils.subject?.principal)
+                    //ConfigUtils.removePrincipal(SecurityUtils.subject?.principal)
                 }
 
                 // If the last value is falsy and there is no explicit return statement then this filter method will

@@ -22,7 +22,6 @@ package com.netflix.asgard
 @Category(Retriable)
 class NoDelayRetriableMixin {
 
-    @Override
     void delay(int milliseconds) {
         // Do not sleep
     }

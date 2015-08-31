@@ -18,7 +18,7 @@ package com.netflix.asgard.model
 import com.amazonaws.services.autoscaling.model.ScalingPolicy
 import com.netflix.asgard.model.ScalingPolicyData.AdjustmentType
 
-@Category(ScalingPolicy)
+//@Category(ScalingPolicy)
 class ScalingPolicyMixin {
 
     Closure max = { "${percentage()} (${minAdjustmentStep})" }
