@@ -21,6 +21,22 @@ p            { padding: 10px 0; }
 img          { border: none; }
 .titlebar a:link, .titlebar a:visited, .titlebar a:hover { color: #FFF !important; }
 .titlebar                 { background-color: #000; color: #FFF; padding: 0 0 0 14px; height: 75px; clear: both; min-width: 831px; }
+
+.build .titlebar,
+.build .titlebar .search,
+.build .titlebar .ticket,
+.build .titlebar .region     { background-color: black; }
+
+.dev .titlebar,
+.dev .titlebar .search,
+.dev .titlebar .ticket,
+.dev .titlebar .region     { background-color: forestgreen; }
+
+.stage .titlebar,
+.stage .titlebar .search,
+.stage .titlebar .ticket,
+.stage .titlebar .region     { background-color: deepskyblue; }
+
 .prod .titlebar,
 .prod .titlebar .search,
 .prod .titlebar .ticket,
