@@ -166,6 +166,11 @@
   <g:if test="${bleskJavaScriptUrl}">
     <script defer type="text/javascript" src="${bleskJavaScriptUrl}?v=${build}"></script>
   </g:if>
+  <g:if test="${disableUIDeletes == true}">
+    <script type="text/javascript">
+      jQuery("button.delete").attr("disabled", true).attr("name", "__disabled");
+    </script>
+  </g:if>
   <g:render template="/layouts/occasion"/>
 </body>
 </html>
