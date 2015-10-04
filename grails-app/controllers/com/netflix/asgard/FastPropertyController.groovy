@@ -202,4 +202,8 @@ propagate."
 
 class FastPropertySaveCommand {
     Integer ttl
+
+    static constraints = {
+        ttl nullable: true
+    }
 }
