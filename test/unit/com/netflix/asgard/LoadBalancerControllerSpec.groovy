@@ -99,6 +99,7 @@ class LoadBalancerControllerSpec extends Specification {
         setUpHealthCheckParams()
 
         when:
+        request.method = 'POST'
         controller.update()
 
         then:
@@ -140,6 +141,7 @@ class LoadBalancerControllerSpec extends Specification {
         ])
 
         when:
+        request.method = 'POST'
         controller.update()
 
         then:
@@ -165,6 +167,7 @@ class LoadBalancerControllerSpec extends Specification {
         cmd.validate()
 
         when:
+        request.method = 'POST'
         controller.addListener(cmd)
 
         then:
@@ -180,6 +183,7 @@ class LoadBalancerControllerSpec extends Specification {
         }
 
         when:
+        request.method = 'POST'
         controller.addListener(cmd)
 
         then:
@@ -192,6 +196,7 @@ class LoadBalancerControllerSpec extends Specification {
         cmd.validate()
 
         when:
+        request.method = 'POST'
         controller.addListener(cmd)
 
         then:
@@ -207,6 +212,7 @@ class LoadBalancerControllerSpec extends Specification {
         cmd.validate()
 
         when:
+        request.method = 'POST'
         controller.addListener(cmd)
 
         then:
@@ -225,6 +231,7 @@ class LoadBalancerControllerSpec extends Specification {
         cmd.validate()
 
         when:
+        request.method = 'POST'
         controller.addListener(cmd)
 
         then:
@@ -240,6 +247,7 @@ class LoadBalancerControllerSpec extends Specification {
         cmd.validate()
 
         when:
+        request.method = 'POST'
         controller.removeListener(cmd)
 
         then:

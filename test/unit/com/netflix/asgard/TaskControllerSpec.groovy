@@ -150,6 +150,7 @@ class TaskControllerSpec extends Specification {
         response.format = "form"
 
         when:
+        request.method = 'POST'
         controller.cancel('789')
 
         then:
@@ -164,6 +165,7 @@ class TaskControllerSpec extends Specification {
         response.format = "form"
 
         when:
+        request.method = 'POST'
         controller.cancel('456')
 
         then:
@@ -176,6 +178,7 @@ class TaskControllerSpec extends Specification {
 
     void 'should fail to cancel a non-existent local in-memory running task'() {
         when:
+        request.method = 'POST'
         controller.cancel('nosuchluck')
 
         then:
@@ -191,6 +194,7 @@ class TaskControllerSpec extends Specification {
         response.format = "json"
 
         when:
+        request.method = 'POST'
         controller.cancel('456')
 
         then:

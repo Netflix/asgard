@@ -99,6 +99,7 @@ class AlarmControllerSpec extends Specification {
         createCommand.validate()
 
         when:
+        request.method = 'POST'
         controller.save(createCommand)
 
         then:
@@ -167,6 +168,7 @@ class AlarmControllerSpec extends Specification {
         }
 
         when:
+        request.method = 'POST'
         controller.update(createCommand)
 
         then:
@@ -183,6 +185,7 @@ class AlarmControllerSpec extends Specification {
         createCommand.validate()
 
         when:
+        request.method = 'POST'
         controller.save(createCommand)
 
         then:
@@ -202,6 +205,7 @@ class AlarmControllerSpec extends Specification {
         }
 
         when:
+        request.method = 'POST'
         controller.delete()
 
         then:

@@ -41,6 +41,7 @@ class ApplicationControllerSpec extends Specification {
             params.monitorBucketType = "application"
 
         when:
+            request.method = 'POST'
             controller.save()
 
         then:

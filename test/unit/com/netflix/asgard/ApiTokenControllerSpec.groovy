@@ -70,6 +70,7 @@ class ApiTokenControllerSpec extends Specification {
         command.validate()
 
         when:
+        request.method = 'POST'
         controller.generate(command)
 
         then:
@@ -83,6 +84,7 @@ class ApiTokenControllerSpec extends Specification {
         command.validate()
 
         when:
+        request.method = 'POST'
         controller.generate(command)
 
         then:
