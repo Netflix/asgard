@@ -46,7 +46,7 @@
                   action="terminate" value="Terminate Instance" title="Shut down and delete this instance." />
           <g:buttonSubmit class="shutdown" data-warning="Really Reboot: ${instance.instanceId}?"
                   action="reboot" value="Reboot Instance" title="Restart the OS of the instance." />
-          <g:link class="cli" action="raw" params="[instanceId: instance.instanceId]" title="Display the operating system console output log.">Console Output (Raw)</g:link>
+          <g:link class="cli" action="raw_output" params="[instanceId: instance.instanceId]" title="Display the operating system console output log.">Console Output (Raw)</g:link>
           <g:link class="userData" action="userDataHtml" params="[id: instance.instanceId]" title="Display the user data executed by the instance on startup.">User Data</g:link>
         </div>
         <div class="buttons">

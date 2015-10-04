@@ -261,7 +261,7 @@ class InstanceController {
     }
 
     @SuppressWarnings("ReturnsNullInsteadOfEmptyCollection")
-    def raw() {
+    def raw_output() {
         UserContext userContext = UserContext.of(request)
         String instanceId = EntityType.instance.ensurePrefix(params.instanceId ?: params.id)
         try {
