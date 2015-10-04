@@ -16,11 +16,15 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.model.SubnetData
-import com.netflix.asgard.model.Subnets
-//import grails.plugin.spock.ControllerSpec
 import com.netflix.asgard.model.SubnetTarget
+import com.netflix.asgard.model.Subnets
 
-class SubnetControllerSpec /*extends ControllerSpec*/ {
+import grails.test.mixin.TestFor
+import spock.lang.Ignore
+import spock.lang.Specification
+
+@TestFor(SubnetController)
+class SubnetControllerSpec extends Specification {
 
     static SubnetData subnet(String id, String zone, String purpose, SubnetTarget target) {
         new SubnetData(subnetId: id, availabilityZone: zone, purpose: purpose, target: target)
@@ -31,6 +35,7 @@ class SubnetControllerSpec /*extends ControllerSpec*/ {
         controller.awsEc2Service = Mock(AwsEc2Service)
     }
 
+    @Ignore
     def 'list should display subnets'() {
         controller.awsEc2Service.getSubnets(_) >> new Subnets([
                 subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),
