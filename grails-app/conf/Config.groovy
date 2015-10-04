@@ -133,6 +133,8 @@ grails.enable.native2ascii = true
 
 grails.exceptionresolver.params.exclude = ['password', 'j_password']
 
+grails.databinding.convertEmptyStringsToNull = false
+
 thread {
     useJitter = true
 }
