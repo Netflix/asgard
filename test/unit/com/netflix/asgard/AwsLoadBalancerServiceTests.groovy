@@ -70,7 +70,7 @@ class AwsLoadBalancerServiceTests extends GrailsUnitTestCase {
         }
 
         Map instanceIdsToLoadBalancerLists = service.mapInstanceIdsToLoadBalancers(Mocks.userContext(), instanceIds)
-        assert 8 == instanceIdsToLoadBalancerLists.size()
+        assert 7 == instanceIdsToLoadBalancerLists.size()
 
         assert 1 == instanceIdsToLoadBalancerLists[ideadbeef].size()
         assert instanceIdsToLoadBalancerLists[ideadbeef].contains(helloworldLoadBalancer)
@@ -95,7 +95,7 @@ class AwsLoadBalancerServiceTests extends GrailsUnitTestCase {
         assert 1 == instanceIdsToLoadBalancerLists[i10101010].size()
         assert instanceIdsToLoadBalancerLists[i10101010].contains(apiProxyLoadBalancer)
 
-        assert 0 == instanceIdsToLoadBalancerLists[i00000000].size()
+        assert null == instanceIdsToLoadBalancerLists[i00000000]
     }
 
     void testAddInstances() {
