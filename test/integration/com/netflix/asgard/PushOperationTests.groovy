@@ -21,9 +21,7 @@ import com.netflix.asgard.push.RollingPushOperation
 import com.netflix.asgard.push.RollingPushOptions
 import grails.test.GrailsUnitTestCase
 import org.joda.time.DateTime
-import org.junit.Ignore
 
-@Ignore
 class PushOperationTests extends GrailsUnitTestCase {
 
     Date dateAlmond = new DateTime(1280199222000).toDate()
