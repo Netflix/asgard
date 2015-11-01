@@ -47,10 +47,10 @@
   </div>
   <div class="titlebar">
     <div class="header">
-      <a href="${assetPath(src: '/')}">
-        <asset:image id="occasionIcon" class="logo" title="${occasion.message}" src="occasion/${occasion?.iconFileName}"/>
-        <div class="mainHeader">Asgard</div>
-      </a>
+      <g:link uri="/">
+          <asset:image id="occasionIcon" class="logo" title="${occasion.message}" src="occasion/${occasion?.iconFileName}"/>
+          <div class="mainHeader">Asgard</div>
+      </g:link>
       <span>${env}</span>
     </div>
     <g:if test="${!pageProperty(name: 'meta.hideNav')}">
