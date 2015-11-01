@@ -32,7 +32,7 @@
     <div class="icons">
       ${iconSet.path}<br/>
       <g:each var="icon" in="${iconSet.icons}" status="i">
-        <img class="icon" src="${resource(file: icon.path)}" alt="" title="${resource(file: icon.path)}"/>
+        <asset:image class="icon" src="${icon.path}" alt="" title="${icon.path}" />
       </g:each>
     </div>
   </g:each>

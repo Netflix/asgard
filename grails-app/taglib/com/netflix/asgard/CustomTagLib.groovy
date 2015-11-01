@@ -172,7 +172,7 @@ href="${failureImage.url}">${failureImage.owner}</a></figcaption>""" : ''
         String dataTipStyleAttribute = tipStyle ? " data-tip-style=\"${tipStyle}\"" : ''
 
         // Use the value or the body of the tip tag as the tip content
-        String imageElement = "<img src=\"${g.resource(dir: 'images/tango/16/apps', file: 'help-browser.png')}\" />"
+        String imageElement = "<img src=\"${asset.assetPath(src: 'tango/16/apps/help-browser.png')}\" />"
         String templateElement = "<span class=\"template\">${innerBody ?: value}</span>"
 
         out << "<span class=\"tip\"${dataTipStyleAttribute}>${imageElement}${templateElement}</span>"
