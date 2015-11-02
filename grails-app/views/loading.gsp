@@ -27,11 +27,11 @@
       <div class="message">${flash.message}</div>
     </g:if>
     <h1>Asgard is starting up. This may take a few minutes.</h1>
-    <h3>This page will automatically refresh when Asgard is loaded.<img alt="spinner" src="${resource(dir: 'images', file: 'spinner.gif')}"/></h3>
+    <h3>This page will automatically refresh when Asgard is loaded.<asset:image alt="spinner" src="spinner.gif"/></h3>
     Time since server startup: <strong><span id="timeSinceStartup">?</span></strong>
     <h2>Caches remaining to load</h2>
     <div id="remainingCaches">?</div>
   </div>
-  <script defer type="text/javascript" src="${resource(dir: 'js', file: 'loading.js')}?v=${build}"></script>
+  <script defer type="text/javascript" src="${assetPath(src: 'loading.js')}?v=${build}"></script>
 </body>
 </html>

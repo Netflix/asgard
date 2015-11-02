@@ -1,0 +1,20 @@
+/**
+ * Copyright 2012 Netflix, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+.buttons button        { margin-left: -30px; margin-right: -30px; }
+li .buttons button     { margin-left: -12px; margin-right: -18px; }
+.buttons button div    { padding-top: 5px; }
+.groupReplacingPush li { width: 320px; }
+.groupReplacingPush li button.create { margin-left: -50px; }
