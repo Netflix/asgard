@@ -234,7 +234,7 @@ ruleset {
 //    GrailsDomainHasToString
     GrailsDuplicateMapping
 //    GrailsPublicControllerMethod
-    GrailsServletContextReference
+//    GrailsServletContextReference
     GrailsSessionReference
 //    GrailsStatelessService
     GrailsDuplicateConstraint
