@@ -176,5 +176,7 @@ grails.project.dependency.resolution = {
         compile ":standalone:1.1.1"
 
         runtime ":cors:1.0.4"
+
+        test ':code-coverage:2.0.3-3'
     }
 }
