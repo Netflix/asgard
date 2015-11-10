@@ -20,7 +20,6 @@ import com.netflix.asgard.model.SubnetTarget
 import com.netflix.asgard.model.Subnets
 
 import grails.test.mixin.TestFor
-import spock.lang.Ignore
 import spock.lang.Specification
 
 @TestFor(SubnetController)
@@ -35,7 +34,6 @@ class SubnetControllerSpec extends Specification {
         controller.awsEc2Service = Mock(AwsEc2Service)
     }
 
-    @Ignore
     def 'list should display subnets'() {
         controller.awsEc2Service.getSubnets(_) >> new Subnets([
                 subnet('subnet-e9b0a3a1', 'us-east-1a', 'internal', SubnetTarget.EC2),

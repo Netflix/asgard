@@ -33,7 +33,7 @@ class SubnetController {
         UserContext userContext = UserContext.of(request)
         Subnets subnets = awsEc2Service.getSubnets(userContext)
         OrderBy<SubnetData> orderBy = new OrderBy<SubnetData>([{ it.availabilityZone }, { it.purpose }, { it.target }])
-        Collection<SubnetData> allSubnets = Lists.newArrayList(subnets.allSubnets).sort(orderBy)
+        Collection<SubnetData> allSubnets = Lists.newArrayList(subnets.allSubnets).sort(false, orderBy)
         withFormat {
             html { [subnets: allSubnets] }
             xml { new XML(allSubnets).render(response) }
