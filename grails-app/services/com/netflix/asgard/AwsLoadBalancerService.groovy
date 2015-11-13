@@ -176,9 +176,9 @@ class AwsLoadBalancerService implements CacheInitializer, InitializingBean {
         }
         Map<String, Collection<LoadBalancerDescription>> result = instanceIdsToLoadBalancers.asMap().subMap(instanceIds)
         // subMap() omits missing keys, we want them initialized as empty lists
-        for(String instanceId : instanceIds) {
+        for (String instanceId : instanceIds) {
             // will deal with missing key and the scenario where the value is null
-            if(!result[instanceId]) {
+            if (!result[instanceId]) {
                 result[instanceId] = []
             }
         }
