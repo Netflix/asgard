@@ -32,6 +32,7 @@ import grails.validation.Validateable
     boolean appWithClusterOptLevel
 
     static constraints = {
+        region nullable: true
         appName(nullable: false, blank: false, validator: validateAppName)
         stack(nullable: true, validator: validateStack)
         newStack(nullable: true, validator: validateNewStack)

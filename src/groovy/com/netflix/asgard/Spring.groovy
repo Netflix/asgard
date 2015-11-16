@@ -15,7 +15,6 @@
  */
 package com.netflix.asgard
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory
 
 /**
@@ -29,7 +28,7 @@ class Spring {
      * @param object the custom object that contains instance variables to autowire by name
      */
     static void autowire(def object) {
-        ApplicationHolder.application?.mainContext?.autowireCapableBeanFactory?.autowireBeanProperties(
+        grails.util.Holders.getApplicationContext()?.autowireCapableBeanFactory?.autowireBeanProperties(
             object, AutowireCapableBeanFactory.AUTOWIRE_BY_NAME, false)
     }
 }

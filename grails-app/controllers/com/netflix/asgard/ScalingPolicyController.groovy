@@ -234,6 +234,9 @@ class ScalingPolicyCreateCommand {
     String topic
 
     static constraints = {
+        existingMetric nullable: true
+        policyName nullable: true
+        minAdjustmentStep nullable: true
         group(nullable: false, blank: false)
         adjustmentType(nullable: false, blank: false)
         adjustment(nullable: false)

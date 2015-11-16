@@ -15,12 +15,20 @@
  */
 package com.netflix.asgard
 
+import asset.pipeline.grails.AssetMethodTagLib
+import asset.pipeline.grails.AssetsTagLib
+import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.web.taglib.exceptions.GrailsTagException
 import spock.lang.Specification
 
 @TestFor(CustomTagLib)
+@Mock([AssetsTagLib, AssetMethodTagLib])
 class CustomTagLibSpec extends Specification {
+
+    static doWithSpring = {
+        assetProcessorService MockProcessor
+    }
 
     def 'should generate html tooltip with body text'() {
         when:
@@ -58,4 +66,8 @@ class CustomTagLibSpec extends Specification {
         e.message == 'Tip tag requires either a [value] attribute or a body'
 
     }
+}
+
+class MockProcessor {
+    def assetMapping = 'images'
 }

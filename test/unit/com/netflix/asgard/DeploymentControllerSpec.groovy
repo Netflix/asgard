@@ -136,6 +136,7 @@ class DeploymentControllerSpec extends Specification {
         request.JSON = createStartDeploymentRequest()
 
         when:
+        request.method = 'POST'
         controller.start()
 
         then:
@@ -204,6 +205,7 @@ class DeploymentControllerSpec extends Specification {
         request.JSON = createStartDeploymentRequest(0)
 
         when:
+        request.method = 'POST'
         controller.start()
 
         then:
@@ -218,6 +220,7 @@ class DeploymentControllerSpec extends Specification {
         request.JSON = activityCompletionRequest
 
         when:
+        request.method = 'POST'
         controller.proceed()
 
         then:
@@ -235,6 +238,7 @@ class DeploymentControllerSpec extends Specification {
         request.JSON = activityCompletionRequest
 
         when:
+        request.method = 'POST'
         controller.rollback()
 
         then:

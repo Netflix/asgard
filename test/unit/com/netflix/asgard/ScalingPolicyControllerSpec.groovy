@@ -85,6 +85,7 @@ class ScalingPolicyControllerSpec extends Specification {
         createCommand.validate()
 
         when:
+        request.method = 'POST'
         controller.save(createCommand)
 
         then:
@@ -129,6 +130,7 @@ class ScalingPolicyControllerSpec extends Specification {
         createCommand.validate()
 
         when:
+        request.method = 'POST'
         controller.save(createCommand)
 
         then:
@@ -150,6 +152,7 @@ class ScalingPolicyControllerSpec extends Specification {
         controller.params.id = 'scale-up-helloworld--scalingtest-v000-32-301'
 
         when:
+        request.method = 'POST'
         controller.delete()
 
         then:
@@ -187,6 +190,7 @@ class ScalingPolicyControllerSpec extends Specification {
         controller.params.id = 'scale-up-helloworld--scalingtest-v000-32-301'
 
         when:
+        request.method = 'POST'
         controller.delete()
 
         then:

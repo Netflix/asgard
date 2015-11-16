@@ -41,6 +41,7 @@ class InitControllerSpec extends Specification {
         configService.getAsgardHome() >> 'asgardHomeDir'
 
         when:
+        request.method = 'POST'
         controller.save(command)
 
         then:
@@ -55,6 +56,7 @@ class InitControllerSpec extends Specification {
         initService.writeConfig(_) >> { throw new IOException('This error') }
 
         when:
+        request.method = 'POST'
         controller.save(command)
 
         then:
@@ -67,6 +69,7 @@ class InitControllerSpec extends Specification {
         command.validate()
 
         when:
+        request.method = 'POST'
         controller.save(command)
 
         then:

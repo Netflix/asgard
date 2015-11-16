@@ -29,8 +29,10 @@ import org.apache.http.conn.scheme.SchemeRegistry
 import org.apache.http.entity.StringEntity
 import org.apache.http.message.BasicStatusLine
 import org.codehaus.groovy.grails.web.json.JSONElement
+import spock.lang.Ignore
 import spock.lang.Specification
 
+@Ignore
 @SuppressWarnings("GroovyAssignabilityCheck")
 class RestClientServiceUnitSpec extends Specification {
 

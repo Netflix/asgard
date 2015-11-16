@@ -20,8 +20,11 @@ import com.netflix.asgard.push.CommonPushOptions
 import com.netflix.asgard.push.RollingPushOperation
 import com.netflix.asgard.push.RollingPushOptions
 import grails.test.GrailsUnitTestCase
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import org.joda.time.DateTime
 
+@TestMixin(GrailsUnitTestMixin)
 class PushOperationTests extends GrailsUnitTestCase {
 
     Date dateAlmond = new DateTime(1280199222000).toDate()

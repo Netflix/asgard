@@ -18,7 +18,6 @@ package com.netflix.asgard
 import org.apache.shiro.SecurityUtils
 import org.apache.shiro.authc.AuthenticationException
 import org.apache.shiro.authc.AuthenticationToken
-import org.apache.shiro.grails.ConfigUtils
 
 class AuthController {
     static final String AUTH_TARGET_URL = 'AUTH_TARGET_URL'
@@ -58,7 +57,7 @@ class AuthController {
     def signOut() {
         def principal = SecurityUtils.subject?.principal
         SecurityUtils.subject?.logout()
-        ConfigUtils.removePrincipal(principal)
+        //ConfigUtils.removePrincipal(principal)
         String logoutUrl = pluginService.authenticationProvider.logoutUrl(request) ?: params.targetUri
         String redirectUri = logoutUrl ?: '/'
         redirect(uri: redirectUri)

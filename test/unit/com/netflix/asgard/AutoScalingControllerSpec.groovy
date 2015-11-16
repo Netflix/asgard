@@ -237,6 +237,7 @@ class AutoScalingControllerSpec extends Specification {
         }
 
         when:
+        request.method = 'POST'
         controller.update()
 
         then:
@@ -275,6 +276,7 @@ class AutoScalingControllerSpec extends Specification {
         }
 
         when:
+        request.method = 'POST'
         controller.update()
 
         then:
@@ -297,6 +299,7 @@ class AutoScalingControllerSpec extends Specification {
         }
 
         when:
+        request.method = 'POST'
         controller.update()
 
         then:
@@ -372,6 +375,7 @@ class AutoScalingControllerSpec extends Specification {
                 withEbsOptimized(ebsOptimizedValue).withInstanceMonitoring(new InstanceMonitoring().withEnabled(false))
 
         when:
+        request.method = 'POST'
         controller.save(cmd)
 
         then:

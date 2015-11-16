@@ -16,11 +16,14 @@
 package com.netflix.asgard
 
 import com.netflix.asgard.model.SubnetData
-import com.netflix.asgard.model.Subnets
-import grails.plugin.spock.ControllerSpec
 import com.netflix.asgard.model.SubnetTarget
+import com.netflix.asgard.model.Subnets
 
-class SubnetControllerSpec extends ControllerSpec {
+import grails.test.mixin.TestFor
+import spock.lang.Specification
+
+@TestFor(SubnetController)
+class SubnetControllerSpec extends Specification {
 
     static SubnetData subnet(String id, String zone, String purpose, SubnetTarget target) {
         new SubnetData(subnetId: id, availabilityZone: zone, purpose: purpose, target: target)

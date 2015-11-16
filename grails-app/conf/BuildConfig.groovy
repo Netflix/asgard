@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import org.apache.ivy.plugins.resolver.FileSystemResolver
-import org.apache.ivy.plugins.resolver.URLResolver
-
-
-grails.project.work.dir = 'work'
-grails.project.class.dir = 'target/classes'
-grails.project.test.class.dir = 'target/test-classes'
-grails.project.test.reports.dir = 'target/test-reports'
+grails.servlet.version = "3.0" // Change depending on target container compliance (2.5 or 3.0)
+grails.project.class.dir = "target/classes"
+grails.project.test.class.dir = "target/test-classes"
+grails.project.test.reports.dir = "target/test-reports"
+grails.project.work.dir = "target/work"
+grails.project.target.level = 1.6
+grails.project.source.level = 1.6
 grails.project.war.file = "target/${appName}.war"
 
 codenarc {
@@ -41,48 +39,48 @@ codenarc {
     maxPriority3Violations = 0
 }
 
-grails.project.dependency.resolution = {
-    // Inherit Grails' default dependencies
-    inherits('global') {}
+grails.project.fork = [
+    // configure settings for compilation JVM, note that if you alter the Groovy version forked compilation is required
+    //  compile: [maxMemory: 256, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
 
-    log 'warn'
+    // configure settings for the test-app JVM, uses the daemon by default
+    test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
+    // configure settings for the run-app JVM
+    run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+    // configure settings for the run-war JVM
+    war: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+    // configure settings for the Console UI JVM
+    console: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256]
+]
+
+grails.project.dependency.resolver = "maven" // or ivy
+grails.project.dependency.resolution = {
+    // inherit Grails' default dependencies
+    inherits("global") {
+        // specify dependency exclusions here; for example, uncomment this to disable ehcache:
+        // excludes 'ehcache'
+    }
+    log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    checksums true // Whether to verify checksums on resolve
+    legacyResolve false // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
 
     repositories {
+        inherits true // Whether to inherit repository definitions from plugins
+
         grailsPlugins()
         grailsHome()
+        mavenLocal()
         grailsCentral()
         mavenCentral()
         mavenRepo "http://dl.bintray.com/spinnaker/spinnaker"
         mavenRepo "http://repo.grails.org/grails/repo/"
-
-        // Optional custom repository for dependencies.
-        Closure internalRepo = {
-            String repoUrl = 'http://artifacts/ext-releases-local'
-            String artifactPattern = '[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]'
-            String ivyPattern = '[organisation]/[module]/[revision]/[module]-[revision]-ivy.[ext]'
-            URLResolver urlLibResolver = new URLResolver()
-            urlLibResolver.with {
-                name = repoUrl
-                addArtifactPattern("${repoUrl}/${artifactPattern}")
-                addIvyPattern("${repoUrl}/${ivyPattern}")
-                m2compatible = true
-            }
-            resolver urlLibResolver
-
-            String localDir = System.getenv('IVY_LOCAL_REPO') ?: "${System.getProperty('user.home')}/ivy2-local"
-            FileSystemResolver localLibResolver = new FileSystemResolver()
-            localLibResolver.with {
-                name = localDir
-                addArtifactPattern("${localDir}/${artifactPattern}")
-                addIvyPattern("${localDir}/${ivyPattern}")
-            }
-            resolver localLibResolver
-        }
-        // Comment or uncomment the next line to toggle the use of an internal artifacts repository.
-        //internalRepo()
     }
 
     dependencies {
+        // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes e.g.
+        // runtime 'mysql:mysql-connector-java:5.1.29'
+        // runtime 'org.postgresql:postgresql:9.3-1101-jdbc41'
+        test "org.grails:grails-datastore-test-support:1.0.2-grails-2.4"
 
         compile(
                 // Ease of use library for Amazon Simple Workflow Service (SWF), e.g., WorkflowClientFactory
@@ -154,31 +152,31 @@ grails.project.dependency.resolution = {
 
                     'mockito-core',
             )
-        }
-
-        // Spock in Grails 2.2.x http://grails.org/plugin/spock
-        test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
-
-        // Optional dependency for Spock to support mocking objects without a parameterless constructor.
-        test 'org.objenesis:objenesis:1.2'
+            }
     }
 
     plugins {
-        compile ":hibernate:$grailsVersion"
+        // plugins for the build system only
+        build ":tomcat:7.0.55.3" // or ":tomcat:8.0.22"
+
+        // plugins for the compile step
+        compile ":scaffolding:2.1.2"
+        compile ':cache:1.1.8'
+        // asset-pipeline 2.0+ requires Java 7, use version 1.9.x with Java 6
+        compile ":asset-pipeline:2.2.3"
+
+        // plugins needed at runtime but not for compilation
+        runtime ":hibernate4:4.3.10" // or ":hibernate:3.6.10.18"
+        runtime ":database-migration:1.4.0"
+        runtime ":jquery:1.11.1"
+
         compile ":compress:0.4"
         compile ":context-param:1.0"
-        compile ':shiro:1.1.4'
+        compile ':shiro:1.2.1'
         compile ":standalone:1.1.1"
 
         runtime ":cors:1.0.4"
 
-        // Spock in Grails 2.2.x http://grails.org/plugin/spock
-        test(":spock:0.7") {
-            exclude "spock-grails-support"
-        }
-
-        test ':code-coverage:1.2.5'
-
-        build ":tomcat:$grailsVersion"
+        test ':code-coverage:2.0.3-3'
     }
 }

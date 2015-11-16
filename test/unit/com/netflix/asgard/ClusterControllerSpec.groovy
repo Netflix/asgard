@@ -147,6 +147,7 @@ class ClusterControllerSpec extends Specification {
         controller.params.name = 'helloworld-example'
 
         when:
+        request.method = 'POST'
         controller.createNextGroup()
 
         then:
@@ -189,6 +190,7 @@ class ClusterControllerSpec extends Specification {
         }
 
         when:
+        request.method = 'POST'
         controller.createNextGroup()
 
         then:
@@ -264,6 +266,7 @@ class ClusterControllerSpec extends Specification {
         }
 
         when:
+        request.method = 'POST'
         controller.createNextGroup()
 
         then:

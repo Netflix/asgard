@@ -18,14 +18,14 @@ class UrlMappings {
 
         "/externalImage/$name**"(controller: 'externalImage')
 
-        "/$controller/$action?/$id?" {
+        "/$controller/$action?/$id?(.$format)?" {
             constraints {
                 // apply constraints here
             }
         }
 
         // Optionally allow the region in the URL to the left of the controller.
-        "/$region/$controller/$action?/$id?" {
+        "/$region/$controller/$action?/$id?(.$format)?" {
             constraints {
                 // apply constraints here
             }

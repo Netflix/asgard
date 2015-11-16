@@ -245,6 +245,9 @@ class AlarmValidationCommand {
     String policy
 
     static constraints = {
+        existingMetric nullable: true
+        description nullable: true
+        alarmName nullable: true
         comparisonOperator(nullable: false, blank: false)
         threshold(nullable: false)
         metric(nullable: true, validator: { Object value, AlarmValidationCommand cmd ->

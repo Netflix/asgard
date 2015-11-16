@@ -21,10 +21,9 @@ import com.netflix.asgard.model.ScalingPolicyData.AdjustmentType
 @Category(ScalingPolicy)
 class ScalingPolicyMixin {
 
-    Closure max = { "${percentage()} (${minAdjustmentStep})" }
-    Closure percentage = { "${scalingAdjustment}%" }
-
     String toDisplayValue() {
+        Closure percentage = { "${scalingAdjustment}%" }
+        Closure max = { "${percentage()} (${minAdjustmentStep})" }
         Map<AdjustmentType, Closure> adjustmentTypesToDisplayFormats = [
             (AdjustmentType.PercentChangeInCapacity) : { "${minAdjustmentStep ? max() : percentage()}" },
             (AdjustmentType.ChangeInCapacity) : { "${scalingAdjustment > 0 ? '+' : ''}${scalingAdjustment}" },

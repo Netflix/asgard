@@ -85,6 +85,7 @@ class TopicControllerSpec extends Specification {
         cmd.validate()
 
         when:
+        request.method = 'POST'
         controller.save(cmd)
 
         then:
@@ -99,6 +100,7 @@ class TopicControllerSpec extends Specification {
         }
 
         when:
+        request.method = 'POST'
         controller.save(cmd)
 
         then:
@@ -111,6 +113,7 @@ class TopicControllerSpec extends Specification {
         cmd.validate()
 
         when:
+        request.method = 'POST'
         controller.save(cmd)
 
         then:
@@ -126,6 +129,7 @@ class TopicControllerSpec extends Specification {
         controller.params.id = 'arn:aws:sns:us-east-1:179000000000:a_test'
 
         when:
+        request.method = 'POST'
         controller.delete()
 
         then:
@@ -140,6 +144,7 @@ class TopicControllerSpec extends Specification {
         cmd.validate()
 
         when:
+        request.method = 'POST'
         controller.subscribe(cmd)
 
         then:
@@ -155,6 +160,7 @@ class TopicControllerSpec extends Specification {
         cmd.validate()
 
         when:
+        request.method = 'POST'
         controller.unsubscribe(cmd)
 
         then:
@@ -170,6 +176,7 @@ class TopicControllerSpec extends Specification {
         cmd.validate()
 
         when:
+        request.method = 'POST'
         controller.publish(cmd)
 
         then:

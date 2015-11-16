@@ -26,6 +26,10 @@ class LoadBalancerCreateCommandTests {
 
     def appService
 
+    static doWithConfig(c) {
+        c.grails.databinding.convertEmptyStringsToNull = false
+    }
+
     @Before
     void setUp() {
         TestUtils.setUpMockRequest()
