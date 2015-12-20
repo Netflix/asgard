@@ -57,7 +57,8 @@ class StartDeploymentRequestSpec extends Specification {
                     instancePriceType: "ON_DEMAND",
                     iamInstanceProfile: "BaseIAMRole",
                     associatePublicIpAddress: false,
-                    ebsOptimized: true),
+                    ebsOptimized: true,
+                    placementTenancy: "default"),
             new AutoScalingGroupBeanOptions(
                     minSize: 1,
                     maxSize: 3,
@@ -87,7 +88,8 @@ class StartDeploymentRequestSpec extends Specification {
             '"keyName":"nf-test-keypair-a","securityGroups":["sg-12345678"],' +
             '"userData":"#!/bin/bash","instanceType":"m1.large","kernelId":"123","ramdiskId":"abc",' +
             '"blockDeviceMappings":null,"instanceMonitoringIsEnabled":false,"instancePriceType":"ON_DEMAND",' +
-            '"iamInstanceProfile":"BaseIAMRole","ebsOptimized":true,"associatePublicIpAddress":false},' +
+            '"iamInstanceProfile":"BaseIAMRole","ebsOptimized":true,"associatePublicIpAddress":false,' +
+            '"placementTenancy":"default"},' +
 
             '"asgOptions":{"autoScalingGroupName":null,"launchConfigurationName":null,"minSize":1,"maxSize":3,' +
             '"desiredCapacity":2,"defaultCooldown":10,"availabilityZones":["us-west-1a"],' +

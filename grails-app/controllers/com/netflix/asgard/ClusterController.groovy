@@ -251,6 +251,7 @@ ${loadBalancerNames}"""
 Group: ${lastGroup.loadBalancerNames}"""
             boolean ebsOptimized = params.containsKey('ebsOptimized') ? params.ebsOptimized?.toBoolean() :
                 lastLaunchConfig.ebsOptimized
+            String placementTenancy = params.placementTenancy ?: lastLaunchConfig.placementTenancy
             if (params.noOptionalDefaults != 'true') {
                 securityGroups = securityGroups ?: lastLaunchConfig.securityGroups
                 termPolicies = termPolicies ?: lastGroup.terminationPolicies
@@ -291,7 +292,8 @@ Group: ${loadBalancerNames}"""
                     scheduledActions: newScheduledActions,
                     vpcZoneIdentifier: vpcZoneIdentifier,
                     spotPrice: spotPrice,
-                    ebsOptimized: ebsOptimized
+                    ebsOptimized: ebsOptimized,
+                    placementTenancy: placementTenancy
             )
             def operation = pushService.startGroupCreate(options)
             flash.message = "${operation.task.name} has been started."

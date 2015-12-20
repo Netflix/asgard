@@ -120,7 +120,8 @@ class RollingPushOperation extends AbstractPushOperation {
                 securityGroups: securityGroups, instanceType: options.instanceType,
                 kernelId: oldLaunch.kernelId, ramdiskId: oldLaunch.ramdiskId, iamInstanceProfile: iamInstanceProfile,
                 ebsOptimized: oldLaunch.ebsOptimized,
-                instancePriceType: options.spotPrice ? InstancePriceType.SPOT : InstancePriceType.ON_DEMAND
+                instancePriceType: options.spotPrice ? InstancePriceType.SPOT : InstancePriceType.ON_DEMAND,
+                placementTenancy: oldLaunch.placementTenancy
         )
         AutoScalingGroupBeanOptions groupForUserData = AutoScalingGroupBeanOptions.from(group, subnets)
         groupForUserData.launchConfigurationName = newLaunchName
