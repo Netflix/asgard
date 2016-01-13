@@ -357,6 +357,7 @@ button.resize div, a.resize                   { background-image: url(../images/
 .buttons button.delete div                    { background-image: url(../images/tango/24/places/user-trash.png);                                 }
 .buttons button.delete                        { display: none; } /* Hide dangerous button until JavaScript validation is ready */
 .buttons input[type=text]                     { border: 1px solid #CCC; cursor: auto; }
+.buttons a.disabled                           { pointer-events: none; cursor: not-allowed; opacity: .65;}
 
 /* SMALL ACTION BUTTONS */
 .subitems .buttons .count                     { padding: 0 15px; }

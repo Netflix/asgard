@@ -31,11 +31,11 @@
     <div class="buttons">
       <g:form class="validate">
         <input type="hidden" name="id" value="${scalingPolicy.policyName}"/>
-        <g:link class="edit" action="edit" id="${scalingPolicy.policyName}"
+        <g:link class="edit keep" action="edit" id="${scalingPolicy.policyName}"
                 params="[group: scalingPolicy.autoScalingGroupName]">Edit Scaling Policy</g:link>
         <g:buttonSubmit class="delete" data-warning="Really delete Scaling Policy '${scalingPolicy.policyName}'?"
                         action="delete" value="Delete Scaling Policy"/>
-        <g:link class="create" controller="alarm" action="create"
+        <g:link class="create keep" controller="alarm" action="create"
                 params="[id: scalingPolicy.policyName]">Add Alarm</g:link>
       </g:form>
     </div>
