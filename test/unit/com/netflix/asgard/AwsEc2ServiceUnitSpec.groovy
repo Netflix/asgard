@@ -504,10 +504,10 @@ and groupName is #groupName""")
         then:
         1 * mockAmazonEC2.describeSubnets() >> new DescribeSubnetsResult(subnets: subnets)
         ImmutableList.copyOf(awsEc2Service.getSubnets(userContext).allSubnets) == [
+                new SubnetData(subnetId: 'subnet-e9b0a3a4', availabilityZone: 'us-east-1a', purpose: 'external',
+                    target: SubnetTarget.ELB),
                 new SubnetData(subnetId: 'subnet-e9b0a3a1', availabilityZone: 'us-east-1a', purpose: 'internal',
                         target: SubnetTarget.EC2),
-                new SubnetData(subnetId: 'subnet-e9b0a3a4', availabilityZone: 'us-east-1a', purpose: 'external',
-                        target: SubnetTarget.ELB),
         ]
         0 * _
     }

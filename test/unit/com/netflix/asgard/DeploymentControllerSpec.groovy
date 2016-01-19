@@ -188,7 +188,7 @@ class DeploymentControllerSpec extends Specification {
                         maxSize: 5,
                         desiredCapacity: 3,
                         defaultCooldown: 10,
-                        availabilityZones: ["us-west-1c", "us-west-1a"],
+                        availabilityZones: ["us-west-1a", "us-west-1c"],
                         loadBalancerNames: ["helloclay--frontend"],
                         healthCheckType: AutoScalingGroupHealthCheckType.EC2,
                         healthCheckGracePeriod: 600,
@@ -302,7 +302,7 @@ class DeploymentControllerSpec extends Specification {
                 maxSize: 5,
                 desiredCapacity: 3,
                 defaultCooldown: 10,
-                availabilityZones: ["us-west-1c", "us-west-1a"],
+                availabilityZones: ["us-west-1a", "us-west-1c"],
                 loadBalancerNames: ["helloclay--frontend"],
                 healthCheckType: AutoScalingGroupHealthCheckType.EC2,
                 healthCheckGracePeriod: 600,
@@ -336,8 +336,9 @@ class DeploymentControllerSpec extends Specification {
 
         then:
         response.status == 200
-        objectMapper.readValue(response.contentAsString, Map) == [
-                lcOptions: [
+        def results = objectMapper.readValue(response.contentAsString, Map)
+
+        results.lcOptions == [
                         launchConfigurationName: null,
                         imageId: "ami-12345678",
                         keyName: "keypair",
@@ -352,15 +353,16 @@ class DeploymentControllerSpec extends Specification {
                         iamInstanceProfile: "BaseIAMRole",
                         ebsOptimized: false,
                         associatePublicIpAddress: false
-                ],
-                asgOptions: [
+                ]
+
+        results.asgOptions == [
                         autoScalingGroupName: null,
                         launchConfigurationName: null,
                         minSize: 0,
                         maxSize: 5,
                         desiredCapacity: 3,
                         defaultCooldown: 10,
-                        availabilityZones: ["us-west-1c", "us-west-1a"],
+                        availabilityZones: ["us-west-1a", "us-west-1c"],
                         loadBalancerNames: ["helloclay--frontend"],
                         healthCheckType: "EC2",
                         healthCheckGracePeriod: 600,
@@ -370,7 +372,6 @@ class DeploymentControllerSpec extends Specification {
                         tags: [],
                         suspendedProcesses: []
                 ]
-        ]
 
         and:
         with(controller.awsAutoScalingService) {
@@ -429,8 +430,8 @@ class DeploymentControllerSpec extends Specification {
 
         then:
         response.status == 200
-        objectMapper.readValue(response.contentAsString, Map) == [
-                deploymentOptions: [
+        def results = objectMapper.readValue(response.contentAsString, Map)
+                results.deploymentOptions == [
                         clusterName: "helloclay--test",
                         notificationDestination: "jdoe@netflix.com",
                         steps:[
@@ -439,8 +440,8 @@ class DeploymentControllerSpec extends Specification {
                                 [type: "DisableAsg", targetAsg: "Previous"],
                                 [type: "DeleteAsg", targetAsg: "Previous"]
                         ]
-                ],
-                lcOptions: [
+                ]
+                results.lcOptions == [
                         launchConfigurationName: null,
                         imageId: "ami-12345678",
                         keyName: "keypair",
@@ -455,15 +456,15 @@ class DeploymentControllerSpec extends Specification {
                         iamInstanceProfile: "BaseIAMRole",
                         ebsOptimized: false,
                         associatePublicIpAddress: false
-                ],
-                asgOptions: [
+                ]
+                results.asgOptions == [
                         autoScalingGroupName: null,
                         launchConfigurationName: null,
                         minSize: 0,
                         maxSize: 5,
                         desiredCapacity: 3,
                         defaultCooldown: 10,
-                        availabilityZones: ["us-west-1c", "us-west-1a"],
+                        availabilityZones: ["us-west-1a", "us-west-1c"],
                         loadBalancerNames: ["helloclay--frontend"],
                         healthCheckType: "EC2",
                         healthCheckGracePeriod: 600,
@@ -472,8 +473,8 @@ class DeploymentControllerSpec extends Specification {
                         terminationPolicies: ["OldestLaunchConfiguration"],
                         tags: [],
                         suspendedProcesses: []
-                ],
-                environment: [
+                ]
+                results.environment == [
                         nextGroupName: "helloclay--test-v457",
                         terminationPolicies: ["tp1"],
                         purposeToVpcId: [internal: "vpc1"],
@@ -493,7 +494,6 @@ class DeploymentControllerSpec extends Specification {
                         keys: ["key1"],
                         spotUrl: "spotUrl"
                 ]
-        ]
 
         and:
         with(controller.awsAutoScalingService) {
