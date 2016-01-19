@@ -83,7 +83,7 @@ grails.project.dependency.resolution = {
         test "org.grails:grails-datastore-test-support:1.0.2-grails-2.4"
 
         // Grails Plugin Testing jar is need when running locally in offline mode to mock out the services.
-        runtime "org.grails:grails-plugin-testing:2.5.2"
+        // runtime "org.grails:grails-plugin-testing:2.5.2"
 
         compile(
                 // Ease of use library for Amazon Simple Workflow Service (SWF), e.g., WorkflowClientFactory
