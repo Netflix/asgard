@@ -193,7 +193,7 @@ ${a.cause} : ${a.description} (${a.progress}% done) (Status: ${a.statusCode})
                 <td colspan="100%" class="subitems">
                   <div class="buttons">
                     <span class="count">Total Policies: ${scalingPolicies.size()}</span>
-                    <g:link class="create" controller="scalingPolicy" action="create"
+                    <g:link class="create keep" controller="scalingPolicy" action="create"
                             params="[id: group.autoScalingGroupName]">Create New Scaling Policy</g:link>
                   </div>
                 </td>

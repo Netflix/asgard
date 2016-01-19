@@ -171,6 +171,19 @@
       jQuery("button.delete").attr("disabled", true).attr("name", "__disabled");
     </script>
   </g:if>
+
+  <g:if test="${disableUIUpdates == true}">
+     <script type="text/javascript">
+       jQuery("a.edit, a.clean, a.create, a[class*='push'], a[class*='attach']")
+        .not(".keep")
+        .addClass('disabled');
+
+       jQuery("button.save, button.create, button[class*='Edit'], button[class*='push'], button[class*='Disable'], button[class*='Enable'], button[type='submit']")
+        .not('.keep')
+        .attr("disabled", true).attr("name", "__disabled");
+     </script>
+  </g:if>
+
   <g:render template="/layouts/occasion"/>
 </body>
 </html>

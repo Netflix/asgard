@@ -45,6 +45,7 @@ class SettingsFilters {
                 request.targetUri = request.forwardURI + (request.queryString ? "?${request.queryString}" : '')
 
                 request.disableUIDeletes = configService.disableUIDeletes
+                request.disableUIUpdates = configService.disableUIUpdates
 
                 // If the last value is falsy and there is no explicit return statement then this filter method will
                 // return a falsy value and cause requests to fail silently.
