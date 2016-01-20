@@ -47,7 +47,7 @@
     </div>
     <div class="buttons">
       <input type="hidden" name="policyName" value="${scalingPolicy?.policyName}"/>
-      <g:buttonSubmit class="save" value="update">Update Scaling Policy</g:buttonSubmit>
+      <g:buttonSubmit class="save keep" value="update">Update Scaling Policy</g:buttonSubmit>
     </div>
   </g:form>
 </div>
