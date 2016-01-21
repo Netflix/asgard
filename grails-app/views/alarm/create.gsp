@@ -49,7 +49,7 @@
     </div>
     <div class="buttons">
       <input type="hidden" name="policy" value="${policy}"/>
-      <g:buttonSubmit class="save" value="save">Create New Alarm</g:buttonSubmit>
+      <g:buttonSubmit class="save keep" value="save">Create New Alarm</g:buttonSubmit>
     </div>
   </g:form>
 </div>
