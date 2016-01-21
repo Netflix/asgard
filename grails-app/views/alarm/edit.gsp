@@ -69,7 +69,7 @@
     </div>
     <div class="buttons">
       <input type="hidden" name="alarmName" value="${alarmName}"/>
-      <g:buttonSubmit class="save" value="update">Update Alarm</g:buttonSubmit>
+      <g:buttonSubmit class="save keep" value="update">Update Alarm</g:buttonSubmit>
     </div>
   </g:form>
 </div>
