@@ -30,7 +30,7 @@
     <div class="buttons">
       <g:form class="validate">
         <input type="hidden" name="id" value="${alarm.alarmName}"/>
-        <g:link class="edit" action="edit" id="${alarm.alarmName}">Edit Alarm</g:link>
+        <g:link class="edit keep" action="edit" id="${alarm.alarmName}">Edit Alarm</g:link>
         <g:buttonSubmit class="delete" action="delete" value="Delete Alarm" data-warning="Really delete Alarm '${alarm.alarmName}'?"/>
       </g:form>
     </div>
