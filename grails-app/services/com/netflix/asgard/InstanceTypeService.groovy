@@ -145,12 +145,14 @@ class InstanceTypeService implements CacheInitializer {
         String xxl = 'Double Extra Large'
         String xxxxl = 'Quadruple Extra Large'
         String xxxxxxxxl = 'Eight Extra Large'
+        String decaxl = 'Deca Extra Large'
         String gen = 'General purpose'
         String second = 'Second Generation Standard'
         String cc = 'Cluster Compute'
         String memOpt = 'Memory optimized'
         String hiMem = 'High-Memory'
         String compOpt = 'Compute optimized'
+        String bInst = 'Burstable Performance Instances'
         String six4 = '64-bit'
         String three2OrSix4 = '32-bit or 64-bit'
         String hcpu = 'High-CPU'
@@ -158,6 +160,22 @@ class InstanceTypeService implements CacheInitializer {
                 new HardwareProfile(instanceType: 't1.micro', family: 'Micro instances', group: 'Micro', size: 'Micro',
                         arch: three2OrSix4, vCpu: '1', ecu: 'Variable', mem: '0.615', storage: 'EBS only',
                         ebsOptim: '-', netPerf: 'Very Low'),
+
+                new HardwareProfile(instanceType: 't2.nano', family: bInst, group: gen, size: 'Nano',
+                        arch: six4, vCpu: '1', ecu: 'Variable', mem: '0.5', storage: 'EBS only',  ebsOptim: '-',
+                        netPerf: 'Low'),
+                new HardwareProfile(instanceType: 't2.micro', family: bInst, group: gen, size: 'Micro',
+                        arch: three2OrSix4, vCpu: '1', ecu: 'Variable', mem: '1', storage: 'EBS only',  ebsOptim: '-',
+                        netPerf: 'Low to Moderate'),
+                new HardwareProfile(instanceType: 't2.small', family: bInst, group: gen, size: 'Small',
+                        arch: three2OrSix4, vCpu: '1', ecu: 'Variable', mem: '2', storage: 'EBS only',  ebsOptim: '-',
+                        netPerf: 'Low to Moderate'),
+                new HardwareProfile(instanceType: 't2.medium', family: bInst, group: gen, size: 'Medium',
+                        arch: six4, vCpu: '2', ecu: 'Variable', mem: '4', storage: 'EBS only',  ebsOptim: '-',
+                        netPerf: 'Low to Moderate'),
+                new HardwareProfile(instanceType: 't2.large', family: bInst, group: gen, size: 'Large',
+                        arch: six4, vCpu: '2', ecu: 'Variable', mem: '8', storage: 'EBS only',  ebsOptim: '-',
+                        netPerf: 'Low to Moderate'),
 
                 new HardwareProfile(instanceType: 'm1.small', family: gen, group: 'Standard', size: 'Small (Default)',
                         arch: three2OrSix4, vCpu: '1', ecu: '1', mem: '1.7', storage: '1 x 160', ebsOptim: '-',
@@ -180,6 +198,17 @@ class InstanceTypeService implements CacheInitializer {
                 new HardwareProfile(instanceType: 'm3.2xlarge', family: gen, group: second, size: xxl, arch: six4,
                         vCpu: '8', ecu: '26', mem: '30', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'High'),
 
+                new HardwareProfile(instanceType: 'm4.large', family: gen, group: gen, size: 'Large', arch: six4,
+                        vCpu: '2', ecu: '6.5', mem: '8', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'm4.xlarge', family: gen, group: gen, size: xl, arch: six4,
+                        vCpu: '4', ecu: '13', mem: '16', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'm4.2xlarge', family: gen, group: gen, size: xxl, arch: six4,
+                        vCpu: '8', ecu: '26', mem: '32', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'm4.4xlarge', family: gen, group: gen, size: xxxxl, arch: six4,
+                        vCpu: '16', ecu: '53.5', mem: '64', storage: 'EBS only', ebsOptim: 'Yes', netPerf: 'High'),
+                new HardwareProfile(instanceType: 'm4.10xlarge', family: gen, group: gen, size: decaxl, arch: six4,
+                        vCpu: '40', ecu: '124.5', mem: '160', storage: 'EBS only', ebsOptim: 'Yes', netPerf: '10 Gigabit'),
+
                 new HardwareProfile(instanceType: 'c1.medium', family: compOpt, group: hcpu, size: 'Medium',
                         arch: three2OrSix4, vCpu: '2', ecu: '5', mem: '1.7', storage: '1 x 350', ebsOptim: '-',
                         netPerf: 'Moderate'),
@@ -193,6 +222,23 @@ class InstanceTypeService implements CacheInitializer {
                         arch: six4, vCpu: '32', ecu: '88', mem: '60.5', storage: '4 x 840', ebsOptim: '-',
                         netPerf: '10 Gigabit'),
 
+                new HardwareProfile(instanceType: 'c4.large', family: compOpt, group: hcpu, size: 'Large',
+                        arch: six4, vCpu: '2', ecu: '8', mem: '3.75', storage: 'EBS Only', ebsOptim: 'Yes',
+                        netPerf: 'Moderate'),
+                new HardwareProfile(instanceType: 'c4.xlarge', family: compOpt, group: hcpu, size: xl,
+                        arch: six4, vCpu: '4', ecu: '16', mem: '7.5', storage: 'EBS Only', ebsOptim: 'Yes',
+                        netPerf: 'High'),
+                new HardwareProfile(instanceType: 'c4.2xlarge', family: compOpt, group: hcpu, size: xxl,
+                        arch: six4, vCpu: '8', ecu: '31', mem: '15', storage: 'EBS Only', ebsOptim: 'Yes',
+                        netPerf: 'High'),
+                new HardwareProfile(instanceType: 'c4.4xlarge', family: compOpt, group: hcpu, size: xxxxl,
+                        arch: six4, vCpu: '16', ecu: '62', mem: '30', storage: 'EBS Only', ebsOptim: 'Yes',
+                        netPerf: 'High'),
+                new HardwareProfile(instanceType: 'c4.8xlarge', family: compOpt, group: hcpu, size: xxxxxxxxl,
+                        arch: six4, vCpu: '36', ecu: '132', mem: '60', storage: 'EBS Only', ebsOptim: 'Yes',
+                        netPerf: '10 Gigabit'),
+
+                // M2 INSTANCE TYPES
                 new HardwareProfile(instanceType: 'm2.xlarge', family: memOpt, group: hiMem, size: xl, arch: six4,
                         vCpu: '2', ecu: '6.5', mem: '17.1', storage: '1 x 420', ebsOptim: '-', netPerf: 'Moderate'),
                 new HardwareProfile(instanceType: 'm2.2xlarge', family: memOpt, group: hiMem, size: xxl, arch: six4,
