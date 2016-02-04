@@ -93,12 +93,13 @@ grails.project.dependency.resolution = {
 
         compile(
                 // Amazon Web Services programmatic interface. Transitive dependency of glisten, but also used directly.
-                'com.amazonaws:aws-java-sdk:1.8.11',
+                //'com.amazonaws:aws-java-sdk:1.8.11',
+                'com.amazonaws:aws-java-sdk:1.10.0',
 
                 // Enables publication of a health check URL for deploying Asgard, and an on/off switch for activities.
                 // Transitive dependencies include:
                 // rxjava, archaius, ribbon, servo, netflix-commons, netflix-statistics, jersey, guava
-                'com.netflix.eureka:eureka-client:1.1.127',
+                'com.netflix.eureka:eureka-client:1.3.4',
 
                 // Transitive dependencies of eureka and aws-java-sdk, but also used for REST calls, e.g., HttpClient
                 'org.apache.httpcomponents:httpcore:4.2',

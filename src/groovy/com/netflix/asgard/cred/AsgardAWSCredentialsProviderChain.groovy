@@ -62,8 +62,8 @@ class AsgardAWSCredentialsProviderChain extends AWSCredentialsProviderChain {
                         new SshCredentialsProvider(configService),
                         new KeyManagementServiceAssumeRoleCredentialsProvider(configService, restClientService),
                         new KeyManagementServiceCredentialsProvider(configService, restClientService),
-                        new STSAssumeRoleSessionCredentialsProvider(configService.assumeRoleArn,
-                                configService.assumeRoleSessionName),
+                        //new STSAssumeRoleSessionCredentialsProvider.Builder(configService.assumeRoleArn,
+                        //        configService.assumeRoleSessionName),
                         new InstanceProfileCredentialsProvider()
                 ] as AWSCredentialsProvider[]
         )
