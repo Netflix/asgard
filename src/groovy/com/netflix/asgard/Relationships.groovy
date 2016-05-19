@@ -158,11 +158,7 @@ class Relationships {
     }
 
     static String buildNextAutoScalingGroupName(String previousGroupNameInCluster) {
-        Names names = dissectCompoundName(previousGroupNameInCluster)
-        Integer previous = names.sequence
-        Integer next = (previous == null || previous >= CLUSTER_MAX_SEQUENCE_NUMBER) ? 0 : previous + 1
-        String threeDigitNextNumber = String.format("%03d", next)
-        "${names.cluster}-v${threeDigitNextNumber}"
+        return AutoScalingGroupNameBuilder.buildNextGroupName(previousGroupNameInCluster)
     }
 
     static String buildLoadBalancerName(String appName, String stack, String detail) {
