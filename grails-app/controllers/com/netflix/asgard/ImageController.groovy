@@ -423,14 +423,14 @@ class ImageDeleteCommand {
     AwsAutoScalingService awsAutoScalingService
     AwsEc2Service awsEc2Service
     RestClientService restClientService
-    ConfigService configService
     def grailsApplication
 
     @SuppressWarnings("GroovyAssignabilityCheck")
     static constraints = {
         id(nullable: false, blank: false, size: 12..12, validator: { String value, ImageDeleteCommand command ->
             UserContext userContext = UserContext.of(Requests.request)
-            List<String> promotionTargetServerRootUrls = configService.promotionTargetServerRootUrls
+            List<String> promotionTargetServerRootUrls =
+                command.grailsApplication.config.promote?.targetServerRootUrls ?: []
             String promotionTargetServer = command.grailsApplication.config.promote.targetServer
             String env = command.grailsApplication.config.cloud.accountName
 
