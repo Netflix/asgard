@@ -441,7 +441,7 @@ and groupName is #groupName""")
         1 * mockSecurityGroupCache.list() >> [securityGroup]
         1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupNames: ['super_secure'])) >> {
             AmazonServiceException e = new AmazonServiceException('you cannot ask for a VPC Security Group by name')
-            e.errorCode = 'InvalidParameterValue'
+            e.errorCode = 'VPCIdNotSpecified'
             throw e
         }
         1 * mockAmazonEC2.describeSecurityGroups(new DescribeSecurityGroupsRequest(groupIds: ['sg-123'])) >>
